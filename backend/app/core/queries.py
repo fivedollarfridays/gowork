@@ -103,3 +103,37 @@ async def update_session_plan(session: AsyncSession, session_id: str, plan_json:
         {"plan": plan_json, "id": session_id},
     )
     await session.commit()
+
+
+async def insert_job_listings(session: AsyncSession, listings: list[dict]) -> int:
+    """Bulk insert job listings. Returns count inserted."""
+    if not listings:
+        return 0
+    for row in listings:
+        await session.execute(
+            text(
+                "INSERT INTO job_listings (title, company, location, description, url, source, scraped_at, expires_at) "
+                "VALUES (:title, :company, :location, :description, :url, :source, :scraped_at, :expires_at)"
+            ),
+            {
+                "title": row["title"],
+                "company": row.get("company"),
+                "location": row.get("location"),
+                "description": row.get("description"),
+                "url": row.get("url"),
+                "source": row.get("source"),
+                "scraped_at": row["scraped_at"],
+                "expires_at": row.get("expires_at"),
+            },
+        )
+    await session.commit()
+    return len(listings)
+
+
+async def get_job_listings_by_source(session: AsyncSession, source: str) -> list[dict]:
+    """Fetch job listings filtered by source."""
+    result = await session.execute(
+        text("SELECT * FROM job_listings WHERE source = :source"),
+        {"source": source},
+    )
+    return [dict(row._mapping) for row in result]

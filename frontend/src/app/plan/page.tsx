@@ -3,8 +3,11 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getPlan, generateNarrative } from "@/lib/api";
+import { getPlan, generateNarrative, getJobs } from "@/lib/api";
+import { Briefcase, ExternalLink } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { MondayMorning } from "@/components/plan/MondayMorning";
 import { BarrierCardView } from "@/components/plan/BarrierCardView";
@@ -12,8 +15,8 @@ import { JobMatchCard } from "@/components/plan/JobMatchCard";
 import { ComparisonView } from "@/components/plan/ComparisonView";
 import { CreditResults } from "@/components/plan/CreditResults";
 import { BarrierType, EmploymentStatus, AvailableHours } from "@/lib/types";
-import type { CreditAssessmentResult, PlanNarrative, UserProfile } from "@/lib/types";
-import { barrierCountToSeverity } from "@/lib/constants";
+import type { CreditAssessmentResult, EnrichedJob, PlanNarrative, UserProfile } from "@/lib/types";
+import { barrierCountToSeverity, safeHref } from "@/lib/constants";
 
 const BARRIER_TYPE_VALUES = new Set<string>(Object.values(BarrierType));
 
@@ -32,6 +35,40 @@ function buildProfileFromPlan(sessionId: string, barriers: string[]): UserProfil
     work_history: "",
     target_industries: [],
   };
+}
+
+function LiveJobCard({ job }: { job: EnrichedJob }) {
+  const href = job.url ? safeHref(job.url) : undefined;
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <div className="flex items-start gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted">
+            <Briefcase className="h-5 w-5 text-foreground/70" />
+          </div>
+          <div>
+            <CardTitle className="text-base">{job.title}</CardTitle>
+            {job.company && <p className="text-sm text-muted-foreground">{job.company}</p>}
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="flex flex-wrap gap-1.5">
+          {job.industry && <Badge variant="secondary" className="text-xs">{job.industry}</Badge>}
+          {job.credit_check_required === "yes" && (
+            <Badge variant="outline" className="text-xs text-amber-700 border-amber-300 bg-amber-50">Credit check required</Badge>
+          )}
+        </div>
+        {href && (
+          <Button variant="outline" size="sm" className="gap-1.5" asChild>
+            <a href={href} target="_blank" rel="noopener noreferrer">
+              Apply <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          </Button>
+        )}
+      </CardContent>
+    </Card>
+  );
 }
 
 function PlanSkeleton() {
@@ -59,6 +96,15 @@ function PlanContent() {
     queryKey: ["plan", sessionId],
     queryFn: () => getPlan(sessionId ?? ""),
     enabled: !!sessionId,
+  });
+
+  const barriers = data?.barriers ?? [];
+  const barrierParam = barriers.length > 0 ? barriers.join(",") : undefined;
+
+  const { data: liveJobs } = useQuery({
+    queryKey: ["liveJobs", barrierParam],
+    queryFn: () => getJobs({ barriers: barrierParam }),
+    enabled: !!data,
   });
 
   const handleNarrative = useCallback(
@@ -229,6 +275,24 @@ function PlanContent() {
 
       {/* Comparison view */}
       <ComparisonView plan={plan} profile={profile} creditResult={creditResult} />
+
+      {/* Explore More Jobs — live listings from job_listings table */}
+      {liveJobs && liveJobs.jobs.length > 0 && (
+        <>
+          <Separator />
+          <section className="space-y-4">
+            <h2 className="text-xl font-semibold text-primary">Explore More Jobs</h2>
+            <p className="text-sm text-muted-foreground">
+              Live job listings from Montgomery, AL job boards.
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {liveJobs.jobs.map((job) => (
+                <LiveJobCard key={`live-${job.id}`} job={job} />
+              ))}
+            </div>
+          </section>
+        </>
+      )}
 
       {/* Narrative error */}
       {narrativeMutation.isError && (

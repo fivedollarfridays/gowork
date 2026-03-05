@@ -157,6 +157,7 @@ export interface EnrichedJob {
   title: string;
   company: string | null;
   url: string | null;
+  source: string | null;
   scraped_at: string | null;
   industry: string | null;
   credit_check_required: string;
