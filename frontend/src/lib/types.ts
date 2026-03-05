@@ -193,12 +193,73 @@ export interface CreditProfileRequest {
   negative_items: string[];
 }
 
+export interface CreditReadiness {
+  score: number;
+  fico_score: number;
+  score_band: string;
+  factors: {
+    payment_history: number;
+    utilization: number;
+    credit_age: number;
+    credit_mix: number;
+    new_credit: number;
+  };
+}
+
+export interface CreditThreshold {
+  threshold_name: string;
+  threshold_score: number;
+  estimated_days: number;
+  already_met: boolean;
+  confidence: string;
+}
+
+export interface DisputeStep {
+  step_number: number;
+  action: string;
+  description: string;
+}
+
+export interface DisputePathway {
+  steps: DisputeStep[];
+  total_estimated_days: number;
+  statutes_cited: string[];
+  legal_theories: string[];
+}
+
+export interface CreditEligibility {
+  product_name: string;
+  category: string;
+  required_score: number;
+  status: string;
+  gap_points: number;
+  estimated_days_to_eligible: number;
+}
+
+export interface BarrierDetail {
+  severity: string;
+  description: string;
+  affected_accounts: string[];
+  estimated_resolution_days: number;
+}
+
 export interface CreditAssessmentResult {
   barrier_severity: string;
-  barrier_details: Record<string, unknown>[];
-  readiness: Record<string, unknown>;
-  thresholds: Record<string, unknown>[];
-  dispute_pathway: Record<string, unknown>;
-  eligibility: Record<string, unknown>[];
+  barrier_details: BarrierDetail[];
+  readiness: CreditReadiness;
+  thresholds: CreditThreshold[];
+  dispute_pathway: DisputePathway;
+  eligibility: CreditEligibility[];
   disclaimer: string;
+}
+
+export interface CreditFormData {
+  currentScore: number;
+  overallUtilization: number;
+  paymentHistoryPct: number;
+  accountAgeRange: string;
+  totalAccounts: number;
+  openAccounts: number;
+  collectionAccounts: number;
+  negativeItems: string[];
 }

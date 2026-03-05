@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { ClipboardList, ListChecks, FileText, Loader2 } from "lucide-react";
-import { postAssessment } from "@/lib/api";
+import { ClipboardList, ListChecks, CreditCard, FileText, Loader2 } from "lucide-react";
+import { postAssessment, postCredit } from "@/lib/api";
 import { WizardShell, type WizardStepConfig } from "@/components/wizard/WizardShell";
 import { BarrierForm, type BarrierFormData } from "@/components/wizard/BarrierForm";
+import { CreditForm, creditFormCanAdvance, ACCOUNT_AGE_RANGES } from "@/components/wizard/CreditForm";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
@@ -18,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AvailableHours, BarrierType } from "@/lib/types";
-import type { AssessmentRequest, EmploymentStatus } from "@/lib/types";
+import type { AssessmentRequest, CreditAssessmentResult, CreditFormData, EmploymentStatus } from "@/lib/types";
 import { EMPLOYMENT_OPTIONS, isValidMontgomeryZip, humanizeLabel } from "@/lib/constants";
 
 export default function AssessPage() {
@@ -33,14 +34,29 @@ export default function AssessPage() {
     workHistory: "",
     hasVehicle: false,
   });
+  const [creditData, setCreditData] = useState<CreditFormData>({
+    currentScore: 580,
+    overallUtilization: 30,
+    paymentHistoryPct: 90,
+    accountAgeRange: "",
+    totalAccounts: 0,
+    openAccounts: 0,
+    collectionAccounts: 0,
+    negativeItems: [],
+  });
+  const [creditResult, setCreditResult] = useState<CreditAssessmentResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const zipValid = isValidMontgomeryZip(formData.zipCode);
   const barrierCount = Object.values(formData.barriers).filter(Boolean).length;
+  const hasCreditBarrier = formData.barriers[BarrierType.CREDIT];
 
   const mutation = useMutation({
     mutationFn: postAssessment,
     onSuccess: (data) => {
+      if (creditResultRef.current) {
+        sessionStorage.setItem(`credit_${data.session_id}`, JSON.stringify(creditResultRef.current));
+      }
       router.push(`/plan?session=${data.session_id}`);
     },
     onError: (err) => {
@@ -48,8 +64,42 @@ export default function AssessPage() {
     },
   });
 
-  const handleSubmit = useCallback(() => {
+  // Store credit result in a ref so onSuccess can read it synchronously
+  const creditResultRef = useRef<CreditAssessmentResult | null>(null);
+  creditResultRef.current = creditResult;
+
+  const handleSubmit = useCallback(async () => {
     setError(null);
+
+    // If credit barrier selected, run credit assessment first
+    if (hasCreditBarrier && !creditResultRef.current) {
+      try {
+        const ageRange = ACCOUNT_AGE_RANGES.find((r) => r.value === creditData.accountAgeRange);
+        const result = await postCredit({
+          current_score: creditData.currentScore,
+          score_band: null,
+          overall_utilization: creditData.overallUtilization,
+          account_summary: {
+            total_accounts: creditData.totalAccounts,
+            open_accounts: creditData.openAccounts,
+            closed_accounts: Math.max(0, creditData.totalAccounts - creditData.openAccounts),
+            negative_accounts: creditData.negativeItems.length,
+            collection_accounts: creditData.collectionAccounts,
+            total_balance: 0,
+            total_credit_limit: 0,
+            monthly_payments: 0,
+          },
+          payment_history_pct: creditData.paymentHistoryPct,
+          average_account_age_months: ageRange?.months ?? 24,
+          negative_items: creditData.negativeItems,
+        });
+        setCreditResult(result);
+        creditResultRef.current = result;
+      } catch (err) {
+        setError(err instanceof Error ? `Credit check failed: ${err.message}. Continuing without credit data.` : "Credit check failed. Continuing without credit data.");
+      }
+    }
+
     const request: AssessmentRequest = {
       zip_code: formData.zipCode,
       employment_status: formData.employment,
@@ -57,13 +107,14 @@ export default function AssessPage() {
       work_history: formData.workHistory,
       target_industries: [],
       has_vehicle: formData.hasVehicle,
+      // Placeholder — no schedule step in wizard yet
       schedule_constraints: {
         available_days: ["monday", "tuesday", "wednesday", "thursday", "friday"],
         available_hours: AvailableHours.DAYTIME,
       },
     };
     mutation.mutate(request);
-  }, [formData, mutation]);
+  }, [formData, creditData, hasCreditBarrier, mutation]);
 
   const steps: WizardStepConfig[] = useMemo(() => [
     {
@@ -135,15 +186,31 @@ export default function AssessPage() {
       content: () => (
         <div className="space-y-4">
           <div>
-            <h2 className="text-lg font-semibold mb-1">Select your barriers</h2>
+            <h2 className="text-lg font-semibold mb-1">What&apos;s in your way?</h2>
             <p className="text-sm text-muted-foreground">
-              Choose all that apply. We&apos;ll match you with resources and jobs that work around these challenges.
+              Choose all that apply. We&apos;ll match you with resources and jobs that work around these.
             </p>
           </div>
           <BarrierForm data={formData} onChange={setFormData} />
         </div>
       ),
     },
+    ...(hasCreditBarrier ? [{
+      title: "Credit Check",
+      icon: <CreditCard className="h-4 w-4" />,
+      canAdvance: () => creditFormCanAdvance(creditData),
+      content: () => (
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-lg font-semibold mb-1">Credit Self-Assessment</h2>
+            <p className="text-sm text-muted-foreground">
+              Help us understand your credit situation. This stays private and helps us match you with the right resources.
+            </p>
+          </div>
+          <CreditForm data={creditData} onChange={setCreditData} />
+        </div>
+      ),
+    }] as WizardStepConfig[] : []),
     {
       title: "Review & Submit",
       icon: <FileText className="h-4 w-4" />,
@@ -198,6 +265,12 @@ export default function AssessPage() {
                 <span className="text-muted-foreground">Vehicle</span>
                 <span className="font-medium">{formData.hasVehicle ? "Yes" : "No"}</span>
               </div>
+              {hasCreditBarrier && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Credit Score</span>
+                  <span className="font-medium">{creditData.currentScore}</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -213,7 +286,7 @@ export default function AssessPage() {
         </div>
       ),
     },
-  ], [formData, zipValid, barrierCount, mutation.isPending, error]);
+  ], [formData, creditData, zipValid, barrierCount, hasCreditBarrier, mutation.isPending, error]);
 
   return (
     <main className="min-h-screen px-4 py-8 sm:px-8">

@@ -1,16 +1,18 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { MapPin, Sparkles, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useMemo } from "react";
+import { ExternalLink, MapPin, Phone, Sparkles, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import type { ReEntryPlan, UserProfile } from "@/lib/types";
+import type { PlanNarrative, ReEntryPlan, UserProfile } from "@/lib/types";
+import { safeHref } from "@/lib/constants";
 
 interface ActionStep {
   title: string;
   detail: string;
   location?: string;
+  phone?: string;
+  url?: string;
 }
 
 function buildSteps(plan: ReEntryPlan): ActionStep[] {
@@ -29,6 +31,8 @@ function buildSteps(plan: ReEntryPlan): ActionStep[] {
       title: `Visit ${resource.name}`,
       detail: resource.phone ? `Call ahead: ${resource.phone}` : "Bring your ID and any relevant documents",
       location: resource.address ?? undefined,
+      phone: resource.phone ?? undefined,
+      url: resource.url ?? undefined,
     });
   }
 
@@ -40,9 +44,10 @@ function buildSteps(plan: ReEntryPlan): ActionStep[] {
       detail: firstJob.route
         ? `Transit accessible via ${firstJob.route}`
         : firstJob.url
-          ? "Apply online — link in your plan"
+          ? "Apply online"
           : "Contact employer directly",
       location: firstJob.location ?? undefined,
+      url: firstJob.url ?? undefined,
     });
   }
 
@@ -52,21 +57,12 @@ function buildSteps(plan: ReEntryPlan): ActionStep[] {
 interface MondayMorningProps {
   plan: ReEntryPlan;
   profile: UserProfile;
-  onGenerateNarrative: () => Promise<void>;
+  narrative: PlanNarrative | null;
+  narrativeLoading: boolean;
 }
 
-export function MondayMorning({ plan, profile, onGenerateNarrative }: MondayMorningProps) {
-  const [generating, setGenerating] = useState(false);
+export function MondayMorning({ plan, profile, narrative, narrativeLoading }: MondayMorningProps) {
   const steps = useMemo(() => buildSteps(plan), [plan]);
-
-  async function handleGenerate() {
-    setGenerating(true);
-    try {
-      await onGenerateNarrative();
-    } finally {
-      setGenerating(false);
-    }
-  }
 
   return (
     <section className="space-y-8">
@@ -84,6 +80,16 @@ export function MondayMorning({ plan, profile, onGenerateNarrative }: MondayMorn
       </div>
 
       {/* AI narrative */}
+      {narrativeLoading && (
+        <Card className="bg-secondary/5 border-secondary/20">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 text-muted-foreground">
+              <Loader2 className="h-5 w-5 animate-spin text-secondary" />
+              <p className="text-sm">Generating your personalized summary...</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       {plan.resident_summary && (
         <>
           <Card className="bg-secondary/5 border-secondary/20">
@@ -98,6 +104,56 @@ export function MondayMorning({ plan, profile, onGenerateNarrative }: MondayMorn
           </Card>
           <Separator />
         </>
+      )}
+
+      {/* Key actions from AI — inline with links */}
+      {narrative && narrative.key_actions.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold text-primary">Key Actions</h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {narrative.key_actions.map((action, i) => {
+              // Find a matching resource to link
+              const matchedResource = plan.barriers
+                .flatMap((b) => b.resources)
+                .find((r) => action.toLowerCase().includes(r.name.toLowerCase()));
+
+              return (
+                <Card key={i}>
+                  <CardContent className="p-4 space-y-2">
+                    <p className="text-sm font-medium text-foreground">{action}</p>
+                    {matchedResource && (
+                      <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                        {matchedResource.phone && (
+                          <a href={`tel:${matchedResource.phone}`} className="flex items-center gap-1 text-secondary hover:underline">
+                            <Phone className="h-3 w-3" />
+                            {matchedResource.phone}
+                          </a>
+                        )}
+                        {matchedResource.address && (
+                          <a
+                            href={`https://maps.google.com/?q=${encodeURIComponent(matchedResource.address)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-secondary hover:underline"
+                          >
+                            <MapPin className="h-3 w-3" />
+                            Directions
+                          </a>
+                        )}
+                        {matchedResource.url && safeHref(matchedResource.url) && (
+                          <a href={safeHref(matchedResource.url)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-secondary hover:underline">
+                            <ExternalLink className="h-3 w-3" />
+                            Website
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
       )}
 
       {/* Action steps timeline */}
@@ -121,46 +177,37 @@ export function MondayMorning({ plan, profile, onGenerateNarrative }: MondayMorn
                 <CardContent className="p-4">
                   <h3 className="font-semibold text-foreground">{step.title}</h3>
                   <p className="text-sm text-muted-foreground mt-1">{step.detail}</p>
-                  {step.location && (
-                    <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground">
-                      <MapPin className="h-3 w-3" />
-                      <span>{step.location}</span>
-                    </div>
-                  )}
+                  <div className="flex flex-wrap gap-3 mt-2">
+                    {step.phone && (
+                      <a href={`tel:${step.phone}`} className="flex items-center gap-1 text-xs text-secondary hover:underline">
+                        <Phone className="h-3 w-3" />
+                        {step.phone}
+                      </a>
+                    )}
+                    {step.location && (
+                      <a
+                        href={`https://maps.google.com/?q=${encodeURIComponent(step.location)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-xs text-secondary hover:underline"
+                      >
+                        <MapPin className="h-3 w-3" />
+                        {step.location}
+                      </a>
+                    )}
+                    {step.url && safeHref(step.url) && (
+                      <a href={safeHref(step.url)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-secondary hover:underline">
+                        <ExternalLink className="h-3 w-3" />
+                        Visit Website
+                      </a>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             </div>
           ))}
         </div>
       </div>
-
-      {/* Generate AI Summary CTA */}
-      {!plan.resident_summary && (
-        <div className="flex flex-col items-center gap-3 py-4">
-          <Separator className="mb-2" />
-          <p className="text-sm text-muted-foreground text-center">
-            Want a personalized narrative summary of your plan?
-          </p>
-          <Button
-            onClick={handleGenerate}
-            disabled={generating}
-            size="lg"
-            className="gap-2"
-          >
-            {generating ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-4 w-4" />
-                Generate AI Summary
-              </>
-            )}
-          </Button>
-        </div>
-      )}
     </section>
   );
 }
