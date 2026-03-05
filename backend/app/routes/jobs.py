@@ -1,5 +1,7 @@
 """GET /api/jobs — job listings with barrier, transit, and industry filters."""
 
+import asyncio
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,7 +25,11 @@ def is_transit_accessible(route: dict, schedule_type: str) -> bool:
 
     M-Transit: no Sunday service; weekday hours ~5am-9pm.
     """
-    end_hour = int(route["weekday_end"].split(":")[0])
+    weekday_end = route.get("weekday_end", "")
+    try:
+        end_hour = int(weekday_end.split(":")[0])
+    except (ValueError, IndexError):
+        return True
     if schedule_type == "night" and end_hour < 22:
         return False
     return True
@@ -74,9 +80,11 @@ async def list_jobs(
     industry: str | None = Query(None),
 ) -> dict:
     """List jobs with optional filters."""
-    jobs = await get_all_job_listings(db)
-    employers = await get_all_employers(db)
-    transit_routes = await get_all_transit_routes(db)
+    jobs, employers, transit_routes = await asyncio.gather(
+        get_all_job_listings(db),
+        get_all_employers(db),
+        get_all_transit_routes(db),
+    )
 
     employer_map = {e["name"]: e for e in employers}
     enriched = [_enrich_job(j, employer_map, transit_routes) for j in jobs]
@@ -85,7 +93,10 @@ async def list_jobs(
         enriched = [j for j in enriched if j.get("industry") == industry]
 
     if transit_accessible:
-        enriched = [j for j in enriched if j.get("transit_info") is not None]
+        enriched = [
+            j for j in enriched
+            if j.get("transit_info") and j["transit_info"].get("accessible")
+        ]
 
     if barriers:
         barrier_list = [b.strip() for b in barriers.split(",")]
@@ -105,8 +116,10 @@ async def get_job(
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found")
 
-    employers = await get_all_employers(db)
-    transit_routes = await get_all_transit_routes(db)
+    employers, transit_routes = await asyncio.gather(
+        get_all_employers(db),
+        get_all_transit_routes(db),
+    )
     employer_map = {e["name"]: e for e in employers}
 
     return _enrich_job(job, employer_map, transit_routes)

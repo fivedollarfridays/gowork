@@ -25,10 +25,14 @@ async def get_plan(
     if row is None:
         raise HTTPException(status_code=404, detail="Session not found")
 
-    plan = json.loads(row["plan"]) if row["plan"] else None
+    try:
+        plan = json.loads(row["plan"]) if row["plan"] else None
+        barriers = json.loads(row["barriers"]) if row["barriers"] else []
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=500, detail="Corrupt session data")
     return {
         "session_id": session_id,
-        "barriers": json.loads(row["barriers"]),
+        "barriers": barriers,
         "qualifications": row.get("qualifications"),
         "plan": plan,
     }
@@ -47,9 +51,12 @@ async def generate_plan_narrative(
     if not row["plan"]:
         raise HTTPException(status_code=400, detail="No plan exists for this session. Run assessment first.")
 
-    barriers = json.loads(row["barriers"])
+    try:
+        barriers = json.loads(row["barriers"])
+        plan_data = json.loads(row["plan"])
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=500, detail="Corrupt session data")
     qualifications = row.get("qualifications", "")
-    plan_data = json.loads(row["plan"])
 
     try:
         narrative = await generate_narrative(

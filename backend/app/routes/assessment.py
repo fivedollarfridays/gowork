@@ -68,7 +68,7 @@ async def create_assessment(
         "credit_profile": None,
         "qualifications": request.work_history,
         "plan": None,
-    })
+    }, session_id=session_id)
 
     plan = await generate_plan(profile, db)
 

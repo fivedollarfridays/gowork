@@ -193,6 +193,13 @@ class TestTransitSchedule:
         route = {"weekday_start": "05:00", "weekday_end": "21:00", "saturday": 1, "sunday": 0}
         assert is_transit_accessible(route, "daytime") is True
 
+    def test_missing_weekday_end_returns_accessible(self):
+        """Route with missing weekday_end defaults to accessible."""
+        from app.routes.jobs import is_transit_accessible
+
+        assert is_transit_accessible({}, "night") is True
+        assert is_transit_accessible({"weekday_end": ""}, "night") is True
+
 
 class TestCreditBarrierFilter:
     def test_filters_credit_check_jobs(self):

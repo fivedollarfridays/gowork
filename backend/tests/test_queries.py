@@ -131,6 +131,21 @@ class TestCreateSession:
         assert len(session_id) == 36  # UUID format
 
     @pytest.mark.anyio
+    async def test_uses_caller_provided_session_id(self, db_session):
+        """Should use the provided session_id instead of generating one."""
+        session_data = {
+            "barriers": '["credit"]',
+            "credit_profile": None,
+            "qualifications": None,
+            "plan": None,
+        }
+        session_id = await create_session(db_session, session_data, session_id="custom-id-123")
+        assert session_id == "custom-id-123"
+        result = await get_session_by_id(db_session, session_id)
+        assert result is not None
+        assert result["id"] == "custom-id-123"
+
+    @pytest.mark.anyio
     async def test_session_has_expiry(self, db_session):
         """Created session should have expires_at set."""
         session_data = {
