@@ -167,7 +167,7 @@ Submit a barrier assessment form. Creates a new session, builds a user profile, 
 | `schedule_constraints.available_days` | string[] | No | Days available. Defaults to Monday through Friday. |
 | `schedule_constraints.available_hours` | string | No | One of: `daytime`, `evening`, `night`, `flexible`. Defaults to `daytime`. |
 
-**Response** `200 OK`
+**Response** `201 Created`
 
 ```json
 {
@@ -242,8 +242,9 @@ Submit a barrier assessment form. Creates a new session, builds a user profile, 
 
 | Code | Description |
 |------|-------------|
-| 200 | Assessment created and plan generated |
+| 201 | Assessment created and plan generated |
 | 422 | Validation error (invalid zip code, missing required fields, etc.) |
+| 429 | Rate limit exceeded (10 requests per minute per IP) |
 
 **curl**
 

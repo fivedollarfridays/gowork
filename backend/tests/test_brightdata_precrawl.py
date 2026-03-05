@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from app.core.database import get_async_session_factory
-from app.core.queries import insert_job_listings
+from app.core.queries_jobs import insert_job_listings
 from app.integrations.brightdata.precrawl import (
     _has_recent_data,
     build_search_urls,

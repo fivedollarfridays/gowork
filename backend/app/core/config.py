@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     environment: str = "development"
     database_url: str = "sqlite+aiosqlite:///./montgowork.db"
     credit_api_url: str = "http://localhost:8001"
-    credit_api_key: str = "montgowork-dev"
+    credit_api_key: str = ""
     anthropic_api_key: str = ""
     claude_model: str = "claude-sonnet-4-20250514"
     brightdata_api_key: str = ""

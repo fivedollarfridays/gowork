@@ -100,7 +100,16 @@ export default function CreditPage() {
             {mutation.isPending ? "Analyzing..." : "Assess Credit"}
           </button>
           {mutation.isError && (
-            <p role="alert" className="text-sm text-destructive">Error: {mutation.error.message}</p>
+            <div role="alert" className="flex items-center gap-3">
+              <p className="text-sm text-destructive">Error: {mutation.error.message}</p>
+              <button
+                type="button"
+                onClick={() => mutation.reset()}
+                className="text-sm text-primary underline hover:no-underline"
+              >
+                Try Again
+              </button>
+            </div>
           )}
         </form>
       ) : (

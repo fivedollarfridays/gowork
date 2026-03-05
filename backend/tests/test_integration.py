@@ -26,6 +26,11 @@ _UPDATE_PLAN_PATCH = "app.routes.assessment.update_session_plan"
 class TestAssessmentToPlan:
     """Full flow: POST assessment -> GET plan -> POST generate."""
 
+    @pytest.fixture(autouse=True)
+    def _clear_rate_limiter(self):
+        from app.routes.assessment import _rate_limiter
+        _rate_limiter.clear()
+
     @pytest.mark.asyncio
     async def test_full_assessment_flow(self):
         """Assessment creates session, plan page retrieves it."""
@@ -46,7 +51,7 @@ class TestAssessmentToPlan:
                     "has_vehicle": False,
                 })
 
-        assert assess_resp.status_code == 200
+        assert assess_resp.status_code == 201
         data = assess_resp.json()
         assert "session_id" in data
         assert "profile" in data
@@ -81,7 +86,7 @@ class TestAssessmentToPlan:
                     "has_vehicle": True,
                 })
 
-        assert resp.status_code == 200
+        assert resp.status_code == 201
         profile = resp.json()["profile"]
         assert profile["barrier_severity"] == "low"
         assert profile["barrier_count"] == 1

@@ -15,15 +15,22 @@ async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
   if (init?.body) {
     (headers as Record<string, string>)["Content-Type"] = "application/json";
   }
-  const res = await fetch(`${API_BASE}${url}`, {
-    ...init,
-    headers,
-  });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error(body.detail || `API error ${res.status}`);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30_000);
+  try {
+    const res = await fetch(`${API_BASE}${url}`, {
+      ...init,
+      headers,
+      signal: init?.signal ?? controller.signal,
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(body.detail || `API error ${res.status}`);
+    }
+    return res.json() as Promise<T>;
+  } finally {
+    clearTimeout(timeout);
   }
-  return res.json() as Promise<T>;
 }
 
 export function postAssessment(data: AssessmentRequest): Promise<AssessmentResponse> {

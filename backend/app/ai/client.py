@@ -37,6 +37,8 @@ async def generate_narrative(
         messages=[{"role": "user", "content": user_prompt}],
     )
 
+    if not message.content:
+        raise ValueError("Claude returned empty response")
     raw = message.content[0].text
     try:
         parsed = json.loads(raw)

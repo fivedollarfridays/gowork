@@ -4,7 +4,8 @@ import asyncio
 import json
 import uuid
 
-from app.core.queries import get_all_job_listings, get_resources_by_categories
+from app.core.queries import get_resources_by_categories
+from app.core.queries_jobs import get_all_job_listings
 from app.modules.matching.filters import apply_credit_filter, get_certification_renewal
 from app.modules.matching.scoring import BARRIER_CATEGORY_MAP, rank_resources
 from app.modules.matching.types import (

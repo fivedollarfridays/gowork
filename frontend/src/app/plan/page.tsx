@@ -4,7 +4,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import { useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getPlan, generateNarrative, getJobs } from "@/lib/api";
-import { Briefcase, ExternalLink, Search } from "lucide-react";
+import { Briefcase, ExternalLink, Loader2, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -104,7 +104,7 @@ function PlanContent() {
   const barriers = data?.barriers ?? [];
   const barrierParam = barriers.length > 0 ? barriers.join(",") : undefined;
 
-  const { data: liveJobs } = useQuery({
+  const { data: liveJobs, isLoading: liveJobsLoading } = useQuery({
     queryKey: ["liveJobs", barrierParam],
     queryFn: () => getJobs({ barriers: barrierParam }),
     enabled: !!data,
@@ -191,7 +191,16 @@ function PlanContent() {
     );
   }
 
-  if (!data || !plan || !profile || !planWithNarrative) return null;
+  if (!data || !plan || !profile || !planWithNarrative) {
+    return (
+      <div role="alert" className="text-center py-12 space-y-3">
+        <p className="text-destructive">Something went wrong loading your plan.</p>
+        <Button asChild variant="outline">
+          <a href="/assess">Start a new assessment</a>
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-10">
@@ -202,6 +211,22 @@ function PlanContent() {
         narrative={narrative}
         narrativeLoading={narrativeMutation.isPending}
       />
+
+      {/* Narrative error with retry */}
+      {narrativeMutation.isError && (
+        <div role="alert" className="flex items-center justify-center gap-3 text-sm">
+          <p className="text-destructive">
+            Could not generate your personalized summary.
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => narrativeMutation.mutate()}
+          >
+            Retry
+          </Button>
+        </div>
+      )}
 
       <Separator />
 
@@ -293,6 +318,15 @@ function PlanContent() {
       </div>
 
       {/* Explore More Jobs — live listings from job_listings table */}
+      {liveJobsLoading && (
+        <>
+          <Separator />
+          <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Loading live job listings...
+          </div>
+        </>
+      )}
       {liveJobs && liveJobs.jobs.length > 0 && (
         <>
           <Separator />
@@ -310,12 +344,6 @@ function PlanContent() {
         </>
       )}
 
-      {/* Narrative error */}
-      {narrativeMutation.isError && (
-        <p role="alert" className="text-sm text-destructive text-center">
-          Failed to generate summary: {narrativeMutation.error.message}
-        </p>
-      )}
     </div>
   );
 }

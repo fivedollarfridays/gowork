@@ -4,16 +4,15 @@ import pytest
 
 from app.core.queries import (
     create_session,
-    get_all_job_listings,
     get_all_resources,
     get_all_transit_routes,
     get_all_employers,
-    get_job_listing_by_id,
     get_resource_by_id,
     get_resources_by_category,
     get_session_by_id,
     update_session_plan,
 )
+from app.core.queries_jobs import get_all_job_listings, get_job_listing_by_id
 from sqlalchemy import text
 
 from app.core.database import get_async_session_factory
@@ -180,6 +179,25 @@ class TestGetSessionById:
     async def test_returns_none_for_invalid_id(self, db_session):
         """Should return None for nonexistent session."""
         result = await get_session_by_id(db_session, "nonexistent-uuid")
+        assert result is None
+
+    @pytest.mark.anyio
+    async def test_returns_none_for_expired_session(self, db_session):
+        """Should return None when session has expired."""
+        session_data = {
+            "barriers": '["credit"]',
+            "credit_profile": None,
+            "qualifications": None,
+            "plan": None,
+        }
+        session_id = await create_session(db_session, session_data)
+        # Manually set expires_at to the past
+        await db_session.execute(
+            text("UPDATE sessions SET expires_at = '2020-01-01T00:00:00' WHERE id = :id"),
+            {"id": session_id},
+        )
+        await db_session.commit()
+        result = await get_session_by_id(db_session, session_id)
         assert result is None
 
 

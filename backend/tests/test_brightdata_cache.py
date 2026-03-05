@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import text
 
 from app.core.database import get_async_session_factory
-from app.core.queries import get_job_listings_by_source, insert_job_listings
+from app.core.queries_jobs import get_job_listings_by_source, insert_job_listings
 from app.integrations.brightdata.cache import parse_brightdata_jobs, store_crawl_results
 
 
@@ -83,6 +83,34 @@ class TestGetJobListingsBySource:
     async def test_returns_empty_for_unknown_source(self, db_session):
         results = await get_job_listings_by_source(db_session, "nonexistent")
         assert results == []
+
+
+class TestFieldTruncation:
+    def test_truncates_long_title(self):
+        raw = [{"title": "A" * 1000}]
+        result = parse_brightdata_jobs(raw)
+        assert len(result[0].title) == 500
+
+    def test_truncates_long_company(self):
+        raw = [{"title": "Job", "company": "B" * 500}]
+        result = parse_brightdata_jobs(raw)
+        assert len(result[0].company) == 200
+
+    def test_truncates_long_description(self):
+        raw = [{"title": "Job", "description": "D" * 10000}]
+        result = parse_brightdata_jobs(raw)
+        assert len(result[0].description) == 5000
+
+    def test_truncates_long_url(self):
+        raw = [{"title": "Job", "url": "https://x.com/" + "a" * 3000}]
+        result = parse_brightdata_jobs(raw)
+        assert len(result[0].url) == 2000
+
+    def test_short_fields_unchanged(self):
+        raw = [{"title": "CNA", "company": "Baptist", "url": "https://example.com"}]
+        result = parse_brightdata_jobs(raw)
+        assert result[0].title == "CNA"
+        assert result[0].company == "Baptist"
 
 
 class TestStoreCrawlResults:

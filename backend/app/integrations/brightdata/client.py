@@ -64,6 +64,7 @@ class BrightDataClient:
         if resp.status_code == 200:
             return CrawlResult(snapshot_id=snapshot_id, jobs=resp.json())
         self._raise_api_error(resp)
+        raise AssertionError("unreachable")  # _raise_api_error always raises
 
     async def close(self):
         """Close the underlying HTTP client."""

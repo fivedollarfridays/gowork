@@ -61,17 +61,17 @@ Use the `implementing-with-tdd` skill for guidance.
 Before marking work complete:
 
 ```bash
-# Run tests
-pytest tests/ -v
+# Backend tests (from backend/ directory)
+python -m pytest tests/ -q
 
-# Quick test run (stop on first failure)
-pytest tests/ -x
+# Frontend tests (from frontend/ directory)
+npx vitest run
 
-# Check types (if configured)
-mypy src/
+# Architecture check (from project root)
+bpsai-pair arch check <path/to/modified/file.py>
 
-# Lint
-ruff check src/
+# Full CI check
+bpsai-pair ci
 ```
 
 ### 5. Review

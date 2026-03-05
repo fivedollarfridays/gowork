@@ -9,7 +9,7 @@
 - [ ] Backend running: `cd backend && uvicorn app.main:app --reload` (port 8000)
 - [ ] Frontend running: `cd frontend && npm run dev` (port 3000)
 - [ ] `ANTHROPIC_API_KEY` set in `backend/.env` (for AI narrative)
-- [ ] Seed data loaded: `cd backend && python -m app.seed` (resources + employers)
+- [ ] Database auto-seeds on first startup (resources, transit routes — no manual step needed)
 - [ ] BrightData API key set (optional -- live jobs section only shows if crawled data exists)
 - [ ] Browser at `http://localhost:3000`, zoomed to 125% for visibility
 - [ ] Screen sharing active, dark/light mode matches projector

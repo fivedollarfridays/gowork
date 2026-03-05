@@ -252,3 +252,72 @@ class TestGeneratePlan:
 
         assert isinstance(plan, ReEntryPlan)
         assert len(plan.barriers) == 0
+
+    @pytest.mark.asyncio
+    async def test_housing_barrier_produces_card(self):
+        """HOUSING barrier maps to social_service resources and has correct card."""
+        profile = _make_profile(
+            primary_barriers=[BarrierType.HOUSING],
+            barrier_count=1,
+            barrier_severity=BarrierSeverity.LOW,
+            needs_credit_assessment=False,
+            transit_dependent=False,
+        )
+        mock_session = AsyncMock()
+        resource = _make_resource(id=10, name="Housing Authority", category="social_service")
+
+        with patch(_QUERY_PATCH, return_value=[resource]):
+            plan = await generate_plan(profile, mock_session)
+
+        housing_cards = [b for b in plan.barriers if b.type == BarrierType.HOUSING]
+        assert len(housing_cards) == 1
+        assert housing_cards[0].title == "Housing Stability"
+        assert len(housing_cards[0].actions) > 0
+        assert any(r.name == "Housing Authority" for r in housing_cards[0].resources)
+
+    @pytest.mark.asyncio
+    async def test_health_barrier_produces_card(self):
+        """HEALTH barrier maps to social_service resources."""
+        profile = _make_profile(
+            primary_barriers=[BarrierType.HEALTH],
+            barrier_count=1,
+            barrier_severity=BarrierSeverity.LOW,
+            needs_credit_assessment=False,
+            transit_dependent=False,
+        )
+        mock_session = AsyncMock()
+        resource = _make_resource(id=11, name="Community Health", category="social_service")
+
+        with patch(_QUERY_PATCH, return_value=[resource]):
+            plan = await generate_plan(profile, mock_session)
+
+        health_cards = [b for b in plan.barriers if b.type == BarrierType.HEALTH]
+        assert len(health_cards) == 1
+        assert health_cards[0].title == "Health & Wellness"
+        assert len(health_cards[0].actions) > 0
+
+    @pytest.mark.asyncio
+    async def test_criminal_record_barrier_produces_card(self):
+        """CRIMINAL_RECORD maps to career_center + social_service."""
+        profile = _make_profile(
+            primary_barriers=[BarrierType.CRIMINAL_RECORD],
+            barrier_count=1,
+            barrier_severity=BarrierSeverity.LOW,
+            needs_credit_assessment=False,
+            transit_dependent=False,
+        )
+        mock_session = AsyncMock()
+        resources = [
+            _make_resource(id=12, name="Legal Aid", category="social_service"),
+            _make_resource(id=13, name="Re-Entry Program", category="career_center"),
+        ]
+
+        with patch(_QUERY_PATCH, return_value=resources):
+            plan = await generate_plan(profile, mock_session)
+
+        cr_cards = [b for b in plan.barriers if b.type == BarrierType.CRIMINAL_RECORD]
+        assert len(cr_cards) == 1
+        assert cr_cards[0].title == "Record & Legal Support"
+        assert len(cr_cards[0].resources) == 2
+        actions_text = " ".join(cr_cards[0].actions)
+        assert "expungement" in actions_text.lower()
