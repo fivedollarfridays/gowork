@@ -1,6 +1,5 @@
 """End-to-end integration tests: assessment -> matching -> session -> plan."""
 
-import json
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -36,9 +35,8 @@ class TestAssessmentToPlan:
             patch(_SESSION_PATCH, new_callable=AsyncMock, return_value="int-session-123"),
         ):
             transport = ASGITransport(app=app)
-            async with AsyncClient(transport=transport, base_url="http://test") as client:
-                # Step 1: Submit assessment
-                assess_resp = await client.post("/api/assessment/", json={
+            async with AsyncClient(transport=transport, base_url="http://test") as c:
+                assess_resp = await c.post("/api/assessment/", json={
                     "zip_code": "36104",
                     "employment_status": "unemployed",
                     "barriers": {"credit": True, "transportation": True, "childcare": True},
@@ -48,13 +46,10 @@ class TestAssessmentToPlan:
 
         assert assess_resp.status_code == 200
         data = assess_resp.json()
-
-        # Verify assessment response structure
         assert "session_id" in data
         assert "profile" in data
         assert "plan" in data
 
-        # Profile should reflect inputs
         profile = data["profile"]
         assert profile["barrier_severity"] == "high"
         assert profile["barrier_count"] == 3
@@ -74,8 +69,8 @@ class TestAssessmentToPlan:
             patch(_SESSION_PATCH, new_callable=AsyncMock, return_value="low-session"),
         ):
             transport = ASGITransport(app=app)
-            async with AsyncClient(transport=transport, base_url="http://test") as client:
-                resp = await client.post("/api/assessment/", json={
+            async with AsyncClient(transport=transport, base_url="http://test") as c:
+                resp = await c.post("/api/assessment/", json={
                     "zip_code": "36116",
                     "employment_status": "underemployed",
                     "barriers": {"training": True},
@@ -92,54 +87,38 @@ class TestAssessmentToPlan:
 
 
 class TestJobsEndToEnd:
-    """Jobs route returns enriched listings."""
+    """Jobs route returns enriched listings (uses test DB via client fixture)."""
 
-    @pytest.mark.asyncio
-    async def test_jobs_returns_empty_from_seed(self):
-        """Jobs route returns empty list when no seed data (production state)."""
-        from app.main import app
-
-        transport = ASGITransport(app=app)
-        async with AsyncClient(transport=transport, base_url="http://test") as client:
-            resp = await client.get("/api/jobs/")
+    @pytest.mark.anyio
+    async def test_jobs_returns_empty_from_seed(self, client):
+        """Jobs route returns empty list when no seed data."""
+        resp = await client.get("/api/jobs/")
         assert resp.status_code == 200
         data = resp.json()
         assert "jobs" in data
         assert isinstance(data["jobs"], list)
 
-    @pytest.mark.asyncio
-    async def test_job_not_found(self):
+    @pytest.mark.anyio
+    async def test_job_not_found(self, client):
         """GET /api/jobs/999 returns 404 for non-existent job."""
-        from app.main import app
-
-        transport = ASGITransport(app=app)
-        async with AsyncClient(transport=transport, base_url="http://test") as client:
-            resp = await client.get("/api/jobs/999")
+        resp = await client.get("/api/jobs/999")
         assert resp.status_code == 404
 
 
 class TestHealthIntegration:
-    """Health endpoint works with full app context."""
+    """Health endpoint works with full app context (uses test DB via client fixture)."""
 
-    @pytest.mark.asyncio
-    async def test_health_returns_ok(self):
+    @pytest.mark.anyio
+    async def test_health_returns_ok(self, client):
         """Health endpoint returns healthy status."""
-        from app.main import app
-
-        transport = ASGITransport(app=app)
-        async with AsyncClient(transport=transport, base_url="http://test") as client:
-            resp = await client.get("/health")
+        resp = await client.get("/health")
         assert resp.status_code == 200
         data = resp.json()
         assert data["status"] == "healthy"
 
-    @pytest.mark.asyncio
-    async def test_root_returns_running(self):
+    @pytest.mark.anyio
+    async def test_root_returns_running(self, client):
         """Root endpoint confirms API is running."""
-        from app.main import app
-
-        transport = ASGITransport(app=app)
-        async with AsyncClient(transport=transport, base_url="http://test") as client:
-            resp = await client.get("/")
+        resp = await client.get("/")
         assert resp.status_code == 200
         assert resp.json()["status"] == "running"
