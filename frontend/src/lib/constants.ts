@@ -26,6 +26,15 @@ export function humanizeLabel(s: string): string {
   return s.replaceAll("_", " ");
 }
 
+export function safeHref(url: string): string | undefined {
+  try {
+    const parsed = new URL(url, "https://placeholder.invalid");
+    return parsed.protocol === "https:" || parsed.protocol === "http:" ? url : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export const EMPLOYMENT_OPTIONS: { value: EmploymentStatus; label: string }[] = [
   { value: "unemployed", label: "Unemployed" },
   { value: "underemployed", label: "Underemployed" },

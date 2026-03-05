@@ -5,14 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import type { JobMatch } from "@/lib/types";
-import { STATUS_BADGE_STYLES } from "@/lib/constants";
+import type { CreditAssessmentResult, JobMatch } from "@/lib/types";
+import { STATUS_BADGE_STYLES, safeHref } from "@/lib/constants";
 
 interface JobMatchCardProps {
   job: JobMatch;
+  creditResult?: CreditAssessmentResult | null;
 }
 
-export function JobMatchCard({ job }: JobMatchCardProps) {
+export function JobMatchCard({ job, creditResult }: JobMatchCardProps) {
+  const unmetThreshold = creditResult?.thresholds.find((t) => !t.already_met);
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -42,10 +45,24 @@ export function JobMatchCard({ job }: JobMatchCardProps) {
               </Badge>
             )}
             {job.credit_check_required === "yes" && (
-              <Badge className={`${STATUS_BADGE_STYLES.negative} text-xs`} variant="outline">
-                <CreditCard className="h-3 w-3 mr-1" />
-                Credit Check
-              </Badge>
+              creditResult && job.eligible_now ? (
+                <Badge className={`${STATUS_BADGE_STYLES.positive} text-xs`} variant="outline">
+                  <CreditCard className="h-3 w-3 mr-1" />
+                  Eligible Now
+                </Badge>
+              ) : creditResult ? (
+                <Badge className={`${STATUS_BADGE_STYLES.warning} text-xs`} variant="outline">
+                  <CreditCard className="h-3 w-3 mr-1" />
+                  {unmetThreshold
+                    ? `~${Math.round(unmetThreshold.estimated_days / 30)}mo`
+                    : "After Repair"}
+                </Badge>
+              ) : (
+                <Badge className={`${STATUS_BADGE_STYLES.negative} text-xs`} variant="outline">
+                  <CreditCard className="h-3 w-3 mr-1" />
+                  Credit Check
+                </Badge>
+              )
             )}
           </div>
         </div>
@@ -79,9 +96,9 @@ export function JobMatchCard({ job }: JobMatchCardProps) {
         )}
 
         {/* Apply link */}
-        {job.url && (
+        {job.url && safeHref(job.url) && (
           <Button variant="outline" size="sm" className="gap-1.5" asChild>
-            <a href={job.url} target="_blank" rel="noopener noreferrer">
+            <a href={safeHref(job.url)} target="_blank" rel="noopener noreferrer">
               Apply <ExternalLink className="h-3.5 w-3.5" />
             </a>
           </Button>

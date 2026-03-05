@@ -1,5 +1,6 @@
 """Matching engine core — takes a UserProfile and returns ranked resources."""
 
+import json
 import uuid
 
 from app.core.queries import get_resources_by_category
@@ -80,9 +81,10 @@ async def query_resources_for_barriers(
         for row in rows:
             if row["id"] not in seen_ids:
                 seen_ids.add(row["id"])
-                results.append(Resource(**{
-                    k: row[k] for k in Resource.model_fields if k in row
-                }))
+                fields = {k: row[k] for k in Resource.model_fields if k in row}
+                if isinstance(fields.get("services"), str):
+                    fields["services"] = json.loads(fields["services"])
+                results.append(Resource(**fields))
 
     return results
 

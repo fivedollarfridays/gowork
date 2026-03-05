@@ -11,9 +11,13 @@ import type {
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
+  const headers: HeadersInit = { ...init?.headers };
+  if (init?.body) {
+    (headers as Record<string, string>)["Content-Type"] = "application/json";
+  }
   const res = await fetch(`${API_BASE}${url}`, {
-    headers: { "Content-Type": "application/json" },
     ...init,
+    headers,
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({ detail: res.statusText }));

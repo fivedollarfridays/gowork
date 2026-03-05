@@ -13,11 +13,12 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import type { ReEntryPlan, UserProfile } from "@/lib/types";
+import type { CreditAssessmentResult, ReEntryPlan, UserProfile } from "@/lib/types";
 
 interface ComparisonViewProps {
   plan: ReEntryPlan;
   profile: UserProfile;
+  creditResult?: CreditAssessmentResult | null;
 }
 
 interface ComparisonRow {
@@ -28,7 +29,7 @@ interface ComparisonRow {
   futureIcon: React.ReactNode;
 }
 
-function buildRows(plan: ReEntryPlan, profile: UserProfile): ComparisonRow[] {
+function buildRows(plan: ReEntryPlan, profile: UserProfile, creditResult?: CreditAssessmentResult | null): ComparisonRow[] {
   const rows: ComparisonRow[] = [];
 
   // Barriers
@@ -48,7 +49,7 @@ function buildRows(plan: ReEntryPlan, profile: UserProfile): ComparisonRow[] {
     : plan.job_matches.filter((j) => j.eligible_now).length;
   const eligibleAfter = plan.eligible_after_repair.length > 0
     ? plan.eligible_after_repair.length
-    : plan.job_matches.length;
+    : plan.job_matches.filter((j) => !j.eligible_now).length + eligibleNow;
   rows.push({
     label: "Job Matches",
     now: `${eligibleNow} eligible now`,
@@ -59,12 +60,27 @@ function buildRows(plan: ReEntryPlan, profile: UserProfile): ComparisonRow[] {
 
   // Credit
   if (profile.needs_credit_assessment) {
+    const ficoNow = creditResult?.readiness.fico_score ?? null;
+    const fairThreshold = creditResult?.thresholds.find((t) => t.threshold_name === "Fair Credit") ?? null;
+    const eligibleCount = creditResult
+      ? creditResult.eligibility.filter((e) => e.status === "eligible").length
+      : 0;
+    const totalProducts = creditResult ? creditResult.eligibility.length : 0;
+
+    const nowText = creditResult
+      ? `FICO ${ficoNow} (${creditResult.readiness.score_band}) — ${eligibleCount}/${totalProducts} products eligible`
+      : plan.credit_readiness_score != null
+        ? `Readiness: ${plan.credit_readiness_score}/100`
+        : "Assessment needed";
+
     rows.push({
       label: "Credit Status",
-      now: plan.credit_readiness_score != null
-        ? `Score: ${plan.credit_readiness_score}/100`
-        : "Assessment needed",
-      future: "Credit repair plan in progress — more employers accessible",
+      now: nowText,
+      future: fairThreshold && !fairThreshold.already_met
+        ? `Fair credit (${fairThreshold.threshold_score}+) in ~${Math.round(fairThreshold.estimated_days / 30)} months — more employers accessible`
+        : creditResult
+          ? `${totalProducts} financial products accessible`
+          : "Credit repair plan in progress — more employers accessible",
       nowIcon: <CreditCard className="h-4 w-4 text-amber-600" />,
       futureIcon: <CreditCard className="h-4 w-4 text-green-600" />,
     });
@@ -87,8 +103,8 @@ function buildRows(plan: ReEntryPlan, profile: UserProfile): ComparisonRow[] {
   return rows;
 }
 
-export function ComparisonView({ plan, profile }: ComparisonViewProps) {
-  const rows = useMemo(() => buildRows(plan, profile), [plan, profile]);
+export function ComparisonView({ plan, profile, creditResult }: ComparisonViewProps) {
+  const rows = useMemo(() => buildRows(plan, profile, creditResult), [plan, profile, creditResult]);
 
   return (
     <section className="space-y-4">

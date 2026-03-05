@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo, useState, useCallback } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getPlan, generateNarrative } from "@/lib/api";
@@ -10,20 +10,24 @@ import { MondayMorning } from "@/components/plan/MondayMorning";
 import { BarrierCardView } from "@/components/plan/BarrierCardView";
 import { JobMatchCard } from "@/components/plan/JobMatchCard";
 import { ComparisonView } from "@/components/plan/ComparisonView";
+import { CreditResults } from "@/components/plan/CreditResults";
 import { BarrierType, EmploymentStatus, AvailableHours } from "@/lib/types";
-import type { PlanNarrative, UserProfile } from "@/lib/types";
+import type { CreditAssessmentResult, PlanNarrative, UserProfile } from "@/lib/types";
 import { barrierCountToSeverity } from "@/lib/constants";
 
+const BARRIER_TYPE_VALUES = new Set<string>(Object.values(BarrierType));
+
 function buildProfileFromPlan(sessionId: string, barriers: string[]): UserProfile {
+  const validBarriers = barriers.filter((b): b is BarrierType => BARRIER_TYPE_VALUES.has(b));
   return {
     session_id: sessionId,
     zip_code: "",
     employment_status: EmploymentStatus.UNEMPLOYED,
-    barrier_count: barriers.length,
-    primary_barriers: barriers as UserProfile["primary_barriers"],
-    barrier_severity: barrierCountToSeverity(barriers.length),
-    needs_credit_assessment: barriers.includes(BarrierType.CREDIT),
-    transit_dependent: barriers.includes(BarrierType.TRANSPORTATION),
+    barrier_count: validBarriers.length,
+    primary_barriers: validBarriers,
+    barrier_severity: barrierCountToSeverity(validBarriers.length),
+    needs_credit_assessment: validBarriers.includes(BarrierType.CREDIT),
+    transit_dependent: validBarriers.includes(BarrierType.TRANSPORTATION),
     schedule_type: AvailableHours.DAYTIME,
     work_history: "",
     target_industries: [],
@@ -53,12 +57,16 @@ function PlanContent() {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["plan", sessionId],
-    queryFn: () => getPlan(sessionId!),
+    queryFn: () => getPlan(sessionId ?? ""),
     enabled: !!sessionId,
   });
 
+  const handleNarrative = useCallback(
+    () => generateNarrative(sessionId ?? ""),
+    [sessionId],
+  );
   const narrativeMutation = useMutation({
-    mutationFn: () => generateNarrative(sessionId!),
+    mutationFn: handleNarrative,
     onSuccess: (result) => {
       setNarrative(result);
       queryClient.invalidateQueries({ queryKey: ["plan", sessionId] });
@@ -66,6 +74,17 @@ function PlanContent() {
   });
 
   const plan = data?.plan ?? null;
+
+  // Load credit assessment from sessionStorage (set by assess page)
+  const [creditResult] = useState<CreditAssessmentResult | null>(() => {
+    if (!sessionId || typeof window === "undefined") return null;
+    try {
+      const stored = sessionStorage.getItem(`credit_${sessionId}`);
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
 
   const profile = useMemo(
     () => data ? buildProfileFromPlan(data.session_id, data.barriers) : null,
@@ -75,10 +94,24 @@ function PlanContent() {
     () => plan && narrative ? { ...plan, resident_summary: narrative.summary } : plan,
     [plan, narrative],
   );
-  const handleGenerateNarrative = useCallback(
-    async () => { await narrativeMutation.mutateAsync(); },
-    [narrativeMutation],
-  );
+
+  const { jobsNow, jobsAfter } = useMemo(() => {
+    if (!plan) return { jobsNow: [], jobsAfter: [] };
+    return {
+      jobsNow: plan.job_matches.filter((j) => j.eligible_now),
+      jobsAfter: plan.job_matches.filter((j) => !j.eligible_now),
+    };
+  }, [plan]);
+
+  // Auto-generate narrative when plan loads (once)
+  const narrativeTriggered = useRef(false);
+  useEffect(() => {
+    if (plan && !plan.resident_summary && !narrative && !narrativeTriggered.current) {
+      narrativeTriggered.current = true;
+      narrativeMutation.mutate();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plan, narrative]);
 
   if (!sessionId) {
     return (
@@ -97,9 +130,12 @@ function PlanContent() {
     return (
       <div className="text-center py-12 space-y-3">
         <p className="text-destructive">
-          {(error as Error).message.includes("404")
-            ? "Session not found. It may have expired."
-            : `Error: ${(error as Error).message}`}
+          {(() => {
+            const msg = error instanceof Error ? error.message : String(error);
+            return msg.includes("404")
+              ? "Session not found. It may have expired."
+              : `Error: ${msg}`;
+          })()}
         </p>
         <Button asChild variant="outline">
           <a href="/assess">Start a new assessment</a>
@@ -116,20 +152,9 @@ function PlanContent() {
       <MondayMorning
         plan={planWithNarrative}
         profile={profile}
-        onGenerateNarrative={handleGenerateNarrative}
+        narrative={narrative}
+        narrativeLoading={narrativeMutation.isPending}
       />
-
-      {/* AI narrative key actions */}
-      {narrative && narrative.key_actions.length > 0 && (
-        <section className="space-y-3">
-          <h2 className="text-xl font-semibold text-primary">Key Actions</h2>
-          <ol className="list-decimal list-inside space-y-2 text-sm">
-            {narrative.key_actions.map((action, i) => (
-              <li key={i} className="text-foreground/90">{action}</li>
-            ))}
-          </ol>
-        </section>
-      )}
 
       <Separator />
 
@@ -145,24 +170,65 @@ function PlanContent() {
         </section>
       )}
 
+      {/* Credit results */}
+      {creditResult && (
+        <>
+          <Separator />
+          <section className="space-y-4">
+            <h2 className="text-xl font-semibold text-primary">Credit Assessment</h2>
+            <CreditResults result={creditResult} />
+          </section>
+        </>
+      )}
+
       <Separator />
 
-      {/* Job matches */}
+      {/* Job matches — split by eligibility when credit data exists */}
       {plan.job_matches.length > 0 && (
         <section className="space-y-4">
-          <h2 className="text-xl font-semibold text-primary">Matched Jobs</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {plan.job_matches.map((job) => (
-              <JobMatchCard key={`${job.title}-${job.company}`} job={job} />
-            ))}
-          </div>
+          {creditResult ? (
+            <>
+              {jobsNow.length > 0 && (
+                <div className="space-y-3">
+                  <h2 className="text-xl font-semibold text-primary">Qualified Now</h2>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {jobsNow.map((job, i) => (
+                      <JobMatchCard key={`now-${job.title}-${job.company}-${i}`} job={job} creditResult={creditResult} />
+                    ))}
+                  </div>
+                </div>
+              )}
+              {jobsAfter.length > 0 && (
+                <div className="space-y-3">
+                  <h2 className="text-xl font-semibold text-amber-600">After Credit Repair</h2>
+                  <p className="text-sm text-muted-foreground">
+                    These jobs require a credit check. Follow your credit repair plan to become eligible.
+                  </p>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {jobsAfter.map((job, i) => (
+                      <JobMatchCard key={`after-${job.title}-${job.company}-${i}`} job={job} creditResult={creditResult} />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <h2 className="text-xl font-semibold text-primary">Matched Jobs</h2>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {plan.job_matches.map((job, i) => (
+                  <JobMatchCard key={`job-${job.title}-${job.company}-${i}`} job={job} />
+                ))}
+              </div>
+            </>
+          )}
         </section>
       )}
 
       <Separator />
 
       {/* Comparison view */}
-      <ComparisonView plan={plan} profile={profile} />
+      <ComparisonView plan={plan} profile={profile} creditResult={creditResult} />
 
       {/* Narrative error */}
       {narrativeMutation.isError && (

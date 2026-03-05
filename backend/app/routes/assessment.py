@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.core.queries import create_session
+from app.core.queries import create_session, update_session_plan
 from app.modules.matching.engine import generate_plan
 from app.modules.matching.types import (
     AssessmentRequest,
@@ -71,6 +71,8 @@ async def create_assessment(
     }, session_id=session_id)
 
     plan = await generate_plan(profile, db)
+
+    await update_session_plan(db, session_id, json.dumps(plan.model_dump()))
 
     return {
         "session_id": session_id,

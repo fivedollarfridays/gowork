@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,6 +23,11 @@ interface WizardShellProps {
 export function WizardShell({ steps, onComplete, completeLabel = "Submit" }: WizardShellProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const totalSteps = steps.length;
+
+  // Clamp currentStep when steps array shrinks (e.g. credit step removed)
+  useEffect(() => {
+    setCurrentStep((s) => Math.min(s, totalSteps - 1));
+  }, [totalSteps]);
   const progressValue = ((currentStep + 1) / totalSteps) * 100;
   const isFirst = currentStep === 0;
   const isLast = currentStep === totalSteps - 1;
