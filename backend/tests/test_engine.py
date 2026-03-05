@@ -105,6 +105,27 @@ class TestQueryResourcesForBarriers:
         assert len(ids) == len(set(ids))
 
     @pytest.mark.asyncio
+    async def test_deserializes_services_json_string(self):
+        """Services stored as JSON string should be deserialized to a list."""
+        resource = _make_resource_dict(
+            id=10,
+            name="Job Center",
+            category="career_center",
+            services='["job placement", "resume help"]',
+        )
+        mock_session = AsyncMock()
+
+        async def mock_get_by_category(session, category):
+            return [resource] if category == "career_center" else []
+
+        with patch(_CAT_PATCH, side_effect=mock_get_by_category):
+            result = await query_resources_for_barriers(
+                [BarrierType.CREDIT], mock_session
+            )
+        assert len(result) == 1
+        assert result[0].services == ["job placement", "resume help"]
+
+    @pytest.mark.asyncio
     async def test_empty_barriers_returns_empty(self):
         """No barriers -> no resources."""
         mock_session = AsyncMock()
