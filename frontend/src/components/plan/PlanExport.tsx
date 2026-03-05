@@ -54,6 +54,7 @@ export function PlanExport({ plan, creditResult }: PlanExportProps) {
           disabled={generating}
           variant="outline"
           className="gap-2"
+          aria-label={generating ? "Generating PDF, please wait" : undefined}
         >
           {generating ? (
             <>
@@ -67,7 +68,7 @@ export function PlanExport({ plan, creditResult }: PlanExportProps) {
             </>
           )}
         </Button>
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
       </div>
 
       {/* Hidden print-ready content — always mounted for html2pdf ref access */}

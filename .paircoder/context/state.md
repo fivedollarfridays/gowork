@@ -4,78 +4,92 @@
 
 ## Active Plan
 
-**Plan:** plan-2026-03-plan-2026-03-implementation
-**Type:** feature
-**Title:** Full implementation: DB queries, scoring, filters, engine, routes, frontend
+**Plan:** plan-2026-03-a11y-and-demo
+**Type:** chore
+**Title:** Phase 6: Accessibility + Final Polish
 **Status:** In Progress
-**Current Sprint:** 4
+**Current Sprint:** 10
 
 ## Previous Plans
 
-- plan-2026-03-test-coverage (Complete, 4/4 done)
+- plan-2026-03-docs-and-readme (Complete, 5/5 done -- Sprint 9)
+- plan-2026-03-export-and-polish (Complete, 4/4 done -- Sprint 8)
+- plan-2026-03-brightdata-live-jobs (Complete, 6/6 done -- Sprint 7)
+- plan-2026-03-demo-killer-frontend (Complete, 10/10 done -- Sprint 5)
+- plan-2026-03-plan-2026-03-implementation (Complete, 9/9 done -- Sprint 4)
+- plan-2026-03-test-coverage (Complete, 4/4 done -- Sprint 3)
 - plan-2026-03-plan-2026-03-review-fixes (Complete, 3/3 done)
 - plan-2026-03-module-skeletons (Complete, 7/7 done)
 
 ## Current Focus
 
-Sprint 4: T4.0 complete. T4.1 (scoring), T4.2 (filters), and T4.6 (jobs) are now unblocked.
+Sprint 10: Accessibility + Final Polish. All 5 tasks complete.
 
 ## Task Status
 
-### Sprint 4 — Full Implementation
+### Sprint 10 -- Accessibility + Final Polish
 
-| ID | Title | Priority | Complexity | Status | Branch | Depends On |
-|----|-------|----------|------------|--------|--------|------------|
-| T4.0 | Database query layer | P0 | 35 | done | feat/db-query-layer | -- |
-| T4.1 | Scoring engine | P0 | 45 | pending | feat/scoring-engine | T4.0 |
-| T4.2 | Matching filters | P0 | 40 | pending | feat/matching-filters | T4.0 |
-| T4.3 | Matching engine orchestrator | P0 | 50 | pending | feat/matching-engine | T4.1, T4.2 |
-| T4.4 | Assessment route | P0 | 45 | pending | feat/assessment-route | T4.3 |
-| T4.5 | Plan route + Claude API | P1 | 60 | pending | feat/plan-route | T4.4 |
-| T4.6 | Jobs route | P1 | 35 | pending | feat/jobs-route | T4.0 |
-| T4.7 | Frontend wiring + TypeScript types | P1 | 50 | pending | feat/frontend-pages | T4.4, T4.5 |
-| T4.8 | Integration testing | P2 | 40 | pending | feat/integration-tests | all |
+| ID | Title | Priority | Complexity | Status | Depends On |
+|----|-------|----------|------------|--------|------------|
+| T10.0 | Semantic HTML -- headings, landmarks, form labels | P0 | 30 | done | -- |
+| T10.1 | Keyboard nav -- tab order, focus in wizard | P0 | 25 | done | -- |
+| T10.2 | ARIA -- live regions, async updates, button states | P0 | 25 | done | -- |
+| T10.3 | Claude narrative polish -- demo-quality prompts | P1 | 20 | done | -- |
+| T10.4 | Demo script -- Maria scenario, click path | P1 | 15 | done | T10.0-T10.3 |
 
-**Total: 9 tasks, 400 complexity points (1/9 done)**
-
-### Dependency Graph
-
-```
-T4.0 (DB queries) DONE
-├── T4.1 (Scoring) ──┐
-├── T4.2 (Filters) ──┼── T4.3 (Engine) ── T4.4 (Assessment) ── T4.5 (Plan)
-└── T4.6 (Jobs)      │                                      └── T4.7 (Frontend)
-                      └── T4.8 (Integration -- after all)
-```
-
-### Sprint 3 — Test Coverage (Complete)
-
-| ID | Title | Priority | Complexity | Status |
-|----|-------|----------|------------|--------|
-| T3.1 | Test core errors + exception handlers | P1 | 15 | done |
-| T3.2 | Test health checks endpoint | P1 | 20 | done |
-| T3.3 | Test database lifecycle + seed edge cases | P0 | 25 | done |
-| T3.4 | Test app lifespan, root endpoint, credit success path, type imports | P1 | 15 | done |
+**Total: 5 tasks, 115 complexity points (5/5 done)**
 
 ## What Was Just Done
 
-### Session: 2026-03-05 - T4.0 Database Query Layer (Driver)
+### Session: 2026-03-05 - T10.4 Demo Script
 
-- Created `backend/app/core/queries.py` with 7 async query functions
-- Functions: get_all_resources, get_resource_by_id, get_resources_by_category, get_all_transit_routes, get_all_employers, create_session, get_session_by_id
-- All queries use parameterized SQL (`:param` binding, zero f-strings)
-- Created `backend/tests/test_queries.py` with 14 tests
-- 100% coverage on queries.py, arch check clean
-- Full suite: 73 passed, 17 skipped
+- Created `docs/demo-script.md` (222 lines) with complete demo walkthrough
+- Maria persona: 34, Montgomery, ZIP 36104, 4 barriers (credit/transport/childcare/criminal_record), credit 580
+- 8-section click-by-click path: landing -> basic info -> barriers -> credit -> review -> plan -> jobs -> export
+- Talking points per screen with what to say and what to highlight
+- Timing targets: 3 minutes total, 15-30s per section
+- Pre-demo checklist: servers, API keys, seed data, browser zoom
+- Q&A prep: 5 likely questions with answers
+- Fallback plan for demo failures (backend down, AI fails, etc.)
+
+### Session: 2026-03-05 - T10.2 ARIA Live Regions + Async Updates
+
+- Added `aria-live="polite"` to loading spinner in assess/page.tsx (profile analysis)
+- Added `role="alert"` to error message in assess/page.tsx
+- Added `aria-busy="true"` and `aria-label="Loading your plan"` to PlanSkeleton in plan/page.tsx
+- Added `role="alert"` to error state container and narrative error in plan/page.tsx
+- Added `aria-live="polite"` wrapper around narrative loading card in MondayMorning.tsx
+- Added `aria-label="Generating PDF, please wait"` to PlanExport button during generation
+- Added `role="alert"` to PlanExport error message
+- Added `aria-live="polite"` to EmailExport success message ("Plan sent to...")
+- Added `role="alert"` to EmailExport error message
+- Added `role="alert"` to credit/page.tsx mutation error
+- Added contextual `aria-label` to WizardShell Previous/Next buttons (e.g., "Go to step 2: Barriers")
+- Created 8 new tests: 4 WizardShell ARIA tests, 2 PlanExport ARIA tests, 2 EmailExport ARIA tests, 2 MondayMorning ARIA tests
+- All 75 frontend tests pass, build clean, all files within arch limits
+
+### Session: 2026-03-05 - T10.1 Keyboard Nav and Focus Management
+
+- Added programmatic focus management to WizardShell: when step changes, focus moves to the step content container so keyboard users don't lose their place
+- Added `useRef<HTMLDivElement>` for step content container, `tabIndex={-1}` on CardContent (allows programmatic focus without adding to tab order), `outline-none` to suppress focus ring on container
+- Added `useEffect` watching `currentStep` with `setTimeout(0)` for DOM readiness; skips focus on initial mount via `hasMountedRef` flag
+- Added `aria-current="step"` to the active step indicator circle in the nav
+- Created 7 tests in `WizardShell-a11y.test.tsx`: aria-current on mount, aria-current not on non-current steps, aria-current moves on navigation, tabIndex=-1 presence, no focus on mount, focus on next, focus on back
+- All 73 frontend tests pass, build clean
+
+### Session: 2026-03-05 - T10.3 Claude Narrative Polish
+
+- Rewrote SYSTEM_PROMPT in `backend/app/ai/prompts.py`: persona is now "caring, experienced workforce navigator at the Alabama Career Center in Montgomery." Includes Montgomery-specific context (M-Transit, Alabama Career Center, Montgomery Job Corps, GreenPath Financial, local employers). Style rules: short paragraphs, 2-3 sentences, direct "you" address, no emojis. JSON response format: summary (max 250 words Monday Morning narrative) + key_actions (3-5 concrete steps).
+- Rewrote USER_PROMPT_TEMPLATE: frames the task as sitting across from the resident. Includes barriers, qualifications, plan data placeholders. Instructs Monday morning pep talk, specific resource/job references, M-Transit for transportation barriers, concrete key_actions with places and deadlines.
+- Rewrote `build_fallback_narrative()` in `backend/app/ai/client.py`: replaced robotic "Based on your assessment, you have barriers in:" with empathetic, Montgomery-specific template. Opening acknowledges courage. Monday morning next step references first matched contact or Alabama Career Center. Job titles woven naturally. Empty-data fallback still warm and actionable.
+- Refactored fallback into 4 helper functions (`_fallback_opening`, `_fallback_next_step`, `_fallback_jobs_sentence`, `_build_fallback_summary`) to satisfy arch check function length limits.
+- Added 13 new tests in `tests/test_prompts.py` (persona, tone, Montgomery context, style, JSON format, no emojis, template placeholders, rendering).
+- Added 7 new tests in `tests/test_fallback_narrative.py` (empathetic tone, Montgomery references, natural job mentions, natural contacts, empty plan warmth, specific actions, no emojis).
+- All 255 tests pass (235 original + 20 new). All arch checks clean. No function signature changes.
 
 ## What's Next
 
-Next tasks (all unblocked by T4.0):
-- `/start-task T4.1` -- Scoring engine (P0, Kevin)
-- `/start-task T4.2` -- Matching filters (P0, Vinny)
-- `/start-task T4.6` -- Jobs route (P1)
-
-Need to commit T4.0, push branch, create PR, merge to main before starting dependent tasks.
+1. Commit/push/PR for Phase 6 (Sprint 10 complete)
 
 ## Blockers
 

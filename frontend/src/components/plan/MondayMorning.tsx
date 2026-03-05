@@ -81,6 +81,7 @@ export function MondayMorning({ plan, profile, narrative, narrativeLoading }: Mo
 
       {/* AI narrative */}
       {narrativeLoading && (
+        <div aria-live="polite">
         <Card className="bg-secondary/5 border-secondary/20">
           <CardContent className="p-6">
             <div className="flex items-center gap-3 text-muted-foreground">
@@ -89,6 +90,7 @@ export function MondayMorning({ plan, profile, narrative, narrativeLoading }: Mo
             </div>
           </CardContent>
         </Card>
+        </div>
       )}
       {plan.resident_summary && (
         <>

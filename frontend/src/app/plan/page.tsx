@@ -76,7 +76,7 @@ function LiveJobCard({ job }: { job: EnrichedJob }) {
 
 function PlanSkeleton() {
   return (
-    <div className="space-y-6 animate-pulse">
+    <div className="space-y-6 animate-pulse" aria-busy="true" aria-label="Loading your plan">
       <div className="h-10 w-3/4 bg-muted rounded" />
       <div className="h-5 w-1/2 bg-muted rounded" />
       <div className="h-40 bg-muted rounded-xl" />
@@ -182,7 +182,7 @@ function PlanContent() {
       : "Something went wrong loading your plan. Please try again.";
 
     return (
-      <div className="text-center py-12 space-y-3">
+      <div role="alert" className="text-center py-12 space-y-3">
         <p className="text-destructive">{friendlyMessage}</p>
         <Button asChild variant="outline">
           <a href="/assess">Start a new assessment</a>
@@ -312,7 +312,7 @@ function PlanContent() {
 
       {/* Narrative error */}
       {narrativeMutation.isError && (
-        <p className="text-sm text-destructive text-center">
+        <p role="alert" className="text-sm text-destructive text-center">
           Failed to generate summary: {narrativeMutation.error.message}
         </p>
       )}

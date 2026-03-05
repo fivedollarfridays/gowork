@@ -69,21 +69,74 @@ def build_fallback_narrative(
     qualifications: str,
     plan_data: dict,
 ) -> PlanNarrative:
-    """Build a structured narrative without AI when the API is unavailable."""
+    """Build a warm, Montgomery-specific narrative when the AI API is unavailable."""
     actions, contacts, job_titles = _extract_actions_and_contacts(plan_data)
-
-    if barriers:
-        summary = (
-            f"Based on your assessment, you have barriers in: {', '.join(barriers)}. "
-            "Here are your recommended next steps to move forward."
-        )
-    else:
-        summary = "Based on your assessment, here are your recommended next steps."
-
-    if job_titles:
-        summary += f" Matched job opportunities include: {', '.join(job_titles[:3])}."
-    if contacts:
-        summary += f" Key contacts: {'; '.join(contacts[:3])}."
-
-    key_actions = actions[:5] if actions else ["Visit the Montgomery Career Center for assistance"]
+    summary = _build_fallback_summary(barriers, contacts, job_titles)
+    key_actions = _build_fallback_actions(actions)
     return PlanNarrative(summary=summary, key_actions=key_actions)
+
+
+def _fallback_opening(barriers: list[str]) -> str:
+    """Return an empathetic opening sentence based on whether barriers exist."""
+    if barriers:
+        return (
+            "You have already taken a big step by identifying what is standing "
+            "in your way. That takes real courage."
+        )
+    return (
+        "You are taking an important first step, and there are people in "
+        "Montgomery ready to help you move forward."
+    )
+
+
+def _fallback_next_step(contacts: list[str]) -> str:
+    """Return a Monday-morning contact step for the fallback narrative."""
+    if contacts:
+        return (
+            f"Your first step Monday morning is to reach out to {contacts[0]} "
+            "-- they work with Montgomery residents every day and know exactly "
+            "how to help."
+        )
+    return (
+        "Monday morning, head to the Alabama Career Center on Carter Hill Road. "
+        "The staff there help Montgomery residents just like you every single day."
+    )
+
+
+def _fallback_jobs_sentence(job_titles: list[str]) -> str:
+    """Return a natural sentence about matched jobs, or empty string."""
+    if not job_titles:
+        return ""
+    if len(job_titles) == 1:
+        return f"We also found a {job_titles[0]} position that could be a great fit for you."
+    if len(job_titles) > 2:
+        joined = ", ".join(job_titles[:2]) + " and " + job_titles[2]
+    else:
+        joined = " and ".join(job_titles[:2])
+    return f"We also found openings for {joined} that could be a great fit."
+
+
+def _build_fallback_summary(
+    barriers: list[str],
+    contacts: list[str],
+    job_titles: list[str],
+) -> str:
+    """Compose a warm, Montgomery-specific fallback summary."""
+    parts = [
+        _fallback_opening(barriers),
+        _fallback_next_step(contacts),
+    ]
+    jobs_sentence = _fallback_jobs_sentence(job_titles)
+    if jobs_sentence:
+        parts.append(jobs_sentence)
+    return " ".join(parts)
+
+
+def _build_fallback_actions(actions: list[str]) -> list[str]:
+    """Return up to 5 key actions, with a Montgomery-specific default."""
+    if actions:
+        return actions[:5]
+    return [
+        "Visit the Alabama Career Center on Carter Hill Road in Montgomery "
+        "for personalized guidance"
+    ]

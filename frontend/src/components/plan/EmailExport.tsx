@@ -90,7 +90,7 @@ export function EmailExport({ plan }: EmailExportProps) {
 
   if (sent) {
     return (
-      <div className="flex items-center gap-2 text-sm text-success">
+      <div aria-live="polite" className="flex items-center gap-2 text-sm text-success">
         <CheckCircle className="h-4 w-4" />
         <span>Plan sent to {email}</span>
       </div>
@@ -137,7 +137,7 @@ export function EmailExport({ plan }: EmailExportProps) {
           "Send"
         )}
       </Button>
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
     </div>
   );
 }

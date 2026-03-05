@@ -266,13 +266,13 @@ export default function AssessPage() {
           </div>
 
           {mutation.isPending && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div aria-live="polite" className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" />
               Analyzing your profile and matching resources...
             </div>
           )}
           {error && (
-            <p className="text-sm text-destructive">{error}</p>
+            <p role="alert" className="text-sm text-destructive">{error}</p>
           )}
         </div>
       ),
