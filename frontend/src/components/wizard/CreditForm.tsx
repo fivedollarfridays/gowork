@@ -17,11 +17,11 @@ import { humanizeLabel } from "@/lib/constants";
 import type { CreditFormData } from "@/lib/types";
 
 const SCORE_BANDS: { label: string; min: number; max: number; color: string }[] = [
-  { label: "Very Poor", min: 300, max: 599, color: "text-red-600" },
-  { label: "Poor", min: 600, max: 649, color: "text-red-500" },
-  { label: "Fair", min: 650, max: 699, color: "text-amber-600" },
-  { label: "Good", min: 700, max: 749, color: "text-green-600" },
-  { label: "Excellent", min: 750, max: 850, color: "text-green-700" },
+  { label: "Very Poor", min: 300, max: 599, color: "text-destructive" },
+  { label: "Poor", min: 600, max: 649, color: "text-destructive" },
+  { label: "Fair", min: 650, max: 699, color: "text-accent-foreground" },
+  { label: "Good", min: 700, max: 749, color: "text-success" },
+  { label: "Excellent", min: 750, max: 850, color: "text-success" },
 ];
 
 function getScoreBand(score: number) {
@@ -29,9 +29,9 @@ function getScoreBand(score: number) {
 }
 
 function utilizationColor(pct: number): string {
-  if (pct <= 30) return "text-green-600";
-  if (pct <= 50) return "text-amber-600";
-  return "text-red-600";
+  if (pct <= 30) return "text-success";
+  if (pct <= 50) return "text-accent-foreground";
+  return "text-destructive";
 }
 
 const ACCOUNT_AGE_RANGES: { value: string; label: string; months: number }[] = [

@@ -4,7 +4,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import { useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getPlan, generateNarrative, getJobs } from "@/lib/api";
-import { Briefcase, ExternalLink } from "lucide-react";
+import { Briefcase, ExternalLink, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +14,9 @@ import { BarrierCardView } from "@/components/plan/BarrierCardView";
 import { JobMatchCard } from "@/components/plan/JobMatchCard";
 import { ComparisonView } from "@/components/plan/ComparisonView";
 import { CreditResults } from "@/components/plan/CreditResults";
+import { EmailExport } from "@/components/plan/EmailExport";
+import { PlanExport } from "@/components/plan/PlanExport";
+import { EmptyState } from "@/components/EmptyState";
 import { BarrierType, EmploymentStatus, AvailableHours } from "@/lib/types";
 import type { CreditAssessmentResult, EnrichedJob, PlanNarrative, UserProfile } from "@/lib/types";
 import { barrierCountToSeverity, safeHref } from "@/lib/constants";
@@ -56,7 +59,7 @@ function LiveJobCard({ job }: { job: EnrichedJob }) {
         <div className="flex flex-wrap gap-1.5">
           {job.industry && <Badge variant="secondary" className="text-xs">{job.industry}</Badge>}
           {job.credit_check_required === "yes" && (
-            <Badge variant="outline" className="text-xs text-amber-700 border-amber-300 bg-amber-50">Credit check required</Badge>
+            <Badge variant="outline" className="text-xs text-accent-foreground border-accent/30 bg-accent/10">Credit check required</Badge>
           )}
         </div>
         {href && (
@@ -173,16 +176,14 @@ function PlanContent() {
   if (isLoading) return <PlanSkeleton />;
 
   if (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    const friendlyMessage = msg.includes("404")
+      ? "Session not found. It may have expired."
+      : "Something went wrong loading your plan. Please try again.";
+
     return (
       <div className="text-center py-12 space-y-3">
-        <p className="text-destructive">
-          {(() => {
-            const msg = error instanceof Error ? error.message : String(error);
-            return msg.includes("404")
-              ? "Session not found. It may have expired."
-              : `Error: ${msg}`;
-          })()}
-        </p>
+        <p className="text-destructive">{friendlyMessage}</p>
         <Button asChild variant="outline">
           <a href="/assess">Start a new assessment</a>
         </Button>
@@ -230,9 +231,9 @@ function PlanContent() {
       <Separator />
 
       {/* Job matches — split by eligibility when credit data exists */}
-      {plan.job_matches.length > 0 && (
-        <section className="space-y-4">
-          {creditResult ? (
+      <section className="space-y-4">
+        {plan.job_matches.length > 0 ? (
+          creditResult ? (
             <>
               {jobsNow.length > 0 && (
                 <div className="space-y-3">
@@ -246,7 +247,7 @@ function PlanContent() {
               )}
               {jobsAfter.length > 0 && (
                 <div className="space-y-3">
-                  <h2 className="text-xl font-semibold text-amber-600">After Credit Repair</h2>
+                  <h2 className="text-xl font-semibold text-accent-foreground">After Credit Repair</h2>
                   <p className="text-sm text-muted-foreground">
                     These jobs require a credit check. Follow your credit repair plan to become eligible.
                   </p>
@@ -267,14 +268,29 @@ function PlanContent() {
                 ))}
               </div>
             </>
-          )}
-        </section>
-      )}
+          )
+        ) : (
+          <EmptyState
+            icon={Search}
+            title="No job matches yet"
+            description="We're still looking for the best matches for your profile. Check back soon or update your assessment."
+            actionLabel="Update Assessment"
+            actionHref="/assess"
+          />
+        )}
+      </section>
 
       <Separator />
 
       {/* Comparison view */}
       <ComparisonView plan={plan} profile={profile} creditResult={creditResult} />
+
+      {/* Export actions */}
+      <Separator />
+      <div className="flex flex-wrap items-center gap-3">
+        <PlanExport plan={planWithNarrative} creditResult={creditResult} />
+        <EmailExport plan={planWithNarrative} />
+      </div>
 
       {/* Explore More Jobs — live listings from job_listings table */}
       {liveJobs && liveJobs.jobs.length > 0 && (

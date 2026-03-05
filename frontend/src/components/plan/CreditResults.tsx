@@ -16,7 +16,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import type { CreditAssessmentResult } from "@/lib/types";
-import { SEVERITY_BADGE_STYLES } from "@/lib/constants";
+import { SEVERITY_BADGE_STYLES, STATUS_BADGE_STYLES } from "@/lib/constants";
 
 interface CreditResultsProps {
   result: CreditAssessmentResult;
@@ -116,12 +116,12 @@ export function CreditResults({ result }: CreditResultsProps) {
                 key={t.threshold_name}
                 className={cn(
                   "flex items-center justify-between rounded-lg border p-3 text-sm",
-                  t.already_met ? "bg-green-50 border-green-200" : "bg-muted/30"
+                  t.already_met ? "bg-success/10 border-success/20" : "bg-muted/30"
                 )}
               >
                 <div className="flex items-center gap-2">
                   {t.already_met ? (
-                    <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
                   ) : (
                     <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
                   )}
@@ -131,7 +131,7 @@ export function CreditResults({ result }: CreditResultsProps) {
                   </div>
                 </div>
                 {t.already_met ? (
-                  <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200 text-xs">
+                  <Badge variant="outline" className={cn(STATUS_BADGE_STYLES.positive, "text-xs")}>
                     Reached
                   </Badge>
                 ) : (
@@ -208,7 +208,7 @@ export function CreditResults({ result }: CreditResultsProps) {
                       key={e.product_name}
                       className={cn(
                         "flex items-center justify-between rounded-lg border p-3 text-sm",
-                        e.status === "eligible" ? "bg-green-50 border-green-200" : "bg-muted/30"
+                        e.status === "eligible" ? "bg-success/10 border-success/20" : "bg-muted/30"
                       )}
                     >
                       <div>
@@ -216,7 +216,7 @@ export function CreditResults({ result }: CreditResultsProps) {
                         <span className="text-xs text-muted-foreground ml-1">({e.category})</span>
                       </div>
                       {e.status === "eligible" ? (
-                        <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200 text-xs">
+                        <Badge variant="outline" className={cn(STATUS_BADGE_STYLES.positive, "text-xs")}>
                           Eligible
                         </Badge>
                       ) : (

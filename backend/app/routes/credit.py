@@ -1,14 +1,10 @@
-"""POST /api/credit/assess — Thin proxy to credit assessment API."""
+"""POST /api/credit/assess — Thin proxy to credit assessment API (/v1/assess/simple)."""
 
 import httpx
 from fastapi import APIRouter, HTTPException
 
 from app.core.config import get_settings
-from app.modules.credit.types import (
-    CreditAssessmentResult,
-    CreditProfileRequest,
-    score_to_band,
-)
+from app.modules.credit.types import CreditAssessmentResult, SimpleCreditRequest
 
 router = APIRouter(prefix="/api/credit", tags=["credit"])
 
@@ -25,17 +21,15 @@ def _check_credit_response(resp: httpx.Response) -> None:
 
 
 @router.post("/assess")
-async def assess_credit(profile: CreditProfileRequest) -> CreditAssessmentResult:
-    """Proxy to the credit assessment microservice."""
+async def assess_credit(profile: SimpleCreditRequest) -> CreditAssessmentResult:
+    """Proxy to the credit assessment microservice's simple endpoint."""
     settings = get_settings()
-    payload = profile.model_dump()
-    payload["score_band"] = score_to_band(profile.current_score)
 
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
             resp = await client.post(
-                f"{settings.credit_api_url}/v1/assess",
-                json=payload,
+                f"{settings.credit_api_url}/v1/assess/simple",
+                json=profile.model_dump(),
                 headers={
                     "Content-Type": "application/json",
                     "X-API-Key": settings.credit_api_key,

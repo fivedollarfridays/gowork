@@ -59,8 +59,8 @@ export default function AssessPage() {
       }
       router.push(`/plan?session=${data.session_id}`);
     },
-    onError: (err) => {
-      setError(err.message);
+    onError: () => {
+      setError("Something went wrong submitting your assessment. Please try again.");
     },
   });
 
@@ -76,27 +76,18 @@ export default function AssessPage() {
       try {
         const ageRange = ACCOUNT_AGE_RANGES.find((r) => r.value === creditData.accountAgeRange);
         const result = await postCredit({
-          current_score: creditData.currentScore,
-          score_band: null,
-          overall_utilization: creditData.overallUtilization,
-          account_summary: {
-            total_accounts: creditData.totalAccounts,
-            open_accounts: creditData.openAccounts,
-            closed_accounts: Math.max(0, creditData.totalAccounts - creditData.openAccounts),
-            negative_accounts: creditData.negativeItems.length,
-            collection_accounts: creditData.collectionAccounts,
-            total_balance: 0,
-            total_credit_limit: 0,
-            monthly_payments: 0,
-          },
-          payment_history_pct: creditData.paymentHistoryPct,
-          average_account_age_months: ageRange?.months ?? 24,
+          credit_score: creditData.currentScore,
+          utilization_percent: creditData.overallUtilization,
+          total_accounts: creditData.totalAccounts,
+          open_accounts: creditData.openAccounts,
+          payment_history_percent: creditData.paymentHistoryPct,
+          oldest_account_months: ageRange?.months ?? 24,
           negative_items: creditData.negativeItems,
         });
         setCreditResult(result);
         creditResultRef.current = result;
       } catch (err) {
-        setError(err instanceof Error ? `Credit check failed: ${err.message}. Continuing without credit data.` : "Credit check failed. Continuing without credit data.");
+        setError("Credit check could not be completed. Continuing without credit data.");
       }
     }
 
