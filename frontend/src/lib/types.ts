@@ -147,6 +147,29 @@ export interface PlanNarrative {
   key_actions: string[];
 }
 
+export interface JobsResponse {
+  jobs: EnrichedJob[];
+  total: number;
+}
+
+export interface EnrichedJob {
+  id: number;
+  title: string;
+  company: string | null;
+  url: string | null;
+  scraped_at: string | null;
+  industry: string | null;
+  credit_check_required: string;
+  transit_info: TransitInfo | null;
+  application_steps: string[];
+}
+
+export interface TransitInfo {
+  accessible: boolean;
+  routes: { route_number: number; route_name: string }[];
+  schedule: string;
+}
+
 // --- Credit types ---
 
 export interface AccountSummary {
