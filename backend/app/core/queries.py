@@ -70,6 +70,22 @@ async def create_session(session: AsyncSession, session_data: dict) -> str:
     return session_id
 
 
+async def get_all_job_listings(session: AsyncSession) -> list[dict]:
+    """Fetch all job listings."""
+    result = await session.execute(text("SELECT * FROM job_listings"))
+    return [dict(row._mapping) for row in result]
+
+
+async def get_job_listing_by_id(session: AsyncSession, job_id: int) -> dict | None:
+    """Fetch a single job listing by id."""
+    result = await session.execute(
+        text("SELECT * FROM job_listings WHERE id = :id"),
+        {"id": job_id},
+    )
+    row = result.first()
+    return dict(row._mapping) if row else None
+
+
 async def get_session_by_id(session: AsyncSession, session_id: str) -> dict | None:
     """Fetch a session by id."""
     result = await session.execute(
@@ -78,3 +94,12 @@ async def get_session_by_id(session: AsyncSession, session_id: str) -> dict | No
     )
     row = result.first()
     return dict(row._mapping) if row else None
+
+
+async def update_session_plan(session: AsyncSession, session_id: str, plan_json: str) -> None:
+    """Update the plan column for an existing session."""
+    await session.execute(
+        text("UPDATE sessions SET plan = :plan WHERE id = :id"),
+        {"plan": plan_json, "id": session_id},
+    )
+    await session.commit()
