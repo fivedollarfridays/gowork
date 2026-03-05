@@ -98,6 +98,18 @@ class TestChildcareFilter:
         assert "Near Work" in names
 
 
+    def test_includes_montgomery_area_via_regex(self):
+        """Should include resources with 361xx zip even if not exact zip match."""
+        resources = [
+            _make_resource(id=1, name="Other Montgomery", address="100 Oak Ave, Montgomery, AL 36117"),
+            _make_resource(id=2, name="Out of Area", address="200 Pine St, Mobile, AL 36601"),
+        ]
+        result = apply_childcare_filter(resources, "36104", [])
+        names = [r.name for r in result]
+        assert "Other Montgomery" in names
+        assert "Out of Area" not in names
+
+
 class TestCertificationRenewal:
     def test_parses_cna_from_work_history(self):
         """Should detect CNA in work history."""

@@ -192,6 +192,12 @@ class TestScheduleScoring:
         score_day = score_resource(resource_day, profile)
         assert score_eve > score_day
 
+    def test_daytime_resource_matches_daytime_user(self):
+        profile = _make_profile(schedule_type="daytime")
+        resource = _make_resource(notes="Open weekdays 9am-5pm")
+        score = score_resource(resource, profile)
+        assert 0.0 <= score <= 1.0
+
     def test_night_schedule_penalized(self):
         profile = _make_profile(schedule_type="night")
         resource = _make_resource(notes="Open weekdays 9-5")
