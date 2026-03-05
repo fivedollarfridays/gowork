@@ -94,3 +94,12 @@ async def get_session_by_id(session: AsyncSession, session_id: str) -> dict | No
     )
     row = result.first()
     return dict(row._mapping) if row else None
+
+
+async def update_session_plan(session: AsyncSession, session_id: str, plan_json: str) -> None:
+    """Update the plan column for an existing session."""
+    await session.execute(
+        text("UPDATE sessions SET plan = :plan WHERE id = :id"),
+        {"plan": plan_json, "id": session_id},
+    )
+    await session.commit()
