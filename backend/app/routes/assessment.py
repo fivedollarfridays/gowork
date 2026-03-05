@@ -1,7 +1,14 @@
-"""POST /api/assessment — Vinny implements this."""
+"""POST /api/assessment — intake assessment and matching pipeline."""
 
-from fastapi import APIRouter, HTTPException
+import json
+import uuid
 
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.database import get_db
+from app.core.queries import create_session
+from app.modules.matching.engine import generate_plan
 from app.modules.matching.types import (
     AssessmentRequest,
     BarrierSeverity,
@@ -13,24 +20,60 @@ router = APIRouter(prefix="/api/assessment", tags=["assessment"])
 
 
 def determine_severity(barrier_count: int) -> BarrierSeverity:
-    """3+ barriers = HIGH, 2 = MEDIUM, 1 = LOW."""
-    raise NotImplementedError("Vinny implements this")
+    """3+ barriers = HIGH, 2 = MEDIUM, 1 or 0 = LOW."""
+    if barrier_count >= 3:
+        return BarrierSeverity.HIGH
+    if barrier_count == 2:
+        return BarrierSeverity.MEDIUM
+    return BarrierSeverity.LOW
 
 
 def extract_primary_barriers(barriers: dict[BarrierType, bool]) -> list[BarrierType]:
     """Return list of BarrierType enums for checked barriers."""
-    raise NotImplementedError("Vinny implements this")
+    return [bt for bt, checked in barriers.items() if checked]
+
+
+def _build_profile(session_id: str, request: AssessmentRequest) -> UserProfile:
+    """Build UserProfile from assessment request."""
+    primary_barriers = extract_primary_barriers(request.barriers)
+    return UserProfile(
+        session_id=session_id,
+        zip_code=request.zip_code,
+        employment_status=request.employment_status,
+        barrier_count=len(primary_barriers),
+        primary_barriers=primary_barriers,
+        barrier_severity=determine_severity(len(primary_barriers)),
+        needs_credit_assessment=request.barriers.get(BarrierType.CREDIT, False),
+        transit_dependent=(
+            not request.has_vehicle
+            and request.barriers.get(BarrierType.TRANSPORTATION, False)
+        ),
+        schedule_type=request.schedule_constraints.available_hours.value,
+        work_history=request.work_history,
+        target_industries=request.target_industries,
+    )
 
 
 @router.post("/")
-async def create_assessment(request: AssessmentRequest) -> dict:
-    """Receive barrier form, create session, return profile summary.
+async def create_assessment(
+    request: AssessmentRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Receive barrier form, create session, run matching, return results."""
+    session_id = str(uuid.uuid4())
+    profile = _build_profile(session_id, request)
 
-    1. Validate zip_code is Montgomery area (361xx) — already enforced by Pydantic pattern
-    2. Create session_id (UUID)
-    3. Count barriers, determine severity
-    4. Set flags: needs_credit_assessment, transit_dependent
-    5. Store session in SQLite (expires in 24h)
-    6. Return UserProfile
-    """
-    raise NotImplementedError("Vinny implements this")
+    await create_session(db, {
+        "barriers": json.dumps([b.value for b in profile.primary_barriers]),
+        "credit_profile": None,
+        "qualifications": request.work_history,
+        "plan": None,
+    })
+
+    plan = await generate_plan(profile, db)
+
+    return {
+        "session_id": session_id,
+        "profile": profile.model_dump(),
+        "plan": plan.model_dump(),
+    }
