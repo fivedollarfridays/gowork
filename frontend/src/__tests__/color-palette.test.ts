@@ -78,7 +78,7 @@ describe("STATUS_BADGE_STYLES uses semantic tokens", () => {
 
   it("does NOT use hardcoded green/amber/red in badge styles", () => {
     // Extract only the STATUS_BADGE_STYLES block
-    const match = constants.match(/STATUS_BADGE_STYLES\s*=\s*\{[^}]+\}/s);
+    const match = constants.match(/STATUS_BADGE_STYLES\s*=\s*\{[\s\S]+?\}\s*as\s*const/);
     expect(match).toBeTruthy();
     const block = match![0];
     expect(block).not.toMatch(/text-green-/);

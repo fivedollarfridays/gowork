@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { PlanExport } from "../PlanExport";
-import type { ReEntryPlan, UserProfile, CreditAssessmentResult } from "@/lib/types";
+import type { ReEntryPlan, CreditAssessmentResult } from "@/lib/types";
 
 // --- Fixtures ---
 
@@ -66,20 +66,6 @@ const basePlan: ReEntryPlan = {
   eligible_after_repair: ["Bank Teller"],
 };
 
-const baseProfile: UserProfile = {
-  session_id: "sess-abc",
-  zip_code: "36104",
-  employment_status: "unemployed",
-  barrier_count: 2,
-  primary_barriers: ["credit", "transportation"],
-  barrier_severity: "high",
-  needs_credit_assessment: true,
-  transit_dependent: true,
-  schedule_type: "daytime",
-  work_history: "2 years retail",
-  target_industries: ["logistics", "banking"],
-};
-
 const baseCreditResult: CreditAssessmentResult = {
   barrier_severity: "high",
   barrier_details: [],
@@ -110,13 +96,13 @@ const baseCreditResult: CreditAssessmentResult = {
 
 describe("PlanExport", () => {
   it("renders a Download PDF button", () => {
-    render(<PlanExport plan={basePlan} profile={baseProfile} />);
+    render(<PlanExport plan={basePlan} />);
     const button = screen.getByRole("button", { name: /download pdf/i });
     expect(button).toBeInTheDocument();
   });
 
   it("renders the Download icon inside the button", () => {
-    render(<PlanExport plan={basePlan} profile={baseProfile} />);
+    render(<PlanExport plan={basePlan} />);
     const button = screen.getByRole("button", { name: /download pdf/i });
     expect(button).toBeInTheDocument();
   });
@@ -125,8 +111,7 @@ describe("PlanExport", () => {
     render(
       <PlanExport
         plan={basePlan}
-        profile={baseProfile}
-        creditResult={baseCreditResult}
+               creditResult={baseCreditResult}
       />
     );
     const button = screen.getByRole("button", { name: /download pdf/i });
@@ -134,26 +119,26 @@ describe("PlanExport", () => {
   });
 
   it("renders hidden PDF content with MontGoWork header", () => {
-    render(<PlanExport plan={basePlan} profile={baseProfile} />);
+    render(<PlanExport plan={basePlan} />);
     const header = screen.getByText("MontGoWork Re-Entry Plan");
     expect(header).toBeInTheDocument();
   });
 
   it("renders resident summary in hidden content", () => {
-    render(<PlanExport plan={basePlan} profile={baseProfile} />);
+    render(<PlanExport plan={basePlan} />);
     expect(
       screen.getByText("You have a strong path forward.")
     ).toBeInTheDocument();
   });
 
   it("renders barrier titles in hidden content", () => {
-    render(<PlanExport plan={basePlan} profile={baseProfile} />);
+    render(<PlanExport plan={basePlan} />);
     expect(screen.getByText("Credit Barrier")).toBeInTheDocument();
     expect(screen.getByText("Transportation Barrier")).toBeInTheDocument();
   });
 
   it("renders barrier action steps in hidden content", () => {
-    render(<PlanExport plan={basePlan} profile={baseProfile} />);
+    render(<PlanExport plan={basePlan} />);
     // "Check credit report" appears both in barrier actions and next steps
     expect(screen.getAllByText("Check credit report").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Dispute errors")).toBeInTheDocument();
@@ -162,19 +147,19 @@ describe("PlanExport", () => {
   });
 
   it("renders job match titles and companies", () => {
-    render(<PlanExport plan={basePlan} profile={baseProfile} />);
+    render(<PlanExport plan={basePlan} />);
     expect(screen.getByText("Warehouse Associate")).toBeInTheDocument();
     expect(screen.getByText("Bank Teller")).toBeInTheDocument();
   });
 
   it("renders eligible now / after status for jobs", () => {
-    render(<PlanExport plan={basePlan} profile={baseProfile} />);
+    render(<PlanExport plan={basePlan} />);
     expect(screen.getByText("Eligible Now")).toBeInTheDocument();
     expect(screen.getByText("Credit score improvement")).toBeInTheDocument();
   });
 
   it("renders immediate next steps", () => {
-    render(<PlanExport plan={basePlan} profile={baseProfile} />);
+    render(<PlanExport plan={basePlan} />);
     expect(
       screen.getByText("Visit Alabama Career Center")
     ).toBeInTheDocument();
@@ -184,8 +169,7 @@ describe("PlanExport", () => {
     render(
       <PlanExport
         plan={basePlan}
-        profile={baseProfile}
-        creditResult={baseCreditResult}
+               creditResult={baseCreditResult}
       />
     );
     expect(screen.getByText(/FICO Score:/)).toBeInTheDocument();
@@ -194,13 +178,13 @@ describe("PlanExport", () => {
   });
 
   it("does not render credit section when creditResult is null", () => {
-    render(<PlanExport plan={basePlan} profile={baseProfile} />);
+    render(<PlanExport plan={basePlan} />);
     expect(screen.queryByText(/FICO Score:/)).not.toBeInTheDocument();
   });
 
   it("does not render summary when resident_summary is null", () => {
     const planNoSummary = { ...basePlan, resident_summary: null };
-    render(<PlanExport plan={planNoSummary} profile={baseProfile} />);
+    render(<PlanExport plan={planNoSummary} />);
     expect(
       screen.queryByText("You have a strong path forward.")
     ).not.toBeInTheDocument();
@@ -219,7 +203,7 @@ describe("PlanExport", () => {
     }));
     vi.doMock("html2pdf.js", () => ({ default: mockHtml2pdf }));
 
-    render(<PlanExport plan={basePlan} profile={baseProfile} />);
+    render(<PlanExport plan={basePlan} />);
     const user = userEvent.setup();
 
     const button = screen.getByRole("button", { name: /download pdf/i });
@@ -242,7 +226,7 @@ describe("PlanExport", () => {
       job_matches: [],
       immediate_next_steps: [],
     };
-    render(<PlanExport plan={emptyPlan} profile={baseProfile} />);
+    render(<PlanExport plan={emptyPlan} />);
     const button = screen.getByRole("button", { name: /download pdf/i });
     expect(button).toBeInTheDocument();
     // Should not render empty sections
