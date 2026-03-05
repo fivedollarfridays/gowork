@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     credit_api_url: str = "http://localhost:8001"
     credit_api_key: str = "montgowork-dev"
     anthropic_api_key: str = ""
+    claude_model: str = "claude-sonnet-4-20250514"
     brightdata_api_key: str = ""
     brightdata_dataset_id: str = ""
 

@@ -31,14 +31,18 @@ async def generate_narrative(
     )
 
     message = await client.messages.create(
-        model="claude-sonnet-4-20250514",
+        model=settings.claude_model,
         max_tokens=1024,
         system=SYSTEM_PROMPT,
         messages=[{"role": "user", "content": user_prompt}],
     )
 
     raw = message.content[0].text
-    parsed = json.loads(raw)
+    try:
+        parsed = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        logger.warning("Claude returned invalid JSON: %s", raw[:200])
+        raise ValueError("Claude returned invalid JSON") from exc
     return PlanNarrative(**parsed)
 
 

@@ -44,9 +44,9 @@ async def get_all_employers(session: AsyncSession) -> list[dict]:
     return [dict(row._mapping) for row in result]
 
 
-async def create_session(session: AsyncSession, session_data: dict) -> str:
+async def create_session(session: AsyncSession, session_data: dict, session_id: str | None = None) -> str:
     """Insert a new session row with UUID and 24h expiry. Returns session id."""
-    session_id = str(uuid.uuid4())
+    session_id = session_id or str(uuid.uuid4())
     now = datetime.now(timezone.utc).isoformat()
     expires = (datetime.now(timezone.utc) + timedelta(hours=24)).isoformat()
     await session.execute(

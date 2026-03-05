@@ -147,8 +147,39 @@ class TestGeneratePlan:
         data = resp.json()
         assert "next steps" in data["summary"]
 
+    @pytest.mark.asyncio
+    async def test_generate_corrupt_json_returns_500(self):
+        """Returns 500 when session has corrupt JSON in barriers/plan."""
+        from app.main import app
+
+        row = _seed_session_row(with_plan=True)
+        row["barriers"] = "not-json{{"
+        with patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.post("/api/plan/test-session-abc/generate")
+        assert resp.status_code == 500
+        assert "Corrupt" in resp.json()["detail"]
+
 
 # --- AI Client ---
+
+class TestGetPlanCorruptData:
+    @pytest.mark.asyncio
+    async def test_corrupt_json_returns_500(self):
+        """Returns 500 when session plan contains invalid JSON."""
+        from app.main import app
+
+        row = _seed_session_row(with_plan=False)
+        row["plan"] = "not-valid-json{{"
+        row["barriers"] = '["credit"]'
+        with patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.get("/api/plan/test-session-abc")
+        assert resp.status_code == 500
+        assert "Corrupt" in resp.json()["detail"]
+
 
 class TestGenerateNarrative:
     @pytest.mark.asyncio
@@ -172,6 +203,24 @@ class TestGenerateNarrative:
             )
         assert isinstance(result, PlanNarrative)
         assert "Route 4" in result.summary
+
+    @pytest.mark.asyncio
+    async def test_raises_on_invalid_json_from_claude(self):
+        """generate_narrative raises ValueError when Claude returns bad JSON."""
+        from app.ai.client import generate_narrative
+
+        mock_message = MagicMock()
+        mock_message.content = [MagicMock(text="This is not JSON at all")]
+        mock_client = AsyncMock()
+        mock_client.messages.create = AsyncMock(return_value=mock_message)
+
+        with patch("app.ai.client.AsyncAnthropic", return_value=mock_client):
+            with pytest.raises(ValueError, match="invalid JSON"):
+                await generate_narrative(
+                    barriers=["credit"],
+                    qualifications="CNA",
+                    plan_data={"barriers": []},
+                )
 
     @pytest.mark.asyncio
     async def test_raises_on_timeout(self):
