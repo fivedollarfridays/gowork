@@ -130,6 +130,41 @@ class TestGetSnapshotStatus:
             assert "Service Unavailable" in exc_info.value.detail
 
 
+class TestNetworkErrors:
+    @pytest.mark.asyncio
+    async def test_trigger_crawl_timeout(self):
+        """TimeoutException from httpx propagates through trigger_crawl."""
+        client = BrightDataClient(api_key="key-123", dataset_id="ds-123")
+        with patch.object(
+            client._http, "post", new_callable=AsyncMock,
+            side_effect=httpx.TimeoutException("Connection timed out"),
+        ):
+            with pytest.raises(httpx.TimeoutException):
+                await client.trigger_crawl(["https://indeed.com/jobs"])
+
+    @pytest.mark.asyncio
+    async def test_get_snapshot_timeout(self):
+        """TimeoutException from httpx propagates through get_snapshot_status."""
+        client = BrightDataClient(api_key="key-123", dataset_id="ds-123")
+        with patch.object(
+            client._http, "get", new_callable=AsyncMock,
+            side_effect=httpx.TimeoutException("Read timed out"),
+        ):
+            with pytest.raises(httpx.TimeoutException):
+                await client.get_snapshot_status("snap-abc")
+
+    @pytest.mark.asyncio
+    async def test_trigger_crawl_connect_error(self):
+        """ConnectError from httpx propagates through trigger_crawl."""
+        client = BrightDataClient(api_key="key-123", dataset_id="ds-123")
+        with patch.object(
+            client._http, "post", new_callable=AsyncMock,
+            side_effect=httpx.ConnectError("Connection refused"),
+        ):
+            with pytest.raises(httpx.ConnectError):
+                await client.trigger_crawl(["https://indeed.com/jobs"])
+
+
 class TestClose:
     @pytest.mark.asyncio
     async def test_close_closes_http_client(self):

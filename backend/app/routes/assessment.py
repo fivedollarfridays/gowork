@@ -1,9 +1,10 @@
 """POST /api/assessment — intake assessment and matching pipeline."""
 
 import json
+import time
 import uuid
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -17,6 +18,35 @@ from app.modules.matching.types import (
 )
 
 router = APIRouter(prefix="/api/assessment", tags=["assessment"])
+
+
+class _RateLimiter:
+    """Simple in-memory rate limiter: max_requests per window_seconds per key."""
+
+    def __init__(self, max_requests: int = 10, window_seconds: int = 60):
+        self._max = max_requests
+        self._window = window_seconds
+        self._requests: dict[str, list[float]] = {}
+
+    def check(self, key: str) -> bool:
+        """Return True if under limit, False if over."""
+        now = time.monotonic()
+        cutoff = now - self._window
+        timestamps = self._requests.get(key, [])
+        timestamps = [t for t in timestamps if t > cutoff]
+        if len(timestamps) >= self._max:
+            self._requests[key] = timestamps
+            return False
+        timestamps.append(now)
+        self._requests[key] = timestamps
+        return True
+
+    def clear(self) -> None:
+        """Reset all tracked requests (for testing)."""
+        self._requests.clear()
+
+
+_rate_limiter = _RateLimiter()
 
 
 def determine_severity(barrier_count: int) -> BarrierSeverity:
@@ -54,12 +84,16 @@ def _build_profile(session_id: str, request: AssessmentRequest) -> UserProfile:
     )
 
 
-@router.post("/")
+@router.post("/", status_code=201)
 async def create_assessment(
     request: AssessmentRequest,
+    http_request: Request,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """Receive barrier form, create session, run matching, return results."""
+    client_ip = http_request.client.host if http_request.client else "unknown"
+    if not _rate_limiter.check(client_ip):
+        raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
     session_id = str(uuid.uuid4())
     profile = _build_profile(session_id, request)
 

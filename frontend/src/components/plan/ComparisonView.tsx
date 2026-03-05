@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import type { CreditAssessmentResult, ReEntryPlan, UserProfile } from "@/lib/types";
+import { daysToMonths } from "@/lib/constants";
 
 interface ComparisonViewProps {
   plan: ReEntryPlan;
@@ -77,7 +78,7 @@ function buildRows(plan: ReEntryPlan, profile: UserProfile, creditResult?: Credi
       label: "Credit Status",
       now: nowText,
       future: fairThreshold && !fairThreshold.already_met
-        ? `Fair credit (${fairThreshold.threshold_score}+) in ~${Math.round(fairThreshold.estimated_days / 30)} months — more employers accessible`
+        ? `Fair credit (${fairThreshold.threshold_score}+) in ${daysToMonths(fairThreshold.estimated_days)} — more employers accessible`
         : creditResult
           ? `${totalProducts} financial products accessible`
           : "Credit repair plan in progress — more employers accessible",

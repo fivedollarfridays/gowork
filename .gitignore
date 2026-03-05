@@ -4,11 +4,16 @@ __pycache__/
 .venv/
 *.db
 .env
+.coverage
 
 # Node
 node_modules/
 .next/
 .env.local
+tsconfig.tsbuildinfo
+
+# Build
+.paircoder/cache/
 
 # IDE
 .vscode/

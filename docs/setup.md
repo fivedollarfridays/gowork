@@ -46,7 +46,7 @@ Open http://localhost:3000 in your browser. You should see the MontGoWork landin
 | `CORS_ORIGINS` | No | Comma-separated allowed origins | `http://localhost:3000` |
 | `ANTHROPIC_API_KEY` | No | Claude API key for AI narrative generation | `sk-ant-...` |
 | `CREDIT_API_URL` | No | URL to credit assessment microservice | `http://localhost:8001` |
-| `CREDIT_API_KEY` | No | API key for credit microservice | `montgowork-dev` |
+| `CREDIT_API_KEY` | No | API key for credit microservice | (empty) |
 | `BRIGHTDATA_API_KEY` | No | BrightData API key for live job crawling | (empty) |
 | `BRIGHTDATA_DATASET_ID` | No | BrightData dataset ID for job crawling | (empty) |
 
@@ -92,7 +92,7 @@ cd backend
 python -m pytest tests/ -q
 ```
 
-235 tests, 100% coverage.
+277 tests.
 
 ### Frontend
 
@@ -101,7 +101,7 @@ cd frontend
 npx vitest run
 ```
 
-58 tests.
+82 tests.
 
 ## Troubleshooting
 

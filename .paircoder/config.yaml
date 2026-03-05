@@ -6,9 +6,9 @@ project:
     \ what's\n  actually blocking someone from working (transportation, childcare,\
     \ credit history,\n   skills gaps) and builds a personalized action plan to address\
     \ each barrier."
-  primary_goal: Give a Montgomery resident a clear, actionable path from "I can't   get
-    a job" to employment by connecting barrier assessment, credit building tools,   local
-    job matching, and community resources into
+  primary_goal: Give a Montgomery resident a clear, actionable path from "I can't
+    get a job" to employment by connecting barrier assessment, credit building tools,
+    local job matching, and community resources into a personalized re-entry plan.
   coverage_target: 100
 workflow:
   default_branch_type: feature

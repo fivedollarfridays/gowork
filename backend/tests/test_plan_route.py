@@ -148,6 +148,51 @@ class TestGeneratePlan:
         assert "next steps" in data["summary"]
 
     @pytest.mark.asyncio
+    async def test_fallback_runs_without_mock(self):
+        """When Claude API fails, real fallback code runs and produces narrative."""
+        from app.main import app
+
+        row = _seed_session_row(with_plan=True)
+        # Set plan with actual barrier data so fallback has something to work with
+        row["plan"] = json.dumps({
+            "barriers": [
+                {"type": "credit", "title": "Credit Repair", "actions": ["Check report"],
+                 "resources": [{"name": "GreenPath", "phone": "555-0100"}]},
+            ],
+            "job_matches": [{"title": "Warehouse Worker", "company": "Acme"}],
+            "immediate_next_steps": ["Visit career center"],
+        })
+        with (
+            patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row),
+            patch(_GENERATE_PATCH, new_callable=AsyncMock, side_effect=Exception("Claude down")),
+            # DO NOT mock _FALLBACK_PATCH — let real fallback run
+            patch(_UPDATE_SESSION_PATCH, new_callable=AsyncMock),
+        ):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.post("/api/plan/test-session-abc/generate")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert len(data["summary"]) > 0
+        assert len(data["key_actions"]) > 0
+
+    @pytest.mark.asyncio
+    async def test_double_fault_returns_500(self):
+        """Returns 500 when both Claude API and fallback fail."""
+        from app.main import app
+
+        row = _seed_session_row(with_plan=True)
+        with (
+            patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row),
+            patch(_GENERATE_PATCH, new_callable=AsyncMock, side_effect=Exception("Claude down")),
+            patch(_FALLBACK_PATCH, side_effect=RuntimeError("Fallback also broken")),
+        ):
+            transport = ASGITransport(app=app, raise_app_exceptions=False)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.post("/api/plan/test-session-abc/generate")
+        assert resp.status_code == 500
+
+    @pytest.mark.asyncio
     async def test_generate_corrupt_json_returns_500(self):
         """Returns 500 when session has corrupt JSON in barriers/plan."""
         from app.main import app
@@ -216,6 +261,24 @@ class TestGenerateNarrative:
 
         with patch("app.ai.client.AsyncAnthropic", return_value=mock_client):
             with pytest.raises(ValueError, match="invalid JSON"):
+                await generate_narrative(
+                    barriers=["credit"],
+                    qualifications="CNA",
+                    plan_data={"barriers": []},
+                )
+
+    @pytest.mark.asyncio
+    async def test_raises_on_empty_response(self):
+        """generate_narrative raises ValueError when Claude returns empty content."""
+        from app.ai.client import generate_narrative
+
+        mock_message = MagicMock()
+        mock_message.content = []
+        mock_client = AsyncMock()
+        mock_client.messages.create = AsyncMock(return_value=mock_message)
+
+        with patch("app.ai.client.AsyncAnthropic", return_value=mock_client):
+            with pytest.raises(ValueError, match="[Ee]mpty"):
                 await generate_narrative(
                     barriers=["credit"],
                     qualifications="CNA",

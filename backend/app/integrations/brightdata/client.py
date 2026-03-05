@@ -28,6 +28,15 @@ class BrightDataClient:
             timeout=30.0,
         )
 
+    def _raise_api_error(self, resp: httpx.Response) -> None:
+        """Extract error detail from response and raise BrightDataAPIError."""
+        detail = resp.text
+        try:
+            detail = resp.json().get("error", detail)
+        except Exception:
+            pass
+        raise BrightDataAPIError(resp.status_code, detail)
+
     async def trigger_crawl(self, urls: list[str]) -> str:
         """Trigger an async crawl job. Returns the snapshot_id."""
         resp = await self._http.post(
@@ -36,12 +45,7 @@ class BrightDataClient:
             json=[{"url": u} for u in urls],
         )
         if resp.status_code != 200:
-            detail = resp.text
-            try:
-                detail = resp.json().get("error", detail)
-            except Exception:
-                pass
-            raise BrightDataAPIError(resp.status_code, detail)
+            self._raise_api_error(resp)
         return resp.json()["snapshot_id"]
 
     async def get_snapshot_status(self, snapshot_id: str) -> CrawlProgress | CrawlResult:
@@ -59,12 +63,8 @@ class BrightDataClient:
             )
         if resp.status_code == 200:
             return CrawlResult(snapshot_id=snapshot_id, jobs=resp.json())
-        detail = resp.text
-        try:
-            detail = resp.json().get("error", detail)
-        except Exception:
-            pass
-        raise BrightDataAPIError(resp.status_code, detail)
+        self._raise_api_error(resp)
+        raise AssertionError("unreachable")  # _raise_api_error always raises
 
     async def close(self):
         """Close the underlying HTTP client."""

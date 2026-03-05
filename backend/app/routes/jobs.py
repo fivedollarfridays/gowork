@@ -6,7 +6,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.core.queries import get_all_employers, get_all_job_listings, get_all_transit_routes, get_job_listing_by_id
+from app.core.queries import get_all_employers, get_all_transit_routes
+from app.core.queries_jobs import get_all_job_listings, get_job_listing_by_id
 
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 

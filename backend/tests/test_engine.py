@@ -61,7 +61,7 @@ def _make_resource(**overrides) -> Resource:
 
 
 _QUERY_PATCH = "app.modules.matching.engine.query_resources_for_barriers"
-_CAT_PATCH = "app.modules.matching.engine.get_resources_by_category"
+_CATS_PATCH = "app.modules.matching.engine.get_resources_by_categories"
 
 
 class TestQueryResourcesForBarriers:
@@ -73,11 +73,12 @@ class TestQueryResourcesForBarriers:
         training = _make_resource_dict(id=3, name="Training", category="training")
 
         mock_session = AsyncMock()
+        all_resources = [career, childcare, training]
 
-        async def mock_get_by_category(session, category):
-            return [r for r in [career, childcare, training] if r["category"] == category]
+        async def mock_get_by_categories(session, categories):
+            return [r for r in all_resources if r["category"] in categories]
 
-        with patch(_CAT_PATCH, side_effect=mock_get_by_category):
+        with patch(_CATS_PATCH, side_effect=mock_get_by_categories):
             result = await query_resources_for_barriers(
                 [BarrierType.CREDIT], mock_session
             )
@@ -91,12 +92,12 @@ class TestQueryResourcesForBarriers:
 
         mock_session = AsyncMock()
 
-        async def mock_get_by_category(session, category):
-            if category == "career_center":
+        async def mock_get_by_categories(session, categories):
+            if "career_center" in categories:
                 return [career]
             return []
 
-        with patch(_CAT_PATCH, side_effect=mock_get_by_category):
+        with patch(_CATS_PATCH, side_effect=mock_get_by_categories):
             # CREDIT and TRANSPORTATION both map to career_center
             result = await query_resources_for_barriers(
                 [BarrierType.CREDIT, BarrierType.TRANSPORTATION], mock_session
@@ -115,10 +116,10 @@ class TestQueryResourcesForBarriers:
         )
         mock_session = AsyncMock()
 
-        async def mock_get_by_category(session, category):
-            return [resource] if category == "career_center" else []
+        async def mock_get_by_categories(session, categories):
+            return [resource] if "career_center" in categories else []
 
-        with patch(_CAT_PATCH, side_effect=mock_get_by_category):
+        with patch(_CATS_PATCH, side_effect=mock_get_by_categories):
             result = await query_resources_for_barriers(
                 [BarrierType.CREDIT], mock_session
             )
@@ -251,3 +252,72 @@ class TestGeneratePlan:
 
         assert isinstance(plan, ReEntryPlan)
         assert len(plan.barriers) == 0
+
+    @pytest.mark.asyncio
+    async def test_housing_barrier_produces_card(self):
+        """HOUSING barrier maps to social_service resources and has correct card."""
+        profile = _make_profile(
+            primary_barriers=[BarrierType.HOUSING],
+            barrier_count=1,
+            barrier_severity=BarrierSeverity.LOW,
+            needs_credit_assessment=False,
+            transit_dependent=False,
+        )
+        mock_session = AsyncMock()
+        resource = _make_resource(id=10, name="Housing Authority", category="social_service")
+
+        with patch(_QUERY_PATCH, return_value=[resource]):
+            plan = await generate_plan(profile, mock_session)
+
+        housing_cards = [b for b in plan.barriers if b.type == BarrierType.HOUSING]
+        assert len(housing_cards) == 1
+        assert housing_cards[0].title == "Housing Stability"
+        assert len(housing_cards[0].actions) > 0
+        assert any(r.name == "Housing Authority" for r in housing_cards[0].resources)
+
+    @pytest.mark.asyncio
+    async def test_health_barrier_produces_card(self):
+        """HEALTH barrier maps to social_service resources."""
+        profile = _make_profile(
+            primary_barriers=[BarrierType.HEALTH],
+            barrier_count=1,
+            barrier_severity=BarrierSeverity.LOW,
+            needs_credit_assessment=False,
+            transit_dependent=False,
+        )
+        mock_session = AsyncMock()
+        resource = _make_resource(id=11, name="Community Health", category="social_service")
+
+        with patch(_QUERY_PATCH, return_value=[resource]):
+            plan = await generate_plan(profile, mock_session)
+
+        health_cards = [b for b in plan.barriers if b.type == BarrierType.HEALTH]
+        assert len(health_cards) == 1
+        assert health_cards[0].title == "Health & Wellness"
+        assert len(health_cards[0].actions) > 0
+
+    @pytest.mark.asyncio
+    async def test_criminal_record_barrier_produces_card(self):
+        """CRIMINAL_RECORD maps to career_center + social_service."""
+        profile = _make_profile(
+            primary_barriers=[BarrierType.CRIMINAL_RECORD],
+            barrier_count=1,
+            barrier_severity=BarrierSeverity.LOW,
+            needs_credit_assessment=False,
+            transit_dependent=False,
+        )
+        mock_session = AsyncMock()
+        resources = [
+            _make_resource(id=12, name="Legal Aid", category="social_service"),
+            _make_resource(id=13, name="Re-Entry Program", category="career_center"),
+        ]
+
+        with patch(_QUERY_PATCH, return_value=resources):
+            plan = await generate_plan(profile, mock_session)
+
+        cr_cards = [b for b in plan.barriers if b.type == BarrierType.CRIMINAL_RECORD]
+        assert len(cr_cards) == 1
+        assert cr_cards[0].title == "Record & Legal Support"
+        assert len(cr_cards[0].resources) == 2
+        actions_text = " ".join(cr_cards[0].actions)
+        assert "expungement" in actions_text.lower()

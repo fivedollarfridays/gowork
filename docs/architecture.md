@@ -368,7 +368,7 @@ All configuration is managed via environment variables loaded by pydantic-settin
 |----------|---------|---------|
 | `DATABASE_URL` | `sqlite+aiosqlite:///./montgowork.db` | SQLite database path |
 | `CREDIT_API_URL` | `http://localhost:8001` | Credit microservice base URL |
-| `CREDIT_API_KEY` | `montgowork-dev` | API key for credit microservice |
+| `CREDIT_API_KEY` | (empty) | API key for credit microservice |
 | `ANTHROPIC_API_KEY` | (empty) | Anthropic API key for Claude |
 | `CLAUDE_MODEL` | `claude-sonnet-4-20250514` | Claude model identifier |
 | `BRIGHTDATA_API_KEY` | (empty) | BrightData API key |

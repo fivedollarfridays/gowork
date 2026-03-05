@@ -183,6 +183,11 @@ export default function AssessPage() {
             </p>
           </div>
           <BarrierForm data={formData} onChange={setFormData} />
+          {barrierCount === 0 && (
+            <p className="text-sm text-muted-foreground">
+              Select at least one barrier to continue.
+            </p>
+          )}
         </div>
       ),
     },

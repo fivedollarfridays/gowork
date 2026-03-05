@@ -61,12 +61,40 @@ class TestExtractPrimaryBarriers:
         assert extract_primary_barriers(barriers) == []
 
 
+class TestRateLimiter:
+    def test_allows_requests_under_limit(self):
+        from app.routes.assessment import _rate_limiter
+        _rate_limiter.clear()
+        for _ in range(10):
+            assert _rate_limiter.check("1.2.3.4") is True
+
+    def test_blocks_requests_over_limit(self):
+        from app.routes.assessment import _rate_limiter
+        _rate_limiter.clear()
+        for _ in range(10):
+            _rate_limiter.check("5.6.7.8")
+        assert _rate_limiter.check("5.6.7.8") is False
+
+    def test_different_ips_independent(self):
+        from app.routes.assessment import _rate_limiter
+        _rate_limiter.clear()
+        for _ in range(10):
+            _rate_limiter.check("10.0.0.1")
+        assert _rate_limiter.check("10.0.0.1") is False
+        assert _rate_limiter.check("10.0.0.2") is True
+
+
 _GEN_PATCH = "app.routes.assessment.generate_plan"
 _SESSION_PATCH = "app.routes.assessment.create_session"
 _UPDATE_PLAN_PATCH = "app.routes.assessment.update_session_plan"
 
 
 class TestAssessmentEndpoint:
+    @pytest.fixture(autouse=True)
+    def _clear_rate_limiter(self):
+        from app.routes.assessment import _rate_limiter
+        _rate_limiter.clear()
+
     @pytest.mark.asyncio
     async def test_valid_assessment_returns_profile(self):
         """Valid request returns session_id and profile."""
@@ -85,7 +113,7 @@ class TestAssessmentEndpoint:
                     "barriers": {"credit": True, "transportation": True},
                     "work_history": "Former CNA at Baptist Hospital",
                 })
-        assert resp.status_code == 200
+        assert resp.status_code == 201
         data = resp.json()
         assert "session_id" in data
         assert "profile" in data
@@ -173,3 +201,68 @@ class TestAssessmentEndpoint:
                 })
         data = resp.json()
         assert data["profile"]["transit_dependent"] is True
+
+    @pytest.mark.asyncio
+    async def test_db_failure_returns_500(self):
+        """Returns 500 when create_session raises."""
+        from app.main import app
+
+        with (
+            patch(_SESSION_PATCH, new_callable=AsyncMock, side_effect=RuntimeError("DB down")),
+        ):
+            transport = ASGITransport(app=app, raise_app_exceptions=False)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.post("/api/assessment/", json={
+                    "zip_code": "36104",
+                    "employment_status": "unemployed",
+                    "barriers": {"credit": True},
+                    "work_history": "Some work",
+                })
+        assert resp.status_code == 500
+
+    @pytest.mark.asyncio
+    async def test_engine_failure_returns_500(self):
+        """Returns 500 when generate_plan raises."""
+        from app.main import app
+
+        with (
+            patch(_SESSION_PATCH, return_value="test-uuid"),
+            patch(_GEN_PATCH, side_effect=RuntimeError("Engine crash")),
+        ):
+            transport = ASGITransport(app=app, raise_app_exceptions=False)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.post("/api/assessment/", json={
+                    "zip_code": "36104",
+                    "employment_status": "unemployed",
+                    "barriers": {"credit": True},
+                    "work_history": "Some work",
+                })
+        assert resp.status_code == 500
+
+    @pytest.mark.asyncio
+    async def test_rate_limit_returns_429(self):
+        """Returns 429 when rate limit exceeded."""
+        from app.main import app
+        from app.routes.assessment import _rate_limiter
+
+        _rate_limiter.clear()
+
+        with (
+            patch(_GEN_PATCH, return_value=_mock_plan()),
+            patch(_SESSION_PATCH, return_value="test-uuid"),
+            patch(_UPDATE_PLAN_PATCH, new_callable=AsyncMock),
+        ):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                payload = {
+                    "zip_code": "36104",
+                    "employment_status": "unemployed",
+                    "barriers": {"credit": True},
+                    "work_history": "Some work",
+                }
+                for _ in range(10):
+                    resp = await client.post("/api/assessment/", json=payload)
+                    assert resp.status_code == 201
+                # 11th should be rate limited
+                resp = await client.post("/api/assessment/", json=payload)
+                assert resp.status_code == 429

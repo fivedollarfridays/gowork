@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import type { CreditAssessmentResult, JobMatch } from "@/lib/types";
-import { STATUS_BADGE_STYLES, safeHref } from "@/lib/constants";
+import { STATUS_BADGE_STYLES, safeHref, daysToMonths } from "@/lib/constants";
 
 interface JobMatchCardProps {
   job: JobMatch;
@@ -54,7 +54,7 @@ export function JobMatchCard({ job, creditResult }: JobMatchCardProps) {
                 <Badge className={`${STATUS_BADGE_STYLES.warning} text-xs`} variant="outline">
                   <CreditCard className="h-3 w-3 mr-1" />
                   {unmetThreshold
-                    ? `~${Math.round(unmetThreshold.estimated_days / 30)}mo`
+                    ? daysToMonths(unmetThreshold.estimated_days)
                     : "After Repair"}
                 </Badge>
               ) : (

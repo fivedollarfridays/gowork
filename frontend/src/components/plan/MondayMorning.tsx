@@ -63,6 +63,10 @@ interface MondayMorningProps {
 
 export function MondayMorning({ plan, profile, narrative, narrativeLoading }: MondayMorningProps) {
   const steps = useMemo(() => buildSteps(plan), [plan]);
+  const allResources = useMemo(
+    () => plan.barriers.flatMap((b) => b.resources),
+    [plan],
+  );
 
   return (
     <section className="space-y-8">
@@ -114,9 +118,7 @@ export function MondayMorning({ plan, profile, narrative, narrativeLoading }: Mo
           <h2 className="text-xl font-semibold text-primary">Key Actions</h2>
           <div className="grid gap-3 sm:grid-cols-2">
             {narrative.key_actions.map((action, i) => {
-              // Find a matching resource to link
-              const matchedResource = plan.barriers
-                .flatMap((b) => b.resources)
+              const matchedResource = allResources
                 .find((r) => action.toLowerCase().includes(r.name.toLowerCase()));
 
               return (

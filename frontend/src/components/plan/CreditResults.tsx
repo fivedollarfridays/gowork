@@ -16,7 +16,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import type { CreditAssessmentResult } from "@/lib/types";
-import { SEVERITY_BADGE_STYLES, STATUS_BADGE_STYLES } from "@/lib/constants";
+import { SEVERITY_BADGE_STYLES, STATUS_BADGE_STYLES, daysToMonths } from "@/lib/constants";
 
 interface CreditResultsProps {
   result: CreditAssessmentResult;
@@ -42,12 +42,6 @@ function factorWeight(key: string): string {
     new_credit: "10%",
   };
   return weights[key] ?? "";
-}
-
-function daysToMonths(days: number): string {
-  if (days <= 30) return `${days} days`;
-  const months = Math.round(days / 30);
-  return `~${months} month${months === 1 ? "" : "s"}`;
 }
 
 export function CreditResults({ result }: CreditResultsProps) {
