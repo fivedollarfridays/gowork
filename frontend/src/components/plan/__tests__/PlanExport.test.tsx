@@ -219,6 +219,53 @@ describe("PlanExport", () => {
     vi.doUnmock("html2pdf.js");
   });
 
+  it("error message has role=alert", async () => {
+    // Mock html2pdf to throw an error
+    vi.doMock("html2pdf.js", () => ({
+      default: () => ({
+        set: vi.fn().mockReturnThis(),
+        from: vi.fn().mockReturnThis(),
+        save: vi.fn(() => Promise.reject(new Error("PDF failed"))),
+      }),
+    }));
+
+    render(<PlanExport plan={basePlan} />);
+    const user = userEvent.setup();
+    const button = screen.getByRole("button", { name: /download pdf/i });
+    await user.click(button);
+
+    // Wait for the error to appear
+    const errorEl = await screen.findByRole("alert");
+    expect(errorEl).toHaveTextContent(/failed to generate pdf/i);
+
+    vi.doUnmock("html2pdf.js");
+  });
+
+  it("button has aria-label during generation", async () => {
+    let resolveSave!: () => void;
+    const savePromise = new Promise<void>((r) => {
+      resolveSave = r;
+    });
+    vi.doMock("html2pdf.js", () => ({
+      default: () => ({
+        set: vi.fn().mockReturnThis(),
+        from: vi.fn().mockReturnThis(),
+        save: vi.fn(() => savePromise),
+      }),
+    }));
+
+    render(<PlanExport plan={basePlan} />);
+    const user = userEvent.setup();
+    const button = screen.getByRole("button", { name: /download pdf/i });
+    await user.click(button);
+
+    // During generation, button should have descriptive aria-label
+    expect(button).toHaveAttribute("aria-label", "Generating PDF, please wait");
+
+    resolveSave();
+    vi.doUnmock("html2pdf.js");
+  });
+
   it("handles empty barriers and jobs gracefully", () => {
     const emptyPlan: ReEntryPlan = {
       ...basePlan,

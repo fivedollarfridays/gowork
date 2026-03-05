@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,11 +23,25 @@ interface WizardShellProps {
 export function WizardShell({ steps, onComplete, completeLabel = "Submit" }: WizardShellProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const totalSteps = steps.length;
+  const stepContentRef = useRef<HTMLDivElement>(null);
+  const hasMountedRef = useRef(false);
 
   // Clamp currentStep when steps array shrinks (e.g. credit step removed)
   useEffect(() => {
     setCurrentStep((s) => Math.min(s, totalSteps - 1));
   }, [totalSteps]);
+
+  // Focus step content container on step change (skip initial mount)
+  useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+    const timer = setTimeout(() => {
+      stepContentRef.current?.focus();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [currentStep]);
   const progressValue = ((currentStep + 1) / totalSteps) * 100;
   const isFirst = currentStep === 0;
   const isLast = currentStep === totalSteps - 1;
@@ -57,6 +71,7 @@ export function WizardShell({ steps, onComplete, completeLabel = "Submit" }: Wiz
           return (
             <div key={s.title} className="flex flex-1 flex-col items-center gap-1.5">
               <div
+                aria-current={isCurrent ? "step" : undefined}
                 className={cn(
                   "flex h-9 w-9 items-center justify-center rounded-full border-2 text-sm font-semibold transition-colors",
                   isCompleted && "border-secondary bg-secondary text-secondary-foreground",
@@ -84,7 +99,7 @@ export function WizardShell({ steps, onComplete, completeLabel = "Submit" }: Wiz
 
       {/* Step content */}
       <Card>
-        <CardContent className="p-6">
+        <CardContent ref={stepContentRef} tabIndex={-1} className="p-6 outline-none">
           {step.content({ onNext: handleNext, onBack: handleBack })}
         </CardContent>
       </Card>
@@ -96,6 +111,9 @@ export function WizardShell({ steps, onComplete, completeLabel = "Submit" }: Wiz
           onClick={handleBack}
           disabled={isFirst}
           className={cn(isFirst && "invisible")}
+          {...(!isFirst && steps[currentStep - 1]
+            ? { "aria-label": `Go to step ${currentStep}: ${steps[currentStep - 1].title}` }
+            : {})}
         >
           <ChevronLeft className="h-4 w-4" />
           Back
@@ -103,6 +121,9 @@ export function WizardShell({ steps, onComplete, completeLabel = "Submit" }: Wiz
         <Button
           onClick={handleNext}
           disabled={!canAdvance}
+          {...(!isLast && steps[currentStep + 1]
+            ? { "aria-label": `Go to step ${currentStep + 2}: ${steps[currentStep + 1].title}` }
+            : {})}
         >
           {isLast ? completeLabel : "Next"}
           {!isLast && <ChevronRight className="h-4 w-4" />}
