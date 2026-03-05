@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { postCredit } from "@/lib/api";
 import type { CreditAssessmentResult, CreditProfileRequest } from "@/lib/types";
+import { SEVERITY_BADGE_STYLES } from "@/lib/constants";
 
 export default function CreditPage() {
   const [score, setScore] = useState("");
@@ -22,21 +23,12 @@ export default function CreditPage() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const request: CreditProfileRequest = {
-      current_score: parseInt(score, 10),
-      score_band: null,
-      overall_utilization: parseFloat(utilization),
-      account_summary: {
-        total_accounts: parseInt(totalAccounts, 10) || 1,
-        open_accounts: parseInt(openAccounts, 10) || 1,
-        closed_accounts: 0,
-        negative_accounts: 0,
-        collection_accounts: 0,
-        total_balance: 0,
-        total_credit_limit: 0,
-        monthly_payments: 0,
-      },
-      payment_history_pct: parseFloat(paymentHistory),
-      average_account_age_months: parseInt(accountAge, 10),
+      credit_score: parseInt(score, 10),
+      utilization_percent: parseFloat(utilization),
+      total_accounts: parseInt(totalAccounts, 10) || 1,
+      open_accounts: parseInt(openAccounts, 10) || 1,
+      payment_history_percent: parseFloat(paymentHistory),
+      oldest_account_months: parseInt(accountAge, 10),
       negative_items: [],
     };
     mutation.mutate(request);
@@ -108,14 +100,13 @@ export default function CreditPage() {
             {mutation.isPending ? "Analyzing..." : "Assess Credit"}
           </button>
           {mutation.isError && (
-            <p className="text-sm text-red-500">Error: {mutation.error.message}</p>
+            <p className="text-sm text-destructive">Error: {mutation.error.message}</p>
           )}
         </form>
       ) : (
         <div className="space-y-6">
           <div className={`rounded-lg border p-4 ${
-            result.barrier_severity === "high" ? "bg-red-50" :
-            result.barrier_severity === "medium" ? "bg-yellow-50" : "bg-green-50"
+            SEVERITY_BADGE_STYLES[result.barrier_severity as keyof typeof SEVERITY_BADGE_STYLES] ?? SEVERITY_BADGE_STYLES.low
           }`}>
             <h2 className="font-semibold text-lg">
               Barrier Severity: <span className="capitalize">{result.barrier_severity}</span>
@@ -142,7 +133,7 @@ export default function CreditPage() {
               {result.eligibility.map((e, i) => (
                 <div key={i} className="flex justify-between py-1 border-b last:border-0">
                   <span>{String(e.product_name || "")}</span>
-                  <span className={`text-sm ${e.status === "eligible" ? "text-green-600" : "text-amber-600"}`}>
+                  <span className={`text-sm ${e.status === "eligible" ? "text-success" : "text-accent-foreground"}`}>
                     {String(e.status || "")}
                   </span>
                 </div>

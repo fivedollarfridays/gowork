@@ -5,12 +5,23 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import httpx
 import pytest
 
+FULL_CREDIT_RESPONSE = {
+    "barrier_severity": "medium",
+    "barrier_details": [{"severity": "medium", "description": "test"}],
+    "readiness": {"score": 45, "fico_score": 580, "score_band": "poor"},
+    "thresholds": [{"threshold_name": "fair", "threshold_score": 650}],
+    "dispute_pathway": {"steps": [], "total_estimated_days": 90},
+    "eligibility": [{"product_name": "auto loan", "status": "not_eligible"}],
+    "disclaimer": "This is not financial advice.",
+}
+
 VALID_PAYLOAD = {
-    "current_score": 580,
-    "overall_utilization": 45.0,
-    "account_summary": {"total_accounts": 5, "open_accounts": 3},
-    "payment_history_pct": 85.0,
-    "average_account_age_months": 24,
+    "credit_score": 580,
+    "utilization_percent": 45.0,
+    "total_accounts": 5,
+    "open_accounts": 3,
+    "payment_history_percent": 85.0,
+    "oldest_account_months": 24,
 }
 
 
@@ -90,3 +101,43 @@ class TestCreditProxySuccess:
             resp = await client.post("/api/credit/assess", json=VALID_PAYLOAD)
             assert resp.status_code == 200
             assert resp.json() == credit_response
+
+    @pytest.mark.anyio
+    async def test_calls_simple_endpoint(self, client):
+        """Proxy should call /v1/assess/simple, not /v1/assess."""
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = FULL_CREDIT_RESPONSE
+
+        with patch("app.routes.credit.httpx.AsyncClient") as mock_cls:
+            instance = AsyncMock()
+            instance.post.return_value = mock_resp
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            mock_cls.return_value = instance
+
+            await client.post("/api/credit/assess", json=VALID_PAYLOAD)
+
+            call_url = instance.post.call_args[0][0]
+            assert "/v1/assess/simple" in call_url
+
+    @pytest.mark.anyio
+    async def test_payload_sent_directly_no_score_band(self, client):
+        """Payload should be sent as-is — no score_band injected."""
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = FULL_CREDIT_RESPONSE
+
+        with patch("app.routes.credit.httpx.AsyncClient") as mock_cls:
+            instance = AsyncMock()
+            instance.post.return_value = mock_resp
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            mock_cls.return_value = instance
+
+            await client.post("/api/credit/assess", json=VALID_PAYLOAD)
+
+            sent_json = instance.post.call_args[1]["json"]
+            assert "score_band" not in sent_json
+            assert "account_summary" not in sent_json
+            assert sent_json["credit_score"] == 580

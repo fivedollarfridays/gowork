@@ -40,7 +40,7 @@ function buildRows(plan: ReEntryPlan, profile: UserProfile, creditResult?: Credi
     now: `${activeBarriers} active${highSeverity > 0 ? ` (${highSeverity} high severity)` : ""}`,
     future: activeBarriers > 0 ? `${activeBarriers} addressed with action plans` : "No barriers identified",
     nowIcon: <AlertCircle className="h-4 w-4 text-destructive" />,
-    futureIcon: <Check className="h-4 w-4 text-green-600" />,
+    futureIcon: <Check className="h-4 w-4 text-success" />,
   });
 
   // Jobs — prefer plan summary arrays; fall back to counting job_matches directly
@@ -55,7 +55,7 @@ function buildRows(plan: ReEntryPlan, profile: UserProfile, creditResult?: Credi
     now: `${eligibleNow} eligible now`,
     future: `${eligibleAfter} eligible after plan completion`,
     nowIcon: <Briefcase className="h-4 w-4 text-muted-foreground" />,
-    futureIcon: <Briefcase className="h-4 w-4 text-green-600" />,
+    futureIcon: <Briefcase className="h-4 w-4 text-success" />,
   });
 
   // Credit
@@ -81,8 +81,8 @@ function buildRows(plan: ReEntryPlan, profile: UserProfile, creditResult?: Credi
         : creditResult
           ? `${totalProducts} financial products accessible`
           : "Credit repair plan in progress — more employers accessible",
-      nowIcon: <CreditCard className="h-4 w-4 text-amber-600" />,
-      futureIcon: <CreditCard className="h-4 w-4 text-green-600" />,
+      nowIcon: <CreditCard className="h-4 w-4 text-warning-foreground" />,
+      futureIcon: <CreditCard className="h-4 w-4 text-success" />,
     });
   }
 
@@ -96,7 +96,7 @@ function buildRows(plan: ReEntryPlan, profile: UserProfile, creditResult?: Credi
       now: "Transit dependent — limited schedule",
       future: routeCount > 0 ? `${routeCount} bus route${routeCount > 1 ? "s" : ""} mapped to resources & jobs` : "Transit routes identified",
       nowIcon: <Shield className="h-4 w-4 text-muted-foreground" />,
-      futureIcon: <TrendingUp className="h-4 w-4 text-green-600" />,
+      futureIcon: <TrendingUp className="h-4 w-4 text-success" />,
     });
   }
 

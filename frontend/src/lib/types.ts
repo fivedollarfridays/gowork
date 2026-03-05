@@ -173,25 +173,17 @@ export interface TransitInfo {
 
 // --- Credit types ---
 
-export interface AccountSummary {
+export interface CreditProfileRequest {
+  credit_score: number;
+  utilization_percent: number;
   total_accounts: number;
   open_accounts: number;
-  closed_accounts: number;
-  negative_accounts: number;
-  collection_accounts: number;
-  total_balance: number;
-  total_credit_limit: number;
-  monthly_payments: number;
-}
-
-export interface CreditProfileRequest {
-  current_score: number;
-  score_band: string | null;
-  overall_utilization: number;
-  account_summary: AccountSummary;
-  payment_history_pct: number;
-  average_account_age_months: number;
   negative_items: string[];
+  payment_history_percent: number;
+  oldest_account_months: number;
+  total_balance?: number;
+  total_credit_limit?: number;
+  monthly_payments?: number;
 }
 
 export interface CreditReadiness {

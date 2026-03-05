@@ -89,7 +89,7 @@ export function JobMatchCard({ job, creditResult }: JobMatchCardProps) {
         {!job.eligible_now && job.eligible_after && (
           <>
             <Separator />
-            <p className="text-sm text-amber-600">
+            <p className="text-sm text-accent-foreground">
               Eligible after: {job.eligible_after}
             </p>
           </>
