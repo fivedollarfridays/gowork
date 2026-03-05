@@ -4,7 +4,7 @@ import asyncio
 import json
 import uuid
 
-from app.core.queries import get_all_job_listings, get_resources_by_category
+from app.core.queries import get_all_job_listings, get_resources_by_categories
 from app.modules.matching.filters import apply_credit_filter, get_certification_renewal
 from app.modules.matching.scoring import BARRIER_CATEGORY_MAP, rank_resources
 from app.modules.matching.types import (
@@ -71,22 +71,21 @@ async def query_resources_for_barriers(
     barriers: list[BarrierType], db_session,
 ) -> list[Resource]:
     """Query Montgomery data for resources matching the user's barrier types."""
-    seen_ids: set[int] = set()
-    results: list[Resource] = []
-
     categories: set[str] = set()
     for barrier in barriers:
         categories.update(BARRIER_CATEGORY_MAP.get(barrier, set()))
 
-    for category in sorted(categories):
-        rows = await get_resources_by_category(db_session, category)
-        for row in rows:
-            if row["id"] not in seen_ids:
-                seen_ids.add(row["id"])
-                fields = {k: row[k] for k in Resource.model_fields if k in row}
-                if isinstance(fields.get("services"), str):
-                    fields["services"] = json.loads(fields["services"])
-                results.append(Resource(**fields))
+    rows = await get_resources_by_categories(db_session, categories)
+
+    seen_ids: set[int] = set()
+    results: list[Resource] = []
+    for row in rows:
+        if row["id"] not in seen_ids:
+            seen_ids.add(row["id"])
+            fields = {k: row[k] for k in Resource.model_fields if k in row}
+            if isinstance(fields.get("services"), str):
+                fields["services"] = json.loads(fields["services"])
+            results.append(Resource(**fields))
 
     return results
 

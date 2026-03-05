@@ -32,6 +32,19 @@ async def get_resources_by_category(session: AsyncSession, category: str) -> lis
     return [dict(row._mapping) for row in result]
 
 
+async def get_resources_by_categories(session: AsyncSession, categories: set[str]) -> list[dict]:
+    """Fetch resources matching any of the given categories in a single query."""
+    if not categories:
+        return []
+    placeholders = ", ".join(f":c{i}" for i in range(len(categories)))
+    params = {f"c{i}": cat for i, cat in enumerate(sorted(categories))}
+    result = await session.execute(
+        text(f"SELECT * FROM resources WHERE category IN ({placeholders})"),
+        params,
+    )
+    return [dict(row._mapping) for row in result]
+
+
 async def get_all_transit_routes(session: AsyncSession) -> list[dict]:
     """Fetch all transit routes."""
     result = await session.execute(text("SELECT * FROM transit_routes"))
@@ -47,8 +60,9 @@ async def get_all_employers(session: AsyncSession) -> list[dict]:
 async def create_session(session: AsyncSession, session_data: dict, session_id: str | None = None) -> str:
     """Insert a new session row with UUID and 24h expiry. Returns session id."""
     session_id = session_id or str(uuid.uuid4())
-    now = datetime.now(timezone.utc).isoformat()
-    expires = (datetime.now(timezone.utc) + timedelta(hours=24)).isoformat()
+    now_dt = datetime.now(timezone.utc)
+    now = now_dt.isoformat()
+    expires = (now_dt + timedelta(hours=24)).isoformat()
     await session.execute(
         text(
             "INSERT INTO sessions (id, created_at, barriers, credit_profile, "
@@ -109,23 +123,26 @@ async def insert_job_listings(session: AsyncSession, listings: list[dict]) -> in
     """Bulk insert job listings. Returns count inserted."""
     if not listings:
         return 0
-    for row in listings:
-        await session.execute(
-            text(
-                "INSERT INTO job_listings (title, company, location, description, url, source, scraped_at, expires_at) "
-                "VALUES (:title, :company, :location, :description, :url, :source, :scraped_at, :expires_at)"
-            ),
-            {
-                "title": row["title"],
-                "company": row.get("company"),
-                "location": row.get("location"),
-                "description": row.get("description"),
-                "url": row.get("url"),
-                "source": row.get("source"),
-                "scraped_at": row["scraped_at"],
-                "expires_at": row.get("expires_at"),
-            },
-        )
+    params = [
+        {
+            "title": row["title"],
+            "company": row.get("company"),
+            "location": row.get("location"),
+            "description": row.get("description"),
+            "url": row.get("url"),
+            "source": row.get("source"),
+            "scraped_at": row["scraped_at"],
+            "expires_at": row.get("expires_at"),
+        }
+        for row in listings
+    ]
+    await session.execute(
+        text(
+            "INSERT INTO job_listings (title, company, location, description, url, source, scraped_at, expires_at) "
+            "VALUES (:title, :company, :location, :description, :url, :source, :scraped_at, :expires_at)"
+        ),
+        params,
+    )
     await session.commit()
     return len(listings)
 

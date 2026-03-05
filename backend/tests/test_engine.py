@@ -61,7 +61,7 @@ def _make_resource(**overrides) -> Resource:
 
 
 _QUERY_PATCH = "app.modules.matching.engine.query_resources_for_barriers"
-_CAT_PATCH = "app.modules.matching.engine.get_resources_by_category"
+_CATS_PATCH = "app.modules.matching.engine.get_resources_by_categories"
 
 
 class TestQueryResourcesForBarriers:
@@ -73,11 +73,12 @@ class TestQueryResourcesForBarriers:
         training = _make_resource_dict(id=3, name="Training", category="training")
 
         mock_session = AsyncMock()
+        all_resources = [career, childcare, training]
 
-        async def mock_get_by_category(session, category):
-            return [r for r in [career, childcare, training] if r["category"] == category]
+        async def mock_get_by_categories(session, categories):
+            return [r for r in all_resources if r["category"] in categories]
 
-        with patch(_CAT_PATCH, side_effect=mock_get_by_category):
+        with patch(_CATS_PATCH, side_effect=mock_get_by_categories):
             result = await query_resources_for_barriers(
                 [BarrierType.CREDIT], mock_session
             )
@@ -91,12 +92,12 @@ class TestQueryResourcesForBarriers:
 
         mock_session = AsyncMock()
 
-        async def mock_get_by_category(session, category):
-            if category == "career_center":
+        async def mock_get_by_categories(session, categories):
+            if "career_center" in categories:
                 return [career]
             return []
 
-        with patch(_CAT_PATCH, side_effect=mock_get_by_category):
+        with patch(_CATS_PATCH, side_effect=mock_get_by_categories):
             # CREDIT and TRANSPORTATION both map to career_center
             result = await query_resources_for_barriers(
                 [BarrierType.CREDIT, BarrierType.TRANSPORTATION], mock_session
@@ -115,10 +116,10 @@ class TestQueryResourcesForBarriers:
         )
         mock_session = AsyncMock()
 
-        async def mock_get_by_category(session, category):
-            return [resource] if category == "career_center" else []
+        async def mock_get_by_categories(session, categories):
+            return [resource] if "career_center" in categories else []
 
-        with patch(_CAT_PATCH, side_effect=mock_get_by_category):
+        with patch(_CATS_PATCH, side_effect=mock_get_by_categories):
             result = await query_resources_for_barriers(
                 [BarrierType.CREDIT], mock_session
             )

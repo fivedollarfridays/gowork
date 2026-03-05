@@ -33,14 +33,22 @@ async def store_crawl_results(
     if not parsed:
         return 0
 
-    # Fetch existing URLs for deduplication
-    result = await session.execute(
-        text("SELECT url FROM job_listings WHERE url IS NOT NULL"),
-    )
-    existing_urls = {row[0] for row in result}
+    # Fetch existing URLs for deduplication — only check URLs in this batch
+    incoming_urls = [j.url for j in parsed if j.url]
+    existing_urls: set[str] = set()
+    if incoming_urls:
+        # Use batched IN query instead of full table scan
+        placeholders = ", ".join(f":u{i}" for i in range(len(incoming_urls)))
+        params = {f"u{i}": url for i, url in enumerate(incoming_urls)}
+        result = await session.execute(
+            text(f"SELECT url FROM job_listings WHERE url IN ({placeholders})"),
+            params,
+        )
+        existing_urls = {row[0] for row in result}
 
-    now = datetime.now(timezone.utc).isoformat()
-    expires = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
+    now_dt = datetime.now(timezone.utc)
+    now = now_dt.isoformat()
+    expires = (now_dt + timedelta(days=30)).isoformat()
     source = f"brightdata:{snapshot_id}"
 
     listings = []

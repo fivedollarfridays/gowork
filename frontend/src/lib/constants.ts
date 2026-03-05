@@ -63,6 +63,12 @@ export const SEVERITY_BADGE_STYLES: Record<BarrierSeverity, string> = {
   high: STATUS_BADGE_STYLES.negative,
 };
 
+export function daysToMonths(days: number): string {
+  if (days <= 30) return `${days} days`;
+  const months = Math.round(days / 30);
+  return `~${months} month${months === 1 ? "" : "s"}`;
+}
+
 /** Hex colors for PDF inline styles (html2pdf.js can't use CSS vars). */
 export const PDF_SEVERITY_COLORS: Record<string, { bg: string; text: string }> = {
   low: { bg: "#dcfce7", text: "#166534" },
