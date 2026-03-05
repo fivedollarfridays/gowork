@@ -1,29 +1,38 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+import type {
+  AssessmentRequest,
+  AssessmentResponse,
+  CreditAssessmentResult,
+  CreditProfileRequest,
+  PlanNarrative,
+  PlanResponse,
+} from "./types";
 
-// TODO: Replace `any` with real typed interfaces from lib/types.ts
-export async function postAssessment(data: any) {
-  const res = await fetch(`${API_BASE}/api/assessment`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(`${API_BASE}${url}`, {
+    headers: { "Content-Type": "application/json" },
+    ...init,
   });
-  return res.json();
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(body.detail || `API error ${res.status}`);
+  }
+  return res.json() as Promise<T>;
 }
 
-export async function postCredit(data: any) {
-  const res = await fetch(`${API_BASE}/api/credit/assess`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  return res.json();
+export function postAssessment(data: AssessmentRequest): Promise<AssessmentResponse> {
+  return apiFetch("/api/assessment/", { method: "POST", body: JSON.stringify(data) });
 }
 
-export async function postPlan(sessionId: string) {
-  const res = await fetch(`${API_BASE}/api/plan`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ session_id: sessionId }),
-  });
-  return res.json();
+export function getPlan(sessionId: string): Promise<PlanResponse> {
+  return apiFetch(`/api/plan/${sessionId}`);
+}
+
+export function generateNarrative(sessionId: string): Promise<PlanNarrative> {
+  return apiFetch(`/api/plan/${sessionId}/generate`, { method: "POST" });
+}
+
+export function postCredit(data: CreditProfileRequest): Promise<CreditAssessmentResult> {
+  return apiFetch("/api/credit/assess", { method: "POST", body: JSON.stringify(data) });
 }
