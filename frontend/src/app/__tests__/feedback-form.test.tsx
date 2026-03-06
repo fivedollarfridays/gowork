@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import FeedbackPage from "../feedback/[token]/page";
+import { FeedbackForm } from "../feedback/[token]/feedback-form";
 
 // Mock api module
 vi.mock("@/lib/api", () => ({
@@ -27,7 +27,7 @@ describe("FeedbackPage", () => {
     const { validateFeedbackToken } = await import("@/lib/api");
     (validateFeedbackToken as ReturnType<typeof vi.fn>).mockReturnValue(new Promise(() => {}));
 
-    renderWithClient(<FeedbackPage params={{ token: "abc123" }} />);
+    renderWithClient(<FeedbackForm token="abc123" />);
 
     expect(screen.getByLabelText(/loading/i)).toBeInTheDocument();
   });
@@ -36,7 +36,7 @@ describe("FeedbackPage", () => {
     const { validateFeedbackToken } = await import("@/lib/api");
     (validateFeedbackToken as ReturnType<typeof vi.fn>).mockRejectedValue(new Error("Token expired"));
 
-    renderWithClient(<FeedbackPage params={{ token: "expired-tok" }} />);
+    renderWithClient(<FeedbackForm token="expired-tok" />);
 
     await waitFor(() => {
       expect(screen.getByText(/expired|invalid/i)).toBeInTheDocument();
@@ -48,7 +48,7 @@ describe("FeedbackPage", () => {
     const { validateFeedbackToken } = await import("@/lib/api");
     (validateFeedbackToken as ReturnType<typeof vi.fn>).mockResolvedValue({ valid: true, session_id: "sess-1" });
 
-    renderWithClient(<FeedbackPage params={{ token: "valid-tok" }} />);
+    renderWithClient(<FeedbackForm token="valid-tok" />);
 
     await waitFor(() => {
       expect(screen.getByText(/did you make it/i)).toBeInTheDocument();
@@ -60,7 +60,7 @@ describe("FeedbackPage", () => {
     const { validateFeedbackToken } = await import("@/lib/api");
     (validateFeedbackToken as ReturnType<typeof vi.fn>).mockResolvedValue({ valid: true, session_id: "sess-1" });
 
-    renderWithClient(<FeedbackPage params={{ token: "valid-tok" }} />);
+    renderWithClient(<FeedbackForm token="valid-tok" />);
 
     await waitFor(() => {
       expect(screen.getByText(/did you make it/i)).toBeInTheDocument();
@@ -78,7 +78,7 @@ describe("FeedbackPage", () => {
     (validateFeedbackToken as ReturnType<typeof vi.fn>).mockResolvedValue({ valid: true, session_id: "sess-1" });
     (submitVisitFeedback as ReturnType<typeof vi.fn>).mockResolvedValue({ success: true });
 
-    renderWithClient(<FeedbackPage params={{ token: "valid-tok" }} />);
+    renderWithClient(<FeedbackForm token="valid-tok" />);
 
     await waitFor(() => {
       expect(screen.getByText(/did you make it/i)).toBeInTheDocument();
@@ -109,7 +109,7 @@ describe("FeedbackPage", () => {
     (validateFeedbackToken as ReturnType<typeof vi.fn>).mockResolvedValue({ valid: true, session_id: "sess-1" });
     (submitVisitFeedback as ReturnType<typeof vi.fn>).mockRejectedValue(new Error("Feedback already submitted"));
 
-    renderWithClient(<FeedbackPage params={{ token: "valid-tok" }} />);
+    renderWithClient(<FeedbackForm token="valid-tok" />);
 
     await waitFor(() => {
       expect(screen.getByText(/did you make it/i)).toBeInTheDocument();
@@ -128,7 +128,7 @@ describe("FeedbackPage", () => {
     const { validateFeedbackToken } = await import("@/lib/api");
     (validateFeedbackToken as ReturnType<typeof vi.fn>).mockResolvedValue({ valid: true, session_id: "sess-1" });
 
-    renderWithClient(<FeedbackPage params={{ token: "valid-tok" }} />);
+    renderWithClient(<FeedbackForm token="valid-tok" />);
 
     await waitFor(() => {
       expect(screen.getByText(/did you make it/i)).toBeInTheDocument();
