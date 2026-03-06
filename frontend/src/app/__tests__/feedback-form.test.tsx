@@ -36,7 +36,7 @@ describe("FeedbackPage", () => {
     const { validateFeedbackToken } = await import("@/lib/api");
     (validateFeedbackToken as ReturnType<typeof vi.fn>).mockRejectedValue(new Error("Token expired"));
 
-    renderWithClient(<FeedbackForm token="expired-tok" />);
+    renderWithClient(<FeedbackForm token="exp-tk" />);
 
     await waitFor(() => {
       expect(screen.getByText(/expired|invalid/i)).toBeInTheDocument();
@@ -48,7 +48,7 @@ describe("FeedbackPage", () => {
     const { validateFeedbackToken } = await import("@/lib/api");
     (validateFeedbackToken as ReturnType<typeof vi.fn>).mockResolvedValue({ valid: true, session_id: "sess-1" });
 
-    renderWithClient(<FeedbackForm token="valid-tok" />);
+    renderWithClient(<FeedbackForm token="val-tk" />);
 
     await waitFor(() => {
       expect(screen.getByText(/did you make it/i)).toBeInTheDocument();
@@ -60,7 +60,7 @@ describe("FeedbackPage", () => {
     const { validateFeedbackToken } = await import("@/lib/api");
     (validateFeedbackToken as ReturnType<typeof vi.fn>).mockResolvedValue({ valid: true, session_id: "sess-1" });
 
-    renderWithClient(<FeedbackForm token="valid-tok" />);
+    renderWithClient(<FeedbackForm token="val-tk" />);
 
     await waitFor(() => {
       expect(screen.getByText(/did you make it/i)).toBeInTheDocument();
@@ -78,7 +78,7 @@ describe("FeedbackPage", () => {
     (validateFeedbackToken as ReturnType<typeof vi.fn>).mockResolvedValue({ valid: true, session_id: "sess-1" });
     (submitVisitFeedback as ReturnType<typeof vi.fn>).mockResolvedValue({ success: true });
 
-    renderWithClient(<FeedbackForm token="valid-tok" />);
+    renderWithClient(<FeedbackForm token="val-tk" />);
 
     await waitFor(() => {
       expect(screen.getByText(/did you make it/i)).toBeInTheDocument();
@@ -96,7 +96,7 @@ describe("FeedbackPage", () => {
     });
 
     expect((submitVisitFeedback as ReturnType<typeof vi.fn>).mock.calls[0][0]).toEqual({
-      token: "valid-tok",
+      token: "val-tk",
       made_it_to_center: 1,
       outcomes: [],
       plan_accuracy: 3,
@@ -109,7 +109,7 @@ describe("FeedbackPage", () => {
     (validateFeedbackToken as ReturnType<typeof vi.fn>).mockResolvedValue({ valid: true, session_id: "sess-1" });
     (submitVisitFeedback as ReturnType<typeof vi.fn>).mockRejectedValue(new Error("Feedback already submitted"));
 
-    renderWithClient(<FeedbackForm token="valid-tok" />);
+    renderWithClient(<FeedbackForm token="val-tk" />);
 
     await waitFor(() => {
       expect(screen.getByText(/did you make it/i)).toBeInTheDocument();
@@ -128,7 +128,7 @@ describe("FeedbackPage", () => {
     const { validateFeedbackToken } = await import("@/lib/api");
     (validateFeedbackToken as ReturnType<typeof vi.fn>).mockResolvedValue({ valid: true, session_id: "sess-1" });
 
-    renderWithClient(<FeedbackForm token="valid-tok" />);
+    renderWithClient(<FeedbackForm token="val-tk" />);
 
     await waitFor(() => {
       expect(screen.getByText(/did you make it/i)).toBeInTheDocument();
