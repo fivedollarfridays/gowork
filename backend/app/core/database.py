@@ -5,6 +5,7 @@ from pathlib import Path
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.pool import StaticPool
 
 from app.core.config import get_settings
 
@@ -52,7 +53,8 @@ CREATE TABLE IF NOT EXISTS resources (
     eligibility TEXT,
     services TEXT,
     hours TEXT,
-    notes TEXT
+    notes TEXT,
+    health_status TEXT DEFAULT 'healthy'
 );
 CREATE TABLE IF NOT EXISTS job_listings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -74,6 +76,32 @@ CREATE TABLE IF NOT EXISTS sessions (
     qualifications TEXT,
     plan TEXT,
     expires_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS feedback_tokens (
+    token TEXT PRIMARY KEY,
+    session_id TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    expires_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS visit_feedback (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id TEXT NOT NULL,
+    submitted_at TEXT NOT NULL,
+    made_it_to_center INTEGER NOT NULL,
+    outcomes TEXT,
+    plan_accuracy INTEGER NOT NULL,
+    free_text TEXT,
+    reviewed INTEGER DEFAULT 0,
+    action_taken TEXT
+);
+CREATE TABLE IF NOT EXISTS resource_feedback (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    resource_id INTEGER REFERENCES resources(id),
+    session_id TEXT NOT NULL,
+    helpful INTEGER NOT NULL,
+    barrier_type TEXT,
+    submitted_at TEXT NOT NULL,
+    UNIQUE(resource_id, session_id)
 );
 """
 
@@ -117,7 +145,11 @@ def get_engine():
     global _engine
     if _engine is None:
         settings = get_settings()
-        _engine = create_async_engine(settings.database_url, echo=False)
+        _engine = create_async_engine(
+            settings.database_url,
+            echo=False,
+            poolclass=StaticPool,
+        )
     return _engine
 
 

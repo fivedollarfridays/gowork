@@ -87,6 +87,7 @@ class TestRateLimiter:
 _GEN_PATCH = "app.routes.assessment.generate_plan"
 _SESSION_PATCH = "app.routes.assessment.create_session"
 _UPDATE_PLAN_PATCH = "app.routes.assessment.update_session_plan"
+_FEEDBACK_TOKEN_PATCH = "app.routes.assessment.create_feedback_token"
 
 
 class TestAssessmentEndpoint:
@@ -104,6 +105,7 @@ class TestAssessmentEndpoint:
             patch(_GEN_PATCH, return_value=_mock_plan()),
             patch(_SESSION_PATCH, return_value="test-uuid"),
             patch(_UPDATE_PLAN_PATCH, new_callable=AsyncMock),
+            patch(_FEEDBACK_TOKEN_PATCH, new_callable=AsyncMock, return_value="test-token"),
         ):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -118,6 +120,7 @@ class TestAssessmentEndpoint:
         assert "session_id" in data
         assert "profile" in data
         assert "plan" in data
+        assert data["feedback_token"] == "test-token"
 
     @pytest.mark.asyncio
     async def test_invalid_zip_rejected(self):
@@ -143,6 +146,7 @@ class TestAssessmentEndpoint:
             patch(_GEN_PATCH, return_value=_mock_plan()),
             patch(_SESSION_PATCH, return_value="test-uuid"),
             patch(_UPDATE_PLAN_PATCH, new_callable=AsyncMock),
+            patch(_FEEDBACK_TOKEN_PATCH, new_callable=AsyncMock, return_value="test-token"),
         ):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -168,6 +172,7 @@ class TestAssessmentEndpoint:
             patch(_GEN_PATCH, return_value=_mock_plan()),
             patch(_SESSION_PATCH, return_value="test-uuid"),
             patch(_UPDATE_PLAN_PATCH, new_callable=AsyncMock),
+            patch(_FEEDBACK_TOKEN_PATCH, new_callable=AsyncMock, return_value="test-token"),
         ):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -189,6 +194,7 @@ class TestAssessmentEndpoint:
             patch(_GEN_PATCH, return_value=_mock_plan()),
             patch(_SESSION_PATCH, return_value="test-uuid"),
             patch(_UPDATE_PLAN_PATCH, new_callable=AsyncMock),
+            patch(_FEEDBACK_TOKEN_PATCH, new_callable=AsyncMock, return_value="test-token"),
         ):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -251,6 +257,7 @@ class TestAssessmentEndpoint:
             patch(_GEN_PATCH, return_value=_mock_plan()),
             patch(_SESSION_PATCH, return_value="test-uuid"),
             patch(_UPDATE_PLAN_PATCH, new_callable=AsyncMock),
+            patch(_FEEDBACK_TOKEN_PATCH, new_callable=AsyncMock, return_value="test-token"),
         ):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:

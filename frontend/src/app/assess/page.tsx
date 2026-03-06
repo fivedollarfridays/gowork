@@ -57,6 +57,9 @@ export default function AssessPage() {
       if (creditResultRef.current) {
         sessionStorage.setItem(`credit_${data.session_id}`, JSON.stringify(creditResultRef.current));
       }
+      if (data.feedback_token) {
+        sessionStorage.setItem(`feedback_token_${data.session_id}`, data.feedback_token);
+      }
       router.push(`/plan?session=${data.session_id}`);
     },
     onError: () => {

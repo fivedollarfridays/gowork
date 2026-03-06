@@ -14,6 +14,7 @@ from app.health import router as health_router
 from app.routes.assessment import router as assessment_router
 from app.routes.brightdata import router as brightdata_router
 from app.routes.credit import router as credit_router
+from app.routes.feedback import router as feedback_router
 from app.routes.jobs import router as jobs_router
 from app.routes.plan import router as plan_router
 
@@ -64,6 +65,7 @@ app.include_router(plan_router)
 app.include_router(credit_router)
 app.include_router(jobs_router)
 app.include_router(brightdata_router)
+app.include_router(feedback_router)
 
 
 @app.get("/")

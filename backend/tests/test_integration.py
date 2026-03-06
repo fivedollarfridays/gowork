@@ -21,6 +21,7 @@ def _mock_plan() -> ReEntryPlan:
 _GEN_PATCH = "app.routes.assessment.generate_plan"
 _SESSION_PATCH = "app.routes.assessment.create_session"
 _UPDATE_PLAN_PATCH = "app.routes.assessment.update_session_plan"
+_FEEDBACK_TOKEN_PATCH = "app.routes.assessment.create_feedback_token"
 
 
 class TestAssessmentToPlan:
@@ -40,6 +41,7 @@ class TestAssessmentToPlan:
             patch(_GEN_PATCH, return_value=_mock_plan()),
             patch(_SESSION_PATCH, new_callable=AsyncMock, return_value="int-session-123"),
             patch(_UPDATE_PLAN_PATCH, new_callable=AsyncMock),
+            patch(_FEEDBACK_TOKEN_PATCH, new_callable=AsyncMock, return_value="test-token"),
         ):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as c:
@@ -75,6 +77,7 @@ class TestAssessmentToPlan:
             patch(_GEN_PATCH, return_value=_mock_plan()),
             patch(_SESSION_PATCH, new_callable=AsyncMock, return_value="low-session"),
             patch(_UPDATE_PLAN_PATCH, new_callable=AsyncMock),
+            patch(_FEEDBACK_TOKEN_PATCH, new_callable=AsyncMock, return_value="test-token"),
         ):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as c:

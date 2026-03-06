@@ -4,6 +4,12 @@ import json
 import uuid
 
 from app.core.queries import get_resources_by_categories
+from app.modules.feedback.types import ResourceHealth
+from app.modules.matching.affinity import (
+    CAREER_CENTER_STEP,
+    assign_resources,
+)
+from app.modules.matching.barrier_priority import prioritize_barriers
 from app.modules.matching.filters import get_certification_renewal
 from app.modules.matching.job_matcher import match_jobs
 from app.modules.matching.scoring import BARRIER_CATEGORY_MAP, rank_resources
@@ -81,11 +87,17 @@ async def query_resources_for_barriers(
     results: list[Resource] = []
     for row in rows:
         if row["id"] not in seen_ids:
+            # Exclude HIDDEN resources
+            if row.get("health_status") == ResourceHealth.HIDDEN:
+                continue
             seen_ids.add(row["id"])
             fields = {k: row[k] for k in Resource.model_fields if k in row}
             if isinstance(fields.get("services"), str):
                 fields["services"] = json.loads(fields["services"])
             results.append(Resource(**fields))
+
+    # Deprioritize FLAGGED resources (sort healthy/watch before flagged)
+    results.sort(key=lambda r: 1 if r.health_status == ResourceHealth.FLAGGED else 0)
 
     return results
 
@@ -99,7 +111,11 @@ async def generate_plan(
 
     strong, possible, after_repair = await match_jobs(profile, db_session)
 
-    barrier_cards = _build_barrier_cards(profile, resources)
+    sorted_barriers = prioritize_barriers([b.value for b in profile.primary_barriers])
+    sorted_profile = profile.model_copy(
+        update={"primary_barriers": [BarrierType(b) for b in sorted_barriers]},
+    )
+    barrier_cards = _build_barrier_cards(sorted_profile, resources)
     next_steps = _build_next_steps(profile, barrier_cards, strong)
 
     return ReEntryPlan(
@@ -118,13 +134,11 @@ async def generate_plan(
 def _build_barrier_cards(
     profile: UserProfile, resources: list[Resource],
 ) -> list[BarrierCard]:
-    """Create a BarrierCard for each primary barrier."""
+    """Create a BarrierCard for each primary barrier with affinity routing."""
+    card_resources = assign_resources(set(profile.primary_barriers), resources)
+
     cards: list[BarrierCard] = []
-
     for barrier in profile.primary_barriers:
-        matching_categories = BARRIER_CATEGORY_MAP.get(barrier, set())
-        matched = [r for r in resources if r.category in matching_categories]
-
         actions = list(BARRIER_ACTIONS.get(barrier, []))
 
         if barrier == BarrierType.TRAINING:
@@ -141,7 +155,7 @@ def _build_barrier_cards(
             severity=profile.barrier_severity,
             title=BARRIER_TITLES.get(barrier, barrier.value.replace("_", " ").title()),
             actions=actions,
-            resources=matched,
+            resources=card_resources.get(barrier, []),
         ))
 
     return cards
@@ -152,7 +166,7 @@ def _build_next_steps(
     strong_matches: list[ScoredJobMatch] | None = None,
 ) -> list[str]:
     """Generate prioritized immediate next steps."""
-    steps: list[str] = []
+    steps: list[str] = [CAREER_CENTER_STEP]
 
     if strong_matches:
         top = strong_matches[0]
@@ -168,8 +182,5 @@ def _build_next_steps(
             steps.append(f"Contact {top.name}{contact} for {card.title.lower()} support")
         elif card.actions:
             steps.append(card.actions[0])
-
-    if not steps:
-        steps.append("Visit a local career center for personalized guidance")
 
     return steps

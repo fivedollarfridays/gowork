@@ -141,6 +141,7 @@ export interface AssessmentResponse {
   session_id: string;
   profile: UserProfile;
   plan: ReEntryPlan;
+  feedback_token?: string;
 }
 
 export interface PlanResponse {
@@ -252,6 +253,46 @@ export interface CreditAssessmentResult {
   dispute_pathway: DisputePathway;
   eligibility: CreditEligibility[];
   disclaimer: string;
+}
+
+// --- Feedback types ---
+
+export const ResourceHealth = {
+  HEALTHY: "healthy",
+  WATCH: "watch",
+  FLAGGED: "flagged",
+  HIDDEN: "hidden",
+} as const;
+export type ResourceHealth = (typeof ResourceHealth)[keyof typeof ResourceHealth];
+
+export interface ResourceFeedbackRequest {
+  resource_id: number;
+  session_id: string;
+  helpful: boolean;
+  barrier_type?: string;
+}
+
+export interface ResourceFeedbackResponse {
+  success: boolean;
+  resource_id: number;
+  helpful: boolean;
+}
+
+export interface VisitFeedbackRequest {
+  token: string;
+  made_it_to_center: number;
+  outcomes: string[];
+  plan_accuracy: number;
+  free_text?: string;
+}
+
+export interface VisitFeedbackResponse {
+  success: boolean;
+}
+
+export interface TokenValidation {
+  valid: boolean;
+  session_id?: string;
 }
 
 export interface CreditFormData {

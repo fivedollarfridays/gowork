@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import {
   Bus,
   ChevronDown,
   ChevronUp,
   MapPin,
   Phone,
+  ThumbsUp,
+  ThumbsDown,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,15 +17,57 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import type { BarrierCard as BarrierCardType } from "@/lib/types";
 import { BARRIER_ICONS, SEVERITY_BADGE_STYLES, humanizeLabel } from "@/lib/constants";
+import { submitResourceFeedback } from "@/lib/api";
 
 const INITIAL_RESOURCE_COUNT = 2;
 
-interface BarrierCardViewProps {
-  barrier: BarrierCardType;
+type FeedbackState = Record<number, boolean | null>;
+
+function loadFeedbackState(sessionId: string, resourceIds: number[]): FeedbackState {
+  if (typeof window === "undefined") return {};
+  const state: FeedbackState = {};
+  for (const id of resourceIds) {
+    const stored = sessionStorage.getItem(`feedback_${sessionId}_${id}`);
+    state[id] = stored === "true" ? true : stored === "false" ? false : null;
+  }
+  return state;
 }
 
-export function BarrierCardView({ barrier }: BarrierCardViewProps) {
+interface BarrierCardViewProps {
+  barrier: BarrierCardType;
+  sessionId?: string;
+}
+
+export function BarrierCardView({ barrier, sessionId }: BarrierCardViewProps) {
   const [expanded, setExpanded] = useState(false);
+  const [feedback, setFeedback] = useState<FeedbackState>(() =>
+    sessionId ? loadFeedbackState(sessionId, barrier.resources.map((r) => r.id)) : {},
+  );
+
+  const handleFeedback = useCallback(
+    (resourceId: number, helpful: boolean) => {
+      if (!sessionId) return;
+
+      setFeedback((prev) => {
+        const current = prev[resourceId];
+        const newValue = current === helpful ? null : helpful;
+
+        if (newValue === null) {
+          sessionStorage.removeItem(`feedback_${sessionId}_${resourceId}`);
+        } else {
+          sessionStorage.setItem(`feedback_${sessionId}_${resourceId}`, String(newValue));
+          submitResourceFeedback({
+            resource_id: resourceId,
+            session_id: sessionId,
+            helpful: newValue,
+          }).catch(() => {});
+        }
+
+        return { ...prev, [resourceId]: newValue };
+      });
+    },
+    [sessionId],
+  );
   const Icon = BARRIER_ICONS[barrier.type];
   const badgeStyle = SEVERITY_BADGE_STYLES[barrier.severity] ?? SEVERITY_BADGE_STYLES.low;
   const hasMoreResources = barrier.resources.length > INITIAL_RESOURCE_COUNT;
@@ -100,6 +144,38 @@ export function BarrierCardView({ barrier }: BarrierCardViewProps) {
                         </a>
                       )}
                     </div>
+                    {sessionId && (
+                      <div className="flex shrink-0 gap-1">
+                        <button
+                          type="button"
+                          aria-label="Mark as helpful"
+                          data-active={feedback[resource.id] === true ? "true" : undefined}
+                          onClick={() => handleFeedback(resource.id, true)}
+                          className={cn(
+                            "rounded p-1 transition-colors",
+                            feedback[resource.id] === true
+                              ? "text-success"
+                              : "text-muted-foreground/50 hover:text-success",
+                          )}
+                        >
+                          <ThumbsUp className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label="Mark as not helpful"
+                          data-active={feedback[resource.id] === false ? "true" : undefined}
+                          onClick={() => handleFeedback(resource.id, false)}
+                          className={cn(
+                            "rounded p-1 transition-colors",
+                            feedback[resource.id] === false
+                              ? "text-muted-foreground"
+                              : "text-muted-foreground/50 hover:text-muted-foreground",
+                          )}
+                        >
+                          <ThumbsDown className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    )}
                   </li>
                 ))}
               </ul>
