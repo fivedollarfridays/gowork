@@ -2,6 +2,8 @@ from pydantic import BaseModel, Field
 from enum import Enum
 from typing import Optional
 
+from app.modules.feedback.types import ResourceHealth
+
 
 class BarrierType(str, Enum):
     CREDIT = "credit"
@@ -74,6 +76,7 @@ class Resource(BaseModel):
     eligibility: Optional[str] = None
     services: Optional[list[str]] = None
     notes: Optional[str] = None
+    health_status: ResourceHealth = ResourceHealth.HEALTHY
 
 
 class MatchBucket(str, Enum):

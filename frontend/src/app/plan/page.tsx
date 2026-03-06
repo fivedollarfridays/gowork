@@ -122,6 +122,12 @@ function PlanContent() {
     }
   });
 
+  // Load feedback token from sessionStorage (set by assess page)
+  const [feedbackToken] = useState<string | null>(() => {
+    if (!sessionId || typeof window === "undefined") return null;
+    return sessionStorage.getItem(`feedback_token_${sessionId}`);
+  });
+
   const profile = useMemo(
     () => data ? buildProfileFromPlan(data.session_id, data.barriers) : null,
     [data],
@@ -183,7 +189,7 @@ function PlanContent() {
           <h2 className="text-xl font-semibold text-primary">Your Barriers</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {plan.barriers.map((barrier) => (
-              <BarrierCardView key={barrier.type} barrier={barrier} />
+              <BarrierCardView key={barrier.type} barrier={barrier} sessionId={sessionId ?? undefined} />
             ))}
           </div>
         </section>
@@ -250,7 +256,7 @@ function PlanContent() {
       {/* Export actions */}
       <Separator />
       <div className="flex flex-wrap items-center gap-3">
-        <PlanExport plan={plan} creditResult={creditResult} />
+        <PlanExport plan={plan} creditResult={creditResult} feedbackToken={feedbackToken} />
         <EmailExport plan={plan} />
       </div>
 

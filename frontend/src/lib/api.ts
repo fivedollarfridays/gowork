@@ -6,6 +6,11 @@ import type {
   JobsResponse,
   PlanNarrative,
   PlanResponse,
+  ResourceFeedbackRequest,
+  ResourceFeedbackResponse,
+  TokenValidation,
+  VisitFeedbackRequest,
+  VisitFeedbackResponse,
 } from "./types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -60,4 +65,16 @@ export function getJobs(params?: {
 
 export function postCredit(data: CreditProfileRequest): Promise<CreditAssessmentResult> {
   return apiFetch("/api/credit/assess", { method: "POST", body: JSON.stringify(data) });
+}
+
+export function submitResourceFeedback(data: ResourceFeedbackRequest): Promise<ResourceFeedbackResponse> {
+  return apiFetch("/api/feedback/resource", { method: "POST", body: JSON.stringify(data) });
+}
+
+export function validateFeedbackToken(token: string): Promise<TokenValidation> {
+  return apiFetch(`/api/feedback/validate/${encodeURIComponent(token)}`);
+}
+
+export function submitVisitFeedback(data: VisitFeedbackRequest): Promise<VisitFeedbackResponse> {
+  return apiFetch("/api/feedback/visit", { method: "POST", body: JSON.stringify(data) });
 }

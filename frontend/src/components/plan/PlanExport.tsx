@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import { Download, Loader2 } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import type { ReEntryPlan, CreditAssessmentResult } from "@/lib/types";
 import { PDF_SEVERITY_COLORS } from "@/lib/constants";
@@ -9,9 +10,10 @@ import { PDF_SEVERITY_COLORS } from "@/lib/constants";
 interface PlanExportProps {
   plan: ReEntryPlan;
   creditResult?: CreditAssessmentResult | null;
+  feedbackToken?: string | null;
 }
 
-export function PlanExport({ plan, creditResult }: PlanExportProps) {
+export function PlanExport({ plan, creditResult, feedbackToken }: PlanExportProps) {
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -94,6 +96,7 @@ export function PlanExport({ plan, creditResult }: PlanExportProps) {
         <PdfJobMatches jobs={plan.job_matches} />
         <PdfNextSteps steps={plan.immediate_next_steps} />
         {creditResult && <PdfCreditInfo creditResult={creditResult} />}
+        {feedbackToken && <PdfFeedbackQR token={feedbackToken} />}
       </div>
     </>
   );
@@ -238,6 +241,28 @@ function PdfCreditInfo({ creditResult }: { creditResult: CreditAssessmentResult 
           </p>
         )}
       </div>
+    </div>
+  );
+}
+
+function PdfFeedbackQR({ token }: { token: string }) {
+  const url = `${window.location.origin}/feedback/${token}`;
+  return (
+    <div
+      style={{
+        borderTop: "1px solid #e5e7eb",
+        paddingTop: "16px",
+        marginTop: "16px",
+        textAlign: "center",
+      }}
+    >
+      <p style={{ fontSize: "13px", fontWeight: "bold", margin: "0 0 8px" }}>
+        How did your visit go? Help us improve for the next person.
+      </p>
+      <QRCodeSVG data-testid="feedback-qr" value={url} size={100} level="M" />
+      <p style={{ fontSize: "10px", color: "#6b7280", margin: "6px 0 0" }}>
+        Scan to share feedback
+      </p>
     </div>
   );
 }

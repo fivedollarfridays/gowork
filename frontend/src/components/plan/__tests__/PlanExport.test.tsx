@@ -283,4 +283,22 @@ describe("PlanExport", () => {
     expect(screen.queryByText("Job Matches")).not.toBeInTheDocument();
     expect(screen.queryByText("Immediate Next Steps")).not.toBeInTheDocument();
   });
+
+  it("renders QR code section when feedbackToken is provided", () => {
+    render(<PlanExport plan={basePlan} feedbackToken="tk-abc" />);
+    expect(screen.getByText(/how did your visit go/i)).toBeInTheDocument();
+    // QR code SVG should be present
+    const svg = document.querySelector("[data-testid='feedback-qr']");
+    expect(svg).toBeInTheDocument();
+  });
+
+  it("renders scan instructions with QR code", () => {
+    render(<PlanExport plan={basePlan} feedbackToken="tk-abc" />);
+    expect(screen.getByText(/scan to share feedback/i)).toBeInTheDocument();
+  });
+
+  it("does not render QR section when feedbackToken is missing", () => {
+    render(<PlanExport plan={basePlan} />);
+    expect(screen.queryByText(/how did your visit go/i)).not.toBeInTheDocument();
+  });
 });

@@ -409,3 +409,19 @@ The matching engine maps each barrier type to resource categories for querying:
 | `criminal_record` | career_center, social_service |
 
 Barrier severity is determined by count: 1 barrier = LOW, 2 = MEDIUM, 3+ = HIGH. Severity affects the credit filter behavior (HIGH excludes all credit-check jobs; MEDIUM excludes only finance/government credit-check jobs; LOW applies no filter).
+
+---
+
+## Known Limitations & Scaling Path
+
+1. **SQLite → PostgreSQL:** Single-file database, limited concurrent writes. Migration path: swap `aiosqlite` for `asyncpg`, update `DATABASE_URL` format (`postgresql+asyncpg://...`). Railway managed Postgres or Supabase are drop-in replacements with no schema changes required — SQLAlchemy handles the abstraction.
+
+2. **Static resource data:** Resources loaded from JSON at startup, no automated refresh. Path: nightly cron via BrightData for job listings (routes already exist at `POST /api/brightdata/precrawl`). Manual review cadence for static resources; user feedback loop (in development) handles decay detection via helpfulness signals.
+
+3. **No caching layer:** All requests hit SQLite directly. Path: Redis for job listings (24h TTL) and resource queries (1h TTL). FastAPI middleware for cache-aside pattern.
+
+4. **External API resilience:** BrightData polling already has exponential backoff with jitter (2-60s, 30 retries). Credit API returns 503/504/502 on failure. Claude API falls back to template narrative. Missing: circuit breaker pattern. Path: `tenacity` for retry decorators, `pybreaker` for circuit breakers on future integrations.
+
+5. **Security hardening:** Rate limiting exists on `/api/assessment` (10 req/60s per IP). Missing: per-endpoint limits on all routes. Path: `slowapi` for full route coverage, Cloudflare proxy for DDoS protection.
+
+6. **Horizontal scaling:** Single process, single SQLite file. Decomposition path: API service and scraping workers as separate Railway services, PostgreSQL as managed addon, Redis as Railway plugin. No application code changes required — infrastructure decomposition only.
