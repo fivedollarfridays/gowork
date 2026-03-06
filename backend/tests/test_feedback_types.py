@@ -73,13 +73,13 @@ class TestVisitFeedbackRequest:
     def test_valid_full_request(self):
         """Full visit feedback request with all fields."""
         req = VisitFeedbackRequest(
-            token="abc123token",
+            token="tok-123",
             made_it_to_center=1,
             outcomes=["wioa_approved", "training_referred"],
             plan_accuracy=1,
             free_text="Everything was great",
         )
-        assert req.token == "abc123token"
+        assert req.token == "tok-123"
         assert req.made_it_to_center == 1
         assert len(req.outcomes) == 2
 

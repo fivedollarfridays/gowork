@@ -285,7 +285,7 @@ describe("PlanExport", () => {
   });
 
   it("renders QR code section when feedbackToken is provided", () => {
-    render(<PlanExport plan={basePlan} feedbackToken="tok-abc123" />);
+    render(<PlanExport plan={basePlan} feedbackToken="tk-abc" />);
     expect(screen.getByText(/how did your visit go/i)).toBeInTheDocument();
     // QR code SVG should be present
     const svg = document.querySelector("[data-testid='feedback-qr']");
@@ -293,7 +293,7 @@ describe("PlanExport", () => {
   });
 
   it("renders scan instructions with QR code", () => {
-    render(<PlanExport plan={basePlan} feedbackToken="tok-abc123" />);
+    render(<PlanExport plan={basePlan} feedbackToken="tk-abc" />);
     expect(screen.getByText(/scan to share feedback/i)).toBeInTheDocument();
   });
 
