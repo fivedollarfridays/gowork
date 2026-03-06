@@ -22,7 +22,6 @@ const barrier: BarrierCard = {
       eligibility: null,
       services: null,
       notes: null,
-      distance_miles: 2,
     },
   ],
   transit_matches: [],

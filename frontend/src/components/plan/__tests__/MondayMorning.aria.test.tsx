@@ -14,6 +14,8 @@ const basePlan: ReEntryPlan = {
   credit_readiness_score: null,
   eligible_now: [],
   eligible_after_repair: [],
+  strong_matches: [],
+  possible_matches: [],
 };
 
 const baseProfile: UserProfile = {
