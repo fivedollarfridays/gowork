@@ -64,6 +64,8 @@ const basePlan: ReEntryPlan = {
   credit_readiness_score: 45,
   eligible_now: ["Warehouse Associate"],
   eligible_after_repair: ["Bank Teller"],
+  strong_matches: [],
+  possible_matches: [],
 };
 
 const baseCreditResult: CreditAssessmentResult = {

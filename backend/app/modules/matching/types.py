@@ -76,6 +76,12 @@ class Resource(BaseModel):
     notes: Optional[str] = None
 
 
+class MatchBucket(str, Enum):
+    STRONG = "strong"
+    POSSIBLE = "possible"
+    AFTER_REPAIR = "after_repair"
+
+
 class JobMatch(BaseModel):
     title: str
     company: Optional[str] = None
@@ -87,6 +93,12 @@ class JobMatch(BaseModel):
     credit_check_required: str = "unknown"
     eligible_now: bool = True
     eligible_after: Optional[str] = None
+
+
+class ScoredJobMatch(JobMatch):
+    relevance_score: float = Field(ge=0.0, le=1.0)
+    match_reason: str = ""
+    bucket: MatchBucket = MatchBucket.POSSIBLE
 
 
 class TransitConnection(BaseModel):
@@ -111,7 +123,9 @@ class ReEntryPlan(BaseModel):
     session_id: str
     resident_summary: Optional[str] = None  # AI-generated narrative (Tier 4)
     barriers: list[BarrierCard]
-    job_matches: list[JobMatch]
+    job_matches: list[JobMatch]  # flat list (backward compat)
+    strong_matches: list["ScoredJobMatch"] = Field(default_factory=list)
+    possible_matches: list["ScoredJobMatch"] = Field(default_factory=list)
     immediate_next_steps: list[str]
     credit_readiness_score: Optional[int] = None  # 0-100 (from credit API)
     eligible_now: list[str] = Field(default_factory=list)

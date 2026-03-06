@@ -203,15 +203,18 @@ class TestGetSessionById:
 
 class TestGetAllJobListings:
     @pytest.mark.anyio
-    async def test_returns_empty_when_no_listings(self, db_session):
-        """Should return empty list when no job listings exist."""
+    async def test_returns_seeded_listings(self, db_session):
+        """Should return seed job listings from job_listings.json."""
         results = await get_all_job_listings(db_session)
-        assert results == []
+        assert len(results) >= 25
 
     @pytest.mark.anyio
     async def test_returns_inserted_listing(self, test_engine):
-        """Should return job listings after manual insert."""
+        """Should return job listings after manual insert (on top of seeds)."""
         async with test_engine.begin() as conn:
+            count_before = (await conn.execute(
+                text("SELECT COUNT(*) FROM job_listings")
+            )).scalar()
             await conn.execute(
                 text(
                     "INSERT INTO job_listings (title, company, scraped_at) "
@@ -222,8 +225,7 @@ class TestGetAllJobListings:
         factory = get_async_session_factory()
         async with factory() as session:
             results = await get_all_job_listings(session)
-            assert len(results) == 1
-            assert results[0]["title"] == "CNA"
+            assert len(results) == count_before + 1
 
 
 class TestGetJobListingById:

@@ -70,6 +70,40 @@ class TestTriggerCrawl:
             assert exc_info.value.status_code == 500
 
 
+class TestTriggerKeywordCrawl:
+    @pytest.mark.asyncio
+    async def test_trigger_keyword_crawl_success(self):
+        client = BrightDataClient(api_key="key-123", dataset_id="ds-123")
+        mock_response = httpx.Response(
+            200,
+            json={"snapshot_id": "snap-kw"},
+            request=httpx.Request("POST", "https://example.com"),
+        )
+        with patch.object(client._http, "post", new_callable=AsyncMock, return_value=mock_response) as mock_post:
+            snapshot_id = await client.trigger_keyword_crawl([
+                {"country": "US", "domain": "indeed.com", "keyword_search": "warehouse", "location": "Montgomery, AL"},
+            ])
+        assert snapshot_id == "snap-kw"
+        # Verify it sends to /scrape with correct params
+        call_kwargs = mock_post.call_args
+        assert "/scrape" in call_kwargs.args[0]
+        assert call_kwargs.kwargs["params"]["type"] == "discover_new"
+        assert call_kwargs.kwargs["params"]["discover_by"] == "keyword"
+
+    @pytest.mark.asyncio
+    async def test_trigger_keyword_crawl_http_error(self):
+        client = BrightDataClient(api_key="key-123", dataset_id="ds-123")
+        mock_response = httpx.Response(
+            400,
+            json={"error": "bad request"},
+            request=httpx.Request("POST", "https://example.com"),
+        )
+        with patch.object(client._http, "post", new_callable=AsyncMock, return_value=mock_response):
+            with pytest.raises(BrightDataAPIError) as exc_info:
+                await client.trigger_keyword_crawl([{"country": "US", "domain": "indeed.com", "keyword_search": "", "location": "Montgomery, AL"}])
+            assert exc_info.value.status_code == 400
+
+
 class TestGetSnapshotStatus:
     @pytest.mark.asyncio
     async def test_status_running_returns_progress(self):

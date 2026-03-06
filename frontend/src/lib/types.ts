@@ -100,6 +100,12 @@ export interface JobMatch {
   eligible_after: string | null;
 }
 
+export interface ScoredJobMatch extends JobMatch {
+  relevance_score: number;
+  match_reason: string;
+  bucket: "strong" | "possible" | "after_repair";
+}
+
 export interface TransitConnection {
   route_number: number;
   route_name: string;
@@ -123,6 +129,8 @@ export interface ReEntryPlan {
   resident_summary: string | null;
   barriers: BarrierCard[];
   job_matches: JobMatch[];
+  strong_matches: ScoredJobMatch[];
+  possible_matches: ScoredJobMatch[];
   immediate_next_steps: string[];
   credit_readiness_score: number | null;
   eligible_now: string[];

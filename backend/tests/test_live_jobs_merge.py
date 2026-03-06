@@ -1,17 +1,18 @@
-"""Tests for live job matching merge in generate_plan."""
+"""Tests for job matching integration in generate_plan."""
 
 import uuid
 from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from app.modules.matching.engine import _build_job_matches, generate_plan
+from app.modules.matching.engine import generate_plan
 from app.modules.matching.types import (
     BarrierSeverity,
     BarrierType,
     EmploymentStatus,
-    JobMatch,
+    MatchBucket,
     ReEntryPlan,
+    ScoredJobMatch,
     UserProfile,
 )
 
@@ -42,129 +43,102 @@ def _make_job_listing(**overrides) -> dict:
         "location": "Montgomery, AL",
         "description": "Entry-level warehouse position",
         "url": "https://example.com/job1",
-        "source": "brightdata:snap-abc",
+        "source": "seed",
         "scraped_at": "2026-03-05T00:00:00Z",
-        "expires_at": "2026-04-04T00:00:00Z",
+        "expires_at": None,
+        "credit_check": "not_required",
     }
     defaults.update(overrides)
     return defaults
 
 
 _QUERY_PATCH = "app.modules.matching.engine.query_resources_for_barriers"
-_JOBS_PATCH = "app.modules.matching.engine.get_all_job_listings"
+_MATCH_PATCH = "app.modules.matching.engine.match_jobs"
 
 
-class TestBuildJobMatches:
-    def test_converts_listings_to_job_matches(self):
-        listings = [
-            _make_job_listing(title="CNA", company="Baptist"),
-            _make_job_listing(id=2, title="Driver", company="FedEx"),
-        ]
-        result = _build_job_matches(listings)
-        assert len(result) == 2
-        assert all(isinstance(m, JobMatch) for m in result)
-        assert result[0].title == "CNA"
-        assert result[1].title == "Driver"
-
-    def test_includes_source_field(self):
-        listings = [_make_job_listing(source="brightdata:snap-xyz")]
-        result = _build_job_matches(listings)
-        assert result[0].source == "brightdata:snap-xyz"
-
-    def test_handles_missing_optional_fields(self):
-        listings = [{"id": 1, "title": "Job", "scraped_at": "2026-03-05T00:00:00Z"}]
-        result = _build_job_matches(listings)
-        assert len(result) == 1
-        assert result[0].company is None
-        assert result[0].url is None
-
-    def test_empty_listings_returns_empty(self):
-        assert _build_job_matches([]) == []
-
-
-class TestGeneratePlanWithJobs:
+class TestGeneratePlanWithMatchJobs:
     @pytest.mark.asyncio
-    async def test_plan_includes_job_matches(self):
-        """generate_plan should populate job_matches from job_listings table."""
-        profile = _make_profile(
-            primary_barriers=[BarrierType.TRANSPORTATION],
-            needs_credit_assessment=False,
-            barrier_severity=BarrierSeverity.LOW,
-        )
+    async def test_plan_populates_bucketed_matches(self):
+        """generate_plan should populate strong_matches, possible_matches, eligible_after_repair."""
+        profile = _make_profile()
         mock_session = AsyncMock()
-        listings = [
-            _make_job_listing(title="CNA", company="Baptist"),
-            _make_job_listing(id=2, title="Driver", company="FedEx"),
-        ]
+
+        strong = [ScoredJobMatch(
+            title="CNA", company="Baptist", relevance_score=0.8,
+            match_reason="Matches your CNA experience", bucket=MatchBucket.STRONG,
+        )]
+        possible = [ScoredJobMatch(
+            title="Cashier", company="Walmart", relevance_score=0.4,
+            match_reason="Entry-level opportunity", bucket=MatchBucket.POSSIBLE,
+        )]
+        after = [ScoredJobMatch(
+            title="Bank Teller", company="Regions", relevance_score=0.5,
+            match_reason="Matches target industry", bucket=MatchBucket.AFTER_REPAIR,
+        )]
 
         with (
             patch(_QUERY_PATCH, return_value=[]),
-            patch(_JOBS_PATCH, new_callable=AsyncMock, return_value=listings),
+            patch(_MATCH_PATCH, new_callable=AsyncMock, return_value=(strong, possible, after)),
         ):
             plan = await generate_plan(profile, mock_session)
 
-        assert len(plan.job_matches) == 2
-        titles = [j.title for j in plan.job_matches]
-        assert "CNA" in titles
-        assert "Driver" in titles
-
-    @pytest.mark.asyncio
-    async def test_credit_filter_applied_for_credit_barrier(self):
-        """Jobs with credit_check_required=yes should be ineligible for high credit severity."""
-        profile = _make_profile(
-            primary_barriers=[BarrierType.CREDIT],
-            needs_credit_assessment=True,
-            barrier_severity=BarrierSeverity.HIGH,
-        )
-        mock_session = AsyncMock()
-        listings = [
-            _make_job_listing(title="Bank Teller", company="Wells Fargo"),
-            _make_job_listing(id=2, title="Warehouse", company="FedEx"),
-        ]
-
-        with (
-            patch(_QUERY_PATCH, return_value=[]),
-            patch(_JOBS_PATCH, new_callable=AsyncMock, return_value=listings),
-        ):
-            plan = await generate_plan(profile, mock_session)
-
-        # With high severity, all jobs default to credit_check_required="unknown"
-        # which means they go to after_repair (only "no" stays eligible)
-        assert len(plan.job_matches) >= 1
+        assert len(plan.strong_matches) == 1
+        assert plan.strong_matches[0].title == "CNA"
+        assert len(plan.possible_matches) == 1
+        assert len(plan.eligible_after_repair) == 1
 
     @pytest.mark.asyncio
     async def test_empty_job_listings_graceful(self):
-        """Empty job_listings table should not crash — just empty job_matches."""
+        """Empty match results should produce empty buckets."""
         profile = _make_profile()
         mock_session = AsyncMock()
 
         with (
             patch(_QUERY_PATCH, return_value=[]),
-            patch(_JOBS_PATCH, new_callable=AsyncMock, return_value=[]),
+            patch(_MATCH_PATCH, new_callable=AsyncMock, return_value=([], [], [])),
         ):
             plan = await generate_plan(profile, mock_session)
 
         assert isinstance(plan, ReEntryPlan)
-        assert plan.job_matches == []
+        assert plan.strong_matches == []
+        assert plan.possible_matches == []
 
     @pytest.mark.asyncio
-    async def test_eligible_now_and_after_repair_populated(self):
-        """Plan should populate eligible_now and eligible_after_repair title lists."""
+    async def test_next_steps_reference_top_match(self):
+        """_build_next_steps should mention top strong match when available."""
         profile = _make_profile(
-            primary_barriers=[BarrierType.CREDIT],
-            barrier_severity=BarrierSeverity.HIGH,
+            primary_barriers=[BarrierType.TRANSPORTATION],
+            barrier_severity=BarrierSeverity.LOW,
         )
         mock_session = AsyncMock()
-        listings = [
-            _make_job_listing(title="Warehouse", company="FedEx"),
-        ]
+
+        strong = [ScoredJobMatch(
+            title="CNA", company="Baptist Health", relevance_score=0.85,
+            match_reason="Matches your CNA experience", bucket=MatchBucket.STRONG,
+        )]
 
         with (
             patch(_QUERY_PATCH, return_value=[]),
-            patch(_JOBS_PATCH, new_callable=AsyncMock, return_value=listings),
+            patch(_MATCH_PATCH, new_callable=AsyncMock, return_value=(strong, [], [])),
         ):
             plan = await generate_plan(profile, mock_session)
 
-        # All jobs listed should appear in either eligible_now or eligible_after_repair
-        all_titles = plan.eligible_now + plan.eligible_after_repair
-        assert len(all_titles) >= 1
+        steps_text = " ".join(plan.immediate_next_steps)
+        assert "CNA" in steps_text or "Baptist" in steps_text or "position" in steps_text
+
+    @pytest.mark.asyncio
+    async def test_job_matches_backward_compatible(self):
+        """plan.job_matches should still contain all matches (flat list)."""
+        profile = _make_profile()
+        mock_session = AsyncMock()
+
+        strong = [ScoredJobMatch(title="CNA", relevance_score=0.8, bucket=MatchBucket.STRONG)]
+        possible = [ScoredJobMatch(title="Cashier", relevance_score=0.4, bucket=MatchBucket.POSSIBLE)]
+
+        with (
+            patch(_QUERY_PATCH, return_value=[]),
+            patch(_MATCH_PATCH, new_callable=AsyncMock, return_value=(strong, possible, [])),
+        ):
+            plan = await generate_plan(profile, mock_session)
+
+        assert len(plan.job_matches) == 2

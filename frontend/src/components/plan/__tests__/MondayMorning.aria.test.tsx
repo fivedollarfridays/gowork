@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MondayMorning } from "../MondayMorning";
 import type { ReEntryPlan, UserProfile } from "@/lib/types";
-import { AvailableHours, BarrierType, EmploymentStatus } from "@/lib/types";
+import { AvailableHours, EmploymentStatus } from "@/lib/types";
 
 const basePlan: ReEntryPlan = {
   plan_id: "plan-001",
@@ -14,6 +14,8 @@ const basePlan: ReEntryPlan = {
   credit_readiness_score: null,
   eligible_now: [],
   eligible_after_repair: [],
+  strong_matches: [],
+  possible_matches: [],
 };
 
 const baseProfile: UserProfile = {
@@ -31,32 +33,15 @@ const baseProfile: UserProfile = {
 };
 
 describe("MondayMorning ARIA attributes", () => {
-  it("narrative loading card is wrapped in aria-live=polite", () => {
-    render(
-      <MondayMorning
-        plan={basePlan}
-        profile={baseProfile}
-        narrative={null}
-        narrativeLoading={true}
-      />
-    );
-
-    const loadingText = screen.getByText(/generating your personalized summary/i);
-    // The loading text should be inside an aria-live region
-    const liveRegion = loadingText.closest("[aria-live]");
-    expect(liveRegion).toHaveAttribute("aria-live", "polite");
+  it("renders the hero heading as h1", () => {
+    render(<MondayMorning plan={basePlan} profile={baseProfile} />);
+    const heading = screen.getByRole("heading", { level: 1 });
+    expect(heading).toBeInTheDocument();
+    expect(heading.textContent).toMatch(/what you can do/i);
   });
 
-  it("does not render aria-live region when not loading", () => {
-    render(
-      <MondayMorning
-        plan={basePlan}
-        profile={baseProfile}
-        narrative={null}
-        narrativeLoading={false}
-      />
-    );
-
-    expect(screen.queryByText(/generating your personalized summary/i)).not.toBeInTheDocument();
+  it("renders section element as landmark", () => {
+    const { container } = render(<MondayMorning plan={basePlan} profile={baseProfile} />);
+    expect(container.querySelector("section")).toBeInTheDocument();
   });
 });

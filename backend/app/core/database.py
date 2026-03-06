@@ -63,7 +63,8 @@ CREATE TABLE IF NOT EXISTS job_listings (
     url TEXT,
     source TEXT,
     scraped_at TEXT NOT NULL,
-    expires_at TEXT
+    expires_at TEXT,
+    credit_check TEXT DEFAULT 'unknown'
 );
 CREATE TABLE IF NOT EXISTS sessions (
     id TEXT PRIMARY KEY,
@@ -82,6 +83,10 @@ ALLOWED_COLUMNS = {
     "resources": {
         "name", "category", "subcategory", "address", "lat", "lng",
         "phone", "url", "eligibility", "services", "hours", "notes",
+    },
+    "job_listings": {
+        "title", "company", "location", "description", "url",
+        "source", "scraped_at", "expires_at", "credit_check",
     },
 }
 
@@ -180,6 +185,7 @@ def _seed_file_map():
         ("training_programs.json", "resources"),
         ("childcare_providers.json", "resources"),
         ("community_resources.json", "resources"),
+        ("job_listings.json", "job_listings"),
     ]
 
 

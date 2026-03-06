@@ -80,16 +80,24 @@ export function BarrierCardView({ barrier }: BarrierCardViewProps) {
                         </Badge>
                       </div>
                       {resource.address && (
-                        <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                        <a
+                          href={`https://maps.google.com/?q=${encodeURIComponent(resource.address)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 mt-1 text-xs text-muted-foreground hover:text-secondary hover:underline"
+                        >
                           <MapPin className="h-3 w-3 shrink-0" />
-                          <span>{resource.address}</span>
-                        </div>
+                          {resource.address}
+                        </a>
                       )}
                       {resource.phone && (
-                        <div className="flex items-center gap-1 mt-0.5 text-xs text-muted-foreground">
+                        <a
+                          href={`tel:${resource.phone}`}
+                          className="flex items-center gap-1 mt-0.5 text-xs text-muted-foreground hover:text-secondary hover:underline"
+                        >
                           <Phone className="h-3 w-3 shrink-0" />
-                          <span>{resource.phone}</span>
-                        </div>
+                          {resource.phone}
+                        </a>
                       )}
                     </div>
                   </li>

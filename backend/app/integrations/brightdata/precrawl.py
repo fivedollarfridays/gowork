@@ -11,14 +11,20 @@ from app.integrations.brightdata.client import BrightDataClient
 from app.integrations.brightdata.polling import poll_until_ready
 
 
-def build_search_urls() -> list[str]:
-    """Return Indeed and LinkedIn search URLs for Montgomery, AL."""
+def build_keyword_searches() -> list[dict]:
+    """Return structured keyword searches for Montgomery, AL jobs."""
+    keywords = ["", "warehouse", "healthcare", "customer service"]
     return [
-        "https://www.indeed.com/jobs?q=&l=Montgomery%2C+AL&radius=25",
-        "https://www.indeed.com/jobs?q=warehouse&l=Montgomery%2C+AL",
-        "https://www.indeed.com/jobs?q=healthcare&l=Montgomery%2C+AL",
-        "https://www.indeed.com/jobs?q=customer+service&l=Montgomery%2C+AL",
-        "https://www.linkedin.com/jobs/search/?location=Montgomery%2C+Alabama",
+        {
+            "country": "US",
+            "domain": "indeed.com",
+            "keyword_search": kw,
+            "location": "Montgomery, AL",
+            "date_posted": "Last 7 days",
+            "posted_by": "",
+            "location_radius": "",
+        }
+        for kw in keywords
     ]
 
 
@@ -39,8 +45,8 @@ async def precrawl_montgomery_jobs(db_session: AsyncSession) -> dict:
 
     settings = get_settings()
     async with BrightDataClient(settings.brightdata_api_key, settings.brightdata_dataset_id) as client:
-        urls = build_search_urls()
-        snapshot_id = await client.trigger_crawl(urls)
+        searches = build_keyword_searches()
+        snapshot_id = await client.trigger_keyword_crawl(searches)
         result = await poll_until_ready(client, snapshot_id)
         count = await store_crawl_results(db_session, snapshot_id, result.jobs)
 

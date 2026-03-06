@@ -1,10 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
-import { ExternalLink, MapPin, Phone, Sparkles, Loader2 } from "lucide-react";
+import { useMemo, type ReactNode } from "react";
+import { ExternalLink, MapPin, Phone } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import type { PlanNarrative, ReEntryPlan, UserProfile } from "@/lib/types";
+import type { ReEntryPlan, UserProfile } from "@/lib/types";
 import { safeHref } from "@/lib/constants";
 
 interface ActionStep {
@@ -13,6 +12,33 @@ interface ActionStep {
   location?: string;
   phone?: string;
   url?: string;
+}
+
+function getNextActionableDay(): string {
+  const day = new Date().getDay();
+  // Friday (5) or Saturday (6) → "Monday morning"
+  // All other days → "tomorrow morning"
+  return day === 5 || day === 6 ? "Monday morning" : "tomorrow morning";
+}
+
+function mapsUrl(address: string): string {
+  return `https://maps.google.com/?q=${encodeURIComponent(address)}`;
+}
+
+const PHONE_RE = /(\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4})/;
+
+function linkifyPhones(text: string): ReactNode {
+  const parts = text.split(PHONE_RE);
+  if (parts.length === 1) return text;
+  return parts.map((part, i) =>
+    PHONE_RE.test(part) ? (
+      <a key={i} href={`tel:${part}`} className="text-secondary hover:underline">
+        {part}
+      </a>
+    ) : (
+      part
+    ),
+  );
 }
 
 function buildSteps(plan: ReEntryPlan): ActionStep[] {
@@ -29,15 +55,15 @@ function buildSteps(plan: ReEntryPlan): ActionStep[] {
     const resource = firstBarrier.resources[0];
     steps.push({
       title: `Visit ${resource.name}`,
-      detail: resource.phone ? `Call ahead: ${resource.phone}` : "Bring your ID and any relevant documents",
+      detail: resource.phone ? "Call ahead" : "Bring your ID and any relevant documents",
       location: resource.address ?? undefined,
       phone: resource.phone ?? undefined,
       url: resource.url ?? undefined,
     });
   }
 
-  // Add first eligible job match
-  const firstJob = plan.job_matches.find((j) => j.eligible_now);
+  // Add top strong match, or fallback to first eligible job
+  const firstJob = plan.strong_matches?.[0] ?? plan.job_matches.find((j) => j.eligible_now);
   if (firstJob) {
     steps.push({
       title: `Apply for ${firstJob.title}${firstJob.company ? ` at ${firstJob.company}` : ""}`,
@@ -57,23 +83,17 @@ function buildSteps(plan: ReEntryPlan): ActionStep[] {
 interface MondayMorningProps {
   plan: ReEntryPlan;
   profile: UserProfile;
-  narrative: PlanNarrative | null;
-  narrativeLoading: boolean;
 }
 
-export function MondayMorning({ plan, profile, narrative, narrativeLoading }: MondayMorningProps) {
+export function MondayMorning({ plan, profile }: MondayMorningProps) {
   const steps = useMemo(() => buildSteps(plan), [plan]);
-  const allResources = useMemo(
-    () => plan.barriers.flatMap((b) => b.resources),
-    [plan],
-  );
 
   return (
     <section className="space-y-8">
       {/* Hero header */}
       <div className="space-y-3">
         <h1 className="text-3xl sm:text-4xl font-bold text-primary tracking-tight">
-          Here&apos;s what you can do Monday morning.
+          Here&apos;s what you can do {getNextActionableDay()}.
         </h1>
         <p className="text-lg text-muted-foreground">
           Your personalized action plan for Montgomery, AL
@@ -82,83 +102,6 @@ export function MondayMorning({ plan, profile, narrative, narrativeLoading }: Mo
           )}
         </p>
       </div>
-
-      {/* AI narrative */}
-      {narrativeLoading && (
-        <div aria-live="polite">
-        <Card className="bg-secondary/5 border-secondary/20">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3 text-muted-foreground">
-              <Loader2 className="h-5 w-5 animate-spin text-secondary" />
-              <p className="text-sm">Generating your personalized summary...</p>
-            </div>
-          </CardContent>
-        </Card>
-        </div>
-      )}
-      {plan.resident_summary && (
-        <>
-          <Card className="bg-secondary/5 border-secondary/20">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-3">
-                <Sparkles className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
-                <p className="text-base leading-relaxed italic text-foreground/90">
-                  {plan.resident_summary}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-          <Separator />
-        </>
-      )}
-
-      {/* Key actions from AI — inline with links */}
-      {narrative && narrative.key_actions.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-primary">Key Actions</h2>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {narrative.key_actions.map((action, i) => {
-              const matchedResource = allResources
-                .find((r) => action.toLowerCase().includes(r.name.toLowerCase()));
-
-              return (
-                <Card key={i}>
-                  <CardContent className="p-4 space-y-2">
-                    <p className="text-sm font-medium text-foreground">{action}</p>
-                    {matchedResource && (
-                      <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-                        {matchedResource.phone && (
-                          <a href={`tel:${matchedResource.phone}`} className="flex items-center gap-1 text-secondary hover:underline">
-                            <Phone className="h-3 w-3" />
-                            {matchedResource.phone}
-                          </a>
-                        )}
-                        {matchedResource.address && (
-                          <a
-                            href={`https://maps.google.com/?q=${encodeURIComponent(matchedResource.address)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-secondary hover:underline"
-                          >
-                            <MapPin className="h-3 w-3" />
-                            Directions
-                          </a>
-                        )}
-                        {matchedResource.url && safeHref(matchedResource.url) && (
-                          <a href={safeHref(matchedResource.url)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-secondary hover:underline">
-                            <ExternalLink className="h-3 w-3" />
-                            Website
-                          </a>
-                        )}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-      )}
 
       {/* Action steps timeline */}
       <div className="space-y-1">
@@ -179,8 +122,8 @@ export function MondayMorning({ plan, profile, narrative, narrativeLoading }: Mo
               {/* Step content */}
               <Card className="flex-1">
                 <CardContent className="p-4">
-                  <h3 className="font-semibold text-foreground">{step.title}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">{step.detail}</p>
+                  <h3 className="font-semibold text-foreground">{linkifyPhones(step.title)}</h3>
+                  <p className="text-sm text-muted-foreground mt-1">{linkifyPhones(step.detail)}</p>
                   <div className="flex flex-wrap gap-3 mt-2">
                     {step.phone && (
                       <a href={`tel:${step.phone}`} className="flex items-center gap-1 text-xs text-secondary hover:underline">
@@ -190,7 +133,7 @@ export function MondayMorning({ plan, profile, narrative, narrativeLoading }: Mo
                     )}
                     {step.location && (
                       <a
-                        href={`https://maps.google.com/?q=${encodeURIComponent(step.location)}`}
+                        href={mapsUrl(step.location)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1 text-xs text-secondary hover:underline"
