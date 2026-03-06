@@ -44,12 +44,16 @@ function buildRows(plan: ReEntryPlan, profile: UserProfile, creditResult?: Credi
     futureIcon: <Check className="h-4 w-4 text-success" />,
   });
 
-  // Jobs — prefer plan summary arrays; fall back to counting job_matches directly
-  const eligibleNow = plan.eligible_now.length > 0
-    ? plan.eligible_now.length
-    : plan.job_matches.filter((j) => j.eligible_now).length;
+  // Jobs — prefer bucket counts; fall back to plan summary arrays or job_matches
+  const strongCount = plan.strong_matches?.length ?? 0;
+  const possibleCount = plan.possible_matches?.length ?? 0;
+  const eligibleNow = strongCount + possibleCount > 0
+    ? strongCount + possibleCount
+    : plan.eligible_now.length > 0
+      ? plan.eligible_now.length
+      : plan.job_matches.filter((j) => j.eligible_now).length;
   const eligibleAfter = plan.eligible_after_repair.length > 0
-    ? plan.eligible_after_repair.length
+    ? plan.eligible_after_repair.length + eligibleNow
     : plan.job_matches.filter((j) => !j.eligible_now).length + eligibleNow;
   rows.push({
     label: "Job Matches",

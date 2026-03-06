@@ -5,11 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import type { CreditAssessmentResult, JobMatch } from "@/lib/types";
+import type { CreditAssessmentResult, JobMatch, ScoredJobMatch } from "@/lib/types";
 import { STATUS_BADGE_STYLES, safeHref, daysToMonths } from "@/lib/constants";
 
+export function isScoredJob(job: JobMatch): job is ScoredJobMatch {
+  return "relevance_score" in job;
+}
+
 interface JobMatchCardProps {
-  job: JobMatch;
+  job: JobMatch | ScoredJobMatch;
   creditResult?: CreditAssessmentResult | null;
 }
 
@@ -32,6 +36,12 @@ export function JobMatchCard({ job, creditResult }: JobMatchCardProps) {
             </div>
           </div>
           <div className="flex flex-wrap gap-1.5">
+            {/* Relevance score badge */}
+            {isScoredJob(job) && job.relevance_score > 0 && (
+              <Badge className="bg-secondary/10 text-secondary border-secondary/30 text-xs" variant="outline">
+                {Math.round(job.relevance_score * 100)}%
+              </Badge>
+            )}
             {/* Transit badge */}
             {job.transit_accessible ? (
               <Badge className={`${STATUS_BADGE_STYLES.positive} text-xs`} variant="outline">
@@ -44,7 +54,7 @@ export function JobMatchCard({ job, creditResult }: JobMatchCardProps) {
                 Requires Transport
               </Badge>
             )}
-            {job.credit_check_required === "yes" && (
+            {job.credit_check_required === "required" && (
               creditResult && job.eligible_now ? (
                 <Badge className={`${STATUS_BADGE_STYLES.positive} text-xs`} variant="outline">
                   <CreditCard className="h-3 w-3 mr-1" />
@@ -69,6 +79,11 @@ export function JobMatchCard({ job, creditResult }: JobMatchCardProps) {
       </CardHeader>
 
       <CardContent className="space-y-3">
+        {/* Match reason for scored jobs */}
+        {isScoredJob(job) && job.match_reason && (
+          <p className="text-sm text-secondary font-medium">{job.match_reason}</p>
+        )}
+
         {/* Location + route */}
         <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
           {job.location && (

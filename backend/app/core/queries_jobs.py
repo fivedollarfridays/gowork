@@ -34,13 +34,14 @@ async def insert_job_listings(session: AsyncSession, listings: list[dict]) -> in
             "source": row.get("source"),
             "scraped_at": row["scraped_at"],
             "expires_at": row.get("expires_at"),
+            "credit_check": row.get("credit_check", "unknown"),
         }
         for row in listings
     ]
     await session.execute(
         text(
-            "INSERT INTO job_listings (title, company, location, description, url, source, scraped_at, expires_at) "
-            "VALUES (:title, :company, :location, :description, :url, :source, :scraped_at, :expires_at)"
+            "INSERT INTO job_listings (title, company, location, description, url, source, scraped_at, expires_at, credit_check) "
+            "VALUES (:title, :company, :location, :description, :url, :source, :scraped_at, :expires_at, :credit_check)"
         ),
         params,
     )

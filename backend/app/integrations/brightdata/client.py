@@ -38,11 +38,31 @@ class BrightDataClient:
         raise BrightDataAPIError(resp.status_code, detail)
 
     async def trigger_crawl(self, urls: list[str]) -> str:
-        """Trigger an async crawl job. Returns the snapshot_id."""
+        """Trigger an async URL-based crawl job. Returns the snapshot_id."""
         resp = await self._http.post(
             f"{BASE_URL}/trigger",
             params={"dataset_id": self._dataset_id, "format": "json"},
             json=[{"url": u} for u in urls],
+        )
+        if resp.status_code != 200:
+            self._raise_api_error(resp)
+        return resp.json()["snapshot_id"]
+
+    async def trigger_keyword_crawl(self, searches: list[dict]) -> str:
+        """Trigger a keyword discovery crawl. Returns the snapshot_id.
+
+        Each search dict should have: country, domain, keyword_search, location.
+        Optional: date_posted, posted_by, location_radius.
+        """
+        resp = await self._http.post(
+            f"{BASE_URL}/scrape",
+            params={
+                "dataset_id": self._dataset_id,
+                "include_errors": "true",
+                "type": "discover_new",
+                "discover_by": "keyword",
+            },
+            json={"input": searches},
         )
         if resp.status_code != 200:
             self._raise_api_error(resp)

@@ -1,19 +1,18 @@
 """Matching engine core — takes a UserProfile and returns ranked resources."""
 
-import asyncio
 import json
 import uuid
 
 from app.core.queries import get_resources_by_categories
-from app.core.queries_jobs import get_all_job_listings
-from app.modules.matching.filters import apply_credit_filter, get_certification_renewal
+from app.modules.matching.filters import get_certification_renewal
+from app.modules.matching.job_matcher import match_jobs
 from app.modules.matching.scoring import BARRIER_CATEGORY_MAP, rank_resources
 from app.modules.matching.types import (
     BarrierCard,
     BarrierType,
-    JobMatch,
     ReEntryPlan,
     Resource,
+    ScoredJobMatch,
     UserProfile,
 )
 
@@ -91,63 +90,28 @@ async def query_resources_for_barriers(
     return results
 
 
-def _build_job_matches(listings: list[dict]) -> list[JobMatch]:
-    """Convert job listing dicts from DB into JobMatch objects."""
-    return [
-        JobMatch(
-            title=row["title"],
-            company=row.get("company"),
-            location=row.get("location"),
-            url=row.get("url"),
-            source=row.get("source"),
-        )
-        for row in listings
-    ]
-
-
-def _apply_job_credit_filter(
-    job_matches: list[JobMatch], profile: UserProfile,
-) -> tuple[list[JobMatch], list[str], list[str]]:
-    """Apply credit filter and return (updated matches, eligible_now titles, after_repair titles)."""
-    if not job_matches:
-        return [], [], []
-
-    if BarrierType.CREDIT not in profile.primary_barriers:
-        return job_matches, [j.title for j in job_matches], []
-
-    now, after = apply_credit_filter(job_matches, profile.barrier_severity.value)
-    after_ids = {id(j) for j in after}
-    updated = [
-        j.model_copy(update={"eligible_now": id(j) not in after_ids})
-        for j in job_matches
-    ]
-    return updated, [j.title for j in now], [j.title for j in after]
-
-
 async def generate_plan(
     profile: UserProfile, db_session,
 ) -> ReEntryPlan:
     """Orchestrate the full matching pipeline."""
-    resources, listings = await asyncio.gather(
-        query_resources_for_barriers(profile.primary_barriers, db_session),
-        get_all_job_listings(db_session),
-    )
+    resources = await query_resources_for_barriers(profile.primary_barriers, db_session)
     resources = rank_resources(resources, profile)
 
-    barrier_cards = _build_barrier_cards(profile, resources)
-    next_steps = _build_next_steps(profile, barrier_cards)
+    strong, possible, after_repair = await match_jobs(profile, db_session)
 
-    job_matches = _build_job_matches(listings)
-    job_matches, eligible_now, after_repair = _apply_job_credit_filter(job_matches, profile)
+    barrier_cards = _build_barrier_cards(profile, resources)
+    next_steps = _build_next_steps(profile, barrier_cards, strong)
 
     return ReEntryPlan(
         plan_id=str(uuid.uuid4()),
         session_id=profile.session_id,
         barriers=barrier_cards,
-        job_matches=job_matches,
+        job_matches=strong + possible + after_repair,
+        strong_matches=strong,
+        possible_matches=possible,
         immediate_next_steps=next_steps,
-        eligible_now=eligible_now,
-        eligible_after_repair=after_repair,
+        eligible_now=[m.title for m in strong + possible],
+        eligible_after_repair=[m.title for m in after_repair],
     )
 
 
@@ -163,7 +127,6 @@ def _build_barrier_cards(
 
         actions = list(BARRIER_ACTIONS.get(barrier, []))
 
-        # Add certification renewal steps if training barrier
         if barrier == BarrierType.TRAINING:
             cert_renewals = get_certification_renewal(profile.work_history)
             for cert in cert_renewals:
@@ -186,9 +149,17 @@ def _build_barrier_cards(
 
 def _build_next_steps(
     profile: UserProfile, cards: list[BarrierCard],
+    strong_matches: list[ScoredJobMatch] | None = None,
 ) -> list[str]:
     """Generate prioritized immediate next steps."""
     steps: list[str] = []
+
+    if strong_matches:
+        top = strong_matches[0]
+        company = f" at {top.company}" if top.company else ""
+        steps.append(
+            f"Your experience matches {len(strong_matches)} position(s){company} — review and apply"
+        )
 
     for card in cards[:3]:
         if card.resources:

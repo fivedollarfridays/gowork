@@ -84,7 +84,7 @@ def apply_credit_filter(
 
     for job in jobs:
         if credit_severity == "high":
-            if job.credit_check_required == "no":
+            if job.credit_check_required == "not_required":
                 eligible_now.append(job)
             else:
                 after_repair.append(job)
@@ -93,7 +93,7 @@ def apply_credit_filter(
             company_lower = (job.company or "").lower()
             searchable = f"{title_lower} {company_lower}"
             if (
-                job.credit_check_required == "yes"
+                job.credit_check_required == "required"
                 and any(kw in searchable for kw in FINANCE_GOV_KEYWORDS)
             ):
                 after_repair.append(job)

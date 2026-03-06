@@ -8,7 +8,7 @@ from app.core.database import get_async_session_factory
 from app.core.queries_jobs import insert_job_listings
 from app.integrations.brightdata.precrawl import (
     _has_recent_data,
-    build_search_urls,
+    build_keyword_searches,
     precrawl_montgomery_jobs,
 )
 from app.integrations.brightdata.types import (
@@ -53,15 +53,17 @@ class TestHasRecentData:
         assert await _has_recent_data(db_session) is True
 
 
-class TestBuildSearchUrls:
-    def test_returns_multiple_urls(self):
-        urls = build_search_urls()
-        assert len(urls) >= 3
+class TestBuildKeywordSearches:
+    def test_returns_multiple_searches(self):
+        searches = build_keyword_searches()
+        assert len(searches) >= 3
 
-    def test_urls_target_montgomery(self):
-        urls = build_search_urls()
-        for url in urls:
-            assert "montgomery" in url.lower() or "Montgomery" in url
+    def test_searches_target_montgomery(self):
+        searches = build_keyword_searches()
+        for s in searches:
+            assert "Montgomery" in s["location"]
+            assert s["country"] == "US"
+            assert s["domain"] == "indeed.com"
 
 
 class TestPrecrawlMontgomeryJobs:
@@ -69,7 +71,7 @@ class TestPrecrawlMontgomeryJobs:
     async def test_full_flow(self):
         """Trigger -> poll -> cache -> return result."""
         mock_client = AsyncMock()
-        mock_client.trigger_crawl = AsyncMock(return_value="snap-pre")
+        mock_client.trigger_keyword_crawl = AsyncMock(return_value="snap-pre")
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock(return_value=False)
 
@@ -115,7 +117,7 @@ class TestPrecrawlMontgomeryJobs:
     async def test_empty_crawl_results(self):
         """Zero jobs from crawl is not an error."""
         mock_client = AsyncMock()
-        mock_client.trigger_crawl = AsyncMock(return_value="snap-empty")
+        mock_client.trigger_keyword_crawl = AsyncMock(return_value="snap-empty")
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock(return_value=False)
 

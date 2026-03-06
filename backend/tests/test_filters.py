@@ -25,10 +25,10 @@ def _make_resource(**overrides) -> Resource:
 
 class TestCreditFilter:
     def test_high_severity_flags_background_check_jobs(self):
-        """HIGH severity: all jobs with credit_check_required != 'no' go to after_repair."""
+        """HIGH severity: all jobs with credit_check_required != 'not_required' go to after_repair."""
         jobs = [
-            _make_job(title="Bank Teller", credit_check_required="yes"),
-            _make_job(title="Warehouse", credit_check_required="no"),
+            _make_job(title="Bank Teller", credit_check_required="required"),
+            _make_job(title="Warehouse", credit_check_required="not_required"),
             _make_job(title="IT Admin", credit_check_required="unknown"),
         ]
         eligible_now, after_repair = apply_credit_filter(jobs, "high")
@@ -39,8 +39,8 @@ class TestCreditFilter:
     def test_medium_severity_flags_finance_government(self):
         """MEDIUM: only finance/government jobs flagged."""
         jobs = [
-            _make_job(title="Bank Teller", credit_check_required="yes"),
-            _make_job(title="Warehouse", credit_check_required="no"),
+            _make_job(title="Bank Teller", credit_check_required="required"),
+            _make_job(title="Warehouse", credit_check_required="not_required"),
             _make_job(title="Cook", credit_check_required="unknown"),
         ]
         eligible_now, after_repair = apply_credit_filter(jobs, "medium")
@@ -51,8 +51,8 @@ class TestCreditFilter:
     def test_low_severity_all_eligible(self):
         """LOW: all jobs eligible now."""
         jobs = [
-            _make_job(title="Bank Teller", credit_check_required="yes"),
-            _make_job(title="Warehouse", credit_check_required="no"),
+            _make_job(title="Bank Teller", credit_check_required="required"),
+            _make_job(title="Warehouse", credit_check_required="not_required"),
         ]
         eligible_now, after_repair = apply_credit_filter(jobs, "low")
         assert len(eligible_now) == 2
