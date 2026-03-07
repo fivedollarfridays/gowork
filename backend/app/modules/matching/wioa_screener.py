@@ -2,7 +2,14 @@
 
 import re
 
-from app.modules.matching.types import BarrierType, UserProfile, WIOAEligibility
+from app.modules.matching.filters import CERT_DB
+from app.modules.matching.types import (
+    BarrierType,
+    DislocatedWorkerStatus,
+    EligibilityConfidence,
+    UserProfile,
+    WIOAEligibility,
+)
 
 # Barriers that independently qualify for WIOA Adult program
 QUALIFYING_BARRIERS = {
@@ -15,12 +22,12 @@ QUALIFYING_BARRIERS = {
 # Barriers that indicate supportive services eligibility
 SUPPORTIVE_BARRIERS = {BarrierType.TRANSPORTATION, BarrierType.CHILDCARE}
 
-# Certification keywords (CNA, CDL, LPN) — matches from filters.py CERT_DB
-_CERT_PATTERN = re.compile(r"\b(CNA|CDL|LPN)\b", re.IGNORECASE)
+# Certification pattern derived from filters.CERT_DB — single source of truth
+_CERT_PATTERN = re.compile(r"\b(" + "|".join(CERT_DB.keys()) + r")\b", re.IGNORECASE)
 
 
 def has_expired_certification(work_history: str) -> bool:
-    """Check if work history mentions CNA, CDL, or LPN certifications."""
+    """Check if work history mentions recognized certifications."""
     return bool(_CERT_PATTERN.search(work_history))
 
 
@@ -40,6 +47,6 @@ def screen_wioa_eligibility(profile: UserProfile) -> WIOAEligibility:
         adult_reasons=qualifying,
         supportive_services=adult_eligible and has_supportive,
         ita_training=adult_eligible and has_expired_certification(profile.work_history),
-        dislocated_worker="needs_verification",
-        confidence="likely",
+        dislocated_worker=DislocatedWorkerStatus.NEEDS_VERIFICATION,
+        confidence=EligibilityConfidence.LIKELY,
     )

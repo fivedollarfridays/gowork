@@ -1,17 +1,18 @@
 # Current State
 
-> Last updated: 2026-03-06
+> Last updated: 2026-03-07
 
 ## Active Plan
 
-**Plan:** plan-2026-03-feedback-loop
-**Type:** feature
-**Title:** Feedback Loop & Continuous Improvement
-**Status:** In Progress
-**Current Sprint:** 14
+**Plan:** plan-2026-03-security-hardening
+**Type:** bugfix
+**Title:** Security Hardening — Issue #20 Remediation
+**Status:** Complete
+**Current Sprint:** 18
 
 ## Previous Plans
 
+- plan-2026-03-hackathon-demo-polish (Complete, 6/6 done -- Sprint 17)
 - plan-2026-03-intelligent-job-matching (Complete, 6/6 done -- Sprint 13)
 - plan-2026-03-monday-morning-ux (Complete, 1/1 done -- Sprint 12)
 - plan-2026-03-launch-prep-polish (Complete, 8/8 done -- Sprint 11)
@@ -27,9 +28,24 @@
 
 ## Current Focus
 
-Sprint 14: Feedback loop — token auth, resource feedback, visit feedback, resource health decay.
+Sprint 18: Security hardening — admin auth, prompt injection defense, security headers, container hardening, input validation, rate limiting, CI scanning.
 
 ## Task Status
+
+### Sprint 18 -- Security Hardening (GitHub Issue #20)
+
+| ID | Title | Priority | Complexity | Status |
+|----|-------|----------|------------|--------|
+| T18.1 | Admin auth for BrightData endpoints (SEC-001) | P0 | 25 | done |
+| T18.2 | Prompt injection defense (SEC-003) | P0 | 20 | done |
+| T18.3 | Security headers + CORS hardening (SEC-008, SEC-013) | P0 | 20 | done |
+| T18.4 | Container + Docker hardening (SEC-009, SEC-018) | P1 | 15 | done |
+| T18.5 | Input validation + info leak fixes (SEC-012, SEC-016, SEC-017, SEC-023) | P1 | 30 | done ✓ |
+| T18.6 | Rate limiting on expensive endpoints (SEC-010) | P1 | 25 | done ✓ |
+| T18.7 | CI vulnerability scanning + accepted risks docs (SEC-020) | P2 | 20 | done ✓ |
+
+**Total: 7 tasks, 155 complexity points (7/7 done)**
+
 
 ### Sprint 14 -- Feedback Loop
 
@@ -72,7 +88,55 @@ Sprint 14: Feedback loop — token auth, resource feedback, visit feedback, reso
 
 **Total: 5 tasks, 130 complexity points (5/5 done)**
 
+### Sprint 17 -- Hackathon Demo Polish
+
+| ID | Title | Priority | Complexity | Status | Depends On |
+|----|-------|----------|------------|--------|------------|
+| T17.1 | Session recovery on plan page refresh | P0 | 20 | done | -- |
+| T17.2 | Post-plan What's Next CTA section | P0 | 20 | done | -- |
+| T17.3 | Geocode seed resources for proximity scoring | P1 | 30 | done | -- |
+| T17.4 | Add credit counseling resources + complete addresses | P1 | 20 | done | T17.3 |
+| T17.5 | Remove dead feedback_token_secret config | P2 | 5 | done | -- |
+| T17.6 | Documentation sync — api.md and architecture.md | P1 | 30 | done | -- |
+
+**Total: 6 tasks, 125 complexity points (6/6 done)**
+
 ## What Was Just Done
+
+### Sprint 18 (2026-03-07) — Security Hardening — COMPLETE
+
+- **T18.7** CI vulnerability scanning: `pip-audit` step added to CI backend job, `npm audit --audit-level=high` added to CI frontend job. Created `docs/SECURITY.md` with 15 fixed findings, 5 accepted risks with rationale, security architecture overview, and CI scanning docs. 472 backend tests pass.
+
+- **T18.6** Rate limiting: extracted shared `RateLimiter` to `app/core/rate_limit.py`. Added rate limiting to POST /generate (5/min) and POST /credit/assess (10/min). Replaced duplicate classes in assessment.py and feedback.py. 7 new tests, 472 total.
+
+- **T18.5** Input validation + info leak fixes: UUID regex on `session_id` path params (plan.py 3 endpoints), pattern on `ResourceFeedbackRequest.session_id`, alphanumeric regex on `snapshot_id` (brightdata.py), logger logs length not raw response (client.py), removed `session_id` from validate endpoint response. 7 new tests, 465 total.
+
+- **T18.4** Container hardening: both Dockerfiles run as non-root `appuser`. Removed hardcoded env overrides from docker-compose.yml and stale ENV defaults from backend Dockerfile.
+- **T18.3** Security headers + CORS: X-Frame-Options DENY, CSP, nosniff, Referrer-Policy, Permissions-Policy in next.config.mjs. CORS methods restricted to GET/POST/OPTIONS, headers to Content-Type/X-Admin-Key.
+- **T18.2** Prompt injection defense: untrusted-data instruction in system prompt, `<user_input>` XML tags wrapping barriers and qualifications in user prompt. 3 new tests, 458 total.
+- **T18.1** Admin auth for BrightData: `app/core/auth.py` with `require_admin_key` dependency (503/403/422). Router-level `Depends` on all 3 BrightData endpoints. `admin_api_key` added to Settings. 4 new tests + 10 updated, 455 total.
+
+### Sprint 18 Planning (2026-03-07) — Security Hardening
+
+- Audited all 26 findings from GitHub Issue #20 (security audit). 3 already fixed (SEC-002 random tokens, SEC-011 free_text max_length, SEC-026 session expiry). 20 still open, 3 partially fixed.
+- Created plan: plan-2026-03-security-hardening (7 tasks, 155 complexity). Synced 7 cards to Trello Planned/Ready.
+- Scope: CRITICAL (SEC-001 admin auth), HIGH (SEC-003 prompt injection, SEC-008 headers, SEC-009 containers), MEDIUM (SEC-012/016/017/023 input validation, SEC-010 rate limiting), LOW (SEC-020 CI scanning).
+- Accepted risks documented in T18.7: SEC-006 (single-worker rate limiter), SEC-007 (credit proxy error), SEC-014 (EmailJS PII), SEC-015 (QR token by design), SEC-019 (DATA_DIR hardcoded).
+
+### Sprint 17 (2026-03-07) — Hackathon Demo Polish — COMPLETE
+
+- **T17.6** Documentation sync: api.md updated with 4 missing endpoints (feedback resource/validate/visit, career-center) with full request/response examples and curl. architecture.md updated with 3 new tables, 5 new modules, profile column, frontend feedback page, 4 new components, data fetching hooks, and haversine proximity scoring description.
+
+- **T17.5** Removed dead `feedback_token_secret` field from Settings class in config.py. No references in codebase. 451 backend tests pass.
+
+- **T17.4** Credit resources: GreenPath Financial Wellness + CCCS of Central Alabama added to community_resources.json with subcategory credit_counseling. 451 backend tests pass.
+- **T17.3** Geocode: lat/lng added to all 13 seed resources, Resource model updated, `_score_proximity` now uses haversine (was hardcoded 0.5). MPACT address+phone added. 2 new tests, 451 backend total.
+- **T17.2** What's Next CTA: Card section at plan page bottom with 3-step instructions, Career Center address/phone/hours, Start New Assessment link. 2 new tests, 146 frontend total.
+- **T17.1** Session recovery: `useSessionId()` hook persists session_id to sessionStorage from URL, recovers on refresh. 3 new tests, 144 frontend total.
+
+### Sprint 17 Planning (2026-03-06)
+
+- Full platform audit: tested API pipeline, frontend UX, data quality. Debunked false "showstopper" (seed_database works correctly). Identified 6 real issues. Created plan: plan-2026-03-hackathon-demo-polish (6 tasks, 125 complexity). Synced to Trello.
 
 ### Sprint 15 (2026-03-06) — Career Center Ready Package — COMPLETE
 
@@ -113,30 +177,12 @@ Sprint 14: Feedback loop — token auth, resource feedback, visit feedback, reso
 - **T14.2** Feedback tokens: generate_token (SHA256+base64url, 12 chars), create/validate DB queries (30-day expiry), wired into assessment route. Fixed assessment + integration test mocks. 354 backend tests passing, all arch checks clean.
 - Created plan: plan-2026-03-career-center-ready-package (7 tasks, 205 complexity)
 - Created plan: plan-2026-03-fix-sprint-review-corrections (5 tasks, 130 complexity)
+- Created plan: plan-2026-03-security-hardening (7 tasks, 155 complexity)
 
 
 ## What's Next
 
-1. ~~T16.1 (StaticPool fix)~~ done
-2. ~~T16.2 (Resource affinity routing)~~ done
-3. ~~T16.3 (Barrier priority ordering)~~ done
-4. ~~T16.5 (Architecture known limitations)~~ done
-5. ~~T16.4 (Cloud deployment documentation)~~ done
-6. Sprint 16 complete.
-7. T14.4 (Resource feedback UI) — done
-8. ~~T14.5 (Visit feedback API)~~ done
-9. ~~T14.6 (Visit feedback form)~~ done
-10. ~~T14.7 (QR code in PDF)~~ done
-11. ~~T14.8 (Resource health check)~~ done
-12. ~~Sprint 14 complete (8/8).~~
-13. ~~T15.1 (WIOA screener)~~ done
-14. ~~T15.2 (Career Center Package data model + assembler)~~ done
-15. ~~T15.4 (Wire WIOA into generate_plan)~~ done
-16. ~~T15.7 (Frontend types + API client)~~ done
-17. ~~T15.3 (Career center route)~~ done
-18. ~~T15.5 (Frontend component)~~ done
-19. ~~T15.6 (PDF export button)~~ done
-20. Sprint 15 complete (7/7).
+Sprint 18 (Security Hardening) is complete. All 7/7 tasks done. Ready for code review and PR.
 
 
 ## Blockers

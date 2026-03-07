@@ -261,7 +261,7 @@ export function FeedbackForm({ token }: { token: string }) {
               onChange={(e) => setFreeText(e.target.value)}
               aria-label="Additional feedback (optional)"
               placeholder="Anything else you'd like to share? (optional)"
-              maxLength={500}
+              maxLength={1000}
               rows={3}
               className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             />

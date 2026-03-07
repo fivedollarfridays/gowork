@@ -5,6 +5,15 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import httpx
 import pytest
 
+from app.routes.credit import _rate_limiter
+
+
+@pytest.fixture(autouse=True)
+def _clear_credit_rate_limiter():
+    _rate_limiter.clear()
+    yield
+    _rate_limiter.clear()
+
 FULL_CREDIT_RESPONSE = {
     "barrier_severity": "medium",
     "barrier_details": [{"severity": "medium", "description": "test"}],

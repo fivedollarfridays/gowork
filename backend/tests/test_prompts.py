@@ -60,6 +60,13 @@ class TestSystemPrompt:
         )
         assert not emoji_pattern.search(SYSTEM_PROMPT), "System prompt must not contain emojis"
 
+    def test_untrusted_input_instruction(self):
+        """System prompt warns about untrusted user_input tags."""
+        from app.ai.prompts import SYSTEM_PROMPT
+
+        assert "<user_input>" in SYSTEM_PROMPT
+        assert "untrusted" in SYSTEM_PROMPT.lower()
+
 
 class TestUserPromptTemplate:
     def test_includes_barrier_placeholder(self):
@@ -107,6 +114,28 @@ class TestUserPromptTemplate:
         assert "credit" in rendered
         assert "Former CNA" in rendered
         assert len(rendered) > 100
+
+    def test_barriers_wrapped_in_user_input_tags(self):
+        """Barriers field is wrapped in <user_input> XML tags."""
+        from app.ai.prompts import USER_PROMPT_TEMPLATE
+
+        rendered = USER_PROMPT_TEMPLATE.format(
+            barriers="credit, transportation",
+            qualifications="test",
+            plan_data="{}",
+        )
+        assert "<user_input>credit, transportation</user_input>" in rendered
+
+    def test_qualifications_wrapped_in_user_input_tags(self):
+        """Qualifications field is wrapped in <user_input> XML tags."""
+        from app.ai.prompts import USER_PROMPT_TEMPLATE
+
+        rendered = USER_PROMPT_TEMPLATE.format(
+            barriers="credit",
+            qualifications="Former CNA, 3 years",
+            plan_data="{}",
+        )
+        assert "<user_input>Former CNA, 3 years</user_input>" in rendered
 
     def test_no_emojis_in_user_prompt(self):
         """User prompt template must not contain emoji characters."""

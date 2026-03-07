@@ -139,6 +139,18 @@ class ReEntryPlan(BaseModel):
     wioa_eligibility: Optional["WIOAEligibility"] = None
 
 
+class DislocatedWorkerStatus(str, Enum):
+    ELIGIBLE = "eligible"
+    INELIGIBLE = "ineligible"
+    NEEDS_VERIFICATION = "needs_verification"
+
+
+class EligibilityConfidence(str, Enum):
+    LIKELY = "likely"
+    CONFIRMED = "confirmed"
+    UNLIKELY = "unlikely"
+
+
 class WIOAEligibility(BaseModel):
     """WIOA program eligibility screening result."""
 
@@ -146,5 +158,5 @@ class WIOAEligibility(BaseModel):
     adult_reasons: list[str]
     supportive_services: bool
     ita_training: bool
-    dislocated_worker: str
-    confidence: str
+    dislocated_worker: DislocatedWorkerStatus
+    confidence: EligibilityConfidence
