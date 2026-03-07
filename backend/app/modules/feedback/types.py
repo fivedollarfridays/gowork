@@ -21,6 +21,7 @@ class ResourceFeedbackRequest(BaseModel):
     session_id: str = Field(pattern=_UUID_RE)
     helpful: bool
     barrier_type: Optional[str] = None
+    token: str
 
 
 class ResourceFeedbackResponse(BaseModel):

@@ -73,7 +73,7 @@ describe("CareerCenterExport", () => {
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: /career center pdf/i }));
 
-    expect(mockedGet).toHaveBeenCalledWith("sess-1");
+    expect(mockedGet).toHaveBeenCalledWith("sess-1", undefined);
     vi.doUnmock("html2pdf.js");
   });
 

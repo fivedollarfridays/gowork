@@ -109,13 +109,30 @@ function useSessionId(): string | null {
   return null;
 }
 
+function useToken(sessionId: string | null): string | null {
+  const searchParams = useSearchParams();
+  const fromUrl = searchParams.get("token");
+
+  useEffect(() => {
+    if (fromUrl && sessionId) {
+      try { sessionStorage.setItem(`feedback_token_${sessionId}`, fromUrl); } catch {}
+    }
+  }, [fromUrl, sessionId]);
+
+  if (fromUrl) return fromUrl;
+  if (!sessionId || typeof window === "undefined") return null;
+  try { return sessionStorage.getItem(`feedback_token_${sessionId}`); } catch {}
+  return null;
+}
+
 function PlanContent() {
   const sessionId = useSessionId();
+  const token = useToken(sessionId);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["plan", sessionId],
-    queryFn: () => getPlan(sessionId ?? ""),
-    enabled: !!sessionId,
+    queryFn: () => getPlan(sessionId ?? "", token ?? undefined),
+    enabled: !!sessionId && !!token,
   });
 
   const barriers = data?.barriers ?? [];
@@ -129,8 +146,8 @@ function PlanContent() {
 
   const plan = data?.plan ?? null;
 
-  // Load credit assessment from sessionStorage (set by assess page)
-  const [creditResult] = useState<CreditAssessmentResult | null>(() => {
+  // Load credit assessment: sessionStorage first (faster), backend fallback
+  const [localCredit] = useState<CreditAssessmentResult | null>(() => {
     if (!sessionId || typeof window === "undefined") return null;
     try {
       const stored = sessionStorage.getItem(`credit_${sessionId}`);
@@ -139,22 +156,17 @@ function PlanContent() {
       return null;
     }
   });
-
-  // Load feedback token from sessionStorage (set by assess page)
-  const [feedbackToken] = useState<string | null>(() => {
-    if (!sessionId || typeof window === "undefined") return null;
-    return sessionStorage.getItem(`feedback_token_${sessionId}`);
-  });
+  const creditResult = localCredit ?? data?.credit_profile ?? null;
 
   const profile = useMemo(
     () => data ? buildProfileFromPlan(data.session_id, data.barriers) : null,
     [data],
   );
 
-  if (!sessionId) {
+  if (!sessionId || !token) {
     return (
       <div className="text-center py-12 space-y-3">
-        <p className="text-muted-foreground">No session ID provided.</p>
+        <p className="text-muted-foreground">{!sessionId ? "No session ID provided." : "No access token found."}</p>
         <Button asChild variant="outline">
           <a href="/assess">Start an assessment</a>
         </Button>
@@ -207,7 +219,7 @@ function PlanContent() {
           <h2 className="text-xl font-semibold text-primary">Your Barriers</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {plan.barriers.map((barrier) => (
-              <BarrierCardView key={barrier.type} barrier={barrier} sessionId={sessionId ?? undefined} />
+              <BarrierCardView key={barrier.type} barrier={barrier} sessionId={sessionId ?? undefined} token={token ?? undefined} />
             ))}
           </div>
         </section>
@@ -274,9 +286,9 @@ function PlanContent() {
       {/* Export actions */}
       <Separator />
       <div className="flex flex-wrap items-center gap-3">
-        <CareerCenterExport sessionId={sessionId!} />
-        <PlanExport plan={plan} creditResult={creditResult} feedbackToken={feedbackToken} />
-        <EmailExport plan={plan} />
+        <CareerCenterExport sessionId={sessionId!} token={token ?? undefined} />
+        <PlanExport plan={plan} creditResult={creditResult} feedbackToken={token} />
+        <EmailExport sessionId={sessionId!} token={token ?? undefined} />
       </div>
 
       {/* Explore More Jobs — live listings from job_listings table */}

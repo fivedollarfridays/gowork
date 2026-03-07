@@ -5,12 +5,13 @@ import json
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.audit import audit_log
+from app.core.auth import require_session_token
 from app.core.database import get_db
 from app.core.queries_feedback import (
     has_visit_feedback,
     insert_resource_feedback,
     insert_visit_feedback,
-    session_exists,
     token_exists,
     validate_token,
 )
@@ -41,14 +42,18 @@ async def _require_valid_token(db: AsyncSession, token: str) -> str:
 @router.post("/resource", response_model=ResourceFeedbackResponse)
 async def submit_resource_feedback(
     feedback: ResourceFeedbackRequest,
+    request: Request,
     db: AsyncSession = Depends(get_db),
     _: None = Depends(_check_rate),
 ) -> ResourceFeedbackResponse:
     """Record whether a resource was helpful. One vote per resource per session."""
-    if not await session_exists(db, feedback.session_id):
-        raise HTTPException(status_code=404, detail="Session not found")
+    await require_session_token(db, feedback.session_id, feedback.token)
 
     await insert_resource_feedback(db, feedback)
+
+    client_ip = request.client.host if request.client else "unknown"
+    audit_log("feedback_resource", session_id=feedback.session_id, client_ip=client_ip,
+              resource_id=feedback.resource_id, helpful=feedback.helpful)
 
     return ResourceFeedbackResponse(
         success=True,
@@ -71,6 +76,7 @@ async def validate_feedback_token(
 @router.post("/visit", response_model=VisitFeedbackResponse)
 async def submit_visit_feedback(
     feedback: VisitFeedbackRequest,
+    request: Request,
     db: AsyncSession = Depends(get_db),
     _: None = Depends(_check_rate),
 ) -> VisitFeedbackResponse:
@@ -88,5 +94,8 @@ async def submit_visit_feedback(
         plan_accuracy=feedback.plan_accuracy,
         free_text=feedback.free_text,
     )
+
+    client_ip = request.client.host if request.client else "unknown"
+    audit_log("feedback_visit", session_id=session_id, client_ip=client_ip)
 
     return VisitFeedbackResponse(success=True)

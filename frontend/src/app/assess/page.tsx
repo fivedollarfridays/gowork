@@ -3,7 +3,7 @@
 import { useMemo, useState, useCallback, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { ClipboardList, ListChecks, CreditCard, FileText, Loader2 } from "lucide-react";
+import { ClipboardList, ListChecks, Clock, CreditCard, FileText, Loader2 } from "lucide-react";
 import { postAssessment, postCredit } from "@/lib/api";
 import { WizardShell, type WizardStepConfig } from "@/components/wizard/WizardShell";
 import { BarrierForm, type BarrierFormData } from "@/components/wizard/BarrierForm";
@@ -33,6 +33,7 @@ export default function AssessPage() {
     ) as Record<BarrierType, boolean>,
     workHistory: "",
     hasVehicle: false,
+    availableHours: AvailableHours.DAYTIME,
   });
   const [creditData, setCreditData] = useState<CreditFormData>({
     currentScore: 580,
@@ -101,11 +102,11 @@ export default function AssessPage() {
       work_history: formData.workHistory,
       target_industries: [],
       has_vehicle: formData.hasVehicle,
-      // Placeholder — no schedule step in wizard yet
       schedule_constraints: {
         available_days: ["monday", "tuesday", "wednesday", "thursday", "friday"],
-        available_hours: AvailableHours.DAYTIME,
+        available_hours: formData.availableHours,
       },
+      ...(creditResultRef.current ? { credit_result: creditResultRef.current } : {}),
     };
     mutation.mutate(request);
   }, [formData, creditData, hasCreditBarrier, mutation]);
@@ -194,6 +195,38 @@ export default function AssessPage() {
         </div>
       ),
     },
+    {
+      title: "Schedule",
+      icon: <Clock className="h-4 w-4" />,
+      canAdvance: () => true,
+      content: () => (
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-lg font-semibold mb-1">When can you work?</h2>
+            <p className="text-sm text-muted-foreground">
+              Let us know your availability so we can match you with the right shifts and transit options.
+            </p>
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="available-hours" className="text-sm font-medium">Available Hours</label>
+            <Select
+              value={formData.availableHours}
+              onValueChange={(v) => setFormData({ ...formData, availableHours: v as AvailableHours })}
+            >
+              <SelectTrigger id="available-hours">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={AvailableHours.DAYTIME}>Daytime (8am - 5pm)</SelectItem>
+                <SelectItem value={AvailableHours.EVENING}>Evening (5pm - 10pm)</SelectItem>
+                <SelectItem value={AvailableHours.NIGHT}>Overnight (10pm - 6am)</SelectItem>
+                <SelectItem value={AvailableHours.FLEXIBLE}>Flexible / Any shift</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      ),
+    },
     ...(hasCreditBarrier ? [{
       title: "Credit Check",
       icon: <CreditCard className="h-4 w-4" />,
@@ -263,6 +296,10 @@ export default function AssessPage() {
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Vehicle</span>
                 <span className="font-medium">{formData.hasVehicle ? "Yes" : "No"}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Schedule</span>
+                <span className="font-medium capitalize">{humanizeLabel(formData.availableHours)}</span>
               </div>
               {hasCreditBarrier && (
                 <div className="flex justify-between">

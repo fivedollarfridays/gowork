@@ -37,6 +37,7 @@ export interface BarrierFormData {
   barriers: Record<BarrierType, boolean>;
   workHistory: string;
   hasVehicle: boolean;
+  availableHours: import("@/lib/types").AvailableHours;
 }
 
 interface BarrierFormProps {

@@ -4,10 +4,12 @@ import json
 import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Path
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ai.client import build_fallback_narrative, generate_narrative
+from app.core.audit import audit_log
+from app.core.auth import require_session_token
 from app.core.database import get_db
 from app.core.rate_limit import RateLimiter, require_rate_limit
 from app.core.queries import get_session_by_id, update_session_plan
@@ -18,9 +20,9 @@ from app.modules.matching.types import (
     EmploymentStatus,
     ReEntryPlan,
     UserProfile,
+    determine_severity,
 )
 from app.modules.matching.wioa_screener import screen_wioa_eligibility
-from app.routes.assessment import determine_severity
 
 logger = logging.getLogger(__name__)
 
@@ -33,19 +35,31 @@ _rate_limiter = RateLimiter(max_requests=5, window_seconds=60)
 _check_rate = require_rate_limit(_rate_limiter)
 
 
-@router.get("/{session_id}")
-async def get_plan(
-    session_id: SessionId,
-    db: AsyncSession = Depends(get_db),
-) -> dict:
-    """Look up session and return existing plan, or 404."""
+async def _fetch_session(db: AsyncSession, session_id: str, token: str) -> dict:
+    """Validate token, fetch session row, or raise 404."""
+    await require_session_token(db, session_id, token)
     row = await get_session_by_id(db, session_id)
     if row is None:
         raise HTTPException(status_code=404, detail="Session not found")
+    return row
+
+
+@router.get("/{session_id}")
+async def get_plan(
+    session_id: SessionId,
+    request: Request,
+    token: str = Query(...),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Look up session and return existing plan, or 404."""
+    row = await _fetch_session(db, session_id, token)
+    client_ip = request.client.host if request.client else "unknown"
+    audit_log("plan_accessed", session_id=session_id, client_ip=client_ip)
 
     try:
         plan = json.loads(row["plan"]) if row["plan"] else None
         barriers = json.loads(row["barriers"]) if row["barriers"] else []
+        credit_profile = json.loads(row["credit_profile"]) if row.get("credit_profile") else None
     except json.JSONDecodeError:
         raise HTTPException(status_code=500, detail="Corrupt session data")
     return {
@@ -53,19 +67,20 @@ async def get_plan(
         "barriers": barriers,
         "qualifications": row.get("qualifications"),
         "plan": plan,
+        "credit_profile": credit_profile,
     }
 
 
 @router.post("/{session_id}/generate")
 async def generate_plan_narrative(
     session_id: SessionId,
+    request: Request,
+    token: str = Query(...),
     db: AsyncSession = Depends(get_db),
     _: None = Depends(_check_rate),
 ) -> dict:
     """Generate AI narrative for an existing plan. Falls back to template."""
-    row = await get_session_by_id(db, session_id)
-    if row is None:
-        raise HTTPException(status_code=404, detail="Session not found")
+    row = await _fetch_session(db, session_id, token)
     if not row["plan"]:
         raise HTTPException(status_code=400, detail="No plan exists for this session. Run assessment first.")
     try:
@@ -89,24 +104,20 @@ async def generate_plan_narrative(
             plan_data=plan_data,
         )
 
-    await update_session_plan(
-        db,
-        session_id,
-        json.dumps({**plan_data, "resident_summary": narrative.summary}),
-    )
+    await update_session_plan(db, session_id, json.dumps({**plan_data, "resident_summary": narrative.summary}))
 
+    audit_log("plan_generated", session_id=session_id, client_ip=request.client.host if request.client else "unknown")
     return narrative.model_dump()
 
 
 @router.get("/{session_id}/career-center")
 async def get_career_center_package(
     session_id: SessionId,
+    token: str = Query(...),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """Build and return a Career Center Ready Package for this session."""
-    row = await get_session_by_id(db, session_id)
-    if row is None:
-        raise HTTPException(status_code=404, detail="Session not found")
+    row = await _fetch_session(db, session_id, token)
     if not row["plan"]:
         raise HTTPException(status_code=404, detail="No plan for session")
 

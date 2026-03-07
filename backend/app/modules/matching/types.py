@@ -3,6 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
+from app.modules.credit.types import CreditAssessmentResult
 from app.modules.feedback.types import ResourceHealth
 
 
@@ -20,6 +21,15 @@ class BarrierSeverity(str, Enum):
     HIGH = "high"
     MEDIUM = "medium"
     LOW = "low"
+
+
+def determine_severity(barrier_count: int) -> BarrierSeverity:
+    """3+ barriers = HIGH, 2 = MEDIUM, 1 or 0 = LOW."""
+    if barrier_count >= 3:
+        return BarrierSeverity.HIGH
+    if barrier_count == 2:
+        return BarrierSeverity.MEDIUM
+    return BarrierSeverity.LOW
 
 
 class EmploymentStatus(str, Enum):
@@ -50,6 +60,7 @@ class AssessmentRequest(BaseModel):
     target_industries: list[str] = Field(default_factory=list)
     has_vehicle: bool = False
     schedule_constraints: ScheduleConstraints = Field(default_factory=ScheduleConstraints)
+    credit_result: Optional[CreditAssessmentResult] = None
 
 
 class UserProfile(BaseModel):

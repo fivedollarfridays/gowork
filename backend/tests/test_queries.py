@@ -6,6 +6,7 @@ from app.core.queries import (
     create_session,
     get_all_resources,
     get_all_transit_routes,
+    get_all_transit_stops,
     get_all_employers,
     get_resource_by_id,
     get_resources_by_category,
@@ -90,6 +91,31 @@ class TestGetAllTransitRoutes:
         assert "id" in first
         assert "route_number" in first
         assert "route_name" in first
+
+
+class TestGetAllTransitStops:
+    @pytest.mark.anyio
+    async def test_returns_seeded_stops(self, db_session):
+        """Should return all seeded transit stops."""
+        results = await get_all_transit_stops(db_session)
+        assert len(results) > 0
+        assert isinstance(results[0], dict)
+
+    @pytest.mark.anyio
+    async def test_stop_has_required_keys(self, db_session):
+        """Each stop dict should have lat and lng (coordinate-only query)."""
+        results = await get_all_transit_stops(db_session)
+        first = results[0]
+        assert "lat" in first
+        assert "lng" in first
+
+    @pytest.mark.anyio
+    async def test_stops_have_valid_coordinates(self, db_session):
+        """All returned stops should have non-null coordinates."""
+        results = await get_all_transit_stops(db_session)
+        for stop in results:
+            assert stop["lat"] is not None
+            assert stop["lng"] is not None
 
 
 class TestGetAllEmployers:

@@ -3,9 +3,10 @@
 import json
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.audit import audit_log
 from app.core.database import get_db
 from app.core.queries import create_session, update_session_plan
 from app.core.queries_feedback import create_feedback_token
@@ -13,24 +14,15 @@ from app.core.rate_limit import RateLimiter, require_rate_limit
 from app.modules.matching.engine import generate_plan
 from app.modules.matching.types import (
     AssessmentRequest,
-    BarrierSeverity,
     BarrierType,
     UserProfile,
+    determine_severity,
 )
 
 router = APIRouter(prefix="/api/assessment", tags=["assessment"])
 
 _rate_limiter = RateLimiter(max_requests=10, window_seconds=60)
 _check_rate = require_rate_limit(_rate_limiter)
-
-
-def determine_severity(barrier_count: int) -> BarrierSeverity:
-    """3+ barriers = HIGH, 2 = MEDIUM, 1 or 0 = LOW."""
-    if barrier_count >= 3:
-        return BarrierSeverity.HIGH
-    if barrier_count == 2:
-        return BarrierSeverity.MEDIUM
-    return BarrierSeverity.LOW
 
 
 def extract_primary_barriers(barriers: dict[BarrierType, bool]) -> list[BarrierType]:
@@ -62,6 +54,7 @@ def _build_profile(session_id: str, request: AssessmentRequest) -> UserProfile:
 @router.post("/", status_code=201)
 async def create_assessment(
     request: AssessmentRequest,
+    raw_request: Request,
     db: AsyncSession = Depends(get_db),
     _: None = Depends(_check_rate),
 ) -> dict:
@@ -71,7 +64,7 @@ async def create_assessment(
 
     await create_session(db, {
         "barriers": json.dumps([b.value for b in profile.primary_barriers]),
-        "credit_profile": None,
+        "credit_profile": request.credit_result.model_dump_json() if request.credit_result else None,
         "qualifications": request.work_history,
         "plan": None,
         "profile": json.dumps(profile.model_dump()),
@@ -82,6 +75,10 @@ async def create_assessment(
     await update_session_plan(db, session_id, json.dumps(plan.model_dump()))
 
     feedback_token = await create_feedback_token(db, session_id)
+
+    client_ip = raw_request.client.host if raw_request.client else "unknown"
+    audit_log("session_created", session_id=session_id, client_ip=client_ip,
+              barriers=len(profile.primary_barriers))
 
     return {
         "session_id": session_id,

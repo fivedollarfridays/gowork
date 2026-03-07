@@ -43,12 +43,14 @@ export function postAssessment(data: AssessmentRequest): Promise<AssessmentRespo
   return apiFetch("/api/assessment/", { method: "POST", body: JSON.stringify(data) });
 }
 
-export function getPlan(sessionId: string): Promise<PlanResponse> {
-  return apiFetch(`/api/plan/${sessionId}`);
+export function getPlan(sessionId: string, token?: string): Promise<PlanResponse> {
+  const qs = token ? `?token=${encodeURIComponent(token)}` : "";
+  return apiFetch(`/api/plan/${sessionId}${qs}`);
 }
 
-export function generateNarrative(sessionId: string): Promise<PlanNarrative> {
-  return apiFetch(`/api/plan/${sessionId}/generate`, { method: "POST" });
+export function generateNarrative(sessionId: string, token?: string): Promise<PlanNarrative> {
+  const qs = token ? `?token=${encodeURIComponent(token)}` : "";
+  return apiFetch(`/api/plan/${sessionId}/generate${qs}`, { method: "POST" });
 }
 
 export function getJobs(params?: {
@@ -68,7 +70,7 @@ export function postCredit(data: CreditProfileRequest): Promise<CreditAssessment
   return apiFetch("/api/credit/assess", { method: "POST", body: JSON.stringify(data) });
 }
 
-export function submitResourceFeedback(data: ResourceFeedbackRequest): Promise<ResourceFeedbackResponse> {
+export function submitResourceFeedback(data: ResourceFeedbackRequest & { token: string }): Promise<ResourceFeedbackResponse> {
   return apiFetch("/api/feedback/resource", { method: "POST", body: JSON.stringify(data) });
 }
 
@@ -80,6 +82,7 @@ export function submitVisitFeedback(data: VisitFeedbackRequest): Promise<VisitFe
   return apiFetch("/api/feedback/visit", { method: "POST", body: JSON.stringify(data) });
 }
 
-export function getCareerCenterPackage(sessionId: string): Promise<CareerCenterPackage> {
-  return apiFetch(`/api/plan/${sessionId}/career-center`);
+export function getCareerCenterPackage(sessionId: string, token?: string): Promise<CareerCenterPackage> {
+  const qs = token ? `?token=${encodeURIComponent(token)}` : "";
+  return apiFetch(`/api/plan/${sessionId}/career-center${qs}`);
 }

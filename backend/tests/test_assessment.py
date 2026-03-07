@@ -9,8 +9,9 @@ from app.modules.matching.types import (
     BarrierSeverity,
     BarrierType,
     ReEntryPlan,
+    determine_severity,
 )
-from app.routes.assessment import determine_severity, extract_primary_barriers
+from app.routes.assessment import extract_primary_barriers
 
 
 def _mock_plan() -> ReEntryPlan:
@@ -244,6 +245,127 @@ class TestAssessmentEndpoint:
                     "work_history": "Some work",
                 })
         assert resp.status_code == 500
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("hours", ["daytime", "evening", "night", "flexible"])
+    async def test_all_available_hours_accepted(self, hours):
+        """Assessment endpoint should accept all 4 available_hours values."""
+        from app.main import app
+
+        with (
+            patch(_GEN_PATCH, return_value=_mock_plan()),
+            patch(_SESSION_PATCH, return_value="test-uuid"),
+            patch(_UPDATE_PLAN_PATCH, new_callable=AsyncMock),
+            patch(_FEEDBACK_TOKEN_PATCH, new_callable=AsyncMock, return_value="test-token"),
+        ):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.post("/api/assessment/", json={
+                    "zip_code": "36104",
+                    "employment_status": "unemployed",
+                    "barriers": {"transportation": True},
+                    "work_history": "Some work",
+                    "has_vehicle": False,
+                    "schedule_constraints": {
+                        "available_hours": hours,
+                    },
+                })
+        assert resp.status_code == 201
+        data = resp.json()
+        assert data["profile"]["schedule_type"] == hours
+
+    @pytest.mark.asyncio
+    async def test_evening_schedule_sets_profile(self):
+        """Evening schedule_constraints should produce evening schedule_type."""
+        from app.main import app
+
+        with (
+            patch(_GEN_PATCH, return_value=_mock_plan()),
+            patch(_SESSION_PATCH, return_value="test-uuid"),
+            patch(_UPDATE_PLAN_PATCH, new_callable=AsyncMock),
+            patch(_FEEDBACK_TOKEN_PATCH, new_callable=AsyncMock, return_value="test-token"),
+        ):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.post("/api/assessment/", json={
+                    "zip_code": "36104",
+                    "employment_status": "unemployed",
+                    "barriers": {"credit": True},
+                    "work_history": "Some work",
+                    "schedule_constraints": {
+                        "available_hours": "evening",
+                    },
+                })
+        assert resp.status_code == 201
+        assert resp.json()["profile"]["schedule_type"] == "evening"
+
+    @pytest.mark.asyncio
+    async def test_credit_result_persisted_to_session(self):
+        """Credit result should be saved as credit_profile JSON in session."""
+        from app.main import app
+
+        captured_data = {}
+
+        async def capture_session(db, data, session_id=None):
+            captured_data.update(data)
+            return session_id or "test-uuid"
+
+        with (
+            patch(_GEN_PATCH, return_value=_mock_plan()),
+            patch(_SESSION_PATCH, side_effect=capture_session),
+            patch(_UPDATE_PLAN_PATCH, new_callable=AsyncMock),
+            patch(_FEEDBACK_TOKEN_PATCH, new_callable=AsyncMock, return_value="test-token"),
+        ):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.post("/api/assessment/", json={
+                    "zip_code": "36104",
+                    "employment_status": "unemployed",
+                    "barriers": {"credit": True},
+                    "work_history": "Some work",
+                    "credit_result": {
+                        "barrier_severity": "medium",
+                        "barrier_details": [],
+                        "readiness": {"score": 65, "fico_score": 620, "score_band": "fair", "factors": {}},
+                        "thresholds": [],
+                        "dispute_pathway": {"steps": [], "total_estimated_days": 0, "statutes_cited": [], "legal_theories": []},
+                        "eligibility": [],
+                        "disclaimer": "For informational purposes only.",
+                    },
+                })
+        assert resp.status_code == 201
+        assert captured_data["credit_profile"] is not None
+        import json
+        parsed = json.loads(captured_data["credit_profile"])
+        assert parsed["readiness"]["fico_score"] == 620
+
+    @pytest.mark.asyncio
+    async def test_credit_result_null_when_not_provided(self):
+        """Credit profile should be None when credit_result not sent."""
+        from app.main import app
+
+        captured_data = {}
+
+        async def capture_session(db, data, session_id=None):
+            captured_data.update(data)
+            return session_id or "test-uuid"
+
+        with (
+            patch(_GEN_PATCH, return_value=_mock_plan()),
+            patch(_SESSION_PATCH, side_effect=capture_session),
+            patch(_UPDATE_PLAN_PATCH, new_callable=AsyncMock),
+            patch(_FEEDBACK_TOKEN_PATCH, new_callable=AsyncMock, return_value="test-token"),
+        ):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.post("/api/assessment/", json={
+                    "zip_code": "36104",
+                    "employment_status": "unemployed",
+                    "barriers": {"credit": True},
+                    "work_history": "Some work",
+                })
+        assert resp.status_code == 201
+        assert captured_data["credit_profile"] is None
 
     @pytest.mark.asyncio
     async def test_rate_limit_returns_429(self):

@@ -10,6 +10,7 @@ vi.mock("@/lib/api", () => ({
 }));
 
 const SESSION_ID = "test-session-123";
+const TOKEN = "tok-abc";
 
 const barrier: BarrierCard = {
   type: BarrierType.TRANSPORTATION,
@@ -41,14 +42,14 @@ beforeEach(() => {
 
 describe("Resource feedback buttons", () => {
   it("renders thumbs up and thumbs down buttons for each resource", () => {
-    render(<BarrierCardView barrier={barrier} sessionId={SESSION_ID} />);
+    render(<BarrierCardView barrier={barrier} sessionId={SESSION_ID} token={TOKEN} />);
 
     expect(screen.getByRole("button", { name: "Mark as helpful" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Mark as not helpful" })).toBeInTheDocument();
   });
 
   it("toggles visual state on click (optimistic)", async () => {
-    render(<BarrierCardView barrier={barrier} sessionId={SESSION_ID} />);
+    render(<BarrierCardView barrier={barrier} sessionId={SESSION_ID} token={TOKEN} />);
 
     const helpfulBtn = screen.getByRole("button", { name: "Mark as helpful" });
     fireEvent.click(helpfulBtn);
@@ -62,7 +63,7 @@ describe("Resource feedback buttons", () => {
   it("fires API call with correct payload on click", async () => {
     const { submitResourceFeedback } = await import("@/lib/api");
 
-    render(<BarrierCardView barrier={barrier} sessionId={SESSION_ID} />);
+    render(<BarrierCardView barrier={barrier} sessionId={SESSION_ID} token={TOKEN} />);
 
     const helpfulBtn = screen.getByRole("button", { name: "Mark as helpful" });
     fireEvent.click(helpfulBtn);
@@ -72,12 +73,13 @@ describe("Resource feedback buttons", () => {
         resource_id: 1,
         session_id: SESSION_ID,
         helpful: true,
+        token: TOKEN,
       });
     });
   });
 
   it("persists state to sessionStorage", async () => {
-    render(<BarrierCardView barrier={barrier} sessionId={SESSION_ID} />);
+    render(<BarrierCardView barrier={barrier} sessionId={SESSION_ID} token={TOKEN} />);
 
     const helpfulBtn = screen.getByRole("button", { name: "Mark as helpful" });
     fireEvent.click(helpfulBtn);
@@ -89,7 +91,7 @@ describe("Resource feedback buttons", () => {
   });
 
   it("re-tapping same button deselects (neutral)", async () => {
-    render(<BarrierCardView barrier={barrier} sessionId={SESSION_ID} />);
+    render(<BarrierCardView barrier={barrier} sessionId={SESSION_ID} token={TOKEN} />);
 
     const helpfulBtn = screen.getByRole("button", { name: "Mark as helpful" });
 
@@ -107,7 +109,7 @@ describe("Resource feedback buttons", () => {
   });
 
   it("switching vote clears the other button", async () => {
-    render(<BarrierCardView barrier={barrier} sessionId={SESSION_ID} />);
+    render(<BarrierCardView barrier={barrier} sessionId={SESSION_ID} token={TOKEN} />);
 
     const helpfulBtn = screen.getByRole("button", { name: "Mark as helpful" });
     const notHelpfulBtn = screen.getByRole("button", { name: "Mark as not helpful" });
@@ -129,14 +131,14 @@ describe("Resource feedback buttons", () => {
   it("restores state from sessionStorage on mount", () => {
     sessionStorage.setItem(`feedback_${SESSION_ID}_1`, "true");
 
-    render(<BarrierCardView barrier={barrier} sessionId={SESSION_ID} />);
+    render(<BarrierCardView barrier={barrier} sessionId={SESSION_ID} token={TOKEN} />);
 
     const helpfulBtn = screen.getByRole("button", { name: "Mark as helpful" });
     expect(helpfulBtn).toHaveAttribute("data-active", "true");
   });
 
   it("has aria-labels for accessibility", () => {
-    render(<BarrierCardView barrier={barrier} sessionId={SESSION_ID} />);
+    render(<BarrierCardView barrier={barrier} sessionId={SESSION_ID} token={TOKEN} />);
 
     expect(screen.getByRole("button", { name: "Mark as helpful" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Mark as not helpful" })).toBeInTheDocument();

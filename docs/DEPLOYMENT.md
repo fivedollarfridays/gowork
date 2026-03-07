@@ -131,6 +131,8 @@ SQLite is used with no external database server required.
 
 The assessment endpoint (`POST /api/assessment/`) enforces a rate limit of 10 requests per minute per client IP. Exceeding this returns `429 Too Many Requests`.
 
+> **Single-worker limitation:** Rate limiting uses an in-memory counter per process. When running multiple workers (`WEB_CONCURRENCY > 1`), each worker maintains independent counters — a client could exceed the intended limit by a factor of N workers. The backend logs a warning at startup when `WEB_CONCURRENCY > 1`. For multi-worker deployments, replace with a Redis-backed rate limiter (e.g., `slowapi` with Redis storage).
+
 ---
 
 ## Optional Services
@@ -211,6 +213,21 @@ By default, SQLite writes to the container filesystem, which is ephemeral. To pe
 
 SQLite with a volume is acceptable for the current single-instance scale. See `docs/architecture.md` for the PostgreSQL migration path if horizontal scaling is needed.
 
+### Data at Rest — Encryption
+
+SQLite stores PII including self-reported barriers, credit profiles, work history, and session tokens. Production deployments **MUST** use host-level disk encryption to protect this data at rest:
+
+| Platform | Mechanism |
+|----------|-----------|
+| Railway (with Volume) | Volumes are encrypted at rest by default (AWS EBS encryption) |
+| AWS EC2 / ECS | Enable EBS encryption on the volume backing the SQLite file |
+| Linux (bare metal / VM) | LUKS full-disk or partition encryption |
+| macOS (dev) | FileVault (enabled by default on modern macOS) |
+
+If application-level encryption is required (e.g., shared hosting where you do not control the disk), [SQLCipher](https://www.zetetic.net/sqlcipher/) is the upgrade path — it provides transparent AES-256 encryption of the SQLite database file.
+
+For multi-instance production deployments, migrate to PostgreSQL with TLS-encrypted connections instead of SQLite.
+
 ### Health Check
 
 Configure Railway's health check to poll:
@@ -242,6 +259,20 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
 No custom build command or Procfile is needed.
+
+---
+
+## Frontend Docker Build
+
+When building the frontend Docker image, `NEXT_PUBLIC_API_URL` **must** be provided as a build argument. There is no default — the build will produce a broken app if omitted:
+
+```bash
+docker build -f Dockerfile.frontend \
+  --build-arg NEXT_PUBLIC_API_URL=https://your-backend.example.com \
+  -t montgowork-frontend .
+```
+
+For local development, `docker-compose.yml` provides this automatically.
 
 ---
 

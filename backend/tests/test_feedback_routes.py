@@ -18,22 +18,14 @@ class TestResourceFeedbackEndpoint:
     @pytest.mark.anyio
     async def test_valid_feedback_returns_200(self, client, test_engine):
         """Valid feedback submission returns success."""
-        from sqlalchemy import text
-        from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
-
-        factory = async_sessionmaker(test_engine, class_=AsyncSession)
-        async with factory() as session:
-            await session.execute(text(
-                "INSERT INTO sessions (id, created_at, barriers, expires_at) "
-                "VALUES ('00000000-0000-4000-8000-f00dbac00001', '2026-03-06', '[]', '2026-04-06')"
-            ))
-            await session.commit()
+        token = await _seed_session_and_token(test_engine, "00000000-0000-4000-8000-f00dbac00001")
 
         resp = await client.post("/api/feedback/resource", json={
             "resource_id": 1,
             "session_id": "00000000-0000-4000-8000-f00dbac00001",
             "helpful": True,
             "barrier_type": "credit",
+            "token": token,
         })
         assert resp.status_code == 200
         data = resp.json()
@@ -44,34 +36,27 @@ class TestResourceFeedbackEndpoint:
     @pytest.mark.anyio
     async def test_feedback_without_barrier_type(self, client, test_engine):
         """Feedback without optional barrier_type is accepted."""
-        from sqlalchemy import text
-        from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
-
-        factory = async_sessionmaker(test_engine, class_=AsyncSession)
-        async with factory() as session:
-            await session.execute(text(
-                "INSERT INTO sessions (id, created_at, barriers, expires_at) "
-                "VALUES ('00000000-0000-4000-8000-f00dbac00002', '2026-03-06', '[]', '2026-04-06')"
-            ))
-            await session.commit()
+        token = await _seed_session_and_token(test_engine, "00000000-0000-4000-8000-f00dbac00002")
 
         resp = await client.post("/api/feedback/resource", json={
             "resource_id": 2,
             "session_id": "00000000-0000-4000-8000-f00dbac00002",
             "helpful": False,
+            "token": token,
         })
         assert resp.status_code == 200
         assert resp.json()["helpful"] is False
 
     @pytest.mark.anyio
-    async def test_unknown_session_returns_404(self, client):
-        """Feedback for non-existent session returns 404."""
+    async def test_unknown_session_returns_401(self, client):
+        """Feedback with unknown token returns 401."""
         resp = await client.post("/api/feedback/resource", json={
             "resource_id": 1,
             "session_id": "00000000-0000-4000-8000-ffffffffffff",
             "helpful": True,
+            "token": "nonexistent-token",
         })
-        assert resp.status_code == 404
+        assert resp.status_code == 401
 
     @pytest.mark.anyio
     async def test_upsert_updates_existing_vote(self, client, test_engine):
@@ -79,19 +64,14 @@ class TestResourceFeedbackEndpoint:
         from sqlalchemy import text
         from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-        factory = async_sessionmaker(test_engine, class_=AsyncSession)
-        async with factory() as session:
-            await session.execute(text(
-                "INSERT INTO sessions (id, created_at, barriers, expires_at) "
-                "VALUES ('00000000-0000-4000-8000-f00dbac00003', '2026-03-06', '[]', '2026-04-06')"
-            ))
-            await session.commit()
+        token = await _seed_session_and_token(test_engine, "00000000-0000-4000-8000-f00dbac00003")
 
         # First vote: helpful
         resp1 = await client.post("/api/feedback/resource", json={
             "resource_id": 5,
             "session_id": "00000000-0000-4000-8000-f00dbac00003",
             "helpful": True,
+            "token": token,
         })
         assert resp1.status_code == 200
 
@@ -100,11 +80,13 @@ class TestResourceFeedbackEndpoint:
             "resource_id": 5,
             "session_id": "00000000-0000-4000-8000-f00dbac00003",
             "helpful": False,
+            "token": token,
         })
         assert resp2.status_code == 200
         assert resp2.json()["helpful"] is False
 
         # Verify only one row exists
+        factory = async_sessionmaker(test_engine, class_=AsyncSession)
         async with factory() as session:
             result = await session.execute(text(
                 "SELECT COUNT(*) FROM resource_feedback "
@@ -126,21 +108,17 @@ class TestResourceFeedbackEndpoint:
         from sqlalchemy import text
         from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-        factory = async_sessionmaker(test_engine, class_=AsyncSession)
-        async with factory() as session:
-            await session.execute(text(
-                "INSERT INTO sessions (id, created_at, barriers, expires_at) "
-                "VALUES ('00000000-0000-4000-8000-f00dbac00004', '2026-03-06', '[]', '2026-04-06')"
-            ))
-            await session.commit()
+        token = await _seed_session_and_token(test_engine, "00000000-0000-4000-8000-f00dbac00004")
 
         await client.post("/api/feedback/resource", json={
             "resource_id": 3,
             "session_id": "00000000-0000-4000-8000-f00dbac00004",
             "helpful": True,
             "barrier_type": "transportation",
+            "token": token,
         })
 
+        factory = async_sessionmaker(test_engine, class_=AsyncSession)
         async with factory() as session:
             result = await session.execute(text(
                 "SELECT submitted_at, barrier_type FROM resource_feedback "
@@ -156,7 +134,7 @@ class TestResourceFeedbackEndpoint:
         """Missing required fields returns 422."""
         resp = await client.post("/api/feedback/resource", json={
             "resource_id": 1,
-            # missing session_id and helpful
+            # missing session_id, helpful, and token
         })
         assert resp.status_code == 422
 
@@ -318,5 +296,60 @@ class TestResourceFeedbackSessionIdValidation:
             "resource_id": 1,
             "session_id": "not-a-uuid",
             "helpful": True,
+            "token": "some-token",
         })
         assert resp.status_code == 422
+
+
+# --- SEC-005: Resource feedback requires token ---
+
+class TestResourceFeedbackTokenAuth:
+    """POST /api/feedback/resource requires a valid token matching session_id."""
+
+    @pytest.mark.anyio
+    async def test_missing_token_returns_422(self, client, test_engine):
+        """Request without token field returns 422."""
+        resp = await client.post("/api/feedback/resource", json={
+            "resource_id": 1,
+            "session_id": "00000000-0000-4000-8000-f00dbac00001",
+            "helpful": True,
+        })
+        assert resp.status_code == 422
+
+    @pytest.mark.anyio
+    async def test_invalid_token_returns_401(self, client, test_engine):
+        """Request with invalid token returns 401."""
+        await _seed_session_and_token(test_engine, "00000000-0000-4000-8000-f00dbac00010")
+        resp = await client.post("/api/feedback/resource", json={
+            "resource_id": 1,
+            "session_id": "00000000-0000-4000-8000-f00dbac00010",
+            "helpful": True,
+            "token": "bad-token",
+        })
+        assert resp.status_code == 401
+
+    @pytest.mark.anyio
+    async def test_mismatched_token_returns_403(self, client, test_engine):
+        """Token for different session returns 403."""
+        await _seed_session_and_token(test_engine, "00000000-0000-4000-8000-f00dbac00011")
+        token = await _seed_session_and_token(test_engine, "00000000-0000-4000-8000-f00dbac00012")
+        resp = await client.post("/api/feedback/resource", json={
+            "resource_id": 1,
+            "session_id": "00000000-0000-4000-8000-f00dbac00011",
+            "helpful": True,
+            "token": token,  # token belongs to f00dbac00012, not f00dbac00011
+        })
+        assert resp.status_code == 403
+
+    @pytest.mark.anyio
+    async def test_valid_token_succeeds(self, client, test_engine):
+        """Valid matching token allows feedback submission."""
+        token = await _seed_session_and_token(test_engine, "00000000-0000-4000-8000-f00dbac00013")
+        resp = await client.post("/api/feedback/resource", json={
+            "resource_id": 1,
+            "session_id": "00000000-0000-4000-8000-f00dbac00013",
+            "helpful": True,
+            "token": token,
+        })
+        assert resp.status_code == 200
+        assert resp.json()["success"] is True
