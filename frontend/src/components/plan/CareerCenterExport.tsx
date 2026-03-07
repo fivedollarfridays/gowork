@@ -9,9 +9,10 @@ import type { CareerCenterPackage } from "@/lib/types";
 
 interface CareerCenterExportProps {
   sessionId: string;
+  token?: string;
 }
 
-export function CareerCenterExport({ sessionId }: CareerCenterExportProps) {
+export function CareerCenterExport({ sessionId, token }: CareerCenterExportProps) {
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [packageData, setPackageData] = useState<CareerCenterPackage | null>(null);
@@ -21,7 +22,7 @@ export function CareerCenterExport({ sessionId }: CareerCenterExportProps) {
     setGenerating(true);
     setError(null);
     try {
-      const data = await getCareerCenterPackage(sessionId);
+      const data = await getCareerCenterPackage(sessionId, token);
       const { flushSync } = await import("react-dom");
       flushSync(() => setPackageData(data));
       if (!contentRef.current) {
@@ -45,7 +46,7 @@ export function CareerCenterExport({ sessionId }: CareerCenterExportProps) {
     } finally {
       setGenerating(false);
     }
-  }, [sessionId]);
+  }, [sessionId, token]);
 
   return (
     <>

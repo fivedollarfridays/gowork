@@ -51,6 +51,18 @@ async def get_all_transit_routes(session: AsyncSession) -> list[dict]:
     return [dict(row._mapping) for row in result]
 
 
+async def get_all_transit_stops(session: AsyncSession) -> list[dict]:
+    """Fetch transit stop coordinates for distance scoring.
+
+    Returns only lat/lng (the fields used by _compute_stop_distances in engine.py).
+    NULL coordinates are filtered at the SQL level for efficiency.
+    """
+    result = await session.execute(
+        text("SELECT lat, lng FROM transit_stops WHERE lat IS NOT NULL AND lng IS NOT NULL"),
+    )
+    return [dict(row._mapping) for row in result]
+
+
 async def get_all_employers(session: AsyncSession) -> list[dict]:
     """Fetch all employers."""
     result = await session.execute(text("SELECT * FROM employers"))

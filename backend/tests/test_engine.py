@@ -341,6 +341,26 @@ class TestGeneratePlan:
         assert "childcare" in plan.wioa_eligibility.adult_reasons
 
     @pytest.mark.asyncio
+    async def test_fetches_transit_stops_for_scoring(self):
+        """generate_plan should fetch transit stops and use them for scoring."""
+        profile = _make_profile(transit_dependent=True)
+        mock_session = AsyncMock()
+        resources = [
+            _make_resource(
+                id=1, name="Career Center", category="career_center",
+                lat=32.375, lng=-86.296,
+            ),
+        ]
+        stops = [{"lat": 32.375, "lng": -86.296}]
+
+        with patch(_QUERY_PATCH, return_value=resources), \
+             patch("app.modules.matching.engine.get_all_transit_stops",
+                   new_callable=AsyncMock, return_value=stops):
+            plan = await generate_plan(profile, mock_session)
+
+        assert isinstance(plan, ReEntryPlan)
+
+    @pytest.mark.asyncio
     async def test_wioa_none_when_no_qualifying_barriers(self):
         """wioa_eligibility has adult_program=False for housing-only profile."""
         profile = _make_profile(

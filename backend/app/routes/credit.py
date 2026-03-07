@@ -1,11 +1,16 @@
 """POST /api/credit/assess — Thin proxy to credit assessment API (/v1/assess/simple)."""
 
-import httpx
-from fastapi import APIRouter, Depends, HTTPException
+import logging
 
+import httpx
+from fastapi import APIRouter, Depends, HTTPException, Request
+
+from app.core.audit import audit_log
 from app.core.config import get_settings
 from app.core.rate_limit import RateLimiter, require_rate_limit
 from app.modules.credit.types import CreditAssessmentResult, SimpleCreditRequest
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/credit", tags=["credit"])
 
@@ -18,15 +23,17 @@ def _check_credit_response(resp: httpx.Response) -> None:
     if resp.status_code == 200:
         return
     try:
-        detail = resp.json().get("detail", "Credit API error")
+        upstream_detail = resp.json().get("detail", resp.text[:200])
     except Exception:
-        detail = f"Credit API error (HTTP {resp.status_code})"
-    raise HTTPException(status_code=resp.status_code, detail=detail)
+        upstream_detail = resp.text[:200]
+    logger.warning("Credit API error: status=%d detail=%s", resp.status_code, upstream_detail)
+    raise HTTPException(status_code=502, detail="Credit assessment service error")
 
 
 @router.post("/assess")
 async def assess_credit(
     profile: SimpleCreditRequest,
+    request: Request,
     _: None = Depends(_check_rate),
 ) -> CreditAssessmentResult:
     """Proxy to the credit assessment microservice's simple endpoint."""
@@ -42,10 +49,11 @@ async def assess_credit(
                     "X-API-Key": settings.credit_api_key,
                 },
             )
-    except httpx.ConnectError:
+    except httpx.ConnectError as exc:
+        logger.warning("Credit API connection error: %s", exc)
         raise HTTPException(
             status_code=503,
-            detail="Credit assessment service unavailable. Ensure it's running on the configured port.",
+            detail="Credit assessment service unavailable",
         )
     except httpx.TimeoutException:
         raise HTTPException(
@@ -58,4 +66,6 @@ async def assess_credit(
             detail="Credit assessment network error. Try again later.",
         )
     _check_credit_response(resp)
+    client_ip = request.client.host if request.client else "unknown"
+    audit_log("credit_assessed", session_id="anonymous", client_ip=client_ip)
     return resp.json()

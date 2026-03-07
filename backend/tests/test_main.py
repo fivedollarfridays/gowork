@@ -1,8 +1,10 @@
 """Tests for app entry point — root endpoint and lifespan."""
 
+import logging
 from unittest.mock import AsyncMock, patch
 
 import pytest
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 
 class TestSwaggerDocs:
@@ -26,6 +28,30 @@ class TestRootEndpoint:
         body = resp.json()
         assert body["message"] == "MontGoWork API"
         assert body["status"] == "running"
+
+
+class TestProxyHeadersMiddleware:
+    def test_proxy_headers_middleware_registered(self):
+        """ProxyHeadersMiddleware is in the middleware stack."""
+        from app.main import app
+
+        middleware_classes = [m.cls for m in app.user_middleware]
+        assert ProxyHeadersMiddleware in middleware_classes
+
+    def test_trusted_hosts_defaults_to_localhost(self):
+        """Default trusted_hosts is localhost only (safe default)."""
+        from app.core.config import Settings
+
+        s = Settings(cors_origins="http://localhost:3000")
+        assert s.trusted_proxy_hosts == "127.0.0.1"
+
+    def test_trusted_hosts_configurable(self):
+        """trusted_proxy_hosts is configurable via settings."""
+        from app.core.config import Settings
+
+        s = Settings(cors_origins="http://localhost:3000", trusted_proxy_hosts="10.0.0.0/8,172.16.0.0/12")
+        assert "10.0.0.0/8" in s.trusted_proxy_hosts
+        assert "172.16.0.0/12" in s.trusted_proxy_hosts
 
 
 class TestLifespan:
@@ -54,3 +80,40 @@ class TestLifespan:
             async with lifespan(app):
                 pass
             mock_close.assert_awaited_once()
+
+    @pytest.mark.anyio
+    async def test_warns_when_web_concurrency_gt_1(self):
+        """Startup should log a warning when WEB_CONCURRENCY > 1."""
+        from app.main import lifespan, app
+
+        mock_engine = AsyncMock()
+        with patch("app.main.get_engine", return_value=mock_engine), \
+             patch("app.main.init_db", new_callable=AsyncMock), \
+             patch("app.main.close_db", new_callable=AsyncMock), \
+             patch("app.main.logger") as mock_logger, \
+             patch.dict("os.environ", {"WEB_CONCURRENCY": "4"}):
+            async with lifespan(app):
+                pass
+        warning_calls = [
+            str(c) for c in mock_logger.warning.call_args_list
+        ]
+        assert any("WEB_CONCURRENCY" in c for c in warning_calls)
+        assert any("rate limit" in c.lower() for c in warning_calls)
+
+    @pytest.mark.anyio
+    async def test_no_warning_when_web_concurrency_is_1(self):
+        """No warning when WEB_CONCURRENCY is 1."""
+        from app.main import lifespan, app
+
+        mock_engine = AsyncMock()
+        with patch("app.main.get_engine", return_value=mock_engine), \
+             patch("app.main.init_db", new_callable=AsyncMock), \
+             patch("app.main.close_db", new_callable=AsyncMock), \
+             patch("app.main.logger") as mock_logger, \
+             patch.dict("os.environ", {"WEB_CONCURRENCY": "1"}):
+            async with lifespan(app):
+                pass
+        warning_calls = [
+            str(c) for c in mock_logger.warning.call_args_list
+        ]
+        assert not any("WEB_CONCURRENCY" in c for c in warning_calls)

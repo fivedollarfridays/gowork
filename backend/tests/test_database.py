@@ -1,6 +1,7 @@
 """Tests for database seed hardening and lifecycle functions."""
 
 import json
+import logging
 from pathlib import Path
 from unittest.mock import patch
 
@@ -135,6 +136,60 @@ class TestCloseDb:
             db_module._engine = old
 
 
+class TestDataDirConfig:
+    def test_data_dir_from_settings(self):
+        """DATA_DIR should be configurable via settings."""
+        from app.core.config import Settings
+        s = Settings(data_dir="/custom/path")
+        assert s.data_dir == "/custom/path"
+
+    def test_data_dir_default_empty(self):
+        """DATA_DIR defaults to empty string (uses fallback path)."""
+        from app.core.config import Settings
+        s = Settings()
+        assert s.data_dir == ""
+
+    @pytest.mark.anyio
+    async def test_missing_data_dir_logs_error(self, tmp_path, caplog):
+        """seed_database should log error when DATA_DIR doesn't exist."""
+        engine = create_async_engine(
+            f"sqlite+aiosqlite:///{tmp_path / 'datadir.db'}", echo=False
+        )
+        async with engine.begin() as conn:
+            for stmt in db_module.DDL_SQL.strip().split(";"):
+                stmt = stmt.strip()
+                if stmt:
+                    await conn.execute(text(stmt))
+        fake_dir = tmp_path / "nonexistent"
+        with patch.object(db_module, "_resolve_data_dir", return_value=fake_dir):
+            with caplog.at_level(logging.WARNING):
+                await seed_database(engine)
+        assert any("DATA_DIR" in r.message and "does not exist" in r.message for r in caplog.records)
+        await engine.dispose()
+
+    @pytest.mark.anyio
+    async def test_missing_seed_file_logs_warning(self, tmp_path, caplog):
+        """seed_database should log warning for each missing seed file."""
+        engine = create_async_engine(
+            f"sqlite+aiosqlite:///{tmp_path / 'seedwarn.db'}", echo=False
+        )
+        async with engine.begin() as conn:
+            for stmt in db_module.DDL_SQL.strip().split(";"):
+                stmt = stmt.strip()
+                if stmt:
+                    await conn.execute(text(stmt))
+        # Empty directory — all seed files missing
+        empty_dir = tmp_path / "emptydata"
+        empty_dir.mkdir()
+        with patch.object(db_module, "_resolve_data_dir", return_value=empty_dir):
+            with caplog.at_level(logging.WARNING):
+                await seed_database(engine)
+        warning_msgs = [r.message for r in caplog.records if r.levelno == logging.WARNING]
+        assert any("career_centers.json" in m for m in warning_msgs)
+        assert any("transit_routes.json" in m for m in warning_msgs)
+        await engine.dispose()
+
+
 class TestSeedEdgeCases:
     @pytest.mark.anyio
     async def test_skips_when_already_seeded(self, test_engine):
@@ -155,9 +210,10 @@ class TestSeedEdgeCases:
         engine = create_async_engine(
             f"sqlite+aiosqlite:///{tmp_path / 'missing.db'}", echo=False
         )
-        from app.core.database import init_db
-        # Point DATA_DIR to empty tmp_path so no seed files exist
-        with patch.object(db_module, "DATA_DIR", tmp_path):
+        # Point _resolve_data_dir to empty tmp_path so no seed files exist
+        empty_dir = tmp_path / "emptydir"
+        empty_dir.mkdir()
+        with patch.object(db_module, "_resolve_data_dir", return_value=empty_dir):
             async with engine.begin() as conn:
                 for stmt in db_module.DDL_SQL.strip().split(";"):
                     stmt = stmt.strip()
@@ -193,7 +249,7 @@ class TestSeedEdgeCases:
                    "community_resources.json"]:
             (seed_dir / f).write_text("[]")
 
-        with patch.object(db_module, "DATA_DIR", seed_dir):
+        with patch.object(db_module, "_resolve_data_dir", return_value=seed_dir):
             await seed_database(engine)
         async with engine.begin() as conn:
             result = await conn.execute(text("SELECT COUNT(*) FROM resources"))

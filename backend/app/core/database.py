@@ -1,6 +1,7 @@
 """Async SQLAlchemy database setup for SQLite with raw DDL and seed data."""
 
 import json
+import logging
 from pathlib import Path
 
 from sqlalchemy import text
@@ -9,8 +10,17 @@ from sqlalchemy.pool import StaticPool
 
 from app.core.config import get_settings
 
-# From backend/app/core/database.py -> 4 parents up to project root
-DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
+logger = logging.getLogger(__name__)
+
+_DEFAULT_DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
+
+
+def _resolve_data_dir() -> Path:
+    """Return configured DATA_DIR or the default relative path."""
+    settings = get_settings()
+    if settings.data_dir:
+        return Path(settings.data_dir).resolve()
+    return _DEFAULT_DATA_DIR
 
 DDL_SQL = """
 CREATE TABLE IF NOT EXISTS employers (
@@ -113,6 +123,7 @@ ALLOWED_COLUMNS = {
         "name", "category", "subcategory", "address", "lat", "lng",
         "phone", "url", "eligibility", "services", "hours", "notes",
     },
+    "transit_stops": {"route_id", "stop_name", "lat", "lng", "sequence"},
     "job_listings": {
         "title", "company", "location", "description", "url",
         "source", "scraped_at", "expires_at", "credit_check",
@@ -190,9 +201,15 @@ async def seed_database(engine):
         if result.scalar() > 0:
             return
 
+        data_dir = _resolve_data_dir()
+        if not data_dir.is_dir():
+            logger.warning("DATA_DIR %s does not exist — skipping seed", data_dir)
+            return
+
         for filename, table in _seed_file_map():
-            filepath = DATA_DIR / filename
+            filepath = data_dir / filename
             if not filepath.exists():
+                logger.warning("Seed file missing: %s", filepath)
                 continue
             data = json.loads(filepath.read_text())
             if not data:
@@ -201,6 +218,9 @@ async def seed_database(engine):
                 clean = _validate_seed_record(table, record)
                 if not clean:
                     continue
+                # SAFETY: table comes from _seed_file_map (hardcoded), columns from
+                # _validate_seed_record (filtered against ALLOWED_COLUMNS allowlist).
+                # Values are parameterized via :key binding. No user input reaches here.
                 columns = ", ".join(clean.keys())
                 placeholders = ", ".join(f":{k}" for k in clean.keys())
                 await conn.execute(
@@ -214,6 +234,7 @@ def _seed_file_map():
     return [
         ("montgomery_businesses.json", "employers"),
         ("transit_routes.json", "transit_routes"),
+        ("transit_stops.json", "transit_stops"),
         ("career_centers.json", "resources"),
         ("training_programs.json", "resources"),
         ("childcare_providers.json", "resources"),

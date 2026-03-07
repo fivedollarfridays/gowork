@@ -36,9 +36,10 @@ function loadFeedbackState(sessionId: string, resourceIds: number[]): FeedbackSt
 interface BarrierCardViewProps {
   barrier: BarrierCardType;
   sessionId?: string;
+  token?: string;
 }
 
-export function BarrierCardView({ barrier, sessionId }: BarrierCardViewProps) {
+export function BarrierCardView({ barrier, sessionId, token }: BarrierCardViewProps) {
   const [expanded, setExpanded] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackState>(() =>
     sessionId ? loadFeedbackState(sessionId, barrier.resources.map((r) => r.id)) : {},
@@ -46,7 +47,7 @@ export function BarrierCardView({ barrier, sessionId }: BarrierCardViewProps) {
 
   const handleFeedback = useCallback(
     (resourceId: number, helpful: boolean) => {
-      if (!sessionId) return;
+      if (!sessionId || !token) return;
 
       setFeedback((prev) => {
         const current = prev[resourceId];
@@ -60,13 +61,14 @@ export function BarrierCardView({ barrier, sessionId }: BarrierCardViewProps) {
             resource_id: resourceId,
             session_id: sessionId,
             helpful: newValue,
+            token: token!,
           }).catch((err) => console.error("Feedback failed:", err));
         }
 
         return { ...prev, [resourceId]: newValue };
       });
     },
-    [sessionId],
+    [sessionId, token],
   );
   const Icon = BARRIER_ICONS[barrier.type];
   const badgeStyle = SEVERITY_BADGE_STYLES[barrier.severity] ?? SEVERITY_BADGE_STYLES.low;

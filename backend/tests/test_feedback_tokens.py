@@ -11,10 +11,11 @@ class TestGenerateToken:
         token = generate_token()
         assert all(c.isalnum() or c in "-_" for c in token)
 
-    def test_under_20_chars(self):
-        """Token should be < 20 chars."""
-        token = generate_token()
-        assert len(token) < 20
+    def test_exact_length_16_chars(self):
+        """Token should be exactly 16 chars (96-bit entropy, no truncation)."""
+        for _ in range(20):
+            token = generate_token()
+            assert len(token) == 16, f"Token {token!r} has length {len(token)}, expected 16"
 
     def test_non_deterministic(self):
         """Each call produces a unique token."""

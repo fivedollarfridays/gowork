@@ -26,6 +26,7 @@ function renderWithClient(ui: React.ReactElement) {
 describe("PlanPage What's Next CTA", () => {
   beforeEach(async () => {
     mockSearchParams.set("session", "sess-cta-test");
+    mockSearchParams.set("token", "test-token-cta");
     const { getPlan } = await import("@/lib/api");
     (getPlan as ReturnType<typeof vi.fn>).mockResolvedValue({
       session_id: "sess-cta-test",

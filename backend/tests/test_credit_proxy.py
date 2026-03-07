@@ -1,5 +1,6 @@
 """Tests for credit proxy — error handling and success path."""
 
+import logging
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
@@ -67,7 +68,7 @@ class TestCreditProxyErrors:
 
     @pytest.mark.anyio
     async def test_non_json_error_response(self, client):
-        """Non-JSON error body should not cause 500."""
+        """Non-JSON error body should return generic 502."""
         mock_resp = AsyncMock()
         mock_resp.status_code = 502
         mock_resp.json.side_effect = Exception("not JSON")
@@ -77,6 +78,7 @@ class TestCreditProxyErrors:
             _mock_httpx_client(mock_cls, return_value=mock_resp)
             resp = await client.post("/api/credit/assess", json=VALID_PAYLOAD)
             assert resp.status_code == 502
+            assert "Bad Gateway" not in resp.json()["detail"]
 
     @pytest.mark.anyio
     async def test_other_network_error_returns_502(self, client):
@@ -86,6 +88,105 @@ class TestCreditProxyErrors:
             resp = await client.post("/api/credit/assess", json=VALID_PAYLOAD)
             assert resp.status_code == 502
             assert "network error" in resp.json()["detail"].lower()
+
+
+class TestCreditProxyErrorMasking:
+    @pytest.mark.anyio
+    async def test_upstream_detail_not_forwarded(self, client):
+        """Upstream error detail must not be exposed to client."""
+        mock_resp = MagicMock()
+        mock_resp.status_code = 422
+        mock_resp.json.return_value = {"detail": "SSN format invalid — expected XXX-XX-XXXX"}
+        mock_resp.text = '{"detail": "SSN format invalid"}'
+
+        with patch("app.routes.credit.httpx.AsyncClient") as mock_cls:
+            _mock_httpx_client(mock_cls, return_value=mock_resp)
+            resp = await client.post("/api/credit/assess", json=VALID_PAYLOAD)
+            assert resp.status_code == 502
+            body = resp.json()["detail"]
+            assert "SSN" not in body
+            assert "credit assessment" in body.lower()
+
+    @pytest.mark.anyio
+    async def test_connect_error_no_port_info(self, client):
+        """ConnectError message must not reveal port or host."""
+        with patch("app.routes.credit.httpx.AsyncClient") as mock_cls:
+            _mock_httpx_client(mock_cls, side_effect=httpx.ConnectError("Connection refused on port 8001"))
+            resp = await client.post("/api/credit/assess", json=VALID_PAYLOAD)
+            detail = resp.json()["detail"]
+            assert "8001" not in detail
+            assert "port" not in detail.lower()
+
+    @pytest.mark.anyio
+    async def test_upstream_error_logged_server_side(self, client, caplog):
+        """Upstream error detail should be logged at WARNING level."""
+        mock_resp = MagicMock()
+        mock_resp.status_code = 500
+        mock_resp.json.return_value = {"detail": "internal db crash"}
+        mock_resp.text = '{"detail": "internal db crash"}'
+
+        with patch("app.routes.credit.httpx.AsyncClient") as mock_cls:
+            _mock_httpx_client(mock_cls, return_value=mock_resp)
+            with caplog.at_level(logging.WARNING, logger="app.routes.credit"):
+                await client.post("/api/credit/assess", json=VALID_PAYLOAD)
+            assert any("500" in r.message for r in caplog.records)
+
+
+class TestCreditApiUrlValidation:
+    def test_rejects_private_ip_in_production(self):
+        """credit_api_url must reject RFC 1918 addresses in production."""
+        from app.core.config import Settings
+
+        with pytest.raises(Exception):
+            Settings(
+                environment="production",
+                credit_api_url="http://192.168.1.1:8001",
+                cors_origins="https://app.example.com",
+            )
+
+    def test_rejects_localhost_in_production(self):
+        """credit_api_url must reject localhost in production."""
+        from app.core.config import Settings
+
+        with pytest.raises(Exception):
+            Settings(
+                environment="production",
+                credit_api_url="http://127.0.0.1:8001",
+                cors_origins="https://app.example.com",
+            )
+
+    def test_rejects_link_local_in_production(self):
+        """credit_api_url must reject link-local addresses in production."""
+        from app.core.config import Settings
+
+        with pytest.raises(Exception):
+            Settings(
+                environment="production",
+                credit_api_url="http://169.254.1.1:8001",
+                cors_origins="https://app.example.com",
+            )
+
+    def test_allows_private_ip_in_development(self):
+        """credit_api_url can be private IP in development."""
+        from app.core.config import Settings
+
+        s = Settings(
+            environment="development",
+            credit_api_url="http://127.0.0.1:8001",
+            cors_origins="http://localhost:3000",
+        )
+        assert s.credit_api_url == "http://127.0.0.1:8001"
+
+    def test_allows_public_url_in_production(self):
+        """credit_api_url can be a public URL in production."""
+        from app.core.config import Settings
+
+        s = Settings(
+            environment="production",
+            credit_api_url="https://credit-api.example.com",
+            cors_origins="https://app.example.com",
+        )
+        assert s.credit_api_url == "https://credit-api.example.com"
 
 
 class TestCreditProxySuccess:

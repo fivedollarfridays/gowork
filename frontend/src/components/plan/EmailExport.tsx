@@ -4,8 +4,6 @@ import { useState } from "react";
 import { Mail, Loader2, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { ReEntryPlan } from "@/lib/types";
-
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function isEmailJSConfigured(): boolean {
@@ -17,42 +15,29 @@ function isEmailJSConfigured(): boolean {
   );
 }
 
-function formatBarrierList(plan: ReEntryPlan): string {
-  return plan.barriers.map((b) => b.title).join(", ") || "None identified";
-}
-
-function formatJobList(plan: ReEntryPlan): string {
-  return (
-    plan.job_matches.map((j) => j.title).join(", ") || "No matches yet"
-  );
-}
-
-function formatNextSteps(plan: ReEntryPlan): string {
-  return (
-    plan.immediate_next_steps
-      .map((step, i) => `${i + 1}. ${step}`)
-      .join("\n") || "No steps defined"
-  );
+function buildPlanUrl(sessionId: string, token: string): string {
+  const base = typeof window !== "undefined" ? window.location.origin : "";
+  return `${base}/plan?session=${encodeURIComponent(sessionId)}&token=${encodeURIComponent(token)}`;
 }
 
 function buildTemplateParams(
-  plan: ReEntryPlan,
   toEmail: string,
+  sessionId: string,
+  token: string,
 ): Record<string, string> {
   return {
     to_email: toEmail,
-    plan_summary: plan.resident_summary ?? "Your personalized re-entry plan from MontGoWork.",
-    barrier_list: formatBarrierList(plan),
-    job_list: formatJobList(plan),
-    next_steps: formatNextSteps(plan),
+    plan_url: buildPlanUrl(sessionId, token),
+    summary: "Your MontGoWork employment plan is ready. Use the link below to view your full plan.",
   };
 }
 
 interface EmailExportProps {
-  plan: ReEntryPlan;
+  sessionId: string;
+  token?: string;
 }
 
-export function EmailExport({ plan }: EmailExportProps) {
+export function EmailExport({ sessionId, token }: EmailExportProps) {
   const [showForm, setShowForm] = useState(false);
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -72,7 +57,7 @@ export function EmailExport({ plan }: EmailExportProps) {
     setSending(true);
     try {
       const emailjs = (await import("@emailjs/browser")).default;
-      const params = buildTemplateParams(plan, email);
+      const params = buildTemplateParams(email, sessionId, token ?? "");
       await emailjs.send(
         process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
         process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,

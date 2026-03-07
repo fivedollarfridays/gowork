@@ -3,7 +3,7 @@
 import json
 import uuid
 
-from app.core.queries import get_resources_by_categories
+from app.core.queries import get_all_transit_stops, get_resources_by_categories
 from app.modules.feedback.types import ResourceHealth
 from app.modules.matching.affinity import (
     CAREER_CENTER_STEP,
@@ -12,7 +12,11 @@ from app.modules.matching.affinity import (
 from app.modules.matching.barrier_priority import prioritize_barriers
 from app.modules.matching.filters import get_certification_renewal
 from app.modules.matching.job_matcher import match_jobs
-from app.modules.matching.scoring import BARRIER_CATEGORY_MAP, rank_resources
+from app.modules.matching.scoring import (
+    BARRIER_CATEGORY_MAP,
+    haversine_miles,
+    rank_resources,
+)
 from app.modules.matching.types import (
     BarrierCard,
     BarrierType,
@@ -100,12 +104,38 @@ async def query_resources_for_barriers(
     return results
 
 
+def _compute_stop_distances(
+    resources: list[Resource], stops: list[dict],
+) -> dict[int, float]:
+    """For each resource with coordinates, find minimum distance to any transit stop."""
+    stop_coords = [(s["lat"], s["lng"]) for s in stops]
+    if not stop_coords:
+        return {}
+    distances: dict[int, float] = {}
+    for r in resources:
+        if r.lat is None or r.lng is None:
+            continue
+        min_dist = min(
+            haversine_miles(r.lat, r.lng, slat, slng)
+            for slat, slng in stop_coords
+        )
+        distances[r.id] = min_dist
+    return distances
+
+
 async def generate_plan(
     profile: UserProfile, db_session,
 ) -> ReEntryPlan:
     """Orchestrate the full matching pipeline."""
     resources = await query_resources_for_barriers(profile.primary_barriers, db_session)
-    resources = rank_resources(resources, profile)
+
+    stop_distances: dict[int, float] | None = None
+    if profile.transit_dependent:
+        stops = await get_all_transit_stops(db_session)
+        if stops:
+            stop_distances = _compute_stop_distances(resources, stops)
+
+    resources = rank_resources(resources, profile, stop_distances=stop_distances)
 
     strong, possible, after_repair = await match_jobs(profile, db_session)
 

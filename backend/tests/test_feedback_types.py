@@ -33,6 +33,7 @@ class TestResourceFeedbackRequest:
             session_id="00000000-0000-4000-8000-000000000001",
             helpful=True,
             barrier_type="credit",
+            token="test-token",
         )
         assert req.resource_id == 1
         assert req.helpful is True
@@ -41,20 +42,20 @@ class TestResourceFeedbackRequest:
         """resource_id is required."""
         with pytest.raises(ValidationError):
             ResourceFeedbackRequest(
-                session_id="00000000-0000-4000-8000-000000000001", helpful=True, barrier_type="credit"
+                session_id="00000000-0000-4000-8000-000000000001", helpful=True, barrier_type="credit", token="t"
             )
 
     def test_missing_session_id_fails(self):
         """session_id is required."""
         with pytest.raises(ValidationError):
             ResourceFeedbackRequest(
-                resource_id=1, helpful=True, barrier_type="credit"
+                resource_id=1, helpful=True, barrier_type="credit", token="t"
             )
 
     def test_barrier_type_optional(self):
         """barrier_type can be None."""
         req = ResourceFeedbackRequest(
-            resource_id=1, session_id="00000000-0000-4000-8000-000000000001", helpful=False
+            resource_id=1, session_id="00000000-0000-4000-8000-000000000001", helpful=False, token="t"
         )
         assert req.barrier_type is None
 

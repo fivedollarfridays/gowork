@@ -37,6 +37,7 @@ describe("PlanPage error handling", () => {
 
   it("shows error with link to /assess when API returns 404", async () => {
     mockSearchParams.set("session", "nonexistent-id");
+    mockSearchParams.set("token", "test-token-404");
 
     const { getPlan } = await import("@/lib/api");
     (getPlan as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
@@ -54,6 +55,7 @@ describe("PlanPage error handling", () => {
 
   it("shows generic error when API fails with non-404", async () => {
     mockSearchParams.set("session", "some-session-id");
+    mockSearchParams.set("token", "test-token-500");
 
     const { getPlan } = await import("@/lib/api");
     (getPlan as ReturnType<typeof vi.fn>).mockRejectedValueOnce(

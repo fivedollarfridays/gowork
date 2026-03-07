@@ -58,6 +58,7 @@ export interface AssessmentRequest {
   target_industries: string[];
   has_vehicle: boolean;
   schedule_constraints: ScheduleConstraints;
+  credit_result?: CreditAssessmentResult;
 }
 
 export interface UserProfile {
@@ -160,6 +161,7 @@ export interface PlanResponse {
   barriers: string[];
   qualifications: string | null;
   plan: ReEntryPlan | null;
+  credit_profile: CreditAssessmentResult | null;
 }
 
 export interface PlanNarrative {
