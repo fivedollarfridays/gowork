@@ -15,6 +15,7 @@ import { JobMatchCard, isScoredJob } from "@/components/plan/JobMatchCard";
 import { JobBucketSection } from "@/components/plan/JobBucketSection";
 import { ComparisonView } from "@/components/plan/ComparisonView";
 import { CreditResults } from "@/components/plan/CreditResults";
+import { CareerCenterExport } from "@/components/plan/CareerCenterExport";
 import { EmailExport } from "@/components/plan/EmailExport";
 import { PlanExport } from "@/components/plan/PlanExport";
 import { EmptyState } from "@/components/EmptyState";
@@ -256,6 +257,7 @@ function PlanContent() {
       {/* Export actions */}
       <Separator />
       <div className="flex flex-wrap items-center gap-3">
+        <CareerCenterExport sessionId={sessionId!} />
         <PlanExport plan={plan} creditResult={creditResult} feedbackToken={feedbackToken} />
         <EmailExport plan={plan} />
       </div>

@@ -16,6 +16,7 @@ const basePlan: ReEntryPlan = {
   credit_readiness_score: null,
   eligible_now: [],
   eligible_after_repair: [],
+  wioa_eligibility: null,
 };
 
 const baseProfile: UserProfile = {

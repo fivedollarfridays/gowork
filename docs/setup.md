@@ -92,7 +92,7 @@ cd backend
 python -m pytest tests/ -q
 ```
 
-277 tests.
+449 tests.
 
 ### Frontend
 
@@ -101,7 +101,7 @@ cd frontend
 npx vitest run
 ```
 
-82 tests.
+141 tests.
 
 ## Troubleshooting
 

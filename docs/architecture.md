@@ -416,7 +416,7 @@ Barrier severity is determined by count: 1 barrier = LOW, 2 = MEDIUM, 3+ = HIGH.
 
 1. **SQLite → PostgreSQL:** Single-file database, limited concurrent writes. Migration path: swap `aiosqlite` for `asyncpg`, update `DATABASE_URL` format (`postgresql+asyncpg://...`). Railway managed Postgres or Supabase are drop-in replacements with no schema changes required — SQLAlchemy handles the abstraction.
 
-2. **Static resource data:** Resources loaded from JSON at startup, no automated refresh. Path: nightly cron via BrightData for job listings (routes already exist at `POST /api/brightdata/precrawl`). Manual review cadence for static resources; user feedback loop (in development) handles decay detection via helpfulness signals.
+2. **Static resource data:** Resources loaded from JSON at startup, no automated refresh. Path: nightly cron via BrightData for job listings (routes already exist at `POST /api/brightdata/precrawl`). Manual review cadence for static resources; user feedback loop (implemented — resource health decay with HEALTHY/WATCH/FLAGGED/HIDDEN statuses) handles decay detection via helpfulness signals.
 
 3. **No caching layer:** All requests hit SQLite directly. Path: Redis for job listings (24h TTL) and resource queries (1h TTL). FastAPI middleware for cache-aside pattern.
 

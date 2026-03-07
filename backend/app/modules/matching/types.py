@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field
 from enum import Enum
 from typing import Optional
+
+from pydantic import BaseModel, Field
 
 from app.modules.feedback.types import ResourceHealth
 
@@ -127,9 +128,21 @@ class ReEntryPlan(BaseModel):
     resident_summary: Optional[str] = None  # AI-generated narrative (Tier 4)
     barriers: list[BarrierCard]
     job_matches: list[JobMatch]  # flat list (backward compat)
-    strong_matches: list["ScoredJobMatch"] = Field(default_factory=list)
-    possible_matches: list["ScoredJobMatch"] = Field(default_factory=list)
+    strong_matches: list[ScoredJobMatch] = Field(default_factory=list)
+    possible_matches: list[ScoredJobMatch] = Field(default_factory=list)
     immediate_next_steps: list[str]
     credit_readiness_score: Optional[int] = None  # 0-100 (from credit API)
     eligible_now: list[str] = Field(default_factory=list)
     eligible_after_repair: list[str] = Field(default_factory=list)
+    wioa_eligibility: Optional["WIOAEligibility"] = None
+
+
+class WIOAEligibility(BaseModel):
+    """WIOA program eligibility screening result."""
+
+    adult_program: bool
+    adult_reasons: list[str]
+    supportive_services: bool
+    ita_training: bool
+    dislocated_worker: str
+    confidence: str

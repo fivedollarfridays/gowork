@@ -1,16 +1,12 @@
-"""Feedback token generation — URL-safe hashes for feedback URLs."""
+"""Feedback token generation — cryptographically random URL-safe tokens."""
 
-import base64
-import hashlib
-
-from app.core.config import get_settings
+import secrets
 
 
 def generate_token(session_id: str) -> str:
-    """Generate a deterministic URL-safe token from a session ID.
+    """Generate a random URL-safe token (16 chars, ~96 bits of entropy).
 
-    Returns a 12-char base64url string (no padding).
+    The session_id parameter is accepted for interface compatibility but
+    tokens are non-deterministic — each call produces a unique token.
     """
-    secret = get_settings().feedback_token_secret
-    digest = hashlib.sha256(f"{session_id}:{secret}".encode()).digest()
-    return base64.urlsafe_b64encode(digest)[:12].decode()
+    return secrets.token_urlsafe(16)[:16]

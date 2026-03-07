@@ -1,5 +1,6 @@
 """Resource affinity routing — specialized resources claim their barrier card."""
 
+from app.modules.matching.career_center_package import CAREER_CENTER
 from app.modules.matching.scoring import BARRIER_CATEGORY_MAP
 from app.modules.matching.types import BarrierType, Resource
 
@@ -27,7 +28,7 @@ RESOURCE_AFFINITY: dict[str, BarrierType] = {
 }
 
 CAREER_CENTER_STEP = (
-    "Start here: Montgomery Career Center — 334-286-1746, 3470 Norman Bridge Rd"
+    f"Start here: {CAREER_CENTER.name} — {CAREER_CENTER.phone}, {CAREER_CENTER.address}"
 )
 
 

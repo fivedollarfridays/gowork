@@ -31,7 +31,7 @@ class VisitFeedbackRequest(BaseModel):
     made_it_to_center: int = Field(ge=0, le=2)
     outcomes: list[str] = Field(default_factory=list)
     plan_accuracy: int = Field(ge=1, le=3)
-    free_text: Optional[str] = None
+    free_text: Optional[str] = Field(default=None, max_length=1000)
 
 
 class VisitFeedbackResponse(BaseModel):

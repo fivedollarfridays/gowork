@@ -132,6 +132,25 @@ async def get_feedback_stats(db: AsyncSession, resource_id: int, window_days: in
     return {"total": row[0] or 0, "unhelpful_count": row[1] or 0}
 
 
+async def get_all_feedback_stats(db: AsyncSession, window_days: int = 30) -> list[dict]:
+    """Aggregate feedback stats for all resources in a single query."""
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=window_days)).isoformat()
+    result = await db.execute(
+        text(
+            "SELECT resource_id, COUNT(*) as total, "
+            "SUM(CASE WHEN helpful = 0 THEN 1 ELSE 0 END) as unhelpful "
+            "FROM resource_feedback "
+            "WHERE submitted_at > :cutoff "
+            "GROUP BY resource_id"
+        ),
+        {"cutoff": cutoff},
+    )
+    return [
+        {"resource_id": row[0], "total": row[1] or 0, "unhelpful_count": row[2] or 0}
+        for row in result
+    ]
+
+
 async def get_resources_with_feedback(db: AsyncSession) -> list[int]:
     """Get distinct resource IDs that have received feedback."""
     result = await db.execute(

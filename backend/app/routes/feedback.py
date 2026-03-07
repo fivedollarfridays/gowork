@@ -1,8 +1,9 @@
 """Feedback routes — resource and visit feedback endpoints."""
 
 import json
+import time
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -24,6 +25,33 @@ from app.modules.feedback.types import (
 router = APIRouter(prefix="/api/feedback", tags=["feedback"])
 
 
+class _FeedbackRateLimiter:
+    """Simple in-memory rate limiter for feedback endpoints."""
+
+    def __init__(self, max_requests: int = 20, window_seconds: int = 60):
+        self._max = max_requests
+        self._window = window_seconds
+        self._requests: dict[str, list[float]] = {}
+
+    def check(self, key: str) -> bool:
+        now = time.monotonic()
+        cutoff = now - self._window
+        timestamps = self._requests.get(key, [])
+        timestamps = [t for t in timestamps if t > cutoff]
+        if len(timestamps) >= self._max:
+            self._requests[key] = timestamps
+            return False
+        timestamps.append(now)
+        self._requests[key] = timestamps
+        return True
+
+    def clear(self) -> None:
+        self._requests.clear()
+
+
+_rate_limiter = _FeedbackRateLimiter()
+
+
 async def _require_valid_token(db: AsyncSession, token: str) -> str:
     """Validate token, raising 410 (expired) or 404 (unknown) on failure."""
     session_id = await validate_token(db, token)
@@ -37,9 +65,13 @@ async def _require_valid_token(db: AsyncSession, token: str) -> str:
 @router.post("/resource", response_model=ResourceFeedbackResponse)
 async def submit_resource_feedback(
     feedback: ResourceFeedbackRequest,
+    http_request: Request,
     db: AsyncSession = Depends(get_db),
 ) -> ResourceFeedbackResponse:
     """Record whether a resource was helpful. One vote per resource per session."""
+    client_ip = http_request.client.host if http_request.client else "unknown"
+    if not _rate_limiter.check(client_ip):
+        raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
     if not await session_exists(db, feedback.session_id):
         raise HTTPException(status_code=404, detail="Session not found")
 

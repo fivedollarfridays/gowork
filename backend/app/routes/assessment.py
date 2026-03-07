@@ -103,6 +103,7 @@ async def create_assessment(
         "credit_profile": None,
         "qualifications": request.work_history,
         "plan": None,
+        "profile": json.dumps(profile.model_dump()),
     }, session_id=session_id)
 
     plan = await generate_plan(profile, db)

@@ -66,6 +66,7 @@ const basePlan: ReEntryPlan = {
   eligible_after_repair: ["Bank Teller"],
   strong_matches: [],
   possible_matches: [],
+  wioa_eligibility: null,
 };
 
 const baseCreditResult: CreditAssessmentResult = {

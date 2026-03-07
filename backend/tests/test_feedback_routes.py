@@ -2,6 +2,15 @@
 
 import pytest
 
+from app.routes.feedback import _rate_limiter
+
+
+@pytest.fixture(autouse=True)
+def _clear_feedback_rate_limiter():
+    _rate_limiter.clear()
+    yield
+    _rate_limiter.clear()
+
 
 class TestResourceFeedbackEndpoint:
     """POST /api/feedback/resource — one-tap resource feedback."""
