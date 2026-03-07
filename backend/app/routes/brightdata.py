@@ -1,8 +1,11 @@
 """BrightData crawl routes — trigger, status, and pre-crawl."""
 
-from fastapi import APIRouter, Depends, HTTPException
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Path
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.auth import require_admin_key
 from app.core.config import get_settings
 from app.core.database import get_db
 from app.integrations.brightdata.client import BrightDataClient
@@ -18,7 +21,11 @@ from app.integrations.brightdata.types import (
     TriggerCrawlResponse,
 )
 
-router = APIRouter(prefix="/api/brightdata", tags=["brightdata"])
+router = APIRouter(
+    prefix="/api/brightdata",
+    tags=["brightdata"],
+    dependencies=[Depends(require_admin_key)],
+)
 
 
 def _require_config():
@@ -47,9 +54,12 @@ async def trigger_crawl(
     )
 
 
+SnapshotId = Annotated[str, Path(pattern=r"^[a-zA-Z0-9_-]+$", max_length=200)]
+
+
 @router.get("/status/{snapshot_id}")
 async def get_crawl_status(
-    snapshot_id: str,
+    snapshot_id: SnapshotId,
     db: AsyncSession = Depends(get_db),
 ) -> CrawlStatusResponse:
     """Check crawl status. Auto-caches results when done."""

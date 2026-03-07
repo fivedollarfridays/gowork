@@ -25,13 +25,13 @@ class TestResourceFeedbackEndpoint:
         async with factory() as session:
             await session.execute(text(
                 "INSERT INTO sessions (id, created_at, barriers, expires_at) "
-                "VALUES ('sess-fb-1', '2026-03-06', '[]', '2026-04-06')"
+                "VALUES ('00000000-0000-4000-8000-f00dbac00001', '2026-03-06', '[]', '2026-04-06')"
             ))
             await session.commit()
 
         resp = await client.post("/api/feedback/resource", json={
             "resource_id": 1,
-            "session_id": "sess-fb-1",
+            "session_id": "00000000-0000-4000-8000-f00dbac00001",
             "helpful": True,
             "barrier_type": "credit",
         })
@@ -51,13 +51,13 @@ class TestResourceFeedbackEndpoint:
         async with factory() as session:
             await session.execute(text(
                 "INSERT INTO sessions (id, created_at, barriers, expires_at) "
-                "VALUES ('sess-fb-2', '2026-03-06', '[]', '2026-04-06')"
+                "VALUES ('00000000-0000-4000-8000-f00dbac00002', '2026-03-06', '[]', '2026-04-06')"
             ))
             await session.commit()
 
         resp = await client.post("/api/feedback/resource", json={
             "resource_id": 2,
-            "session_id": "sess-fb-2",
+            "session_id": "00000000-0000-4000-8000-f00dbac00002",
             "helpful": False,
         })
         assert resp.status_code == 200
@@ -68,7 +68,7 @@ class TestResourceFeedbackEndpoint:
         """Feedback for non-existent session returns 404."""
         resp = await client.post("/api/feedback/resource", json={
             "resource_id": 1,
-            "session_id": "nonexistent-session",
+            "session_id": "00000000-0000-4000-8000-ffffffffffff",
             "helpful": True,
         })
         assert resp.status_code == 404
@@ -83,14 +83,14 @@ class TestResourceFeedbackEndpoint:
         async with factory() as session:
             await session.execute(text(
                 "INSERT INTO sessions (id, created_at, barriers, expires_at) "
-                "VALUES ('sess-fb-3', '2026-03-06', '[]', '2026-04-06')"
+                "VALUES ('00000000-0000-4000-8000-f00dbac00003', '2026-03-06', '[]', '2026-04-06')"
             ))
             await session.commit()
 
         # First vote: helpful
         resp1 = await client.post("/api/feedback/resource", json={
             "resource_id": 5,
-            "session_id": "sess-fb-3",
+            "session_id": "00000000-0000-4000-8000-f00dbac00003",
             "helpful": True,
         })
         assert resp1.status_code == 200
@@ -98,7 +98,7 @@ class TestResourceFeedbackEndpoint:
         # Second vote: not helpful (should update, not duplicate)
         resp2 = await client.post("/api/feedback/resource", json={
             "resource_id": 5,
-            "session_id": "sess-fb-3",
+            "session_id": "00000000-0000-4000-8000-f00dbac00003",
             "helpful": False,
         })
         assert resp2.status_code == 200
@@ -108,7 +108,7 @@ class TestResourceFeedbackEndpoint:
         async with factory() as session:
             result = await session.execute(text(
                 "SELECT COUNT(*) FROM resource_feedback "
-                "WHERE resource_id = 5 AND session_id = 'sess-fb-3'"
+                "WHERE resource_id = 5 AND session_id = '00000000-0000-4000-8000-f00dbac00003'"
             ))
             count = result.scalar()
             assert count == 1
@@ -116,7 +116,7 @@ class TestResourceFeedbackEndpoint:
             # Verify it's the updated value
             result = await session.execute(text(
                 "SELECT helpful FROM resource_feedback "
-                "WHERE resource_id = 5 AND session_id = 'sess-fb-3'"
+                "WHERE resource_id = 5 AND session_id = '00000000-0000-4000-8000-f00dbac00003'"
             ))
             assert result.scalar() == 0  # False = 0
 
@@ -130,13 +130,13 @@ class TestResourceFeedbackEndpoint:
         async with factory() as session:
             await session.execute(text(
                 "INSERT INTO sessions (id, created_at, barriers, expires_at) "
-                "VALUES ('sess-fb-4', '2026-03-06', '[]', '2026-04-06')"
+                "VALUES ('00000000-0000-4000-8000-f00dbac00004', '2026-03-06', '[]', '2026-04-06')"
             ))
             await session.commit()
 
         await client.post("/api/feedback/resource", json={
             "resource_id": 3,
-            "session_id": "sess-fb-4",
+            "session_id": "00000000-0000-4000-8000-f00dbac00004",
             "helpful": True,
             "barrier_type": "transportation",
         })
@@ -144,7 +144,7 @@ class TestResourceFeedbackEndpoint:
         async with factory() as session:
             result = await session.execute(text(
                 "SELECT submitted_at, barrier_type FROM resource_feedback "
-                "WHERE resource_id = 3 AND session_id = 'sess-fb-4'"
+                "WHERE resource_id = 3 AND session_id = '00000000-0000-4000-8000-f00dbac00004'"
             ))
             row = result.fetchone()
             assert row is not None
@@ -193,7 +193,6 @@ class TestValidateTokenEndpoint:
         assert resp.status_code == 200
         data = resp.json()
         assert data["valid"] is True
-        assert data["session_id"] == "sess-val-1"
 
     @pytest.mark.anyio
     async def test_expired_token_returns_410(self, client, test_engine):
@@ -290,5 +289,34 @@ class TestVisitFeedbackEndpoint:
             # made_it_to_center out of range
             "made_it_to_center": 5,
             "plan_accuracy": 1,
+        })
+        assert resp.status_code == 422
+
+
+# --- SEC-023: Info leak prevention ---
+
+class TestValidateEndpointInfoLeak:
+    """Validate endpoint should NOT return session_id."""
+
+    @pytest.mark.anyio
+    async def test_valid_token_does_not_leak_session_id(self, client, test_engine):
+        token = await _seed_session_and_token(test_engine, "sess-noleak")
+        resp = await client.get(f"/api/feedback/validate/{token}")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "session_id" not in data
+
+
+# --- SEC-012: Body field validation ---
+
+class TestResourceFeedbackSessionIdValidation:
+    """ResourceFeedbackRequest.session_id rejects non-UUID format."""
+
+    @pytest.mark.anyio
+    async def test_non_uuid_session_id_returns_422(self, client):
+        resp = await client.post("/api/feedback/resource", json={
+            "resource_id": 1,
+            "session_id": "not-a-uuid",
+            "helpful": True,
         })
         assert resp.status_code == 422

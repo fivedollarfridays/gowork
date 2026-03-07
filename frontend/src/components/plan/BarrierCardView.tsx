@@ -60,7 +60,7 @@ export function BarrierCardView({ barrier, sessionId }: BarrierCardViewProps) {
             resource_id: resourceId,
             session_id: sessionId,
             helpful: newValue,
-          }).catch(() => {});
+          }).catch((err) => console.error("Feedback failed:", err));
         }
 
         return { ...prev, [resourceId]: newValue };

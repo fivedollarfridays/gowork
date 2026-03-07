@@ -21,7 +21,7 @@ import { PlanExport } from "@/components/plan/PlanExport";
 import { EmptyState } from "@/components/EmptyState";
 import { BarrierType, EmploymentStatus, AvailableHours } from "@/lib/types";
 import type { CreditAssessmentResult, EnrichedJob, UserProfile } from "@/lib/types";
-import { barrierCountToSeverity, safeHref } from "@/lib/constants";
+import { barrierCountToSeverity, CAREER_CENTER, safeHref } from "@/lib/constants";
 
 const BARRIER_TYPE_VALUES = new Set<string>(Object.values(BarrierType));
 
@@ -318,9 +318,9 @@ function PlanContent() {
             <li><strong>Bring this plan to the Montgomery Career Center:</strong></li>
           </ol>
           <div className="ml-6 space-y-1.5 text-sm text-muted-foreground">
-            <p className="flex items-center gap-2"><MapPin className="h-4 w-4 shrink-0" /> 1060 East South Boulevard, Montgomery, AL 36116</p>
-            <p className="flex items-center gap-2"><Phone className="h-4 w-4 shrink-0" /> 334-286-1746</p>
-            <p className="flex items-center gap-2"><Clock className="h-4 w-4 shrink-0" /> Monday &ndash; Friday, 8:00 AM &ndash; 5:00 PM</p>
+            <p className="flex items-center gap-2"><MapPin className="h-4 w-4 shrink-0" /> {CAREER_CENTER.address}</p>
+            <p className="flex items-center gap-2"><Phone className="h-4 w-4 shrink-0" /> {CAREER_CENTER.phone}</p>
+            <p className="flex items-center gap-2"><Clock className="h-4 w-4 shrink-0" /> {CAREER_CENTER.hours}</p>
           </div>
           <ol start={3} className="list-decimal list-inside space-y-3 text-sm">
             <li><strong>Ask for a case manager</strong> and show them your Career Center Ready Package.</li>

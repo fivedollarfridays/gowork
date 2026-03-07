@@ -33,4 +33,5 @@ async def update_all_health_statuses(db: AsyncSession) -> int:
     for stats in all_stats:
         status = check_resource_health(stats["total"], stats["unhelpful_count"])
         await update_resource_health(db, stats["resource_id"], status)
+    await db.commit()
     return len(all_stats)

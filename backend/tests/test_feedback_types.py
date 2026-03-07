@@ -30,7 +30,7 @@ class TestResourceFeedbackRequest:
         """Valid resource feedback request should parse."""
         req = ResourceFeedbackRequest(
             resource_id=1,
-            session_id="abc-123",
+            session_id="00000000-0000-4000-8000-000000000001",
             helpful=True,
             barrier_type="credit",
         )
@@ -41,7 +41,7 @@ class TestResourceFeedbackRequest:
         """resource_id is required."""
         with pytest.raises(ValidationError):
             ResourceFeedbackRequest(
-                session_id="abc", helpful=True, barrier_type="credit"
+                session_id="00000000-0000-4000-8000-000000000001", helpful=True, barrier_type="credit"
             )
 
     def test_missing_session_id_fails(self):
@@ -54,7 +54,7 @@ class TestResourceFeedbackRequest:
     def test_barrier_type_optional(self):
         """barrier_type can be None."""
         req = ResourceFeedbackRequest(
-            resource_id=1, session_id="abc", helpful=False
+            resource_id=1, session_id="00000000-0000-4000-8000-000000000001", helpful=False
         )
         assert req.barrier_type is None
 

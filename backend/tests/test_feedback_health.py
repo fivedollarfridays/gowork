@@ -111,6 +111,7 @@ class TestUpdateResourceHealth:
         await _seed_resource(factory, 200)
         async with factory() as session:
             await update_resource_health(session, 200, ResourceHealth.FLAGGED)
+            await session.commit()
         async with factory() as session:
             result = await session.execute(text(
                 "SELECT health_status FROM resources WHERE id = 200"
@@ -173,28 +174,21 @@ class TestEngineHealthFiltering:
         assert "Visible Resource" in names
         assert "Hidden Resource" not in names
 
-    @pytest.mark.anyio
-    async def test_flagged_resources_sorted_last(self, test_engine):
-        from app.modules.matching.engine import query_resources_for_barriers
-        from app.modules.matching.types import BarrierType
-        factory = _factory(test_engine)
-        # Insert a flagged resource
-        async with factory() as session:
-            await session.execute(text(
-                "INSERT OR IGNORE INTO resources (id, name, category, health_status) "
-                "VALUES (501, 'Flagged Resource', 'career_center', 'flagged')"
-            ))
-            await session.execute(text(
-                "INSERT OR IGNORE INTO resources (id, name, category, health_status) "
-                "VALUES (502, 'Healthy Resource', 'career_center', 'healthy')"
-            ))
-            await session.commit()
+    def test_flagged_resources_sorted_last(self):
+        from app.modules.matching.scoring import rank_resources
+        from app.modules.matching.types import BarrierType, Resource, UserProfile, BarrierSeverity, EmploymentStatus
 
-        async with factory() as session:
-            resources = await query_resources_for_barriers(
-                [BarrierType.CREDIT], session,
-            )
-        # If both present, healthy should come before flagged
-        names = [r.name for r in resources]
-        if "Flagged Resource" in names and "Healthy Resource" in names:
-            assert names.index("Healthy Resource") < names.index("Flagged Resource")
+        profile = UserProfile(
+            session_id="test", zip_code="36104",
+            employment_status=EmploymentStatus.UNEMPLOYED,
+            barrier_count=1, primary_barriers=[BarrierType.CREDIT],
+            barrier_severity=BarrierSeverity.LOW,
+            needs_credit_assessment=True, transit_dependent=False,
+            schedule_type="daytime", work_history="", target_industries=[],
+        )
+        flagged = Resource(id=501, name="Flagged Resource", category="career_center", health_status=ResourceHealth.FLAGGED)
+        healthy = Resource(id=502, name="Healthy Resource", category="career_center", health_status=ResourceHealth.HEALTHY)
+
+        ranked = rank_resources([flagged, healthy], profile)
+        names = [r.name for r in ranked]
+        assert names.index("Healthy Resource") < names.index("Flagged Resource")

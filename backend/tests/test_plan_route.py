@@ -6,12 +6,27 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from httpx import ASGITransport, AsyncClient
 
+from app.ai.client import build_fallback_narrative, generate_narrative
 from app.ai.types import PlanNarrative
+from app.main import app
+from app.routes.plan import _rate_limiter
+
+
+@pytest.fixture(autouse=True)
+def _clear_plan_rate_limiter():
+    _rate_limiter.clear()
+    yield
+    _rate_limiter.clear()
 
 
 # --- Fixtures ---
 
-def _seed_session_row(session_id="test-session-abc", with_plan=False):
+_VALID_UUID = "00000000-0000-4000-8000-000000000001"
+_VALID_UUID_2 = "00000000-0000-4000-8000-000000000002"
+_MISSING_UUID = "00000000-0000-4000-8000-000000000099"
+
+
+def _seed_session_row(session_id=_VALID_UUID, with_plan=False):
     """Return a fake session row dict."""
     return {
         "id": session_id,
@@ -36,28 +51,24 @@ class TestGetPlan:
     @pytest.mark.asyncio
     async def test_valid_session_with_plan(self):
         """Returns stored plan for a valid session."""
-        from app.main import app
-
         row = _seed_session_row(with_plan=True)
         with patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
-                resp = await client.get("/api/plan/test-session-abc")
+                resp = await client.get(f"/api/plan/{_VALID_UUID}")
         assert resp.status_code == 200
         data = resp.json()
-        assert data["session_id"] == "test-session-abc"
+        assert data["session_id"] == _VALID_UUID
         assert data["plan"] is not None
 
     @pytest.mark.asyncio
     async def test_valid_session_no_plan(self):
         """Returns session with null plan when not yet generated."""
-        from app.main import app
-
         row = _seed_session_row(with_plan=False)
         with patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
-                resp = await client.get("/api/plan/test-session-abc")
+                resp = await client.get(f"/api/plan/{_VALID_UUID}")
         assert resp.status_code == 200
         data = resp.json()
         assert data["plan"] is None
@@ -65,12 +76,10 @@ class TestGetPlan:
     @pytest.mark.asyncio
     async def test_invalid_session_404(self):
         """Returns 404 for unknown session."""
-        from app.main import app
-
         with patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=None):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
-                resp = await client.get("/api/plan/nonexistent-id")
+                resp = await client.get(f"/api/plan/{_MISSING_UUID}")
         assert resp.status_code == 404
 
 
@@ -80,8 +89,6 @@ class TestGeneratePlan:
     @pytest.mark.asyncio
     async def test_generates_narrative_success(self):
         """Generates AI narrative and stores it."""
-        from app.main import app
-
         row = _seed_session_row(with_plan=True)
         narrative = PlanNarrative(
             summary="Monday morning, take Route 7 to the career center.",
@@ -94,7 +101,7 @@ class TestGeneratePlan:
         ):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
-                resp = await client.post("/api/plan/test-session-abc/generate")
+                resp = await client.post(f"/api/plan/{_VALID_UUID}/generate")
         assert resp.status_code == 200
         data = resp.json()
         assert "summary" in data
@@ -104,31 +111,25 @@ class TestGeneratePlan:
     @pytest.mark.asyncio
     async def test_generate_404_for_missing_session(self):
         """Returns 404 when session does not exist."""
-        from app.main import app
-
         with patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=None):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
-                resp = await client.post("/api/plan/nonexistent-id/generate")
+                resp = await client.post(f"/api/plan/{_MISSING_UUID}/generate")
         assert resp.status_code == 404
 
     @pytest.mark.asyncio
     async def test_generate_requires_plan(self):
         """Returns 400 when session has no plan to narrate."""
-        from app.main import app
-
         row = _seed_session_row(with_plan=False)
         with patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
-                resp = await client.post("/api/plan/test-session-abc/generate")
+                resp = await client.post(f"/api/plan/{_VALID_UUID}/generate")
         assert resp.status_code == 400
 
     @pytest.mark.asyncio
     async def test_fallback_on_api_failure(self):
         """Falls back to template narrative when Claude API fails."""
-        from app.main import app
-
         row = _seed_session_row(with_plan=True)
         fallback = PlanNarrative(
             summary="Based on your assessment, here are your next steps.",
@@ -142,7 +143,7 @@ class TestGeneratePlan:
         ):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
-                resp = await client.post("/api/plan/test-session-abc/generate")
+                resp = await client.post(f"/api/plan/{_VALID_UUID}/generate")
         assert resp.status_code == 200
         data = resp.json()
         assert "next steps" in data["summary"]
@@ -150,8 +151,6 @@ class TestGeneratePlan:
     @pytest.mark.asyncio
     async def test_fallback_runs_without_mock(self):
         """When Claude API fails, real fallback code runs and produces narrative."""
-        from app.main import app
-
         row = _seed_session_row(with_plan=True)
         # Set plan with actual barrier data so fallback has something to work with
         row["plan"] = json.dumps({
@@ -170,7 +169,7 @@ class TestGeneratePlan:
         ):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
-                resp = await client.post("/api/plan/test-session-abc/generate")
+                resp = await client.post(f"/api/plan/{_VALID_UUID}/generate")
         assert resp.status_code == 200
         data = resp.json()
         assert len(data["summary"]) > 0
@@ -179,8 +178,6 @@ class TestGeneratePlan:
     @pytest.mark.asyncio
     async def test_double_fault_returns_500(self):
         """Returns 500 when both Claude API and fallback fail."""
-        from app.main import app
-
         row = _seed_session_row(with_plan=True)
         with (
             patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row),
@@ -189,20 +186,18 @@ class TestGeneratePlan:
         ):
             transport = ASGITransport(app=app, raise_app_exceptions=False)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
-                resp = await client.post("/api/plan/test-session-abc/generate")
+                resp = await client.post(f"/api/plan/{_VALID_UUID}/generate")
         assert resp.status_code == 500
 
     @pytest.mark.asyncio
     async def test_generate_corrupt_json_returns_500(self):
         """Returns 500 when session has corrupt JSON in barriers/plan."""
-        from app.main import app
-
         row = _seed_session_row(with_plan=True)
         row["barriers"] = "not-json{{"
         with patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
-                resp = await client.post("/api/plan/test-session-abc/generate")
+                resp = await client.post(f"/api/plan/{_VALID_UUID}/generate")
         assert resp.status_code == 500
         assert "Corrupt" in resp.json()["detail"]
 
@@ -213,15 +208,13 @@ class TestGetPlanCorruptData:
     @pytest.mark.asyncio
     async def test_corrupt_json_returns_500(self):
         """Returns 500 when session plan contains invalid JSON."""
-        from app.main import app
-
         row = _seed_session_row(with_plan=False)
         row["plan"] = "not-valid-json{{"
         row["barriers"] = '["credit"]'
         with patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
-                resp = await client.get("/api/plan/test-session-abc")
+                resp = await client.get(f"/api/plan/{_VALID_UUID}")
         assert resp.status_code == 500
         assert "Corrupt" in resp.json()["detail"]
 
@@ -230,8 +223,6 @@ class TestGenerateNarrative:
     @pytest.mark.asyncio
     async def test_calls_anthropic_and_parses(self):
         """generate_narrative calls Claude and returns PlanNarrative."""
-        from app.ai.client import generate_narrative
-
         mock_message = MagicMock()
         mock_message.content = [MagicMock(text=json.dumps({
             "summary": "Take the Route 4 bus to JobLink.",
@@ -252,8 +243,6 @@ class TestGenerateNarrative:
     @pytest.mark.asyncio
     async def test_raises_on_invalid_json_from_claude(self):
         """generate_narrative raises ValueError when Claude returns bad JSON."""
-        from app.ai.client import generate_narrative
-
         mock_message = MagicMock()
         mock_message.content = [MagicMock(text="This is not JSON at all")]
         mock_client = AsyncMock()
@@ -270,8 +259,6 @@ class TestGenerateNarrative:
     @pytest.mark.asyncio
     async def test_raises_on_empty_response(self):
         """generate_narrative raises ValueError when Claude returns empty content."""
-        from app.ai.client import generate_narrative
-
         mock_message = MagicMock()
         mock_message.content = []
         mock_client = AsyncMock()
@@ -289,7 +276,6 @@ class TestGenerateNarrative:
     async def test_raises_on_timeout(self):
         """generate_narrative raises on API timeout."""
         from anthropic import APITimeoutError
-        from app.ai.client import generate_narrative
 
         mock_client = AsyncMock()
         mock_client.messages.create = AsyncMock(
@@ -310,8 +296,6 @@ class TestGenerateNarrative:
 class TestBuildFallbackNarrative:
     def test_builds_from_plan_data(self):
         """Fallback produces structured narrative from plan data."""
-        from app.ai.client import build_fallback_narrative
-
         plan_data = {
             "barriers": [
                 {"type": "credit", "title": "Credit Repair", "actions": ["Check report"],
@@ -331,8 +315,6 @@ class TestBuildFallbackNarrative:
 
     def test_empty_plan_still_works(self):
         """Fallback handles empty plan gracefully."""
-        from app.ai.client import build_fallback_narrative
-
         plan_data = {"barriers": [], "job_matches": [], "immediate_next_steps": []}
         result = build_fallback_narrative(
             barriers=[],
@@ -345,7 +327,7 @@ class TestBuildFallbackNarrative:
 
 # --- GET /api/plan/{session_id}/career-center ---
 
-def _seed_full_plan_row(session_id="sess-cc", barriers=None, credit=None):
+def _seed_full_plan_row(session_id=_VALID_UUID_2, barriers=None, credit=None):
     """Session row with a full ReEntryPlan for career-center tests."""
     b = barriers or ["credit", "transportation"]
     plan = {
@@ -377,13 +359,11 @@ class TestCareerCenterEndpoint:
     @pytest.mark.asyncio
     async def test_returns_200_with_package(self):
         """Returns career center package for valid session with plan."""
-        from app.main import app
-
         row = _seed_full_plan_row()
         with patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
-                resp = await client.get("/api/plan/sess-cc/career-center")
+                resp = await client.get(f"/api/plan/{_VALID_UUID_2}/career-center")
         assert resp.status_code == 200
         data = resp.json()
         assert "staff_summary" in data
@@ -393,37 +373,31 @@ class TestCareerCenterEndpoint:
     @pytest.mark.asyncio
     async def test_404_session_not_found(self):
         """Returns 404 when session does not exist."""
-        from app.main import app
-
         with patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=None):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
-                resp = await client.get("/api/plan/no-such/career-center")
+                resp = await client.get(f"/api/plan/{_MISSING_UUID}/career-center")
         assert resp.status_code == 404
 
     @pytest.mark.asyncio
     async def test_404_no_plan(self):
         """Returns 404 when session has no stored plan."""
-        from app.main import app
-
         row = _seed_full_plan_row()
         row["plan"] = None
         with patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
-                resp = await client.get("/api/plan/sess-cc/career-center")
+                resp = await client.get(f"/api/plan/{_VALID_UUID_2}/career-center")
         assert resp.status_code == 404
 
     @pytest.mark.asyncio
     async def test_wioa_populated_from_barriers(self):
         """WIOA eligibility reflects session barriers."""
-        from app.main import app
-
         row = _seed_full_plan_row(barriers=["credit", "childcare"])
         with patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
-                resp = await client.get("/api/plan/sess-cc/career-center")
+                resp = await client.get(f"/api/plan/{_VALID_UUID_2}/career-center")
         data = resp.json()
         wioa = data["staff_summary"]["wioa_eligibility"]
         assert wioa["adult_program"] is True
@@ -433,8 +407,6 @@ class TestCareerCenterEndpoint:
     @pytest.mark.asyncio
     async def test_credit_pathway_when_credit_data(self):
         """Credit pathway included when credit_profile exists."""
-        from app.main import app
-
         credit = {
             "barrier_severity": "high",
             "barrier_details": [],
@@ -448,7 +420,7 @@ class TestCareerCenterEndpoint:
         with patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
-                resp = await client.get("/api/plan/sess-cc/career-center")
+                resp = await client.get(f"/api/plan/{_VALID_UUID_2}/career-center")
         data = resp.json()
         assert data["credit_pathway"] is not None
         assert len(data["credit_pathway"]["dispute_steps"]) > 0
@@ -456,12 +428,64 @@ class TestCareerCenterEndpoint:
     @pytest.mark.asyncio
     async def test_no_credit_pathway_without_credit_data(self):
         """Credit pathway absent when no credit_profile stored."""
-        from app.main import app
-
         row = _seed_full_plan_row(barriers=["transportation"])
         with patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
-                resp = await client.get("/api/plan/sess-cc/career-center")
+                resp = await client.get(f"/api/plan/{_VALID_UUID_2}/career-center")
         data = resp.json()
         assert data["credit_pathway"] is None
+
+
+# --- SEC-012: Path param validation ---
+
+class TestSessionIdValidation:
+    """Non-UUID session_id in path returns 422."""
+
+    @pytest.mark.asyncio
+    async def test_get_plan_rejects_non_uuid(self):
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.get("/api/plan/not-a-uuid")
+        assert resp.status_code == 422
+
+    @pytest.mark.asyncio
+    async def test_generate_rejects_non_uuid(self):
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.post("/api/plan/not-a-uuid/generate")
+        assert resp.status_code == 422
+
+    @pytest.mark.asyncio
+    async def test_career_center_rejects_non_uuid(self):
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.get("/api/plan/not-a-uuid/career-center")
+        assert resp.status_code == 422
+
+
+# --- SEC-017: Info leak prevention ---
+
+class TestInfoLeakPrevention:
+    @pytest.mark.asyncio
+    async def test_invalid_json_logs_length_not_content(self):
+        """Logger should log response length, not raw content."""
+        raw_content = "Not JSON but contains sensitive data: SSN 123-45-6789"
+        mock_message = MagicMock()
+        mock_message.content = [MagicMock(text=raw_content)]
+        mock_client = AsyncMock()
+        mock_client.messages.create = AsyncMock(return_value=mock_message)
+
+        with (
+            patch("app.ai.client.AsyncAnthropic", return_value=mock_client),
+            patch("app.ai.client.logger") as mock_logger,
+        ):
+            with pytest.raises(ValueError, match="invalid JSON"):
+                await generate_narrative(
+                    barriers=["credit"],
+                    qualifications="CNA",
+                    plan_data={"barriers": []},
+                )
+            log_call_args = str(mock_logger.warning.call_args)
+            assert raw_content[:50] not in log_call_args
+            assert str(len(raw_content)) in log_call_args

@@ -43,7 +43,7 @@ async def generate_narrative(
     try:
         parsed = json.loads(raw)
     except json.JSONDecodeError as exc:
-        logger.warning("Claude returned invalid JSON: %s", raw[:200])
+        logger.warning("Claude returned invalid JSON (length=%d)", len(raw))
         raise ValueError("Claude returned invalid JSON") from exc
     return PlanNarrative(**parsed)
 

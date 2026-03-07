@@ -8,29 +8,29 @@ from app.modules.feedback.tokens import generate_token
 class TestGenerateToken:
     def test_produces_url_safe_string(self):
         """Token should be URL-safe (alphanumeric, -, _)."""
-        token = generate_token("session-123")
+        token = generate_token()
         assert all(c.isalnum() or c in "-_" for c in token)
 
     def test_under_20_chars(self):
         """Token should be < 20 chars."""
-        token = generate_token("session-123")
+        token = generate_token()
         assert len(token) < 20
 
     def test_non_deterministic(self):
-        """Each call produces a unique token, even for the same session_id."""
-        t1 = generate_token("session-abc")
-        t2 = generate_token("session-abc")
+        """Each call produces a unique token."""
+        t1 = generate_token()
+        t2 = generate_token()
         assert t1 != t2
 
     def test_different_calls_different_tokens(self):
         """Consecutive calls always produce different tokens."""
-        t1 = generate_token("session-1")
-        t2 = generate_token("session-2")
+        t1 = generate_token()
+        t2 = generate_token()
         assert t1 != t2
 
     def test_nonempty(self):
         """Token should not be empty."""
-        token = generate_token("x")
+        token = generate_token()
         assert len(token) > 0
 
 
@@ -99,7 +99,7 @@ class TestCreateAndValidateToken:
 
         factory = async_sessionmaker(test_engine, class_=AsyncSession)
         async with factory() as session:
-            token = generate_token("sess-expired")
+            token = generate_token()
             # Insert with already-expired date
             await session.execute(text(
                 "INSERT INTO feedback_tokens (token, session_id, created_at, expires_at) "

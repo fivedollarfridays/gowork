@@ -2,6 +2,7 @@
 
 import math
 
+from app.modules.feedback.types import ResourceHealth
 from app.modules.matching.types import BarrierType, Resource, UserProfile
 
 # Weights for scoring factors (must sum to 1.0)
@@ -160,7 +161,10 @@ def get_score_band(score: float) -> str:
 def rank_resources(
     resources: list[Resource], profile: UserProfile,
 ) -> list[Resource]:
-    """Rank resources by relevance score, descending."""
+    """Rank resources by relevance score descending. FLAGGED resources sort last."""
     scored = [(score_resource(r, profile), r) for r in resources]
-    scored.sort(key=lambda x: x[0], reverse=True)
+    scored.sort(
+        key=lambda x: (0 if x[1].health_status == ResourceHealth.FLAGGED else 1, x[0]),
+        reverse=True,
+    )
     return [r for _, r in scored]

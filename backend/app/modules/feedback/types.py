@@ -13,9 +13,12 @@ class ResourceHealth(str, Enum):
     HIDDEN = "hidden"
 
 
+_UUID_RE = r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+
+
 class ResourceFeedbackRequest(BaseModel):
     resource_id: int = Field(ge=1)
-    session_id: str
+    session_id: str = Field(pattern=_UUID_RE)
     helpful: bool
     barrier_type: Optional[str] = None
 

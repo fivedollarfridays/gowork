@@ -89,16 +89,13 @@ async def query_resources_for_barriers(
     for row in rows:
         if row["id"] not in seen_ids:
             # Exclude HIDDEN resources
-            if row.get("health_status") == ResourceHealth.HIDDEN:
+            if row.get("health_status") == ResourceHealth.HIDDEN.value:
                 continue
             seen_ids.add(row["id"])
             fields = {k: row[k] for k in Resource.model_fields if k in row}
             if isinstance(fields.get("services"), str):
                 fields["services"] = json.loads(fields["services"])
             results.append(Resource(**fields))
-
-    # Deprioritize FLAGGED resources (sort healthy/watch before flagged)
-    results.sort(key=lambda r: 1 if r.health_status == ResourceHealth.FLAGGED else 0)
 
     return results
 
@@ -120,15 +117,16 @@ async def generate_plan(
     next_steps = _build_next_steps(profile, barrier_cards, strong)
     wioa = screen_wioa_eligibility(profile)
 
+    eligible = strong + possible
     return ReEntryPlan(
         plan_id=str(uuid.uuid4()),
         session_id=profile.session_id,
         barriers=barrier_cards,
-        job_matches=strong + possible + after_repair,
+        job_matches=eligible + after_repair,
         strong_matches=strong,
         possible_matches=possible,
         immediate_next_steps=next_steps,
-        eligible_now=[m.title for m in strong + possible],
+        eligible_now=[m.title for m in eligible],
         eligible_after_repair=[m.title for m in after_repair],
         wioa_eligibility=wioa,
     )

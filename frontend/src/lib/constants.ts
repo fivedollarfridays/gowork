@@ -69,6 +69,13 @@ export function daysToMonths(days: number): string {
   return `~${months} month${months === 1 ? "" : "s"}`;
 }
 
+export const CAREER_CENTER = {
+  name: "Montgomery Career Center",
+  address: "1060 East South Boulevard, Montgomery, AL 36116",
+  phone: "334-286-1746",
+  hours: "Monday \u2013 Friday, 8:00 AM \u2013 5:00 PM",
+} as const;
+
 /** Hex colors for PDF inline styles (html2pdf.js can't use CSS vars). */
 export const PDF_SEVERITY_COLORS: Record<string, { bg: string; text: string }> = {
   low: { bg: "#dcfce7", text: "#166534" },

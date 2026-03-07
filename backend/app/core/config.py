@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     claude_model: str = "claude-sonnet-4-20250514"
     brightdata_api_key: str = ""
     brightdata_dataset_id: str = ""
+    admin_api_key: str = ""
 
     # Logging
     log_level: str = "INFO"

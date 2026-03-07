@@ -1,12 +1,16 @@
 """POST /api/credit/assess — Thin proxy to credit assessment API (/v1/assess/simple)."""
 
 import httpx
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 from app.core.config import get_settings
+from app.core.rate_limit import RateLimiter, require_rate_limit
 from app.modules.credit.types import CreditAssessmentResult, SimpleCreditRequest
 
 router = APIRouter(prefix="/api/credit", tags=["credit"])
+
+_rate_limiter = RateLimiter(max_requests=10, window_seconds=60)
+_check_rate = require_rate_limit(_rate_limiter)
 
 
 def _check_credit_response(resp: httpx.Response) -> None:
@@ -21,7 +25,10 @@ def _check_credit_response(resp: httpx.Response) -> None:
 
 
 @router.post("/assess")
-async def assess_credit(profile: SimpleCreditRequest) -> CreditAssessmentResult:
+async def assess_credit(
+    profile: SimpleCreditRequest,
+    _: None = Depends(_check_rate),
+) -> CreditAssessmentResult:
     """Proxy to the credit assessment microservice's simple endpoint."""
     settings = get_settings()
 

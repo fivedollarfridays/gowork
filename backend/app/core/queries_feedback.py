@@ -11,7 +11,7 @@ from app.modules.feedback.types import ResourceFeedbackRequest, ResourceHealth
 
 async def create_feedback_token(db: AsyncSession, session_id: str) -> str:
     """Generate and store a feedback token with 30-day expiry."""
-    token = generate_token(session_id)
+    token = generate_token()
     now = datetime.now(timezone.utc)
     expires = (now + timedelta(days=30)).isoformat()
     now = now.isoformat()
@@ -27,10 +27,11 @@ async def create_feedback_token(db: AsyncSession, session_id: str) -> str:
 
 
 async def session_exists(db: AsyncSession, session_id: str) -> bool:
-    """Check if a session exists in the database."""
+    """Check if a non-expired session exists in the database."""
+    now = datetime.now(timezone.utc).isoformat()
     result = await db.execute(
-        text("SELECT 1 FROM sessions WHERE id = :sid"),
-        {"sid": session_id},
+        text("SELECT 1 FROM sessions WHERE id = :sid AND expires_at > :now"),
+        {"sid": session_id, "now": now},
     )
     return result.fetchone() is not None
 
@@ -151,20 +152,11 @@ async def get_all_feedback_stats(db: AsyncSession, window_days: int = 30) -> lis
     ]
 
 
-async def get_resources_with_feedback(db: AsyncSession) -> list[int]:
-    """Get distinct resource IDs that have received feedback."""
-    result = await db.execute(
-        text("SELECT DISTINCT resource_id FROM resource_feedback")
-    )
-    return [row[0] for row in result]
-
-
 async def update_resource_health(
     db: AsyncSession, resource_id: int, status: ResourceHealth,
 ) -> None:
-    """Update health_status for a resource."""
+    """Update health_status for a resource. Caller must commit."""
     await db.execute(
         text("UPDATE resources SET health_status = :status WHERE id = :rid"),
         {"status": status.value, "rid": resource_id},
     )
-    await db.commit()

@@ -2,12 +2,14 @@
 
 import json
 import logging
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Path
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ai.client import build_fallback_narrative, generate_narrative
 from app.core.database import get_db
+from app.core.rate_limit import RateLimiter, require_rate_limit
 from app.core.queries import get_session_by_id, update_session_plan
 from app.modules.credit.types import CreditAssessmentResult
 from app.modules.matching.career_center_package import assemble_package
@@ -22,12 +24,18 @@ from app.routes.assessment import determine_severity
 
 logger = logging.getLogger(__name__)
 
+_UUID_RE = r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+SessionId = Annotated[str, Path(pattern=_UUID_RE)]
+
 router = APIRouter(prefix="/api/plan", tags=["plan"])
+
+_rate_limiter = RateLimiter(max_requests=5, window_seconds=60)
+_check_rate = require_rate_limit(_rate_limiter)
 
 
 @router.get("/{session_id}")
 async def get_plan(
-    session_id: str,
+    session_id: SessionId,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """Look up session and return existing plan, or 404."""
@@ -50,17 +58,16 @@ async def get_plan(
 
 @router.post("/{session_id}/generate")
 async def generate_plan_narrative(
-    session_id: str,
+    session_id: SessionId,
     db: AsyncSession = Depends(get_db),
+    _: None = Depends(_check_rate),
 ) -> dict:
     """Generate AI narrative for an existing plan. Falls back to template."""
     row = await get_session_by_id(db, session_id)
     if row is None:
         raise HTTPException(status_code=404, detail="Session not found")
-
     if not row["plan"]:
         raise HTTPException(status_code=400, detail="No plan exists for this session. Run assessment first.")
-
     try:
         barriers = json.loads(row["barriers"])
         plan_data = json.loads(row["plan"])
@@ -93,7 +100,7 @@ async def generate_plan_narrative(
 
 @router.get("/{session_id}/career-center")
 async def get_career_center_package(
-    session_id: str,
+    session_id: SessionId,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """Build and return a Career Center Ready Package for this session."""
@@ -139,7 +146,8 @@ def _build_profile_from_session(
     barriers: list[BarrierType],
     row: dict,
 ) -> UserProfile:
-    """Reconstruct a UserProfile from stored session data."""
+    """Reconstruct a UserProfile from stored session data (fallback defaults)."""
+    logger.warning("Using fallback profile for session %s (stored profile missing/corrupt)", session_id)
     return UserProfile(
         session_id=session_id,
         zip_code="36104",
