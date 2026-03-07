@@ -341,3 +341,127 @@ class TestBuildFallbackNarrative:
         )
         assert isinstance(result, PlanNarrative)
         assert len(result.summary) > 0
+
+
+# --- GET /api/plan/{session_id}/career-center ---
+
+def _seed_full_plan_row(session_id="sess-cc", barriers=None, credit=None):
+    """Session row with a full ReEntryPlan for career-center tests."""
+    b = barriers or ["credit", "transportation"]
+    plan = {
+        "plan_id": "p-cc",
+        "session_id": session_id,
+        "barriers": [
+            {"type": bt, "severity": "medium", "title": f"{bt} barrier", "actions": [f"Fix {bt}"], "resources": [], "transit_matches": []}
+            for bt in b
+        ],
+        "job_matches": [],
+        "immediate_next_steps": ["Visit Career Center"],
+        "strong_matches": [],
+        "possible_matches": [],
+        "eligible_now": [],
+        "eligible_after_repair": [],
+    }
+    return {
+        "id": session_id,
+        "created_at": "2026-03-06T12:00:00+00:00",
+        "barriers": json.dumps(b),
+        "credit_profile": json.dumps(credit) if credit else None,
+        "qualifications": "Former CNA",
+        "plan": json.dumps(plan),
+        "expires_at": "2026-03-07T12:00:00+00:00",
+    }
+
+
+class TestCareerCenterEndpoint:
+    @pytest.mark.asyncio
+    async def test_returns_200_with_package(self):
+        """Returns career center package for valid session with plan."""
+        from app.main import app
+
+        row = _seed_full_plan_row()
+        with patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.get("/api/plan/sess-cc/career-center")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "staff_summary" in data
+        assert "resident_plan" in data
+        assert data["resident_plan"]["career_center"]["name"] == "Montgomery Career Center"
+
+    @pytest.mark.asyncio
+    async def test_404_session_not_found(self):
+        """Returns 404 when session does not exist."""
+        from app.main import app
+
+        with patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=None):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.get("/api/plan/no-such/career-center")
+        assert resp.status_code == 404
+
+    @pytest.mark.asyncio
+    async def test_404_no_plan(self):
+        """Returns 404 when session has no stored plan."""
+        from app.main import app
+
+        row = _seed_full_plan_row()
+        row["plan"] = None
+        with patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.get("/api/plan/sess-cc/career-center")
+        assert resp.status_code == 404
+
+    @pytest.mark.asyncio
+    async def test_wioa_populated_from_barriers(self):
+        """WIOA eligibility reflects session barriers."""
+        from app.main import app
+
+        row = _seed_full_plan_row(barriers=["credit", "childcare"])
+        with patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.get("/api/plan/sess-cc/career-center")
+        data = resp.json()
+        wioa = data["staff_summary"]["wioa_eligibility"]
+        assert wioa["adult_program"] is True
+        assert "credit" in wioa["adult_reasons"]
+        assert "childcare" in wioa["adult_reasons"]
+
+    @pytest.mark.asyncio
+    async def test_credit_pathway_when_credit_data(self):
+        """Credit pathway included when credit_profile exists."""
+        from app.main import app
+
+        credit = {
+            "barrier_severity": "high",
+            "barrier_details": [],
+            "readiness": {"score": 45, "fico_score": 580, "score_band": "fair", "factors": {}},
+            "thresholds": [],
+            "dispute_pathway": {"steps": [{"action": "Get report"}], "total_estimated_days": 90, "statutes_cited": [], "legal_theories": []},
+            "eligibility": [],
+            "disclaimer": "Info only.",
+        }
+        row = _seed_full_plan_row(barriers=["credit"], credit=credit)
+        with patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.get("/api/plan/sess-cc/career-center")
+        data = resp.json()
+        assert data["credit_pathway"] is not None
+        assert len(data["credit_pathway"]["dispute_steps"]) > 0
+
+    @pytest.mark.asyncio
+    async def test_no_credit_pathway_without_credit_data(self):
+        """Credit pathway absent when no credit_profile stored."""
+        from app.main import app
+
+        row = _seed_full_plan_row(barriers=["transportation"])
+        with patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.get("/api/plan/sess-cc/career-center")
+        data = resp.json()
+        assert data["credit_pathway"] is None

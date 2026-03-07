@@ -85,6 +85,7 @@ export interface Resource {
   eligibility: string | null;
   services: string[] | null;
   notes: string | null;
+  health_status?: ResourceHealth;
 }
 
 export interface JobMatch {
@@ -123,6 +124,15 @@ export interface BarrierCard {
   transit_matches: TransitConnection[];
 }
 
+export interface WIOAEligibility {
+  adult_program: boolean;
+  adult_reasons: string[];
+  supportive_services: boolean;
+  ita_training: boolean;
+  dislocated_worker: string;
+  confidence: string;
+}
+
 export interface ReEntryPlan {
   plan_id: string;
   session_id: string;
@@ -135,6 +145,7 @@ export interface ReEntryPlan {
   credit_readiness_score: number | null;
   eligible_now: string[];
   eligible_after_repair: string[];
+  wioa_eligibility: WIOAEligibility | null;
 }
 
 export interface AssessmentResponse {
@@ -293,6 +304,51 @@ export interface VisitFeedbackResponse {
 export interface TokenValidation {
   valid: boolean;
   session_id?: string;
+}
+
+// --- Career Center Package types ---
+
+export interface CareerCenterInfo {
+  name: string;
+  phone: string;
+  address: string;
+  hours: string;
+  transit_route: string;
+}
+
+export interface DocumentChecklistItem {
+  label: string;
+  required: boolean;
+}
+
+export interface StaffSummary {
+  employment_goal: string;
+  barrier_profile: string[];
+  wioa_eligibility: WIOAEligibility | null;
+  staff_next_steps: string[];
+}
+
+export interface ResidentActionPlan {
+  document_checklist: DocumentChecklistItem[];
+  work_history: string;
+  what_to_say: string[];
+  what_to_expect: string[];
+  career_center: CareerCenterInfo;
+  programs: string[];
+}
+
+export interface CreditPathway {
+  blocking: string[];
+  not_blocking: string[];
+  dispute_steps: string[];
+  free_resources: string[];
+}
+
+export interface CareerCenterPackage {
+  staff_summary: StaffSummary;
+  resident_plan: ResidentActionPlan;
+  credit_pathway: CreditPathway | null;
+  generated_at: string;
 }
 
 export interface CreditFormData {

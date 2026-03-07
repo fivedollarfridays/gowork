@@ -321,3 +321,40 @@ class TestGeneratePlan:
         assert len(cr_cards[0].resources) == 2
         actions_text = " ".join(cr_cards[0].actions)
         assert "expungement" in actions_text.lower()
+
+    @pytest.mark.asyncio
+    async def test_plan_has_wioa_eligibility(self):
+        """generate_plan populates wioa_eligibility from barriers."""
+        profile = _make_profile(
+            primary_barriers=[BarrierType.CREDIT, BarrierType.CHILDCARE],
+            barrier_count=2,
+        )
+        mock_session = AsyncMock()
+        resources = [_make_resource(id=1, name="Career Center", category="career_center")]
+
+        with patch(_QUERY_PATCH, return_value=resources):
+            plan = await generate_plan(profile, mock_session)
+
+        assert plan.wioa_eligibility is not None
+        assert plan.wioa_eligibility.adult_program is True
+        assert "credit" in plan.wioa_eligibility.adult_reasons
+        assert "childcare" in plan.wioa_eligibility.adult_reasons
+
+    @pytest.mark.asyncio
+    async def test_wioa_none_when_no_qualifying_barriers(self):
+        """wioa_eligibility has adult_program=False for housing-only profile."""
+        profile = _make_profile(
+            primary_barriers=[BarrierType.HOUSING],
+            barrier_count=1,
+            barrier_severity=BarrierSeverity.LOW,
+            needs_credit_assessment=False,
+            transit_dependent=False,
+        )
+        mock_session = AsyncMock()
+        resources = [_make_resource(id=1, name="Housing Aid", category="social_service")]
+
+        with patch(_QUERY_PATCH, return_value=resources):
+            plan = await generate_plan(profile, mock_session)
+
+        assert plan.wioa_eligibility is not None
+        assert plan.wioa_eligibility.adult_program is False

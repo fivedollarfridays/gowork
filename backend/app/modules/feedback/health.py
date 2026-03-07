@@ -3,8 +3,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.queries_feedback import (
-    get_feedback_stats,
-    get_resources_with_feedback,
+    get_all_feedback_stats,
     update_resource_health,
 )
 from app.modules.feedback.types import ResourceHealth
@@ -30,11 +29,8 @@ def check_resource_health(total: int, unhelpful_count: int) -> ResourceHealth:
 
 async def update_all_health_statuses(db: AsyncSession) -> int:
     """Batch update health status for all resources with recent feedback."""
-    resource_ids = await get_resources_with_feedback(db)
-    updated = 0
-    for rid in resource_ids:
-        stats = await get_feedback_stats(db, rid)
+    all_stats = await get_all_feedback_stats(db)
+    for stats in all_stats:
         status = check_resource_health(stats["total"], stats["unhelpful_count"])
-        await update_resource_health(db, rid, status)
-        updated += 1
-    return updated
+        await update_resource_health(db, stats["resource_id"], status)
+    return len(all_stats)

@@ -1,6 +1,7 @@
 import type {
   AssessmentRequest,
   AssessmentResponse,
+  CareerCenterPackage,
   CreditAssessmentResult,
   CreditProfileRequest,
   JobsResponse,
@@ -77,4 +78,8 @@ export function validateFeedbackToken(token: string): Promise<TokenValidation> {
 
 export function submitVisitFeedback(data: VisitFeedbackRequest): Promise<VisitFeedbackResponse> {
   return apiFetch("/api/feedback/visit", { method: "POST", body: JSON.stringify(data) });
+}
+
+export function getCareerCenterPackage(sessionId: string): Promise<CareerCenterPackage> {
+  return apiFetch(`/api/plan/${sessionId}/career-center`);
 }

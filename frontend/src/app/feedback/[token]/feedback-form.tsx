@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -56,7 +56,6 @@ function RadioGroup({ name, options, selected, onChange }: RadioGroupProps) {
             checked={selected === opt.value}
             onChange={() => onChange(opt.value)}
             className="accent-primary"
-            aria-label={opt.label}
           />
           {opt.label}
         </label>
@@ -119,6 +118,8 @@ export function FeedbackForm({ token }: { token: string }) {
   const [submitted, setSubmitted] = useState(false);
   const [duplicateError, setDuplicateError] = useState(false);
 
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   const mutation = useMutation({
     mutationFn: submitVisitFeedback,
     onSuccess: () => setSubmitted(true),
@@ -126,14 +127,17 @@ export function FeedbackForm({ token }: { token: string }) {
       const msg = err instanceof Error ? err.message : "";
       if (msg.toLowerCase().includes("already submitted")) {
         setDuplicateError(true);
+      } else {
+        setSubmitError("Something went wrong. Please try again.");
       }
     },
   });
 
   const canSubmit = q1 !== null && q3 !== null && !mutation.isPending;
 
-  const handleSubmit = useCallback(() => {
+  function handleSubmit() {
     if (q1 === null || q3 === null) return;
+    setSubmitError(null);
     mutation.mutate({
       token,
       made_it_to_center: q1,
@@ -141,7 +145,7 @@ export function FeedbackForm({ token }: { token: string }) {
       plan_accuracy: q3,
       free_text: freeText,
     });
-  }, [token, q1, outcomes, q3, freeText, mutation]);
+  }
 
   // Loading state
   if (isLoading) {
@@ -255,6 +259,7 @@ export function FeedbackForm({ token }: { token: string }) {
             <textarea
               value={freeText}
               onChange={(e) => setFreeText(e.target.value)}
+              aria-label="Additional feedback (optional)"
               placeholder="Anything else you'd like to share? (optional)"
               maxLength={500}
               rows={3}
@@ -262,6 +267,10 @@ export function FeedbackForm({ token }: { token: string }) {
             />
           </CardContent>
         </Card>
+
+        {submitError && (
+          <p role="alert" className="text-sm text-destructive text-center">{submitError}</p>
+        )}
 
         <Button
           onClick={handleSubmit}

@@ -246,7 +246,8 @@ function PdfCreditInfo({ creditResult }: { creditResult: CreditAssessmentResult 
 }
 
 function PdfFeedbackQR({ token }: { token: string }) {
-  const url = `${window.location.origin}/feedback/${token}`;
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const url = `${origin}/feedback/${token}`;
   return (
     <div
       style={{

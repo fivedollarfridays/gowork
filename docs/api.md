@@ -18,6 +18,10 @@ Base URL: `http://localhost:8000`
 | POST | `/api/credit/assess` | Proxy credit assessment to the credit microservice |
 | GET | `/api/jobs/` | List job listings with optional filters |
 | GET | `/api/jobs/{job_id}` | Get a single job listing by ID |
+| POST | `/api/feedback/resource` | Submit resource helpfulness feedback |
+| GET | `/api/feedback/validate/{token}` | Validate a feedback token |
+| POST | `/api/feedback/visit` | Submit post-visit feedback |
+| GET | `/api/plan/{session_id}/career-center` | Get Career Center Ready Package |
 | POST | `/api/brightdata/crawl` | Trigger a BrightData web crawl |
 | GET | `/api/brightdata/status/{snapshot_id}` | Check crawl status and retrieve results |
 | POST | `/api/brightdata/precrawl` | Admin: pre-populate Montgomery job listings |
@@ -320,6 +324,83 @@ Retrieve an existing session plan by session ID.
 
 ```bash
 curl http://localhost:8000/api/plan/a1b2c3d4-e5f6-7890-abcd-ef1234567890
+```
+
+---
+
+### GET /api/plan/{session_id}/career-center
+
+Build and return a Career Center Ready Package for an existing session. Includes a staff summary, document checklist, what-to-say scripts, WIOA eligibility screening, and credit pathway (if credit data was provided).
+
+**Path Parameters**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `session_id` | string | UUID of the session. Must already have a plan from assessment. |
+
+**Response** `200 OK`
+
+```json
+{
+  "staff_summary": {
+    "employment_goal": "Seeking warehouse/logistics employment",
+    "barrier_profile": ["credit", "transportation"],
+    "wioa_eligibility": {
+      "adult_program": "likely_eligible",
+      "adult_reasons": ["Unemployed Montgomery resident"],
+      "supportive_services": "likely_eligible",
+      "ita_training": "likely_eligible",
+      "dislocated_worker": "needs_verification",
+      "confidence": "likely"
+    },
+    "staff_next_steps": [
+      "Verify WIOA adult program eligibility",
+      "Discuss transit assistance options"
+    ]
+  },
+  "resident_plan": {
+    "document_checklist": [
+      { "label": "Government-issued photo ID", "required": true },
+      { "label": "Social Security card", "required": true },
+      { "label": "Proof of Montgomery address", "required": true },
+      { "label": "Resume or work history", "required": false }
+    ],
+    "work_history": "3 years warehouse experience, forklift certified",
+    "what_to_say": [
+      "I completed a MontGoWork assessment and have a personalized plan.",
+      "I'd like to discuss WIOA eligibility and training options."
+    ],
+    "what_to_expect": [
+      "Check-in at the front desk with your ID",
+      "Meet with a case manager (30-45 minutes)",
+      "Review your plan and discuss next steps"
+    ],
+    "career_center": {
+      "name": "Montgomery Career Center",
+      "phone": "334-286-1746",
+      "address": "1060 East South Boulevard, Montgomery, AL 36116",
+      "hours": "Mon-Fri 8am-5pm",
+      "transit_route": "Route 6 — East South Boulevard"
+    },
+    "programs": ["WIOA Adult Program", "Supportive Services"]
+  },
+  "credit_pathway": null,
+  "generated_at": "2026-03-07T12:00:00+00:00"
+}
+```
+
+**Status Codes**
+
+| Code | Description |
+|------|-------------|
+| 200 | Career Center Package assembled |
+| 404 | Session not found or no plan exists |
+| 500 | Corrupt session data |
+
+**curl**
+
+```bash
+curl http://localhost:8000/api/plan/a1b2c3d4-e5f6-7890-abcd-ef1234567890/career-center
 ```
 
 ---
@@ -633,6 +714,155 @@ Get a single job listing by ID, enriched with transit info and application steps
 
 ```bash
 curl http://localhost:8000/api/jobs/1
+```
+
+---
+
+## Feedback
+
+### POST /api/feedback/resource
+
+Submit helpfulness feedback for a resource shown in a plan. One vote per resource per session (upserts on duplicate).
+
+**Request Body**
+
+```json
+{
+  "resource_id": 1,
+  "session_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "helpful": true,
+  "barrier_type": "credit"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `resource_id` | integer | Yes | Database ID of the resource. |
+| `session_id` | string | Yes | Session UUID from assessment. |
+| `helpful` | boolean | Yes | Whether the user found the resource helpful. |
+| `barrier_type` | string | No | The barrier type this resource was shown under. |
+
+**Response** `200 OK`
+
+```json
+{
+  "success": true,
+  "resource_id": 1,
+  "helpful": true
+}
+```
+
+**Status Codes**
+
+| Code | Description |
+|------|-------------|
+| 200 | Feedback recorded |
+| 404 | Session not found |
+| 429 | Rate limit exceeded (20 requests per 60 seconds per IP) |
+
+**curl**
+
+```bash
+curl -X POST http://localhost:8000/api/feedback/resource \
+  -H "Content-Type: application/json" \
+  -d '{
+    "resource_id": 1,
+    "session_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "helpful": true,
+    "barrier_type": "credit"
+  }'
+```
+
+---
+
+### GET /api/feedback/validate/{token}
+
+Validate a feedback token. Tokens are generated during assessment and expire after 30 days.
+
+**Path Parameters**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `token` | string | 16-character cryptographically random URL-safe token. |
+
+**Response** `200 OK` (valid)
+
+```json
+{
+  "valid": true,
+  "session_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+}
+```
+
+**Status Codes**
+
+| Code | Description |
+|------|-------------|
+| 200 | Token is valid, session_id returned |
+| 404 | Token not found |
+| 410 | Token expired |
+
+**curl**
+
+```bash
+curl http://localhost:8000/api/feedback/validate/abc123def456
+```
+
+---
+
+### POST /api/feedback/visit
+
+Submit post-visit feedback. One submission per session (returns 409 on duplicate).
+
+**Request Body**
+
+```json
+{
+  "token": "abc123def456",
+  "made_it_to_center": 1,
+  "outcomes": ["got_job_referral", "received_training_info"],
+  "plan_accuracy": 2,
+  "free_text": "The career center was very helpful."
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `token` | string | Yes | Feedback token from assessment. |
+| `made_it_to_center` | integer | Yes | 0 = did not visit, 1 = visited, 2 = plan to visit. |
+| `outcomes` | string[] | No | Outcome labels from the visit. Defaults to empty. |
+| `plan_accuracy` | integer | Yes | 1-3 rating of plan accuracy. |
+| `free_text` | string | No | Optional free-text comment. Max 1000 characters. |
+
+**Response** `200 OK`
+
+```json
+{
+  "success": true
+}
+```
+
+**Status Codes**
+
+| Code | Description |
+|------|-------------|
+| 200 | Feedback recorded |
+| 404 | Token not found |
+| 409 | Feedback already submitted for this session |
+| 410 | Token expired |
+
+**curl**
+
+```bash
+curl -X POST http://localhost:8000/api/feedback/visit \
+  -H "Content-Type: application/json" \
+  -d '{
+    "token": "abc123def456",
+    "made_it_to_center": 1,
+    "outcomes": ["got_job_referral"],
+    "plan_accuracy": 2,
+    "free_text": "Very helpful plan."
+  }'
 ```
 
 ---

@@ -21,6 +21,7 @@ from app.modules.matching.types import (
     ScoredJobMatch,
     UserProfile,
 )
+from app.modules.matching.wioa_screener import screen_wioa_eligibility
 
 # Human-readable titles for barrier types
 BARRIER_TITLES: dict[BarrierType, str] = {
@@ -117,6 +118,7 @@ async def generate_plan(
     )
     barrier_cards = _build_barrier_cards(sorted_profile, resources)
     next_steps = _build_next_steps(profile, barrier_cards, strong)
+    wioa = screen_wioa_eligibility(profile)
 
     return ReEntryPlan(
         plan_id=str(uuid.uuid4()),
@@ -128,6 +130,7 @@ async def generate_plan(
         immediate_next_steps=next_steps,
         eligible_now=[m.title for m in strong + possible],
         eligible_after_repair=[m.title for m in after_repair],
+        wioa_eligibility=wioa,
     )
 
 

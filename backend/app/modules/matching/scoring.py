@@ -70,10 +70,14 @@ def _score_barrier_alignment(resource: Resource, profile: UserProfile) -> float:
 def _score_proximity(resource: Resource, profile: UserProfile) -> float:
     """Score 0-1 based on distance. Closer = higher score."""
     user_coords = ZIP_CENTROIDS.get(profile.zip_code)
-    if not user_coords or not resource.address:
+    if not user_coords or resource.lat is None or resource.lng is None:
         return 0.5  # neutral when location unknown
-    # Resources don't have lat/lng in the Resource model, so use neutral
-    return 0.5
+    miles = _haversine_miles(user_coords[0], user_coords[1], resource.lat, resource.lng)
+    if miles <= 1.0:
+        return 1.0
+    if miles >= 15.0:
+        return 0.1
+    return 1.0 - (miles - 1.0) / 14.0 * 0.9
 
 
 def _score_transit(resource: Resource, profile: UserProfile) -> float:

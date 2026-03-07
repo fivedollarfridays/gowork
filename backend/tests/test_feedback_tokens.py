@@ -16,14 +16,14 @@ class TestGenerateToken:
         token = generate_token("session-123")
         assert len(token) < 20
 
-    def test_deterministic(self):
-        """Same session_id produces same token."""
+    def test_non_deterministic(self):
+        """Each call produces a unique token, even for the same session_id."""
         t1 = generate_token("session-abc")
         t2 = generate_token("session-abc")
-        assert t1 == t2
+        assert t1 != t2
 
-    def test_different_sessions_different_tokens(self):
-        """Different session_ids produce different tokens."""
+    def test_different_calls_different_tokens(self):
+        """Consecutive calls always produce different tokens."""
         t1 = generate_token("session-1")
         t2 = generate_token("session-2")
         assert t1 != t2

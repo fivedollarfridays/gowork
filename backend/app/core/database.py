@@ -75,6 +75,7 @@ CREATE TABLE IF NOT EXISTS sessions (
     credit_profile TEXT,
     qualifications TEXT,
     plan TEXT,
+    profile TEXT,
     expires_at TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS feedback_tokens (
