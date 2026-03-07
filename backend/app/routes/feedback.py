@@ -87,9 +87,13 @@ async def submit_resource_feedback(
 @router.get("/validate/{token}")
 async def validate_feedback_token(
     token: str,
+    http_request: Request,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """Validate a feedback token. Returns 200 if valid, 410 if expired, 404 if unknown."""
+    client_ip = http_request.client.host if http_request.client else "unknown"
+    if not _rate_limiter.check(client_ip):
+        raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
     session_id = await _require_valid_token(db, token)
     return {"valid": True, "session_id": session_id}
 
@@ -97,9 +101,13 @@ async def validate_feedback_token(
 @router.post("/visit", response_model=VisitFeedbackResponse)
 async def submit_visit_feedback(
     feedback: VisitFeedbackRequest,
+    http_request: Request,
     db: AsyncSession = Depends(get_db),
 ) -> VisitFeedbackResponse:
     """Record visit feedback. One submission per session."""
+    client_ip = http_request.client.host if http_request.client else "unknown"
+    if not _rate_limiter.check(client_ip):
+        raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
     session_id = await _require_valid_token(db, feedback.token)
 
     if await has_visit_feedback(db, session_id):

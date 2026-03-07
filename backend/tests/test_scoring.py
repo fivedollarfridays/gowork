@@ -229,3 +229,25 @@ class TestProximityUnknownZip:
         resource = _make_resource()
         score = score_resource(resource, profile)
         assert 0.0 <= score <= 1.0
+
+
+class TestProximityWithCoordinates:
+    def test_close_resource_scores_higher_than_far(self):
+        """Resource with lat/lng near the user's zip centroid should score higher."""
+        profile = _make_profile(zip_code="36104")  # centroid ~32.375, -86.296
+        close = _make_resource(
+            id=1, category="training",
+            lat=32.375, lng=-86.296,  # essentially on top of centroid
+        )
+        far = _make_resource(
+            id=2, category="training",
+            lat=32.310, lng=-86.400,  # several miles away
+        )
+        assert score_resource(close, profile) > score_resource(far, profile)
+
+    def test_resource_without_coords_gets_neutral(self):
+        """Resource missing lat/lng still gets a valid score."""
+        profile = _make_profile(zip_code="36104")
+        resource = _make_resource(category="training")  # no lat/lng
+        score = score_resource(resource, profile)
+        assert 0.0 <= score <= 1.0

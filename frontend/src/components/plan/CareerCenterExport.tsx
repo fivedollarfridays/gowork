@@ -22,10 +22,11 @@ export function CareerCenterExport({ sessionId }: CareerCenterExportProps) {
     setError(null);
     try {
       const data = await getCareerCenterPackage(sessionId);
-      setPackageData(data);
-      // Wait for React to render the print layout
-      await new Promise((r) => setTimeout(r, 0));
-      if (!contentRef.current) return;
+      const { flushSync } = await import("react-dom");
+      flushSync(() => setPackageData(data));
+      if (!contentRef.current) {
+        throw new Error("Print layout failed to render");
+      }
       const html2pdf = (await import("html2pdf.js")).default;
       const date = new Date().toISOString().split("T")[0];
       await html2pdf()

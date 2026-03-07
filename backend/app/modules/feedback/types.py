@@ -14,7 +14,7 @@ class ResourceHealth(str, Enum):
 
 
 class ResourceFeedbackRequest(BaseModel):
-    resource_id: int
+    resource_id: int = Field(ge=1)
     session_id: str
     helpful: bool
     barrier_type: Optional[str] = None
@@ -29,7 +29,7 @@ class ResourceFeedbackResponse(BaseModel):
 class VisitFeedbackRequest(BaseModel):
     token: str
     made_it_to_center: int = Field(ge=0, le=2)
-    outcomes: list[str] = Field(default_factory=list)
+    outcomes: list[str] = Field(default_factory=list, max_length=20)
     plan_accuracy: int = Field(ge=1, le=3)
     free_text: Optional[str] = Field(default=None, max_length=1000)
 

@@ -1,10 +1,10 @@
 "use client";
 
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { getPlan, getJobs } from "@/lib/api";
-import { Briefcase, ExternalLink, Loader2, Search } from "lucide-react";
+import { Briefcase, Clock, ExternalLink, Loader2, MapPin, Phone, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -91,9 +91,26 @@ function PlanSkeleton() {
   );
 }
 
-function PlanContent() {
+function useSessionId(): string | null {
   const searchParams = useSearchParams();
-  const sessionId = searchParams.get("session");
+  const fromUrl = searchParams.get("session");
+
+  useEffect(() => {
+    if (fromUrl) {
+      try { sessionStorage.setItem("montgowork_session_id", fromUrl); } catch {}
+    }
+  }, [fromUrl]);
+
+  if (fromUrl) {
+    return fromUrl;
+  }
+
+  try { return sessionStorage.getItem("montgowork_session_id"); } catch {}
+  return null;
+}
+
+function PlanContent() {
+  const sessionId = useSessionId();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["plan", sessionId],
@@ -288,6 +305,33 @@ function PlanContent() {
           </section>
         </>
       )}
+
+      {/* What's Next CTA */}
+      <Separator />
+      <Card className="border-secondary/30 bg-secondary/5">
+        <CardHeader>
+          <CardTitle className="text-xl">What&apos;s Next?</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <ol className="list-decimal list-inside space-y-3 text-sm">
+            <li><strong>Print or download your plan</strong> using the export buttons above.</li>
+            <li><strong>Bring this plan to the Montgomery Career Center:</strong></li>
+          </ol>
+          <div className="ml-6 space-y-1.5 text-sm text-muted-foreground">
+            <p className="flex items-center gap-2"><MapPin className="h-4 w-4 shrink-0" /> 1060 East South Boulevard, Montgomery, AL 36116</p>
+            <p className="flex items-center gap-2"><Phone className="h-4 w-4 shrink-0" /> 334-286-1746</p>
+            <p className="flex items-center gap-2"><Clock className="h-4 w-4 shrink-0" /> Monday &ndash; Friday, 8:00 AM &ndash; 5:00 PM</p>
+          </div>
+          <ol start={3} className="list-decimal list-inside space-y-3 text-sm">
+            <li><strong>Ask for a case manager</strong> and show them your Career Center Ready Package.</li>
+          </ol>
+          <div className="pt-2">
+            <Button asChild variant="outline" size="sm">
+              <a href="/assess">Start New Assessment</a>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
     </div>
   );

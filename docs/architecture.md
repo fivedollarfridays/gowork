@@ -127,8 +127,10 @@ sequenceDiagram
 | `/api/plan` | `routes/plan.py` | `GET /{session_id}`, `POST /{session_id}/generate` | Plan lookup, AI narrative generation |
 | `/api/credit` | `routes/credit.py` | `POST /assess` | Thin proxy to credit microservice |
 | `/api/jobs` | `routes/jobs.py` | `GET /`, `GET /{job_id}` | Job listings with barrier/transit/industry filters |
+| `/api/feedback` | `routes/feedback.py` | `POST /resource`, `GET /validate/{token}`, `POST /visit` | Resource helpfulness and post-visit feedback |
+| `/api/plan` | `routes/plan.py` | `GET /{session_id}/career-center` | Career Center Ready Package assembly |
 | `/api/brightdata` | `routes/brightdata.py` | `POST /crawl`, `GET /status/{id}`, `POST /precrawl` | BrightData crawl lifecycle |
-| `/health` | `health/checks.py` | `GET /health` | Service health checks |
+| `/health` | `health/checks.py` | `GET /health`, `GET /health/live`, `GET /health/ready` | Service health checks |
 
 ### Matching Engine
 
@@ -137,7 +139,11 @@ sequenceDiagram
 | Engine | `modules/matching/engine.py` | Orchestrates the full matching pipeline via `generate_plan()`. Queries resources and jobs, applies scoring and filters, builds barrier cards and next steps, returns a `ReEntryPlan`. |
 | Scoring | `modules/matching/scoring.py` | 5-factor weighted scoring: barrier alignment (40%), proximity (20%), transit (15%), schedule (15%), industry (10%). Ranks resources by relevance to a `UserProfile`. |
 | Filters | `modules/matching/filters.py` | Eligibility filters applied before or after scoring. Credit filter (splits jobs by severity), transit filter (M-Transit schedule constraints), childcare filter (proximity-based), certification renewal lookup. |
-| Types | `modules/matching/types.py` | Pydantic models: `AssessmentRequest`, `UserProfile`, `Resource`, `JobMatch`, `BarrierCard`, `ReEntryPlan`, enums for `BarrierType`, `BarrierSeverity`, `EmploymentStatus`, `AvailableHours`. |
+| Types | `modules/matching/types.py` | Pydantic models: `AssessmentRequest`, `UserProfile`, `Resource`, `JobMatch`, `BarrierCard`, `ReEntryPlan`, `WIOAEligibility`, enums for `BarrierType`, `BarrierSeverity`, `EmploymentStatus`, `AvailableHours`. |
+| WIOA Screener | `modules/matching/wioa_screener.py` | WIOA eligibility screening: `screen_wioa_eligibility()` evaluates adult program, supportive services, ITA, and dislocated worker eligibility. `has_expired_certification()` helper for certification renewal detection. |
+| Affinity | `modules/matching/affinity.py` | Resource affinity routing: `assign_resources()` maps barriers to specific resources using `RESOURCE_AFFINITY` and `BARRIER_PROCESSING_ORDER`. Routes Career Center to `immediate_next_steps`. |
+| Barrier Priority | `modules/matching/barrier_priority.py` | Static barrier priority ordering: `get_barrier_priority()` returns a numeric priority (childcare=1 through training=7) for deterministic barrier card ordering. |
+| Career Center Package | `modules/matching/career_center_package.py` | `assemble_package()` builds a Career Center Ready Package with staff summary, document checklist, what-to-say scripts, and credit pathway. |
 
 ### AI Module
 
@@ -146,6 +152,15 @@ sequenceDiagram
 | Client | `ai/client.py` | Calls Claude API via `AsyncAnthropic` to generate plan narratives. Includes `build_fallback_narrative()` for template-based output when the API is unavailable. |
 | Prompts | `ai/prompts.py` | System prompt (Montgomery-specific workforce navigator persona) and user prompt template (barriers, qualifications, plan data). |
 | Types | `ai/types.py` | `PlanNarrative` (summary + key_actions) and `AnalysisResult` models. |
+
+### Feedback Module
+
+| Module | File | Responsibility |
+|--------|------|---------------|
+| Tokens | `modules/feedback/tokens.py` | `generate_token()` creates cryptographically random 16-character URL-safe tokens via `secrets.token_urlsafe()`. `create_feedback_token()` and `validate_token()` handle DB storage with 30-day expiry. |
+| Health | `modules/feedback/health.py` | `check_resource_health()` evaluates helpfulness signals (HEALTHY/WATCH/FLAGGED thresholds). `get_feedback_stats()` aggregates within a 30-day window. `update_all_health_statuses()` batch updates. |
+| Types | `modules/feedback/types.py` | `ResourceHealth` enum (healthy/watch/flagged/hidden), `ResourceFeedbackRequest`, `VisitFeedbackRequest`, and response models. |
+| Queries | `core/queries_feedback.py` | Async query helpers: `insert_resource_feedback` (upsert), `token_exists`, `validate_token`, `has_visit_feedback`, `insert_visit_feedback`, `session_exists`. |
 
 ### BrightData Integration
 
@@ -186,6 +201,7 @@ Stores assessment sessions with a 24-hour expiry. The `plan` column holds the fu
 | credit_profile | TEXT | Optional JSON |
 | qualifications | TEXT | Free-text work history |
 | plan | TEXT | Serialized `ReEntryPlan` JSON |
+| profile | TEXT | Serialized `UserProfile` JSON (for career center package reconstruction) |
 | expires_at | TEXT | ISO 8601 timestamp (created_at + 24h) |
 
 #### resources
@@ -237,6 +253,47 @@ Job listings from BrightData crawls or manual seed.
 | scraped_at | TEXT | ISO 8601 timestamp |
 | expires_at | TEXT | Listing expiration |
 
+#### feedback_tokens
+
+Feedback tokens for post-visit follow-up. Generated during assessment, expire after 30 days.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| token | TEXT | Primary key (16-char cryptographically random URL-safe) |
+| session_id | TEXT | FK to sessions |
+| created_at | TEXT | ISO 8601 timestamp |
+| expires_at | TEXT | ISO 8601 timestamp (created_at + 30 days) |
+
+#### visit_feedback
+
+Post-visit feedback submitted via the `/feedback/[token]` page.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | INTEGER | Primary key (auto) |
+| session_id | TEXT | FK to sessions |
+| submitted_at | TEXT | ISO 8601 timestamp |
+| made_it_to_center | INTEGER | 0=no, 1=yes, 2=plan to |
+| outcomes | TEXT | JSON array of outcome labels |
+| plan_accuracy | INTEGER | 1-3 rating |
+| free_text | TEXT | Optional comment (max 1000 chars) |
+| reviewed | INTEGER | 0=unreviewed, 1=reviewed (default 0) |
+| action_taken | TEXT | Staff notes on follow-up |
+
+#### resource_feedback
+
+Per-resource helpfulness votes. One vote per resource per session (upsert).
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | INTEGER | Primary key (auto) |
+| resource_id | INTEGER | FK to resources |
+| session_id | TEXT | FK to sessions |
+| helpful | INTEGER | 1=helpful, 0=not helpful |
+| barrier_type | TEXT | Barrier context for the feedback |
+| submitted_at | TEXT | ISO 8601 timestamp |
+| | | UNIQUE(resource_id, session_id) |
+
 #### transit_routes
 
 Montgomery M-Transit bus routes.
@@ -275,6 +332,7 @@ The database is seeded on first startup from JSON files in the `data/` directory
 | `training_programs.json` | resources (category: training) |
 | `childcare_providers.json` | resources (category: childcare) |
 | `community_resources.json` | resources (category: social_service) |
+| `job_listings.json` | job_listings |
 
 ---
 
@@ -288,6 +346,7 @@ The database is seeded on first startup from JSON files in the `data/` directory
 | `/assess` | `app/assess/page.tsx` | Multi-step assessment wizard (basic info, barriers, optional credit, review/submit) |
 | `/plan` | `app/plan/page.tsx` | Plan results page with barrier cards, job matches, credit results, comparison view, and export options |
 | `/credit` | `app/credit/page.tsx` | Standalone credit assessment form and results display |
+| `/feedback/[token]` | `app/feedback/[token]/page.tsx` | Post-visit feedback form (mobile-first, token-validated) |
 
 ### Component Hierarchy
 
@@ -306,9 +365,13 @@ app/
       JobMatchCard                  -- Job match with eligibility badge and apply link
       ComparisonView                -- Side-by-side eligible now vs after repair comparison
       CreditResults                 -- Credit assessment results (severity, thresholds, eligibility)
-      PlanExport                    -- Download plan as formatted text
+      PlanExport                    -- Download plan as formatted PDF
       EmailExport                   -- Email plan via mailto link
+      CareerCenterExport            -- Download Career Center Ready Package as PDF
+      PdfFeedbackQR                 -- QR code linking to feedback page
     credit/page.tsx                 -- Standalone credit form
+    feedback/[token]/page.tsx       -- Post-visit feedback form
+      FeedbackForm                  -- Mobile-first 3-question form with token validation
     ErrorBoundary                   -- Global error boundary
     EmptyState                      -- Empty state placeholder
 ```
@@ -327,6 +390,10 @@ app/
 | `CreditResults` | `components/plan/CreditResults.tsx` | Renders credit assessment output: severity badge, thresholds timeline, product eligibility, and dispute pathway. |
 | `PlanExport` | `components/plan/PlanExport.tsx` | Generates a downloadable PDF of the plan via html2pdf.js. |
 | `EmailExport` | `components/plan/EmailExport.tsx` | Sends the plan via the EmailJS API to the resident's email address. |
+| `CareerCenterExport` | `components/plan/CareerCenterExport.tsx` | Fetches Career Center Ready Package, renders `CareerCenterPrintLayout` offscreen, exports as date-stamped PDF. |
+| `CareerCenterPrintLayout` | `components/plan/CareerCenterPackage.tsx` | 3-page print layout: staff summary, resident plan, credit pathway. Uses forwardRef. Exported from `CareerCenterPackage.tsx`. |
+| `PdfFeedbackQR` | `components/plan/PdfFeedbackQR.tsx` | QR code (level M, 100px) encoding the feedback page URL for inclusion in PDF exports. |
+| `FeedbackForm` | `app/feedback/[token]/feedback-form.tsx` | Mobile-first 3-question post-visit feedback form with token validation, conditional outcomes, large touch targets. |
 
 ### Data Fetching
 
@@ -339,6 +406,10 @@ The frontend uses TanStack React Query for server state management:
 | `useMutation` | `POST /api/plan/{session_id}/generate` | Auto-triggered on plan load (once) |
 | `useQuery` | `GET /api/jobs/?barriers=...` | Plan page load (after plan data available) |
 | `useMutation` | `POST /api/credit/assess` | Credit form submit (wizard or standalone) |
+| `useMutation` | `POST /api/feedback/resource` | Thumbs up/down on resource cards |
+| `useQuery` | `GET /api/feedback/validate/{token}` | Feedback page load (token validation) |
+| `useMutation` | `POST /api/feedback/visit` | Visit feedback form submit |
+| `useQuery` | `GET /api/plan/{session_id}/career-center` | Career Center export button click |
 
 ---
 
@@ -385,7 +456,7 @@ The matching engine scores each resource against a user profile using five weigh
 | Factor | Weight | Description |
 |--------|--------|-------------|
 | Barrier alignment | 0.40 | Does the resource category match the user's barriers? (1.0 if match, 0.1 base) |
-| Proximity | 0.20 | Distance from user ZIP centroid to resource. Currently neutral (0.5) as resource coordinates are not stored. |
+| Proximity | 0.20 | Haversine distance from user ZIP centroid to resource lat/lng. Linear decay: 1mi=1.0, 15mi=0.1. Returns 0.5 (neutral) when coordinates are unavailable. |
 | Transit accessibility | 0.15 | Penalizes transit-dependent users needing night (0.2) or flexible/Sunday (0.6) access due to M-Transit constraints. |
 | Schedule compatibility | 0.15 | Matches resource hours to user schedule preference (daytime, evening, night, flexible). |
 | Industry alignment | 0.10 | Checks if resource services/notes mention user's target industries. |

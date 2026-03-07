@@ -72,6 +72,8 @@ class Resource(BaseModel):
     category: str
     subcategory: Optional[str] = None
     address: Optional[str] = None
+    lat: Optional[float] = None
+    lng: Optional[float] = None
     phone: Optional[str] = None
     url: Optional[str] = None
     eligibility: Optional[str] = None

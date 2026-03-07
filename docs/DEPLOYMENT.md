@@ -191,16 +191,15 @@ Configure these in the Railway service settings:
 | Variable | Required | Value / Notes |
 |----------|----------|---------------|
 | `DATABASE_URL` | Yes | `sqlite+aiosqlite:///./montgowork.db` (default works; for volume persistence use `sqlite+aiosqlite:////app/data/montgowork.db`) |
-| `ANTHROPIC_API_KEY` | Yes | Claude API key for AI narrative generation |
-| `BRIGHTDATA_API_KEY` | Yes | BrightData API key for live job crawling |
-| `BRIGHTDATA_DATASET_ID` | Yes | Dataset ID from BrightData dashboard |
+| `ANTHROPIC_API_KEY` | No (for AI) | Claude API key for AI narrative generation; falls back to template without it |
+| `BRIGHTDATA_API_KEY` | No (for jobs) | BrightData API key for live job crawling; seed data used without it |
+| `BRIGHTDATA_DATASET_ID` | No (for jobs) | Dataset ID from BrightData dashboard |
 | `CORS_ORIGINS` | Yes | Set to your Vercel frontend URL (e.g. `https://montgowork.vercel.app`) |
-| `CREDIT_API_URL` | Optional | Defaults to `http://localhost:8001` -- update if credit service is deployed separately |
-| `CREDIT_API_KEY` | Optional | `montgowork-dev` for hackathon demo |
+| `CREDIT_API_URL` | No | Defaults to `http://localhost:8001` -- update if credit service is deployed separately |
+| `CREDIT_API_KEY` | No | API key for credit microservice authentication |
 | `ENVIRONMENT` | No | Defaults to `development`; set to `production` to disable `/docs` and `/redoc` |
 | `CLAUDE_MODEL` | No | Defaults to `claude-sonnet-4-20250514` |
 | `LOG_LEVEL` | No | Defaults to `INFO` |
-| `FEEDBACK_TOKEN_SECRET` | No | Defaults to `montgowork-feedback-v1` -- change in production |
 
 ### SQLite Persistence
 
@@ -298,7 +297,6 @@ All backend variables are read by `backend/app/core/config.py` using Pydantic Se
 | `CREDIT_API_KEY` | No | (empty) | API key for credit microservice authentication |
 | `CORS_ORIGINS` | No | `http://localhost:3000` | Comma-separated list of allowed CORS origins |
 | `LOG_LEVEL` | No | `INFO` | Logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`) |
-| `FEEDBACK_TOKEN_SECRET` | No | `montgowork-feedback-v1` | HMAC secret for feedback token generation; change in production |
 
 ### Frontend
 
