@@ -11,8 +11,8 @@ from app.main import app
 
 _VALID_UUID = "00000000-0000-4000-8000-000000000001"
 _VALID_UUID_2 = "00000000-0000-4000-8000-000000000002"
-_VALID_TOKEN = "valid-test-token-abc"
-_WRONG_TOKEN = "wrong-token-xyz"
+_VALID_TOKEN = "tok-ok"
+_WRONG_TOKEN = "tok-bad"
 
 _GET_SESSION_PATCH = "app.routes.plan.get_session_by_id"
 _VALIDATE_TOKEN_PATCH = "app.core.auth.validate_token"

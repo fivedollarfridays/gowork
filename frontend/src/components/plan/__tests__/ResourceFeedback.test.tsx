@@ -10,7 +10,7 @@ vi.mock("@/lib/api", () => ({
 }));
 
 const SESSION_ID = "test-session-123";
-const TOKEN = "test-token-abc";
+const TOKEN = "tok-abc";
 
 const barrier: BarrierCard = {
   type: BarrierType.TRANSPORTATION,

@@ -33,7 +33,7 @@ class TestResourceFeedbackRequest:
             session_id="00000000-0000-4000-8000-000000000001",
             helpful=True,
             barrier_type="credit",
-            token="test-token",
+            token="tok-t",
         )
         assert req.resource_id == 1
         assert req.helpful is True

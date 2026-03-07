@@ -81,7 +81,7 @@ describe("EmailExport ARIA attributes", () => {
       },
     }));
 
-    render(<EmailExport sessionId="sess-abc" token="tok-test" />);
+    render(<EmailExport sessionId="sess-abc" token="tok-t" />);
     const user = userEvent.setup();
 
     await user.click(screen.getByRole("button", { name: /email my plan/i }));
@@ -102,7 +102,7 @@ describe("EmailExport ARIA attributes", () => {
       },
     }));
 
-    render(<EmailExport sessionId="sess-abc" token="tok-test" />);
+    render(<EmailExport sessionId="sess-abc" token="tok-t" />);
     const user = userEvent.setup();
 
     await user.click(screen.getByRole("button", { name: /email my plan/i }));
