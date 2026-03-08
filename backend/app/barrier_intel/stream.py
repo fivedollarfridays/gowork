@@ -1,7 +1,10 @@
 """SSE streaming handler for barrier intelligence chat."""
 
 import json
+import logging
 import time
+
+logger = logging.getLogger(__name__)
 
 from app.barrier_intel.audit_log import write_audit_entry
 from app.barrier_intel.llm_client import get_llm_stream
@@ -42,11 +45,17 @@ async def stream_chat(
 
     user_prompt = build_user_prompt(body.user_question, body.mode, ctx)
     input_tokens = output_tokens = 0
-    async for text, in_tok, out_tok in get_llm_stream(user_prompt):
-        if text:
-            yield format_sse("token", {"text": text})
-        if in_tok:
-            input_tokens, output_tokens = in_tok, out_tok
+    try:
+        async for text, in_tok, out_tok in get_llm_stream(user_prompt):
+            if text:
+                yield format_sse("token", {"text": text})
+            if in_tok:
+                input_tokens, output_tokens = in_tok, out_tok
+    except Exception as exc:
+        logger.error("LLM stream error: %s", exc)
+        yield format_sse("error", {"message": _friendly_error(exc)})
+        yield format_sse("done", {"usage": {"input_tokens": 0, "output_tokens": 0}})
+        return
 
     yield format_sse("done", {"usage": {"input_tokens": input_tokens, "output_tokens": output_tokens}})
     latency_ms = (time.monotonic() - t0) * 1000
@@ -57,3 +66,14 @@ async def stream_chat(
         input_tokens=input_tokens, output_tokens=output_tokens,
         latency_ms=latency_ms, guardrail_triggered=False,
     )
+
+
+def _friendly_error(exc: Exception) -> str:
+    msg = str(exc).lower()
+    if "401" in msg or "authentication" in msg or "invalid" in msg and "key" in msg:
+        return "Invalid API key. Check your LLM provider key in .env and restart the server."
+    if "429" in msg or "rate" in msg:
+        return "Rate limit reached. Please wait a moment and try again."
+    if "quota" in msg or "billing" in msg:
+        return "API quota exceeded. Check your provider billing settings."
+    return "The AI service is temporarily unavailable. Please try again."

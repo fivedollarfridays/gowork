@@ -7,23 +7,26 @@ import pytest
 # Cycle 1: Config fields
 # ---------------------------------------------------------------------------
 
-def test_config_default_provider_is_anthropic():
+def _settings(**kwargs):
+    """Create Settings without reading .env so tests are hermetic."""
     from app.core.config import Settings
-    s = Settings(anthropic_api_key="test-key")
+    return Settings(_env_file=None, **kwargs)
+
+
+def test_config_default_provider_is_anthropic():
+    s = _settings(anthropic_api_key="test-key")
     assert s.llm_provider == "anthropic"
 
 
 def test_config_accepts_openai_provider():
-    from app.core.config import Settings
-    s = Settings(llm_provider="openai", openai_api_key="sk-test")
+    s = _settings(llm_provider="openai", openai_api_key="sk-test")
     assert s.llm_provider == "openai"
     assert s.openai_api_key == "sk-test"
     assert s.openai_model == "gpt-4o"
 
 
 def test_config_accepts_gemini_provider():
-    from app.core.config import Settings
-    s = Settings(llm_provider="gemini", gemini_api_key="gm-test")
+    s = _settings(llm_provider="gemini", gemini_api_key="gm-test")
     assert s.llm_provider == "gemini"
     assert s.gemini_api_key == "gm-test"
     assert s.gemini_model == "gemini-2.0-flash"
@@ -52,7 +55,9 @@ async def test_anthropic_stream_yields_text_and_tokens():
     mock_final.usage.output_tokens = 5
     mock_stream.get_final_message = AsyncMock(return_value=mock_final)
 
-    with patch("app.barrier_intel.llm_client.AsyncAnthropic") as mock_cls:
+    anthropic_settings = _settings(llm_provider="anthropic", anthropic_api_key="test-key")
+    with patch("app.barrier_intel.llm_client.get_settings", return_value=anthropic_settings), \
+         patch("app.barrier_intel.llm_client.AsyncAnthropic") as mock_cls:
         mock_cls.return_value.messages.stream.return_value = mock_stream
         results = []
         async for text, in_tok, out_tok in get_llm_stream("test prompt"):
@@ -121,10 +126,9 @@ async def test_gemini_stream_yields_text():
 
 def test_missing_api_key_raises_value_error():
     from app.barrier_intel.llm_client import get_llm_stream
-    from app.core.config import Settings
     from unittest.mock import patch
 
-    settings = Settings(llm_provider="openai", openai_api_key="")
+    settings = _settings(llm_provider="openai", openai_api_key="")
     with patch("app.barrier_intel.llm_client.get_settings", return_value=settings):
         with pytest.raises(ValueError, match="OPENAI_API_KEY"):
             get_llm_stream("test")
@@ -132,10 +136,9 @@ def test_missing_api_key_raises_value_error():
 
 def test_unknown_provider_raises_value_error():
     from app.barrier_intel.llm_client import get_llm_stream
-    from app.core.config import Settings
     from unittest.mock import patch
 
-    settings = Settings(llm_provider="cohere")
+    settings = _settings(llm_provider="cohere")
     with patch("app.barrier_intel.llm_client.get_settings", return_value=settings):
         with pytest.raises(ValueError, match="Unknown LLM_PROVIDER"):
             get_llm_stream("test")

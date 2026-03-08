@@ -52,6 +52,7 @@ export function BarrierIntelChat({ sessionId, sources = [] }: BarrierIntelChatPr
             key={i}
             role={m.role}
             text={m.text}
+            isError={m.isError}
             isStreaming={status === "streaming" && i === messages.length - 1 && m.role === "assistant"}
           />
         ))}

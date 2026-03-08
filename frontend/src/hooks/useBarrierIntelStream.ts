@@ -3,6 +3,7 @@ import { useState } from "react";
 export interface ChatMsg {
   role: "user" | "assistant";
   text: string;
+  isError?: boolean;
 }
 
 type Status = "idle" | "streaming" | "done" | "error";
@@ -60,6 +61,12 @@ export function useBarrierIntelStream(): StreamHook {
               }
               return msgs;
             });
+          } else if (payload.type === "error") {
+            setMessages((prev) => [
+              ...prev,
+              { role: "assistant", text: payload.message, isError: true },
+            ]);
+            setStatus("error");
           } else if (payload.type === "done") {
             setStatus("done");
           }
