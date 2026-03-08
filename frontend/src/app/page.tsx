@@ -17,7 +17,7 @@ const FLOW_STEPS = [
   {
     icon: Map,
     title: "Plan",
-    description: "Get a personalized action plan — what to do Monday morning",
+    description: "Get a personalized action plan: what to do Monday morning",
   },
 ];
 

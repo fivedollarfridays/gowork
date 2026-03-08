@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import type { BarrierCard as BarrierCardType } from "@/lib/types";
-import { BARRIER_ICONS, SEVERITY_BADGE_STYLES, humanizeLabel } from "@/lib/constants";
+import { BARRIER_ICONS, SEVERITY_BADGE_STYLES, humanizeLabel, mapsUrl } from "@/lib/constants";
 import { submitResourceFeedback } from "@/lib/api";
 
 const INITIAL_RESOURCE_COUNT = 2;
@@ -27,7 +27,7 @@ function loadFeedbackState(sessionId: string, resourceIds: number[]): FeedbackSt
   if (typeof window === "undefined") return {};
   const state: FeedbackState = {};
   for (const id of resourceIds) {
-    const stored = sessionStorage.getItem(`feedback_${sessionId}_${id}`);
+    const stored = localStorage.getItem(`feedback_${sessionId}_${id}`);
     state[id] = stored === "true" ? true : stored === "false" ? false : null;
   }
   return state;
@@ -54,9 +54,9 @@ export function BarrierCardView({ barrier, sessionId, token }: BarrierCardViewPr
         const newValue = current === helpful ? null : helpful;
 
         if (newValue === null) {
-          sessionStorage.removeItem(`feedback_${sessionId}_${resourceId}`);
+          localStorage.removeItem(`feedback_${sessionId}_${resourceId}`);
         } else {
-          sessionStorage.setItem(`feedback_${sessionId}_${resourceId}`, String(newValue));
+          localStorage.setItem(`feedback_${sessionId}_${resourceId}`, String(newValue));
           submitResourceFeedback({
             resource_id: resourceId,
             session_id: sessionId,
@@ -127,7 +127,7 @@ export function BarrierCardView({ barrier, sessionId, token }: BarrierCardViewPr
                       </div>
                       {resource.address && (
                         <a
-                          href={`https://maps.google.com/?q=${encodeURIComponent(resource.address)}`}
+                          href={mapsUrl(resource.address)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center gap-1 mt-1 text-xs text-muted-foreground hover:text-secondary hover:underline"
@@ -210,7 +210,7 @@ export function BarrierCardView({ barrier, sessionId, token }: BarrierCardViewPr
               <div className="flex flex-wrap gap-2">
                 {barrier.transit_matches.map((t) => (
                   <Badge key={t.route_number} variant="secondary" className="text-xs">
-                    Route {t.route_number} — {t.route_name}
+                    Route {t.route_number}: {t.route_name}
                   </Badge>
                 ))}
               </div>

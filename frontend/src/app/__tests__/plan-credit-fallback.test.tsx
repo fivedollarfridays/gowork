@@ -49,10 +49,10 @@ describe("PlanPage credit data fallback", () => {
   beforeEach(() => {
     mockSearchParams.delete("session");
     mockSearchParams.delete("token");
-    sessionStorage.clear();
+    localStorage.clear();
   });
 
-  it("falls back to backend credit_profile when sessionStorage is empty", async () => {
+  it("falls back to backend credit_profile when localStorage is empty", async () => {
     mockSearchParams.set("session", "sess-credit-test");
     mockSearchParams.set("token", "test-token");
 
@@ -79,7 +79,7 @@ describe("PlanPage credit data fallback", () => {
     });
   });
 
-  it("uses sessionStorage credit data when available (faster)", async () => {
+  it("uses localStorage credit data when available (faster)", async () => {
     mockSearchParams.set("session", "sess-credit-test");
     mockSearchParams.set("token", "test-token");
 
@@ -92,7 +92,7 @@ describe("PlanPage credit data fallback", () => {
       eligibility: [],
       disclaimer: "Info only.",
     };
-    sessionStorage.setItem("credit_sess-credit-test", JSON.stringify(localCredit));
+    localStorage.setItem("credit_sess-credit-test", JSON.stringify(localCredit));
 
     const { getPlan } = await import("@/lib/api");
     (getPlan as ReturnType<typeof vi.fn>).mockResolvedValueOnce({

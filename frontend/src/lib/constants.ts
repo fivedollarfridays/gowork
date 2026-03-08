@@ -26,6 +26,10 @@ export function humanizeLabel(s: string): string {
   return s.replaceAll("_", " ");
 }
 
+export function mapsUrl(address: string): string {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+}
+
 export function safeHref(url: string): string | undefined {
   try {
     const parsed = new URL(url, "https://placeholder.invalid");

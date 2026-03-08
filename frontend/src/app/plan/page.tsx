@@ -3,8 +3,8 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { getPlan, getJobs } from "@/lib/api";
-import { Briefcase, Clock, ExternalLink, Loader2, MapPin, Phone, Search } from "lucide-react";
+import { getPlan } from "@/lib/api";
+import { Clock, Loader2, MapPin, Phone, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,8 +21,8 @@ import { EmailExport } from "@/components/plan/EmailExport";
 import { PlanExport } from "@/components/plan/PlanExport";
 import { EmptyState } from "@/components/EmptyState";
 import { BarrierType, EmploymentStatus, AvailableHours } from "@/lib/types";
-import type { CreditAssessmentResult, EnrichedJob, UserProfile } from "@/lib/types";
-import { barrierCountToSeverity, CAREER_CENTER, safeHref } from "@/lib/constants";
+import type { CreditAssessmentResult, UserProfile } from "@/lib/types";
+import { barrierCountToSeverity, CAREER_CENTER, mapsUrl } from "@/lib/constants";
 
 const BARRIER_TYPE_VALUES = new Set<string>(Object.values(BarrierType));
 
@@ -43,39 +43,6 @@ function buildProfileFromPlan(sessionId: string, barriers: string[]): UserProfil
   };
 }
 
-function LiveJobCard({ job }: { job: EnrichedJob }) {
-  const href = job.url ? safeHref(job.url) : undefined;
-  return (
-    <Card>
-      <CardHeader className="pb-3">
-        <div className="flex items-start gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted">
-            <Briefcase className="h-5 w-5 text-foreground/70" />
-          </div>
-          <div>
-            <CardTitle className="text-base">{job.title}</CardTitle>
-            {job.company && <p className="text-sm text-muted-foreground">{job.company}</p>}
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="flex flex-wrap gap-1.5">
-          {job.industry && <Badge variant="secondary" className="text-xs">{job.industry}</Badge>}
-          {job.credit_check_required === "required" && (
-            <Badge variant="outline" className="text-xs text-accent-foreground border-accent/30 bg-accent/10">Credit check required</Badge>
-          )}
-        </div>
-        {href && (
-          <Button variant="outline" size="sm" className="gap-1.5" asChild>
-            <a href={href} target="_blank" rel="noopener noreferrer">
-              Apply <ExternalLink className="h-3.5 w-3.5" />
-            </a>
-          </Button>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
 
 function PlanSkeleton() {
   return (
@@ -92,43 +59,49 @@ function PlanSkeleton() {
   );
 }
 
-function useSessionId(): string | null {
+function useClientStorage(key: string | null): { value: string | null; ready: boolean } {
+  const [state, setState] = useState<{ value: string | null; ready: boolean }>({ value: null, ready: false });
+  useEffect(() => {
+    if (!key) { setState({ value: null, ready: true }); return; }
+    try { setState({ value: localStorage.getItem(key), ready: true }); } catch { setState({ value: null, ready: true }); }
+  }, [key]);
+  return state;
+}
+
+function useSessionId(): { id: string | null; ready: boolean } {
   const searchParams = useSearchParams();
   const fromUrl = searchParams.get("session");
+  const stored = useClientStorage(fromUrl ? null : "montgowork_session_id");
 
   useEffect(() => {
     if (fromUrl) {
-      try { sessionStorage.setItem("montgowork_session_id", fromUrl); } catch {}
+      try { localStorage.setItem("montgowork_session_id", fromUrl); } catch {}
     }
   }, [fromUrl]);
 
-  if (fromUrl) {
-    return fromUrl;
-  }
-
-  try { return sessionStorage.getItem("montgowork_session_id"); } catch {}
-  return null;
+  if (fromUrl) return { id: fromUrl, ready: true };
+  return { id: stored.value, ready: stored.ready };
 }
 
-function useToken(sessionId: string | null): string | null {
+function useToken(sessionId: string | null): { token: string | null; ready: boolean } {
   const searchParams = useSearchParams();
   const fromUrl = searchParams.get("token");
+  const storageKey = (!fromUrl && sessionId) ? `feedback_token_${sessionId}` : null;
+  const stored = useClientStorage(storageKey);
 
   useEffect(() => {
     if (fromUrl && sessionId) {
-      try { sessionStorage.setItem(`feedback_token_${sessionId}`, fromUrl); } catch {}
+      try { localStorage.setItem(`feedback_token_${sessionId}`, fromUrl); } catch {}
     }
   }, [fromUrl, sessionId]);
 
-  if (fromUrl) return fromUrl;
-  if (!sessionId || typeof window === "undefined") return null;
-  try { return sessionStorage.getItem(`feedback_token_${sessionId}`); } catch {}
-  return null;
+  if (fromUrl) return { token: fromUrl, ready: true };
+  return { token: stored.value, ready: stored.ready };
 }
 
 function PlanContent() {
-  const sessionId = useSessionId();
-  const token = useToken(sessionId);
+  const { id: sessionId, ready: sessionReady } = useSessionId();
+  const { token, ready: tokenReady } = useToken(sessionId);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["plan", sessionId, token],
@@ -136,33 +109,22 @@ function PlanContent() {
     enabled: !!sessionId && !!token,
   });
 
-  const barriers = data?.barriers ?? [];
-  const barrierParam = barriers.length > 0 ? barriers.join(",") : undefined;
-
-  const { data: liveJobs, isLoading: liveJobsLoading } = useQuery({
-    queryKey: ["liveJobs", barrierParam],
-    queryFn: () => getJobs({ barriers: barrierParam }),
-    enabled: !!data,
-  });
-
   const plan = data?.plan ?? null;
 
-  // Load credit assessment: sessionStorage first (faster), backend fallback
-  const [localCredit] = useState<CreditAssessmentResult | null>(() => {
-    if (!sessionId || typeof window === "undefined") return null;
-    try {
-      const stored = sessionStorage.getItem(`credit_${sessionId}`);
-      return stored ? JSON.parse(stored) : null;
-    } catch {
-      return null;
-    }
-  });
+  // Load credit assessment: localStorage first (faster), backend fallback
+  const storedCredit = useClientStorage(sessionId ? `credit_${sessionId}` : null);
+  const localCredit = useMemo<CreditAssessmentResult | null>(() => {
+    if (!storedCredit.value) return null;
+    try { return JSON.parse(storedCredit.value); } catch { return null; }
+  }, [storedCredit.value]);
   const creditResult = localCredit ?? data?.credit_profile ?? null;
 
   const profile = useMemo(
     () => data ? buildProfileFromPlan(data.session_id, data.barriers) : null,
     [data],
   );
+
+  if (!sessionReady || !tokenReady || isLoading) return <PlanSkeleton />;
 
   if (!sessionId || !token) {
     return (
@@ -174,8 +136,6 @@ function PlanContent() {
       </div>
     );
   }
-
-  if (isLoading) return <PlanSkeleton />;
 
   if (error) {
     const msg = error instanceof Error ? error.message : String(error);
@@ -210,6 +170,9 @@ function PlanContent() {
       <MondayMorning
         plan={plan}
         profile={profile}
+        firstStepAction={
+          <CareerCenterExport sessionId={sessionId} token={token ?? undefined} />
+        }
       />
 
       <Separator />
@@ -251,7 +214,7 @@ function PlanContent() {
       <Separator />
 
       {/* Job matches — three-bucket display */}
-      <section className="space-y-6">
+      <section id="matched-jobs" className="space-y-6 scroll-mt-8">
         {(plan.strong_matches?.length ?? 0) > 0 || (plan.possible_matches?.length ?? 0) > 0 || (plan.after_repair?.length ?? 0) > 0 ? (
           <>
             <JobBucketSection
@@ -293,41 +256,6 @@ function PlanContent() {
       {/* Comparison view */}
       <ComparisonView plan={plan} profile={profile} creditResult={creditResult} />
 
-      {/* Export actions */}
-      <Separator />
-      <div className="flex flex-wrap items-center gap-3">
-        <CareerCenterExport sessionId={sessionId} token={token ?? undefined} />
-        <PlanExport plan={plan} creditResult={creditResult} feedbackToken={token} />
-        <EmailExport sessionId={sessionId} token={token ?? undefined} />
-      </div>
-
-      {/* Explore More Jobs — live listings from job_listings table */}
-      {liveJobsLoading && (
-        <>
-          <Separator />
-          <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Loading live job listings...
-          </div>
-        </>
-      )}
-      {liveJobs && liveJobs.jobs.length > 0 && (
-        <>
-          <Separator />
-          <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-primary">Explore More Jobs</h2>
-            <p className="text-sm text-muted-foreground">
-              Live job listings from Montgomery, AL job boards.
-            </p>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {liveJobs.jobs.map((job) => (
-                <LiveJobCard key={`live-${job.id}`} job={job} />
-              ))}
-            </div>
-          </section>
-        </>
-      )}
-
       {/* What's Next CTA */}
       <Separator />
       <Card className="border-secondary/30 bg-secondary/5">
@@ -336,18 +264,38 @@ function PlanContent() {
         </CardHeader>
         <CardContent className="space-y-4">
           <ol className="list-decimal list-inside space-y-3 text-sm">
-            <li><strong>Print or download your plan</strong> using the export buttons above.</li>
+            <li><strong>Download your Career Center Ready Package</strong> <span className="text-muted-foreground">using the button in Step 1 above.</span></li>
             <li><strong>Bring this plan to the Montgomery Career Center:</strong></li>
           </ol>
           <div className="ml-6 space-y-1.5 text-sm text-muted-foreground">
-            <p className="flex items-center gap-2"><MapPin className="h-4 w-4 shrink-0" /> {CAREER_CENTER.address}</p>
-            <p className="flex items-center gap-2"><Phone className="h-4 w-4 shrink-0" /> {CAREER_CENTER.phone}</p>
+            <p className="flex items-center gap-2">
+              <MapPin className="h-4 w-4 shrink-0" />
+              <a
+                href={mapsUrl(CAREER_CENTER.address)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-foreground transition-colors"
+              >
+                {CAREER_CENTER.address}
+              </a>
+            </p>
+            <p className="flex items-center gap-2">
+              <Phone className="h-4 w-4 shrink-0" />
+              <a
+                href={`tel:${CAREER_CENTER.phone.replace(/[^+\d]/g, "")}`}
+                className="underline hover:text-foreground transition-colors"
+              >
+                {CAREER_CENTER.phone}
+              </a>
+            </p>
             <p className="flex items-center gap-2"><Clock className="h-4 w-4 shrink-0" /> {CAREER_CENTER.hours}</p>
           </div>
           <ol start={3} className="list-decimal list-inside space-y-3 text-sm">
             <li><strong>Ask for a case manager</strong> and show them your Career Center Ready Package.</li>
           </ol>
-          <div className="pt-2">
+          <div className="flex flex-wrap items-center gap-3 pt-2">
+            <PlanExport plan={plan} creditResult={creditResult} feedbackToken={token} />
+            <EmailExport sessionId={sessionId} token={token ?? undefined} />
             <Button asChild variant="outline" size="sm">
               <a href="/assess">Start New Assessment</a>
             </Button>

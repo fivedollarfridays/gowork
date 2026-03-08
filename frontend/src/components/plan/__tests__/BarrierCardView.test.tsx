@@ -39,7 +39,7 @@ describe("BarrierCardView clickable contacts", () => {
     render(<BarrierCardView barrier={barrier} />);
 
     const mapLink = screen.getByRole("link", { name: /1060 East South Boulevard/ });
-    expect(mapLink.getAttribute("href")).toContain("maps.google.com");
+    expect(mapLink.getAttribute("href")).toContain("google.com/maps/search");
     expect(mapLink.getAttribute("href")).toContain(
       encodeURIComponent("1060 East South Boulevard, Montgomery, AL 36116")
     );

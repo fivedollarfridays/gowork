@@ -56,15 +56,17 @@ export default function AssessPage() {
   const zipValid = isValidMontgomeryZip(formData.zipCode);
   const barrierCount = Object.values(formData.barriers).filter(Boolean).length;
   const hasCreditBarrier = formData.barriers[BarrierType.CREDIT];
+  const hasResume = resumeText.trim().length > 0;
+  const resumeWordCount = useMemo(() => resumeText.split(/\s+/).filter(Boolean).length, [resumeText]);
 
   const mutation = useMutation({
     mutationFn: postAssessment,
     onSuccess: (data) => {
       if (creditResultRef.current) {
-        sessionStorage.setItem(`credit_${data.session_id}`, JSON.stringify(creditResultRef.current));
+        localStorage.setItem(`credit_${data.session_id}`, JSON.stringify(creditResultRef.current));
       }
       if (data.feedback_token) {
-        sessionStorage.setItem(`feedback_token_${data.session_id}`, data.feedback_token);
+        localStorage.setItem(`feedback_token_${data.session_id}`, data.feedback_token);
       }
       router.push(`/plan?session=${data.session_id}`);
     },
@@ -290,7 +292,7 @@ export default function AssessPage() {
     {
       title: "Review & Submit",
       icon: <FileText className="h-4 w-4" />,
-      canAdvance: () => formData.workHistory.trim().length > 0 && !mutation.isPending,
+      canAdvance: () => (formData.workHistory.trim().length > 0 || hasResume) && !mutation.isPending,
       content: () => (
         <div className="space-y-6">
           <div>
@@ -300,15 +302,35 @@ export default function AssessPage() {
             </p>
           </div>
 
+          {hasResume ? (
+            <div className="rounded-lg border p-4 bg-muted/30 space-y-2">
+              <div className="flex justify-between items-center">
+                <h3 className="text-sm font-medium">Resume Uploaded</h3>
+                <Badge variant="secondary" className="text-xs">
+                  {resumeWordCount} words extracted
+                </Badge>
+              </div>
+              {!formData.workHistory.trim() ? (
+                <p className="text-xs text-muted-foreground">Your resume will be used for job matching.</p>
+              ) : (
+                <p className="text-xs text-muted-foreground">Your resume and work history will both be used.</p>
+              )}
+            </div>
+          ) : null}
+
           <div className="space-y-2">
-            <label htmlFor="work-history" className="text-sm font-medium">Work History</label>
+            <label htmlFor="work-history" className="text-sm font-medium">
+              Work History {hasResume ? "(optional, resume uploaded)" : ""}
+            </label>
             <textarea
               id="work-history"
               value={formData.workHistory}
               onChange={(e) => setFormData({ ...formData, workHistory: e.target.value })}
-              placeholder="Describe your work experience, certifications, or skills..."
+              placeholder={hasResume
+                ? "Add anything not covered in your resume..."
+                : "Describe your work experience, certifications, or skills..."}
               maxLength={500}
-              rows={4}
+              rows={hasResume ? 2 : 4}
               className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             />
             <p className="text-xs text-muted-foreground text-right">{formData.workHistory.length}/500</p>
@@ -345,6 +367,12 @@ export default function AssessPage() {
                 <span className="text-muted-foreground">Schedule</span>
                 <span className="font-medium capitalize">{humanizeLabel(formData.availableHours)}</span>
               </div>
+              {hasResume && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Resume</span>
+                  <span className="font-medium">Uploaded</span>
+                </div>
+              )}
               {hasCreditBarrier && (
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Credit Score</span>

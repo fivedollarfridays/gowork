@@ -13,7 +13,7 @@ function StaffSummarySection({ data }: { data: CCPackage }) {
   return (
     <div>
       <h1 style={pageHeading}>
-        Career Center Ready Package — Staff Summary
+        Career Center Ready Package: Staff Summary
       </h1>
       <div style={spacing}>
         <h2 style={subheading}>Employment Goal</h2>
