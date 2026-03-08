@@ -51,6 +51,21 @@ describe("JobMatchCard with ScoredJobMatch", () => {
     render(<JobMatchCard job={afterRepairJob} />);
     expect(screen.getByText("Credit Check")).toBeInTheDocument();
   });
+
+  it("displays green pay badge when pay_range is present", () => {
+    render(<JobMatchCard job={{ ...strongJob, pay_range: "$15.00/hr" }} />);
+    expect(screen.getByText("$15.00/hr")).toBeInTheDocument();
+  });
+
+  it("displays amber 'Pay not disclosed' badge when pay_range is null", () => {
+    render(<JobMatchCard job={{ ...strongJob, pay_range: null }} />);
+    expect(screen.getByText("Pay not disclosed")).toBeInTheDocument();
+  });
+
+  it("displays amber badge when pay_range is undefined", () => {
+    render(<JobMatchCard job={strongJob} />);
+    expect(screen.getByText("Pay not disclosed")).toBeInTheDocument();
+  });
 });
 
 const possibleJob: ScoredJobMatch = {

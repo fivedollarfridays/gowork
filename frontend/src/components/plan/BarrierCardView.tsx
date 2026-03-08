@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import type { BarrierCard as BarrierCardType } from "@/lib/types";
-import { BARRIER_ICONS, SEVERITY_BADGE_STYLES, humanizeLabel, mapsUrl } from "@/lib/constants";
+import { BARRIER_ICONS, SEVERITY_BADGE_STYLES, humanizeLabel, mapsUrl, toTelHref } from "@/lib/constants";
 import { submitResourceFeedback } from "@/lib/api";
 
 const INITIAL_RESOURCE_COUNT = 2;
@@ -130,7 +130,7 @@ export function BarrierCardView({ barrier, sessionId, token }: BarrierCardViewPr
                           href={mapsUrl(resource.address)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-1 mt-1 text-xs text-muted-foreground hover:text-secondary hover:underline"
+                          className="flex items-center gap-1.5 mt-1 text-xs text-secondary hover:underline"
                         >
                           <MapPin className="h-3 w-3 shrink-0" />
                           {resource.address}
@@ -138,8 +138,8 @@ export function BarrierCardView({ barrier, sessionId, token }: BarrierCardViewPr
                       )}
                       {resource.phone && (
                         <a
-                          href={`tel:${resource.phone}`}
-                          className="flex items-center gap-1 mt-0.5 text-xs text-muted-foreground hover:text-secondary hover:underline"
+                          href={toTelHref(resource.phone)}
+                          className="flex items-center gap-1.5 mt-0.5 text-xs text-secondary hover:underline"
                         >
                           <Phone className="h-3 w-3 shrink-0" />
                           {resource.phone}
