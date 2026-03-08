@@ -22,6 +22,7 @@ RESOURCE_AFFINITY: dict[str, BarrierType] = {
     "dhr": BarrierType.CHILDCARE,
     "department of human resources": BarrierType.CHILDCARE,
     "childcare": BarrierType.CHILDCARE,
+    "credit": BarrierType.CREDIT,
     "mrwtc": BarrierType.TRAINING,
     "montgomery regional workforce": BarrierType.TRAINING,
     "workforce training": BarrierType.TRAINING,

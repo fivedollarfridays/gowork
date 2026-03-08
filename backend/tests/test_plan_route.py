@@ -486,3 +486,39 @@ class TestCareerCenterEndpoint:
                 resp = await client.get(f"/api/plan/{_VALID_UUID_2}/career-center{_token_query(_VALID_UUID_2)}")
         data = resp.json()
         assert data["credit_pathway"] is None
+
+    @pytest.mark.asyncio
+    async def test_corrupt_json_in_career_center_returns_500(self):
+        """Returns 500 when career-center endpoint encounters corrupt JSON."""
+        row = _seed_full_plan_row()
+        row["barriers"] = "not-json{{"
+        with patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.get(f"/api/plan/{_VALID_UUID_2}/career-center{_token_query(_VALID_UUID_2)}")
+        assert resp.status_code == 500
+        assert "Corrupt" in resp.json()["detail"]
+
+    @pytest.mark.asyncio
+    async def test_corrupt_profile_uses_fallback(self):
+        """Falls back to _build_profile_from_session when profile JSON is corrupt."""
+        row = _seed_full_plan_row()
+        row["profile"] = "not-valid-json"
+        with patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.get(f"/api/plan/{_VALID_UUID_2}/career-center{_token_query(_VALID_UUID_2)}")
+        assert resp.status_code == 200
+
+    @pytest.mark.asyncio
+    async def test_invalid_credit_profile_ignored(self):
+        """Invalid credit_profile JSON logs warning and returns credit_pathway=None."""
+        row = _seed_full_plan_row()
+        row["credit_profile"] = "not-json{{"
+        with patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.get(f"/api/plan/{_VALID_UUID_2}/career-center{_token_query(_VALID_UUID_2)}")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["credit_pathway"] is None

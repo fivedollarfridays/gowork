@@ -5,7 +5,7 @@ import json
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.audit import audit_log
+from app.core.audit import audit_log, get_client_ip
 from app.core.auth import require_session_token
 from app.core.database import get_db
 from app.core.queries_feedback import (
@@ -51,8 +51,7 @@ async def submit_resource_feedback(
 
     await insert_resource_feedback(db, feedback)
 
-    client_ip = request.client.host if request.client else "unknown"
-    audit_log("feedback_resource", session_id=feedback.session_id, client_ip=client_ip,
+    audit_log("feedback_resource", session_id=feedback.session_id, client_ip=get_client_ip(request),
               resource_id=feedback.resource_id, helpful=feedback.helpful)
 
     return ResourceFeedbackResponse(
@@ -95,7 +94,6 @@ async def submit_visit_feedback(
         free_text=feedback.free_text,
     )
 
-    client_ip = request.client.host if request.client else "unknown"
-    audit_log("feedback_visit", session_id=session_id, client_ip=client_ip)
+    audit_log("feedback_visit", session_id=session_id, client_ip=get_client_ip(request))
 
     return VisitFeedbackResponse(success=True)

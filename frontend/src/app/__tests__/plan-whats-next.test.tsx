@@ -40,6 +40,7 @@ describe("PlanPage What's Next CTA", () => {
         job_matches: [],
         strong_matches: [],
         possible_matches: [],
+        after_repair: [],
         immediate_next_steps: ["Visit the career center"],
         credit_readiness_score: null,
         eligible_now: [],

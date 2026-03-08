@@ -16,6 +16,7 @@ const basePlan: ReEntryPlan = {
   eligible_after_repair: [],
   strong_matches: [],
   possible_matches: [],
+  after_repair: [],
   wioa_eligibility: null,
 };
 

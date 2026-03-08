@@ -127,18 +127,25 @@ class TestGeneratePlanWithMatchJobs:
         assert "CNA" in steps_text or "Baptist" in steps_text or "position" in steps_text
 
     @pytest.mark.asyncio
-    async def test_job_matches_backward_compatible(self):
-        """plan.job_matches should still contain all matches (flat list)."""
+    async def test_job_matches_computed_from_buckets(self):
+        """plan.job_matches is computed from strong + possible + after_repair."""
         profile = _make_profile()
         mock_session = AsyncMock()
 
         strong = [ScoredJobMatch(title="CNA", relevance_score=0.8, bucket=MatchBucket.STRONG)]
         possible = [ScoredJobMatch(title="Cashier", relevance_score=0.4, bucket=MatchBucket.POSSIBLE)]
+        after = [ScoredJobMatch(title="Banker", relevance_score=0.3, bucket=MatchBucket.AFTER_REPAIR)]
 
         with (
             patch(_QUERY_PATCH, return_value=[]),
-            patch(_MATCH_PATCH, new_callable=AsyncMock, return_value=(strong, possible, [])),
+            patch(_MATCH_PATCH, new_callable=AsyncMock, return_value=(strong, possible, after)),
         ):
             plan = await generate_plan(profile, mock_session)
 
-        assert len(plan.job_matches) == 2
+        assert len(plan.after_repair) == 1
+        assert plan.after_repair[0].title == "Banker"
+        assert len(plan.job_matches) == 3  # computed: strong + possible + after_repair
+        titles = [j.title for j in plan.job_matches]
+        assert "CNA" in titles
+        assert "Cashier" in titles
+        assert "Banker" in titles

@@ -12,6 +12,7 @@ const basePlan: ReEntryPlan = {
   job_matches: [],
   strong_matches: [],
   possible_matches: [],
+  after_repair: [],
   immediate_next_steps: ["Visit career center"],
   credit_readiness_score: null,
   eligible_now: [],

@@ -15,6 +15,11 @@ vi.mock("@/lib/api", () => ({
   postCredit: vi.fn(),
 }));
 
+// Mock resume extraction (not needed for barrier tests)
+vi.mock("@/lib/resume", () => ({
+  extractResumeText: vi.fn(),
+}));
+
 function renderWithClient(ui: React.ReactElement) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -29,13 +34,14 @@ describe("AssessPage barrier guidance", () => {
     const user = userEvent.setup();
     renderWithClient(<AssessPage />);
 
-    // Enter valid ZIP to advance past step 1
+    // Enter valid ZIP to advance past Basic Info
     const zipInput = screen.getByLabelText(/montgomery zip/i);
     await user.type(zipInput, "36104");
 
-    // Advance to Barriers step
-    const nextBtn = screen.getByRole("button", { name: /go to step 2/i });
-    await user.click(nextBtn);
+    // Step 1 -> 2 (Resume)
+    await user.click(screen.getByRole("button", { name: /go to step 2/i }));
+    // Step 2 -> 3 (Barriers)
+    await user.click(screen.getByRole("button", { name: /go to step 3/i }));
 
     // Guidance text visible when no barriers selected
     expect(
@@ -51,9 +57,9 @@ describe("AssessPage barrier guidance", () => {
     const zipInput = screen.getByLabelText(/montgomery zip/i);
     await user.type(zipInput, "36104");
 
-    // Advance to Barriers step
-    const nextBtn = screen.getByRole("button", { name: /go to step 2/i });
-    await user.click(nextBtn);
+    // Navigate to Barriers step (step 3)
+    await user.click(screen.getByRole("button", { name: /go to step 2/i }));
+    await user.click(screen.getByRole("button", { name: /go to step 3/i }));
 
     // Click a barrier card (they're rendered as role="button" cards)
     const creditCard = screen.getByText("Credit / Financial").closest("[role='button']")!;

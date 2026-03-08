@@ -80,3 +80,19 @@ class TestRequireAdminKey:
                 )
         assert resp.status_code == 503
         assert "not configured" in resp.json()["detail"]
+
+
+@pytest.mark.anyio
+async def test_require_session_token_expired_raises_401():
+    """When validate_token returns None but token_exists returns True, raise 401 expired."""
+    from unittest.mock import AsyncMock, patch as mock_patch
+    from fastapi import HTTPException
+    from app.core.auth import require_session_token
+
+    mock_db = AsyncMock()
+    with mock_patch("app.core.auth.validate_token", new_callable=AsyncMock, return_value=None), \
+         mock_patch("app.core.auth.token_exists", new_callable=AsyncMock, return_value=True):
+        with pytest.raises(HTTPException) as exc_info:
+            await require_session_token(mock_db, "sess-1", "expired-token")
+        assert exc_info.value.status_code == 401
+        assert "expired" in exc_info.value.detail.lower()

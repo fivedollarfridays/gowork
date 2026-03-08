@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ai.client import build_fallback_narrative, generate_narrative
-from app.core.audit import audit_log
+from app.core.audit import audit_log, get_client_ip
 from app.core.auth import require_session_token
 from app.core.database import get_db
 from app.core.rate_limit import RateLimiter, require_rate_limit
@@ -16,6 +16,7 @@ from app.core.queries import get_session_by_id, update_session_plan
 from app.modules.credit.types import CreditAssessmentResult
 from app.modules.matching.career_center_package import assemble_package
 from app.modules.matching.types import (
+    AvailableHours,
     BarrierType,
     EmploymentStatus,
     ReEntryPlan,
@@ -44,6 +45,16 @@ async def _fetch_session(db: AsyncSession, session_id: str, token: str) -> dict:
     return row
 
 
+def _safe_json(raw: str | None, default=None):
+    """Parse a JSON string, raising 500 on corrupt data."""
+    if not raw:
+        return default
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=500, detail="Corrupt session data")
+
+
 @router.get("/{session_id}")
 async def get_plan(
     session_id: SessionId,
@@ -53,15 +64,11 @@ async def get_plan(
 ) -> dict:
     """Look up session and return existing plan, or 404."""
     row = await _fetch_session(db, session_id, token)
-    client_ip = request.client.host if request.client else "unknown"
-    audit_log("plan_accessed", session_id=session_id, client_ip=client_ip)
+    audit_log("plan_accessed", session_id=session_id, client_ip=get_client_ip(request))
 
-    try:
-        plan = json.loads(row["plan"]) if row["plan"] else None
-        barriers = json.loads(row["barriers"]) if row["barriers"] else []
-        credit_profile = json.loads(row["credit_profile"]) if row.get("credit_profile") else None
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=500, detail="Corrupt session data")
+    plan = _safe_json(row["plan"])
+    barriers = _safe_json(row["barriers"], [])
+    credit_profile = _safe_json(row.get("credit_profile"))
     return {
         "session_id": session_id,
         "barriers": barriers,
@@ -83,11 +90,8 @@ async def generate_plan_narrative(
     row = await _fetch_session(db, session_id, token)
     if not row["plan"]:
         raise HTTPException(status_code=400, detail="No plan exists for this session. Run assessment first.")
-    try:
-        barriers = json.loads(row["barriers"])
-        plan_data = json.loads(row["plan"])
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=500, detail="Corrupt session data")
+    barriers = _safe_json(row["barriers"], [])
+    plan_data = _safe_json(row["plan"])
     qualifications = row.get("qualifications", "")
 
     try:
@@ -106,7 +110,7 @@ async def generate_plan_narrative(
 
     await update_session_plan(db, session_id, json.dumps({**plan_data, "resident_summary": narrative.summary}))
 
-    audit_log("plan_generated", session_id=session_id, client_ip=request.client.host if request.client else "unknown")
+    audit_log("plan_generated", session_id=session_id, client_ip=get_client_ip(request))
     return narrative.model_dump()
 
 
@@ -121,11 +125,8 @@ async def get_career_center_package(
     if not row["plan"]:
         raise HTTPException(status_code=404, detail="No plan for session")
 
-    try:
-        barrier_names = json.loads(row["barriers"]) if row["barriers"] else []
-        plan_data = json.loads(row["plan"])
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=500, detail="Corrupt session data")
+    barrier_names = _safe_json(row["barriers"], [])
+    plan_data = _safe_json(row["plan"])
 
     valid_values = {bt.value for bt in BarrierType}
     barrier_types = [BarrierType(b) for b in barrier_names if b in valid_values]
@@ -168,7 +169,7 @@ def _build_profile_from_session(
         barrier_severity=determine_severity(len(barriers)),
         needs_credit_assessment=BarrierType.CREDIT in barriers,
         transit_dependent=BarrierType.TRANSPORTATION in barriers,
-        schedule_type="daytime",
+        schedule_type=AvailableHours.DAYTIME,
         work_history=row.get("qualifications", ""),
         target_industries=[],
     )

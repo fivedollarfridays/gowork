@@ -98,3 +98,52 @@ class TestSkillsStopWords:
 
         assert isinstance(SKILLS_STOP_WORDS, set)
         assert len(SKILLS_STOP_WORDS) >= 5
+
+
+@pytest.mark.anyio
+async def test_match_jobs_full_pipeline(test_engine):
+    """Exercise the full match_jobs pipeline with DB data (covers lines 15, 105-116)."""
+    from sqlalchemy import text
+    from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
+    from app.modules.matching.job_matcher import match_jobs
+    from app.modules.matching.types import (
+        BarrierSeverity,
+        BarrierType,
+        EmploymentStatus,
+        UserProfile,
+    )
+
+    factory = async_sessionmaker(test_engine, class_=AsyncSession)
+    async with factory() as session:
+        await session.execute(text(
+            "INSERT INTO job_listings "
+            "(title, company, location, description, url, source, scraped_at, credit_check) "
+            "VALUES ('CNA', 'Baptist Hospital', 'Montgomery, AL', "
+            "'Certified Nursing Assistant needed', "
+            "'http://example.com', 'test', '2026-03-07', 'unknown')"
+        ))
+        await session.execute(text(
+            "INSERT INTO transit_stops (stop_name, lat, lng, sequence) "
+            "VALUES ('Downtown', 32.375, -86.296, 1)"
+        ))
+        await session.commit()
+
+        profile = UserProfile(
+            session_id="test-session",
+            zip_code="36104",
+            employment_status=EmploymentStatus.UNEMPLOYED,
+            barrier_count=1,
+            primary_barriers=[BarrierType.CREDIT],
+            barrier_severity=BarrierSeverity.LOW,
+            needs_credit_assessment=True,
+            transit_dependent=True,
+            schedule_type="daytime",
+            work_history="Former CNA at hospital",
+            target_industries=["healthcare"],
+        )
+
+        strong, possible, after_repair = await match_jobs(profile, session)
+        all_matches = strong + possible + after_repair
+        assert len(all_matches) >= 1
+        assert all_matches[0].title == "CNA"

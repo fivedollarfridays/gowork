@@ -61,7 +61,7 @@ export function BarrierCardView({ barrier, sessionId, token }: BarrierCardViewPr
             resource_id: resourceId,
             session_id: sessionId,
             helpful: newValue,
-            token: token!,
+            token,
           }).catch((err) => console.error("Feedback failed:", err));
         }
 

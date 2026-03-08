@@ -54,16 +54,44 @@ class TestHasRecentData:
 
 
 class TestBuildKeywordSearches:
-    def test_returns_multiple_searches(self):
+    def test_returns_30_searches(self):
+        """15 keywords x 2 platforms (Indeed + LinkedIn) = 30."""
         searches = build_keyword_searches()
-        assert len(searches) >= 3
+        assert len(searches) == 30
 
-    def test_searches_target_montgomery(self):
+    def test_indeed_searches_target_montgomery(self):
         searches = build_keyword_searches()
-        for s in searches:
+        indeed = [s for s in searches if s["domain"] == "indeed.com"]
+        assert len(indeed) == 15
+        for s in indeed:
             assert "Montgomery" in s["location"]
             assert s["country"] == "US"
-            assert s["domain"] == "indeed.com"
+
+    def test_linkedin_searches_target_montgomery(self):
+        searches = build_keyword_searches()
+        linkedin = [s for s in searches if s["domain"] == "linkedin.com"]
+        assert len(linkedin) == 15
+        for s in linkedin:
+            assert "Montgomery" in s["location"]
+            assert s["country"] == "US"
+
+    def test_includes_required_keywords(self):
+        """All 15 required keywords must be present across both platforms."""
+        searches = build_keyword_searches()
+        indeed_keywords = {s["keyword_search"] for s in searches if s["domain"] == "indeed.com"}
+        required = {
+            "", "warehouse", "healthcare", "customer service", "retail",
+            "manufacturing", "food service", "construction", "driver",
+            "cashier", "cleaning", "security", "maintenance",
+            "administrative", "entry level",
+        }
+        assert required == indeed_keywords
+
+    def test_linkedin_has_same_keywords_as_indeed(self):
+        searches = build_keyword_searches()
+        indeed_kw = {s["keyword_search"] for s in searches if s["domain"] == "indeed.com"}
+        linkedin_kw = {s["keyword_search"] for s in searches if s["domain"] == "linkedin.com"}
+        assert indeed_kw == linkedin_kw
 
 
 class TestPrecrawlMontgomeryJobs:

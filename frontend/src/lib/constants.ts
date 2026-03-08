@@ -76,6 +76,29 @@ export const CAREER_CENTER = {
   hours: "Monday \u2013 Friday, 8:00 AM \u2013 5:00 PM",
 } as const;
 
+export const INDUSTRY_OPTIONS = [
+  { value: "healthcare", label: "Healthcare" },
+  { value: "manufacturing", label: "Manufacturing" },
+  { value: "food_service", label: "Food Service" },
+  { value: "government", label: "Government" },
+  { value: "retail", label: "Retail" },
+  { value: "construction", label: "Construction" },
+  { value: "transportation", label: "Transportation" },
+] as const;
+
+export const CERTIFICATION_OPTIONS = [
+  { value: "CNA", label: "CNA (Certified Nursing Assistant)" },
+  { value: "CDL", label: "CDL (Commercial Driver's License)" },
+  { value: "LPN", label: "LPN (Licensed Practical Nurse)" },
+] as const;
+
+export const READINESS_BAND_STYLES: Record<string, { bg: string; text: string; border: string }> = {
+  not_ready: { bg: "bg-destructive/10", text: "text-destructive", border: "border-destructive/20" },
+  developing: { bg: "bg-warning/10", text: "text-warning-foreground", border: "border-warning/20" },
+  ready: { bg: "bg-success/10", text: "text-success", border: "border-success/20" },
+  strong: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20" },
+};
+
 /** Hex colors for PDF inline styles (html2pdf.js can't use CSS vars). */
 export const PDF_SEVERITY_COLORS: Record<string, { bg: string; text: string }> = {
   low: { bg: "#dcfce7", text: "#166534" },

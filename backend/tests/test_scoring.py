@@ -3,6 +3,9 @@
 import pytest
 
 from app.modules.matching.scoring import (
+    BARRIER_CATEGORY_MAP,
+    _score_industry,
+    _score_proximity,
     haversine_miles,
     get_score_band,
     score_resource,
@@ -92,10 +95,13 @@ class TestBarrierAlignment:
         training = _make_resource(category="training")
         childcare = _make_resource(category="childcare", id=2)
         # Neither matches credit barrier
-        score_t = score_resource(training, profile)
-        score_c = score_resource(childcare, profile)
-        assert score_t < 0.5
-        assert score_c < 0.5
+        assert score_resource(training, profile) < 0.5
+        assert score_resource(childcare, profile) < 0.5
+        # Verify expanded mappings include cross-category routing
+        assert "social_service" in BARRIER_CATEGORY_MAP[BarrierType.TRANSPORTATION]
+        assert "career_center" in BARRIER_CATEGORY_MAP[BarrierType.HEALTH]
+        assert "social_service" in BARRIER_CATEGORY_MAP[BarrierType.CHILDCARE]
+        assert "career_center" in BARRIER_CATEGORY_MAP[BarrierType.HOUSING]
 
 
 class TestTransitScoring:
@@ -145,6 +151,22 @@ class TestIndustryMatch:
         resource = _make_resource(category="training")
         score = score_resource(resource, profile)
         assert 0.0 <= score <= 1.0
+
+    def test_word_boundary_prevents_false_positives(self):
+        """Word boundaries prevent substring false positives."""
+        # "health" should NOT match "healthy", SHOULD match "health services"
+        profile = _make_profile(target_industries=["health"])
+        assert _score_industry(_make_resource(services=["healthy eating"]), profile) == 0.3
+        assert _score_industry(_make_resource(id=2, services=["health services"]), profile) == 1.0
+
+        # "auto" should NOT match "automatic", SHOULD match "auto repair"
+        profile2 = _make_profile(target_industries=["auto"])
+        assert _score_industry(_make_resource(services=["automatic scheduling"]), profile2) == 0.3
+        assert _score_industry(_make_resource(id=2, services=["auto repair"]), profile2) == 1.0
+
+        # Match in notes field
+        profile3 = _make_profile(target_industries=["welding"])
+        assert _score_industry(_make_resource(notes="Offers welding certification"), profile3) == 1.0
 
 
 class TestRankResources:
@@ -296,6 +318,14 @@ class TestLocationAwareTransitScoring:
         far_score = score_resource(resource, profile, nearest_stop_miles=5.0)
         assert near_score > far_score
 
+        # Exercise middle transit distance bands (0.25-1.0 -> 0.7, 1.0-3.0 -> 0.4)
+        from app.modules.matching.scoring import _score_transit
+        mid_near = _score_transit(resource, profile, nearest_stop_miles=0.5)
+        mid_far = _score_transit(resource, profile, nearest_stop_miles=2.0)
+        # daytime schedule_mult=1.0, so dist_score returned directly
+        assert mid_near == pytest.approx(0.7)
+        assert mid_far == pytest.approx(0.4)
+
     def test_night_penalty_applies_on_top_of_location(self):
         """Night schedule should still penalize even when resource is near a stop."""
         profile_day = _make_profile(
@@ -340,6 +370,18 @@ class TestProximityUnknownZip:
         score = score_resource(resource, profile)
         assert 0.0 <= score <= 1.0
 
+    def test_unknown_zip_falls_back_to_downtown(self):
+        """Unknown ZIP uses downtown centroid; known ZIP uses its own."""
+        downtown_resource = _make_resource(lat=32.3668, lng=-86.3000)
+
+        # Unknown ZIP 36114 → downtown fallback → distance ~0 → high score
+        unknown = _make_profile(zip_code="36114")
+        assert _score_proximity(downtown_resource, unknown) > 0.9
+
+        # Known ZIP 36117 (east Montgomery) → own centroid → ~7mi → lower score
+        known = _make_profile(zip_code="36117")
+        assert _score_proximity(downtown_resource, known) < 0.9
+
 
 class TestProximityWithCoordinates:
     def test_close_resource_scores_higher_than_far(self):
@@ -354,6 +396,13 @@ class TestProximityWithCoordinates:
             lat=32.310, lng=-86.400,  # several miles away
         )
         assert score_resource(close, profile) > score_resource(far, profile)
+
+        # Very far resource (~80 miles) exercises miles >= 15.0 branch (return 0.1)
+        very_far = _make_resource(
+            id=3, category="training",
+            lat=33.5, lng=-85.0,
+        )
+        assert _score_proximity(very_far, profile) == pytest.approx(0.1)
 
     def test_resource_without_coords_gets_neutral(self):
         """Resource missing lat/lng still gets a valid score."""

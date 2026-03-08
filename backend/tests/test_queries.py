@@ -14,7 +14,16 @@ from app.core.queries import (
     update_session_plan,
 )
 from app.core.queries_jobs import get_all_job_listings, get_job_listing_by_id
+from app.core.queries_feedback import (
+    session_exists,
+    insert_resource_feedback,
+    token_exists,
+    has_visit_feedback,
+    insert_visit_feedback,
+)
+from app.modules.feedback.types import ResourceFeedbackRequest
 from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.core.database import get_async_session_factory
 
@@ -293,3 +302,92 @@ class TestUpdateSessionPlan:
         await update_session_plan(db_session, session_id, '{"plan_id": "p1"}')
         result = await get_session_by_id(db_session, session_id)
         assert result["plan"] == '{"plan_id": "p1"}'
+
+
+class TestQueriesFeedbackDirect:
+    """Direct tests for queries_feedback functions to cover lines missed by ASGI transport."""
+
+    @pytest.mark.anyio
+    async def test_session_exists_true_and_false(self, test_engine):
+        """session_exists returns True for live session, False for missing one."""
+        factory = async_sessionmaker(test_engine, class_=AsyncSession)
+        async with factory() as session:
+            # Insert a non-expired session
+            await session.execute(text(
+                "INSERT INTO sessions (id, created_at, barriers, expires_at) "
+                "VALUES ('sess-exist-1', '2026-03-06', '[]', '2099-01-01')"
+            ))
+            await session.commit()
+
+            assert await session_exists(session, "sess-exist-1") is True
+            assert await session_exists(session, "nonexistent-id") is False
+
+    @pytest.mark.anyio
+    async def test_insert_resource_feedback_commits(self, test_engine):
+        """insert_resource_feedback persists feedback row via commit."""
+        factory = async_sessionmaker(test_engine, class_=AsyncSession)
+        async with factory() as session:
+            # Seed the required session row
+            await session.execute(text(
+                "INSERT INTO sessions (id, created_at, barriers, expires_at) "
+                "VALUES ('00000000-0000-4000-8000-000000000001', '2026-03-06', '[]', '2099-01-01')"
+            ))
+            await session.commit()
+
+            feedback = ResourceFeedbackRequest(
+                resource_id=1,
+                session_id="00000000-0000-4000-8000-000000000001",
+                helpful=True,
+                token="tok-1",
+            )
+            await insert_resource_feedback(session, feedback)
+
+            result = await session.execute(text(
+                "SELECT helpful FROM resource_feedback "
+                "WHERE resource_id = 1 AND session_id = '00000000-0000-4000-8000-000000000001'"
+            ))
+            row = result.fetchone()
+            assert row is not None
+            assert row[0] == 1  # True stored as 1
+
+    @pytest.mark.anyio
+    async def test_token_exists_true_and_false(self, test_engine):
+        """token_exists returns True for known token, False for unknown."""
+        factory = async_sessionmaker(test_engine, class_=AsyncSession)
+        async with factory() as session:
+            await session.execute(text(
+                "INSERT INTO sessions (id, created_at, barriers, expires_at) "
+                "VALUES ('sess-tok-1', '2026-03-06', '[]', '2099-01-01')"
+            ))
+            await session.execute(text(
+                "INSERT INTO feedback_tokens (token, session_id, created_at, expires_at) "
+                "VALUES ('known-token', 'sess-tok-1', '2026-03-06T00:00:00', '2099-01-01T00:00:00')"
+            ))
+            await session.commit()
+
+            assert await token_exists(session, "known-token") is True
+            assert await token_exists(session, "unknown-token") is False
+
+    @pytest.mark.anyio
+    async def test_has_visit_feedback_true_and_false(self, test_engine):
+        """has_visit_feedback returns False before insert, True after insert_visit_feedback."""
+        factory = async_sessionmaker(test_engine, class_=AsyncSession)
+        async with factory() as session:
+            await session.execute(text(
+                "INSERT INTO sessions (id, created_at, barriers, expires_at) "
+                "VALUES ('sess-visit-direct', '2026-03-06', '[]', '2099-01-01')"
+            ))
+            await session.commit()
+
+            assert await has_visit_feedback(session, "sess-visit-direct") is False
+
+            await insert_visit_feedback(
+                session,
+                session_id="sess-visit-direct",
+                made_it_to_center=2,
+                outcomes_json='["got_interview"]',
+                plan_accuracy=3,
+                free_text=None,
+            )
+
+            assert await has_visit_feedback(session, "sess-visit-direct") is True
