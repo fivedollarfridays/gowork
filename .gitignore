@@ -27,3 +27,4 @@ docs/internal
 *.faiss
 *.faiss
 data/rag_index/metadata.json
+backend/logs/*.jsonl
