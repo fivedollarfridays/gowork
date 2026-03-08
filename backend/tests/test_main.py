@@ -133,6 +133,7 @@ class TestLifespan:
              patch("app.main.get_engine", return_value=mock_engine), \
              patch("app.main.init_db", new_callable=AsyncMock), \
              patch("app.main.close_db", new_callable=AsyncMock), \
+             patch("app.main.upsert_barrier_graph", new_callable=AsyncMock), \
              patch("app.main.logger") as mock_logger:
             ms.return_value.anthropic_api_key = ""
             async with lifespan(app):
