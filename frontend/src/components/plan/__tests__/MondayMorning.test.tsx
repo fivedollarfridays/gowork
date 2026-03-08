@@ -134,27 +134,41 @@ describe("MondayMorning clickable phone numbers", () => {
   });
 });
 
-describe("MondayMorning step titles from immediate_next_steps", () => {
-  const planWithSteps: ReEntryPlan = {
-    ...basePlan,
-    immediate_next_steps: [
-      "Contact Montgomery Career Center for transportation support",
-      "Call Legal Aid for record help",
-    ],
-  };
+describe("MondayMorning fixed step titles", () => {
+  it("renders the three fixed step card titles", () => {
+    renderMondayMorning();
 
-  it("renders each immediate_next_step as a step card title", () => {
-    renderMondayMorning({ plan: planWithSteps });
+    // The component now renders three fixed steps instead of immediate_next_steps
+    expect(screen.getByText("Visit the Career Center")).toBeInTheDocument();
+    expect(screen.getByText("Review Your Job Matches")).toBeInTheDocument();
+    // With no barriers, step 3 shows "No Barriers Identified"
+    expect(screen.getByText("No Barriers Identified")).toBeInTheDocument();
+  });
 
-    // Career center step is detected and structured with phone/location
-    // Other steps render as plain title text
-    expect(screen.getByText(/Call Legal Aid for record help/)).toBeInTheDocument();
+  it("shows 'Address Your Barriers' when barriers exist", () => {
+    const planWithBarriers: ReEntryPlan = {
+      ...basePlan,
+      barriers: [
+        {
+          type: BarrierType.CREDIT,
+          severity: "medium",
+          title: "Credit Barrier",
+          timeline_days: null,
+          actions: [],
+          transit_matches: [],
+          resources: [],
+        },
+      ],
+    };
+    renderMondayMorning({ plan: planWithBarriers });
+
+    expect(screen.getByText("Address Your Barriers")).toBeInTheDocument();
   });
 
   it("structures career center step with phone link", () => {
-    renderMondayMorning({ plan: planWithSteps });
+    renderMondayMorning();
 
-    // Career center step is detected by name and gets structured phone/address
+    // Career center step renders CAREER_CENTER phone as a tel: link
     const phoneLinks = screen.getAllByRole("link").filter(
       (link) => link.getAttribute("href")?.startsWith("tel:")
     );
@@ -207,7 +221,12 @@ describe("MondayMorning map links", () => {
     const mapLinks = screen.getAllByRole("link").filter(
       (link) => link.getAttribute("href")?.includes("google.com/maps")
     );
-    expect(mapLinks[0].getAttribute("href")).toContain(
+    // Find the link for the barrier resource address (not the career center address)
+    const barrierMapLink = mapLinks.find((link) =>
+      link.getAttribute("href")?.includes(encodeURIComponent("100 Main St, Montgomery, AL"))
+    );
+    expect(barrierMapLink).toBeDefined();
+    expect(barrierMapLink!.getAttribute("href")).toContain(
       encodeURIComponent("100 Main St, Montgomery, AL")
     );
   });

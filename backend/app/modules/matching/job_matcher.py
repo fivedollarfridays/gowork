@@ -5,7 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.queries_jobs import get_all_job_listings
 from app.modules.matching.job_keywords import INDUSTRY_KEYWORDS, SCHEDULE_CONFLICT_KEYWORDS, SUNDAY_KEYWORDS
-from app.modules.matching.job_scoring import rank_and_bucket, job_search_text
+from app.modules.matching.job_scoring import job_search_text
+from app.modules.matching.pvs_scorer import rank_all_jobs
 from app.modules.matching.types import AvailableHours, ScoredJobMatch, UserProfile
 
 
@@ -96,11 +97,11 @@ def _annotate_credit(jobs: list[dict]) -> list[dict]:
 
 async def match_jobs(
     profile: UserProfile, db_session: AsyncSession,
-) -> tuple[list[ScoredJobMatch], list[ScoredJobMatch], list[ScoredJobMatch]]:
-    """Run the full filter→score→rank pipeline. Returns (strong, possible, after_repair)."""
+) -> list[ScoredJobMatch]:
+    """Run the full filter→score→rank pipeline. Returns flat PVS-ranked list."""
     listings = await get_all_job_listings(db_session)
     if not listings:
-        return [], [], []
+        return []
 
     transit_stops = await _get_transit_stops(db_session)
 
@@ -109,4 +110,10 @@ async def match_jobs(
     jobs = _filter_by_transit(jobs, profile.transit_dependent, transit_stops)
     jobs = _annotate_credit(jobs)
 
-    return rank_and_bucket(jobs, profile.work_history, profile.transit_dependent)
+    return rank_all_jobs(
+        jobs,
+        user_zip=profile.zip_code,
+        transit_dependent=profile.transit_dependent,
+        schedule_type=profile.schedule_type,
+        barriers=profile.primary_barriers,
+    )

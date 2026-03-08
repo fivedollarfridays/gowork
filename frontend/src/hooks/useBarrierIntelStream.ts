@@ -5,6 +5,18 @@ import { useCallback, useState } from "react";
 import { streamBarrierIntelChat } from "@/lib/api";
 import type { ChatContext, ChatMessage, ChatMode, ChatSSEEvent } from "@/lib/types";
 
+function patchLastAssistant(
+  prev: ChatMessage[],
+  patch: Partial<ChatMessage>,
+): ChatMessage[] {
+  const updated = [...prev];
+  const last = updated[updated.length - 1];
+  if (last?.role === "assistant") {
+    updated[updated.length - 1] = { ...last, ...patch };
+  }
+  return updated;
+}
+
 export function useBarrierIntelStream(sessionId: string | null) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -24,14 +36,15 @@ export function useBarrierIntelStream(sessionId: string | null) {
           if (event.type === "context") {
             setContext({ root_barriers: event.root_barriers ?? [], chain: event.chain ?? "" });
           } else if (event.type === "token" && event.text) {
+            const text = event.text;
             setMessages((prev) => {
-              const updated = [...prev];
-              const last = updated[updated.length - 1];
-              if (last?.role === "assistant") {
-                updated[updated.length - 1] = { ...last, content: last.content + event.text };
-              }
-              return updated;
+              const last = prev[prev.length - 1];
+              return patchLastAssistant(prev, {
+                content: (last?.content ?? "") + text,
+              });
             });
+          } else if (event.type === "disclaimer" && event.text) {
+            setMessages((prev) => patchLastAssistant(prev, { disclaimer: event.text }));
           } else if (event.type === "done") {
             setIsStreaming(false);
           }

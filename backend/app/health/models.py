@@ -8,6 +8,7 @@ class HealthStatus(BaseModel):
     status: Literal["healthy", "degraded", "unhealthy"]
     version: str
     uptime_seconds: float
+    llm_provider: str | None = None
 
 
 class ServiceCheck(BaseModel):

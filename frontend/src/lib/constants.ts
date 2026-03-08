@@ -30,6 +30,10 @@ export function mapsUrl(address: string): string {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
 }
 
+export function toTelHref(phone: string): string {
+  return `tel:${phone.replace(/[^+\d]/g, "")}`;
+}
+
 export function safeHref(url: string): string | undefined {
   try {
     const parsed = new URL(url, "https://placeholder.invalid");

@@ -162,4 +162,4 @@ class TestMatchJobsEmpty:
             with patch("app.modules.matching.job_matcher._get_transit_stops", return_value=[]):
                 result = await match_jobs(profile, mock_session)
 
-        assert result == ([], [], [])
+        assert result == []

@@ -6,15 +6,13 @@ import { useQuery } from "@tanstack/react-query";
 import { getPlan } from "@/lib/api";
 import { useReducedMotion } from "framer-motion";
 import { ScrollReveal, ShimmerBar } from "@/lib/motion";
-import { Clock, Loader2, MapPin, Phone, Search } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Clock, MapPin, Phone, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { MondayMorning } from "@/components/plan/MondayMorning";
 import { BarrierCardView } from "@/components/plan/BarrierCardView";
-import { JobMatchCard } from "@/components/plan/JobMatchCard";
-import { JobBucketSection } from "@/components/plan/JobBucketSection";
+import { JobListSection } from "@/components/plan/JobListSection";
 import { ComparisonView } from "@/components/plan/ComparisonView";
 import { CreditResults } from "@/components/plan/CreditResults";
 import { JobReadinessResults } from "@/components/plan/JobReadinessResults";
@@ -25,7 +23,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { BarrierIntelChat } from "@/components/barrier-intel/BarrierIntelChat";
 import { BarrierType, EmploymentStatus, AvailableHours } from "@/lib/types";
 import type { CreditAssessmentResult, UserProfile } from "@/lib/types";
-import { barrierCountToSeverity, CAREER_CENTER, mapsUrl } from "@/lib/constants";
+import { barrierCountToSeverity, CAREER_CENTER, mapsUrl, toTelHref } from "@/lib/constants";
 
 const BARRIER_TYPE_VALUES = new Set<string>(Object.values(BarrierType));
 
@@ -199,34 +197,14 @@ function PlanContent() {
 
       <Separator />
 
-      {/* Job matches — three-bucket display */}
+      {/* Job matches — unified ranked list with pagination */}
       <ScrollReveal>
       <section id="matched-jobs" className="space-y-6 scroll-mt-8">
-        {(plan.strong_matches?.length ?? 0) > 0 || (plan.possible_matches?.length ?? 0) > 0 || (plan.after_repair?.length ?? 0) > 0 ? (
-          <>
-            <JobBucketSection
-              title="Jobs That Match Your Profile"
-              jobs={plan.strong_matches ?? []}
-            />
-            <JobBucketSection
-              title="Worth Exploring"
-              jobs={plan.possible_matches ?? []}
-            />
-            <JobBucketSection
-              title="After Credit Repair"
-              jobs={plan.after_repair ?? []}
-              description="These jobs require a credit check. Follow your credit repair plan to become eligible."
-            />
-          </>
-        ) : (plan.job_matches?.length ?? 0) > 0 ? (
-          <>
-            <h2 className="text-xl font-semibold text-primary">Matched Jobs</h2>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {plan.job_matches.map((job, i) => (
-                <JobMatchCard key={`job-${job.title}-${job.company}-${i}`} job={job} creditResult={creditResult} />
-              ))}
-            </div>
-          </>
+        {(plan.job_matches?.length ?? 0) > 0 ? (
+          <JobListSection
+            jobs={plan.job_matches}
+            creditResult={creditResult}
+          />
         ) : (
           <EmptyState
             icon={Search}
@@ -316,7 +294,7 @@ function PlanContent() {
             <p className="flex items-center gap-2">
               <Phone className="h-4 w-4 shrink-0" />
               <a
-                href={`tel:${CAREER_CENTER.phone.replace(/[^+\d]/g, "")}`}
+                href={toTelHref(CAREER_CENTER.phone)}
                 className="underline hover:text-foreground transition-colors"
               >
                 {CAREER_CENTER.phone}
@@ -343,6 +321,10 @@ function PlanContent() {
 }
 
 export default function PlanPage() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="flex min-h-screen">
       <main className="flex-1 px-4 py-8 sm:px-8">

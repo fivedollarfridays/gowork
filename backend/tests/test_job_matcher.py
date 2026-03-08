@@ -143,7 +143,6 @@ async def test_match_jobs_full_pipeline(test_engine):
             target_industries=["healthcare"],
         )
 
-        strong, possible, after_repair = await match_jobs(profile, session)
-        all_matches = strong + possible + after_repair
-        assert len(all_matches) >= 1
-        assert all_matches[0].title == "CNA"
+        ranked = await match_jobs(profile, session)
+        assert len(ranked) >= 1
+        assert ranked[0].title == "CNA"
