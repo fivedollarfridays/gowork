@@ -46,7 +46,7 @@ class TestResolveProvider:
     def test_gemini_with_key(self):
         with patch("app.ai.llm_client.get_settings") as mock_settings:
             mock_settings.return_value.llm_provider = "gemini"
-            mock_settings.return_value.gemini_api_key = "gemini-key"
+            mock_settings.return_value.gemini_api_key = "gm-key"
             assert resolve_provider() == "gemini"
 
     def test_openai_without_key_falls_back(self):

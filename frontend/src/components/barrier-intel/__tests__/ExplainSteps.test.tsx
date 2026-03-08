@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { ExplainSteps } from "../ExplainSteps";
 import type { ExplainStep } from "@/lib/types";

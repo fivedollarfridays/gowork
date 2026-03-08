@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { EvidenceChips } from "../EvidenceChips";
 import type { EvidenceSource } from "@/lib/types";

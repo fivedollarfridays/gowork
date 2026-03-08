@@ -82,8 +82,8 @@ class TestExistingConfigUnchanged:
         get_settings.cache_clear()
 
     def test_anthropic_api_key_still_works(self):
-        s = Settings(environment="development", anthropic_api_key="sk-ant-test")
-        assert s.anthropic_api_key == "sk-ant-test"
+        s = Settings(environment="development", anthropic_api_key="sk-test")
+        assert s.anthropic_api_key == "sk-test"
 
     def test_claude_model_still_works(self):
         s = Settings(environment="development")
