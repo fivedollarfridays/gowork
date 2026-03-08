@@ -48,11 +48,11 @@ Sprint 23: Barrier Graph + RAG — Barrier Intelligence Assistant. Adds graph-aw
 | T23.2 | Barrier-resource mapping: join table, impact scores, top-N query | P0 | 45 | done | T23.1 |
 | T23.3 | RAG knowledge base: document schema + FAISS ingestion pipeline | P0 | 60 | done | T23.1, T23.2 |
 | T23.4 | Hybrid retrieval layer: vector + metadata filter + graph context assembly | P0 | 50 | done | T23.2, T23.3 |
-| T23.5 | LLM orchestration + guardrails: POST /api/barrier-intel/chat + SSE streaming | P0 | 70 | pending | T23.4 |
+| T23.5 | LLM orchestration + guardrails: POST /api/barrier-intel/chat + SSE streaming | P0 | 70 | done | T23.4 |
 | T23.6 | Frontend: BarrierIntelChat + SSE streaming + explainability UI | P1 | 70 | pending | T23.5 |
 | T23.7 | NFRs: caching, observability, rate limiting + eval suite | P2 | 55 | pending | T23.5, T23.6 |
 
-**Total: 7 tasks, 405 complexity points (4/7 done)**
+**Total: 7 tasks, 405 complexity points (5/7 done)**
 
 ### Sprint 18 -- Security Hardening (GitHub Issue #20)
 
@@ -124,6 +124,10 @@ Sprint 23: Barrier Graph + RAG — Barrier Intelligence Assistant. Adds graph-aw
 **Total: 6 tasks, 125 complexity points (6/6 done)**
 
 ## What Was Just Done
+
+### Sprint 24 T24.5 (2026-03-08) — LLM Orchestration + SSE Streaming
+
+- **T24.5** LLM orchestration: Created `app/barrier_intel/` module — `schemas.py` (ChatRequest with Literal mode validation), `guardrails.py` (topic filter: legal/medical/immigration patterns, hallucination check), `prompts.py` (SYSTEM_PROMPT, build_user_prompt serializing RetrievalContext), `audit_log.py` (PII-safe JSONL: sha256[:12] session hash), `stream.py` (async generator: context→token→done SSE events, Claude streaming). Added `POST /api/barrier-intel/chat` to router with 10/min rate limiter, 404 on missing session, guardrail short-circuit. 13 new tests, 599 total. All arch checks clean.
 
 ### Sprint 24 T24.4 (2026-03-08) — Hybrid Retrieval Layer
 
@@ -229,8 +233,8 @@ Sprint 23: Barrier Graph + RAG — Barrier Intelligence Assistant. Adds graph-aw
 
 ## What's Next
 
-1. Start T24.5 (LLM orchestration + guardrails: POST /api/barrier-intel/chat + SSE streaming)
-2. Then T24.6 (Frontend: BarrierIntelChat + SSE streaming + explainability UI)
+1. Start T24.6 (Frontend: BarrierIntelChat + SSE streaming + explainability UI)
+2. Then T24.7 (NFRs: caching, observability, rate limiting + eval suite)
 
 
 ## Blockers

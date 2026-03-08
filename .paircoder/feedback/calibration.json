@@ -2,19 +2,19 @@
   "task_types": {
     "feature": {
       "task_type": "feature",
-      "sample_count": 10,
-      "avg_tokens": 4080.1,
-      "std_dev": 4261.166939935585,
-      "p80_tokens": 7668.002563425762,
-      "avg_duration_seconds": 239.89999999999998,
+      "sample_count": 11,
+      "avg_tokens": 6247.090909090909,
+      "std_dev": 7966.5145390456955,
+      "p80_tokens": 12954.896150967385,
+      "avg_duration_seconds": 308.09090909090907,
       "success_rate": 1.0,
       "recommended_model": "haiku",
       "model": "aggregate",
       "recommended_effort": "high",
-      "_m2_tokens": 181575436.89999998,
-      "_m2_duration": 1334800.9,
-      "estimation_mape": 893.4669732585269,
-      "estimation_sample_count": 10
+      "_m2_tokens": 698118892.909091,
+      "_m2_duration": 1846300.9090909092,
+      "estimation_mape": 820.0049983378748,
+      "estimation_sample_count": 11
     },
     "feature:claude-opus-4-6": {
       "task_type": "feature",
@@ -66,21 +66,21 @@
     },
     "feature:claude-sonnet-4-6": {
       "task_type": "feature",
-      "sample_count": 3,
-      "avg_tokens": 5140.666666666667,
-      "std_dev": 6075.230603762205,
-      "p80_tokens": 10256.010835034444,
-      "avg_duration_seconds": 475.6666666666667,
+      "sample_count": 4,
+      "avg_tokens": 10834.75,
+      "std_dev": 11178.062228646788,
+      "p80_tokens": 20246.678396520598,
+      "avg_duration_seconds": 604.25,
       "success_rate": 1.0,
       "recommended_model": "haiku",
       "model": "claude-sonnet-4-6",
       "recommended_effort": "high",
-      "_m2_tokens": 110725280.66666666,
-      "_m2_duration": 1024784.6666666666,
-      "estimation_mape": 276.13868606026693,
-      "estimation_sample_count": 3
+      "_m2_tokens": 499796300.75,
+      "_m2_duration": 1223188.75,
+      "estimation_mape": 228.4503268280386,
+      "estimation_sample_count": 4
     }
   },
-  "last_calibrated": "2026-03-08T13:10:35.333342+00:00",
-  "total_records": 13
+  "last_calibrated": "2026-03-08T13:27:05.548890+00:00",
+  "total_records": 14
 }

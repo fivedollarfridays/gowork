@@ -1,0 +1,8 @@
+{
+  "version": "2.0",
+  "task_id": "T24.5",
+  "source_agent": "driver",
+  "target_agent": "reviewer",
+  "task_description": "[T24.5] LLM orchestration + guardrails: POST /api/barrier-intel/chat + SSE streaming",
+  "acceptance_criteria": [
+    

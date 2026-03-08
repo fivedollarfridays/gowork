@@ -152,5 +152,25 @@
       }
     ],
     "total_seconds": 468.580427
+  },
+  "T24.5": {
+    "entries": [
+      {
+        "id": "local-20260308061612",
+        "task_id": "T24.5",
+        "description": "T24.5: LLM orchestration + guardrails: POST /api/barrier-intel/chat + SSE streaming",
+        "start": "2026-03-08T06:16:12.487963",
+        "end": "2026-03-08T06:27:05.545628",
+        "duration_seconds": 653.057665,
+        "provider_id": null
+      }
+    ],
+    "total_seconds": 653.057665
+  },
+  "_active": {
+    "task_id": "T24.6",
+    "timer_id": "local-20260308063217",
+    "description": "T24.6: Frontend: BarrierIntelChat + SSE streaming + explainability UI",
+    "start": "2026-03-08T06:32:17.234541"
   }
 }
