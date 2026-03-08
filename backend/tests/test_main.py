@@ -62,7 +62,8 @@ class TestLifespan:
         mock_engine = AsyncMock()
         with patch("app.main.get_engine", return_value=mock_engine) as mock_ge, \
              patch("app.main.init_db", new_callable=AsyncMock) as mock_init, \
-             patch("app.main.close_db", new_callable=AsyncMock) as mock_close:
+             patch("app.main.close_db", new_callable=AsyncMock) as mock_close, \
+             patch("app.main.upsert_barrier_graph", new_callable=AsyncMock):
             async with lifespan(app):
                 mock_ge.assert_called_once()
                 mock_init.assert_awaited_once_with(mock_engine)
@@ -76,7 +77,8 @@ class TestLifespan:
         mock_engine = AsyncMock()
         with patch("app.main.get_engine", return_value=mock_engine), \
              patch("app.main.init_db", new_callable=AsyncMock), \
-             patch("app.main.close_db", new_callable=AsyncMock) as mock_close:
+             patch("app.main.close_db", new_callable=AsyncMock) as mock_close, \
+             patch("app.main.upsert_barrier_graph", new_callable=AsyncMock):
             async with lifespan(app):
                 pass
             mock_close.assert_awaited_once()
@@ -90,6 +92,7 @@ class TestLifespan:
         with patch("app.main.get_engine", return_value=mock_engine), \
              patch("app.main.init_db", new_callable=AsyncMock), \
              patch("app.main.close_db", new_callable=AsyncMock), \
+             patch("app.main.upsert_barrier_graph", new_callable=AsyncMock), \
              patch("app.main.logger") as mock_logger, \
              patch.dict("os.environ", {"WEB_CONCURRENCY": "4"}):
             async with lifespan(app):
@@ -109,6 +112,7 @@ class TestLifespan:
         with patch("app.main.get_engine", return_value=mock_engine), \
              patch("app.main.init_db", new_callable=AsyncMock), \
              patch("app.main.close_db", new_callable=AsyncMock), \
+             patch("app.main.upsert_barrier_graph", new_callable=AsyncMock), \
              patch("app.main.logger") as mock_logger, \
              patch.dict("os.environ", {"WEB_CONCURRENCY": "1"}):
             async with lifespan(app):
