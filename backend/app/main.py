@@ -11,6 +11,7 @@ from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 from app.core.config import get_settings
 from app.barrier_graph.seed import upsert_barrier_graph
 from app.core.database import close_db, get_async_session_factory, get_engine, init_db
+from app.rag.store import RagStore
 from app.core.exception_handlers import register_exception_handlers
 from app.routes import all_routers
 
@@ -39,6 +40,10 @@ async def lifespan(app: FastAPI):
     factory = get_async_session_factory()
     async with factory() as session:
         await upsert_barrier_graph(session)
+    rag_store = RagStore()
+    async with factory() as session:
+        await rag_store.build_or_load(session)
+    app.state.rag_store = rag_store
     yield
     await close_db()
     logger.info("MontGoWork API shutting down")

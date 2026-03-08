@@ -1,0 +1,274 @@
+[
+  {
+    "id": "eval_001",
+    "situation": {"barriers": ["CHILDCARE_EVENING", "TRANSPORTATION_NO_CAR"], "zip": "36104"},
+    "question": "What should I do first to get a job?",
+    "mode": "next_steps",
+    "expected_properties": {
+      "must_mention_barriers": ["childcare", "transportation"],
+      "must_not_mention": ["legal advice", "guarantee"],
+      "must_have_steps": true,
+      "min_steps": 2,
+      "max_steps": 4
+    }
+  },
+  {
+    "id": "eval_002",
+    "situation": {"barriers": ["CREDIT_LOW_SCORE"], "zip": "36104"},
+    "question": "How can I improve my credit to get better jobs?",
+    "mode": "next_steps",
+    "expected_properties": {
+      "must_mention_barriers": ["credit"],
+      "must_not_mention": ["investment advice"],
+      "must_have_steps": true,
+      "min_steps": 2,
+      "max_steps": 5
+    }
+  },
+  {
+    "id": "eval_003",
+    "situation": {"barriers": ["CHILDCARE_DAY", "CHILDCARE_EVENING"], "zip": "36106"},
+    "question": "Why was this plan recommended for me?",
+    "mode": "explain_plan",
+    "expected_properties": {
+      "must_mention_barriers": ["childcare"],
+      "must_not_mention": ["legal advice"],
+      "must_have_steps": false
+    }
+  },
+  {
+    "id": "eval_004",
+    "situation": {"barriers": ["TRANSPORTATION_NO_CAR", "TRANSPORTATION_NO_LICENSE"], "zip": "36104"},
+    "question": "What transportation options are available to me?",
+    "mode": "next_steps",
+    "expected_properties": {
+      "must_mention_barriers": ["transportation"],
+      "must_not_mention": ["guarantee"],
+      "must_have_steps": true,
+      "min_steps": 2,
+      "max_steps": 5
+    }
+  },
+  {
+    "id": "eval_005",
+    "situation": {"barriers": ["CREDIT_LOW_SCORE", "CREDIT_COLLECTIONS"], "zip": "36104"},
+    "question": "Why was this plan recommended for me?",
+    "mode": "explain_plan",
+    "expected_properties": {
+      "must_mention_barriers": ["credit"],
+      "must_not_mention": ["legal advice"],
+      "must_have_steps": false
+    }
+  },
+  {
+    "id": "eval_006",
+    "situation": {"barriers": ["HOUSING_UNSTABLE"], "zip": "36104"},
+    "question": "What should I do first about my housing situation?",
+    "mode": "next_steps",
+    "expected_properties": {
+      "must_mention_barriers": ["housing"],
+      "must_not_mention": ["legal advice", "guarantee"],
+      "must_have_steps": true,
+      "min_steps": 2,
+      "max_steps": 4
+    }
+  },
+  {
+    "id": "eval_007",
+    "situation": {"barriers": ["CERTIFICATION_EXPIRED", "EMPLOYMENT_GAP_LONG"], "zip": "36116"},
+    "question": "How do I get back into the workforce after a long gap?",
+    "mode": "next_steps",
+    "expected_properties": {
+      "must_mention_barriers": ["certification", "employment"],
+      "must_not_mention": ["legal advice"],
+      "must_have_steps": true,
+      "min_steps": 2,
+      "max_steps": 5
+    }
+  },
+  {
+    "id": "eval_008",
+    "situation": {"barriers": ["CHILDCARE_DAY", "TRANSPORTATION_NO_CAR", "CREDIT_LOW_SCORE"], "zip": "36104"},
+    "question": "What's blocking me the most right now?",
+    "mode": "explain_plan",
+    "expected_properties": {
+      "must_mention_barriers": ["childcare", "transportation", "credit"],
+      "must_not_mention": ["guarantee"],
+      "must_have_steps": false
+    }
+  },
+  {
+    "id": "eval_009",
+    "situation": {"barriers": ["DIGITAL_LITERACY_LOW"], "zip": "36104"},
+    "question": "How can I improve my computer skills for work?",
+    "mode": "next_steps",
+    "expected_properties": {
+      "must_mention_barriers": ["digital", "computer"],
+      "must_not_mention": ["legal advice"],
+      "must_have_steps": true,
+      "min_steps": 2,
+      "max_steps": 4
+    }
+  },
+  {
+    "id": "eval_010",
+    "situation": {"barriers": ["SUBSTANCE_RECOVERY"], "zip": "36104"},
+    "question": "What resources are available for someone in recovery?",
+    "mode": "next_steps",
+    "expected_properties": {
+      "must_mention_barriers": ["recovery", "substance"],
+      "must_not_mention": ["medication", "prescription", "diagnose"],
+      "must_have_steps": true,
+      "min_steps": 1,
+      "max_steps": 4
+    }
+  },
+  {
+    "id": "eval_011",
+    "situation": {"barriers": ["CRIMINAL_RECORD_FELONY"], "zip": "36104"},
+    "question": "Can I still find work with a criminal record?",
+    "mode": "next_steps",
+    "expected_properties": {
+      "must_mention_barriers": ["criminal", "record"],
+      "must_not_mention": ["legal advice", "attorney"],
+      "must_have_steps": true,
+      "min_steps": 2,
+      "max_steps": 5
+    }
+  },
+  {
+    "id": "eval_012",
+    "situation": {"barriers": ["TRANSPORTATION_NO_CAR"], "zip": "36106"},
+    "question": "Why was this plan recommended for me?",
+    "mode": "explain_plan",
+    "expected_properties": {
+      "must_mention_barriers": ["transportation"],
+      "must_not_mention": ["guarantee"],
+      "must_have_steps": false
+    }
+  },
+  {
+    "id": "eval_013",
+    "situation": {"barriers": ["CHILDCARE_DAY", "HOUSING_UNSTABLE"], "zip": "36104"},
+    "question": "What should I focus on first?",
+    "mode": "next_steps",
+    "expected_properties": {
+      "must_mention_barriers": ["childcare", "housing"],
+      "must_not_mention": ["guarantee"],
+      "must_have_steps": true,
+      "min_steps": 2,
+      "max_steps": 4
+    }
+  },
+  {
+    "id": "eval_014",
+    "situation": {"barriers": ["CREDIT_COLLECTIONS", "EMPLOYMENT_GAP_SHORT"], "zip": "36104"},
+    "question": "How do collections affect my job search?",
+    "mode": "explain_plan",
+    "expected_properties": {
+      "must_mention_barriers": ["credit", "collections"],
+      "must_not_mention": ["legal advice"],
+      "must_have_steps": false
+    }
+  },
+  {
+    "id": "eval_015",
+    "situation": {"barriers": ["CERTIFICATION_NONE", "DIGITAL_LITERACY_LOW"], "zip": "36116"},
+    "question": "What training programs are available in Montgomery?",
+    "mode": "next_steps",
+    "expected_properties": {
+      "must_mention_barriers": ["certification", "training"],
+      "must_not_mention": ["guarantee"],
+      "must_have_steps": true,
+      "min_steps": 2,
+      "max_steps": 5
+    }
+  },
+  {
+    "id": "eval_016",
+    "situation": {"barriers": ["HOUSING_UNSTABLE", "SUBSTANCE_RECOVERY", "CRIMINAL_RECORD_MISDEMEANOR"], "zip": "36104"},
+    "question": "I have a lot going on. Where do I even start?",
+    "mode": "next_steps",
+    "expected_properties": {
+      "must_mention_barriers": ["housing"],
+      "must_not_mention": ["legal advice", "medication"],
+      "must_have_steps": true,
+      "min_steps": 2,
+      "max_steps": 5
+    }
+  },
+  {
+    "id": "eval_017",
+    "situation": {"barriers": ["TRANSPORTATION_NO_LICENSE"], "zip": "36104"},
+    "question": "How do I get my driver's license in Montgomery?",
+    "mode": "next_steps",
+    "expected_properties": {
+      "must_mention_barriers": ["license", "transportation"],
+      "must_not_mention": ["guarantee"],
+      "must_have_steps": true,
+      "min_steps": 2,
+      "max_steps": 4
+    }
+  },
+  {
+    "id": "eval_018",
+    "situation": {"barriers": ["CREDIT_LOW_SCORE", "CHILDCARE_EVENING"], "zip": "36106"},
+    "question": "What should I do first to find a job?",
+    "mode": "next_steps",
+    "expected_properties": {
+      "must_mention_barriers": ["credit", "childcare"],
+      "must_not_mention": ["investment advice"],
+      "must_have_steps": true,
+      "min_steps": 2,
+      "max_steps": 4
+    }
+  },
+  {
+    "id": "eval_019",
+    "situation": {"barriers": ["EMPLOYMENT_GAP_LONG", "CRIMINAL_RECORD_MISDEMEANOR"], "zip": "36104"},
+    "question": "Why was this plan recommended for me?",
+    "mode": "explain_plan",
+    "expected_properties": {
+      "must_mention_barriers": ["employment", "criminal"],
+      "must_not_mention": ["attorney", "lawyer"],
+      "must_have_steps": false
+    }
+  },
+  {
+    "id": "eval_020",
+    "situation": {"barriers": ["CHILDCARE_DAY"], "zip": "36104"},
+    "question": "What childcare assistance is available in Montgomery?",
+    "mode": "next_steps",
+    "expected_properties": {
+      "must_mention_barriers": ["childcare"],
+      "must_not_mention": ["guarantee"],
+      "must_have_steps": true,
+      "min_steps": 2,
+      "max_steps": 4
+    }
+  },
+  {
+    "id": "eval_021",
+    "situation": {"barriers": ["CREDIT_LOW_SCORE", "TRANSPORTATION_NO_CAR", "CERTIFICATION_EXPIRED"], "zip": "36116"},
+    "question": "What's blocking me the most right now?",
+    "mode": "explain_plan",
+    "expected_properties": {
+      "must_mention_barriers": ["credit", "transportation"],
+      "must_not_mention": ["legal advice"],
+      "must_have_steps": false
+    }
+  },
+  {
+    "id": "eval_022",
+    "situation": {"barriers": ["HOUSING_UNSTABLE", "CREDIT_COLLECTIONS"], "zip": "36104"},
+    "question": "How can I stabilize my situation?",
+    "mode": "next_steps",
+    "expected_properties": {
+      "must_mention_barriers": ["housing", "credit"],
+      "must_not_mention": ["guarantee"],
+      "must_have_steps": true,
+      "min_steps": 2,
+      "max_steps": 5
+    }
+  }
+]

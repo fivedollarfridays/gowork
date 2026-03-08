@@ -21,14 +21,17 @@ async def upsert_barrier_graph(session: AsyncSession) -> None:
     data = json.loads(_SEED_FILE.read_text())
     barriers = data.get("barriers", [])
     relationships = data.get("relationships", [])
+    barrier_resources = data.get("barrier_resources", [])
 
     await _upsert_barriers(session, barriers)
     await _upsert_relationships(session, relationships)
+    await _upsert_barrier_resources(session, barrier_resources)
     await session.commit()
     logger.info(
-        "Barrier graph seeded: %d nodes, %d edges",
+        "Barrier graph seeded: %d nodes, %d edges, %d resource links",
         len(barriers),
         len(relationships),
+        len(barrier_resources),
     )
 
 
@@ -65,5 +68,24 @@ async def _upsert_relationships(
                 "tgt": rel["target"],
                 "rel_type": rel["relationship_type"],
                 "weight": rel.get("weight", 1.0),
+            },
+        )
+
+
+async def _upsert_barrier_resources(
+    session: AsyncSession, barrier_resources: list[dict]
+) -> None:
+    for br in barrier_resources:
+        await session.execute(
+            text(
+                "INSERT OR IGNORE INTO barrier_resources "
+                "(barrier_id, resource_id, impact_strength, notes) "
+                "VALUES (:barrier_id, :resource_id, :impact_strength, :notes)"
+            ),
+            {
+                "barrier_id": br["barrier_id"],
+                "resource_id": br["resource_id"],
+                "impact_strength": br["impact_strength"],
+                "notes": br.get("notes", ""),
             },
         )
