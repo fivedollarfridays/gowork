@@ -57,20 +57,32 @@ def _truncate(value: str | None, limit: int) -> str | None:
     return value[:limit]
 
 
+def _get_field(job: dict, *keys: str) -> str | None:
+    """Return the first non-empty value found among the given keys."""
+    for k in keys:
+        v = job.get(k)
+        if v:
+            return v
+    return None
+
+
 def parse_brightdata_jobs(raw_jobs: list[dict]) -> list[BrightDataJobRecord]:
     """Parse raw BrightData JSON into typed records. Skips entries without title or excluded."""
     results = []
     for job in raw_jobs:
-        if not job.get("title"):
+        title = _get_field(job, "title", "job_title", "name")
+        if not title:
             continue
-        if _should_exclude(job):
+        # Normalize for exclusion check
+        normalized = {**job, "title": title}
+        if _should_exclude(normalized):
             continue
         results.append(BrightDataJobRecord(
-            title=_truncate(job["title"], _FIELD_LIMITS["title"]),
-            company=_truncate(job.get("company"), _FIELD_LIMITS["company"]),
-            location=_truncate(job.get("location"), _FIELD_LIMITS["location"]),
-            description=_truncate(job.get("description"), _FIELD_LIMITS["description"]),
-            url=_truncate(job.get("url"), _FIELD_LIMITS["url"]),
+            title=_truncate(title, _FIELD_LIMITS["title"]),
+            company=_truncate(_get_field(job, "company", "company_name"), _FIELD_LIMITS["company"]),
+            location=_truncate(_get_field(job, "location"), _FIELD_LIMITS["location"]),
+            description=_truncate(_get_field(job, "description", "description_text"), _FIELD_LIMITS["description"]),
+            url=_truncate(_get_field(job, "url", "apply_link"), _FIELD_LIMITS["url"]),
         ))
     return results
 

@@ -84,9 +84,9 @@ class TestTriggerKeywordCrawl:
                 {"country": "US", "domain": "indeed.com", "keyword_search": "warehouse", "location": "Montgomery, AL"},
             ])
         assert snapshot_id == "snap-kw"
-        # Verify it sends to /scrape with correct params
+        # Verify it sends to /trigger with correct params
         call_kwargs = mock_post.call_args
-        assert "/scrape" in call_kwargs.args[0]
+        assert "/trigger" in call_kwargs.args[0]
         assert call_kwargs.kwargs["params"]["type"] == "discover_new"
         assert call_kwargs.kwargs["params"]["discover_by"] == "keyword"
 
