@@ -20,6 +20,7 @@ import { CareerCenterExport } from "@/components/plan/CareerCenterExport";
 import { EmailExport } from "@/components/plan/EmailExport";
 import { PlanExport } from "@/components/plan/PlanExport";
 import { EmptyState } from "@/components/EmptyState";
+import { BarrierIntelChat } from "@/components/barrier-intel/BarrierIntelChat";
 import { BarrierType, EmploymentStatus, AvailableHours } from "@/lib/types";
 import type { CreditAssessmentResult, UserProfile } from "@/lib/types";
 import { barrierCountToSeverity, CAREER_CENTER, mapsUrl } from "@/lib/constants";
@@ -165,6 +166,7 @@ function PlanContent() {
   }
 
   return (
+    <div className="lg:grid lg:grid-cols-[1fr_320px] lg:gap-6 lg:items-start">
     <div className="space-y-10">
       {/* Monday Morning hero */}
       <MondayMorning
@@ -304,13 +306,26 @@ function PlanContent() {
       </Card>
 
     </div>
+
+    {/* Barrier Intel Chat sidebar (desktop sticky / mobile inline) */}
+    <aside className="lg:sticky lg:top-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Ask about your plan</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <BarrierIntelChat sessionId={sessionId ?? ""} />
+        </CardContent>
+      </Card>
+    </aside>
+    </div>
   );
 }
 
 export default function PlanPage() {
   return (
     <main className="min-h-screen px-4 py-8 sm:px-8">
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto max-w-5xl">
         <Suspense fallback={<PlanSkeleton />}>
           <PlanContent />
         </Suspense>
