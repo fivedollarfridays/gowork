@@ -12,26 +12,37 @@ from app.integrations.brightdata.polling import poll_until_ready
 
 
 _KEYWORDS = [
-    "", "warehouse", "healthcare", "customer service", "retail",
+    "jobs", "warehouse", "healthcare", "customer service", "retail",
     "manufacturing", "food service", "construction", "driver",
     "cashier", "cleaning", "security", "maintenance",
     "administrative", "entry level",
 ]
 
+_LOCATION = "Montgomery, AL"
+
+
+def build_search_urls() -> list[str]:
+    """Return Indeed search URLs for Montgomery, AL jobs."""
+    from urllib.parse import quote_plus
+    urls: list[str] = []
+    for kw in _KEYWORDS:
+        q = quote_plus(kw) if kw else ""
+        loc = quote_plus(_LOCATION)
+        url = f"https://www.indeed.com/jobs?q={q}&l={loc}&fromage=7"
+        urls.append(url)
+    return urls
+
 
 def build_keyword_searches() -> list[dict]:
     """Return structured keyword searches for Montgomery, AL jobs (Indeed + LinkedIn)."""
     searches: list[dict] = []
-    for domain in ("indeed.com", "linkedin.com"):
+    for domain in ("indeed.com",):
         for kw in _KEYWORDS:
             searches.append({
                 "country": "US",
                 "domain": domain,
                 "keyword_search": kw,
-                "location": "Montgomery, AL",
-                "date_posted": "Last 7 days",
-                "posted_by": "",
-                "location_radius": "",
+                "location": _LOCATION,
             })
     return searches
 

@@ -32,7 +32,8 @@ class BrightDataClient:
         """Extract error detail from response and raise BrightDataAPIError."""
         detail = resp.text
         try:
-            detail = resp.json().get("error", detail)
+            body = resp.json()
+            detail = body.get("message", body.get("error", detail))
         except Exception:
             pass
         raise BrightDataAPIError(resp.status_code, detail)
@@ -51,18 +52,17 @@ class BrightDataClient:
     async def trigger_keyword_crawl(self, searches: list[dict]) -> str:
         """Trigger a keyword discovery crawl. Returns the snapshot_id.
 
-        Each search dict should have: country, domain, keyword_search, location.
-        Optional: date_posted, posted_by, location_radius.
+        Each search dict should have: domain, keyword_search, location, country.
         """
         resp = await self._http.post(
-            f"{BASE_URL}/scrape",
+            f"{BASE_URL}/trigger",
             params={
                 "dataset_id": self._dataset_id,
-                "include_errors": "true",
+                "format": "json",
                 "type": "discover_new",
                 "discover_by": "keyword",
             },
-            json={"input": searches},
+            json=searches,
         )
         if resp.status_code != 200:
             self._raise_api_error(resp)
