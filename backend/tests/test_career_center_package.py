@@ -10,6 +10,8 @@ from app.modules.matching.career_center_package import (
     DocumentChecklistItem,
     ResidentActionPlan,
     StaffSummary,
+    _format_barrier,
+    _format_dispute_step,
     assemble_package,
 )
 from app.modules.matching.types import (
@@ -78,11 +80,31 @@ def _wioa(adult: bool = True, reasons: list[str] | None = None) -> WIOAEligibili
 def _credit_result() -> CreditAssessmentResult:
     return CreditAssessmentResult(
         barrier_severity="high",
-        barrier_details=[],
+        barrier_details=[
+            {
+                "severity": "high",
+                "description": "1 collection account(s) on file",
+                "affected_accounts": [],
+                "estimated_resolution_days": 90,
+            },
+        ],
         readiness={"score": 45, "fico_score": 580, "score_band": "fair", "factors": {}},
         thresholds=[],
         dispute_pathway={
-            "steps": [{"step_number": 1, "action": "Get report"}],
+            "steps": [
+                {
+                    "step_number": 1,
+                    "action": "Validate and dispute collection",
+                    "description": "collections",
+                    "estimated_days": 45,
+                },
+                {
+                    "step_number": 2,
+                    "action": "Dispute late payment",
+                    "description": "late_payments",
+                    "estimated_days": 30,
+                },
+            ],
             "total_estimated_days": 90,
             "statutes_cited": [],
             "legal_theories": [],
@@ -90,6 +112,32 @@ def _credit_result() -> CreditAssessmentResult:
         eligibility=[],
         disclaimer="For info only.",
     )
+
+
+class TestFormatBarrier:
+    def test_uses_description_field(self):
+        assert _format_barrier({"severity": "high", "description": "1 collection account(s)"}) == "1 collection account(s)"
+
+    def test_falls_back_to_severity(self):
+        assert _format_barrier({"severity": "medium"}) == "medium barrier"
+
+    def test_empty_dict_fallback(self):
+        assert _format_barrier({}) == "Credit barrier"
+
+
+class TestFormatDisputeStep:
+    def test_action_and_description(self):
+        result = _format_dispute_step({"action": "Dispute collection", "description": "debt validation"})
+        assert result == "Dispute collection: debt validation"
+
+    def test_action_only(self):
+        assert _format_dispute_step({"action": "Get report"}) == "Get report"
+
+    def test_description_only(self):
+        assert _format_dispute_step({"description": "Pull credit report"}) == "Pull credit report"
+
+    def test_empty_dict_fallback(self):
+        assert _format_dispute_step({}) == "Review your credit report"
 
 
 class TestCareerCenterInfo:
@@ -190,6 +238,27 @@ class TestAssemblePackage:
         )
         assert pkg.credit_pathway is not None
         assert len(pkg.credit_pathway.dispute_steps) > 0
+
+    def test_credit_pathway_formats_blocking_items(self):
+        pkg = assemble_package(
+            _profile([BarrierType.CREDIT]),
+            _plan([BarrierType.CREDIT]),
+            _wioa(True, ["credit"]),
+            credit_result=_credit_result(),
+        )
+        assert pkg.credit_pathway is not None
+        assert pkg.credit_pathway.blocking == ["1 collection account(s) on file"]
+
+    def test_credit_pathway_formats_dispute_steps(self):
+        pkg = assemble_package(
+            _profile([BarrierType.CREDIT]),
+            _plan([BarrierType.CREDIT]),
+            _wioa(True, ["credit"]),
+            credit_result=_credit_result(),
+        )
+        assert pkg.credit_pathway is not None
+        assert pkg.credit_pathway.dispute_steps[0] == "Validate and dispute collection: collections"
+        assert pkg.credit_pathway.dispute_steps[1] == "Dispute late payment: late_payments"
 
     def test_credit_pathway_absent_without_credit_barrier(self):
         pkg = assemble_package(

@@ -73,7 +73,7 @@ function buildRows(plan: ReEntryPlan, profile: UserProfile, creditResult?: Credi
     const totalProducts = creditResult ? creditResult.eligibility.length : 0;
 
     const nowText = creditResult
-      ? `FICO ${ficoNow} (${creditResult.readiness.score_band}) — ${eligibleCount}/${totalProducts} products eligible`
+      ? `FICO ${ficoNow} (${creditResult.readiness.score_band}), ${eligibleCount}/${totalProducts} products eligible`
       : plan.credit_readiness_score != null
         ? `Readiness: ${plan.credit_readiness_score}/100`
         : "Assessment needed";
@@ -82,10 +82,10 @@ function buildRows(plan: ReEntryPlan, profile: UserProfile, creditResult?: Credi
       label: "Credit Status",
       now: nowText,
       future: fairThreshold && !fairThreshold.already_met
-        ? `Fair credit (${fairThreshold.threshold_score}+) in ${daysToMonths(fairThreshold.estimated_days)} — more employers accessible`
+        ? `Fair credit (${fairThreshold.threshold_score}+) in ${daysToMonths(fairThreshold.estimated_days)}, more employers accessible`
         : creditResult
           ? `${totalProducts} financial products accessible`
-          : "Credit repair plan in progress — more employers accessible",
+          : "Credit repair plan in progress, more employers accessible",
       nowIcon: <CreditCard className="h-4 w-4 text-warning-foreground" />,
       futureIcon: <CreditCard className="h-4 w-4 text-success" />,
     });
@@ -98,7 +98,7 @@ function buildRows(plan: ReEntryPlan, profile: UserProfile, creditResult?: Credi
       .reduce((set, t) => set.add(t.route_number), new Set<number>()).size;
     rows.push({
       label: "Transit Access",
-      now: "Transit dependent — limited schedule",
+      now: "Transit dependent, limited schedule",
       future: routeCount > 0 ? `${routeCount} bus route${routeCount > 1 ? "s" : ""} mapped to resources & jobs` : "Transit routes identified",
       nowIcon: <Shield className="h-4 w-4 text-muted-foreground" />,
       futureIcon: <TrendingUp className="h-4 w-4 text-success" />,

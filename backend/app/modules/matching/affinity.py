@@ -29,7 +29,7 @@ RESOURCE_AFFINITY: dict[str, BarrierType] = {
 }
 
 CAREER_CENTER_STEP = (
-    f"Start here: {CAREER_CENTER.name} — {CAREER_CENTER.phone}, {CAREER_CENTER.address}"
+    f"{CAREER_CENTER.name}, {CAREER_CENTER.phone}, {CAREER_CENTER.address}"
 )
 
 

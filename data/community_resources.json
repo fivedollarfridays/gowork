@@ -1,6 +1,6 @@
 [
   {
-    "name": "Montgomery OneAlabama — 2-1-1 Helpline",
+    "name": "Montgomery OneAlabama, 2-1-1 Helpline",
     "category": "social_service",
     "subcategory": "referral",
     "address": "600 South Court Street, Montgomery, AL 36104",
@@ -24,7 +24,7 @@
     "notes": "Mandatory for able-bodied TANF recipients. Provides transportation vouchers."
   },
   {
-    "name": "Montgomery Area Transit System (MATS) — The M",
+    "name": "Montgomery Area Transit System (MATS), The M",
     "category": "social_service",
     "subcategory": "transportation",
     "address": "2318 West Fairview Avenue, Montgomery, AL 36108",
@@ -36,7 +36,7 @@
     "notes": "31-day pass available at MATS office. No Sunday service. Download TransLoc app for real-time tracking."
   },
   {
-    "name": "Salvation Army — Montgomery",
+    "name": "Salvation Army, Montgomery",
     "category": "social_service",
     "subcategory": "emergency",
     "address": "911 South Court Street, Montgomery, AL 36104",

@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import type { CreditAssessmentResult, JobMatch, ScoredJobMatch } from "@/lib/types";
-import { STATUS_BADGE_STYLES, safeHref, daysToMonths } from "@/lib/constants";
+import { STATUS_BADGE_STYLES, safeHref, daysToMonths, mapsUrl } from "@/lib/constants";
 
 export function isScoredJob(job: JobMatch): job is ScoredJobMatch {
   return "relevance_score" in job;
@@ -87,10 +87,15 @@ export function JobMatchCard({ job, creditResult }: JobMatchCardProps) {
         {/* Location + route */}
         <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
           {job.location && (
-            <span className="flex items-center gap-1">
+            <a
+              href={mapsUrl(job.location)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 hover:text-secondary hover:underline transition-colors"
+            >
               <MapPin className="h-3.5 w-3.5" />
               {job.location}
-            </span>
+            </a>
           )}
           {job.route && (
             <span className="flex items-center gap-1">

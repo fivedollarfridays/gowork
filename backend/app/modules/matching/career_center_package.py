@@ -18,7 +18,7 @@ CAREER_CENTER = CareerCenterInfo(
     phone="334-286-1746",
     address="1060 East South Boulevard, Montgomery, AL 36116",
     hours="Mon-Fri 8am-5pm",
-    transit_route="Route 6 — East South Boulevard",
+    transit_route="Route 6, East South Boulevard",
 )
 
 _BASE_DOCS = [
@@ -29,9 +29,9 @@ _BASE_DOCS = [
 ]
 
 _FREE_CREDIT_RESOURCES = [
-    "AnnualCreditReport.com — free weekly reports",
+    "AnnualCreditReport.com: free weekly reports",
     "Consumer Financial Protection Bureau (CFPB)",
-    "Alabama Legal Help — free credit dispute assistance",
+    "Alabama Legal Help: free credit dispute assistance",
 ]
 
 _WHAT_TO_EXPECT = [
@@ -54,20 +54,38 @@ def _build_document_checklist(profile: UserProfile) -> list[DocumentChecklistIte
 def _build_what_to_say(profile: UserProfile, wioa: WIOAEligibility) -> list[str]:
     lines = ["I'm here to get help finding employment."]
     if wioa.adult_program:
-        lines.append("I may qualify for the WIOA Adult program — I'd like to discuss enrollment.")
+        lines.append("I may qualify for the WIOA Adult program. I'd like to discuss enrollment.")
         if wioa.supportive_services:
             lines.append("I also need help with supportive services (transportation/childcare assistance).")
         if wioa.ita_training:
-            lines.append("I have certifications that may need renewal — I'd like to explore Individual Training Accounts.")
+            lines.append("I have certifications that may need renewal. I'd like to explore Individual Training Accounts.")
     barrier_names = [b.value.replace("_", " ") for b in profile.primary_barriers]
     if barrier_names:
         lines.append(f"My main challenges are: {', '.join(barrier_names)}.")
     return lines
 
 
+def _format_barrier(d: dict) -> str:
+    """Format a credit barrier dict into a human-readable string."""
+    desc = d.get("description", "")
+    if desc:
+        return desc
+    severity = d.get("severity", "")
+    return f"{severity} barrier" if severity else "Credit barrier"
+
+
+def _format_dispute_step(s: dict) -> str:
+    """Format a dispute step dict into a human-readable string."""
+    action = s.get("action", "")
+    desc = s.get("description", "")
+    if action and desc:
+        return f"{action}: {desc}"
+    return action or desc or "Review your credit report"
+
+
 def _build_credit_pathway(credit_result: CreditAssessmentResult) -> CreditPathway:
-    blocking = [d.get("detail", str(d)) for d in credit_result.barrier_details]
-    steps = [s.get("action", str(s)) for s in credit_result.dispute_pathway.get("steps", [])]
+    blocking = [_format_barrier(d) for d in credit_result.barrier_details]
+    steps = [_format_dispute_step(s) for s in credit_result.dispute_pathway.get("steps", [])]
     return CreditPathway(
         blocking=blocking, not_blocking=[], dispute_steps=steps, free_resources=_FREE_CREDIT_RESOURCES,
     )

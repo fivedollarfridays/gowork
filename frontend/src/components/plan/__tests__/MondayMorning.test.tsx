@@ -127,38 +127,38 @@ describe("MondayMorning clickable phone numbers", () => {
     expect(callAheadText).not.toBeInTheDocument();
   });
 
-  it("shows 'Call ahead' detail text without inline phone number", () => {
+  it("shows phone number in step card detail area", () => {
     renderMondayMorning({ plan: planWithResource });
-    expect(screen.getByText("Call ahead")).toBeInTheDocument();
+    // The phone should appear as text content within the card
+    expect(screen.getByText("(334) 555-1234")).toBeInTheDocument();
   });
 });
 
-describe("MondayMorning inline phone numbers in step titles", () => {
-  const planWithPhoneInTitle: ReEntryPlan = {
+describe("MondayMorning step titles from immediate_next_steps", () => {
+  const planWithSteps: ReEntryPlan = {
     ...basePlan,
     immediate_next_steps: [
-      "Contact Montgomery Career Center (334-286-1746) for transportation support",
-      "Call Legal Aid at (334) 832-4570 for record help",
+      "Contact Montgomery Career Center for transportation support",
+      "Call Legal Aid for record help",
     ],
   };
 
-  it("renders embedded phone numbers as clickable tel: links", () => {
-    renderMondayMorning({ plan: planWithPhoneInTitle });
+  it("renders each immediate_next_step as a step card title", () => {
+    renderMondayMorning({ plan: planWithSteps });
 
+    // Career center step is detected and structured with phone/location
+    // Other steps render as plain title text
+    expect(screen.getByText(/Call Legal Aid for record help/)).toBeInTheDocument();
+  });
+
+  it("structures career center step with phone link", () => {
+    renderMondayMorning({ plan: planWithSteps });
+
+    // Career center step is detected by name and gets structured phone/address
     const phoneLinks = screen.getAllByRole("link").filter(
       (link) => link.getAttribute("href")?.startsWith("tel:")
     );
-    expect(phoneLinks.length).toBeGreaterThanOrEqual(2);
-    // Regex captures phone with optional parens as they appear in text
-    expect(phoneLinks[0].getAttribute("href")).toMatch(/^tel:.*334.*286.*1746/);
-    expect(phoneLinks[1].getAttribute("href")).toMatch(/^tel:.*334.*832.*4570/);
-  });
-
-  it("renders text around the phone number as plain text", () => {
-    renderMondayMorning({ plan: planWithPhoneInTitle });
-
-    expect(screen.getByText(/Contact Montgomery Career Center/)).toBeInTheDocument();
-    expect(screen.getByText(/for transportation support/)).toBeInTheDocument();
+    expect(phoneLinks.length).toBeGreaterThanOrEqual(1);
   });
 });
 
@@ -191,21 +191,21 @@ describe("MondayMorning map links", () => {
     ],
   };
 
-  it("uses maps.google.com for address links (universal cross-platform)", () => {
+  it("uses Google Maps search URL for address links", () => {
     renderMondayMorning({ plan: planWithAddress });
 
     const mapLinks = screen.getAllByRole("link").filter(
-      (link) => link.getAttribute("href")?.includes("maps")
+      (link) => link.getAttribute("href")?.includes("google.com/maps")
     );
     expect(mapLinks.length).toBeGreaterThanOrEqual(1);
-    expect(mapLinks[0].getAttribute("href")).toContain("maps.google.com");
+    expect(mapLinks[0].getAttribute("href")).toContain("google.com/maps/search");
   });
 
   it("encodes address in map URL", () => {
     renderMondayMorning({ plan: planWithAddress });
 
     const mapLinks = screen.getAllByRole("link").filter(
-      (link) => link.getAttribute("href")?.includes("maps.google.com")
+      (link) => link.getAttribute("href")?.includes("google.com/maps")
     );
     expect(mapLinks[0].getAttribute("href")).toContain(
       encodeURIComponent("100 Main St, Montgomery, AL")

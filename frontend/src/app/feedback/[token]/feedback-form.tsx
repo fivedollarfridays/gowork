@@ -216,7 +216,7 @@ export function FeedbackForm({ token }: { token: string }) {
         <div className="text-center space-y-1">
           <h1 className="text-2xl font-bold text-primary">How did it go?</h1>
           <p className="text-sm text-muted-foreground">
-            3 quick questions — takes under a minute
+            3 quick questions, takes under a minute
           </p>
         </div>
 
