@@ -1,6 +1,6 @@
 # Current State
 
-> Last updated: 2026-03-07
+> Last updated: 2026-03-08
 
 ## Active Plan
 
@@ -45,14 +45,14 @@ Sprint 23: Barrier Graph + RAG — Barrier Intelligence Assistant. Adds graph-aw
 | ID | Title | Priority | Complexity | Status | Depends On |
 |----|-------|----------|------------|--------|------------|
 | T23.1 | Barrier graph DB schema: Alembic migration + seed data | P0 | 55 | done | -- |
-| T23.2 | Barrier-resource mapping: join table, impact scores, top-N query | P0 | 45 | pending | T23.1 |
-| T23.3 | RAG knowledge base: document schema + FAISS ingestion pipeline | P0 | 60 | pending | T23.1, T23.2 |
-| T23.4 | Hybrid retrieval layer: vector + metadata filter + graph context assembly | P0 | 50 | pending | T23.2, T23.3 |
+| T23.2 | Barrier-resource mapping: join table, impact scores, top-N query | P0 | 45 | done | T23.1 |
+| T23.3 | RAG knowledge base: document schema + FAISS ingestion pipeline | P0 | 60 | done | T23.1, T23.2 |
+| T23.4 | Hybrid retrieval layer: vector + metadata filter + graph context assembly | P0 | 50 | done | T23.2, T23.3 |
 | T23.5 | LLM orchestration + guardrails: POST /api/barrier-intel/chat + SSE streaming | P0 | 70 | pending | T23.4 |
 | T23.6 | Frontend: BarrierIntelChat + SSE streaming + explainability UI | P1 | 70 | pending | T23.5 |
 | T23.7 | NFRs: caching, observability, rate limiting + eval suite | P2 | 55 | pending | T23.5, T23.6 |
 
-**Total: 7 tasks, 405 complexity points (1/7 done)**
+**Total: 7 tasks, 405 complexity points (4/7 done)**
 
 ### Sprint 18 -- Security Hardening (GitHub Issue #20)
 
@@ -124,6 +124,18 @@ Sprint 23: Barrier Graph + RAG — Barrier Intelligence Assistant. Adds graph-aw
 **Total: 6 tasks, 125 complexity points (6/6 done)**
 
 ## What Was Just Done
+
+### Sprint 24 T24.4 (2026-03-08) — Hybrid Retrieval Layer
+
+- **T24.4** Hybrid retrieval layer: Created `barrier_graph/traversal.py` with `find_root_barriers()` (BFS detecting barriers with no incoming CAUSES edges within user's set, priority-sorted: childcare=1, transportation=2...). Added `RagStore.search()` (embed query → FAISS top-k*2 → post-filter by barrier_tags overlap → top-k). Created `rag/retrieval.py` with `retrieve_context()` (assembles RetrievalContext: root barriers, chain summary, top resources, FAISS docs, latency_ms). Added `RetrievalContext` model to `document_schema.py`. 10 new tests, 586 total. All arch checks clean.
+
+### Sprint 24 T24.3 (2026-03-08) — RAG Knowledge Base
+
+- **T24.3** RAG knowledge base: Created `app/rag/` module with `document_schema.py` (RagDocument Pydantic model with barrier_tags validator), `corpus_builder.py` (loads resources+playbooks from DB → RagDocuments), `ingestion.py` (sentence-transformers/all-MiniLM-L6-v2, 384-dim IndexFlatIP, build/save/load), `store.py` (RagStore singleton with build_or_load+rebuild). Created `POST /api/barrier-intel/reindex` (admin-only via X-Admin-Key). Wired `init_rag_store` into `main.py` lifespan after barrier graph seed. Added `*.faiss` to .gitignore, `backend/data/rag_index/.gitkeep`. 14 new tests, 576 total. All arch checks clean.
+
+### Sprint 24 T24.2 (2026-03-08) — Barrier-Resource Mapping
+
+- **T24.2** Barrier-resource mapping: Added `barrier_resource_rules` array (11 rules) to `data/barrier_graph_seed.json` mapping all resource categories/subcategories to barrier node IDs with impact scores. Extended `seed.py` with `_upsert_barrier_resources()` that queries resources by category/subcategory and inserts barrier_resources rows via INSERT OR IGNORE. Created `backend/app/barrier_graph/queries.py` with `get_top_resources_for_barriers()` (SUM aggregation, HIDDEN exclusion, top-N limit) and `_build_top_resources_query()` helper. 9 new tests (minimum count ≥50, all resources linked, impact range, idempotency, top-N ranking, HIDDEN exclusion, required fields, empty input). All arch checks clean. 562 total tests pass.
 
 ### Sprint 23 T23.1 (2026-03-07) — Barrier Graph DB Schema
 
@@ -217,8 +229,8 @@ Sprint 23: Barrier Graph + RAG — Barrier Intelligence Assistant. Adds graph-aw
 
 ## What's Next
 
-1. Start T23.2 (Barrier-resource mapping: join table, impact scores, top-N query)
-2. Then T23.3 (RAG knowledge base: document schema + FAISS ingestion pipeline)
+1. Start T24.5 (LLM orchestration + guardrails: POST /api/barrier-intel/chat + SSE streaming)
+2. Then T24.6 (Frontend: BarrierIntelChat + SSE streaming + explainability UI)
 
 
 ## Blockers

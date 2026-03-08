@@ -111,10 +111,46 @@
     ],
     "total_seconds": 89.375955
   },
-  "_active": {
-    "task_id": "T23.1",
-    "timer_id": "local-20260307143645",
-    "description": "T23.1: Barrier graph DB schema: Alembic migration + seed data",
-    "start": "2026-03-07T14:36:45.670984"
+  "T24.2": {
+    "entries": [
+      {
+        "id": "local-20260308050813",
+        "task_id": "T24.2",
+        "description": "T24.2: Barrier-resource mapping: join table, impact scores, top-N query",
+        "start": "2026-03-08T05:08:13.755017",
+        "end": "2026-03-08T05:15:52.804909",
+        "duration_seconds": 459.049892,
+        "provider_id": null
+      }
+    ],
+    "total_seconds": 459.049892
+  },
+  "T24.3": {
+    "entries": [
+      {
+        "id": "local-20260308052032",
+        "task_id": "T24.3",
+        "description": "T24.3: RAG knowledge base: document schema + FAISS ingestion pipeline",
+        "start": "2026-03-08T05:20:32.291707",
+        "end": "2026-03-08T05:48:51.837924",
+        "duration_seconds": 1699.546217,
+        "provider_id": null
+      }
+    ],
+    "total_seconds": 1699.546217
+  },
+  "T24.4": {
+    "entries": [
+      {
+        "id": "local-20260308060246",
+        "task_id": "T24.4",
+        "description": "T24.4: Hybrid retrieval layer: vector + metadata filter + graph context assembly",
+        "start": "2026-03-08T06:02:46.749534",
+        "end": "2026-03-08T06:10:35.329961",
+        "duration_seconds": 468.580427,
+        "provider_id": null
+      }
+    ],
+    "total_seconds": 468.580427
   }
 }
