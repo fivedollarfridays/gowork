@@ -1,4 +1,10 @@
-"""Async SQLAlchemy database setup for SQLite with raw DDL and seed data."""
+"""Async SQLAlchemy database setup for SQLite with raw DDL and seed data.
+
+Module globals ``_engine`` and ``_async_session_factory`` use lazy initialization
+for the single-process SQLite lifecycle. ``close_db()`` is called by the FastAPI
+lifespan handler in ``main.py`` on shutdown. Test isolation is handled by
+``conftest.py`` which saves/restores the globals per test via ``test_engine``.
+"""
 
 import json
 import logging

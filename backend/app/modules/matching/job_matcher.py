@@ -104,12 +104,8 @@ async def match_jobs(
 
     transit_stops = await _get_transit_stops(db_session)
 
-    available_hours = AvailableHours(profile.schedule_type) if profile.schedule_type in {
-        e.value for e in AvailableHours
-    } else AvailableHours.DAYTIME
-
     jobs = _filter_by_industry(listings, profile.target_industries)
-    jobs = _filter_by_schedule(jobs, available_hours)
+    jobs = _filter_by_schedule(jobs, profile.schedule_type)
     jobs = _filter_by_transit(jobs, profile.transit_dependent, transit_stops)
     jobs = _annotate_credit(jobs)
 

@@ -58,6 +58,8 @@ export interface AssessmentRequest {
   target_industries: string[];
   has_vehicle: boolean;
   schedule_constraints: ScheduleConstraints;
+  resume_text?: string;
+  certifications?: string[];
   credit_result?: CreditAssessmentResult;
 }
 
@@ -125,6 +127,32 @@ export interface BarrierCard {
   transit_matches: TransitConnection[];
 }
 
+export type ReadinessBand = "not_ready" | "developing" | "ready" | "strong";
+
+export interface ReadinessFactor {
+  name: string;
+  weight: number;
+  score: number;
+  detail: string;
+}
+
+export interface ReadinessPathwayStep {
+  step_number: number;
+  action: string;
+  resource: string;
+  timeline_days: number;
+  completed: boolean;
+}
+
+export interface JobReadinessResult {
+  overall_score: number;
+  readiness_band: ReadinessBand;
+  factors: ReadinessFactor[];
+  pathway: ReadinessPathwayStep[];
+  estimated_days_to_ready: number;
+  summary: string;
+}
+
 export interface WIOAEligibility {
   adult_program: boolean;
   adult_reasons: string[];
@@ -139,14 +167,16 @@ export interface ReEntryPlan {
   session_id: string;
   resident_summary: string | null;
   barriers: BarrierCard[];
-  job_matches: JobMatch[];
+  job_matches: ScoredJobMatch[];  // computed: strong + possible + after_repair
   strong_matches: ScoredJobMatch[];
   possible_matches: ScoredJobMatch[];
+  after_repair: ScoredJobMatch[];
   immediate_next_steps: string[];
   credit_readiness_score: number | null;
   eligible_now: string[];
   eligible_after_repair: string[];
   wioa_eligibility: WIOAEligibility | null;
+  job_readiness: JobReadinessResult | null;
 }
 
 export interface AssessmentResponse {
@@ -283,6 +313,7 @@ export interface ResourceFeedbackRequest {
   session_id: string;
   helpful: boolean;
   barrier_type?: string;
+  token: string;
 }
 
 export interface ResourceFeedbackResponse {

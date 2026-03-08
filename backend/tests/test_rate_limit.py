@@ -51,6 +51,19 @@ class TestRateLimiter:
         limiter.clear()
         assert limiter.check("k") is True
 
+    def test_prune_stale_keys_at_100_calls(self):
+        """Every 100 successful checks, stale keys are pruned."""
+        limiter = RateLimiter(max_requests=200, window_seconds=1)
+        # Make 99 successful checks to get _call_count to 99
+        for _ in range(99):
+            assert limiter.check("key1") is True
+        # Inject a stale key with timestamp 0 (always expired)
+        limiter._requests["stale_key"] = [0.0]
+        assert "stale_key" in limiter._requests
+        # 100th check triggers _prune_stale via _call_count % 100 == 0
+        assert limiter.check("key1") is True
+        assert "stale_key" not in limiter._requests
+
 
 _VALID_UUID = "00000000-0000-4000-8000-000000000001"
 _GET_SESSION = "app.routes.plan.get_session_by_id"

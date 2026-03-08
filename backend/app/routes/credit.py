@@ -5,7 +5,7 @@ import logging
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request
 
-from app.core.audit import audit_log
+from app.core.audit import audit_log, get_client_ip
 from app.core.config import get_settings
 from app.core.rate_limit import RateLimiter, require_rate_limit
 from app.modules.credit.types import CreditAssessmentResult, SimpleCreditRequest
@@ -66,6 +66,5 @@ async def assess_credit(
             detail="Credit assessment network error. Try again later.",
         )
     _check_credit_response(resp)
-    client_ip = request.client.host if request.client else "unknown"
-    audit_log("credit_assessed", session_id="anonymous", client_ip=client_ip)
+    audit_log("credit_assessed", session_id="anonymous", client_ip=get_client_ip(request))
     return resp.json()

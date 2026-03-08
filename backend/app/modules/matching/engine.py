@@ -12,6 +12,8 @@ from app.modules.matching.affinity import (
 from app.modules.matching.barrier_priority import prioritize_barriers
 from app.modules.matching.filters import get_certification_renewal
 from app.modules.matching.job_matcher import match_jobs
+from app.modules.matching.job_readiness import assess_job_readiness
+from app.modules.matching.resume_parser import ParsedResume, parse_resume
 from app.modules.matching.scoring import (
     BARRIER_CATEGORY_MAP,
     haversine_miles,
@@ -123,19 +125,26 @@ def _compute_stop_distances(
     return distances
 
 
-async def generate_plan(
-    profile: UserProfile, db_session,
-) -> ReEntryPlan:
-    """Orchestrate the full matching pipeline."""
-    resources = await query_resources_for_barriers(profile.primary_barriers, db_session)
-
+async def _rank_with_transit(
+    profile: UserProfile, resources: list[Resource], db_session,
+) -> list[Resource]:
+    """Rank resources, factoring in transit stop proximity for transit-dependent users."""
     stop_distances: dict[int, float] | None = None
     if profile.transit_dependent:
         stops = await get_all_transit_stops(db_session)
         if stops:
             stop_distances = _compute_stop_distances(resources, stops)
+    return rank_resources(resources, profile, stop_distances=stop_distances)
 
-    resources = rank_resources(resources, profile, stop_distances=stop_distances)
+
+async def generate_plan(
+    profile: UserProfile, db_session,
+    resume_text: str = "",
+    credit_result: dict | None = None,
+) -> ReEntryPlan:
+    """Orchestrate the full matching pipeline."""
+    resources = await query_resources_for_barriers(profile.primary_barriers, db_session)
+    resources = await _rank_with_transit(profile, resources, db_session)
 
     strong, possible, after_repair = await match_jobs(profile, db_session)
 
@@ -147,18 +156,23 @@ async def generate_plan(
     next_steps = _build_next_steps(profile, barrier_cards, strong)
     wioa = screen_wioa_eligibility(profile)
 
+    parsed_resume = parse_resume(resume_text) if resume_text else None
+    all_matches = list(strong) + list(possible) + list(after_repair)
+    readiness = assess_job_readiness(profile, parsed_resume, all_matches, credit_result)
+
     eligible = strong + possible
     return ReEntryPlan(
         plan_id=str(uuid.uuid4()),
         session_id=profile.session_id,
         barriers=barrier_cards,
-        job_matches=eligible + after_repair,
         strong_matches=strong,
         possible_matches=possible,
+        after_repair=after_repair,
         immediate_next_steps=next_steps,
         eligible_now=[m.title for m in eligible],
         eligible_after_repair=[m.title for m in after_repair],
         wioa_eligibility=wioa,
+        job_readiness=readiness,
     )
 
 

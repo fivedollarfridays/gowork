@@ -121,3 +121,22 @@ class TestLifespan:
             str(c) for c in mock_logger.warning.call_args_list
         ]
         assert not any("WEB_CONCURRENCY" in c for c in warning_calls)
+
+    @pytest.mark.anyio
+    async def test_warns_on_missing_anthropic_key(self):
+        """Lifespan logs warning when ANTHROPIC_API_KEY is not set."""
+        from app.main import lifespan, app
+
+        mock_engine = AsyncMock()
+        mock_settings = patch("app.main.get_settings")
+        with mock_settings as ms, \
+             patch("app.main.get_engine", return_value=mock_engine), \
+             patch("app.main.init_db", new_callable=AsyncMock), \
+             patch("app.main.close_db", new_callable=AsyncMock), \
+             patch("app.main.logger") as mock_logger:
+            ms.return_value.anthropic_api_key = ""
+            async with lifespan(app):
+                pass
+        mock_logger.warning.assert_any_call(
+            "ANTHROPIC_API_KEY is not set \u2014 AI narrative will use fallback"
+        )

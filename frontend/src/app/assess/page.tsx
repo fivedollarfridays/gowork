@@ -3,11 +3,13 @@
 import { useMemo, useState, useCallback, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { ClipboardList, ListChecks, Clock, CreditCard, FileText, Loader2 } from "lucide-react";
+import { ClipboardList, ListChecks, Clock, CreditCard, FileText, Loader2, Upload, Briefcase } from "lucide-react";
 import { postAssessment, postCredit } from "@/lib/api";
 import { WizardShell, type WizardStepConfig } from "@/components/wizard/WizardShell";
 import { BarrierForm, type BarrierFormData } from "@/components/wizard/BarrierForm";
 import { CreditForm, creditFormCanAdvance, ACCOUNT_AGE_RANGES } from "@/components/wizard/CreditForm";
+import { ResumeStep } from "@/components/wizard/ResumeStep";
+import { IndustryForm } from "@/components/wizard/IndustryForm";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
@@ -35,6 +37,9 @@ export default function AssessPage() {
     hasVehicle: false,
     availableHours: AvailableHours.DAYTIME,
   });
+  const [resumeText, setResumeText] = useState("");
+  const [targetIndustries, setTargetIndustries] = useState<string[]>([]);
+  const [certifications, setCertifications] = useState<string[]>([]);
   const [creditData, setCreditData] = useState<CreditFormData>({
     currentScore: 580,
     overallUtilization: 30,
@@ -100,16 +105,18 @@ export default function AssessPage() {
       employment_status: formData.employment,
       barriers: formData.barriers,
       work_history: formData.workHistory,
-      target_industries: [],
+      target_industries: targetIndustries,
       has_vehicle: formData.hasVehicle,
       schedule_constraints: {
         available_days: ["monday", "tuesday", "wednesday", "thursday", "friday"],
         available_hours: formData.availableHours,
       },
+      ...(resumeText ? { resume_text: resumeText } : {}),
+      ...(certifications.length > 0 ? { certifications } : {}),
       ...(creditResultRef.current ? { credit_result: creditResultRef.current } : {}),
     };
     mutation.mutate(request);
-  }, [formData, creditData, hasCreditBarrier, mutation]);
+  }, [formData, creditData, hasCreditBarrier, mutation, resumeText, targetIndustries, certifications]);
 
   const steps: WizardStepConfig[] = useMemo(() => [
     {
@@ -175,6 +182,22 @@ export default function AssessPage() {
       ),
     },
     {
+      title: "Resume",
+      icon: <Upload className="h-4 w-4" />,
+      canAdvance: () => true,
+      content: () => (
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-lg font-semibold mb-1">Upload Your Resume</h2>
+            <p className="text-sm text-muted-foreground">
+              Upload a resume to improve your job matches. This step is optional.
+            </p>
+          </div>
+          <ResumeStep resumeText={resumeText} onResumeTextChange={setResumeText} />
+        </div>
+      ),
+    },
+    {
       title: "Barriers",
       icon: <ListChecks className="h-4 w-4" />,
       canAdvance: () => barrierCount > 0,
@@ -224,6 +247,27 @@ export default function AssessPage() {
               </SelectContent>
             </Select>
           </div>
+        </div>
+      ),
+    },
+    {
+      title: "Industries",
+      icon: <Briefcase className="h-4 w-4" />,
+      canAdvance: () => true,
+      content: () => (
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-lg font-semibold mb-1">Target Industries</h2>
+            <p className="text-sm text-muted-foreground">
+              Select industries you&apos;re interested in. This helps us find better job matches.
+            </p>
+          </div>
+          <IndustryForm
+            targetIndustries={targetIndustries}
+            certifications={certifications}
+            onIndustriesChange={setTargetIndustries}
+            onCertificationsChange={setCertifications}
+          />
         </div>
       ),
     },
@@ -322,15 +366,15 @@ export default function AssessPage() {
         </div>
       ),
     },
-  ], [formData, creditData, zipValid, barrierCount, hasCreditBarrier, mutation.isPending, error]);
+  ], [formData, creditData, zipValid, barrierCount, hasCreditBarrier, mutation.isPending, error, resumeText, targetIndustries, certifications]);
 
   return (
     <main className="min-h-screen px-4 py-8 sm:px-8">
       <div className="mx-auto max-w-2xl space-y-6">
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-primary">Skills Assessment</h1>
+          <h1 className="text-3xl font-bold text-primary">Workforce Navigator</h1>
           <p className="text-muted-foreground">
-            Answer a few questions to get your personalized workforce plan
+            Answer a few questions to get your personalized re-entry plan
           </p>
         </div>
 

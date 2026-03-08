@@ -149,6 +149,19 @@ class TestDataDirConfig:
         s = Settings()
         assert s.data_dir == ""
 
+    def test_resolve_data_dir_uses_configured_path(self, tmp_path):
+        """_resolve_data_dir returns configured path when data_dir is set."""
+        from unittest.mock import MagicMock
+        from app.core.database import _resolve_data_dir
+
+        mock_settings = MagicMock()
+        mock_settings.data_dir = str(tmp_path / "custom_data")
+
+        with patch("app.core.database.get_settings", return_value=mock_settings):
+            result = _resolve_data_dir()
+
+        assert result == (tmp_path / "custom_data").resolve()
+
     @pytest.mark.anyio
     async def test_missing_data_dir_logs_error(self, tmp_path, caplog):
         """seed_database should log error when DATA_DIR doesn't exist."""

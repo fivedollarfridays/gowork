@@ -16,6 +16,10 @@ import type {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+function tokenQs(token?: string): string {
+  return token ? `?token=${encodeURIComponent(token)}` : "";
+}
+
 async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
   const headers: HeadersInit = { ...init?.headers };
   if (init?.body) {
@@ -44,13 +48,11 @@ export function postAssessment(data: AssessmentRequest): Promise<AssessmentRespo
 }
 
 export function getPlan(sessionId: string, token?: string): Promise<PlanResponse> {
-  const qs = token ? `?token=${encodeURIComponent(token)}` : "";
-  return apiFetch(`/api/plan/${sessionId}${qs}`);
+  return apiFetch(`/api/plan/${sessionId}${tokenQs(token)}`);
 }
 
 export function generateNarrative(sessionId: string, token?: string): Promise<PlanNarrative> {
-  const qs = token ? `?token=${encodeURIComponent(token)}` : "";
-  return apiFetch(`/api/plan/${sessionId}/generate${qs}`, { method: "POST" });
+  return apiFetch(`/api/plan/${sessionId}/generate${tokenQs(token)}`, { method: "POST" });
 }
 
 export function getJobs(params?: {
@@ -70,7 +72,7 @@ export function postCredit(data: CreditProfileRequest): Promise<CreditAssessment
   return apiFetch("/api/credit/assess", { method: "POST", body: JSON.stringify(data) });
 }
 
-export function submitResourceFeedback(data: ResourceFeedbackRequest & { token: string }): Promise<ResourceFeedbackResponse> {
+export function submitResourceFeedback(data: ResourceFeedbackRequest): Promise<ResourceFeedbackResponse> {
   return apiFetch("/api/feedback/resource", { method: "POST", body: JSON.stringify(data) });
 }
 
@@ -83,6 +85,5 @@ export function submitVisitFeedback(data: VisitFeedbackRequest): Promise<VisitFe
 }
 
 export function getCareerCenterPackage(sessionId: string, token?: string): Promise<CareerCenterPackage> {
-  const qs = token ? `?token=${encodeURIComponent(token)}` : "";
-  return apiFetch(`/api/plan/${sessionId}/career-center${qs}`);
+  return apiFetch(`/api/plan/${sessionId}/career-center${tokenQs(token)}`);
 }

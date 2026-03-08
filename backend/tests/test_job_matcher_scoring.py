@@ -70,6 +70,15 @@ class TestScoreSkills:
         score = _score_skills(job, "")
         assert score == pytest.approx(0.3)
 
+    def test_score_skills_all_stop_words(self):
+        """Work history with only stop words returns 0.3 (covers line 35)."""
+        from app.modules.matching.job_scoring import _score_skills
+
+        job = _annotated_job("Warehouse Worker", "Acme", "entry level")
+        # "the", "at", "in" are stop words; "on" and "a" are <= 2 chars
+        score = _score_skills(job, "the at in on a")
+        assert score == pytest.approx(0.3)
+
 
 class TestScoreSchedule:
     def test_no_conflict_returns_high(self):

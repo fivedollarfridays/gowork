@@ -134,6 +134,16 @@ class TestFallbackNarrativePolish:
         assert len(result.key_actions) >= 1
         assert len(result.key_actions) <= 5
 
+    def test_fallback_jobs_sentence_three_titles(self):
+        """Three or more job titles use comma-and format (covers line 115)."""
+        from app.ai.client import _fallback_jobs_sentence
+
+        result = _fallback_jobs_sentence(["CNA", "Warehouse", "Driver"])
+        assert "CNA" in result
+        assert "Warehouse" in result
+        assert "Driver" in result
+        assert "and" in result
+
     def test_fallback_no_emojis(self):
         """Fallback narrative must not contain emojis."""
         import re
