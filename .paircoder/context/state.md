@@ -4,11 +4,19 @@
 
 ## Active Plan
 
+**Plan:** plan-2026-03-barrier-graph-rag
+**Type:** feature
+**Title:** Barrier Graph + RAG — Barrier Intelligence Assistant
+**Status:** Planned (pending Trello sync)
+**Current Sprint:** 19
+
+## Previous Active Plan
+
 **Plan:** plan-2026-03-security-hardening
 **Type:** bugfix
 **Title:** Security Hardening — Issue #20 Remediation
 **Status:** Complete
-**Current Sprint:** 18
+**Sprint:** 18
 
 ## Previous Plans
 
@@ -28,9 +36,23 @@
 
 ## Current Focus
 
-Sprint 18: Security hardening — admin auth, prompt injection defense, security headers, container hardening, input validation, rate limiting, CI scanning.
+Sprint 23: Barrier Graph + RAG — Barrier Intelligence Assistant. Adds graph-aware AI assistant to `/plan` page with root cause analysis, step-by-step action plans, and explainability UI.
 
 ## Task Status
+
+### Sprint 23 — Barrier Graph + RAG (Barrier Intelligence Assistant)
+
+| ID | Title | Priority | Complexity | Status | Depends On |
+|----|-------|----------|------------|--------|------------|
+| T23.1 | Barrier graph DB schema: Alembic migration + seed data | P0 | 55 | done | -- |
+| T23.2 | Barrier-resource mapping: join table, impact scores, top-N query | P0 | 45 | pending | T23.1 |
+| T23.3 | RAG knowledge base: document schema + FAISS ingestion pipeline | P0 | 60 | pending | T23.1, T23.2 |
+| T23.4 | Hybrid retrieval layer: vector + metadata filter + graph context assembly | P0 | 50 | pending | T23.2, T23.3 |
+| T23.5 | LLM orchestration + guardrails: POST /api/barrier-intel/chat + SSE streaming | P0 | 70 | pending | T23.4 |
+| T23.6 | Frontend: BarrierIntelChat + SSE streaming + explainability UI | P1 | 70 | pending | T23.5 |
+| T23.7 | NFRs: caching, observability, rate limiting + eval suite | P2 | 55 | pending | T23.5, T23.6 |
+
+**Total: 7 tasks, 405 complexity points (1/7 done)**
 
 ### Sprint 18 -- Security Hardening (GitHub Issue #20)
 
@@ -102,6 +124,19 @@ Sprint 18: Security hardening — admin auth, prompt injection defense, security
 **Total: 6 tasks, 125 complexity points (6/6 done)**
 
 ## What Was Just Done
+
+### Sprint 23 T23.1 (2026-03-07) — Barrier Graph DB Schema
+
+- **T23.1** Barrier graph DB schema: Created ADR doc (`ADR_embeddings.md`) with 5 architecture decisions. Added 3 new tables (`barriers`, `barrier_relationships`, `barrier_resources`) to DDL in `database.py` with `ALLOWED_COLUMNS` entries. Initialized Alembic and created migration `8ae7be7d93ea_add_barrier_graph_tables`. Created `barrier_graph/seed.py` with idempotent `upsert_barrier_graph()` using INSERT OR IGNORE. Created `data/barrier_graph_seed.json` with 33 barrier nodes across 8 categories and 53 relationship edges (CAUSES, WORSENS, PRE_REQ_FOR). Wired barrier graph seeding into `main.py` lifespan startup. 8 new tests (tables exist, minimum counts, playbook coverage, category validation, idempotency), 414 total passing.
+
+### Sprint 23 Planning (2026-03-07) — Barrier Graph + RAG
+
+- Analyzed `docs/internal/barrier-graph-rag-implementation/00_planning.md` and all 14 reference docs.
+- Identified 9 gaps/problems: unspecified embeddings model, streaming protocol, missing Alembic task, LangChain decision, what-if underspecification, Redis ambiguity, dependency ordering, missing CI tests, FAISS migration trigger.
+- Decisions recorded in plan: `sentence-transformers/all-MiniLM-L6-v2`, SSE streaming, what-if deferred to v2, in-memory cache (no Redis v1), no LangChain.
+- Created plan: plan-2026-03-barrier-graph-rag (7 tasks, 405 complexity, Sprint 23).
+- All 7 task files written with full objectives, schemas, implementation plans, and acceptance criteria.
+- Trello sync pending: `bpsai-pair trello connect` required to push 7 cards.
 
 ### Sprint 18 (2026-03-07) — Security Hardening — COMPLETE
 
@@ -182,7 +217,8 @@ Sprint 18: Security hardening — admin auth, prompt injection defense, security
 
 ## What's Next
 
-Sprint 18 (Security Hardening) is complete. All 7/7 tasks done. Ready for code review and PR.
+1. Start T23.2 (Barrier-resource mapping: join table, impact scores, top-N query)
+2. Then T23.3 (RAG knowledge base: document schema + FAISS ingestion pipeline)
 
 
 ## Blockers

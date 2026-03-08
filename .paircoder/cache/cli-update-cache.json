@@ -38,5 +38,9 @@
   "T2.3": {
     "last_cli_update": "2026-03-04T19:48:54.885998",
     "last_status": "done"
+  },
+  "T23.1": {
+    "last_cli_update": "2026-03-07T14:36:45.479726",
+    "last_status": "in_progress"
   }
 }

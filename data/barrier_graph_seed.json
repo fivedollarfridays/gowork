@@ -1,0 +1,290 @@
+{
+  "barriers": [
+    {
+      "id": "CHILDCARE_DAY",
+      "name": "No Daytime Childcare",
+      "category": "childcare",
+      "description": "Cannot find or afford daytime childcare, preventing attendance at day-shift jobs or training programs.",
+      "playbook": "Connect client with DHR childcare voucher program and local Head Start centers. Verify eligibility for CCDF subsidies and assist with application."
+    },
+    {
+      "id": "CHILDCARE_EVENING",
+      "name": "No Evening Childcare",
+      "category": "childcare",
+      "description": "Lack of evening/night childcare options limits availability for second-shift or overnight employment.",
+      "playbook": "Identify licensed evening care providers in Montgomery area. Explore family support networks and employer-sponsored backup care options."
+    },
+    {
+      "id": "CHILDCARE_INFANT",
+      "name": "No Infant Care Available",
+      "category": "childcare",
+      "description": "Infant care slots are scarce and expensive, creating a barrier for parents of children under 12 months.",
+      "playbook": "Check waitlists at licensed infant care centers. Connect with Early Head Start and home-based care provider networks for immediate openings."
+    },
+    {
+      "id": "CHILDCARE_SUBSIDY_UNKNOWN",
+      "name": "Unaware of Childcare Subsidies",
+      "category": "childcare",
+      "description": "Client does not know about available childcare assistance programs such as CCDF or DHR vouchers.",
+      "playbook": "Educate client on CCDF and DHR childcare voucher eligibility. Walk through application process and provide contact info for local DHR office."
+    },
+    {
+      "id": "CHILDCARE_UNAFFORDABLE",
+      "name": "Childcare Unaffordable",
+      "category": "childcare",
+      "description": "Cost of childcare consumes too large a share of income, making employment financially unviable.",
+      "playbook": "Calculate childcare cost vs. income ratio. Apply for sliding-scale fee programs and explore employer childcare benefits or co-op arrangements."
+    },
+    {
+      "id": "TRANSPORTATION_NO_CAR",
+      "name": "No Personal Vehicle",
+      "category": "transportation",
+      "description": "Client lacks access to a personal vehicle, limiting job opportunities to transit-accessible locations.",
+      "playbook": "Map transit routes from client's home to potential employers. Connect with vehicle assistance programs and explore carpool matching services."
+    },
+    {
+      "id": "TRANSPORTATION_NO_TRANSIT",
+      "name": "No Public Transit Access",
+      "category": "transportation",
+      "description": "Client lives in an area with no or very limited public transit service, isolating them from employment centers.",
+      "playbook": "Identify alternative transportation: vanpools, ride-share programs, employer shuttles. Consider relocation assistance if housing is flexible."
+    },
+    {
+      "id": "TRANSPORTATION_NIGHT_SHIFT",
+      "name": "No Night Shift Transportation",
+      "category": "transportation",
+      "description": "Public transit does not operate during night shift hours, preventing second and third shift employment.",
+      "playbook": "Check employer willingness to adjust shifts. Explore ride-share stipends, employer shuttle programs, and bicycle commuting for short distances."
+    },
+    {
+      "id": "TRANSPORTATION_UNRELIABLE",
+      "name": "Unreliable Transportation",
+      "category": "transportation",
+      "description": "Vehicle breaks down frequently or transit is inconsistent, causing attendance problems at work.",
+      "playbook": "Connect with auto repair assistance programs. Establish backup transportation plan with transit, carpool, or ride-share as contingency."
+    },
+    {
+      "id": "TRANSPORTATION_COST",
+      "name": "Transportation Cost Too High",
+      "category": "transportation",
+      "description": "Gas, insurance, or transit pass costs consume a disproportionate share of income.",
+      "playbook": "Calculate commute cost vs. income. Apply for transit pass subsidies, explore employer transit benefits, and consider closer employment options."
+    },
+    {
+      "id": "CREDIT_LOW_SCORE",
+      "name": "Low Credit Score",
+      "category": "credit",
+      "description": "Credit score below 580 limits access to housing, auto loans, and some employment opportunities requiring credit checks.",
+      "playbook": "Pull free credit report to identify specific issues. Create a credit improvement plan targeting highest-impact items first. Connect with credit counseling."
+    },
+    {
+      "id": "CREDIT_NO_HISTORY",
+      "name": "No Credit History",
+      "category": "credit",
+      "description": "Client has no established credit file, making it difficult to access housing, utilities, or financing.",
+      "playbook": "Open a secured credit card or credit-builder loan. Enroll in rent reporting programs to build credit history from existing payments."
+    },
+    {
+      "id": "CREDIT_DEBT_HIGH",
+      "name": "High Debt Burden",
+      "category": "credit",
+      "description": "Outstanding debt payments consume too much of monthly income, limiting financial stability.",
+      "playbook": "Create debt inventory and prioritize by interest rate. Explore debt consolidation, income-driven repayment plans, and negotiate with creditors."
+    },
+    {
+      "id": "CREDIT_COLLECTIONS",
+      "name": "Accounts in Collections",
+      "category": "credit",
+      "description": "One or more accounts have been sent to collections, damaging credit and causing wage garnishment risk.",
+      "playbook": "Verify debt validity under FDCPA. Negotiate pay-for-delete agreements where possible. Connect with legal aid for disputed or invalid debts."
+    },
+    {
+      "id": "CREDIT_NO_BANK",
+      "name": "No Bank Account",
+      "category": "credit",
+      "description": "Client is unbanked, paying check-cashing fees and unable to receive direct deposit from employers.",
+      "playbook": "Identify second-chance banking programs at local credit unions. Assist with opening a basic checking account to enable direct deposit."
+    },
+    {
+      "id": "HOUSING_UNSTABLE",
+      "name": "Unstable Housing",
+      "category": "housing",
+      "description": "Client is couch-surfing, in a shelter, or at risk of homelessness, making steady employment very difficult.",
+      "playbook": "Connect with emergency housing programs and shelters. Apply for rapid rehousing assistance and establish stable address for employment applications."
+    },
+    {
+      "id": "HOUSING_UNAFFORDABLE",
+      "name": "Housing Unaffordable",
+      "category": "housing",
+      "description": "Rent or mortgage exceeds 40% of income, leaving insufficient funds for other basic needs.",
+      "playbook": "Apply for Section 8 or public housing waitlists. Explore shared housing options and negotiate with landlord for reduced rent or payment plan."
+    },
+    {
+      "id": "HOUSING_EVICTION_HISTORY",
+      "name": "Eviction on Record",
+      "category": "housing",
+      "description": "Past eviction makes it very difficult to pass tenant screening for new rental housing.",
+      "playbook": "Connect with legal aid to review eviction record for expungement eligibility. Identify landlords who accept applicants with eviction history."
+    },
+    {
+      "id": "HEALTH_NO_INSURANCE",
+      "name": "No Health Insurance",
+      "category": "health",
+      "description": "Lack of health coverage means medical issues go untreated, potentially causing work absences.",
+      "playbook": "Screen for Medicaid eligibility and assist with enrollment. Check marketplace plans during open enrollment. Connect with community health centers for immediate care."
+    },
+    {
+      "id": "HEALTH_DISABILITY",
+      "name": "Physical Disability",
+      "category": "health",
+      "description": "Physical limitation requires workplace accommodations that not all employers can provide.",
+      "playbook": "Document accommodation needs under ADA. Connect with vocational rehabilitation services for job placement support and workplace modification assistance."
+    },
+    {
+      "id": "HEALTH_MENTAL_HEALTH",
+      "name": "Mental Health Challenges",
+      "category": "health",
+      "description": "Depression, anxiety, or other mental health conditions affect job performance and attendance.",
+      "playbook": "Connect with mental health providers accepting Medicaid or sliding-scale fees. Explore Employee Assistance Programs and workplace accommodation options."
+    },
+    {
+      "id": "HEALTH_SUBSTANCE",
+      "name": "Substance Use Disorder",
+      "category": "health",
+      "description": "Active or recent substance use issues affect employability and may require treatment before stable employment.",
+      "playbook": "Connect with SAMHSA treatment locator and local recovery programs. Support treatment-compatible work schedules and sober living arrangements."
+    },
+    {
+      "id": "TRAINING_NO_CERT",
+      "name": "No Professional Certification",
+      "category": "training",
+      "description": "Client lacks industry certifications needed for higher-paying positions in their field.",
+      "playbook": "Identify relevant certifications for target industry. Connect with WIOA-funded training programs and scholarship opportunities for certification exams."
+    },
+    {
+      "id": "TRAINING_SKILL_GAP",
+      "name": "Skills Gap",
+      "category": "training",
+      "description": "Client's current skills do not match employer requirements in available job openings.",
+      "playbook": "Conduct skills assessment to identify specific gaps. Enroll in targeted short-term training at community college or workforce development center."
+    },
+    {
+      "id": "TRAINING_NO_GED",
+      "name": "No GED or High School Diploma",
+      "category": "training",
+      "description": "Lack of high school credential eliminates many job opportunities and training program eligibility.",
+      "playbook": "Enroll in GED preparation program at local adult education center. Explore employer-sponsored GED programs and online preparation resources."
+    },
+    {
+      "id": "TRAINING_OUTDATED_SKILLS",
+      "name": "Outdated Job Skills",
+      "category": "training",
+      "description": "Skills from previous employment are no longer relevant to current labor market demands.",
+      "playbook": "Assess transferable skills and identify in-demand fields. Connect with retraining programs and apprenticeship opportunities in growing industries."
+    },
+    {
+      "id": "CRIMINAL_RECORD",
+      "name": "Criminal Record",
+      "category": "criminal",
+      "description": "Criminal conviction history limits employment options, especially with employers who run background checks.",
+      "playbook": "Research ban-the-box employers in Montgomery area. Explore expungement eligibility and connect with reentry employment programs."
+    },
+    {
+      "id": "CRIMINAL_BACKGROUND_CHECK",
+      "name": "Background Check Barrier",
+      "category": "criminal",
+      "description": "Pending charges or recent record causes automatic disqualification from many employer screening processes.",
+      "playbook": "Identify fair-chance employers who evaluate candidates individually. Prepare disclosure statement and gather character references for applications."
+    },
+    {
+      "id": "CRIMINAL_REENTRY",
+      "name": "Reentry from Incarceration",
+      "category": "criminal",
+      "description": "Recently released from incarceration with gaps in work history, limited contacts, and reentry challenges.",
+      "playbook": "Connect with reentry programs for job readiness training. Assist with ID documents, resume development, and transitional employment placement."
+    },
+    {
+      "id": "EMPLOYMENT_GAP",
+      "name": "Extended Employment Gap",
+      "category": "employment",
+      "description": "Gap of 6+ months in work history raises concerns with potential employers during hiring process.",
+      "playbook": "Develop narrative explaining gap positively. Fill with volunteer work, training, or freelance experience. Practice interview responses for gap questions."
+    },
+    {
+      "id": "EMPLOYMENT_LOW_INCOME",
+      "name": "Low Income / Underemployment",
+      "category": "employment",
+      "description": "Current earnings are below self-sufficiency level, creating cascading financial barriers.",
+      "playbook": "Identify higher-paying opportunities matching client skills. Connect with career advancement programs and negotiate for raises or promotions at current employer."
+    },
+    {
+      "id": "EMPLOYMENT_LIMITED_HOURS",
+      "name": "Limited Work Hours Available",
+      "category": "employment",
+      "description": "Constraints like childcare or transportation limit available work hours, reducing income potential.",
+      "playbook": "Address root constraints first (childcare, transportation). Explore remote work options and employers offering flexible scheduling."
+    },
+    {
+      "id": "EMPLOYMENT_INSTABILITY",
+      "name": "Job Instability",
+      "category": "employment",
+      "description": "Pattern of short-term employment due to cascading barriers creates a cycle of instability.",
+      "playbook": "Identify and address root-cause barriers creating instability. Build emergency fund plan and develop retention strategies with employer support."
+    }
+  ],
+  "relationships": [
+    {"source": "CHILDCARE_DAY", "target": "EMPLOYMENT_LIMITED_HOURS", "relationship_type": "CAUSES", "weight": 0.9},
+    {"source": "CHILDCARE_EVENING", "target": "EMPLOYMENT_LIMITED_HOURS", "relationship_type": "CAUSES", "weight": 0.9},
+    {"source": "CHILDCARE_INFANT", "target": "EMPLOYMENT_LIMITED_HOURS", "relationship_type": "CAUSES", "weight": 0.95},
+    {"source": "CHILDCARE_UNAFFORDABLE", "target": "EMPLOYMENT_LIMITED_HOURS", "relationship_type": "CAUSES", "weight": 0.85},
+    {"source": "CHILDCARE_SUBSIDY_UNKNOWN", "target": "CHILDCARE_UNAFFORDABLE", "relationship_type": "WORSENS", "weight": 0.7},
+    {"source": "TRANSPORTATION_NO_CAR", "target": "EMPLOYMENT_LIMITED_HOURS", "relationship_type": "CAUSES", "weight": 0.8},
+    {"source": "TRANSPORTATION_NO_TRANSIT", "target": "EMPLOYMENT_LIMITED_HOURS", "relationship_type": "CAUSES", "weight": 0.85},
+    {"source": "TRANSPORTATION_NIGHT_SHIFT", "target": "EMPLOYMENT_LIMITED_HOURS", "relationship_type": "CAUSES", "weight": 0.75},
+    {"source": "TRANSPORTATION_UNRELIABLE", "target": "EMPLOYMENT_INSTABILITY", "relationship_type": "CAUSES", "weight": 0.7},
+    {"source": "TRANSPORTATION_COST", "target": "EMPLOYMENT_LOW_INCOME", "relationship_type": "WORSENS", "weight": 0.6},
+    {"source": "EMPLOYMENT_LIMITED_HOURS", "target": "EMPLOYMENT_LOW_INCOME", "relationship_type": "CAUSES", "weight": 0.9},
+    {"source": "EMPLOYMENT_LOW_INCOME", "target": "CREDIT_LOW_SCORE", "relationship_type": "CAUSES", "weight": 0.7},
+    {"source": "EMPLOYMENT_LOW_INCOME", "target": "HOUSING_UNAFFORDABLE", "relationship_type": "CAUSES", "weight": 0.8},
+    {"source": "EMPLOYMENT_LOW_INCOME", "target": "CREDIT_DEBT_HIGH", "relationship_type": "WORSENS", "weight": 0.6},
+    {"source": "EMPLOYMENT_LOW_INCOME", "target": "HEALTH_NO_INSURANCE", "relationship_type": "WORSENS", "weight": 0.5},
+    {"source": "CREDIT_LOW_SCORE", "target": "HOUSING_UNSTABLE", "relationship_type": "CAUSES", "weight": 0.7},
+    {"source": "CREDIT_LOW_SCORE", "target": "TRANSPORTATION_NO_CAR", "relationship_type": "WORSENS", "weight": 0.5},
+    {"source": "CREDIT_NO_HISTORY", "target": "CREDIT_LOW_SCORE", "relationship_type": "WORSENS", "weight": 0.6},
+    {"source": "CREDIT_DEBT_HIGH", "target": "CREDIT_LOW_SCORE", "relationship_type": "CAUSES", "weight": 0.8},
+    {"source": "CREDIT_COLLECTIONS", "target": "CREDIT_LOW_SCORE", "relationship_type": "CAUSES", "weight": 0.9},
+    {"source": "CREDIT_NO_BANK", "target": "CREDIT_NO_HISTORY", "relationship_type": "CAUSES", "weight": 0.7},
+    {"source": "CREDIT_NO_BANK", "target": "EMPLOYMENT_LOW_INCOME", "relationship_type": "WORSENS", "weight": 0.4},
+    {"source": "HOUSING_UNSTABLE", "target": "EMPLOYMENT_INSTABILITY", "relationship_type": "CAUSES", "weight": 0.85},
+    {"source": "HOUSING_UNAFFORDABLE", "target": "HOUSING_UNSTABLE", "relationship_type": "CAUSES", "weight": 0.7},
+    {"source": "HOUSING_EVICTION_HISTORY", "target": "HOUSING_UNSTABLE", "relationship_type": "CAUSES", "weight": 0.8},
+    {"source": "EMPLOYMENT_INSTABILITY", "target": "EMPLOYMENT_GAP", "relationship_type": "CAUSES", "weight": 0.75},
+    {"source": "EMPLOYMENT_GAP", "target": "EMPLOYMENT_LOW_INCOME", "relationship_type": "CAUSES", "weight": 0.6},
+    {"source": "HEALTH_NO_INSURANCE", "target": "HEALTH_MENTAL_HEALTH", "relationship_type": "WORSENS", "weight": 0.5},
+    {"source": "HEALTH_DISABILITY", "target": "EMPLOYMENT_LIMITED_HOURS", "relationship_type": "CAUSES", "weight": 0.7},
+    {"source": "HEALTH_MENTAL_HEALTH", "target": "EMPLOYMENT_INSTABILITY", "relationship_type": "CAUSES", "weight": 0.65},
+    {"source": "HEALTH_SUBSTANCE", "target": "EMPLOYMENT_INSTABILITY", "relationship_type": "CAUSES", "weight": 0.8},
+    {"source": "HEALTH_SUBSTANCE", "target": "CRIMINAL_RECORD", "relationship_type": "WORSENS", "weight": 0.5},
+    {"source": "HEALTH_SUBSTANCE", "target": "HOUSING_UNSTABLE", "relationship_type": "CAUSES", "weight": 0.6},
+    {"source": "TRAINING_NO_GED", "target": "EMPLOYMENT_LOW_INCOME", "relationship_type": "CAUSES", "weight": 0.7},
+    {"source": "TRAINING_NO_CERT", "target": "EMPLOYMENT_LOW_INCOME", "relationship_type": "CAUSES", "weight": 0.6},
+    {"source": "TRAINING_SKILL_GAP", "target": "EMPLOYMENT_LOW_INCOME", "relationship_type": "CAUSES", "weight": 0.65},
+    {"source": "TRAINING_OUTDATED_SKILLS", "target": "TRAINING_SKILL_GAP", "relationship_type": "CAUSES", "weight": 0.7},
+    {"source": "TRAINING_NO_GED", "target": "TRAINING_NO_CERT", "relationship_type": "PRE_REQ_FOR", "weight": 0.8},
+    {"source": "CRIMINAL_RECORD", "target": "EMPLOYMENT_GAP", "relationship_type": "CAUSES", "weight": 0.7},
+    {"source": "CRIMINAL_RECORD", "target": "HOUSING_EVICTION_HISTORY", "relationship_type": "WORSENS", "weight": 0.4},
+    {"source": "CRIMINAL_BACKGROUND_CHECK", "target": "EMPLOYMENT_LIMITED_HOURS", "relationship_type": "CAUSES", "weight": 0.6},
+    {"source": "CRIMINAL_REENTRY", "target": "EMPLOYMENT_GAP", "relationship_type": "CAUSES", "weight": 0.9},
+    {"source": "CRIMINAL_REENTRY", "target": "HOUSING_UNSTABLE", "relationship_type": "CAUSES", "weight": 0.75},
+    {"source": "CRIMINAL_REENTRY", "target": "CREDIT_NO_HISTORY", "relationship_type": "CAUSES", "weight": 0.6},
+    {"source": "CHILDCARE_UNAFFORDABLE", "target": "EMPLOYMENT_LOW_INCOME", "relationship_type": "WORSENS", "weight": 0.5},
+    {"source": "HOUSING_UNSTABLE", "target": "HEALTH_MENTAL_HEALTH", "relationship_type": "WORSENS", "weight": 0.6},
+    {"source": "EMPLOYMENT_INSTABILITY", "target": "CREDIT_LOW_SCORE", "relationship_type": "WORSENS", "weight": 0.5},
+    {"source": "HEALTH_NO_INSURANCE", "target": "CREDIT_DEBT_HIGH", "relationship_type": "WORSENS", "weight": 0.4},
+    {"source": "TRANSPORTATION_NO_CAR", "target": "TRAINING_SKILL_GAP", "relationship_type": "WORSENS", "weight": 0.4},
+    {"source": "HOUSING_UNAFFORDABLE", "target": "TRANSPORTATION_COST", "relationship_type": "WORSENS", "weight": 0.5},
+    {"source": "CREDIT_COLLECTIONS", "target": "CREDIT_NO_BANK", "relationship_type": "WORSENS", "weight": 0.5},
+    {"source": "HEALTH_MENTAL_HEALTH", "target": "HEALTH_SUBSTANCE", "relationship_type": "WORSENS", "weight": 0.4},
+    {"source": "TRAINING_NO_GED", "target": "CRIMINAL_REENTRY", "relationship_type": "WORSENS", "weight": 0.3}
+  ]
+}

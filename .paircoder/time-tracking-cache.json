@@ -110,5 +110,11 @@
       }
     ],
     "total_seconds": 89.375955
+  },
+  "_active": {
+    "task_id": "T23.1",
+    "timer_id": "local-20260307143645",
+    "description": "T23.1: Barrier graph DB schema: Alembic migration + seed data",
+    "start": "2026-03-07T14:36:45.670984"
   }
 }

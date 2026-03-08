@@ -4,9 +4,10 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import create_async_engine
 
+from app.barrier_graph.seed import upsert_barrier_graph
 from app.core import database as db_module
 from app.core.config import get_settings
-from app.core.database import init_db
+from app.core.database import get_async_session_factory, init_db
 
 
 @pytest.fixture
@@ -34,6 +35,10 @@ async def test_engine(tmp_path):
     db_module._async_session_factory = None
 
     await init_db(engine)
+
+    factory = get_async_session_factory()
+    async with factory() as session:
+        await upsert_barrier_graph(session)
 
     yield engine
 
