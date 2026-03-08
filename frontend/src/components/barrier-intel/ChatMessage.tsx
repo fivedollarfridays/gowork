@@ -1,6 +1,8 @@
 "use client";
 
 import type { ChatMessage as ChatMessageType } from "@/lib/types";
+import { EvidenceChips } from "./EvidenceChips";
+import { ExplainSteps } from "./ExplainSteps";
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -20,6 +22,13 @@ export function ChatMessage({ message, isStreaming }: ChatMessageProps) {
         <div className="whitespace-pre-wrap">{message.content}</div>
         {isStreaming && !message.content && (
           <span className="inline-block h-4 w-4 animate-pulse rounded-full bg-current opacity-40" />
+        )}
+        <ExplainSteps steps={message.steps} />
+        <EvidenceChips evidence={message.evidence} />
+        {message.disclaimer && (
+          <p className="mt-2 text-xs italic text-warning-foreground">
+            {message.disclaimer}
+          </p>
         )}
       </div>
     </div>

@@ -10,7 +10,6 @@ from app.barrier_intel.guardrails import SAFE_FALLBACK, is_disallowed_topic
 from app.barrier_intel.schemas import ChatRequest
 from app.barrier_intel.streaming import stream_chat_response
 from app.core.auth import require_admin_key
-from app.core.config import get_settings
 from app.core.database import get_db
 from app.core.queries import get_session_by_id
 from app.core.rate_limit import RateLimiter, require_rate_limit
@@ -61,17 +60,11 @@ async def chat(body: ChatRequest, request: Request, db=Depends(get_db)):
     cache_key = get_cache_key(body.session_id, body.user_question, body.mode)
     ctx = await _get_retrieval_ctx(cache_key, barriers, db, store, profile)
 
-    settings = get_settings()
-    if not settings.anthropic_api_key:
-        raise HTTPException(status_code=503, detail="AI service not configured")
-
     return StreamingResponse(
         stream_chat_response(
             question=body.user_question,
             mode=body.mode,
             ctx=ctx,
-            api_key=settings.anthropic_api_key,
-            model=settings.claude_model,
             session_hash=cache_key[:12],
         ),
         media_type="text/event-stream",

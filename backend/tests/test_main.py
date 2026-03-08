@@ -134,22 +134,64 @@ class TestLifespan:
         assert not any("WEB_CONCURRENCY" in c for c in warning_calls)
 
     @pytest.mark.anyio
-    async def test_warns_on_missing_anthropic_key(self):
-        """Lifespan logs warning when ANTHROPIC_API_KEY is not set."""
+    async def test_logs_llm_provider_status_on_startup(self):
+        """Lifespan logs LLM provider status during startup."""
         from app.main import lifespan, app
 
         mock_engine = AsyncMock()
-        mock_settings = patch("app.main.get_settings")
-        with mock_settings as ms, \
-             patch("app.main.get_engine", return_value=mock_engine), \
+        mock_status = {
+            "providers": {"anthropic": "configured", "openai": "no_key", "gemini": "no_key", "mock": "available"},
+            "active": "anthropic",
+        }
+        with patch("app.main.get_engine", return_value=mock_engine), \
              patch("app.main.init_db", new_callable=AsyncMock), \
              patch("app.main.close_db", new_callable=AsyncMock), \
              patch("app.main.upsert_barrier_graph", new_callable=AsyncMock), \
              _mock_rag_store(), \
+             patch("app.main.check_llm_providers", return_value=mock_status), \
              patch("app.main.logger") as mock_logger:
-            ms.return_value.anthropic_api_key = ""
             async with lifespan(app):
                 pass
-        mock_logger.warning.assert_any_call(
-            "ANTHROPIC_API_KEY is not set \u2014 AI narrative will use fallback"
-        )
+        info_calls = [str(c) for c in mock_logger.info.call_args_list]
+        assert any("LLM" in c and "anthropic" in c for c in info_calls)
+
+    @pytest.mark.anyio
+    async def test_warns_when_llm_falls_back_to_mock(self):
+        """Lifespan warns when no LLM provider configured (mock fallback)."""
+        from app.main import lifespan, app
+
+        mock_engine = AsyncMock()
+        mock_status = {
+            "providers": {"anthropic": "no_key", "openai": "no_key", "gemini": "no_key", "mock": "available"},
+            "active": "mock",
+        }
+        with patch("app.main.get_engine", return_value=mock_engine), \
+             patch("app.main.init_db", new_callable=AsyncMock), \
+             patch("app.main.close_db", new_callable=AsyncMock), \
+             patch("app.main.upsert_barrier_graph", new_callable=AsyncMock), \
+             _mock_rag_store(), \
+             patch("app.main.check_llm_providers", return_value=mock_status), \
+             patch("app.main.logger") as mock_logger:
+            async with lifespan(app):
+                pass
+        warning_calls = [str(c) for c in mock_logger.warning.call_args_list]
+        assert any("mock" in c.lower() for c in warning_calls)
+
+    @pytest.mark.anyio
+    async def test_app_starts_with_no_providers(self):
+        """App starts gracefully even with no LLM providers available."""
+        from app.main import lifespan, app
+
+        mock_engine = AsyncMock()
+        mock_status = {
+            "providers": {"anthropic": "no_key", "openai": "no_key", "gemini": "no_key", "mock": "available"},
+            "active": "mock",
+        }
+        with patch("app.main.get_engine", return_value=mock_engine), \
+             patch("app.main.init_db", new_callable=AsyncMock), \
+             patch("app.main.close_db", new_callable=AsyncMock), \
+             patch("app.main.upsert_barrier_graph", new_callable=AsyncMock), \
+             _mock_rag_store(), \
+             patch("app.main.check_llm_providers", return_value=mock_status):
+            async with lifespan(app):
+                pass
