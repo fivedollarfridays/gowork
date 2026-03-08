@@ -1,1 +1,1 @@
-{"session_id": "78493032-65ab-4f72-ab87-07c5836ac857", "total_input_tokens": 531, "total_output_tokens": 92847, "duration_seconds": 6284.664, "user_messages": 16, "compactions": 1, "cache_read_tokens": 41006586, "cache_write_tokens": 366297}
+{"session_id": "78493032-65ab-4f72-ab87-07c5836ac857", "total_input_tokens": 712, "total_output_tokens": 115711, "duration_seconds": 9787.731, "user_messages": 21, "compactions": 1, "cache_read_tokens": 56005888, "cache_write_tokens": 443955}

@@ -51,8 +51,9 @@ Sprint 23: Barrier Graph + RAG — Barrier Intelligence Assistant. Adds graph-aw
 | T23.5 | LLM orchestration + guardrails: POST /api/barrier-intel/chat + SSE streaming | P0 | 70 | done | T23.4 |
 | T23.6 | Frontend: BarrierIntelChat + SSE streaming + explainability UI | P1 | 70 | done | T23.5 |
 | T23.7 | NFRs: caching, observability, rate limiting + eval suite | P2 | 55 | pending | T23.5, T23.6 |
+| T24.8 | Multi-provider LLM: Anthropic + OpenAI with env-based config | P1 | 35 | pending | T24.5 |
 
-**Total: 7 tasks, 405 complexity points (6/7 done)**
+**Total: 8 tasks, 440 complexity points (6/8 done)**
 
 ### Sprint 18 -- Security Hardening (GitHub Issue #20)
 
@@ -124,6 +125,8 @@ Sprint 23: Barrier Graph + RAG — Barrier Intelligence Assistant. Adds graph-aw
 **Total: 6 tasks, 125 complexity points (6/6 done)**
 
 ## What Was Just Done
+
+- **T24.8 done** (auto-updated by hook)
 
 ### Sprint 24 T24.6 (2026-03-08) — Frontend BarrierIntelChat
 
@@ -237,8 +240,8 @@ Sprint 23: Barrier Graph + RAG — Barrier Intelligence Assistant. Adds graph-aw
 
 ## What's Next
 
-1. Start T24.7 (NFRs: caching, observability, rate limiting + eval suite)
-2. Commit and push T24.6 changes to repo
+1. Start T24.8 (Multi-provider LLM: Anthropic + OpenAI) — unblocks contributors
+2. Start T24.7 (NFRs: caching, observability, rate limiting + eval suite)
 
 
 ## Blockers

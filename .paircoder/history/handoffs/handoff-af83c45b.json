@@ -1,0 +1,8 @@
+{
+  "version": "2.0",
+  "task_id": "T24.8",
+  "source_agent": "driver",
+  "target_agent": "reviewer",
+  "task_description": "[T24.8] Multi-provider LLM: Anthropic + OpenAI with env-based config",
+  "acceptance_criteria": [
+    

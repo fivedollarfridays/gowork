@@ -2,19 +2,19 @@
   "task_types": {
     "feature": {
       "task_type": "feature",
-      "sample_count": 12,
-      "avg_tokens": 5789.583333333333,
-      "std_dev": 7776.825792681885,
-      "p80_tokens": 12337.67065077148,
-      "avg_duration_seconds": 290.5,
+      "sample_count": 13,
+      "avg_tokens": 7116.923076923076,
+      "std_dev": 8773.183953753081,
+      "p80_tokens": 14503.94396598317,
+      "avg_duration_seconds": 537.6153846153846,
       "success_rate": 1.0,
       "recommended_model": "haiku",
       "model": "aggregate",
       "recommended_effort": "high",
-      "_m2_tokens": 725748232.9166667,
-      "_m2_duration": 1887147.0,
-      "estimation_mape": 812.1071797841792,
-      "estimation_sample_count": 12
+      "_m2_tokens": 1000593836.9230771,
+      "_m2_duration": 11413445.076923076,
+      "estimation_mape": 755.3973646795297,
+      "estimation_sample_count": 13
     },
     "feature:claude-opus-4-6": {
       "task_type": "feature",
@@ -66,21 +66,21 @@
     },
     "feature:claude-sonnet-4-6": {
       "task_type": "feature",
-      "sample_count": 5,
-      "avg_tokens": 8819.2,
-      "std_dev": 10780.029098290968,
-      "p80_tokens": 17895.984500761,
-      "avg_duration_seconds": 502.8,
+      "sample_count": 6,
+      "avg_tokens": 11190.166666666668,
+      "std_dev": 11178.026248204802,
+      "p80_tokens": 20602.06476765511,
+      "avg_duration_seconds": 1002.8333333333333,
       "success_rate": 1.0,
       "recommended_model": "haiku",
       "model": "claude-sonnet-4-6",
       "recommended_effort": "high",
-      "_m2_tokens": 581045136.8,
-      "_m2_duration": 1429030.8,
-      "estimation_mape": 327.8064966011363,
-      "estimation_sample_count": 5
+      "_m2_tokens": 749689624.8333333,
+      "_m2_duration": 8930030.833333334,
+      "estimation_mape": 285.65201107156963,
+      "estimation_sample_count": 6
     }
   },
-  "last_calibrated": "2026-03-08T14:07:54.528579+00:00",
-  "total_records": 15
+  "last_calibrated": "2026-03-08T15:06:17.314335+00:00",
+  "total_records": 16
 }
