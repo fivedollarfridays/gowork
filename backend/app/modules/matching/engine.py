@@ -153,7 +153,7 @@ async def generate_plan(
         update={"primary_barriers": [BarrierType(b) for b in sorted_barriers]},
     )
     barrier_cards = _build_barrier_cards(sorted_profile, resources)
-    next_steps = _build_next_steps(profile, barrier_cards, strong)
+    next_steps = _build_next_steps(profile, barrier_cards)
     wioa = screen_wioa_eligibility(profile)
 
     parsed_resume = parse_resume(resume_text) if resume_text else None
@@ -208,17 +208,9 @@ def _build_barrier_cards(
 
 def _build_next_steps(
     profile: UserProfile, cards: list[BarrierCard],
-    strong_matches: list[ScoredJobMatch] | None = None,
 ) -> list[str]:
     """Generate prioritized immediate next steps."""
     steps: list[str] = [CAREER_CENTER_STEP]
-
-    if strong_matches:
-        top = strong_matches[0]
-        company = f" at {top.company}" if top.company else ""
-        steps.append(
-            f"Your experience matches {len(strong_matches)} position(s){company} — review and apply"
-        )
 
     for card in cards[:3]:
         if card.resources:

@@ -8,3 +8,6 @@ httpx==0.28.1
 structlog==25.5.0
 alembic==1.18.4
 anthropic==0.84.0
+sentence-transformers==4.1.0
+faiss-cpu==1.11.0
+cachetools==5.5.2

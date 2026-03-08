@@ -22,5 +22,8 @@ tsconfig.tsbuildinfo
 # OS
 .DS_Store
 
+# RAG index
+*.faiss
+
 # docs internal
 docs/internal

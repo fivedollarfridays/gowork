@@ -61,7 +61,7 @@ export function CreditResults({ result }: CreditResultsProps) {
             <div>
               <CardTitle className="text-base">Credit Assessment</CardTitle>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Score: {readiness.fico_score} ({readiness.score_band})
+                Score: {readiness.score_band.replace(/_/g, " ")}
               </p>
             </div>
           </div>

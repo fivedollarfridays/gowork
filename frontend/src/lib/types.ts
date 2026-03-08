@@ -394,3 +394,27 @@ export interface CreditFormData {
   collectionAccounts: number;
   negativeItems: string[];
 }
+
+// --- Barrier Intelligence types ---
+
+export type ChatMode = "next_steps" | "explain_plan";
+
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+  context?: ChatContext;
+}
+
+export interface ChatContext {
+  root_barriers: string[];
+  chain: string;
+}
+
+export interface ChatSSEEvent {
+  type: "context" | "token" | "done";
+  root_barriers?: string[];
+  chain?: string;
+  text?: string;
+  usage?: { input_tokens: number; output_tokens: number };
+  latency_ms?: number;
+}

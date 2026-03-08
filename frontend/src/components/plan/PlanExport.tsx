@@ -230,7 +230,7 @@ function PdfCreditInfo({ creditResult }: { creditResult: CreditAssessmentResult 
       <h2 style={sectionHeading}>Credit Assessment</h2>
       <div style={{ border: "1px solid #e5e7eb", borderRadius: "6px", padding: "10px" }}>
         <p style={{ margin: "0 0 4px" }}>
-          <strong>FICO Score:</strong> {creditResult.readiness.fico_score} ({creditResult.readiness.score_band})
+          <strong>FICO Score:</strong> {creditResult.readiness.fico_score} ({creditResult.readiness.score_band.replace(/_/g, " ")})
         </p>
         <p style={{ margin: "0 0 4px" }}>
           <strong>Readiness Score:</strong> {creditResult.readiness.score}/100

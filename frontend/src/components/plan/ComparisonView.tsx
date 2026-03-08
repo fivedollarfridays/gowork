@@ -73,7 +73,7 @@ function buildRows(plan: ReEntryPlan, profile: UserProfile, creditResult?: Credi
     const totalProducts = creditResult ? creditResult.eligibility.length : 0;
 
     const nowText = creditResult
-      ? `FICO ${ficoNow} (${creditResult.readiness.score_band}), ${eligibleCount}/${totalProducts} products eligible`
+      ? `FICO ${ficoNow} (${creditResult.readiness.score_band.replace(/_/g, " ")}), ${eligibleCount}/${totalProducts} products eligible`
       : plan.credit_readiness_score != null
         ? `Readiness: ${plan.credit_readiness_score}/100`
         : "Assessment needed";

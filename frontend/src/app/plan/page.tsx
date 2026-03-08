@@ -20,6 +20,7 @@ import { CareerCenterExport } from "@/components/plan/CareerCenterExport";
 import { EmailExport } from "@/components/plan/EmailExport";
 import { PlanExport } from "@/components/plan/PlanExport";
 import { EmptyState } from "@/components/EmptyState";
+import { BarrierIntelChat } from "@/components/barrier-intel/BarrierIntelChat";
 import { BarrierType, EmploymentStatus, AvailableHours } from "@/lib/types";
 import type { CreditAssessmentResult, UserProfile } from "@/lib/types";
 import { barrierCountToSeverity, CAREER_CENTER, mapsUrl } from "@/lib/constants";
@@ -177,42 +178,6 @@ function PlanContent() {
 
       <Separator />
 
-      {/* Barrier cards */}
-      {plan.barriers.length > 0 && (
-        <section className="space-y-4">
-          <h2 className="text-xl font-semibold text-primary">Your Barriers</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {plan.barriers.map((barrier) => (
-              <BarrierCardView key={barrier.type} barrier={barrier} sessionId={sessionId ?? undefined} token={token ?? undefined} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Credit results */}
-      {creditResult && (
-        <>
-          <Separator />
-          <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-primary">Credit Assessment</h2>
-            <CreditResults result={creditResult} />
-          </section>
-        </>
-      )}
-
-      {/* Job Readiness Score */}
-      {plan.job_readiness && (
-        <>
-          <Separator />
-          <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-primary">Job Readiness</h2>
-            <JobReadinessResults result={plan.job_readiness} />
-          </section>
-        </>
-      )}
-
-      <Separator />
-
       {/* Job matches — three-bucket display */}
       <section id="matched-jobs" className="space-y-6 scroll-mt-8">
         {(plan.strong_matches?.length ?? 0) > 0 || (plan.possible_matches?.length ?? 0) > 0 || (plan.after_repair?.length ?? 0) > 0 ? (
@@ -255,6 +220,43 @@ function PlanContent() {
 
       {/* Comparison view */}
       <ComparisonView plan={plan} profile={profile} creditResult={creditResult} />
+
+      {/* Barrier cards */}
+      {plan.barriers.length > 0 && (
+        <>
+          <Separator />
+          <section className="space-y-4">
+            <h2 className="text-xl font-semibold text-primary">Your Barriers</h2>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {plan.barriers.map((barrier) => (
+                <BarrierCardView key={barrier.type} barrier={barrier} sessionId={sessionId ?? undefined} token={token ?? undefined} />
+              ))}
+            </div>
+          </section>
+        </>
+      )}
+
+      {/* Credit results */}
+      {creditResult && (
+        <>
+          <Separator />
+          <section className="space-y-4">
+            <h2 className="text-xl font-semibold text-primary">Credit Assessment</h2>
+            <CreditResults result={creditResult} />
+          </section>
+        </>
+      )}
+
+      {/* Job Readiness Score */}
+      {plan.job_readiness && (
+        <>
+          <Separator />
+          <section className="space-y-4">
+            <h2 className="text-xl font-semibold text-primary">Job Readiness</h2>
+            <JobReadinessResults result={plan.job_readiness} />
+          </section>
+        </>
+      )}
 
       {/* What's Next CTA */}
       <Separator />
@@ -309,12 +311,22 @@ function PlanContent() {
 
 export default function PlanPage() {
   return (
-    <main className="min-h-screen px-4 py-8 sm:px-8">
-      <div className="mx-auto max-w-3xl">
-        <Suspense fallback={<PlanSkeleton />}>
-          <PlanContent />
-        </Suspense>
-      </div>
-    </main>
+    <div className="flex min-h-screen">
+      <main className="flex-1 px-4 py-8 sm:px-8">
+        <div className="mx-auto max-w-3xl">
+          <Suspense fallback={<PlanSkeleton />}>
+            <PlanContent />
+          </Suspense>
+        </div>
+      </main>
+      <Suspense fallback={null}>
+        <PlanChatSidebar />
+      </Suspense>
+    </div>
   );
+}
+
+function PlanChatSidebar() {
+  const { id: sessionId } = useSessionId();
+  return <BarrierIntelChat sessionId={sessionId} />;
 }

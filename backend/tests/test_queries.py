@@ -238,10 +238,10 @@ class TestGetSessionById:
 
 class TestGetAllJobListings:
     @pytest.mark.anyio
-    async def test_returns_seeded_listings(self, db_session):
-        """Should return seed job listings from job_listings.json."""
+    async def test_returns_empty_when_no_seed(self, db_session):
+        """Should return empty list when job_listings.json is empty."""
         results = await get_all_job_listings(db_session)
-        assert len(results) >= 25
+        assert results == []
 
     @pytest.mark.anyio
     async def test_returns_inserted_listing(self, test_engine):

@@ -1,6 +1,4 @@
-"""Tests for job_listings seed data and credit_check column."""
-
-import json
+"""Tests for job_listings table schema and seed configuration."""
 
 import pytest
 from sqlalchemy import text
@@ -22,7 +20,7 @@ class TestJobListingsDDL:
 
 
 class TestJobListingsSeed:
-    """Verify job_listings.json is loaded by the seed loader."""
+    """Verify job_listings seed configuration (seed file is empty; data comes from BrightData)."""
 
     @pytest.mark.anyio
     async def test_seed_file_map_includes_job_listings(self):
@@ -39,50 +37,9 @@ class TestJobListingsSeed:
         assert "title" in db_module.ALLOWED_COLUMNS["job_listings"]
 
     @pytest.mark.anyio
-    async def test_seeds_load_job_listings(self, test_engine):
-        """init_db should populate job_listings from data/job_listings.json."""
+    async def test_empty_seed_creates_no_rows(self, test_engine):
+        """Empty job_listings.json should result in zero seeded rows."""
         async with test_engine.begin() as conn:
             result = await conn.execute(text("SELECT COUNT(*) FROM job_listings"))
             count = result.scalar()
-        assert count >= 25, f"Expected at least 25 job listings, got {count}"
-
-    @pytest.mark.anyio
-    async def test_seeded_jobs_have_credit_check(self, test_engine):
-        """Every seeded job listing should have a credit_check value."""
-        valid_values = {"required", "not_required", "unknown"}
-        async with test_engine.begin() as conn:
-            result = await conn.execute(
-                text("SELECT credit_check FROM job_listings")
-            )
-            values = [row[0] for row in result]
-        assert len(values) > 0
-        for val in values:
-            assert val in valid_values, f"Invalid credit_check: {val}"
-
-    @pytest.mark.anyio
-    async def test_seeded_jobs_have_industry_mix(self, test_engine):
-        """Seed data should include healthcare, manufacturing, government, retail, food_service."""
-        async with test_engine.begin() as conn:
-            result = await conn.execute(
-                text("SELECT company FROM job_listings")
-            )
-            companies = [row[0] for row in result if row[0]]
-        company_text = " ".join(companies).lower()
-        # Check for at least some known Montgomery employers
-        assert any(
-            name in company_text
-            for name in ["baptist", "jackson hospital", "hyundai"]
-        ), f"Missing expected Montgomery employers in: {companies[:5]}..."
-
-    @pytest.mark.anyio
-    async def test_seeded_jobs_have_shift_variety(self, test_engine):
-        """Seed data should include different shift types in descriptions."""
-        async with test_engine.begin() as conn:
-            result = await conn.execute(
-                text("SELECT description FROM job_listings")
-            )
-            descriptions = [row[0] for row in result if row[0]]
-        all_text = " ".join(descriptions).lower()
-        # Should mention various shifts
-        assert "night" in all_text or "evening" in all_text
-        assert "day" in all_text or "morning" in all_text
+        assert count == 0

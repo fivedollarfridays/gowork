@@ -48,7 +48,9 @@ class TestReadiness:
     @pytest.mark.anyio
     async def test_ready_when_db_up(self, client):
         up_check = ServiceCheck(name="database", status="up", latency_ms=1.0)
-        with patch("app.health.checks.check_database", return_value=up_check):
+        rag_check = ServiceCheck(name="rag_store", status="up", latency_ms=0)
+        with patch("app.health.checks.check_database", return_value=up_check), \
+             patch("app.health.checks.check_rag_store", return_value=rag_check):
             resp = await client.get("/health/ready")
         assert resp.status_code == 200
         assert resp.json()["ready"] is True
@@ -56,7 +58,9 @@ class TestReadiness:
     @pytest.mark.anyio
     async def test_not_ready_when_db_down(self, client):
         down_check = ServiceCheck(name="database", status="down", error="fail")
-        with patch("app.health.checks.check_database", return_value=down_check):
+        rag_check = ServiceCheck(name="rag_store", status="up", latency_ms=0)
+        with patch("app.health.checks.check_database", return_value=down_check), \
+             patch("app.health.checks.check_rag_store", return_value=rag_check):
             resp = await client.get("/health/ready")
         assert resp.status_code == 503
         assert resp.json()["ready"] is False

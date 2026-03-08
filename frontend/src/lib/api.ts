@@ -2,6 +2,8 @@ import type {
   AssessmentRequest,
   AssessmentResponse,
   CareerCenterPackage,
+  ChatMode,
+  ChatSSEEvent,
   CreditAssessmentResult,
   CreditProfileRequest,
   JobsResponse,
@@ -86,4 +88,47 @@ export function submitVisitFeedback(data: VisitFeedbackRequest): Promise<VisitFe
 
 export function getCareerCenterPackage(sessionId: string, token?: string): Promise<CareerCenterPackage> {
   return apiFetch(`/api/plan/${sessionId}/career-center${tokenQs(token)}`);
+}
+
+export async function streamBarrierIntelChat(
+  sessionId: string,
+  question: string,
+  mode: ChatMode,
+  onEvent: (event: ChatSSEEvent) => void,
+): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/barrier-intel/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ session_id: sessionId, user_question: question, mode }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(body.detail || `API error ${res.status}`);
+  }
+  // Handle guardrail response (non-streaming JSON)
+  const contentType = res.headers.get("content-type") || "";
+  if (contentType.includes("application/json")) {
+    const data = await res.json();
+    onEvent({ type: "token", text: data.message });
+    onEvent({ type: "done" });
+    return;
+  }
+  // SSE streaming
+  const reader = res.body?.getReader();
+  if (!reader) return;
+  const decoder = new TextDecoder();
+  let buffer = "";
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() || "";
+    for (const line of lines) {
+      if (line.startsWith("data: ")) {
+        const event: ChatSSEEvent = JSON.parse(line.slice(6));
+        onEvent(event);
+      }
+    }
+  }
 }

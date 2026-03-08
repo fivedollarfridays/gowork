@@ -2,7 +2,7 @@
 
 import time
 
-from fastapi import APIRouter, Response, status
+from fastapi import APIRouter, Request, Response, status
 from sqlalchemy import text
 
 from app.core.database import get_engine
@@ -32,6 +32,19 @@ async def check_database() -> ServiceCheck:
         return ServiceCheck(name="database", status="down", error=str(e))
 
 
+def check_rag_store(request: Request) -> ServiceCheck:
+    """Check if RAG store is loaded and ready."""
+    try:
+        store = getattr(request.app.state, "rag_store", None)
+        if store is None:
+            return ServiceCheck(name="rag_store", status="down", error="Not initialized")
+        if not store.is_ready():
+            return ServiceCheck(name="rag_store", status="down", error="Index not loaded")
+        return ServiceCheck(name="rag_store", status="up", latency_ms=0)
+    except Exception as e:
+        return ServiceCheck(name="rag_store", status="down", error=str(e))
+
+
 @router.get("/live", response_model=LivenessStatus)
 async def liveness():
     """Liveness probe — is the application running?"""
@@ -40,11 +53,9 @@ async def liveness():
 
 
 @router.get("/ready", response_model=ReadinessStatus)
-async def readiness(response: Response):
+async def readiness(request: Request, response: Response):
     """Readiness probe — can the application serve traffic?"""
-    checks = []
-    db_check = await check_database()
-    checks.append(db_check)
+    checks = [await check_database(), check_rag_store(request)]
     ready = all(check.status == "up" for check in checks)
     if not ready:
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
