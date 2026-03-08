@@ -1,3 +1,4 @@
+import type { TextItem } from "pdfjs-dist/types/src/display/api";
 import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
 
 // Use inline worker to avoid bundler issues with worker files
@@ -17,7 +18,7 @@ export async function extractPdfText(file: File): Promise<string> {
     const page = await pdf.getPage(i);
     const content = await page.getTextContent();
     const text = content.items
-      .filter((item): item is { str: string } => "str" in item)
+      .filter((item): item is TextItem => "str" in item)
       .map((item) => item.str)
       .join(" ");
     if (text.trim()) {

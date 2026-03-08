@@ -224,6 +224,8 @@ describe("PlanExport", () => {
   });
 
   it("error message has role=alert", async () => {
+    // Reset module cache so previous test's mock doesn't leak
+    vi.resetModules();
     // Mock html2pdf to throw an error
     vi.doMock("html2pdf.js", () => ({
       default: () => ({

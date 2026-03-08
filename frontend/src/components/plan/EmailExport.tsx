@@ -57,7 +57,7 @@ export function EmailExport({ sessionId, token }: EmailExportProps) {
     setSending(true);
     try {
       const emailjs = (await import("@emailjs/browser")).default;
-      const params = buildTemplateParams(email, sessionId, token);
+      const params = buildTemplateParams(email, sessionId, token!);
       await emailjs.send(
         process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
         process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,

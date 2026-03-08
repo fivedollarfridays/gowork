@@ -1,7 +1,4 @@
 import type { ExtractionResult, FileType } from "./types";
-import { extractPdfText } from "./pdf";
-import { ocrPdfText } from "./ocr";
-import { extractDocxText } from "./docx";
 
 const MIN_NATIVE_WORDS = 50;
 
@@ -43,6 +40,7 @@ export async function extractResumeText(
 
   if (fileType === "docx") {
     try {
+      const { extractDocxText } = await import("./docx");
       const text = await extractDocxText(file);
       return {
         text,
@@ -57,6 +55,7 @@ export async function extractResumeText(
 
   // PDF: try native first, fall back to OCR
   try {
+    const { extractPdfText } = await import("./pdf");
     const nativeText = await extractPdfText(file);
     const wordCount = countWords(nativeText);
 
@@ -71,6 +70,7 @@ export async function extractResumeText(
 
     // Too few words — likely a scanned PDF, try OCR
     try {
+      const { ocrPdfText } = await import("./ocr");
       const ocrText = await ocrPdfText(file);
       const ocrWordCount = countWords(ocrText);
       return {
