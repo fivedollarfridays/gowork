@@ -3,7 +3,14 @@
 import json
 import logging
 
+from starlette.requests import Request
+
 _logger = logging.getLogger("audit")
+
+
+def get_client_ip(request: Request) -> str:
+    """Extract client IP from request, falling back to 'unknown'."""
+    return request.client.host if request.client else "unknown"
 
 
 def audit_log(event: str, *, session_id: str, client_ip: str, **details: object) -> None:

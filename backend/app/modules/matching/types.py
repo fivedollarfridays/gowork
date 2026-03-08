@@ -1,10 +1,11 @@
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 
 from app.modules.credit.types import CreditAssessmentResult
 from app.modules.feedback.types import ResourceHealth
+from app.modules.matching.job_readiness_types import JobReadinessResult
 
 
 class BarrierType(str, Enum):
@@ -60,6 +61,8 @@ class AssessmentRequest(BaseModel):
     target_industries: list[str] = Field(default_factory=list)
     has_vehicle: bool = False
     schedule_constraints: ScheduleConstraints = Field(default_factory=ScheduleConstraints)
+    resume_text: str = Field(default="", max_length=5000)
+    certifications: list[str] = Field(default_factory=list)
     credit_result: Optional[CreditAssessmentResult] = None
 
 
@@ -72,7 +75,7 @@ class UserProfile(BaseModel):
     barrier_severity: BarrierSeverity
     needs_credit_assessment: bool
     transit_dependent: bool
-    schedule_type: str
+    schedule_type: AvailableHours
     work_history: str
     target_industries: list[str]
 
@@ -140,14 +143,21 @@ class ReEntryPlan(BaseModel):
     session_id: str
     resident_summary: Optional[str] = None  # AI-generated narrative (Tier 4)
     barriers: list[BarrierCard]
-    job_matches: list[JobMatch]  # flat list (backward compat)
     strong_matches: list[ScoredJobMatch] = Field(default_factory=list)
     possible_matches: list[ScoredJobMatch] = Field(default_factory=list)
+    after_repair: list[ScoredJobMatch] = Field(default_factory=list)
     immediate_next_steps: list[str]
     credit_readiness_score: Optional[int] = None  # 0-100 (from credit API)
     eligible_now: list[str] = Field(default_factory=list)
     eligible_after_repair: list[str] = Field(default_factory=list)
     wioa_eligibility: Optional["WIOAEligibility"] = None
+    job_readiness: Optional[JobReadinessResult] = None
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def job_matches(self) -> list[ScoredJobMatch]:
+        """Flat list derived from bucketed fields for backward compatibility."""
+        return list(self.strong_matches) + list(self.possible_matches) + list(self.after_repair)
 
 
 class DislocatedWorkerStatus(str, Enum):

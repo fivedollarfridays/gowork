@@ -178,36 +178,39 @@ export function CreditForm({ data, onChange }: CreditFormProps) {
       {/* Accounts */}
       <Card className="p-4 space-y-3">
         <label className="text-sm font-medium">Account Summary</label>
+        <p className="text-xs text-muted-foreground">
+          How many credit accounts (credit cards, loans, etc.) do you have? Check your credit report if unsure.
+        </p>
         <div className="grid grid-cols-3 gap-3">
           <div>
-            <label className="text-xs text-muted-foreground">Total</label>
+            <label className="text-xs text-muted-foreground">Total accounts</label>
             <Input
               type="number"
               min={0}
               value={data.totalAccounts || ""}
               onChange={(e) => update({ totalAccounts: parseInt(e.target.value) || 0 })}
-              placeholder="0"
+              placeholder="e.g. 5"
             />
           </div>
           <div>
-            <label className="text-xs text-muted-foreground">Open</label>
+            <label className="text-xs text-muted-foreground">Still open</label>
             <Input
               type="number"
               min={0}
               max={data.totalAccounts}
               value={data.openAccounts || ""}
               onChange={(e) => update({ openAccounts: parseInt(e.target.value) || 0 })}
-              placeholder="0"
+              placeholder="e.g. 3"
             />
           </div>
           <div>
-            <label className="text-xs text-muted-foreground">In Collections</label>
+            <label className="text-xs text-muted-foreground">In collections</label>
             <Input
               type="number"
               min={0}
               value={data.collectionAccounts || ""}
               onChange={(e) => update({ collectionAccounts: parseInt(e.target.value) || 0 })}
-              placeholder="0"
+              placeholder="e.g. 0"
             />
           </div>
         </div>

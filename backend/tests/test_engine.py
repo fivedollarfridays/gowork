@@ -5,7 +5,11 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from app.modules.matching.engine import generate_plan, query_resources_for_barriers
+from app.modules.matching.engine import (
+    _compute_stop_distances,
+    generate_plan,
+    query_resources_for_barriers,
+)
 from app.modules.matching.types import (
     BarrierSeverity,
     BarrierType,
@@ -378,3 +382,68 @@ class TestGeneratePlan:
 
         assert plan.wioa_eligibility is not None
         assert plan.wioa_eligibility.adult_program is False
+
+
+class TestGeneratePlanWithResume:
+    @pytest.mark.asyncio
+    async def test_resume_text_produces_job_readiness(self):
+        """generate_plan with resume_text should attach job_readiness to plan."""
+        profile = _make_profile()
+        mock_session = AsyncMock()
+        resources = [_make_resource(id=1, name="Career Center", category="career_center")]
+
+        with patch(_QUERY_PATCH, return_value=resources):
+            plan = await generate_plan(
+                profile, mock_session,
+                resume_text="Experienced CNA with 3 years in patient care nursing healthcare",
+            )
+
+        assert plan.job_readiness is not None
+        assert 0 <= plan.job_readiness.overall_score <= 100
+
+    @pytest.mark.asyncio
+    async def test_no_resume_still_produces_job_readiness(self):
+        """generate_plan without resume_text should still compute readiness from profile."""
+        profile = _make_profile()
+        mock_session = AsyncMock()
+
+        with patch(_QUERY_PATCH, return_value=[]):
+            plan = await generate_plan(profile, mock_session)
+
+        assert plan.job_readiness is not None
+
+    @pytest.mark.asyncio
+    async def test_credit_result_passed_to_readiness(self):
+        """Credit result flows through to job readiness scoring."""
+        profile = _make_profile(needs_credit_assessment=True)
+        mock_session = AsyncMock()
+
+        credit = {"readiness": {"score": 75}}
+
+        with patch(_QUERY_PATCH, return_value=[]):
+            plan = await generate_plan(
+                profile, mock_session, credit_result=credit,
+            )
+
+        assert plan.job_readiness is not None
+
+
+class TestComputeStopDistances:
+    def test_empty_stops_returns_empty_dict(self):
+        """When stops list is empty, should return an empty dict."""
+        resources = [_make_resource(id=1, lat=32.375, lng=-86.296)]
+        result = _compute_stop_distances(resources, stops=[])
+        assert result == {}
+
+    def test_resource_without_coords_skipped(self):
+        """Resources with lat=None or lng=None should be skipped."""
+        no_coords = _make_resource(id=1, name="No Coords", lat=None, lng=None)
+        has_coords = _make_resource(id=2, name="Has Coords", lat=32.375, lng=-86.296)
+        stops = [{"lat": 32.376, "lng": -86.295}]
+
+        result = _compute_stop_distances([no_coords, has_coords], stops)
+
+        assert 1 not in result
+        assert 2 in result
+        assert isinstance(result[2], float)
+        assert result[2] > 0

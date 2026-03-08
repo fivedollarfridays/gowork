@@ -13,6 +13,10 @@ vi.mock("@/lib/api", () => ({
   postCredit: vi.fn(),
 }));
 
+vi.mock("@/lib/resume", () => ({
+  extractResumeText: vi.fn(),
+}));
+
 function renderWithClient(ui: React.ReactElement) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -29,17 +33,17 @@ async function advanceToScheduleStep(user: ReturnType<typeof userEvent.setup>) {
   const zipInput = screen.getByLabelText(/montgomery zip/i);
   await user.type(zipInput, "36104");
 
-  // Advance to Barriers (step 2)
-  const toBarriers = screen.getByRole("button", { name: /go to step 2/i });
-  await user.click(toBarriers);
+  // Step 1 -> 2 (Resume)
+  await user.click(screen.getByRole("button", { name: /go to step 2/i }));
+  // Step 2 -> 3 (Barriers)
+  await user.click(screen.getByRole("button", { name: /go to step 3/i }));
 
   // Select a barrier so we can advance
   const creditCard = screen.getByText("Credit / Financial").closest("[role='button']")!;
   await user.click(creditCard);
 
-  // Advance to Schedule (step 3)
-  const toSchedule = screen.getByRole("button", { name: /go to step 3/i });
-  await user.click(toSchedule);
+  // Step 3 -> 4 (Schedule)
+  await user.click(screen.getByRole("button", { name: /go to step 4/i }));
 }
 
 describe("AssessPage schedule step", () => {
@@ -85,21 +89,21 @@ describe("AssessPage schedule step", () => {
     const zipInput = screen.getByLabelText(/montgomery zip/i);
     await user.type(zipInput, "36104");
 
-    // Advance to Barriers
-    const toBarriers = screen.getByRole("button", { name: /go to step 2/i });
-    await user.click(toBarriers);
+    // Step 1 -> 2 (Resume)
+    await user.click(screen.getByRole("button", { name: /go to step 2/i }));
+    // Step 2 -> 3 (Barriers)
+    await user.click(screen.getByRole("button", { name: /go to step 3/i }));
 
     // Select transportation (not credit) so no Credit Check step
     const transportCard = screen.getByText("Transportation").closest("[role='button']")!;
     await user.click(transportCard);
 
-    // Advance to Schedule
-    const toSchedule = screen.getByRole("button", { name: /go to step 3/i });
-    await user.click(toSchedule);
-
-    // Advance to Review & Submit
-    const toReview = screen.getByRole("button", { name: /go to step 4/i });
-    await user.click(toReview);
+    // Step 3 -> 4 (Schedule)
+    await user.click(screen.getByRole("button", { name: /go to step 4/i }));
+    // Step 4 -> 5 (Industries)
+    await user.click(screen.getByRole("button", { name: /go to step 5/i }));
+    // Step 5 -> 6 (Review & Submit — no credit barrier)
+    await user.click(screen.getByRole("button", { name: /go to step 6/i }));
 
     // Review summary should show default schedule value
     const summarySection = screen.getByText("Your Assessment Summary").closest("div")!;

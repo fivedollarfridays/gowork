@@ -1,6 +1,7 @@
 """Tests for feedback routes — resource feedback endpoint."""
 
 import pytest
+from fastapi import HTTPException
 
 from app.routes.feedback import _rate_limiter
 
@@ -353,3 +354,136 @@ class TestResourceFeedbackTokenAuth:
         })
         assert resp.status_code == 200
         assert resp.json()["success"] is True
+
+
+# --- Direct handler tests for coverage ---
+
+from unittest.mock import AsyncMock, MagicMock, patch
+
+from app.routes.feedback import (
+    _require_valid_token,
+    submit_resource_feedback,
+    submit_visit_feedback,
+    validate_feedback_token,
+)
+from app.modules.feedback.types import (
+    ResourceFeedbackRequest,
+    ResourceFeedbackResponse,
+    VisitFeedbackRequest,
+    VisitFeedbackResponse,
+)
+
+
+class TestFeedbackHandlersDirect:
+    """Direct handler calls (no ASGI) for coverage of route body lines."""
+
+    @pytest.mark.anyio
+    async def test_require_valid_token_returns_session_id(self):
+        """Valid token returns the associated session_id."""
+        mock_db = AsyncMock()
+        with patch("app.routes.feedback.validate_token", new_callable=AsyncMock, return_value="sess-1"):
+            result = await _require_valid_token(mock_db, "good-token")
+        assert result == "sess-1"
+
+    @pytest.mark.anyio
+    async def test_require_valid_token_expired_raises_410(self):
+        """Expired token raises HTTPException 410."""
+        mock_db = AsyncMock()
+        with (
+            patch("app.routes.feedback.validate_token", new_callable=AsyncMock, return_value=None),
+            patch("app.routes.feedback.token_exists", new_callable=AsyncMock, return_value=True),
+        ):
+            with pytest.raises(HTTPException) as exc_info:
+                await _require_valid_token(mock_db, "expired-token")
+        assert exc_info.value.status_code == 410
+
+    @pytest.mark.anyio
+    async def test_require_valid_token_unknown_raises_404(self):
+        """Unknown token raises HTTPException 404."""
+        mock_db = AsyncMock()
+        with (
+            patch("app.routes.feedback.validate_token", new_callable=AsyncMock, return_value=None),
+            patch("app.routes.feedback.token_exists", new_callable=AsyncMock, return_value=False),
+        ):
+            with pytest.raises(HTTPException) as exc_info:
+                await _require_valid_token(mock_db, "unknown-token")
+        assert exc_info.value.status_code == 404
+
+    @pytest.mark.anyio
+    async def test_submit_resource_feedback_direct(self):
+        """Direct call returns ResourceFeedbackResponse with success."""
+        mock_db = AsyncMock()
+        mock_request = MagicMock()
+        mock_request.client.host = "127.0.0.1"
+
+        feedback = ResourceFeedbackRequest(
+            resource_id=1,
+            session_id="00000000-0000-4000-8000-f00dbac00001",
+            helpful=True,
+            token="tok-1",
+        )
+        with (
+            patch("app.routes.feedback.require_session_token", new_callable=AsyncMock),
+            patch("app.routes.feedback.insert_resource_feedback", new_callable=AsyncMock),
+            patch("app.routes.feedback.audit_log"),
+        ):
+            result = await submit_resource_feedback(feedback, mock_request, mock_db)
+
+        assert isinstance(result, ResourceFeedbackResponse)
+        assert result.success is True
+        assert result.resource_id == 1
+        assert result.helpful is True
+
+    @pytest.mark.anyio
+    async def test_validate_feedback_token_direct(self):
+        """Direct call returns {valid: True} when token is valid."""
+        mock_db = AsyncMock()
+        with patch("app.routes.feedback._require_valid_token", new_callable=AsyncMock, return_value="sess-1"):
+            result = await validate_feedback_token("test-token", mock_db)
+        assert result == {"valid": True}
+
+    @pytest.mark.anyio
+    async def test_submit_visit_feedback_direct(self):
+        """Direct call returns VisitFeedbackResponse with success."""
+        mock_db = AsyncMock()
+        mock_request = MagicMock()
+        mock_request.client.host = "127.0.0.1"
+
+        feedback = VisitFeedbackRequest(
+            token="tok-v1",
+            made_it_to_center=2,
+            outcomes=["got_interview"],
+            plan_accuracy=3,
+            free_text="Great!",
+        )
+        with (
+            patch("app.routes.feedback._require_valid_token", new_callable=AsyncMock, return_value="sess-v1"),
+            patch("app.routes.feedback.has_visit_feedback", new_callable=AsyncMock, return_value=False),
+            patch("app.routes.feedback.insert_visit_feedback", new_callable=AsyncMock),
+            patch("app.routes.feedback.audit_log"),
+        ):
+            result = await submit_visit_feedback(feedback, mock_request, mock_db)
+
+        assert isinstance(result, VisitFeedbackResponse)
+        assert result.success is True
+
+    @pytest.mark.anyio
+    async def test_submit_visit_feedback_duplicate_raises_409(self):
+        """When has_visit_feedback is True, submit_visit_feedback raises 409."""
+        mock_db = AsyncMock()
+        mock_request = MagicMock()
+        mock_request.client.host = "127.0.0.1"
+
+        feedback = VisitFeedbackRequest(
+            token="tok-1",
+            made_it_to_center=2,
+            outcomes=[],
+            plan_accuracy=3,
+        )
+        with (
+            patch("app.routes.feedback._require_valid_token", new_callable=AsyncMock, return_value="sess-1"),
+            patch("app.routes.feedback.has_visit_feedback", new_callable=AsyncMock, return_value=True),
+        ):
+            with pytest.raises(HTTPException) as exc_info:
+                await submit_visit_feedback(feedback, mock_request, mock_db)
+            assert exc_info.value.status_code == 409

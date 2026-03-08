@@ -6,7 +6,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.audit import audit_log
+from app.core.audit import audit_log, get_client_ip
 from app.core.database import get_db
 from app.core.queries import create_session, update_session_plan
 from app.core.queries_feedback import create_feedback_token
@@ -45,7 +45,7 @@ def _build_profile(session_id: str, request: AssessmentRequest) -> UserProfile:
             not request.has_vehicle
             and request.barriers.get(BarrierType.TRANSPORTATION, False)
         ),
-        schedule_type=request.schedule_constraints.available_hours.value,
+        schedule_type=request.schedule_constraints.available_hours,
         work_history=request.work_history,
         target_industries=request.target_industries,
     )
@@ -70,14 +70,17 @@ async def create_assessment(
         "profile": json.dumps(profile.model_dump()),
     }, session_id=session_id)
 
-    plan = await generate_plan(profile, db)
+    plan = await generate_plan(
+        profile, db,
+        resume_text=request.resume_text,
+        credit_result=request.credit_result.model_dump() if request.credit_result else None,
+    )
 
     await update_session_plan(db, session_id, json.dumps(plan.model_dump()))
 
     feedback_token = await create_feedback_token(db, session_id)
 
-    client_ip = raw_request.client.host if raw_request.client else "unknown"
-    audit_log("session_created", session_id=session_id, client_ip=client_ip,
+    audit_log("session_created", session_id=session_id, client_ip=get_client_ip(raw_request),
               barriers=len(profile.primary_barriers))
 
     return {

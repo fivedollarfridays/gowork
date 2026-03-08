@@ -11,21 +11,29 @@ from app.integrations.brightdata.client import BrightDataClient
 from app.integrations.brightdata.polling import poll_until_ready
 
 
+_KEYWORDS = [
+    "", "warehouse", "healthcare", "customer service", "retail",
+    "manufacturing", "food service", "construction", "driver",
+    "cashier", "cleaning", "security", "maintenance",
+    "administrative", "entry level",
+]
+
+
 def build_keyword_searches() -> list[dict]:
-    """Return structured keyword searches for Montgomery, AL jobs."""
-    keywords = ["", "warehouse", "healthcare", "customer service"]
-    return [
-        {
-            "country": "US",
-            "domain": "indeed.com",
-            "keyword_search": kw,
-            "location": "Montgomery, AL",
-            "date_posted": "Last 7 days",
-            "posted_by": "",
-            "location_radius": "",
-        }
-        for kw in keywords
-    ]
+    """Return structured keyword searches for Montgomery, AL jobs (Indeed + LinkedIn)."""
+    searches: list[dict] = []
+    for domain in ("indeed.com", "linkedin.com"):
+        for kw in _KEYWORDS:
+            searches.append({
+                "country": "US",
+                "domain": domain,
+                "keyword_search": kw,
+                "location": "Montgomery, AL",
+                "date_posted": "Last 7 days",
+                "posted_by": "",
+                "location_radius": "",
+            })
+    return searches
 
 
 async def _has_recent_data(session: AsyncSession) -> bool:

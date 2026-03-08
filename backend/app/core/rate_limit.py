@@ -4,6 +4,8 @@ import time
 
 from fastapi import HTTPException, Request
 
+from app.core.audit import get_client_ip
+
 
 class RateLimiter:
     """Simple in-memory rate limiter: max_requests per window_seconds per key."""
@@ -45,7 +47,7 @@ class RateLimiter:
 def require_rate_limit(limiter: RateLimiter):
     """FastAPI dependency factory for rate limiting."""
     async def _check(request: Request) -> None:
-        client_ip = request.client.host if request.client else "unknown"
+        client_ip = get_client_ip(request)
         if not limiter.check(client_ip):
             raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
     return _check

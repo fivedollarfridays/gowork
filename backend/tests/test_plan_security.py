@@ -7,6 +7,7 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 from app.ai.client import generate_narrative
+from app.core.config import Settings
 from app.main import app
 
 _VALID_UUID = "00000000-0000-4000-8000-000000000001"
@@ -155,3 +156,12 @@ class TestPlanTokenAuth:
         async with AsyncClient(transport=transport, base_url="http://test") as client:
             resp = await client.get(f"/api/plan/{_VALID_UUID_2}/career-center")
         assert resp.status_code == 422
+
+
+# --- Config: SSRF validator accepts public IPs in production ---
+
+class TestConfigCreditUrlValidation:
+    def test_production_with_public_ip_allowed(self):
+        """Public IP in credit_api_url should pass production validation."""
+        s = Settings(environment="production", credit_api_url="http://8.8.8.8:8001")
+        assert s.credit_api_url == "http://8.8.8.8:8001"

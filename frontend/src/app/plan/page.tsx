@@ -11,10 +11,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { MondayMorning } from "@/components/plan/MondayMorning";
 import { BarrierCardView } from "@/components/plan/BarrierCardView";
-import { JobMatchCard, isScoredJob } from "@/components/plan/JobMatchCard";
+import { JobMatchCard } from "@/components/plan/JobMatchCard";
 import { JobBucketSection } from "@/components/plan/JobBucketSection";
 import { ComparisonView } from "@/components/plan/ComparisonView";
 import { CreditResults } from "@/components/plan/CreditResults";
+import { JobReadinessResults } from "@/components/plan/JobReadinessResults";
 import { CareerCenterExport } from "@/components/plan/CareerCenterExport";
 import { EmailExport } from "@/components/plan/EmailExport";
 import { PlanExport } from "@/components/plan/PlanExport";
@@ -130,7 +131,7 @@ function PlanContent() {
   const token = useToken(sessionId);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["plan", sessionId],
+    queryKey: ["plan", sessionId, token],
     queryFn: () => getPlan(sessionId ?? "", token ?? undefined),
     enabled: !!sessionId && !!token,
   });
@@ -236,29 +237,38 @@ function PlanContent() {
         </>
       )}
 
+      {/* Job Readiness Score */}
+      {plan.job_readiness && (
+        <>
+          <Separator />
+          <section className="space-y-4">
+            <h2 className="text-xl font-semibold text-primary">Job Readiness</h2>
+            <JobReadinessResults result={plan.job_readiness} />
+          </section>
+        </>
+      )}
+
       <Separator />
 
       {/* Job matches — three-bucket display */}
       <section className="space-y-6">
-        {plan.strong_matches.length > 0 || plan.possible_matches.length > 0 || plan.job_matches.some((j) => !j.eligible_now) ? (
+        {(plan.strong_matches?.length ?? 0) > 0 || (plan.possible_matches?.length ?? 0) > 0 || (plan.after_repair?.length ?? 0) > 0 ? (
           <>
             <JobBucketSection
               title="Jobs That Match Your Profile"
-              jobs={plan.strong_matches}
+              jobs={plan.strong_matches ?? []}
             />
             <JobBucketSection
               title="Worth Exploring"
-              jobs={plan.possible_matches}
+              jobs={plan.possible_matches ?? []}
             />
             <JobBucketSection
               title="After Credit Repair"
-              jobs={plan.job_matches
-                .filter(isScoredJob)
-                .filter((j) => !j.eligible_now && j.bucket === "after_repair")}
+              jobs={plan.after_repair ?? []}
               description="These jobs require a credit check. Follow your credit repair plan to become eligible."
             />
           </>
-        ) : plan.job_matches.length > 0 ? (
+        ) : (plan.job_matches?.length ?? 0) > 0 ? (
           <>
             <h2 className="text-xl font-semibold text-primary">Matched Jobs</h2>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -286,9 +296,9 @@ function PlanContent() {
       {/* Export actions */}
       <Separator />
       <div className="flex flex-wrap items-center gap-3">
-        <CareerCenterExport sessionId={sessionId!} token={token ?? undefined} />
+        <CareerCenterExport sessionId={sessionId} token={token ?? undefined} />
         <PlanExport plan={plan} creditResult={creditResult} feedbackToken={token} />
-        <EmailExport sessionId={sessionId!} token={token ?? undefined} />
+        <EmailExport sessionId={sessionId} token={token ?? undefined} />
       </div>
 
       {/* Explore More Jobs — live listings from job_listings table */}

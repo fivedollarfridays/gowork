@@ -1,5 +1,6 @@
 """Cache BrightData crawl results into job_listings table."""
 
+import re
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import text
@@ -11,6 +12,43 @@ from app.integrations.brightdata.types import BrightDataJobRecord
 
 _FIELD_LIMITS = {"title": 500, "company": 200, "location": 200, "description": 5000, "url": 2000}
 
+_TITLE_EXCLUDE = re.compile(
+    r"\b(?:CEO|CFO|CTO|COO|VP|Vice\s+President|Director|Attorney|"
+    r"Physician|Surgeon|Partner|Managing\s+Director|Chief)\b",
+    re.IGNORECASE,
+)
+_SALARY_YEARLY = re.compile(r"\$[\d,]+(?:\.\d+)?/(?:yr|year)", re.IGNORECASE)
+_SALARY_HOURLY = re.compile(r"\$([\d,]+(?:\.\d+)?)/hr", re.IGNORECASE)
+_SALARY_THRESHOLD = 80_000
+_HOURS_PER_YEAR = 2080
+
+
+def _parse_salary_yearly(salary: str) -> float | None:
+    """Extract annual salary from string. Returns None if unparseable."""
+    m = _SALARY_YEARLY.search(salary)
+    if m:
+        num_str = m.group(0).lstrip("$").split("/")[0].replace(",", "")
+        return float(num_str)
+    m = _SALARY_HOURLY.search(salary)
+    if m:
+        return float(m.group(1).replace(",", "")) * _HOURS_PER_YEAR
+    return None
+
+
+def _should_exclude(job: dict) -> bool:
+    """Return True if job should be excluded (executive title or high salary)."""
+    title = job.get("title")
+    if not title:
+        return False
+    if _TITLE_EXCLUDE.search(title):
+        return True
+    salary = job.get("salary", "")
+    if salary:
+        annual = _parse_salary_yearly(salary)
+        if annual is not None and annual > _SALARY_THRESHOLD:
+            return True
+    return False
+
 
 def _truncate(value: str | None, limit: int) -> str | None:
     """Truncate a string to limit length, or return None."""
@@ -20,10 +58,12 @@ def _truncate(value: str | None, limit: int) -> str | None:
 
 
 def parse_brightdata_jobs(raw_jobs: list[dict]) -> list[BrightDataJobRecord]:
-    """Parse raw BrightData JSON into typed records. Skips entries without title."""
+    """Parse raw BrightData JSON into typed records. Skips entries without title or excluded."""
     results = []
     for job in raw_jobs:
         if not job.get("title"):
+            continue
+        if _should_exclude(job):
             continue
         results.append(BrightDataJobRecord(
             title=_truncate(job["title"], _FIELD_LIMITS["title"]),

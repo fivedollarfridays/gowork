@@ -42,6 +42,9 @@ const basePlan: ReEntryPlan = {
       credit_check_required: "no",
       eligible_now: true,
       eligible_after: null,
+      relevance_score: 0.85,
+      match_reason: "Industry match",
+      bucket: "strong" as const,
     },
     {
       title: "Bank Teller",
@@ -54,6 +57,9 @@ const basePlan: ReEntryPlan = {
       credit_check_required: "yes",
       eligible_now: false,
       eligible_after: "Credit score improvement",
+      relevance_score: 0.6,
+      match_reason: "Possible after credit repair",
+      bucket: "after_repair" as const,
     },
   ],
   immediate_next_steps: [
@@ -66,7 +72,9 @@ const basePlan: ReEntryPlan = {
   eligible_after_repair: ["Bank Teller"],
   strong_matches: [],
   possible_matches: [],
+  after_repair: [],
   wioa_eligibility: null,
+  job_readiness: null,
 };
 
 const baseCreditResult: CreditAssessmentResult = {
@@ -223,6 +231,8 @@ describe("PlanExport", () => {
   });
 
   it("error message has role=alert", async () => {
+    // Reset module cache so previous test's mock doesn't leak
+    vi.resetModules();
     // Mock html2pdf to throw an error
     vi.doMock("html2pdf.js", () => ({
       default: () => ({

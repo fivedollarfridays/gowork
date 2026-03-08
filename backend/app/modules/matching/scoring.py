@@ -1,6 +1,7 @@
 """Resource relevance scoring."""
 
 import math
+import re
 
 from app.modules.feedback.types import ResourceHealth
 from app.modules.matching.types import BarrierType, Resource, UserProfile
@@ -15,13 +16,16 @@ INDUSTRY_WEIGHT = 0.10
 # Map BarrierType to resource categories
 BARRIER_CATEGORY_MAP: dict[BarrierType, set[str]] = {
     BarrierType.CREDIT: {"career_center", "social_service"},
-    BarrierType.TRANSPORTATION: {"career_center"},
-    BarrierType.CHILDCARE: {"childcare"},
-    BarrierType.HOUSING: {"social_service"},
-    BarrierType.HEALTH: {"social_service"},
+    BarrierType.TRANSPORTATION: {"career_center", "social_service"},
+    BarrierType.CHILDCARE: {"childcare", "social_service"},
+    BarrierType.HOUSING: {"social_service", "career_center"},
+    BarrierType.HEALTH: {"social_service", "career_center"},
     BarrierType.TRAINING: {"training", "career_center"},
     BarrierType.CRIMINAL_RECORD: {"career_center", "social_service"},
 }
+
+# Fallback for ZIPs not in the centroid table
+DOWNTOWN_MONTGOMERY = (32.3668, -86.3000)
 
 # Montgomery, AL zip code centroids (approximate lat/lng)
 ZIP_CENTROIDS: dict[str, tuple[float, float]] = {
@@ -70,9 +74,9 @@ def _score_barrier_alignment(resource: Resource, profile: UserProfile) -> float:
 
 def _score_proximity(resource: Resource, profile: UserProfile) -> float:
     """Score 0-1 based on distance. Closer = higher score."""
-    user_coords = ZIP_CENTROIDS.get(profile.zip_code)
-    if not user_coords or resource.lat is None or resource.lng is None:
-        return 0.5  # neutral when location unknown
+    if resource.lat is None or resource.lng is None:
+        return 0.5  # neutral when resource location unknown
+    user_coords = ZIP_CENTROIDS.get(profile.zip_code, DOWNTOWN_MONTGOMERY)
     miles = haversine_miles(user_coords[0], user_coords[1], resource.lat, resource.lng)
     if miles <= 1.0:
         return 1.0
@@ -145,7 +149,8 @@ def _score_industry(resource: Resource, profile: UserProfile) -> float:
     ])).lower()
 
     for industry in profile.target_industries:
-        if industry.lower() in searchable:
+        pattern = r"\b" + re.escape(industry.lower()) + r"\b"
+        if re.search(pattern, searchable):
             return 1.0
     return 0.3
 
