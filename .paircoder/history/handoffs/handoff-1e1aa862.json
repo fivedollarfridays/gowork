@@ -1,0 +1,8 @@
+{
+  "version": "2.0",
+  "task_id": "T24.2",
+  "source_agent": "driver",
+  "target_agent": "reviewer",
+  "task_description": "[T24.2] Barrier-resource mapping: join table, impact scores, top-N query",
+  "acceptance_criteria": [
+    
