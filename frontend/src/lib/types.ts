@@ -108,6 +108,7 @@ export interface ScoredJobMatch extends JobMatch {
   relevance_score: number;
   match_reason: string;
   bucket: "strong" | "possible" | "after_repair";
+  pay_range?: string | null;
 }
 
 export interface TransitConnection {

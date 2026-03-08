@@ -3,7 +3,6 @@
 import { useMemo } from "react";
 import {
   AlertCircle,
-  ArrowRight,
   Briefcase,
   Check,
   CreditCard,
@@ -65,15 +64,15 @@ function buildRows(plan: ReEntryPlan, profile: UserProfile, creditResult?: Credi
 
   // Credit
   if (profile.needs_credit_assessment) {
-    const ficoNow = creditResult?.readiness.fico_score ?? null;
     const fairThreshold = creditResult?.thresholds.find((t) => t.threshold_name === "Fair Credit") ?? null;
     const eligibleCount = creditResult
       ? creditResult.eligibility.filter((e) => e.status === "eligible").length
       : 0;
     const totalProducts = creditResult ? creditResult.eligibility.length : 0;
 
+    const bandLabel = creditResult?.readiness.score_band.replace(/_/g, " ") ?? "";
     const nowText = creditResult
-      ? `FICO ${ficoNow} (${creditResult.readiness.score_band.replace(/_/g, " ")}), ${eligibleCount}/${totalProducts} products eligible`
+      ? `${bandLabel} credit, ${eligibleCount}/${totalProducts} products eligible`
       : plan.credit_readiness_score != null
         ? `Readiness: ${plan.credit_readiness_score}/100`
         : "Assessment needed";
@@ -157,13 +156,6 @@ export function ComparisonView({ plan, profile, creditResult }: ComparisonViewPr
         </Card>
       </div>
 
-      {/* Arrow indicator for mobile (between stacked cards) */}
-      <div className="flex justify-center md:hidden">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <ArrowRight className="h-4 w-4" />
-          <span>Follow your plan to get here</span>
-        </div>
-      </div>
     </section>
   );
 }

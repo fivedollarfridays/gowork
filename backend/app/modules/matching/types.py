@@ -119,6 +119,7 @@ class ScoredJobMatch(JobMatch):
     relevance_score: float = Field(ge=0.0, le=1.0)
     match_reason: str = ""
     bucket: MatchBucket = MatchBucket.POSSIBLE
+    pay_range: Optional[str] = None
 
 
 class TransitConnection(BaseModel):

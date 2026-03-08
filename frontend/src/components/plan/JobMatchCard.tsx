@@ -1,6 +1,6 @@
 "use client";
 
-import { Briefcase, Bus, CreditCard, ExternalLink, MapPin } from "lucide-react";
+import { Briefcase, Bus, CreditCard, DollarSign, ExternalLink, MapPin } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -54,6 +54,21 @@ export function JobMatchCard({ job, creditResult }: JobMatchCardProps) {
                 Requires Transport
               </Badge>
             )}
+            {/* Pay badge */}
+            {(() => {
+              const payRange = isScoredJob(job) ? job.pay_range : null;
+              return payRange ? (
+                <Badge className={`${STATUS_BADGE_STYLES.positive} text-xs`} variant="outline">
+                  <DollarSign className="h-3 w-3 mr-1" />
+                  {payRange}
+                </Badge>
+              ) : (
+                <Badge className={`${STATUS_BADGE_STYLES.warning} text-xs`} variant="outline">
+                  <DollarSign className="h-3 w-3 mr-1" />
+                  Pay not disclosed
+                </Badge>
+              );
+            })()}
             {job.credit_check_required === "required" && (
               creditResult && job.eligible_now ? (
                 <Badge className={`${STATUS_BADGE_STYLES.positive} text-xs`} variant="outline">
@@ -85,21 +100,21 @@ export function JobMatchCard({ job, creditResult }: JobMatchCardProps) {
         )}
 
         {/* Location + route */}
-        <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-3 text-sm">
           {job.location && (
             <a
               href={mapsUrl(job.location)}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 hover:text-secondary hover:underline transition-colors"
+              className="flex items-center gap-1.5 text-secondary hover:underline"
             >
-              <MapPin className="h-3.5 w-3.5" />
+              <MapPin className="h-3.5 w-3.5 shrink-0" />
               {job.location}
             </a>
           )}
           {job.route && (
-            <span className="flex items-center gap-1">
-              <Bus className="h-3.5 w-3.5" />
+            <span className="flex items-center gap-1.5 text-muted-foreground">
+              <Bus className="h-3.5 w-3.5 shrink-0" />
               {job.route}
             </span>
           )}

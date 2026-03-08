@@ -146,7 +146,13 @@ async def generate_plan(
     resources = await query_resources_for_barriers(profile.primary_barriers, db_session)
     resources = await _rank_with_transit(profile, resources, db_session)
 
-    strong, possible, after_repair = await match_jobs(profile, db_session)
+    ranked_jobs = await match_jobs(profile, db_session)
+
+    # Backward compat: split flat PVS list into legacy buckets
+    strong: list[ScoredJobMatch] = []
+    after_repair: list[ScoredJobMatch] = []
+    for j in ranked_jobs:
+        (after_repair if j.credit_check_required == "required" else strong).append(j)
 
     sorted_barriers = prioritize_barriers([b.value for b in profile.primary_barriers])
     sorted_profile = profile.model_copy(
@@ -157,19 +163,17 @@ async def generate_plan(
     wioa = screen_wioa_eligibility(profile)
 
     parsed_resume = parse_resume(resume_text) if resume_text else None
-    all_matches = list(strong) + list(possible) + list(after_repair)
-    readiness = assess_job_readiness(profile, parsed_resume, all_matches, credit_result)
+    readiness = assess_job_readiness(profile, parsed_resume, ranked_jobs, credit_result)
 
-    eligible = strong + possible
     return ReEntryPlan(
         plan_id=str(uuid.uuid4()),
         session_id=profile.session_id,
         barriers=barrier_cards,
         strong_matches=strong,
-        possible_matches=possible,
+        possible_matches=[],  # Deprecated: PVS replaces 3-bucket system
         after_repair=after_repair,
         immediate_next_steps=next_steps,
-        eligible_now=[m.title for m in eligible],
+        eligible_now=[m.title for m in strong],
         eligible_after_repair=[m.title for m in after_repair],
         wioa_eligibility=wioa,
         job_readiness=readiness,

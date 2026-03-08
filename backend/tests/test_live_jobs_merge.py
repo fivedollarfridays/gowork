@@ -59,32 +59,35 @@ _MATCH_PATCH = "app.modules.matching.engine.match_jobs"
 class TestGeneratePlanWithMatchJobs:
     @pytest.mark.asyncio
     async def test_plan_populates_bucketed_matches(self):
-        """generate_plan should populate strong_matches, possible_matches, eligible_after_repair."""
+        """generate_plan should split PVS-ranked flat list into legacy buckets."""
         profile = _make_profile()
         mock_session = AsyncMock()
 
-        strong = [ScoredJobMatch(
-            title="CNA", company="Baptist", relevance_score=0.8,
-            match_reason="Matches your CNA experience", bucket=MatchBucket.STRONG,
-        )]
-        possible = [ScoredJobMatch(
-            title="Cashier", company="Walmart", relevance_score=0.4,
-            match_reason="Entry-level opportunity", bucket=MatchBucket.POSSIBLE,
-        )]
-        after = [ScoredJobMatch(
-            title="Bank Teller", company="Regions", relevance_score=0.5,
-            match_reason="Matches target industry", bucket=MatchBucket.AFTER_REPAIR,
-        )]
+        ranked = [
+            ScoredJobMatch(
+                title="CNA", company="Baptist", relevance_score=0.8,
+                match_reason="Matches your CNA experience",
+            ),
+            ScoredJobMatch(
+                title="Bank Teller", company="Regions", relevance_score=0.5,
+                match_reason="Matches target industry",
+                credit_check_required="required",
+            ),
+            ScoredJobMatch(
+                title="Cashier", company="Walmart", relevance_score=0.4,
+                match_reason="Entry-level opportunity",
+            ),
+        ]
 
         with (
             patch(_QUERY_PATCH, return_value=[]),
-            patch(_MATCH_PATCH, new_callable=AsyncMock, return_value=(strong, possible, after)),
+            patch(_MATCH_PATCH, new_callable=AsyncMock, return_value=ranked),
         ):
             plan = await generate_plan(profile, mock_session)
 
-        assert len(plan.strong_matches) == 1
+        assert len(plan.strong_matches) == 2
         assert plan.strong_matches[0].title == "CNA"
-        assert len(plan.possible_matches) == 1
+        assert plan.possible_matches == []
         assert len(plan.eligible_after_repair) == 1
 
     @pytest.mark.asyncio
@@ -95,7 +98,7 @@ class TestGeneratePlanWithMatchJobs:
 
         with (
             patch(_QUERY_PATCH, return_value=[]),
-            patch(_MATCH_PATCH, new_callable=AsyncMock, return_value=([], [], [])),
+            patch(_MATCH_PATCH, new_callable=AsyncMock, return_value=[]),
         ):
             plan = await generate_plan(profile, mock_session)
 
@@ -109,13 +112,15 @@ class TestGeneratePlanWithMatchJobs:
         profile = _make_profile()
         mock_session = AsyncMock()
 
-        strong = [ScoredJobMatch(title="CNA", relevance_score=0.8, bucket=MatchBucket.STRONG)]
-        possible = [ScoredJobMatch(title="Cashier", relevance_score=0.4, bucket=MatchBucket.POSSIBLE)]
-        after = [ScoredJobMatch(title="Banker", relevance_score=0.3, bucket=MatchBucket.AFTER_REPAIR)]
+        ranked = [
+            ScoredJobMatch(title="CNA", relevance_score=0.8),
+            ScoredJobMatch(title="Cashier", relevance_score=0.4),
+            ScoredJobMatch(title="Banker", relevance_score=0.3, credit_check_required="required"),
+        ]
 
         with (
             patch(_QUERY_PATCH, return_value=[]),
-            patch(_MATCH_PATCH, new_callable=AsyncMock, return_value=(strong, possible, after)),
+            patch(_MATCH_PATCH, new_callable=AsyncMock, return_value=ranked),
         ):
             plan = await generate_plan(profile, mock_session)
 
