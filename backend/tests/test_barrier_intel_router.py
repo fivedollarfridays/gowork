@@ -200,22 +200,13 @@ async def test_chat_returns_sse_for_valid_session(client, test_engine):
             },
         )
 
-    mock_stream = AsyncMock()
-    mock_stream.__aenter__ = AsyncMock(return_value=mock_stream)
-    mock_stream.__aexit__ = AsyncMock(return_value=None)
+    async def _fake_llm_stream(prompt: str):
+        yield "Here are your next steps.", 0, 0
+        yield "", 100, 50
 
-    async def _tokens():
-        yield "Here are your next steps."
-
-    mock_stream.text_stream = _tokens()
-    mock_final = MagicMock()
-    mock_final.usage.input_tokens = 100
-    mock_final.usage.output_tokens = 50
-    mock_stream.get_final_message = AsyncMock(return_value=mock_final)
-
-    with patch("app.barrier_intel.stream.AsyncAnthropic") as mock_claude, \
+    with patch("app.barrier_intel.llm_client.get_llm_stream", side_effect=_fake_llm_stream), \
+         patch("app.barrier_intel.stream.get_llm_stream", side_effect=_fake_llm_stream), \
          patch("app.routes.barrier_intel.get_rag_store", return_value=_make_fake_store()):
-        mock_claude.return_value.messages.stream.return_value = mock_stream
         response = await client.post(
             "/api/barrier-intel/chat",
             json={"session_id": session_id, "user_question": "What to do?", "mode": "next_steps"},

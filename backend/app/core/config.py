@@ -24,6 +24,12 @@ class Settings(BaseSettings):
     credit_api_key: str = ""
     anthropic_api_key: str = ""
     claude_model: str = "claude-sonnet-4-20250514"
+    # Multi-provider LLM config (anthropic | openai | gemini)
+    llm_provider: str = "anthropic"
+    openai_api_key: str = ""
+    openai_model: str = "gpt-4o"
+    gemini_api_key: str = ""
+    gemini_model: str = "gemini-2.0-flash"
     brightdata_api_key: str = ""
     brightdata_dataset_id: str = ""
     admin_api_key: str = ""

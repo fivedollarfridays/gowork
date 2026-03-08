@@ -3,12 +3,10 @@
 import json
 import time
 
-from anthropic import AsyncAnthropic
-
 from app.barrier_intel.audit_log import write_audit_entry
-from app.barrier_intel.prompts import SYSTEM_PROMPT, build_context_event, build_user_prompt
+from app.barrier_intel.llm_client import get_llm_stream
+from app.barrier_intel.prompts import build_context_event, build_user_prompt
 from app.barrier_intel.schemas import ChatRequest
-from app.core.config import get_settings
 from app.core.database import get_async_session_factory
 from app.rag.retrieval import retrieve_context
 from app.rag.store import RagStore
@@ -24,22 +22,6 @@ def _parse_session_profile(session_row: dict) -> tuple[list, str, str | None]:
     user_zip = profile.get("zip_code", "36104")
     user_schedule = profile.get("schedule_preference")
     return barriers, user_zip, user_schedule
-
-
-async def _call_claude_stream(user_prompt: str):
-    """Yield (text_chunks, input_tokens, output_tokens) via async gen."""
-    settings = get_settings()
-    client = AsyncAnthropic(api_key=settings.anthropic_api_key)
-    async with client.messages.stream(
-        model=settings.claude_model,
-        max_tokens=1024,
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": user_prompt}],
-    ) as stream:
-        async for text in stream.text_stream:
-            yield text, 0, 0
-        final = await stream.get_final_message()
-        yield "", final.usage.input_tokens, final.usage.output_tokens
 
 
 async def stream_chat(
@@ -60,7 +42,7 @@ async def stream_chat(
 
     user_prompt = build_user_prompt(body.user_question, body.mode, ctx)
     input_tokens = output_tokens = 0
-    async for text, in_tok, out_tok in _call_claude_stream(user_prompt):
+    async for text, in_tok, out_tok in get_llm_stream(user_prompt):
         if text:
             yield format_sse("token", {"text": text})
         if in_tok:
