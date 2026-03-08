@@ -54,7 +54,7 @@ export function CareerCenterExport({ sessionId, token }: CareerCenterExportProps
         <Button
           onClick={handleDownload}
           disabled={generating}
-          className="gap-2"
+          className="gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/90"
           aria-label={generating ? "Generating PDF, please wait" : "Career Center PDF"}
         >
           {generating ? (

@@ -9,6 +9,7 @@ from httpx import ASGITransport, AsyncClient
 from app.ai.client import build_fallback_narrative, generate_narrative
 from app.ai.types import PlanNarrative
 from app.main import app
+from app.modules.matching.types import ReEntryPlan
 from app.routes.plan import _rate_limiter
 
 
@@ -522,3 +523,140 @@ class TestCareerCenterEndpoint:
         assert resp.status_code == 200
         data = resp.json()
         assert data["credit_pathway"] is None
+
+
+# --- POST /api/plan/{session_id}/refresh ---
+
+_GENERATE_PLAN_PATCH = "app.routes.plan.generate_plan"
+
+
+def _seed_session_with_profile(session_id=_VALID_UUID, with_plan=True):
+    """Session row with stored profile for refresh tests."""
+    profile = {
+        "session_id": session_id,
+        "zip_code": "36104",
+        "employment_status": "unemployed",
+        "barrier_count": 1,
+        "primary_barriers": ["credit"],
+        "barrier_severity": "low",
+        "needs_credit_assessment": True,
+        "transit_dependent": False,
+        "schedule_type": "daytime",
+        "work_history": "Former CNA",
+        "target_industries": [],
+    }
+    plan = {
+        "plan_id": "p-old",
+        "session_id": session_id,
+        "barriers": [],
+        "job_matches": [],
+        "immediate_next_steps": ["Old step"],
+        "strong_matches": [],
+        "possible_matches": [],
+        "eligible_now": [],
+        "eligible_after_repair": [],
+    }
+    return {
+        "id": session_id,
+        "created_at": "2026-03-05T12:00:00+00:00",
+        "barriers": json.dumps(["credit"]),
+        "credit_profile": None,
+        "qualifications": "Former CNA",
+        "plan": json.dumps(plan) if with_plan else None,
+        "profile": json.dumps(profile),
+        "expires_at": "2026-03-06T12:00:00+00:00",
+    }
+
+
+def _mock_reentry_plan(session_id=_VALID_UUID):
+    """Build a mock ReEntryPlan for generate_plan return."""
+    return ReEntryPlan(
+        plan_id="p-new",
+        session_id=session_id,
+        barriers=[],
+        job_matches=[],
+        immediate_next_steps=["New step"],
+        strong_matches=[],
+        possible_matches=[],
+        eligible_now=[],
+        eligible_after_repair=[],
+    )
+
+
+class TestRefreshPlan:
+    @pytest.mark.asyncio
+    async def test_refresh_regenerates_plan(self):
+        """Refresh re-runs generate_plan and stores updated plan."""
+        row = _seed_session_with_profile()
+        new_plan = _mock_reentry_plan()
+        with (
+            patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row),
+            patch(_GENERATE_PLAN_PATCH, new_callable=AsyncMock, return_value=new_plan),
+            patch(_UPDATE_SESSION_PATCH, new_callable=AsyncMock) as mock_update,
+        ):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.post(f"/api/plan/{_VALID_UUID}/refresh{_token_query(_VALID_UUID)}")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["plan"]["plan_id"] == "p-new"
+        assert data["plan"]["immediate_next_steps"] == ["New step"]
+        mock_update.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_refresh_404_missing_session(self):
+        """Returns 404 for unknown session."""
+        with patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=None):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.post(f"/api/plan/{_MISSING_UUID}/refresh{_token_query(_MISSING_UUID)}")
+        assert resp.status_code == 404
+
+    @pytest.mark.asyncio
+    async def test_refresh_400_no_profile(self):
+        """Returns 400 when session has no stored profile."""
+        row = _seed_session_with_profile()
+        row["profile"] = None
+        with patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.post(f"/api/plan/{_VALID_UUID}/refresh{_token_query(_VALID_UUID)}")
+        assert resp.status_code == 400
+
+    @pytest.mark.asyncio
+    async def test_refresh_passes_credit_result(self):
+        """Refresh passes stored credit result to generate_plan."""
+        row = _seed_session_with_profile()
+        credit = {"barrier_severity": "high", "readiness": {"score": 45}}
+        row["credit_profile"] = json.dumps(credit)
+        new_plan = _mock_reentry_plan()
+        with (
+            patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row),
+            patch(_GENERATE_PLAN_PATCH, new_callable=AsyncMock, return_value=new_plan) as mock_gen,
+            patch(_UPDATE_SESSION_PATCH, new_callable=AsyncMock),
+        ):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.post(f"/api/plan/{_VALID_UUID}/refresh{_token_query(_VALID_UUID)}")
+        assert resp.status_code == 200
+        call_kwargs = mock_gen.call_args
+        assert call_kwargs.kwargs.get("credit_result") == credit
+
+    @pytest.mark.asyncio
+    async def test_refresh_returns_updated_response(self):
+        """Refresh returns full plan response like GET /plan."""
+        row = _seed_session_with_profile()
+        new_plan = _mock_reentry_plan()
+        with (
+            patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row),
+            patch(_GENERATE_PLAN_PATCH, new_callable=AsyncMock, return_value=new_plan),
+            patch(_UPDATE_SESSION_PATCH, new_callable=AsyncMock),
+        ):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.post(f"/api/plan/{_VALID_UUID}/refresh{_token_query(_VALID_UUID)}")
+        data = resp.json()
+        assert data["session_id"] == _VALID_UUID
+        assert data["barriers"] == ["credit"]
+        assert "plan" in data
+        assert "credit_profile" in data

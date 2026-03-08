@@ -104,29 +104,6 @@ class TestGeneratePlanWithMatchJobs:
         assert plan.possible_matches == []
 
     @pytest.mark.asyncio
-    async def test_next_steps_reference_top_match(self):
-        """_build_next_steps should mention top strong match when available."""
-        profile = _make_profile(
-            primary_barriers=[BarrierType.TRANSPORTATION],
-            barrier_severity=BarrierSeverity.LOW,
-        )
-        mock_session = AsyncMock()
-
-        strong = [ScoredJobMatch(
-            title="CNA", company="Baptist Health", relevance_score=0.85,
-            match_reason="Matches your CNA experience", bucket=MatchBucket.STRONG,
-        )]
-
-        with (
-            patch(_QUERY_PATCH, return_value=[]),
-            patch(_MATCH_PATCH, new_callable=AsyncMock, return_value=(strong, [], [])),
-        ):
-            plan = await generate_plan(profile, mock_session)
-
-        steps_text = " ".join(plan.immediate_next_steps)
-        assert "CNA" in steps_text or "Baptist" in steps_text or "position" in steps_text
-
-    @pytest.mark.asyncio
     async def test_job_matches_computed_from_buckets(self):
         """plan.job_matches is computed from strong + possible + after_repair."""
         profile = _make_profile()

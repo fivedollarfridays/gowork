@@ -1,4 +1,4 @@
-"""GET/POST /api/plan — session plan lookup, AI narrative, and career center package."""
+"""GET/POST /api/plan — session plan lookup, AI narrative, and plan refresh."""
 
 import json
 import logging
@@ -11,19 +11,10 @@ from app.ai.client import build_fallback_narrative, generate_narrative
 from app.core.audit import audit_log, get_client_ip
 from app.core.auth import require_session_token
 from app.core.database import get_db
-from app.core.rate_limit import RateLimiter, require_rate_limit
 from app.core.queries import get_session_by_id, update_session_plan
-from app.modules.credit.types import CreditAssessmentResult
-from app.modules.matching.career_center_package import assemble_package
-from app.modules.matching.types import (
-    AvailableHours,
-    BarrierType,
-    EmploymentStatus,
-    ReEntryPlan,
-    UserProfile,
-    determine_severity,
-)
-from app.modules.matching.wioa_screener import screen_wioa_eligibility
+from app.core.rate_limit import RateLimiter, require_rate_limit
+from app.modules.matching.engine import generate_plan
+from app.modules.matching.types import UserProfile
 
 logger = logging.getLogger(__name__)
 
@@ -114,62 +105,41 @@ async def generate_plan_narrative(
     return narrative.model_dump()
 
 
-@router.get("/{session_id}/career-center")
-async def get_career_center_package(
+@router.post("/{session_id}/refresh")
+async def refresh_plan(
     session_id: SessionId,
+    request: Request,
     token: str = Query(...),
     db: AsyncSession = Depends(get_db),
+    _: None = Depends(_check_rate),
 ) -> dict:
-    """Build and return a Career Center Ready Package for this session."""
+    """Re-run the matching pipeline with stored profile data."""
     row = await _fetch_session(db, session_id, token)
-    if not row["plan"]:
-        raise HTTPException(status_code=404, detail="No plan for session")
 
-    barrier_names = _safe_json(row["barriers"], [])
-    plan_data = _safe_json(row["plan"])
+    profile_json = row.get("profile")
+    if not profile_json:
+        raise HTTPException(status_code=400, detail="No profile stored. Re-run the assessment.")
 
-    valid_values = {bt.value for bt in BarrierType}
-    barrier_types = [BarrierType(b) for b in barrier_names if b in valid_values]
+    try:
+        profile = UserProfile(**json.loads(profile_json))
+    except (json.JSONDecodeError, ValueError):
+        raise HTTPException(status_code=400, detail="Stored profile is corrupt. Re-run the assessment.")
 
-    if row.get("profile"):
-        try:
-            profile = UserProfile(**json.loads(row["profile"]))
-        except (json.JSONDecodeError, ValueError):
-            profile = _build_profile_from_session(session_id, barrier_types, row)
-    else:
-        profile = _build_profile_from_session(session_id, barrier_types, row)
+    credit_result = _safe_json(row.get("credit_profile"))
 
-    plan = ReEntryPlan(**plan_data)
-    wioa = plan.wioa_eligibility or screen_wioa_eligibility(profile)
-
-    credit_result = None
-    if row.get("credit_profile"):
-        try:
-            credit_result = CreditAssessmentResult(**json.loads(row["credit_profile"]))
-        except (json.JSONDecodeError, ValueError):
-            logger.warning("Invalid credit profile data for %s", session_id)
-
-    package = assemble_package(profile, plan, wioa, credit_result)
-    return package.model_dump()
-
-
-def _build_profile_from_session(
-    session_id: str,
-    barriers: list[BarrierType],
-    row: dict,
-) -> UserProfile:
-    """Reconstruct a UserProfile from stored session data (fallback defaults)."""
-    logger.warning("Using fallback profile for session %s (stored profile missing/corrupt)", session_id)
-    return UserProfile(
-        session_id=session_id,
-        zip_code="36104",
-        employment_status=EmploymentStatus.UNEMPLOYED,
-        barrier_count=len(barriers),
-        primary_barriers=barriers,
-        barrier_severity=determine_severity(len(barriers)),
-        needs_credit_assessment=BarrierType.CREDIT in barriers,
-        transit_dependent=BarrierType.TRANSPORTATION in barriers,
-        schedule_type=AvailableHours.DAYTIME,
-        work_history=row.get("qualifications", ""),
-        target_industries=[],
+    new_plan = await generate_plan(
+        profile, db,
+        resume_text=row.get("qualifications", ""),
+        credit_result=credit_result,
     )
+    await update_session_plan(db, session_id, json.dumps(new_plan.model_dump()))
+
+    audit_log("plan_refreshed", session_id=session_id, client_ip=get_client_ip(request))
+
+    return {
+        "session_id": session_id,
+        "barriers": _safe_json(row["barriers"], []),
+        "qualifications": row.get("qualifications"),
+        "plan": new_plan.model_dump(),
+        "credit_profile": credit_result,
+    }

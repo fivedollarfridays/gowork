@@ -3,44 +3,19 @@
 import { useMemo, type ReactNode } from "react";
 import { ExternalLink, MapPin, Phone } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import type { JobMatch, ReEntryPlan, UserProfile } from "@/lib/types";
+import type { ReEntryPlan, UserProfile } from "@/lib/types";
 import { CAREER_CENTER, mapsUrl, safeHref } from "@/lib/constants";
-
-interface JobLink {
-  title: string;
-  company: string | null;
-  url: string | null;
-}
 
 interface ActionStep {
   title: string;
   location?: string;
   phone?: string;
   url?: string;
-  jobs?: JobLink[];
 }
 
 function getNextActionableDay(): string {
   const day = new Date().getDay();
   return day === 5 || day === 6 ? "Monday morning" : "tomorrow morning";
-}
-
-function collectJobs(plan: ReEntryPlan): JobLink[] {
-  // Prefer bucketed arrays; fall back to job_matches only if buckets are empty
-  const hasBuckets = (plan.strong_matches?.length ?? 0) + (plan.possible_matches?.length ?? 0) > 0;
-  const source: JobMatch[] = hasBuckets
-    ? [...(plan.strong_matches ?? []), ...(plan.possible_matches ?? [])]
-    : plan.job_matches.filter((j) => j.eligible_now);
-  const seen = new Set<string>();
-  const jobs: JobLink[] = [];
-  for (const j of source) {
-    const key = `${j.title}|${j.company}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    jobs.push({ title: j.title, company: j.company, url: j.url });
-    if (jobs.length >= 5) break;
-  }
-  return jobs;
 }
 
 function buildSteps(plan: ReEntryPlan): ActionStep[] {
@@ -69,15 +44,7 @@ function buildSteps(plan: ReEntryPlan): ActionStep[] {
     });
   }
 
-  const jobs = collectJobs(plan);
-  if (jobs.length > 0) {
-    steps.push({
-      title: `${jobs.length} matched position${jobs.length > 1 ? "s" : ""}`,
-      jobs,
-    });
-  }
-
-  return steps.slice(0, 5);
+  return steps.slice(0, 3);
 }
 
 interface MondayMorningProps {
@@ -107,7 +74,7 @@ export function MondayMorning({ plan, profile, firstStepAction }: MondayMorningP
         <h2 className="text-xl font-semibold text-primary mb-4">Your Next Steps</h2>
         <div className="flex flex-wrap justify-center gap-3">
           {steps.map((step, i) => (
-            <Card key={i} className="group flex flex-col w-full sm:w-[calc(50%-0.375rem)] lg:w-[calc(33.333%-0.5rem)]">
+            <Card key={i} className="group flex flex-col w-full sm:w-[calc(50%-0.375rem)] lg:w-[calc(33.333%-0.5rem)] transition-shadow duration-300 ease-in-out hover:shadow-md">
               <CardContent className="p-4 flex flex-col gap-2 flex-1">
                 <div className="flex items-start gap-2">
                   <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground text-xs font-bold mt-0.5">
@@ -117,7 +84,7 @@ export function MondayMorning({ plan, profile, firstStepAction }: MondayMorningP
                 </div>
 
                 {/* Details revealed on hover */}
-                <div className="block sm:max-h-0 sm:overflow-hidden sm:group-hover:max-h-96 sm:group-focus-within:max-h-96 transition-all duration-200 text-xs space-y-1.5 ml-8">
+                <div className="block sm:max-h-0 sm:overflow-hidden sm:group-hover:max-h-96 sm:group-focus-within:max-h-96 transition-[max-height,opacity] duration-300 ease-in-out sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 text-xs space-y-1.5 ml-8">
                   {step.phone && (
                     <a href={`tel:${step.phone}`} className="flex items-center gap-1 text-secondary hover:underline">
                       <Phone className="h-3 w-3" />
@@ -140,20 +107,6 @@ export function MondayMorning({ plan, profile, firstStepAction }: MondayMorningP
                       <ExternalLink className="h-3 w-3" />
                       Website
                     </a>
-                  )}
-                  {step.jobs && step.jobs.length > 0 && (
-                    <ul className="space-y-1">
-                      {step.jobs.map((job, j) => (
-                        <li key={j}>
-                          <a
-                            href="#matched-jobs"
-                            className="text-secondary hover:underline"
-                          >
-                            {job.title}{job.company ? ` at ${job.company}` : ""}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
                   )}
                 </div>
 
