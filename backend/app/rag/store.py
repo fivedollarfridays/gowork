@@ -4,10 +4,12 @@ import logging
 from pathlib import Path
 
 import faiss
+import numpy as np
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.rag.corpus_builder import build_corpus
-from app.rag.ingestion import build_index, load_index, save_index
+from app.rag.document_schema import RagDocument
+from app.rag.ingestion import _get_model, build_index, load_index, save_index
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +46,33 @@ class RagStore:
         docs = await build_corpus(db)
         self.index, self.metadata = build_index(docs)
         save_index(self.index, self.metadata, self.index_dir)
+
+    def search(
+        self,
+        query: str,
+        barrier_filter: list[str] | None = None,
+        k: int = 8,
+    ) -> list[RagDocument]:
+        """Embed query, search FAISS, post-filter by barrier_tags overlap."""
+        if self.index is None or self.index.ntotal == 0:
+            return []
+        model = _get_model()
+        vec = model.encode([query], convert_to_numpy=True, normalize_embeddings=True)
+        vec = vec.astype(np.float32)
+        fetch_k = k * 2 if barrier_filter else k
+        fetch_k = min(fetch_k, self.index.ntotal)
+        _, indices = self.index.search(vec, fetch_k)
+        results: list[RagDocument] = []
+        for idx in indices[0]:
+            if idx < 0 or idx >= len(self.metadata):
+                continue
+            m = self.metadata[idx]
+            if barrier_filter and not set(m["barrier_tags"]) & set(barrier_filter):
+                continue
+            results.append(RagDocument(**m, text=""))
+            if len(results) >= k:
+                break
+        return results
 
     async def rebuild(self, db: AsyncSession) -> None:
         """Force rebuild of the index from DB, overwriting any cached files."""

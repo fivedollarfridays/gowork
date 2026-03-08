@@ -20,3 +20,13 @@ class RagDocument(BaseModel):
         if not v:
             raise ValueError("barrier_tags must not be empty")
         return v
+
+
+class RetrievalContext(BaseModel):
+    root_barriers: list[str]
+    barrier_chain_summary: str
+    top_resources: list[dict]
+    retrieved_docs: list[RagDocument]
+    user_zip: str
+    user_schedule: str | None = None
+    retrieval_latency_ms: float

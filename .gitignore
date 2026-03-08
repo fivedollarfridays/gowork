@@ -25,3 +25,5 @@ tsconfig.tsbuildinfo
 # docs internal
 docs/internal
 *.faiss
+*.faiss
+data/rag_index/metadata.json
