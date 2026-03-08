@@ -1,16 +1,16 @@
 "use client";
 
-import { useMemo, useState, useCallback, useRef } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { ClipboardList, ListChecks, Clock, CreditCard, FileText, Loader2, Upload, Briefcase } from "lucide-react";
+import { ClipboardList, ListChecks, Clock, CreditCard, FileText, Upload, Briefcase } from "lucide-react";
 import { postAssessment, postCredit } from "@/lib/api";
 import { WizardShell, type WizardStepConfig } from "@/components/wizard/WizardShell";
 import { BarrierForm, type BarrierFormData } from "@/components/wizard/BarrierForm";
 import { CreditForm, creditFormCanAdvance, ACCOUNT_AGE_RANGES } from "@/components/wizard/CreditForm";
 import { ResumeStep } from "@/components/wizard/ResumeStep";
 import { IndustryForm } from "@/components/wizard/IndustryForm";
-import { Badge } from "@/components/ui/badge";
+import { ReviewStep } from "./ReviewStep";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -22,21 +22,29 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { AvailableHours, BarrierType } from "@/lib/types";
 import type { AssessmentRequest, CreditAssessmentResult, CreditFormData, EmploymentStatus } from "@/lib/types";
-import { EMPLOYMENT_OPTIONS, isValidMontgomeryZip, humanizeLabel } from "@/lib/constants";
+import { EMPLOYMENT_OPTIONS, isValidMontgomeryZip } from "@/lib/constants";
+import { useDemoMode } from "@/hooks/useDemoMode";
+
+const DEFAULT_FORM_DATA: BarrierFormData = {
+  zipCode: "",
+  employment: "unemployed",
+  barriers: Object.fromEntries(
+    Object.values(BarrierType).map(k => [k, false])
+  ) as Record<BarrierType, boolean>,
+  workHistory: "",
+  hasVehicle: false,
+  availableHours: AvailableHours.DAYTIME,
+};
 
 export default function AssessPage() {
   const router = useRouter();
+  const demoData = useDemoMode();
 
-  const [formData, setFormData] = useState<BarrierFormData>({
-    zipCode: "",
-    employment: "unemployed",
-    barriers: Object.fromEntries(
-      Object.values(BarrierType).map(k => [k, false])
-    ) as Record<BarrierType, boolean>,
-    workHistory: "",
-    hasVehicle: false,
-    availableHours: AvailableHours.DAYTIME,
-  });
+  const [formData, setFormData] = useState<BarrierFormData>(DEFAULT_FORM_DATA);
+
+  useEffect(() => {
+    if (demoData) setFormData(demoData);
+  }, [demoData]);
   const [resumeText, setResumeText] = useState("");
   const [targetIndustries, setTargetIndustries] = useState<string[]>([]);
   const [certifications, setCertifications] = useState<string[]>([]);
@@ -97,7 +105,7 @@ export default function AssessPage() {
         });
         setCreditResult(result);
         creditResultRef.current = result;
-      } catch (err) {
+      } catch {
         setError("Credit check could not be completed. Continuing without credit data.");
       }
     }
@@ -294,107 +302,19 @@ export default function AssessPage() {
       icon: <FileText className="h-4 w-4" />,
       canAdvance: () => (formData.workHistory.trim().length > 0 || hasResume) && !mutation.isPending,
       content: () => (
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-lg font-semibold mb-1">Review & Submit</h2>
-            <p className="text-sm text-muted-foreground">
-              Add your work history and review your information before submitting.
-            </p>
-          </div>
-
-          {hasResume ? (
-            <div className="rounded-lg border p-4 bg-muted/30 space-y-2">
-              <div className="flex justify-between items-center">
-                <h3 className="text-sm font-medium">Resume Uploaded</h3>
-                <Badge variant="secondary" className="text-xs">
-                  {resumeWordCount} words extracted
-                </Badge>
-              </div>
-              {!formData.workHistory.trim() ? (
-                <p className="text-xs text-muted-foreground">Your resume will be used for job matching.</p>
-              ) : (
-                <p className="text-xs text-muted-foreground">Your resume and work history will both be used.</p>
-              )}
-            </div>
-          ) : null}
-
-          <div className="space-y-2">
-            <label htmlFor="work-history" className="text-sm font-medium">
-              Work History {hasResume ? "(optional, resume uploaded)" : ""}
-            </label>
-            <textarea
-              id="work-history"
-              value={formData.workHistory}
-              onChange={(e) => setFormData({ ...formData, workHistory: e.target.value })}
-              placeholder={hasResume
-                ? "Add anything not covered in your resume..."
-                : "Describe your work experience, certifications, or skills..."}
-              maxLength={500}
-              rows={hasResume ? 2 : 4}
-              className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            />
-            <p className="text-xs text-muted-foreground text-right">{formData.workHistory.length}/500</p>
-          </div>
-
-          <div className="rounded-lg border p-4 bg-muted/30 space-y-2">
-            <h3 className="text-sm font-medium">Your Assessment Summary</h3>
-            <div className="grid gap-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">ZIP Code</span>
-                <span className="font-medium">{formData.zipCode}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Employment</span>
-                <span className="font-medium capitalize">{humanizeLabel(formData.employment)}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Barriers</span>
-                <div className="flex gap-1 flex-wrap justify-end">
-                  {Object.entries(formData.barriers)
-                    .filter(([, v]) => v)
-                    .map(([k]) => (
-                      <Badge key={k} variant="secondary" className="text-xs capitalize">
-                        {humanizeLabel(k)}
-                      </Badge>
-                    ))}
-                </div>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Vehicle</span>
-                <span className="font-medium">{formData.hasVehicle ? "Yes" : "No"}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Schedule</span>
-                <span className="font-medium capitalize">{humanizeLabel(formData.availableHours)}</span>
-              </div>
-              {hasResume && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Resume</span>
-                  <span className="font-medium">Uploaded</span>
-                </div>
-              )}
-              {hasCreditBarrier && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Credit Score</span>
-                  <span className="font-medium">{creditData.currentScore}</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {mutation.isPending && (
-            <div aria-live="polite" className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Analyzing your profile and matching resources...
-            </div>
-          )}
-          {error && (
-            <p role="alert" className="text-sm text-destructive">{error}</p>
-          )}
-        </div>
+        <ReviewStep
+          formData={formData}
+          hasResume={hasResume}
+          resumeWordCount={resumeWordCount}
+          creditData={creditData}
+          hasCreditBarrier={hasCreditBarrier}
+          isPending={mutation.isPending}
+          error={error}
+          onWorkHistoryChange={(v) => setFormData({ ...formData, workHistory: v })}
+        />
       ),
     },
-  ], [formData, creditData, zipValid, barrierCount, hasCreditBarrier, mutation.isPending, error, resumeText, targetIndustries, certifications]);
+  ], [formData, creditData, zipValid, barrierCount, hasCreditBarrier, mutation.isPending, error, resumeText, resumeWordCount, targetIndustries, certifications, hasResume]);
 
   return (
     <main className="min-h-screen px-4 py-8 sm:px-8">

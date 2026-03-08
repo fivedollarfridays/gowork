@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ChevronDown,
   ChevronUp,
@@ -17,6 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import type { CreditAssessmentResult } from "@/lib/types";
 import { SEVERITY_BADGE_STYLES, STATUS_BADGE_STYLES, daysToMonths } from "@/lib/constants";
+import { ScrollReveal, SlideIn } from "@/lib/motion";
 
 interface CreditResultsProps {
   result: CreditAssessmentResult;
@@ -47,39 +48,55 @@ function factorWeight(key: string): string {
 export function CreditResults({ result }: CreditResultsProps) {
   const [showDispute, setShowDispute] = useState(false);
   const [showEligibility, setShowEligibility] = useState(false);
+  const [animatedFactors, setAnimatedFactors] = useState<Record<string, number>>({});
   const { readiness, thresholds, dispute_pathway, eligibility } = result;
   const badgeStyle = SEVERITY_BADGE_STYLES[result.barrier_severity as keyof typeof SEVERITY_BADGE_STYLES] ?? SEVERITY_BADGE_STYLES.low;
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const factors: Record<string, number> = {};
+      for (const [key, value] of Object.entries(readiness.factors)) {
+        factors[key] = value * 100;
+      }
+      setAnimatedFactors(factors);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [readiness.factors]);
 
   return (
     <Card>
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted">
-              <CreditCard className="h-5 w-5 text-foreground/70" />
+        <SlideIn direction="left">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted">
+                <CreditCard className="h-5 w-5 text-foreground/70" />
+              </div>
+              <div>
+                <CardTitle className="text-base">Credit Assessment</CardTitle>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Score: {readiness.score_band.replace(/_/g, " ")}
+                </p>
+              </div>
             </div>
-            <div>
-              <CardTitle className="text-base">Credit Assessment</CardTitle>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Score: {readiness.score_band.replace(/_/g, " ")}
-              </p>
-            </div>
+            <Badge className={cn("capitalize", badgeStyle)} variant="outline">
+              {result.barrier_severity}
+            </Badge>
           </div>
-          <Badge className={cn("capitalize", badgeStyle)} variant="outline">
-            {result.barrier_severity}
-          </Badge>
-        </div>
+        </SlideIn>
       </CardHeader>
 
       <CardContent className="space-y-5">
         {/* Readiness Score */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="font-medium">Credit Readiness</span>
-            <span className="font-semibold">{readiness.score}/100</span>
+        <ScrollReveal>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-medium">Credit Readiness</span>
+              <span className="font-semibold">{readiness.score}/100</span>
+            </div>
+            <Progress value={readiness.score} className="h-2" />
           </div>
-          <Progress value={readiness.score} className="h-2" />
-        </div>
+        </ScrollReveal>
 
         {/* Key Factors */}
         <div className="space-y-3">
@@ -93,7 +110,7 @@ export function CreditResults({ result }: CreditResultsProps) {
                   </span>
                   <span className="font-medium">{Math.round(value * 100)}%</span>
                 </div>
-                <Progress value={value * 100} className="h-1.5" />
+                <Progress value={animatedFactors[key] ?? 0} className="h-1.5" />
               </div>
             ))}
           </div>

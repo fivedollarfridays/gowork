@@ -1,9 +1,11 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { getPlan } from "@/lib/api";
+import { useReducedMotion } from "framer-motion";
+import { ScrollReveal, ShimmerBar } from "@/lib/motion";
 import { Clock, Loader2, MapPin, Phone, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -47,15 +49,15 @@ function buildProfileFromPlan(sessionId: string, barriers: string[]): UserProfil
 
 function PlanSkeleton() {
   return (
-    <div className="space-y-6 animate-pulse" aria-busy="true" aria-label="Loading your plan">
-      <div className="h-10 w-3/4 bg-muted rounded" />
-      <div className="h-5 w-1/2 bg-muted rounded" />
-      <div className="h-40 bg-muted rounded-xl" />
+    <div className="space-y-6" aria-busy="true" aria-label="Loading your plan">
+      <ShimmerBar height="2.5rem" width="75%" />
+      <ShimmerBar height="1.25rem" width="50%" />
+      <ShimmerBar height="10rem" />
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="h-32 bg-muted rounded-xl" />
-        <div className="h-32 bg-muted rounded-xl" />
+        <ShimmerBar height="8rem" />
+        <ShimmerBar height="8rem" />
       </div>
-      <div className="h-48 bg-muted rounded-xl" />
+      <ShimmerBar height="12rem" />
     </div>
   );
 }
@@ -125,6 +127,23 @@ function PlanContent() {
     [data],
   );
 
+  const prefersReduced = useReducedMotion();
+  const hasFiredConfetti = useRef(false);
+  useEffect(() => {
+    if (data && !hasFiredConfetti.current && !prefersReduced) {
+      hasFiredConfetti.current = true;
+      import("canvas-confetti").then((mod) => {
+        mod.default({
+          particleCount: 60,
+          spread: 50,
+          origin: { y: 0.7 },
+          disableForReducedMotion: true,
+          colors: ["#1e3a5f", "#2d9596", "#d4a843"],
+        });
+      });
+    }
+  }, [data, prefersReduced]);
+
   if (!sessionReady || !tokenReady || isLoading) return <PlanSkeleton />;
 
   if (!sessionId || !token) {
@@ -168,17 +187,20 @@ function PlanContent() {
   return (
     <div className="space-y-10">
       {/* Monday Morning hero */}
-      <MondayMorning
-        plan={plan}
-        profile={profile}
-        firstStepAction={
-          <CareerCenterExport sessionId={sessionId} token={token ?? undefined} />
-        }
-      />
+      <ScrollReveal>
+        <MondayMorning
+          plan={plan}
+          profile={profile}
+          firstStepAction={
+            <CareerCenterExport sessionId={sessionId} token={token ?? undefined} />
+          }
+        />
+      </ScrollReveal>
 
       <Separator />
 
       {/* Job matches — three-bucket display */}
+      <ScrollReveal>
       <section id="matched-jobs" className="space-y-6 scroll-mt-8">
         {(plan.strong_matches?.length ?? 0) > 0 || (plan.possible_matches?.length ?? 0) > 0 || (plan.after_repair?.length ?? 0) > 0 ? (
           <>
@@ -215,24 +237,29 @@ function PlanContent() {
           />
         )}
       </section>
+      </ScrollReveal>
 
       <Separator />
 
       {/* Comparison view */}
-      <ComparisonView plan={plan} profile={profile} creditResult={creditResult} />
+      <ScrollReveal>
+        <ComparisonView plan={plan} profile={profile} creditResult={creditResult} />
+      </ScrollReveal>
 
       {/* Barrier cards */}
       {plan.barriers.length > 0 && (
         <>
           <Separator />
-          <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-primary">Your Barriers</h2>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {plan.barriers.map((barrier) => (
-                <BarrierCardView key={barrier.type} barrier={barrier} sessionId={sessionId ?? undefined} token={token ?? undefined} />
-              ))}
-            </div>
-          </section>
+          <ScrollReveal>
+            <section className="space-y-4">
+              <h2 className="text-xl font-semibold text-primary">Your Barriers</h2>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {plan.barriers.map((barrier) => (
+                  <BarrierCardView key={barrier.type} barrier={barrier} sessionId={sessionId ?? undefined} token={token ?? undefined} />
+                ))}
+              </div>
+            </section>
+          </ScrollReveal>
         </>
       )}
 
@@ -240,10 +267,12 @@ function PlanContent() {
       {creditResult && (
         <>
           <Separator />
-          <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-primary">Credit Assessment</h2>
-            <CreditResults result={creditResult} />
-          </section>
+          <ScrollReveal>
+            <section className="space-y-4">
+              <h2 className="text-xl font-semibold text-primary">Credit Assessment</h2>
+              <CreditResults result={creditResult} />
+            </section>
+          </ScrollReveal>
         </>
       )}
 
@@ -251,15 +280,18 @@ function PlanContent() {
       {plan.job_readiness && (
         <>
           <Separator />
-          <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-primary">Job Readiness</h2>
-            <JobReadinessResults result={plan.job_readiness} />
-          </section>
+          <ScrollReveal>
+            <section className="space-y-4">
+              <h2 className="text-xl font-semibold text-primary">Job Readiness</h2>
+              <JobReadinessResults result={plan.job_readiness} />
+            </section>
+          </ScrollReveal>
         </>
       )}
 
       {/* What's Next CTA */}
       <Separator />
+      <ScrollReveal>
       <Card className="border-secondary/30 bg-secondary/5">
         <CardHeader>
           <CardTitle className="text-xl">What&apos;s Next?</CardTitle>
@@ -304,6 +336,7 @@ function PlanContent() {
           </div>
         </CardContent>
       </Card>
+      </ScrollReveal>
 
     </div>
   );

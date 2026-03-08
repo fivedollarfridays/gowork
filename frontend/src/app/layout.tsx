@@ -1,8 +1,12 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { Providers } from '@/lib/providers';
+import { MotionProvider } from '@/lib/motion';
+import { SmoothScroll } from '@/components/SmoothScroll';
+import { ScrollProgress } from '@/components/ScrollProgress';
 import { Header } from '@/components/layout/Header';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { ViewTransitionsProvider } from '@/components/ViewTransitionsProvider';
 import './globals.css';
 
 const inter = Inter({
@@ -27,10 +31,17 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
         <Providers>
-          <Header />
-          <ErrorBoundary>
-            {children}
-          </ErrorBoundary>
+          <MotionProvider>
+            <SmoothScroll>
+              <ScrollProgress />
+              <ViewTransitionsProvider>
+                <Header />
+                <ErrorBoundary>
+                  {children}
+                </ErrorBoundary>
+              </ViewTransitionsProvider>
+            </SmoothScroll>
+          </MotionProvider>
         </Providers>
       </body>
     </html>

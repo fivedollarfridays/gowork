@@ -14,6 +14,8 @@ vi.mock("@/lib/api", () => ({
   getJobs: vi.fn().mockResolvedValue({ jobs: [], total: 0 }),
 }));
 
+vi.mock("canvas-confetti", () => ({ default: vi.fn() }));
+
 const MOCK_PLAN_RESPONSE = {
   session_id: "sess-credit-test",
   barriers: ["credit"],

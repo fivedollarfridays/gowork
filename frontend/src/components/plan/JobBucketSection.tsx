@@ -1,4 +1,5 @@
 import { JobMatchCard } from "./JobMatchCard";
+import { StaggerContainer, StaggerItem } from "@/lib/motion";
 import type { ScoredJobMatch } from "@/lib/types";
 
 interface JobBucketSectionProps {
@@ -16,11 +17,13 @@ export function JobBucketSection({ title, jobs, description }: JobBucketSectionP
       {description && (
         <p className="text-sm text-muted-foreground">{description}</p>
       )}
-      <div className="grid gap-4 sm:grid-cols-2">
+      <StaggerContainer className="grid gap-4 sm:grid-cols-2">
         {jobs.map((job, i) => (
-          <JobMatchCard key={`${job.bucket}-${job.title}-${job.company}-${i}`} job={job} />
+          <StaggerItem key={`${job.bucket}-${job.title}-${job.company}-${i}`}>
+            <JobMatchCard job={job} />
+          </StaggerItem>
         ))}
-      </div>
+      </StaggerContainer>
     </div>
   );
 }

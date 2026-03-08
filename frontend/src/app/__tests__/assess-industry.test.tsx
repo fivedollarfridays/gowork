@@ -6,6 +6,7 @@ import AssessPage from "../assess/page";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
+  useSearchParams: () => ({ get: () => null }),
 }));
 
 vi.mock("@/lib/api", () => ({
