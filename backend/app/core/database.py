@@ -120,6 +120,30 @@ CREATE TABLE IF NOT EXISTS resource_feedback (
     submitted_at TEXT NOT NULL,
     UNIQUE(resource_id, session_id)
 );
+CREATE TABLE IF NOT EXISTS barriers (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    category TEXT NOT NULL,
+    description TEXT,
+    playbook TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS barrier_relationships (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    source_barrier_id TEXT NOT NULL REFERENCES barriers(id),
+    target_barrier_id TEXT NOT NULL REFERENCES barriers(id),
+    relationship_type TEXT NOT NULL,
+    weight REAL DEFAULT 1.0,
+    UNIQUE(source_barrier_id, target_barrier_id, relationship_type)
+);
+CREATE TABLE IF NOT EXISTS barrier_resources (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    barrier_id TEXT NOT NULL REFERENCES barriers(id),
+    resource_id INTEGER NOT NULL,
+    impact_strength REAL NOT NULL,
+    notes TEXT,
+    UNIQUE(barrier_id, resource_id)
+);
 """
 
 ALLOWED_COLUMNS = {
@@ -134,6 +158,11 @@ ALLOWED_COLUMNS = {
         "title", "company", "location", "description", "url",
         "source", "scraped_at", "expires_at", "credit_check",
     },
+    "barriers": {"id", "name", "category", "description", "playbook"},
+    "barrier_relationships": {
+        "source_barrier_id", "target_barrier_id", "relationship_type", "weight",
+    },
+    "barrier_resources": {"barrier_id", "resource_id", "impact_strength", "notes"},
 }
 
 JSON_FIELDS = {"services"}

@@ -9,7 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from app.core.config import get_settings
-from app.core.database import close_db, get_engine, init_db
+from app.barrier_graph.seed import upsert_barrier_graph
+from app.core.database import close_db, get_async_session_factory, get_engine, init_db
 from app.core.exception_handlers import register_exception_handlers
 from app.routes import all_routers
 
@@ -35,6 +36,9 @@ async def lifespan(app: FastAPI):
         )
     engine = get_engine()
     await init_db(engine)
+    factory = get_async_session_factory()
+    async with factory() as session:
+        await upsert_barrier_graph(session)
     yield
     await close_db()
     logger.info("MontGoWork API shutting down")

@@ -21,3 +21,6 @@ tsconfig.tsbuildinfo
 
 # OS
 .DS_Store
+
+# docs internal
+docs/internal
