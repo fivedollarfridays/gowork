@@ -42,6 +42,9 @@ const basePlan: ReEntryPlan = {
       credit_check_required: "no",
       eligible_now: true,
       eligible_after: null,
+      relevance_score: 0.85,
+      match_reason: "Industry match",
+      bucket: "strong" as const,
     },
     {
       title: "Bank Teller",
@@ -54,6 +57,9 @@ const basePlan: ReEntryPlan = {
       credit_check_required: "yes",
       eligible_now: false,
       eligible_after: "Credit score improvement",
+      relevance_score: 0.6,
+      match_reason: "Possible after credit repair",
+      bucket: "after_repair" as const,
     },
   ],
   immediate_next_steps: [
@@ -68,6 +74,7 @@ const basePlan: ReEntryPlan = {
   possible_matches: [],
   after_repair: [],
   wioa_eligibility: null,
+  job_readiness: null,
 };
 
 const baseCreditResult: CreditAssessmentResult = {
