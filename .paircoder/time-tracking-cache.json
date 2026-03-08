@@ -167,10 +167,18 @@
     ],
     "total_seconds": 653.057665
   },
-  "_active": {
-    "task_id": "T24.6",
-    "timer_id": "local-20260308063217",
-    "description": "T24.6: Frontend: BarrierIntelChat + SSE streaming + explainability UI",
-    "start": "2026-03-08T06:32:17.234541"
+  "T24.6": {
+    "entries": [
+      {
+        "id": "local-20260308063217",
+        "task_id": "T24.6",
+        "description": "T24.6: Frontend: BarrierIntelChat + SSE streaming + explainability UI",
+        "start": "2026-03-08T06:32:17.234541",
+        "end": "2026-03-08T07:07:54.524075",
+        "duration_seconds": 2137.289534,
+        "provider_id": null
+      }
+    ],
+    "total_seconds": 2137.289534
   }
 }

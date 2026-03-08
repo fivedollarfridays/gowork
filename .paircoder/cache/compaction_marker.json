@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-03-07T14:50:29.354655",
+  "timestamp": "2026-03-08T06:44:11.287934",
   "trigger": "",
-  "recovered": true,
-  "snapshot_file": "compaction_snapshot_20260307_145029.json"
+  "recovered": false,
+  "snapshot_file": "compaction_snapshot_20260308_064411.json"
 }

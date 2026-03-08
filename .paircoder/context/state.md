@@ -49,10 +49,10 @@ Sprint 23: Barrier Graph + RAG — Barrier Intelligence Assistant. Adds graph-aw
 | T23.3 | RAG knowledge base: document schema + FAISS ingestion pipeline | P0 | 60 | done | T23.1, T23.2 |
 | T23.4 | Hybrid retrieval layer: vector + metadata filter + graph context assembly | P0 | 50 | done | T23.2, T23.3 |
 | T23.5 | LLM orchestration + guardrails: POST /api/barrier-intel/chat + SSE streaming | P0 | 70 | done | T23.4 |
-| T23.6 | Frontend: BarrierIntelChat + SSE streaming + explainability UI | P1 | 70 | pending | T23.5 |
+| T23.6 | Frontend: BarrierIntelChat + SSE streaming + explainability UI | P1 | 70 | done | T23.5 |
 | T23.7 | NFRs: caching, observability, rate limiting + eval suite | P2 | 55 | pending | T23.5, T23.6 |
 
-**Total: 7 tasks, 405 complexity points (5/7 done)**
+**Total: 7 tasks, 405 complexity points (6/7 done)**
 
 ### Sprint 18 -- Security Hardening (GitHub Issue #20)
 
@@ -124,6 +124,10 @@ Sprint 23: Barrier Graph + RAG — Barrier Intelligence Assistant. Adds graph-aw
 **Total: 6 tasks, 125 complexity points (6/6 done)**
 
 ## What Was Just Done
+
+### Sprint 24 T24.6 (2026-03-08) — Frontend BarrierIntelChat
+
+- **T24.6** Frontend barrier intel chat: Created `SuggestedQuestions` (3 default chips), `EvidenceChips` (secondary badge chips), `ChatMessage` (user/assistant bubbles + streaming indicator), `ExplainSteps` (numbered list with collapsible "Why this step?" and Badge barrier tags), `BarrierIntelChat` wrapper (suggested questions, Explain this plan button with mode=explain_plan, error alert). Created `useBarrierIntelStream` hook (SSE reader: context→token→done events, status machine idle/streaming/done/error). Wired into `/plan` page as sticky sidebar (desktop) / inline (mobile) using responsive grid. Fixed vitest ESM compat by switching to `happy-dom`. 19 new tests, 223 total passing. All arch checks clean.
 
 ### Sprint 24 T24.5 (2026-03-08) — LLM Orchestration + SSE Streaming
 
@@ -233,8 +237,8 @@ Sprint 23: Barrier Graph + RAG — Barrier Intelligence Assistant. Adds graph-aw
 
 ## What's Next
 
-1. Start T24.6 (Frontend: BarrierIntelChat + SSE streaming + explainability UI)
-2. Then T24.7 (NFRs: caching, observability, rate limiting + eval suite)
+1. Start T24.7 (NFRs: caching, observability, rate limiting + eval suite)
+2. Commit and push T24.6 changes to repo
 
 
 ## Blockers

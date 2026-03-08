@@ -2,19 +2,19 @@
   "task_types": {
     "feature": {
       "task_type": "feature",
-      "sample_count": 11,
-      "avg_tokens": 6247.090909090909,
-      "std_dev": 7966.5145390456955,
-      "p80_tokens": 12954.896150967385,
-      "avg_duration_seconds": 308.09090909090907,
+      "sample_count": 12,
+      "avg_tokens": 5789.583333333333,
+      "std_dev": 7776.825792681885,
+      "p80_tokens": 12337.67065077148,
+      "avg_duration_seconds": 290.5,
       "success_rate": 1.0,
       "recommended_model": "haiku",
       "model": "aggregate",
       "recommended_effort": "high",
-      "_m2_tokens": 698118892.909091,
-      "_m2_duration": 1846300.9090909092,
-      "estimation_mape": 820.0049983378748,
-      "estimation_sample_count": 11
+      "_m2_tokens": 725748232.9166667,
+      "_m2_duration": 1887147.0,
+      "estimation_mape": 812.1071797841792,
+      "estimation_sample_count": 12
     },
     "feature:claude-opus-4-6": {
       "task_type": "feature",
@@ -66,21 +66,21 @@
     },
     "feature:claude-sonnet-4-6": {
       "task_type": "feature",
-      "sample_count": 4,
-      "avg_tokens": 10834.75,
-      "std_dev": 11178.062228646788,
-      "p80_tokens": 20246.678396520598,
-      "avg_duration_seconds": 604.25,
+      "sample_count": 5,
+      "avg_tokens": 8819.2,
+      "std_dev": 10780.029098290968,
+      "p80_tokens": 17895.984500761,
+      "avg_duration_seconds": 502.8,
       "success_rate": 1.0,
       "recommended_model": "haiku",
       "model": "claude-sonnet-4-6",
       "recommended_effort": "high",
-      "_m2_tokens": 499796300.75,
-      "_m2_duration": 1223188.75,
-      "estimation_mape": 228.4503268280386,
-      "estimation_sample_count": 4
+      "_m2_tokens": 581045136.8,
+      "_m2_duration": 1429030.8,
+      "estimation_mape": 327.8064966011363,
+      "estimation_sample_count": 5
     }
   },
-  "last_calibrated": "2026-03-08T13:27:05.548890+00:00",
-  "total_records": 14
+  "last_calibrated": "2026-03-08T14:07:54.528579+00:00",
+  "total_records": 15
 }
