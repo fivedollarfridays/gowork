@@ -400,10 +400,23 @@ export interface CreditFormData {
 
 export type ChatMode = "next_steps" | "explain_plan";
 
+export interface ExplainStep {
+  text: string;
+  reasoning?: string;
+}
+
+export interface EvidenceSource {
+  name: string;
+  resource_id?: number;
+}
+
 export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
   context?: ChatContext;
+  steps?: ExplainStep[];
+  evidence?: EvidenceSource[];
+  disclaimer?: string;
 }
 
 export interface ChatContext {
@@ -412,10 +425,10 @@ export interface ChatContext {
 }
 
 export interface ChatSSEEvent {
-  type: "context" | "token" | "done";
+  type: "context" | "token" | "done" | "disclaimer";
   root_barriers?: string[];
   chain?: string;
   text?: string;
-  usage?: { input_tokens: number; output_tokens: number };
+  chunks?: number;
   latency_ms?: number;
 }

@@ -1,13 +1,11 @@
-"""Claude API client for generating plan narratives."""
+"""LLM client for generating plan narratives."""
 
 import json
 import logging
 
-from anthropic import AsyncAnthropic
-
+from app.ai.llm_client import get_llm_stream
 from app.ai.prompts import SYSTEM_PROMPT, USER_PROMPT_TEMPLATE
 from app.ai.types import PlanNarrative
-from app.core.config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -17,34 +15,29 @@ async def generate_narrative(
     qualifications: str,
     plan_data: dict,
 ) -> PlanNarrative:
-    """Call Claude API to generate a personalized plan narrative.
+    """Call LLM to generate a personalized plan narrative.
 
-    Raises anthropic errors (APITimeoutError, etc.) to the caller.
+    Streams the response, collects it, and parses JSON.
+    Falls back to mock provider when no API keys are configured.
     """
-    settings = get_settings()
-    client = AsyncAnthropic(api_key=settings.anthropic_api_key)
-
     user_prompt = USER_PROMPT_TEMPLATE.format(
         barriers=", ".join(barriers),
         qualifications=qualifications,
         plan_data=json.dumps(plan_data, default=str),
     )
 
-    message = await client.messages.create(
-        model=settings.claude_model,
-        max_tokens=1024,
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": user_prompt}],
-    )
+    chunks: list[str] = []
+    async for chunk in get_llm_stream(SYSTEM_PROMPT, user_prompt):
+        chunks.append(chunk)
 
-    if not message.content:
-        raise ValueError("Claude returned empty response")
-    raw = message.content[0].text
+    raw = "".join(chunks)
+    if not raw.strip():
+        raise ValueError("LLM returned empty response")
     try:
         parsed = json.loads(raw)
     except json.JSONDecodeError as exc:
-        logger.warning("Claude returned invalid JSON (length=%d)", len(raw))
-        raise ValueError("Claude returned invalid JSON") from exc
+        logger.warning("LLM returned invalid JSON (length=%d)", len(raw))
+        raise ValueError("LLM returned invalid JSON") from exc
     return PlanNarrative(**parsed)
 
 

@@ -67,13 +67,12 @@ class TestInfoLeakPrevention:
     async def test_invalid_json_logs_length_not_content(self):
         """Logger should log response length, not raw content."""
         raw_content = "Not JSON but contains sensitive data: SSN 123-45-6789"
-        mock_message = MagicMock()
-        mock_message.content = [MagicMock(text=raw_content)]
-        mock_client = AsyncMock()
-        mock_client.messages.create = AsyncMock(return_value=mock_message)
+
+        async def bad_stream(system_prompt, user_prompt):
+            yield raw_content
 
         with (
-            patch("app.ai.client.AsyncAnthropic", return_value=mock_client),
+            patch("app.ai.client.get_llm_stream", return_value=bad_stream("s", "u")),
             patch("app.ai.client.logger") as mock_logger,
         ):
             with pytest.raises(ValueError, match="invalid JSON"):

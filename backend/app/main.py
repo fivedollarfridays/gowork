@@ -8,6 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
+from app.ai.llm_client import check_llm_providers
 from app.core.config import get_settings
 from app.barrier_graph.seed import upsert_barrier_graph
 from app.core.database import close_db, get_async_session_factory, get_engine, init_db
@@ -25,8 +26,13 @@ async def lifespan(app: FastAPI):
     configure_logging()
     logger.info("MontGoWork API starting up")
     settings = get_settings()
-    if not settings.anthropic_api_key:
-        logger.warning("ANTHROPIC_API_KEY is not set — AI narrative will use fallback")
+    llm_status = check_llm_providers()
+    logger.info(
+        "LLM providers: %s (active: %s)",
+        llm_status["providers"], llm_status["active"],
+    )
+    if llm_status["active"] == "mock":
+        logger.warning("No LLM provider configured — using mock fallback")
     web_concurrency = os.environ.get("WEB_CONCURRENCY", "1")
     if web_concurrency.isdigit() and int(web_concurrency) > 1:
         logger.warning(

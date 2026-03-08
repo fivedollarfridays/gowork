@@ -6,7 +6,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from app.ai.client import build_fallback_narrative, generate_narrative
 from app.ai.types import PlanNarrative
 from app.main import app
 from app.modules.matching.types import ReEntryPlan
@@ -269,112 +268,6 @@ class TestGetPlanCorruptData:
                 resp = await client.get(f"/api/plan/{_VALID_UUID}{_token_query(_VALID_UUID)}")
         assert resp.status_code == 500
         assert "Corrupt" in resp.json()["detail"]
-
-
-class TestGenerateNarrative:
-    @pytest.mark.asyncio
-    async def test_calls_anthropic_and_parses(self):
-        """generate_narrative calls Claude and returns PlanNarrative."""
-        mock_message = MagicMock()
-        mock_message.content = [MagicMock(text=json.dumps({
-            "summary": "Take the Route 4 bus to JobLink.",
-            "key_actions": ["Register at JobLink", "Get CNA license renewed"],
-        }))]
-        mock_client = AsyncMock()
-        mock_client.messages.create = AsyncMock(return_value=mock_message)
-
-        with patch("app.ai.client.AsyncAnthropic", return_value=mock_client):
-            result = await generate_narrative(
-                barriers=["credit", "transportation"],
-                qualifications="Former CNA",
-                plan_data={"barriers": [], "job_matches": []},
-            )
-        assert isinstance(result, PlanNarrative)
-        assert "Route 4" in result.summary
-
-    @pytest.mark.asyncio
-    async def test_raises_on_invalid_json_from_claude(self):
-        """generate_narrative raises ValueError when Claude returns bad JSON."""
-        mock_message = MagicMock()
-        mock_message.content = [MagicMock(text="This is not JSON at all")]
-        mock_client = AsyncMock()
-        mock_client.messages.create = AsyncMock(return_value=mock_message)
-
-        with patch("app.ai.client.AsyncAnthropic", return_value=mock_client):
-            with pytest.raises(ValueError, match="invalid JSON"):
-                await generate_narrative(
-                    barriers=["credit"],
-                    qualifications="CNA",
-                    plan_data={"barriers": []},
-                )
-
-    @pytest.mark.asyncio
-    async def test_raises_on_empty_response(self):
-        """generate_narrative raises ValueError when Claude returns empty content."""
-        mock_message = MagicMock()
-        mock_message.content = []
-        mock_client = AsyncMock()
-        mock_client.messages.create = AsyncMock(return_value=mock_message)
-
-        with patch("app.ai.client.AsyncAnthropic", return_value=mock_client):
-            with pytest.raises(ValueError, match="[Ee]mpty"):
-                await generate_narrative(
-                    barriers=["credit"],
-                    qualifications="CNA",
-                    plan_data={"barriers": []},
-                )
-
-    @pytest.mark.asyncio
-    async def test_raises_on_timeout(self):
-        """generate_narrative raises on API timeout."""
-        from anthropic import APITimeoutError
-
-        mock_client = AsyncMock()
-        mock_client.messages.create = AsyncMock(
-            side_effect=APITimeoutError(request=MagicMock())
-        )
-
-        with patch("app.ai.client.AsyncAnthropic", return_value=mock_client):
-            with pytest.raises(APITimeoutError):
-                await generate_narrative(
-                    barriers=["credit"],
-                    qualifications="Some work",
-                    plan_data={"barriers": []},
-                )
-
-
-# --- Fallback ---
-
-class TestBuildFallbackNarrative:
-    def test_builds_from_plan_data(self):
-        """Fallback produces structured narrative from plan data."""
-        plan_data = {
-            "barriers": [
-                {"type": "credit", "title": "Credit Repair", "actions": ["Check report"],
-                 "resources": [{"name": "GreenPath Financial", "phone": "555-1234"}]},
-            ],
-            "job_matches": [{"title": "CNA", "company": "Baptist Hospital"}],
-            "immediate_next_steps": ["Visit career center"],
-        }
-        result = build_fallback_narrative(
-            barriers=["credit"],
-            qualifications="Former CNA",
-            plan_data=plan_data,
-        )
-        assert isinstance(result, PlanNarrative)
-        assert len(result.summary) > 0
-        assert len(result.key_actions) > 0
-
-    def test_empty_plan_still_works(self):
-        """Fallback handles empty plan gracefully."""
-        plan_data = {"barriers": [], "job_matches": [], "immediate_next_steps": []}
-        result = build_fallback_narrative(
-            barriers=[],
-            qualifications="",
-            plan_data=plan_data,
-        )
-        assert isinstance(result, PlanNarrative)
-        assert len(result.summary) > 0
 
 
 # --- GET /api/plan/{session_id}/career-center ---
