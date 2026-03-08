@@ -28,7 +28,8 @@ export function useBarrierIntelStream(): StreamHook {
     let assistantText = "";
 
     try {
-      const res = await fetch("/api/barrier-intel/chat", {
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const res = await fetch(`${API_BASE}/api/barrier-intel/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ session_id: sessionId, user_question: question, mode }),
