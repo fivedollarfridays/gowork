@@ -24,3 +24,4 @@ tsconfig.tsbuildinfo
 
 # docs internal
 docs/internal
+*.faiss

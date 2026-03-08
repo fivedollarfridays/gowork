@@ -12,6 +12,7 @@ from app.core.config import get_settings
 from app.barrier_graph.seed import upsert_barrier_graph
 from app.core.database import close_db, get_async_session_factory, get_engine, init_db
 from app.core.exception_handlers import register_exception_handlers
+from app.rag.store import init_rag_store
 from app.routes import all_routers
 
 logger = logging.getLogger(__name__)
@@ -39,6 +40,8 @@ async def lifespan(app: FastAPI):
     factory = get_async_session_factory()
     async with factory() as session:
         await upsert_barrier_graph(session)
+    async with factory() as session:
+        await init_rag_store(session)
     yield
     await close_db()
     logger.info("MontGoWork API shutting down")

@@ -2,6 +2,7 @@
 
 from app.health import router as health_router
 from app.routes.assessment import router as assessment_router
+from app.routes.barrier_intel import router as barrier_intel_router
 from app.routes.brightdata import router as brightdata_router
 from app.routes.credit import router as credit_router
 from app.routes.feedback import router as feedback_router
@@ -16,4 +17,5 @@ all_routers = [
     jobs_router,
     brightdata_router,
     feedback_router,
+    barrier_intel_router,
 ]
