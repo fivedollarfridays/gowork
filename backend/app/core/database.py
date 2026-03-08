@@ -226,6 +226,14 @@ async def init_db(engine):
             statement = statement.strip()
             if statement:
                 await conn.execute(text(statement))
+        
+        # Add profile column to sessions table if it doesn't exist (for backward compatibility)
+        try:
+            await conn.execute(text("ALTER TABLE sessions ADD COLUMN profile TEXT"))
+        except Exception as e:
+            # Column likely already exists, ignore error
+            logger.debug("profile column addition skipped: %s", e)
+    
     await seed_database(engine)
 
 
