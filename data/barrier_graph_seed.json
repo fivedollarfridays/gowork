@@ -233,58 +233,558 @@
     }
   ],
   "relationships": [
-    {"source": "CHILDCARE_DAY", "target": "EMPLOYMENT_LIMITED_HOURS", "relationship_type": "CAUSES", "weight": 0.9},
-    {"source": "CHILDCARE_EVENING", "target": "EMPLOYMENT_LIMITED_HOURS", "relationship_type": "CAUSES", "weight": 0.9},
-    {"source": "CHILDCARE_INFANT", "target": "EMPLOYMENT_LIMITED_HOURS", "relationship_type": "CAUSES", "weight": 0.95},
-    {"source": "CHILDCARE_UNAFFORDABLE", "target": "EMPLOYMENT_LIMITED_HOURS", "relationship_type": "CAUSES", "weight": 0.85},
-    {"source": "CHILDCARE_SUBSIDY_UNKNOWN", "target": "CHILDCARE_UNAFFORDABLE", "relationship_type": "WORSENS", "weight": 0.7},
-    {"source": "TRANSPORTATION_NO_CAR", "target": "EMPLOYMENT_LIMITED_HOURS", "relationship_type": "CAUSES", "weight": 0.8},
-    {"source": "TRANSPORTATION_NO_TRANSIT", "target": "EMPLOYMENT_LIMITED_HOURS", "relationship_type": "CAUSES", "weight": 0.85},
-    {"source": "TRANSPORTATION_NIGHT_SHIFT", "target": "EMPLOYMENT_LIMITED_HOURS", "relationship_type": "CAUSES", "weight": 0.75},
-    {"source": "TRANSPORTATION_UNRELIABLE", "target": "EMPLOYMENT_INSTABILITY", "relationship_type": "CAUSES", "weight": 0.7},
-    {"source": "TRANSPORTATION_COST", "target": "EMPLOYMENT_LOW_INCOME", "relationship_type": "WORSENS", "weight": 0.6},
-    {"source": "EMPLOYMENT_LIMITED_HOURS", "target": "EMPLOYMENT_LOW_INCOME", "relationship_type": "CAUSES", "weight": 0.9},
-    {"source": "EMPLOYMENT_LOW_INCOME", "target": "CREDIT_LOW_SCORE", "relationship_type": "CAUSES", "weight": 0.7},
-    {"source": "EMPLOYMENT_LOW_INCOME", "target": "HOUSING_UNAFFORDABLE", "relationship_type": "CAUSES", "weight": 0.8},
-    {"source": "EMPLOYMENT_LOW_INCOME", "target": "CREDIT_DEBT_HIGH", "relationship_type": "WORSENS", "weight": 0.6},
-    {"source": "EMPLOYMENT_LOW_INCOME", "target": "HEALTH_NO_INSURANCE", "relationship_type": "WORSENS", "weight": 0.5},
-    {"source": "CREDIT_LOW_SCORE", "target": "HOUSING_UNSTABLE", "relationship_type": "CAUSES", "weight": 0.7},
-    {"source": "CREDIT_LOW_SCORE", "target": "TRANSPORTATION_NO_CAR", "relationship_type": "WORSENS", "weight": 0.5},
-    {"source": "CREDIT_NO_HISTORY", "target": "CREDIT_LOW_SCORE", "relationship_type": "WORSENS", "weight": 0.6},
-    {"source": "CREDIT_DEBT_HIGH", "target": "CREDIT_LOW_SCORE", "relationship_type": "CAUSES", "weight": 0.8},
-    {"source": "CREDIT_COLLECTIONS", "target": "CREDIT_LOW_SCORE", "relationship_type": "CAUSES", "weight": 0.9},
-    {"source": "CREDIT_NO_BANK", "target": "CREDIT_NO_HISTORY", "relationship_type": "CAUSES", "weight": 0.7},
-    {"source": "CREDIT_NO_BANK", "target": "EMPLOYMENT_LOW_INCOME", "relationship_type": "WORSENS", "weight": 0.4},
-    {"source": "HOUSING_UNSTABLE", "target": "EMPLOYMENT_INSTABILITY", "relationship_type": "CAUSES", "weight": 0.85},
-    {"source": "HOUSING_UNAFFORDABLE", "target": "HOUSING_UNSTABLE", "relationship_type": "CAUSES", "weight": 0.7},
-    {"source": "HOUSING_EVICTION_HISTORY", "target": "HOUSING_UNSTABLE", "relationship_type": "CAUSES", "weight": 0.8},
-    {"source": "EMPLOYMENT_INSTABILITY", "target": "EMPLOYMENT_GAP", "relationship_type": "CAUSES", "weight": 0.75},
-    {"source": "EMPLOYMENT_GAP", "target": "EMPLOYMENT_LOW_INCOME", "relationship_type": "CAUSES", "weight": 0.6},
-    {"source": "HEALTH_NO_INSURANCE", "target": "HEALTH_MENTAL_HEALTH", "relationship_type": "WORSENS", "weight": 0.5},
-    {"source": "HEALTH_DISABILITY", "target": "EMPLOYMENT_LIMITED_HOURS", "relationship_type": "CAUSES", "weight": 0.7},
-    {"source": "HEALTH_MENTAL_HEALTH", "target": "EMPLOYMENT_INSTABILITY", "relationship_type": "CAUSES", "weight": 0.65},
-    {"source": "HEALTH_SUBSTANCE", "target": "EMPLOYMENT_INSTABILITY", "relationship_type": "CAUSES", "weight": 0.8},
-    {"source": "HEALTH_SUBSTANCE", "target": "CRIMINAL_RECORD", "relationship_type": "WORSENS", "weight": 0.5},
-    {"source": "HEALTH_SUBSTANCE", "target": "HOUSING_UNSTABLE", "relationship_type": "CAUSES", "weight": 0.6},
-    {"source": "TRAINING_NO_GED", "target": "EMPLOYMENT_LOW_INCOME", "relationship_type": "CAUSES", "weight": 0.7},
-    {"source": "TRAINING_NO_CERT", "target": "EMPLOYMENT_LOW_INCOME", "relationship_type": "CAUSES", "weight": 0.6},
-    {"source": "TRAINING_SKILL_GAP", "target": "EMPLOYMENT_LOW_INCOME", "relationship_type": "CAUSES", "weight": 0.65},
-    {"source": "TRAINING_OUTDATED_SKILLS", "target": "TRAINING_SKILL_GAP", "relationship_type": "CAUSES", "weight": 0.7},
-    {"source": "TRAINING_NO_GED", "target": "TRAINING_NO_CERT", "relationship_type": "PRE_REQ_FOR", "weight": 0.8},
-    {"source": "CRIMINAL_RECORD", "target": "EMPLOYMENT_GAP", "relationship_type": "CAUSES", "weight": 0.7},
-    {"source": "CRIMINAL_RECORD", "target": "HOUSING_EVICTION_HISTORY", "relationship_type": "WORSENS", "weight": 0.4},
-    {"source": "CRIMINAL_BACKGROUND_CHECK", "target": "EMPLOYMENT_LIMITED_HOURS", "relationship_type": "CAUSES", "weight": 0.6},
-    {"source": "CRIMINAL_REENTRY", "target": "EMPLOYMENT_GAP", "relationship_type": "CAUSES", "weight": 0.9},
-    {"source": "CRIMINAL_REENTRY", "target": "HOUSING_UNSTABLE", "relationship_type": "CAUSES", "weight": 0.75},
-    {"source": "CRIMINAL_REENTRY", "target": "CREDIT_NO_HISTORY", "relationship_type": "CAUSES", "weight": 0.6},
-    {"source": "CHILDCARE_UNAFFORDABLE", "target": "EMPLOYMENT_LOW_INCOME", "relationship_type": "WORSENS", "weight": 0.5},
-    {"source": "HOUSING_UNSTABLE", "target": "HEALTH_MENTAL_HEALTH", "relationship_type": "WORSENS", "weight": 0.6},
-    {"source": "EMPLOYMENT_INSTABILITY", "target": "CREDIT_LOW_SCORE", "relationship_type": "WORSENS", "weight": 0.5},
-    {"source": "HEALTH_NO_INSURANCE", "target": "CREDIT_DEBT_HIGH", "relationship_type": "WORSENS", "weight": 0.4},
-    {"source": "TRANSPORTATION_NO_CAR", "target": "TRAINING_SKILL_GAP", "relationship_type": "WORSENS", "weight": 0.4},
-    {"source": "HOUSING_UNAFFORDABLE", "target": "TRANSPORTATION_COST", "relationship_type": "WORSENS", "weight": 0.5},
-    {"source": "CREDIT_COLLECTIONS", "target": "CREDIT_NO_BANK", "relationship_type": "WORSENS", "weight": 0.5},
-    {"source": "HEALTH_MENTAL_HEALTH", "target": "HEALTH_SUBSTANCE", "relationship_type": "WORSENS", "weight": 0.4},
-    {"source": "TRAINING_NO_GED", "target": "CRIMINAL_REENTRY", "relationship_type": "WORSENS", "weight": 0.3}
+    {
+      "source": "CHILDCARE_DAY",
+      "target": "EMPLOYMENT_LIMITED_HOURS",
+      "relationship_type": "CAUSES",
+      "weight": 0.9
+    },
+    {
+      "source": "CHILDCARE_EVENING",
+      "target": "EMPLOYMENT_LIMITED_HOURS",
+      "relationship_type": "CAUSES",
+      "weight": 0.9
+    },
+    {
+      "source": "CHILDCARE_INFANT",
+      "target": "EMPLOYMENT_LIMITED_HOURS",
+      "relationship_type": "CAUSES",
+      "weight": 0.95
+    },
+    {
+      "source": "CHILDCARE_UNAFFORDABLE",
+      "target": "EMPLOYMENT_LIMITED_HOURS",
+      "relationship_type": "CAUSES",
+      "weight": 0.85
+    },
+    {
+      "source": "CHILDCARE_SUBSIDY_UNKNOWN",
+      "target": "CHILDCARE_UNAFFORDABLE",
+      "relationship_type": "WORSENS",
+      "weight": 0.7
+    },
+    {
+      "source": "TRANSPORTATION_NO_CAR",
+      "target": "EMPLOYMENT_LIMITED_HOURS",
+      "relationship_type": "CAUSES",
+      "weight": 0.8
+    },
+    {
+      "source": "TRANSPORTATION_NO_TRANSIT",
+      "target": "EMPLOYMENT_LIMITED_HOURS",
+      "relationship_type": "CAUSES",
+      "weight": 0.85
+    },
+    {
+      "source": "TRANSPORTATION_NIGHT_SHIFT",
+      "target": "EMPLOYMENT_LIMITED_HOURS",
+      "relationship_type": "CAUSES",
+      "weight": 0.75
+    },
+    {
+      "source": "TRANSPORTATION_UNRELIABLE",
+      "target": "EMPLOYMENT_INSTABILITY",
+      "relationship_type": "CAUSES",
+      "weight": 0.7
+    },
+    {
+      "source": "TRANSPORTATION_COST",
+      "target": "EMPLOYMENT_LOW_INCOME",
+      "relationship_type": "WORSENS",
+      "weight": 0.6
+    },
+    {
+      "source": "EMPLOYMENT_LIMITED_HOURS",
+      "target": "EMPLOYMENT_LOW_INCOME",
+      "relationship_type": "CAUSES",
+      "weight": 0.9
+    },
+    {
+      "source": "EMPLOYMENT_LOW_INCOME",
+      "target": "CREDIT_LOW_SCORE",
+      "relationship_type": "CAUSES",
+      "weight": 0.7
+    },
+    {
+      "source": "EMPLOYMENT_LOW_INCOME",
+      "target": "HOUSING_UNAFFORDABLE",
+      "relationship_type": "CAUSES",
+      "weight": 0.8
+    },
+    {
+      "source": "EMPLOYMENT_LOW_INCOME",
+      "target": "CREDIT_DEBT_HIGH",
+      "relationship_type": "WORSENS",
+      "weight": 0.6
+    },
+    {
+      "source": "EMPLOYMENT_LOW_INCOME",
+      "target": "HEALTH_NO_INSURANCE",
+      "relationship_type": "WORSENS",
+      "weight": 0.5
+    },
+    {
+      "source": "CREDIT_LOW_SCORE",
+      "target": "HOUSING_UNSTABLE",
+      "relationship_type": "CAUSES",
+      "weight": 0.7
+    },
+    {
+      "source": "CREDIT_LOW_SCORE",
+      "target": "TRANSPORTATION_NO_CAR",
+      "relationship_type": "WORSENS",
+      "weight": 0.5
+    },
+    {
+      "source": "CREDIT_NO_HISTORY",
+      "target": "CREDIT_LOW_SCORE",
+      "relationship_type": "WORSENS",
+      "weight": 0.6
+    },
+    {
+      "source": "CREDIT_DEBT_HIGH",
+      "target": "CREDIT_LOW_SCORE",
+      "relationship_type": "CAUSES",
+      "weight": 0.8
+    },
+    {
+      "source": "CREDIT_COLLECTIONS",
+      "target": "CREDIT_LOW_SCORE",
+      "relationship_type": "CAUSES",
+      "weight": 0.9
+    },
+    {
+      "source": "CREDIT_NO_BANK",
+      "target": "CREDIT_NO_HISTORY",
+      "relationship_type": "CAUSES",
+      "weight": 0.7
+    },
+    {
+      "source": "CREDIT_NO_BANK",
+      "target": "EMPLOYMENT_LOW_INCOME",
+      "relationship_type": "WORSENS",
+      "weight": 0.4
+    },
+    {
+      "source": "HOUSING_UNSTABLE",
+      "target": "EMPLOYMENT_INSTABILITY",
+      "relationship_type": "CAUSES",
+      "weight": 0.85
+    },
+    {
+      "source": "HOUSING_UNAFFORDABLE",
+      "target": "HOUSING_UNSTABLE",
+      "relationship_type": "CAUSES",
+      "weight": 0.7
+    },
+    {
+      "source": "HOUSING_EVICTION_HISTORY",
+      "target": "HOUSING_UNSTABLE",
+      "relationship_type": "CAUSES",
+      "weight": 0.8
+    },
+    {
+      "source": "EMPLOYMENT_INSTABILITY",
+      "target": "EMPLOYMENT_GAP",
+      "relationship_type": "CAUSES",
+      "weight": 0.75
+    },
+    {
+      "source": "EMPLOYMENT_GAP",
+      "target": "EMPLOYMENT_LOW_INCOME",
+      "relationship_type": "CAUSES",
+      "weight": 0.6
+    },
+    {
+      "source": "HEALTH_NO_INSURANCE",
+      "target": "HEALTH_MENTAL_HEALTH",
+      "relationship_type": "WORSENS",
+      "weight": 0.5
+    },
+    {
+      "source": "HEALTH_DISABILITY",
+      "target": "EMPLOYMENT_LIMITED_HOURS",
+      "relationship_type": "CAUSES",
+      "weight": 0.7
+    },
+    {
+      "source": "HEALTH_MENTAL_HEALTH",
+      "target": "EMPLOYMENT_INSTABILITY",
+      "relationship_type": "CAUSES",
+      "weight": 0.65
+    },
+    {
+      "source": "HEALTH_SUBSTANCE",
+      "target": "EMPLOYMENT_INSTABILITY",
+      "relationship_type": "CAUSES",
+      "weight": 0.8
+    },
+    {
+      "source": "HEALTH_SUBSTANCE",
+      "target": "CRIMINAL_RECORD",
+      "relationship_type": "WORSENS",
+      "weight": 0.5
+    },
+    {
+      "source": "HEALTH_SUBSTANCE",
+      "target": "HOUSING_UNSTABLE",
+      "relationship_type": "CAUSES",
+      "weight": 0.6
+    },
+    {
+      "source": "TRAINING_NO_GED",
+      "target": "EMPLOYMENT_LOW_INCOME",
+      "relationship_type": "CAUSES",
+      "weight": 0.7
+    },
+    {
+      "source": "TRAINING_NO_CERT",
+      "target": "EMPLOYMENT_LOW_INCOME",
+      "relationship_type": "CAUSES",
+      "weight": 0.6
+    },
+    {
+      "source": "TRAINING_SKILL_GAP",
+      "target": "EMPLOYMENT_LOW_INCOME",
+      "relationship_type": "CAUSES",
+      "weight": 0.65
+    },
+    {
+      "source": "TRAINING_OUTDATED_SKILLS",
+      "target": "TRAINING_SKILL_GAP",
+      "relationship_type": "CAUSES",
+      "weight": 0.7
+    },
+    {
+      "source": "TRAINING_NO_GED",
+      "target": "TRAINING_NO_CERT",
+      "relationship_type": "PRE_REQ_FOR",
+      "weight": 0.8
+    },
+    {
+      "source": "CRIMINAL_RECORD",
+      "target": "EMPLOYMENT_GAP",
+      "relationship_type": "CAUSES",
+      "weight": 0.7
+    },
+    {
+      "source": "CRIMINAL_RECORD",
+      "target": "HOUSING_EVICTION_HISTORY",
+      "relationship_type": "WORSENS",
+      "weight": 0.4
+    },
+    {
+      "source": "CRIMINAL_BACKGROUND_CHECK",
+      "target": "EMPLOYMENT_LIMITED_HOURS",
+      "relationship_type": "CAUSES",
+      "weight": 0.6
+    },
+    {
+      "source": "CRIMINAL_REENTRY",
+      "target": "EMPLOYMENT_GAP",
+      "relationship_type": "CAUSES",
+      "weight": 0.9
+    },
+    {
+      "source": "CRIMINAL_REENTRY",
+      "target": "HOUSING_UNSTABLE",
+      "relationship_type": "CAUSES",
+      "weight": 0.75
+    },
+    {
+      "source": "CRIMINAL_REENTRY",
+      "target": "CREDIT_NO_HISTORY",
+      "relationship_type": "CAUSES",
+      "weight": 0.6
+    },
+    {
+      "source": "CHILDCARE_UNAFFORDABLE",
+      "target": "EMPLOYMENT_LOW_INCOME",
+      "relationship_type": "WORSENS",
+      "weight": 0.5
+    },
+    {
+      "source": "HOUSING_UNSTABLE",
+      "target": "HEALTH_MENTAL_HEALTH",
+      "relationship_type": "WORSENS",
+      "weight": 0.6
+    },
+    {
+      "source": "EMPLOYMENT_INSTABILITY",
+      "target": "CREDIT_LOW_SCORE",
+      "relationship_type": "WORSENS",
+      "weight": 0.5
+    },
+    {
+      "source": "HEALTH_NO_INSURANCE",
+      "target": "CREDIT_DEBT_HIGH",
+      "relationship_type": "WORSENS",
+      "weight": 0.4
+    },
+    {
+      "source": "TRANSPORTATION_NO_CAR",
+      "target": "TRAINING_SKILL_GAP",
+      "relationship_type": "WORSENS",
+      "weight": 0.4
+    },
+    {
+      "source": "HOUSING_UNAFFORDABLE",
+      "target": "TRANSPORTATION_COST",
+      "relationship_type": "WORSENS",
+      "weight": 0.5
+    },
+    {
+      "source": "CREDIT_COLLECTIONS",
+      "target": "CREDIT_NO_BANK",
+      "relationship_type": "WORSENS",
+      "weight": 0.5
+    },
+    {
+      "source": "HEALTH_MENTAL_HEALTH",
+      "target": "HEALTH_SUBSTANCE",
+      "relationship_type": "WORSENS",
+      "weight": 0.4
+    },
+    {
+      "source": "TRAINING_NO_GED",
+      "target": "CRIMINAL_REENTRY",
+      "relationship_type": "WORSENS",
+      "weight": 0.3
+    }
+  ],
+  "barrier_resource_rules": [
+    {
+      "match": {
+        "category": "childcare"
+      },
+      "barriers": [
+        {
+          "barrier_id": "CHILDCARE_DAY",
+          "impact_strength": 0.9
+        },
+        {
+          "barrier_id": "CHILDCARE_EVENING",
+          "impact_strength": 0.9
+        },
+        {
+          "barrier_id": "TRAINING_NO_CERT",
+          "impact_strength": 0.3
+        },
+        {
+          "barrier_id": "LOW_INCOME",
+          "impact_strength": 0.5
+        },
+        {
+          "barrier_id": "HOUSING_UNSTABLE",
+          "impact_strength": 0.3
+        }
+      ]
+    },
+    {
+      "match": {
+        "category": "training"
+      },
+      "barriers": [
+        {
+          "barrier_id": "TRAINING_NO_CERT",
+          "impact_strength": 0.9
+        },
+        {
+          "barrier_id": "EMPLOYMENT_GAP",
+          "impact_strength": 0.7
+        },
+        {
+          "barrier_id": "LOW_INCOME",
+          "impact_strength": 0.5
+        }
+      ]
+    },
+    {
+      "match": {
+        "subcategory": "reentry"
+      },
+      "barriers": [
+        {
+          "barrier_id": "CRIMINAL_RECORD",
+          "impact_strength": 0.9
+        },
+        {
+          "barrier_id": "HOUSING_UNSTABLE",
+          "impact_strength": 0.5
+        },
+        {
+          "barrier_id": "CREDIT_LOW_SCORE",
+          "impact_strength": 0.3
+        }
+      ]
+    },
+    {
+      "match": {
+        "subcategory": "healthcare"
+      },
+      "barriers": [
+        {
+          "barrier_id": "HEALTH_NO_INSURANCE",
+          "impact_strength": 0.5
+        }
+      ]
+    },
+    {
+      "match": {
+        "category": "career_center"
+      },
+      "barriers": [
+        {
+          "barrier_id": "TRAINING_NO_CERT",
+          "impact_strength": 0.9
+        },
+        {
+          "barrier_id": "EMPLOYMENT_GAP",
+          "impact_strength": 0.7
+        },
+        {
+          "barrier_id": "CREDIT_LOW_SCORE",
+          "impact_strength": 0.3
+        },
+        {
+          "barrier_id": "HOUSING_UNSTABLE",
+          "impact_strength": 0.3
+        },
+        {
+          "barrier_id": "HEALTH_NO_INSURANCE",
+          "impact_strength": 0.3
+        }
+      ]
+    },
+    {
+      "match": {
+        "subcategory": "credit_counseling"
+      },
+      "barriers": [
+        {
+          "barrier_id": "CREDIT_LOW_SCORE",
+          "impact_strength": 0.9
+        },
+        {
+          "barrier_id": "CREDIT_NO_HISTORY",
+          "impact_strength": 0.9
+        },
+        {
+          "barrier_id": "HOUSING_UNSTABLE",
+          "impact_strength": 0.7
+        },
+        {
+          "barrier_id": "HEALTH_NO_INSURANCE",
+          "impact_strength": 0.3
+        }
+      ]
+    },
+    {
+      "match": {
+        "subcategory": "transportation"
+      },
+      "barriers": [
+        {
+          "barrier_id": "TRANSPORTATION_NO_CAR",
+          "impact_strength": 0.9
+        },
+        {
+          "barrier_id": "TRANSPORTATION_NO_TRANSIT",
+          "impact_strength": 0.9
+        },
+        {
+          "barrier_id": "TRAINING_NO_CERT",
+          "impact_strength": 0.5
+        },
+        {
+          "barrier_id": "EMPLOYMENT_GAP",
+          "impact_strength": 0.5
+        }
+      ]
+    },
+    {
+      "match": {
+        "subcategory": "employment"
+      },
+      "barriers": [
+        {
+          "barrier_id": "EMPLOYMENT_GAP",
+          "impact_strength": 0.9
+        },
+        {
+          "barrier_id": "TRAINING_NO_CERT",
+          "impact_strength": 0.7
+        },
+        {
+          "barrier_id": "HOUSING_UNSTABLE",
+          "impact_strength": 0.3
+        },
+        {
+          "barrier_id": "CREDIT_LOW_SCORE",
+          "impact_strength": 0.3
+        }
+      ]
+    },
+    {
+      "match": {
+        "subcategory": "food"
+      },
+      "barriers": [
+        {
+          "barrier_id": "HOUSING_UNSTABLE",
+          "impact_strength": 0.7
+        },
+        {
+          "barrier_id": "HEALTH_NO_INSURANCE",
+          "impact_strength": 0.5
+        },
+        {
+          "barrier_id": "LOW_INCOME",
+          "impact_strength": 0.7
+        }
+      ]
+    },
+    {
+      "match": {
+        "subcategory": "referral"
+      },
+      "barriers": [
+        {
+          "barrier_id": "HOUSING_UNSTABLE",
+          "impact_strength": 0.7
+        },
+        {
+          "barrier_id": "HEALTH_NO_INSURANCE",
+          "impact_strength": 0.5
+        },
+        {
+          "barrier_id": "CREDIT_LOW_SCORE",
+          "impact_strength": 0.3
+        },
+        {
+          "barrier_id": "TRAINING_NO_CERT",
+          "impact_strength": 0.3
+        }
+      ]
+    },
+    {
+      "match": {
+        "subcategory": "emergency"
+      },
+      "barriers": [
+        {
+          "barrier_id": "HOUSING_UNSTABLE",
+          "impact_strength": 0.9
+        },
+        {
+          "barrier_id": "HEALTH_NO_INSURANCE",
+          "impact_strength": 0.7
+        },
+        {
+          "barrier_id": "LOW_INCOME",
+          "impact_strength": 0.5
+        }
+      ]
+    }
   ]
 }

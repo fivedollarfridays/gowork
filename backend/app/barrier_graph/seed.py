@@ -22,13 +22,17 @@ async def upsert_barrier_graph(session: AsyncSession) -> None:
     barriers = data.get("barriers", [])
     relationships = data.get("relationships", [])
 
+    rules = data.get("barrier_resource_rules", [])
+
     await _upsert_barriers(session, barriers)
     await _upsert_relationships(session, relationships)
+    await _upsert_barrier_resources(session, rules)
     await session.commit()
     logger.info(
-        "Barrier graph seeded: %d nodes, %d edges",
+        "Barrier graph seeded: %d nodes, %d edges, %d resource rules",
         len(barriers),
         len(relationships),
+        len(rules),
     )
 
 
@@ -48,6 +52,40 @@ async def _upsert_barriers(session: AsyncSession, barriers: list[dict]) -> None:
                 "playbook": barrier.get("playbook", ""),
             },
         )
+
+
+async def _upsert_barrier_resources(
+    session: AsyncSession, rules: list[dict]
+) -> None:
+    """Link resources to barriers based on category/subcategory rules."""
+    for rule in rules:
+        match = rule.get("match", {})
+        barriers = rule.get("barriers", [])
+        if not match or not barriers:
+            continue
+
+        # Build WHERE clause from match dict (category or subcategory)
+        conditions = " AND ".join(f"{col} = :{col}" for col in match)
+        resources = await session.execute(
+            text(f"SELECT id FROM resources WHERE {conditions}"),
+            match,
+        )
+        resource_ids = [row[0] for row in resources.fetchall()]
+
+        for resource_id in resource_ids:
+            for b in barriers:
+                await session.execute(
+                    text(
+                        "INSERT OR IGNORE INTO barrier_resources "
+                        "(barrier_id, resource_id, impact_strength) "
+                        "VALUES (:barrier_id, :resource_id, :impact_strength)"
+                    ),
+                    {
+                        "barrier_id": b["barrier_id"],
+                        "resource_id": resource_id,
+                        "impact_strength": b["impact_strength"],
+                    },
+                )
 
 
 async def _upsert_relationships(
