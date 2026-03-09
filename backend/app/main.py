@@ -4,8 +4,9 @@ import logging
 import os
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from app.ai.llm_client import check_llm_providers
@@ -21,13 +22,13 @@ from app.routes import all_routers
 logger = logging.getLogger(__name__)
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Manage application lifespan."""
-    from app.core.logging import configure_logging
-    configure_logging()
-    logger.info("MontGoWork API starting up")
-    settings = get_settings()
+def _log_startup_warnings() -> dict:
+    """Log startup warnings and return LLM provider status."""
+    if not os.environ.get("ENVIRONMENT"):
+        logger.warning(
+            "ENVIRONMENT not set — defaulting to 'development'. "
+            "Set ENVIRONMENT explicitly for production deployments."
+        )
     llm_status = check_llm_providers()
     logger.info(
         "LLM providers: %s (active: %s)",
@@ -43,6 +44,17 @@ async def lifespan(app: FastAPI):
             "or running a single worker.",
             web_concurrency,
         )
+    return llm_status
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage application lifespan."""
+    from app.core.logging import configure_logging
+    configure_logging()
+    logger.info("MontGoWork API starting up")
+    get_settings()
+    llm_status = _log_startup_warnings()
     engine = get_engine()
     await init_db(engine)
     factory = get_async_session_factory()
@@ -85,6 +97,20 @@ app.add_middleware(
 
 _trusted = [h.strip() for h in settings.trusted_proxy_hosts.split(",") if h.strip()]
 app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=_trusted)
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    """Set security headers on all responses (LOW-6)."""
+
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        return response
+
+
+app.add_middleware(SecurityHeadersMiddleware)
 
 for _router in all_routers:
     app.include_router(_router)

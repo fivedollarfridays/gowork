@@ -118,6 +118,67 @@ class TestVisitFeedbackRequest:
         assert req.outcomes == []
 
 
+class TestFreeTextSanitization:
+    """MED-5: free_text field should be sanitized before storage."""
+
+    def test_strips_leading_trailing_whitespace(self):
+        """Leading and trailing whitespace should be removed."""
+        req = VisitFeedbackRequest(
+            token="t", made_it_to_center=1, outcomes=[], plan_accuracy=1,
+            free_text="  hello world  ",
+        )
+        assert req.free_text == "hello world"
+
+    def test_removes_null_bytes(self):
+        """Null bytes should be stripped from free_text."""
+        req = VisitFeedbackRequest(
+            token="t", made_it_to_center=1, outcomes=[], plan_accuracy=1,
+            free_text="hello\x00world",
+        )
+        assert "\x00" not in req.free_text
+        assert req.free_text == "helloworld"
+
+    def test_normalizes_unicode_nfc(self):
+        """Unicode should be NFC-normalized (e.g., combining chars)."""
+        import unicodedata
+        # NFD: e + combining acute accent (two code points)
+        nfd_text = "caf\u0065\u0301"
+        req = VisitFeedbackRequest(
+            token="t", made_it_to_center=1, outcomes=[], plan_accuracy=1,
+            free_text=nfd_text,
+        )
+        assert req.free_text == unicodedata.normalize("NFC", nfd_text)
+        # NFC form should be a single code point for e-acute
+        assert req.free_text == "caf\u00e9"
+
+    def test_none_free_text_stays_none(self):
+        """None free_text should remain None (not crash)."""
+        req = VisitFeedbackRequest(
+            token="t", made_it_to_center=1, outcomes=[], plan_accuracy=1,
+            free_text=None,
+        )
+        assert req.free_text is None
+
+    def test_empty_string_after_strip_becomes_none(self):
+        """A free_text of only whitespace should become None."""
+        req = VisitFeedbackRequest(
+            token="t", made_it_to_center=1, outcomes=[], plan_accuracy=1,
+            free_text="   ",
+        )
+        assert req.free_text is None
+
+    def test_combined_sanitization(self):
+        """Whitespace + null bytes + Unicode normalization applied together."""
+        import unicodedata
+        raw = "  caf\u0065\u0301\x00  "
+        req = VisitFeedbackRequest(
+            token="t", made_it_to_center=1, outcomes=[], plan_accuracy=1,
+            free_text=raw,
+        )
+        assert req.free_text == "caf\u00e9"
+        assert "\x00" not in req.free_text
+
+
 class TestVisitFeedbackResponse:
     def test_success_response(self):
         """Response includes success flag."""

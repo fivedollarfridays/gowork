@@ -75,6 +75,30 @@ class Settings(BaseSettings):
                 )
         return self
 
+    @model_validator(mode="after")
+    def _reject_default_salt_in_production(self) -> "Settings":
+        """HIGH-3 / LOW-4: Weak default audit hash salt must not reach production."""
+        if self.environment != "production":
+            return self
+        if self.audit_hash_salt == "montgowork-default-salt":
+            raise ValueError(
+                "audit_hash_salt must be changed from the default value "
+                "in production — set AUDIT_HASH_SALT env var"
+            )
+        return self
+
+    @model_validator(mode="after")
+    def _reject_weak_admin_key_in_production(self) -> "Settings":
+        """MED-6: Admin API key must be >= 32 chars in production."""
+        if self.environment != "production":
+            return self
+        if len(self.admin_api_key) < 32:
+            raise ValueError(
+                "admin_api_key must be at least 32 characters in production "
+                "— set ADMIN_API_KEY env var"
+            )
+        return self
+
     def get_cors_origins(self) -> list[str]:
         """Parse CORS origins from comma-separated string."""
         return [
