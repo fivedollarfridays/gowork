@@ -42,6 +42,7 @@ function buildProfileFromPlan(sessionId: string, barriers: string[]): UserProfil
     schedule_type: AvailableHours.DAYTIME,
     work_history: "",
     target_industries: [],
+    record_profile: null,
   };
 }
 
@@ -112,6 +113,10 @@ function PlanContent() {
   });
 
   const plan = data?.plan ?? null;
+
+  useEffect(() => {
+    if (plan) window.scrollTo(0, 0);
+  }, [plan]);
 
   // Load credit assessment: localStorage first (faster), backend fallback
   const storedCredit = useClientStorage(sessionId ? `credit_${sessionId}` : null);
@@ -330,10 +335,6 @@ function PlanContent() {
 }
 
 export default function PlanPage() {
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
   return (
     <div className="flex min-h-screen">
       <main className="flex-1 px-4 py-8 sm:px-8">

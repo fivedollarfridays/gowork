@@ -1,5 +1,7 @@
 """Tests for barrier graph DB schema and seed data."""
 
+from unittest.mock import patch
+
 import pytest
 from sqlalchemy import text
 
@@ -79,6 +81,27 @@ class TestBarrierSeedData:
             categories = {row[0] for row in result.fetchall()}
         unknown = categories - valid_cats
         assert not unknown, f"Unknown barrier categories: {unknown}"
+
+
+class TestUpsertMissingFile:
+    """Verify upsert_barrier_graph handles missing seed file gracefully."""
+
+    @pytest.mark.anyio
+    async def test_upsert_barrier_graph_missing_file(self, test_engine):
+        """When seed file is absent, upsert logs warning and returns without error."""
+        from app.barrier_graph.seed import upsert_barrier_graph
+
+        factory = get_async_session_factory()
+        async with factory() as session:
+            # Patch _resolve_data_dir to return a tmp dir without the seed file
+            with patch("app.barrier_graph.seed._resolve_data_dir") as mock_dir:
+                import tempfile
+                from pathlib import Path
+
+                empty_dir = Path(tempfile.mkdtemp())
+                mock_dir.return_value = empty_dir
+                # Should not raise -- just logs warning and returns
+                await upsert_barrier_graph(session)
 
 
 class TestUpsertIdempotency:

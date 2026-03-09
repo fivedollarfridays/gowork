@@ -5,6 +5,8 @@ from pydantic import BaseModel, Field, computed_field, field_validator
 
 from app.modules.benefits.types import BenefitsProfile, CliffAnalysis, CliffSeverity
 from app.modules.credit.types import CreditAssessmentResult
+from app.modules.criminal.expungement import ExpungementResult
+from app.modules.criminal.record_profile import RecordProfile
 from app.modules.feedback.types import ResourceHealth
 from app.modules.matching.job_readiness_types import JobReadinessResult
 
@@ -92,6 +94,7 @@ class AssessmentRequest(BaseModel):
     resume_text: str = Field(default="", max_length=5000)
     certifications: list[str] = Field(default_factory=list)
     credit_result: Optional[CreditAssessmentResult] = None
+    record_profile: Optional[RecordProfile] = None
     benefits_data: Optional[BenefitsFormData] = None
 
 
@@ -107,6 +110,7 @@ class UserProfile(BaseModel):
     schedule_type: AvailableHours
     work_history: str
     target_industries: list[str]
+    record_profile: Optional[RecordProfile] = None
 
 
 class Resource(BaseModel):
@@ -142,6 +146,10 @@ class JobMatch(BaseModel):
     credit_check_required: str = "unknown"
     eligible_now: bool = True
     eligible_after: Optional[str] = None
+    fair_chance: bool = False
+    record_eligible: bool = True
+    background_check_timing: Optional[str] = None
+    record_note: Optional[str] = None
 
 
 class CliffImpact(BaseModel):
@@ -177,6 +185,7 @@ class BarrierCard(BaseModel):
     actions: list[str]
     resources: list[Resource] = Field(default_factory=list)
     transit_matches: list[TransitConnection] = Field(default_factory=list)
+    expungement: Optional[ExpungementResult] = None
 
 
 class ReEntryPlan(BaseModel):

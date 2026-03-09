@@ -9,6 +9,7 @@ from app.core.queries_jobs import insert_job_listings
 from app.integrations.brightdata.precrawl import (
     _has_recent_data,
     build_keyword_searches,
+    build_search_urls,
     precrawl_montgomery_jobs,
 )
 from app.integrations.brightdata.types import (
@@ -51,6 +52,28 @@ class TestHasRecentData:
             "scraped_at": now, "expires_at": now,
         }])
         assert await _has_recent_data(db_session) is True
+
+
+class TestBuildSearchUrls:
+    def test_build_search_urls_returns_list(self):
+        """build_search_urls returns a list of Indeed URL strings."""
+        urls = build_search_urls()
+        assert isinstance(urls, list)
+        assert len(urls) == 15
+        for url in urls:
+            assert url.startswith("https://www.indeed.com/jobs")
+
+    def test_build_search_urls_includes_location(self):
+        """Each URL contains Montgomery (URL-encoded) in the location parameter."""
+        urls = build_search_urls()
+        for url in urls:
+            assert "Montgomery" in url
+
+    def test_build_search_urls_includes_fromage(self):
+        """Each URL includes fromage=7 for recent jobs."""
+        urls = build_search_urls()
+        for url in urls:
+            assert "fromage=7" in url
 
 
 class TestBuildKeywordSearches:

@@ -15,7 +15,7 @@ export function EvidenceChips({ evidence }: EvidenceChipsProps) {
       <span className="text-xs font-medium text-muted-foreground">Sources</span>
       <div className="mt-1 flex flex-wrap gap-1">
         {evidence.map((source, i) => (
-          <Badge key={i} variant="secondary" className="text-xs">
+          <Badge key={`${source.name}-${i}`} variant="secondary" className="text-xs">
             {source.name}
           </Badge>
         ))}

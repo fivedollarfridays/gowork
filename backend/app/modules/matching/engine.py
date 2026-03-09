@@ -6,6 +6,7 @@ import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.queries import get_all_transit_stops, get_resources_by_categories
+from app.modules.criminal.expungement import check_expungement_eligibility
 from app.modules.feedback.types import ResourceHealth
 from app.modules.benefits.cliff_calculator import calculate_cliff_analysis
 from app.modules.benefits.types import BenefitsProfile
@@ -165,6 +166,7 @@ def _barrier_cards_and_steps(
     return cards, steps
 
 
+
 async def generate_plan(
     profile: UserProfile, db_session: AsyncSession,
     resume_text: str = "",
@@ -210,6 +212,7 @@ def _build_barrier_cards(
     cards: list[BarrierCard] = []
     for barrier in profile.primary_barriers:
         actions = list(BARRIER_ACTIONS.get(barrier, []))
+        expungement = None
 
         if barrier == BarrierType.TRAINING:
             cert_renewals = get_certification_renewal(profile.work_history)
@@ -220,12 +223,16 @@ def _build_barrier_cards(
                     f"({cert['renewal_body'].get('phone', 'N/A')})"
                 )
 
+        if barrier == BarrierType.CRIMINAL_RECORD:
+            expungement = check_expungement_eligibility(profile.record_profile)
+
         cards.append(BarrierCard(
             type=barrier,
             severity=profile.barrier_severity,
             title=BARRIER_TITLES.get(barrier, barrier.value.replace("_", " ").title()),
             actions=actions,
             resources=card_resources.get(barrier, []),
+            expungement=expungement,
         ))
 
     return cards
