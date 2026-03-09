@@ -126,6 +126,11 @@ function PlanContent() {
     [data],
   );
 
+  const zipCode = useMemo(() => {
+    if (typeof window === "undefined" || !sessionId) return "";
+    return sessionStorage.getItem(`zip_${sessionId}`) ?? "";
+  }, [sessionId]);
+
   const prefersReduced = useReducedMotion();
   const hasFiredConfetti = useRef(false);
   useEffect(() => {
@@ -242,7 +247,7 @@ function PlanContent() {
               <h2 className="text-xl font-semibold text-primary">Your Barriers</h2>
               <div className="grid gap-4 sm:grid-cols-2">
                 {plan.barriers.map((barrier) => (
-                  <BarrierCardView key={barrier.type} barrier={barrier} sessionId={sessionId ?? undefined} token={token ?? undefined} />
+                  <BarrierCardView key={barrier.type} barrier={barrier} sessionId={sessionId ?? undefined} token={token ?? undefined} zipCode={zipCode} />
                 ))}
               </div>
             </section>

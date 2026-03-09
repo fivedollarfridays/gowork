@@ -98,6 +98,7 @@ export interface Resource {
   services: string[] | null;
   notes: string | null;
   health_status?: ResourceHealth;
+  eligibility_status?: "likely" | "check" | null;
 }
 
 export interface JobMatch {

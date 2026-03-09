@@ -18,6 +18,8 @@ import { cn } from "@/lib/utils";
 import type { BarrierCard as BarrierCardType } from "@/lib/types";
 import { BARRIER_ICONS, SEVERITY_BADGE_STYLES, humanizeLabel, mapsUrl, toTelHref } from "@/lib/constants";
 import { submitResourceFeedback } from "@/lib/api";
+import { EligibilityBadge } from "./EligibilityBadge";
+import { FindhelpLink } from "./FindhelpLink";
 
 const INITIAL_RESOURCE_COUNT = 2;
 
@@ -37,9 +39,10 @@ interface BarrierCardViewProps {
   barrier: BarrierCardType;
   sessionId?: string;
   token?: string;
+  zipCode?: string;
 }
 
-export function BarrierCardView({ barrier, sessionId, token }: BarrierCardViewProps) {
+export function BarrierCardView({ barrier, sessionId, token, zipCode }: BarrierCardViewProps) {
   const [expanded, setExpanded] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackState>(() =>
     sessionId ? loadFeedbackState(sessionId, barrier.resources.map((r) => r.id)) : {},
@@ -124,6 +127,7 @@ export function BarrierCardView({ barrier, sessionId, token }: BarrierCardViewPr
                         <Badge variant="outline" className="text-xs">
                           {humanizeLabel(resource.category)}
                         </Badge>
+                        <EligibilityBadge status={resource.eligibility_status} />
                       </div>
                       {resource.address && (
                         <a
@@ -194,6 +198,9 @@ export function BarrierCardView({ barrier, sessionId, token }: BarrierCardViewPr
                     <>+{barrier.resources.length - INITIAL_RESOURCE_COUNT} more <ChevronDown className="h-3 w-3 ml-1" /></>
                   )}
                 </Button>
+              )}
+              {zipCode && (
+                <FindhelpLink barrierType={barrier.type} zipCode={zipCode} />
               )}
             </div>
           </>

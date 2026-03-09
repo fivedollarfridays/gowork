@@ -79,6 +79,7 @@ export default function AssessPage() {
       if (data.feedback_token) {
         localStorage.setItem(`feedback_token_${data.session_id}`, data.feedback_token);
       }
+      sessionStorage.setItem(`zip_${data.session_id}`, formData.zipCode);
       router.push(`/plan?session=${data.session_id}`);
     },
     onError: () => {

@@ -10,7 +10,7 @@ from app.modules.matching.affinity import (
     CAREER_CENTER_STEP,
     RESOURCE_AFFINITY,
 )
-from app.modules.matching.engine import _build_barrier_cards, _build_next_steps
+from app.modules.matching.barrier_cards import _build_cards as _build_barrier_cards, _build_next_steps
 from app.modules.matching.types import (
     BarrierSeverity,
     BarrierType,

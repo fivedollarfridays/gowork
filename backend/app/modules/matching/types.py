@@ -123,6 +123,7 @@ class Resource(BaseModel):
     services: Optional[list[str]] = None
     notes: Optional[str] = None
     health_status: ResourceHealth = ResourceHealth.HEALTHY
+    eligibility_status: Optional[str] = None
 
 
 class MatchBucket(str, Enum):
