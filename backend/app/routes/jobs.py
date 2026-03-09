@@ -86,7 +86,7 @@ async def list_jobs(
     barriers: str | None = Query(None, description="Comma-separated barriers (e.g. credit,transportation)"),
     transit_accessible: bool | None = Query(None),
     industry: str | None = Query(None),
-    source: str | None = Query(None, description="Filter by source (brightdata, jsearch, honestjobs)"),
+    source: str | None = Query(None, description="Filter by source (brightdata, honestjobs)"),
     fair_chance: bool | None = Query(None, description="Filter to fair-chance employers only"),
     _: None = Depends(_check_list_rate),
 ) -> dict:

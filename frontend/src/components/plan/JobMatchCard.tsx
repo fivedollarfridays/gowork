@@ -1,6 +1,6 @@
 "use client";
 
-import { Briefcase, Bus, CreditCard, DollarSign, ExternalLink, MapPin, Shield } from "lucide-react";
+import { Briefcase, Bus, Car, CreditCard, DollarSign, ExternalLink, Footprints, MapPin, Shield } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,6 @@ function sourceLabel(source: string | null): string | null {
   if (!source) return null;
   if (source === "honestjobs") return "via Honest Jobs";
   if (source.startsWith("brightdata:")) return "via Indeed";
-  if (source.startsWith("jsearch:")) return "via JSearch";
   return null;
 }
 
@@ -147,6 +146,28 @@ export function JobMatchCard({ job, creditResult }: JobMatchCardProps) {
             </span>
           )}
         </div>
+
+        {/* Commute estimate */}
+        {isScoredJob(job) && job.commute_estimate && (
+          <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <Car className="h-3.5 w-3.5 shrink-0" />
+              {job.commute_estimate.drive_min} min drive
+            </span>
+            {job.commute_estimate.transit_min != null && (
+              <span className="flex items-center gap-1.5">
+                <Bus className="h-3.5 w-3.5 shrink-0" />
+                {job.commute_estimate.transit_min} min transit
+              </span>
+            )}
+            {job.commute_estimate.walk_min != null && (
+              <span className="flex items-center gap-1.5">
+                <Footprints className="h-3.5 w-3.5 shrink-0" />
+                {job.commute_estimate.walk_min} min walk
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Transit schedule info */}
         {isScoredJob(job) && job.transit_info && (

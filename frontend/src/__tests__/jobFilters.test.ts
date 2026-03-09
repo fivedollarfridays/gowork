@@ -32,7 +32,7 @@ describe("filterJobs", () => {
   const jobs: ScoredJobMatch[] = [
     makeJob("CNA", { source: "brightdata:snap-1", pay_range: "$14-$18/hr" }),
     makeJob("Driver", {
-      source: "jsearch:req-1",
+      source: "brightdata:snap-2",
       fair_chance: true,
       pay_range: "$20-$25/hr",
     }),
@@ -48,15 +48,8 @@ describe("filterJobs", () => {
   it("filters by source: brightdata", () => {
     const filters: JobFilterState = { ...defaultFilters, source: "brightdata" };
     const result = filterJobs(jobs, filters);
-    expect(result).toHaveLength(2);
+    expect(result).toHaveLength(3);
     expect(result.every((j) => j.source?.startsWith("brightdata:"))).toBe(true);
-  });
-
-  it("filters by source: jsearch", () => {
-    const filters: JobFilterState = { ...defaultFilters, source: "jsearch" };
-    const result = filterJobs(jobs, filters);
-    expect(result).toHaveLength(1);
-    expect(result[0].title).toBe("Driver");
   });
 
   it("filters by source: honestjobs", () => {
@@ -109,11 +102,11 @@ describe("filterJobs", () => {
   it("returns empty for no matches", () => {
     const filters: JobFilterState = {
       ...defaultFilters,
-      source: "jsearch",
+      source: "honestjobs",
       fairChanceOnly: false,
       schedule: "part-time",
     };
-    // jsearch driver has no employment_type, so part-time filter excludes it
+    // honestjobs cook has no employment_type, so part-time filter excludes it
     const result = filterJobs(jobs, filters);
     expect(result).toHaveLength(0);
   });

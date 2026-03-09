@@ -167,6 +167,7 @@ export interface ScoredJobMatch extends JobMatch {
   fair_chance?: boolean;
   employment_type?: string | null;
   transit_info?: TransitInfoDetail | null;
+  commute_estimate?: CommuteEstimate | null;
 }
 
 export interface WageStep {
@@ -406,6 +407,12 @@ export interface TransitInfoDetail {
   transfer_count: number;
   warnings: TransitWarning[];
   google_maps_url: string | null;
+}
+
+export interface CommuteEstimate {
+  drive_min: number;
+  transit_min: number | null;
+  walk_min: number | null;
 }
 
 /** @deprecated Use TransitInfoDetail for schedule-aware transit data */

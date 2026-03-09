@@ -5,7 +5,12 @@ from sqlalchemy import text
 
 from app.core.database import get_async_session_factory
 from app.core.queries_jobs import get_job_listings_by_source, insert_job_listings
-from app.integrations.brightdata.cache import parse_brightdata_jobs, store_crawl_results
+from app.integrations.brightdata.cache import (
+    deduplicate_by_company_title,
+    parse_brightdata_jobs,
+    store_crawl_results,
+)
+from app.integrations.brightdata.types import BrightDataJobRecord
 
 
 @pytest.fixture
@@ -166,3 +171,66 @@ class TestStoreCrawlResults:
         raw = [{"company": "No Title"}, {"description": "Also no title"}]
         count = await store_crawl_results(db_session, "snap-none", raw)
         assert count == 0
+
+
+class TestDeduplicateByCompanyTitle:
+    def test_removes_exact_duplicates(self):
+        """Jobs with same company+title from different domains are deduped."""
+        jobs = [
+            BrightDataJobRecord(title="CNA", company="Baptist", url="https://indeed.com/cna"),
+            BrightDataJobRecord(title="CNA", company="Baptist", url="https://linkedin.com/cna"),
+        ]
+        result = deduplicate_by_company_title(jobs)
+        assert len(result) == 1
+
+    def test_keeps_different_titles(self):
+        """Jobs with different titles at same company are not deduped."""
+        jobs = [
+            BrightDataJobRecord(title="CNA", company="Baptist", url="https://indeed.com/cna"),
+            BrightDataJobRecord(title="RN", company="Baptist", url="https://indeed.com/rn"),
+        ]
+        result = deduplicate_by_company_title(jobs)
+        assert len(result) == 2
+
+    def test_case_insensitive(self):
+        """Dedup is case-insensitive for both company and title."""
+        jobs = [
+            BrightDataJobRecord(title="CNA", company="Baptist Health", url="https://a.com/1"),
+            BrightDataJobRecord(title="cna", company="baptist health", url="https://b.com/2"),
+        ]
+        result = deduplicate_by_company_title(jobs)
+        assert len(result) == 1
+
+    def test_none_company_not_deduped(self):
+        """Jobs without company are never deduped by this function."""
+        jobs = [
+            BrightDataJobRecord(title="CNA", company=None, url="https://a.com/1"),
+            BrightDataJobRecord(title="CNA", company=None, url="https://b.com/2"),
+        ]
+        result = deduplicate_by_company_title(jobs)
+        assert len(result) == 2
+
+    def test_empty_list(self):
+        """Empty input returns empty output."""
+        assert deduplicate_by_company_title([]) == []
+
+    def test_preserves_first_occurrence(self):
+        """The first job in the list wins when duplicates exist."""
+        jobs = [
+            BrightDataJobRecord(title="CNA", company="Baptist", url="https://indeed.com/cna"),
+            BrightDataJobRecord(title="CNA", company="Baptist", url="https://linkedin.com/cna"),
+        ]
+        result = deduplicate_by_company_title(jobs)
+        assert result[0].url == "https://indeed.com/cna"
+
+
+class TestStoreCrawlResultsWithCompanyTitleDedup:
+    @pytest.mark.anyio
+    async def test_cross_domain_dedup_by_company_title(self, db_session):
+        """Same company+title from different domains stored only once."""
+        raw_jobs = [
+            {"title": "CNA", "company": "Baptist", "url": "https://indeed.com/cna"},
+            {"title": "CNA", "company": "Baptist", "url": "https://linkedin.com/cna"},
+        ]
+        count = await store_crawl_results(db_session, "snap-cross", raw_jobs)
+        assert count == 1

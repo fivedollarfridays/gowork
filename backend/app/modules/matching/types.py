@@ -10,6 +10,7 @@ from app.modules.criminal.record_profile import RecordProfile
 from app.modules.feedback.types import ResourceHealth
 from app.modules.matching.job_readiness_types import JobReadinessResult
 from app.modules.matching.types_transit import (  # noqa: F401 — re-export
+    CommuteEstimate,
     RouteFeasibility,
     TransitConnection,
     TransitInfo,
@@ -184,6 +185,7 @@ class ScoredJobMatch(JobMatch):
     pay_range: Optional[str] = None
     cliff_impact: Optional[CliffImpact] = None
     transit_info: Optional[TransitInfo] = None
+    commute_estimate: Optional[CommuteEstimate] = None
 
 
 class BarrierCard(BaseModel):

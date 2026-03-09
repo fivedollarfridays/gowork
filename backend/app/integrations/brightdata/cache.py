@@ -87,6 +87,25 @@ def parse_brightdata_jobs(raw_jobs: list[dict]) -> list[BrightDataJobRecord]:
     return results
 
 
+def deduplicate_by_company_title(jobs: list[BrightDataJobRecord]) -> list[BrightDataJobRecord]:
+    """Remove cross-domain duplicates by (company, title) pair.
+
+    Jobs without a company are never deduped (cannot reliably match).
+    Comparison is case-insensitive. First occurrence wins.
+    """
+    seen: set[tuple[str, str]] = set()
+    unique: list[BrightDataJobRecord] = []
+    for job in jobs:
+        if not job.company:
+            unique.append(job)
+            continue
+        key = (job.company.lower(), job.title.lower())
+        if key not in seen:
+            seen.add(key)
+            unique.append(job)
+    return unique
+
+
 async def get_existing_urls(
     session: AsyncSession, urls: list[str],
 ) -> set[str]:
@@ -105,10 +124,13 @@ async def get_existing_urls(
 async def store_crawl_results(
     session: AsyncSession, snapshot_id: str, raw_jobs: list[dict],
 ) -> int:
-    """Parse, deduplicate by URL, and insert crawl results. Returns insert count."""
+    """Parse, deduplicate by URL and company+title, then insert. Returns insert count."""
     parsed = parse_brightdata_jobs(raw_jobs)
     if not parsed:
         return 0
+
+    # Cross-domain dedup: same company + title = same job
+    parsed = deduplicate_by_company_title(parsed)
 
     incoming_urls = [j.url for j in parsed if j.url]
     existing_urls = await get_existing_urls(session, incoming_urls)
