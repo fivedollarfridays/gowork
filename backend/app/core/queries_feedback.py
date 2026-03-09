@@ -1,5 +1,6 @@
 """Database queries for feedback tables."""
 
+import hmac
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import text
@@ -58,17 +59,27 @@ async def insert_resource_feedback(db: AsyncSession, feedback: ResourceFeedbackR
 
 
 async def validate_token(db: AsyncSession, token: str) -> str | None:
-    """Validate a feedback token. Returns session_id if valid and unexpired, else None."""
+    """Validate a feedback token. Returns session_id if valid and unexpired, else None.
+
+    HIGH-4: Uses hmac.compare_digest as a secondary constant-time check after
+    the SQL lookup. The 96-bit token entropy makes timing attacks impractical,
+    but the constant-time comparison adds defense-in-depth.
+    """
     now = datetime.now(timezone.utc).isoformat()
     result = await db.execute(
         text(
-            "SELECT session_id FROM feedback_tokens "
+            "SELECT token, session_id FROM feedback_tokens "
             "WHERE token = :token AND expires_at > :now"
         ),
         {"token": token, "now": now},
     )
     row = result.fetchone()
-    return row[0] if row else None
+    if row is None:
+        return None
+    stored_token, session_id = row[0], row[1]
+    if not hmac.compare_digest(token, stored_token):
+        return None
+    return session_id
 
 
 async def token_exists(db: AsyncSession, token: str) -> bool:

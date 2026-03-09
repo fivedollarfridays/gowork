@@ -104,14 +104,26 @@ export function Typewriter({ text, delay = 0, className }: TypewriterProps) {
   if (prefersReduced) return <span className={className}>{text}</span>;
   const words = text.split(" ");
   return (
-    <StaggerContainer className={className} delay={delay}>
+    <m.span
+      className={className}
+      initial="hidden"
+      animate="show"
+      variants={{
+        hidden: {},
+        show: { transition: { staggerChildren: 0.08, delayChildren: delay } },
+      }}
+    >
       {words.map((word, i) => (
-        <StaggerItem key={i}>
-          <span style={{ display: "inline-block" }}>{word}</span>
+        <m.span
+          key={i}
+          style={{ display: "inline-block" }}
+          variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}
+        >
+          {word}
           {i < words.length - 1 && "\u00A0"}
-        </StaggerItem>
+        </m.span>
       ))}
-    </StaggerContainer>
+    </m.span>
   );
 }
 

@@ -1,9 +1,10 @@
 """Feedback module types — Pydantic models and enums."""
 
+import unicodedata
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class ResourceHealth(str, Enum):
@@ -36,6 +37,17 @@ class VisitFeedbackRequest(BaseModel):
     outcomes: list[str] = Field(default_factory=list, max_length=20)
     plan_accuracy: int = Field(ge=1, le=3)
     free_text: Optional[str] = Field(default=None, max_length=1000)
+
+    @field_validator("free_text", mode="before")
+    @classmethod
+    def sanitize_free_text(cls, v: str | None) -> str | None:
+        """MED-5: Sanitize free_text — strip, NFC-normalize, remove null bytes."""
+        if v is None:
+            return None
+        v = v.strip()
+        v = v.replace("\x00", "")
+        v = unicodedata.normalize("NFC", v)
+        return v or None
 
 
 class VisitFeedbackResponse(BaseModel):

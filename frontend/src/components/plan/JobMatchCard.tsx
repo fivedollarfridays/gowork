@@ -41,7 +41,7 @@ export function JobMatchCard({ job, creditResult }: JobMatchCardProps) {
             {/* Relevance score badge */}
             {isScoredJob(job) && job.relevance_score > 0 && (
               <Badge className="bg-secondary/10 text-secondary border-secondary/30 text-xs" variant="outline">
-                {Math.round(job.relevance_score * 100)}%
+                {Math.round(job.relevance_score * 100)}% Match
               </Badge>
             )}
             {/* Transit badge */}

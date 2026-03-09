@@ -30,18 +30,18 @@ function renderWithClient(ui: React.ReactElement) {
 describe("PlanPage session recovery", () => {
   beforeEach(() => {
     mockSearchParams.delete("session");
-    localStorage.clear();
+    sessionStorage.clear();
   });
 
-  it("stores session ID from URL to localStorage", () => {
+  it("stores session ID from URL to sessionStorage", () => {
     mockSearchParams.set("session", "sess-abc-123");
     renderWithClient(<PlanPage />);
 
-    expect(localStorage.getItem("montgowork_session_id")).toBe("sess-abc-123");
+    expect(sessionStorage.getItem("montgowork_session_id")).toBe("sess-abc-123");
   });
 
-  it("recovers session ID from localStorage when URL param is missing", async () => {
-    localStorage.setItem("montgowork_session_id", "sess-recovered");
+  it("recovers session ID from sessionStorage when URL param is missing", async () => {
+    sessionStorage.setItem("montgowork_session_id", "sess-recovered");
 
     const { getPlan } = await import("@/lib/api");
     (getPlan as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
@@ -50,12 +50,12 @@ describe("PlanPage session recovery", () => {
 
     renderWithClient(<PlanPage />);
 
-    // Should NOT show "No session ID provided" — it recovered from localStorage
+    // Should NOT show "No session ID provided" — it recovered from sessionStorage
     expect(screen.queryByText(/no session id provided/i)).not.toBeInTheDocument();
   });
 
-  it("shows error when both URL param and localStorage are empty", () => {
-    // No URL param, no localStorage
+  it("shows error when both URL param and sessionStorage are empty", () => {
+    // No URL param, no sessionStorage
     renderWithClient(<PlanPage />);
 
     expect(screen.getByText(/no session id provided/i)).toBeInTheDocument();

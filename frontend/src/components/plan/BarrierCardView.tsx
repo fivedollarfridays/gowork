@@ -30,7 +30,7 @@ function loadFeedbackState(sessionId: string, resourceIds: number[]): FeedbackSt
   if (typeof window === "undefined") return {};
   const state: FeedbackState = {};
   for (const id of resourceIds) {
-    const stored = localStorage.getItem(`feedback_${sessionId}_${id}`);
+    const stored = sessionStorage.getItem(`feedback_${sessionId}_${id}`);
     state[id] = stored === "true" ? true : stored === "false" ? false : null;
   }
   return state;
@@ -58,9 +58,9 @@ export function BarrierCardView({ barrier, sessionId, token, zipCode }: BarrierC
         const newValue = current === helpful ? null : helpful;
 
         if (newValue === null) {
-          localStorage.removeItem(`feedback_${sessionId}_${resourceId}`);
+          sessionStorage.removeItem(`feedback_${sessionId}_${resourceId}`);
         } else {
-          localStorage.setItem(`feedback_${sessionId}_${resourceId}`, String(newValue));
+          sessionStorage.setItem(`feedback_${sessionId}_${resourceId}`, String(newValue));
           submitResourceFeedback({
             resource_id: resourceId,
             session_id: sessionId,

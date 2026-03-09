@@ -137,6 +137,17 @@ class TestUserPromptTemplate:
         )
         assert "<user_input>Former CNA, 3 years</user_input>" in rendered
 
+    def test_plan_data_wrapped_in_user_input_tags(self):
+        """plan_data field is wrapped in <user_input> tags (MED-4 prompt injection defense)."""
+        from app.ai.prompts import USER_PROMPT_TEMPLATE
+
+        rendered = USER_PROMPT_TEMPLATE.format(
+            barriers="credit",
+            qualifications="test",
+            plan_data='{"barriers": [], "job_matches": []}',
+        )
+        assert '<user_input>{"barriers": [], "job_matches": []}</user_input>' in rendered
+
     def test_no_emojis_in_user_prompt(self):
         """User prompt template must not contain emoji characters."""
         from app.ai.prompts import USER_PROMPT_TEMPLATE

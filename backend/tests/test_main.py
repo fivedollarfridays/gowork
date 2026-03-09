@@ -209,3 +209,22 @@ class TestLifespan:
              patch("app.main.check_llm_providers", return_value=mock_status):
             async with lifespan(app):
                 pass
+
+
+class TestSecurityHeaders:
+    """Security headers are set on all responses (LOW-6)."""
+
+    @pytest.mark.anyio
+    async def test_x_content_type_options_nosniff(self, client):
+        resp = await client.get("/")
+        assert resp.headers.get("x-content-type-options") == "nosniff"
+
+    @pytest.mark.anyio
+    async def test_x_frame_options_deny(self, client):
+        resp = await client.get("/")
+        assert resp.headers.get("x-frame-options") == "DENY"
+
+    @pytest.mark.anyio
+    async def test_referrer_policy(self, client):
+        resp = await client.get("/")
+        assert resp.headers.get("referrer-policy") == "strict-origin-when-cross-origin"

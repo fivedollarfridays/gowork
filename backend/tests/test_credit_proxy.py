@@ -185,6 +185,8 @@ class TestCreditApiUrlValidation:
             environment="production",
             credit_api_url="https://credit-api.example.com",
             cors_origins="https://app.example.com",
+            audit_hash_salt="test-production-salt-value",
+            admin_api_key="a" * 32,
         )
         assert s.credit_api_url == "https://credit-api.example.com"
 

@@ -348,6 +348,46 @@ Add expungement eligibility check to plan:
 **Why:** BrightData crawls are triggered manually and cached. For judges and
 real users, we need real-time job results from multiple sources.
 
+#### T27.0 — BrightData Pre-Built Jobs Dataset Integration
+**Complexity: 30** | **Priority: P0** | **HACKATHON PRIORITY — free credits via sponsor**
+
+Ingest BrightData's pre-built Jobs Dataset (40M+ records, JSON/CSV) to populate
+Montgomery-area job listings with real salary data. This is the fastest path to
+fixing our "all jobs at 25% score" problem — seed data has no pay info, so PVS
+scoring can't differentiate.
+
+**Products available (free hackathon credits):**
+- **Pre-built Jobs Dataset** — ready-made JSON/CSV, $2.50/1K records. Includes
+  title, company, location, salary range, description, apply URL, employment type.
+- **Jobs Scraper API** — automated extraction from Indeed, LinkedIn, Glassdoor.
+- **Indeed Jobs Scraper** — entry-level/hourly job focus, strong Montgomery coverage.
+- **LinkedIn Jobs Scraper** — 40M+ listings, skews white-collar.
+
+**MVP approach (T27.0):**
+1. Download pre-built dataset filtered to Montgomery, AL area (36xxx zips)
+2. Normalize to existing `JobListing` schema
+3. Store in `aggregated_jobs` table with `source: "brightdata"`
+4. Feed into PVS scorer — salary data enables real score differentiation
+
+**Files to create/modify:**
+- `backend/app/integrations/brightdata/dataset_loader.py` (NEW) — parse + normalize
+  BrightData JSON/CSV into JobListing schema
+- `backend/app/integrations/brightdata/models.py` (NEW) — BrightData record schema
+- `backend/tests/integrations/brightdata/test_dataset_loader.py` (NEW)
+- `backend/data/brightdata/` — downloaded dataset files
+
+**Env vars:** `BRIGHTDATA_API_TOKEN` (for Scraper API, optional for pre-built)
+
+**Acceptance Criteria:**
+- [ ] Download and parse BrightData pre-built jobs dataset (Montgomery, AL)
+- [ ] Normalize records to JobListing schema (title, company, location, salary, URL)
+- [ ] Salary data extracted and available for PVS scoring
+- [ ] Store in aggregated_jobs table with source attribution
+- [ ] Dedup against existing seed data by (title, company) fuzzy match
+- [ ] Tests with sample BrightData JSON fixture
+
+---
+
 #### T27.1 — JSearch API Integration
 **Complexity: 40** | **Priority: P0**
 
@@ -814,6 +854,53 @@ ALTER TABLE resources ADD COLUMN eligibility_criteria TEXT;  -- JSON
 
 ---
 
+### Bugfixes & Polish (Cross-Sprint)
+
+These are gaps discovered during integration testing that don't belong to a
+single sprint.
+
+#### B1 — Wire `credit_readiness_score` into Plan Response
+**Complexity: 10** | **Priority: P1**
+
+The `ReEntryPlan.credit_readiness_score` field is always `None`. The credit
+assessment result feeds into `job_readiness` factors but never populates the
+top-level plan field. When the user submits a credit self-assessment, the plan
+should reflect the computed score.
+
+**Files to update:**
+- `backend/app/modules/matching/engine.py` — populate `credit_readiness_score`
+  from `credit_result` passed through the assessment
+- `backend/tests/test_engine.py` — test with and without credit result
+
+**Acceptance Criteria:**
+- [ ] `credit_readiness_score` populated when credit result is provided
+- [ ] Remains `None` when no credit assessment is done
+- [ ] Frontend credit section renders correctly with the value
+- [ ] Tests for both paths
+
+#### B2 — Enrich `match_reason` with Resume Keywords and Target Industries
+**Complexity: 20** | **Priority: P1**
+
+Job card `match_reason` strings are generic ("Entry-level opportunity") and
+don't reference the user's resume text or target industries. When a user
+provides resume keywords or selects target industries, the match reason should
+reflect why the job is relevant to *them*.
+
+**Files to update:**
+- `backend/app/modules/matching/pvs_scorer.py` — `_build_pvs_reason()` to
+  accept resume keywords and target industries, generate specific reasons
+- `backend/app/modules/matching/job_matcher.py` — pass resume/industry context
+  to the scorer
+- `backend/tests/test_pvs_scorer.py` — test enriched reasons
+
+**Acceptance Criteria:**
+- [ ] Match reason references matched industry (e.g., "Matches your target: manufacturing")
+- [ ] Match reason references resume keywords (e.g., "Matches your forklift experience")
+- [ ] Falls back to generic reason when no resume/industry data provided
+- [ ] Tests for each reason path
+
+---
+
 ## Execution Order
 
 ```
@@ -824,7 +911,7 @@ Sprint 26: Criminal Record Routing        ← P0, core promise
   T26.1 → T26.2 → T26.3 → T26.4
 
 Sprint 27: Job Board Aggregation          ← P0, coverage
-  T27.1 → T27.2 → T27.3 → T27.4
+  T27.0 (BrightData dataset) → T27.1 → T27.2 → T27.3 → T27.4
 
 Sprint 28: Resource Auto-Matching         ← P1, depth
   T28.1 → T28.2 → T28.3
