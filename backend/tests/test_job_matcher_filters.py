@@ -73,40 +73,59 @@ class TestScheduleFilter:
         assert result[0]["schedule_conflict"] is False
 
 
+def _make_stop(name, lat, lng, route_id=1, route_name="Route 1"):
+    """Build a stop-with-route dict for transit filter tests."""
+    return {
+        "stop_name": name, "lat": lat, "lng": lng,
+        "route_id": route_id, "route_number": route_id, "route_name": route_name,
+        "weekday_start": "05:00", "weekday_end": "21:00", "saturday": 1, "sunday": 0,
+    }
+
+
 class TestTransitFilter:
     def test_job_near_stop_is_accessible(self):
-        """Jobs near a transit stop should be marked transit_accessible=True."""
+        """Jobs with coordinates near a transit stop should be accessible."""
         from app.modules.matching.job_matcher import _filter_by_transit
 
-        jobs = [_make_job("Cashier", location="3801 Eastern Blvd, Montgomery, AL 36116")]
-        stops = [{"lat": 32.35, "lng": -86.27, "stop_name": "Eastern Blvd"}]
-        result = _filter_by_transit(jobs, transit_dependent=True, transit_stops=stops)
+        jobs = [{**_make_job("Cashier", location="Montgomery, AL"), "lat": 32.35, "lng": -86.27}]
+        stops = [_make_stop("Eastern Blvd", 32.35, -86.27)]
+        result = _filter_by_transit(jobs, transit_dependent=True, stops_with_routes=stops)
         assert result[0]["transit_accessible"] is True
 
     def test_job_far_from_stops_not_accessible(self):
-        """Jobs far from all transit stops should be marked transit_accessible=False."""
+        """Jobs far from all transit stops should not be accessible."""
         from app.modules.matching.job_matcher import _filter_by_transit
 
-        jobs = [_make_job("Rural Worker", location="999 Remote Rd, Prattville, AL 36067")]
-        stops = [{"lat": 32.35, "lng": -86.27, "stop_name": "Downtown"}]
-        result = _filter_by_transit(jobs, transit_dependent=True, transit_stops=stops)
+        jobs = [{**_make_job("Rural Worker"), "lat": 33.0, "lng": -85.0}]
+        stops = [_make_stop("Downtown", 32.35, -86.27)]
+        result = _filter_by_transit(jobs, transit_dependent=True, stops_with_routes=stops)
         assert result[0]["transit_accessible"] is False
 
-    def test_sunday_job_flagged_for_transit_users(self):
-        """Jobs requiring Sunday work should flag transit users (no Sunday service)."""
+    def test_sunday_gap_flagged_for_daytime_shift(self):
+        """MATS has no Sunday service — all transit-dependent jobs get sunday_flag."""
         from app.modules.matching.job_matcher import _filter_by_transit
 
-        jobs = [_make_job("Driver", description="Tuesday-Saturday including some Sundays")]
-        stops = [{"lat": 32.37, "lng": -86.30, "stop_name": "Main"}]
-        result = _filter_by_transit(jobs, transit_dependent=True, transit_stops=stops)
+        jobs = [{**_make_job("Cashier"), "lat": 32.35, "lng": -86.27}]
+        stops = [_make_stop("Downtown", 32.35, -86.27)]
+        result = _filter_by_transit(jobs, transit_dependent=True, stops_with_routes=stops)
+        assert result[0]["sunday_flag"] is True  # all MATS routes have sunday=0
+
+    def test_keyword_fallback_for_jobs_without_coords(self):
+        """Jobs without lat/lng fall back to keyword-based transit check."""
+        from app.modules.matching.job_matcher import _filter_by_transit
+
+        jobs = [_make_job("Driver", description="Work includes Sundays in Montgomery")]
+        stops = [_make_stop("Main", 32.37, -86.30)]
+        result = _filter_by_transit(jobs, transit_dependent=True, stops_with_routes=stops)
         assert result[0]["sunday_flag"] is True
+        assert result[0]["transit_accessible"] is True  # "montgomery" in text
 
     def test_non_transit_dependent_skips_filter(self):
         """Non-transit-dependent users get all jobs marked accessible."""
         from app.modules.matching.job_matcher import _filter_by_transit
 
         jobs = [_make_job("Remote", location="Far away")]
-        result = _filter_by_transit(jobs, transit_dependent=False, transit_stops=[])
+        result = _filter_by_transit(jobs, transit_dependent=False, stops_with_routes=[])
         assert result[0]["transit_accessible"] is True
         assert result[0]["sunday_flag"] is False
 
@@ -200,7 +219,7 @@ class TestMatchJobsEmpty:
         # Use a patched version to return empty data
         from unittest.mock import patch
         with patch("app.modules.matching.job_matcher.get_all_job_listings", return_value=[]):
-            with patch("app.modules.matching.job_matcher._get_transit_stops", return_value=[]):
+            with patch("app.modules.matching.job_matcher._get_stops_with_routes", return_value=[]):
                 result = await match_jobs(profile, mock_session)
 
         assert result == []

@@ -132,9 +132,15 @@ function PlanContent() {
     [data],
   );
 
-  const zipCode = useMemo(() => {
-    if (typeof window === "undefined" || !sessionId) return "";
-    return sessionStorage.getItem(`zip_${sessionId}`) ?? "";
+  const [zipCode, setZipCode] = useState("");
+  const [enrolledPrograms, setEnrolledPrograms] = useState<string[]>([]);
+  useEffect(() => {
+    if (typeof window === "undefined" || !sessionId) return;
+    setZipCode(sessionStorage.getItem(`zip_${sessionId}`) ?? "");
+    try {
+      const raw = sessionStorage.getItem(`enrolled_${sessionId}`);
+      if (raw) setEnrolledPrograms(JSON.parse(raw));
+    } catch { /* ignore corrupt data */ }
   }, [sessionId]);
 
   const prefersReduced = useReducedMotion();
@@ -233,7 +239,7 @@ function PlanContent() {
       {plan.benefits_eligibility && (
         <>
           <Separator />
-          <BenefitsEligibility eligibility={plan.benefits_eligibility} />
+          <BenefitsEligibility eligibility={plan.benefits_eligibility} enrolledPrograms={enrolledPrograms} />
         </>
       )}
 

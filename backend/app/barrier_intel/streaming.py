@@ -5,7 +5,7 @@ import logging
 import time
 from typing import Literal
 
-from app.ai.audit_log import log_llm_interaction_async
+from app.ai.audit_log import log_llm_interaction
 from app.ai.llm_client import get_llm_stream, resolve_provider
 from app.barrier_intel.guardrails import check_hallucinations
 from app.barrier_intel.observability import build_request_log
@@ -67,7 +67,6 @@ def _check_response(response: str, ctx: RetrievalContext) -> tuple[bool, str | N
     disclaimer = check_hallucinations(response, known_names)
     return (True, disclaimer) if disclaimer else (False, None)
 
-
 async def _audit_log(
     session_hash: str,
     provider: str,
@@ -97,7 +96,7 @@ async def _audit_log(
     logger.info("barrier_intel_chat", extra=log_data)
 
     settings = get_settings()
-    await log_llm_interaction_async(
+    await log_llm_interaction(
         log_path=settings.audit_log_path,
         session_id=session_hash,
         provider=provider,

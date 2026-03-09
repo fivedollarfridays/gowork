@@ -13,10 +13,8 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-_dirs_ensured: set[str] = set()
 
-
-def hash_session_id(session_id: str, salt: str = "") -> str:
+def hash_session_id(session_id: str, salt: str) -> str:
     """Hash a session ID with salted sha256 for PII-safe logging."""
     return hashlib.sha256((salt + session_id).encode()).hexdigest()
 
@@ -32,33 +30,7 @@ def _write_log_entry(log_path: str, entry: dict) -> None:
         logger.warning("Failed to write audit log to %s", log_path, exc_info=True)
 
 
-def _write_entry(log_path: str, entry: dict) -> None:
-    """Synchronous JSONL append (runs in thread pool)."""
-    path = Path(log_path)
-    parent = str(path.parent)
-    if parent not in _dirs_ensured:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        _dirs_ensured.add(parent)
-    with path.open("a") as f:
-        f.write(json.dumps(entry) + "\n")
-
-
 async def log_llm_interaction(
-    log_path: str,
-    session_id: str,
-    provider: str,
-    prompt_length: int,
-    response_length: int,
-    latency_ms: float,
-) -> None:
-    """Append a JSONL audit entry (sync). Use log_llm_interaction_async on async paths."""
-    if not log_path:
-        return
-    entry = _build_entry(session_id, provider, prompt_length, response_length, latency_ms)
-    _write_log_entry(log_path, entry)
-
-
-async def log_llm_interaction_async(
     log_path: str,
     session_id: str,
     provider: str,

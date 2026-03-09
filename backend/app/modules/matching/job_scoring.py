@@ -44,14 +44,41 @@ def _score_schedule(job: dict) -> float:
 
 
 def _score_transit(job: dict, transit_dependent: bool) -> float:
-    """15% weight: 1.0 accessible, 0.5 Sunday flag, 0.0 unreachable."""
+    """15% weight: score based on accessibility, walk distance, and transfers."""
     if not transit_dependent:
         return 1.0
     if not job.get("transit_accessible"):
         return 0.0
-    if job.get("sunday_flag"):
-        return 0.5
-    return 1.0
+
+    info = job.get("transit_info")
+    if info is None:
+        # Legacy path: keyword-only detection
+        return 0.5 if job.get("sunday_flag") else 1.0
+
+    # Walk distance factor (closest serving route)
+    walk = info.serving_routes[0].walk_miles if info.serving_routes else 1.0
+    if walk <= 0.25:
+        walk_score = 1.0
+    elif walk <= 0.5:
+        walk_score = 0.9
+    elif walk <= 1.0:
+        walk_score = 0.7
+    else:
+        walk_score = 0.4
+
+    # Transfer penalty
+    if info.transfer_count == 0:
+        transfer_mult = 1.0
+    elif info.transfer_count == 1:
+        transfer_mult = 0.8
+    else:
+        transfer_mult = 0.6
+
+    # Schedule feasibility
+    has_infeasible = any(not r.feasible for r in info.serving_routes)
+    schedule_mult = 0.5 if has_infeasible else 1.0
+
+    return round(walk_score * transfer_mult * schedule_mult, 3)
 
 
 def _score_barriers(job: dict) -> float:

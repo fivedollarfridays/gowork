@@ -97,7 +97,7 @@ def _split_legacy_buckets(
 
 def _compute_benefits(
     profile: BenefitsProfile | None,
-) -> tuple:  # (CliffAnalysis | None, BenefitsEligibility | None)
+) -> "tuple[CliffAnalysis | None, BenefitsEligibility | None]":
     """Compute cliff analysis and eligibility screening for benefits profile."""
     from app.modules.benefits.cliff_calculator import calculate_cliff_analysis
     from app.modules.benefits.eligibility_screener import screen_benefits_eligibility

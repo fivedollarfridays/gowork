@@ -31,5 +31,5 @@ export function generateFindhelpUrl(
 ): string | null {
   const path = FINDHELP_CATEGORIES[barrierType];
   if (!path) return null;
-  return `${BASE}/${path}--montgomery-al?postal=${zipCode}`;
+  return `${BASE}/${path}--montgomery-al?postal=${encodeURIComponent(zipCode)}`;
 }

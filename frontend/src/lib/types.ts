@@ -166,6 +166,7 @@ export interface ScoredJobMatch extends JobMatch {
   cliff_impact?: CliffImpact | null;
   fair_chance?: boolean;
   employment_type?: string | null;
+  transit_info?: TransitInfoDetail | null;
 }
 
 export interface WageStep {
@@ -347,6 +348,27 @@ export interface EnrichedJob {
   application_steps: string[];
 }
 
+export type TransitWarning = "sunday_gap" | "night_gap" | "long_walk" | "transfer_required";
+
+export interface RouteFeasibility {
+  route_number: number;
+  route_name: string;
+  nearest_stop: string;
+  walk_miles: number;
+  first_bus: string;
+  last_bus: string;
+  has_sunday: boolean;
+  feasible: boolean;
+}
+
+export interface TransitInfoDetail {
+  serving_routes: RouteFeasibility[];
+  transfer_count: number;
+  warnings: TransitWarning[];
+  google_maps_url: string | null;
+}
+
+/** @deprecated Use TransitInfoDetail for schedule-aware transit data */
 export interface TransitInfo {
   accessible: boolean;
   routes: { route_number: number; route_name: string }[];
