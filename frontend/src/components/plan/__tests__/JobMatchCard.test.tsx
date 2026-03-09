@@ -138,4 +138,13 @@ describe("JobMatchCard — commute estimate", () => {
     render(<JobMatchCard job={job} />);
     expect(screen.queryByText(/min drive/)).not.toBeInTheDocument();
   });
+
+  it("has aria-labels on commute badges", () => {
+    const job = makeJob({ commute_estimate: fullCommute });
+    render(<JobMatchCard job={job} />);
+    expect(screen.getByLabelText("Estimated commute times")).toBeInTheDocument();
+    expect(screen.getByLabelText("12 minute drive")).toBeInTheDocument();
+    expect(screen.getByLabelText("25 minute transit")).toBeInTheDocument();
+    expect(screen.getByLabelText("40 minute walk")).toBeInTheDocument();
+  });
 });
