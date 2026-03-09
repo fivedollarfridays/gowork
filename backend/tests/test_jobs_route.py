@@ -6,7 +6,7 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 
-_JOBS_PATCH = "app.routes.jobs.get_all_job_listings"
+_AGG_SEARCH_PATCH = "app.integrations.job_aggregator.JobAggregator.search"
 _JOB_PATCH = "app.routes.jobs.get_job_listing_by_id"
 _EMPLOYERS_PATCH = "app.routes.jobs.get_all_employers"
 _TRANSIT_PATCH = "app.routes.jobs.get_all_transit_routes"
@@ -60,7 +60,7 @@ class TestGetJobs:
         from app.main import app
 
         with (
-            patch(_JOBS_PATCH, new_callable=AsyncMock, return_value=_sample_jobs()),
+            patch(_AGG_SEARCH_PATCH, new_callable=AsyncMock, return_value=_sample_jobs()),
             patch(_EMPLOYERS_PATCH, new_callable=AsyncMock, return_value=_sample_employers()),
             patch(_TRANSIT_PATCH, new_callable=AsyncMock, return_value=_sample_transit()),
         ):
@@ -77,7 +77,7 @@ class TestGetJobs:
         from app.main import app
 
         with (
-            patch(_JOBS_PATCH, new_callable=AsyncMock, return_value=_sample_jobs()),
+            patch(_AGG_SEARCH_PATCH, new_callable=AsyncMock, return_value=_sample_jobs()),
             patch(_EMPLOYERS_PATCH, new_callable=AsyncMock, return_value=_sample_employers()),
             patch(_TRANSIT_PATCH, new_callable=AsyncMock, return_value=_sample_transit()),
         ):
@@ -94,7 +94,7 @@ class TestGetJobs:
         from app.main import app
 
         with (
-            patch(_JOBS_PATCH, new_callable=AsyncMock, return_value=_sample_jobs()),
+            patch(_AGG_SEARCH_PATCH, new_callable=AsyncMock, return_value=_sample_jobs()),
             patch(_EMPLOYERS_PATCH, new_callable=AsyncMock, return_value=_sample_employers()),
             patch(_TRANSIT_PATCH, new_callable=AsyncMock, return_value=_sample_transit()),
         ):
@@ -111,7 +111,7 @@ class TestGetJobs:
         from app.main import app
 
         with (
-            patch(_JOBS_PATCH, new_callable=AsyncMock, return_value=_sample_jobs()),
+            patch(_AGG_SEARCH_PATCH, new_callable=AsyncMock, return_value=_sample_jobs()),
             patch(_EMPLOYERS_PATCH, new_callable=AsyncMock, return_value=_sample_employers()),
             patch(_TRANSIT_PATCH, new_callable=AsyncMock, return_value=_sample_transit()),
         ):
@@ -129,7 +129,7 @@ class TestGetJobs:
         from app.main import app
 
         with (
-            patch(_JOBS_PATCH, new_callable=AsyncMock, return_value=[]),
+            patch(_AGG_SEARCH_PATCH, new_callable=AsyncMock, return_value=[]),
             patch(_EMPLOYERS_PATCH, new_callable=AsyncMock, return_value=[]),
             patch(_TRANSIT_PATCH, new_callable=AsyncMock, return_value=[]),
         ):

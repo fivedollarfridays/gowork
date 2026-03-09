@@ -39,6 +39,10 @@ class Settings(BaseSettings):
     brightdata_dataset_id: str = ""
     admin_api_key: str = ""
 
+    # JSearch (RapidAPI)
+    jsearch_api_key: str = ""
+    jsearch_host: str = "jsearch.p.rapidapi.com"
+
     # Data
     data_dir: str = ""
 

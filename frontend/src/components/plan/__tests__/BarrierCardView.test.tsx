@@ -32,7 +32,7 @@ describe("BarrierCardView clickable contacts", () => {
     render(<BarrierCardView barrier={barrier} />);
 
     const phoneLink = screen.getByRole("link", { name: /334-286-1746/ });
-    expect(phoneLink).toHaveAttribute("href", "tel:334-286-1746");
+    expect(phoneLink).toHaveAttribute("href", "tel:3342861746");
   });
 
   it("renders address as a maps link", () => {
