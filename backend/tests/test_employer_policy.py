@@ -319,7 +319,7 @@ class TestEmployerPolicySeedMissingFile:
 
         factory = get_async_session_factory()
         async with factory() as session:
-            with patch("app.modules.criminal.employer_seed._resolve_data_dir") as mock_dir:
+            with patch("app.modules.criminal.employer_seed.resolve_data_dir") as mock_dir:
                 empty_dir = Path(tempfile.mkdtemp())
                 mock_dir.return_value = empty_dir
                 # Should not raise

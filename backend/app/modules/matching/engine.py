@@ -128,6 +128,10 @@ async def generate_plan(
     parsed_resume = parse_resume(resume_text) if resume_text else None
     readiness = assess_job_readiness(profile, parsed_resume, ranked_jobs, credit_result)
     cliff, eligibility = _compute_benefits(benefits_profile)
+    credit_score = (
+        credit_result.get("readiness", {}).get("score")
+        if credit_result else None
+    )
 
     return ReEntryPlan(
         plan_id=str(uuid.uuid4()),
@@ -141,6 +145,7 @@ async def generate_plan(
         eligible_after_repair=[m.title for m in after_repair],
         wioa_eligibility=screen_wioa_eligibility(profile),
         job_readiness=readiness,
+        credit_readiness_score=credit_score,
         benefits_cliff_analysis=cliff,
         benefits_eligibility=eligibility,
     )

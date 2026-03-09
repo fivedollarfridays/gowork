@@ -6,7 +6,7 @@ import logging
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import _resolve_data_dir
+from app.core.database import resolve_data_dir
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ _SEED_FILE = "employer_policies_seed.json"
 
 async def seed_employer_policies(session: AsyncSession) -> None:
     """Idempotently insert employer policies from seed JSON. Safe to re-run."""
-    filepath = _resolve_data_dir() / _SEED_FILE
+    filepath = resolve_data_dir() / _SEED_FILE
     if not filepath.exists():
         logger.warning("employer_policies_seed.json not found at %s", filepath)
         return

@@ -60,7 +60,7 @@ def _session_data(profile: UserProfile, request: AssessmentRequest) -> dict:
         "credit_profile": request.credit_result.model_dump_json() if request.credit_result else None,
         "qualifications": request.work_history,
         "plan": None,
-        "profile": json.dumps(profile.model_dump()),
+        "profile": json.dumps(profile.model_dump(exclude={"record_profile"})),
         "benefits_profile": request.benefits_data.model_dump_json() if request.benefits_data else None,
     }
 
@@ -102,7 +102,7 @@ async def create_assessment(
 
     return {
         "session_id": session_id,
-        "profile": profile.model_dump(),
+        "profile": profile.model_dump(exclude={"record_profile"}),
         "plan": plan.model_dump(),
         "feedback_token": feedback_token,
     }

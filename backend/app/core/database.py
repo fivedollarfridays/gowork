@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 _DEFAULT_DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 
 
-def _resolve_data_dir() -> Path:
+def resolve_data_dir() -> Path:
     """Return configured DATA_DIR or the default relative path."""
     settings = get_settings()
     if settings.data_dir:
@@ -92,7 +92,7 @@ async def seed_database(engine):
         if result.scalar() > 0:
             return
 
-        data_dir = _resolve_data_dir()
+        data_dir = resolve_data_dir()
         if not data_dir.is_dir():
             logger.warning("DATA_DIR %s does not exist — skipping seed", data_dir)
             return

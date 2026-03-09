@@ -11,6 +11,7 @@ _SAFE_ADMIN_KEY = "x" * 32
 _DEFAULT_SALT = "montgowork-default-salt"
 _SHORT_KEY = "x" * 7  # under 32 chars, triggers validator
 _TEST_KEY = "t" * 8  # non-production test key
+_PROD_CORS = "https://app.montgowork.org"
 
 
 class TestAuditHashSaltValidator:
@@ -26,6 +27,7 @@ class TestAuditHashSaltValidator:
                 environment="production",
                 audit_hash_salt="montgowork-default-salt",
                 credit_api_url="https://credit.example.com",
+                cors_origins=_PROD_CORS,
             )
 
     def test_rejects_default_salt_explicitly_in_production(self):
@@ -35,6 +37,7 @@ class TestAuditHashSaltValidator:
                 environment="production",
                 audit_hash_salt=_DEFAULT_SALT,
                 credit_api_url="https://credit.example.com",
+                cors_origins=_PROD_CORS,
             )
 
     def test_accepts_custom_salt_in_production(self):
@@ -44,8 +47,18 @@ class TestAuditHashSaltValidator:
             audit_hash_salt=_SAFE_SALT,
             admin_api_key=_SAFE_ADMIN_KEY,
             credit_api_url="https://credit.example.com",
+            cors_origins=_PROD_CORS,
         )
         assert s.audit_hash_salt == _SAFE_SALT
+
+    def test_warns_default_salt_in_staging(self):
+        """Staging with default salt should log a warning but not error."""
+        import logging
+        with patch.object(logging.getLogger("app.core.config"), "warning") as mock_warn:
+            s = Settings(environment="staging", audit_hash_salt=_DEFAULT_SALT)
+            assert s.audit_hash_salt == _DEFAULT_SALT
+            mock_warn.assert_called_once()
+            assert "audit_hash_salt" in str(mock_warn.call_args)
 
     def test_allows_default_salt_in_development(self):
         """Development can use the default salt without error."""
@@ -72,6 +85,7 @@ class TestAdminApiKeyValidator:
                 admin_api_key=_SHORT_KEY,
                 audit_hash_salt=_SAFE_SALT,
                 credit_api_url="https://credit.example.com",
+                cors_origins=_PROD_CORS,
             )
 
     def test_rejects_empty_admin_key_in_production(self):
@@ -82,6 +96,7 @@ class TestAdminApiKeyValidator:
                 admin_api_key="",
                 audit_hash_salt=_SAFE_SALT,
                 credit_api_url="https://credit.example.com",
+                cors_origins=_PROD_CORS,
             )
 
     def test_accepts_long_admin_key_in_production(self):
@@ -91,6 +106,7 @@ class TestAdminApiKeyValidator:
             admin_api_key=_SAFE_ADMIN_KEY,
             audit_hash_salt=_SAFE_SALT,
             credit_api_url="https://credit.example.com",
+            cors_origins=_PROD_CORS,
         )
         assert s.admin_api_key == _SAFE_ADMIN_KEY
 
@@ -108,6 +124,37 @@ class TestAdminApiKeyValidator:
         """Test environment can use a short admin key."""
         s = Settings(environment="test", admin_api_key=_TEST_KEY)
         assert s.admin_api_key == _TEST_KEY
+
+
+class TestCorsLocalhostValidator:
+    """Reject localhost CORS origins in production."""
+
+    def setup_method(self):
+        get_settings.cache_clear()
+
+    def test_rejects_localhost_cors_in_production(self):
+        with pytest.raises(ValueError, match="cors_origins"):
+            Settings(
+                environment="production",
+                audit_hash_salt=_SAFE_SALT,
+                admin_api_key=_SAFE_ADMIN_KEY,
+                credit_api_url="https://credit.example.com",
+                cors_origins="http://localhost:3000",
+            )
+
+    def test_accepts_production_cors_origins(self):
+        s = Settings(
+            environment="production",
+            audit_hash_salt=_SAFE_SALT,
+            admin_api_key=_SAFE_ADMIN_KEY,
+            credit_api_url="https://credit.example.com",
+            cors_origins=_PROD_CORS,
+        )
+        assert "localhost" not in s.cors_origins
+
+    def test_allows_localhost_cors_in_development(self):
+        s = Settings(environment="development", cors_origins="http://localhost:3000")
+        assert "localhost" in s.cors_origins
 
 
 def _mock_rag_store():

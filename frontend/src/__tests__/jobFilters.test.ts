@@ -130,6 +130,7 @@ describe("defaultFilters", () => {
       source: "all",
       fairChanceOnly: false,
       schedule: "all",
+      minPay: 0,
     });
   });
 });
