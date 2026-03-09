@@ -1,7 +1,10 @@
 """Tests for PVS (Practical Value Score) composite scorer."""
 
-from app.modules.matching.pvs_scorer import compute_pvs, rank_all_jobs
-from app.modules.matching.types import AvailableHours, BarrierType, ScoringContext
+import pytest
+
+from app.modules.matching.pvs_scorer import _format_pay_range, compute_pvs, rank_all_jobs
+from app.modules.matching.salary_parser import SalaryInfo
+from app.modules.matching.types import AvailableHours, BarrierType, MatchBucket, ScoringContext
 
 
 # -- Fixtures --
@@ -101,6 +104,33 @@ class TestComputePvs:
         score = compute_pvs(job, _ctx())
         assert 0.0 <= score <= 1.0
 
+    def test_criminal_record_fair_chance_full_score(self) -> None:
+        """Fair-chance employer + record barrier → barrier_compat=1.0 (no penalty)."""
+        ctx = _ctx(barriers=[BarrierType.CRIMINAL_RECORD])
+        job_fair = _job(description="$15/hr", location="Montgomery, AL 36101", fair_chance=True, record_eligible=True)
+        job_blocked = _job(description="$15/hr", location="Montgomery, AL 36101", fair_chance=False, record_eligible=False)
+        score_fair = compute_pvs(job_fair, ctx)
+        score_blocked = compute_pvs(job_blocked, ctx)
+        assert score_fair > score_blocked
+
+    def test_criminal_record_not_eligible_lowers_score(self) -> None:
+        """Not eligible based on record → barrier_compat=0.2, much lower."""
+        ctx = _ctx(barriers=[BarrierType.CRIMINAL_RECORD])
+        job_eligible = _job(description="$15/hr", location="Montgomery, AL 36101", record_eligible=True)
+        job_blocked = _job(description="$15/hr", location="Montgomery, AL 36101", record_eligible=False)
+        score_eligible = compute_pvs(job_eligible, ctx)
+        score_blocked = compute_pvs(job_blocked, ctx)
+        assert score_eligible > score_blocked
+
+    def test_criminal_record_unknown_employer_mid_score(self) -> None:
+        """Unknown employer (no record data) with criminal record → barrier_compat=0.5."""
+        ctx = _ctx(barriers=[BarrierType.CRIMINAL_RECORD])
+        job_unknown = _job(description="$15/hr", location="Montgomery, AL 36101")
+        job_fair = _job(description="$15/hr", location="Montgomery, AL 36101", fair_chance=True, record_eligible=True)
+        score_unknown = compute_pvs(job_unknown, ctx)
+        score_fair = compute_pvs(job_fair, ctx)
+        assert score_unknown < score_fair
+
     def test_credit_blocked_lowers_barrier_compat(self) -> None:
         """Credit-blocked jobs for credit-barrier users should score lower."""
         job_ok = _job(description="$15/hr", location="Montgomery, AL 36101", credit_blocked=False)
@@ -166,3 +196,49 @@ class TestRankAllJobs:
         jobs = [_job(description="$15/hr", industry_match=True)]
         ranked = rank_all_jobs(jobs, _ctx())
         assert ranked[0].match_reason != ""
+
+    def test_record_fields_passed_through(self) -> None:
+        """Record enrichment fields should propagate to ScoredJobMatch."""
+        jobs = [
+            _job(
+                description="$15/hr",
+                fair_chance=True,
+                record_eligible=True,
+                background_check_timing="post_offer",
+                record_note=None,
+            ),
+        ]
+        ranked = rank_all_jobs(jobs, _ctx(barriers=[BarrierType.CRIMINAL_RECORD]))
+        assert ranked[0].fair_chance is True
+        assert ranked[0].record_eligible is True
+        assert ranked[0].background_check_timing == "post_offer"
+        assert ranked[0].record_note is None
+
+    def test_record_not_eligible_passed_through(self) -> None:
+        """Not-eligible record fields should propagate correctly."""
+        jobs = [
+            _job(
+                description="$15/hr",
+                fair_chance=False,
+                record_eligible=False,
+                record_note="Not eligible based on charge type",
+            ),
+        ]
+        ranked = rank_all_jobs(jobs, _ctx(barriers=[BarrierType.CRIMINAL_RECORD]))
+        assert ranked[0].fair_chance is False
+        assert ranked[0].record_eligible is False
+        assert ranked[0].record_note == "Not eligible based on charge type"
+
+
+class TestFormatPayRange:
+    """Test _format_pay_range helper."""
+
+    def test_format_pay_range_returns_raw_text_for_range(self) -> None:
+        """When salary.is_range is True, return the raw_text as-is."""
+        salary = SalaryInfo(
+            hourly_rate=12.25,
+            annual_estimate=25480.0,
+            is_range=True,
+            raw_text="$12.00 to $15.00 per hour",
+        )
+        assert _format_pay_range(salary) == "$12.00 to $15.00 per hour"

@@ -5,8 +5,8 @@ import logging
 import time
 from typing import Literal
 
-from app.ai.audit_log import log_llm_interaction
-from app.ai.llm_client import get_llm_stream
+from app.ai.audit_log import log_llm_interaction_async
+from app.ai.llm_client import get_llm_stream, resolve_provider
 from app.barrier_intel.guardrails import check_hallucinations
 from app.barrier_intel.observability import build_request_log
 from app.barrier_intel.prompts import SYSTEM_PROMPT, build_user_prompt
@@ -32,17 +32,14 @@ async def stream_chat_response(
 ):
     """Async generator yielding SSE events for the chat response."""
     start = time.monotonic()
+    provider = resolve_provider()
     barrier_ids = [b["id"] for b in ctx.root_barriers]
-    ctx_event = {
-        "root_barriers": barrier_ids,
-        "chain": ctx.barrier_chain_summary,
-    }
-    yield format_sse("context", ctx_event)
+    yield format_sse("context", {"root_barriers": barrier_ids, "chain": ctx.barrier_chain_summary})
 
     user_prompt = build_user_prompt(question, mode, ctx)
     chunk_count = 0
-    collected_text = []
-    async for text in get_llm_stream(SYSTEM_PROMPT, user_prompt):
+    collected_text: list[str] = []
+    async for text in get_llm_stream(SYSTEM_PROMPT, user_prompt, provider=provider):
         yield format_sse("token", {"text": text})
         collected_text.append(text)
         chunk_count += 1
@@ -56,7 +53,8 @@ async def stream_chat_response(
     yield format_sse("done", {"chunks": chunk_count, "latency_ms": round(latency_ms)})
 
     await _audit_log(
-        session_hash, mode, barrier_ids, ctx, chunk_count, latency_ms,
+        session_hash, provider, mode, barrier_ids, ctx,
+        chunk_count, latency_ms,
         guardrail_triggered=guardrail_triggered,
         prompt_length=len(user_prompt),
         response_length=len(full_response),
@@ -72,6 +70,7 @@ def _check_response(response: str, ctx: RetrievalContext) -> tuple[bool, str | N
 
 async def _audit_log(
     session_hash: str,
+    provider: str,
     mode: str,
     barrier_ids: list[str],
     ctx: RetrievalContext,
@@ -98,10 +97,10 @@ async def _audit_log(
     logger.info("barrier_intel_chat", extra=log_data)
 
     settings = get_settings()
-    await log_llm_interaction(
+    await log_llm_interaction_async(
         log_path=settings.audit_log_path,
         session_id=session_hash,
-        provider=settings.llm_provider,
+        provider=provider,
         prompt_length=prompt_length,
         response_length=response_length,
         latency_ms=latency_ms,

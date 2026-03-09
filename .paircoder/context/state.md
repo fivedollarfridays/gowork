@@ -1,16 +1,32 @@
 # Current State
 
-> Last updated: 2026-03-08
+> Last updated: 2026-03-09
 
 ## Active Plan
+
+**Plan:** plan-2026-03-benefits-program-eligibility
+**Type:** feature
+**Title:** Benefits Program Eligibility — Screening + Dashboard for Montgomery Residents
+**Status:** Complete (4/4 done)
+**Current Sprint:** 29
+
+## Previous Active Plan
+
+**Plan:** plan-2026-03-resource-auto-matching
+**Type:** feature
+**Title:** Resource Auto-Matching — findhelp.org Integration + Eligibility Engine
+**Status:** Complete (2/3 done, T28.3 deferred — needs findhelp.org API partnership)
+**Sprint:** 28
+
+## Previous Active Plan (Sprint 25)
 
 **Plan:** plan-2026-03-benefits-cliff-engine
 **Type:** feature
 **Title:** Benefits Cliff Engine — Cliff-Aware Job Ranking for Montgomery Residents
-**Status:** Planned (synced to Trello)
-**Current Sprint:** 25
+**Status:** Complete (PR #36 merged)
+**Sprint:** 25
 
-## Previous Active Plan
+## Older Plans
 
 **Plan:** plan-2026-03-barrier-graph-rag
 **Type:** feature
@@ -37,11 +53,32 @@
 
 ## Current Focus
 
-Sprint 25: Benefits Cliff Engine. WorkPath's key differentiator — showing users that "taking this $15/hr job costs you $400/month in benefits." Alabama-specific benefit program modeling (SNAP, TANF, Medicaid, Childcare, Section 8, LIHEAP), cliff-aware PVS scoring, and visualization.
+Sprint 29: Benefits Program Eligibility. The "opportunity system" that complements Sprint 25's cliff "warning system." Shows users which benefit programs they qualify for but aren't enrolled in, with estimated monthly values, income headroom, and actionable application steps (URLs, docs, contacts). Alabama/Montgomery-specific.
 
 ## Task Status
 
-### Sprint 25 — Benefits Cliff Engine
+### Sprint 29 — Benefits Program Eligibility
+
+| ID | Title | Priority | Complexity | Status | Depends On |
+|----|-------|----------|------------|--------|------------|
+| T29.1 | Program Eligibility Screener Module | P0 | 45 | done | -- |
+| T29.2 | Program Application Data (steps, URLs, contacts) | P0 | 30 | done | T29.1 |
+| T29.3 | Engine Integration + Frontend Types | P0 | 25 | done | T29.1, T29.2 |
+| T29.4 | Benefits Eligibility Dashboard UI | P1 | 40 | done | T29.3 |
+
+**Total: 4 tasks, 140 complexity points (4/4 done) — SPRINT COMPLETE**
+
+### Sprint 28 — Resource Auto-Matching
+
+| ID | Title | Priority | Complexity | Status | Depends On |
+|----|-------|----------|------------|--------|------------|
+| T28.1 | findhelp.org Integration (Capability URLs) | P1 | 45 | done | -- |
+| T28.2 | Resource Eligibility Engine | P1 | 50 | done | T28.1 |
+| T28.3 | findhelp.org Deep Integration (V2) | P2 | 60 | deferred | API access |
+
+**Total: 3 tasks, 155 complexity points (2/3 done, 1 deferred) — SPRINT COMPLETE**
+
+### Sprint 25 — Benefits Cliff Engine (COMPLETE)
 
 | ID | Title | Priority | Complexity | Status | Depends On |
 |----|-------|----------|------------|--------|------------|
@@ -137,149 +174,26 @@ Sprint 25: Benefits Cliff Engine. WorkPath's key differentiator — showing user
 
 ## What Was Just Done
 
-- **T27.0 BrightData Pre-Built Jobs Dataset Integration** (2026-03-08) — Created `dataset_loader.py` (parse JSON/JSONL/CSV dataset files, normalize to `BrightDataJobRecord`), `salary_embed.py` (embed structured salary data into description text for PVS salary_parser). Sample dataset with 15 Montgomery-area jobs (real employers: Amazon, Walmart, Hyundai, FedEx, MATS, Jackson Hospital, etc.) with salary ranges $11-$20/hr. Scores now range 0.772-0.959 (was all 25%). Dedup by (title, company), Montgomery-area filter, high-salary exclusion, URL-based DB dedup. 33 new tests, 1105 total passing. All arch checks clean.
+- **T27.0 BrightData Pre-Built Jobs Dataset Integration** (2026-03-08) — Created `dataset_loader.py` (parse JSON/JSONL/CSV dataset files, normalize to `BrightDataJobRecord`), `salary_embed.py` (embed structured salary data into description text for PVS salary_parser). Sample dataset with 15 Montgomery-area jobs. Code review fixes: renamed private symbols to public in cache.py, corrected misleading metric names in observability.
 
-- **Fix: frontend test step indices** (2026-03-08) — Updated `assess-industry.test.tsx` and `assess-schedule.test.tsx` to account for new Benefits step (step 4). Schedule moved from step 4→5, Industries from step 5→6, Review from step 6→7. All 9 assess tests pass. 4 pre-existing failures in unrelated files (BarrierCardView, MondayMorning, plan-whats-next).
+- **Merge conflict resolution** (2026-03-09) — Resolved conflicts between Sprint 29 (benefits eligibility) and Sprint 28 (resource auto-matching). engine.py: kept `_compute_benefits()` with lazy imports, adopted `build_barrier_cards_and_steps` from barrier_cards.py, `ResourceHealth` from feedback.types. state.md: merged both sprint histories.
 
-- **Fix: CliffBadge hardcoded colors** (2026-03-08) — Replaced hardcoded Tailwind colors (`bg-red-50`, `bg-amber-50`, `bg-emerald-50`) with `STATUS_BADGE_STYLES.positive/negative/warning` from constants.ts. Follows project pattern for CSS-variable-based badge styling.
+- **T29.4 done** (2026-03-08) — Benefits Eligibility Dashboard UI: Created `BenefitsEligibility.tsx` with per-program rows (confidence badges via `STATUS_BADGE_STYLES`, monthly values, income headroom), enrolled vs additional-eligible grouping, expandable "How to apply" sections (steps, required docs, office name/address/phone, processing time, apply link). Uses shadcn Card/Badge, Lucide icons, `PROGRAM_LABELS` from constants. Wired into `plan/page.tsx` after barriers, before cliff chart. 11 frontend tests (null render, heading, values, badges, headroom, disclaimer, expand/collapse, enrolled distinction, a11y). `npx tsc --noEmit` clean.
 
-- **Refactor: string enums for benefits types** (2026-03-08) -- Added `CliffSeverity(str, Enum)` with values mild/moderate/severe and `CliffType(str, Enum)` with values gradual/hard to `benefits/types.py`. Updated `CliffPoint.severity` to `CliffSeverity`, `ProgramBenefit.cliff_type` to `CliffType`, `CliffImpact.severity` to `Optional[CliffSeverity]`. Updated `classify_cliff_severity()` return type and `_get_phase_out()` return type in `cliff_calculator.py`. All existing tests pass without modification (str enum equality preserved). 18 new tests in `test_benefits_enums.py`. 945 tests pass (19 pre-existing failures in test_scoring_context.py and test_pvs_cliff.py unrelated).
+- **T29.3 done** (2026-03-08) — Engine Integration + Frontend Types: Wired `screen_benefits_eligibility()` into `generate_plan()` via `_compute_benefits()` helper. Added `benefits_eligibility: Optional[BenefitsEligibility] = None` to `ReEntryPlan`. Added `EligibilityConfidence`, `ProgramApplicationInfo`, `ProgramEligibility`, `BenefitsEligibility` TS interfaces to `types.ts`. 3 new engine tests. Refactored engine imports to stay under arch limit (lazy imports for benefits modules). `npx tsc --noEmit` passes.
 
-- **Refactor: ScoringContext dataclass** (2026-03-08) -- Extracted `ScoringContext` Pydantic BaseModel into `matching/types.py` to bundle user-level scoring parameters (`user_zip`, `transit_dependent`, `schedule_type`, `barriers`, `benefits_profile`). Updated `compute_pvs(job, ctx, salary=)` and `rank_all_jobs(jobs, ctx)` to accept `ScoringContext` instead of 5-6 individual params. Updated `job_matcher.py` to build `ScoringContext` from `UserProfile`. Refactored all tests in `test_pvs_scorer.py`, `test_pvs_cliff.py` to use `ScoringContext`. Added `test_scoring_context.py` with 6 new tests. All 967 tests pass.
+- **T29.2 done** (2026-03-08) — Program Application Data: Added `ProgramApplicationInfo` model to `types.py`. Created `application_data.py` with Montgomery-specific data for all 7 programs (SNAP/TANF/Medicaid/ALL_Kids/Childcare_Subsidy/Section_8/LIHEAP) — application URLs, steps, required documents, office names/addresses/phones, processing times. Section 8 includes waitlist note, LIHEAP includes seasonal note. Wired into screener: eligible programs get `application_info` attached, ineligible programs get `None`. 13 new tests in `test_benefits_application_data.py`. Split test file to satisfy arch check (49→36+15 functions). All 47 benefits tests pass, all arch checks clean.
 
-- **Refactor: consolidate benefit-summing** (2026-03-08) — Extracted `sum_program_benefits(annual_income, profile)` into `program_calculators.py` as the single canonical implementation. `cliff_calculator._total_benefits` is now a thin wrapper delegating to it (converts hourly to annual). `pvs_scorer._sum_benefits` removed entirely; call sites import `sum_program_benefits` directly. Added 7 new tests in `test_sum_program_benefits.py` covering equivalence with old implementations. All 967 tests pass.
+- **T29.1 done** (2026-03-08) — Program Eligibility Screener Module: Created `eligibility_screener.py` (entry point) and `eligibility_checks.py` (per-program check functions). 7 program checks with income thresholds from `thresholds.py`, benefit value estimates from `program_calculators.py`, confidence levels (likely/possible/unlikely within 10% band). Added `EligibilityConfidence` enum, `ProgramEligibility`, `BenefitsEligibility` models to `types.py`. 34 tests covering all programs, confidence, edge cases. All arch checks clean.
 
-- **Refactor: shared constants** (2026-03-08) — Consolidated `HOURS_PER_YEAR = 2080` and `MONTHS_PER_YEAR = 12` into `backend/app/modules/benefits/thresholds.py`. Updated 5 consumers (cliff_calculator.py, program_calculators.py, pvs_scorer.py, salary_parser.py, brightdata/cache.py) to import from thresholds instead of defining locally. Added 9 identity tests in `test_shared_constants.py`. All 958 tests pass (6 pre-existing enum test failures unrelated).
+- **T28.2 done** (2026-03-09) — Resource Eligibility Engine. Backend: `modules/resources/eligibility.py` with `ELIGIBILITY_RULES` (15+ rules: open, enrollment, compound income+dependents), `EligibilityStatus` enum (likely/check/unknown), `check_eligibility()` function. Added `eligibility_status: Optional[str]` to Resource model. Extracted barrier card builders to `matching/barrier_cards.py` (`build_barrier_cards_and_steps`, `_annotate_eligibility`, `_build_cards`, `_build_next_steps`, `BARRIER_TITLES`, `BARRIER_ACTIONS`) to fix engine.py arch violations (17→13 imports, 264→120 lines). Frontend: `EligibilityBadge.tsx` (green "Likely eligible" / yellow "Check eligibility" using semantic `bg-success/10` / `bg-warning/10` tokens), wired into `BarrierCardView.tsx` next to resource names. 20 backend tests, 6 frontend tests. All 1117 backend + 375 frontend tests pass, all arch checks clean.
 
-- **T25.4 done** (auto-updated by hook)
-
-- **T25.4 done** (2026-03-08)
-- **T25.3 done** (2026-03-08)
-- **T25.2 done** (auto-updated by hook)
-- **T25.1 done** (auto-updated by hook)
-
-### Sprint 25 T25.4 (2026-03-08) — Benefits Cliff Visualization
-
-- **T25.4** Benefits Cliff Visualization: Installed recharts. Added `CliffAnalysis`, `WageStep`, `CliffPoint` types to `types.ts`. Added `benefits_cliff_analysis: Optional[CliffAnalysis] = None` to `ReEntryPlan`. Engine computes `calculate_cliff_analysis(benefits_profile)` when enrolled programs exist and attaches to plan. Created `BenefitsCliffChart.tsx` — Recharts AreaChart (net income vs hourly wage, $8-$25), cliff zone ReferenceLine markers (red, −$X labels), current income dashed ReferenceLine, responsive container, `role="img"` with aria-label, text summary (biggest cliff at $X/hr, recovers above $Y/hr). Wired into `plan/page.tsx` between job matches and comparison view, conditionally rendered when `benefits_cliff_analysis` exists. Extracted `_barrier_cards_and_steps()` helper in engine.py for arch compliance. 6 new frontend tests. All arch checks clean.
-
-### Sprint 25 T25.3 (2026-03-08) — Cliff-Aware Job Ranking
-
-- **T25.3** Cliff-Aware Job Ranking: Added `CliffImpact` model to `types.py` (benefits_change, net_monthly_change, has_cliff, severity, affected_programs). Modified `pvs_scorer.py`: renamed W_EARNINGS→W_NET_INCOME, added `_score_net_income()` using `calculate_net_at_wage()` from cliff calculator, `_compute_cliff_impact()` with benefit-by-benefit comparison, `_build_match()` helper. When `BenefitsProfile` with enrolled programs is provided, PVS earnings component uses net income (wages + benefits - taxes) instead of gross wages. Falls back to gross `score_earnings()` when no profile. NO_PAY_CEILING unchanged. Threaded `benefits_profile` through `job_matcher.py` → `rank_all_jobs()` → `compute_pvs()`. Engine `generate_plan()` accepts `benefits_profile` param; assessment route converts `BenefitsFormData` → `BenefitsProfile` and passes it. Frontend: `CliffImpact` type in `types.ts`, `CliffBadge.tsx` component (green "No benefits impact" / red "-$X/mo benefits" with severity + affected programs + net change), wired into `JobMatchCard.tsx`. Extracted `_split_legacy_buckets()` and `_session_data()` helpers to fix arch function-length violations. 14 new backend tests (920 total), 6 new frontend tests. All arch checks clean.
-
-### Sprint 25 T25.2 (2026-03-08) — Benefits Profile in Assessment Wizard
-
-- **T25.2** Benefits Profile in Assessment Wizard: Backend — added `BenefitsFormData` Pydantic model to `matching/types.py`, `benefits_data` optional field on `AssessmentRequest`, `benefits_profile TEXT` column in sessions DDL, `create_session` query updated, assessment route stores `benefits_data.model_dump_json()`. Frontend — created `BenefitsStep.tsx` component with household size, monthly income, 7 program checkboxes (SNAP/TANF/Medicaid/ALL Kids/Childcare/Section 8/LIHEAP + "None"), dependents under 6/6-17. Added between Barriers and Schedule in wizard (`assess/page.tsx`). Benefits data only sent when user provides meaningful input. `BenefitsFormData` interface added to `types.ts`. 10 new backend tests (906 total), 8 new frontend tests (254 total). All arch checks clean.
-
-### Sprint 25 T25.1 (2026-03-08) — Benefits Cliff Calculator Module
-
-- **T25.1** Benefits Cliff Calculator Module: Created `backend/app/modules/benefits/` with 4 files. `types.py` with 6 Pydantic models (BenefitsProfile, ProgramBenefit, WageStep, CliffPoint, CliffAnalysis). `thresholds.py` with Alabama-specific 2026 constants (FPL, SNAP max benefit, TANF, ALL Kids 317% FPL, Childcare SMI 85%, Section 8 50% AMI Montgomery, LIHEAP 150% FPL, tax brackets). `program_calculators.py` with 7 per-program benefit calculators (SNAP gradual, TANF hard, Medicaid=0 no expansion, ALL Kids, Childcare copay tiers, Section 8, LIHEAP). `cliff_calculator.py` with `calculate_cliff_analysis()` computing net income at $8-$25/hr in $0.50 steps, cliff detection (>$1/month drop threshold), severity classification (mild/moderate/severe), program identification, safe wage floor. 37 new tests (severity, thresholds, no-program monotonic increase, SNAP gradual phase-out, Section 8 hard cliff, compound cliffs, all programs, net-at-wage, edge cases), 896 total passing. All arch checks clean.
-
-### Sprint 25 Planning (2026-03-08) — Benefits Cliff Engine
-
-- Analyzed `docs/workpath-pipeline-backlog.md` — comprehensive multi-sprint backlog (Sprints 25-31) covering benefits cliff, criminal record routing, job aggregation, resource matching, transit, and action plan generation.
-- Explored codebase: PVS formula (0.35 earnings + 0.25 proximity + 0.20 time_fit + 0.20 barrier_compat), UserProfile fields, assessment wizard steps, plan page sections, database schema.
-- Key design decisions: new `backend/app/modules/benefits/` module, net income replaces gross earnings in PVS (35% weight), new wizard step between Barriers and Credit (skippable), Recharts cliff chart on plan page, Alabama-only hardcoded thresholds for MVP.
-- Architecture concerns: assess/page.tsx at 417 lines (over limit, new step extracted as separate component), types.ts at 434 lines (benefits types may need separate file), engine.py at 227 lines (minimal changes only).
-- Created plan: plan-2026-03-benefits-cliff-engine (4 tasks, 185 complexity, Sprint 25).
-- All 4 task files written with full objectives, file lists, implementation plans, and acceptance criteria.
-- Synced 4 cards to Trello Planned/Ready.
-
-### Sprint 23 T23.1 (2026-03-07) — Barrier Graph DB Schema
-
-- **T23.1** Barrier graph DB schema: Created ADR doc (`ADR_embeddings.md`) with 5 architecture decisions. Added 3 new tables (`barriers`, `barrier_relationships`, `barrier_resources`) to DDL in `database.py` with `ALLOWED_COLUMNS` entries. Initialized Alembic and created migration `8ae7be7d93ea_add_barrier_graph_tables`. Created `barrier_graph/seed.py` with idempotent `upsert_barrier_graph()` using INSERT OR IGNORE. Created `data/barrier_graph_seed.json` with 33 barrier nodes across 8 categories and 53 relationship edges (CAUSES, WORSENS, PRE_REQ_FOR). Wired barrier graph seeding into `main.py` lifespan startup. 8 new tests (tables exist, minimum counts, playbook coverage, category validation, idempotency), 414 total passing.
-
-### Sprint 23 Planning (2026-03-07) — Barrier Graph + RAG
-
-- Analyzed `docs/internal/barrier-graph-rag-implementation/00_planning.md` and all 14 reference docs.
-- Identified 9 gaps/problems: unspecified embeddings model, streaming protocol, missing Alembic task, LangChain decision, what-if underspecification, Redis ambiguity, dependency ordering, missing CI tests, FAISS migration trigger.
-- Decisions recorded in plan: `sentence-transformers/all-MiniLM-L6-v2`, SSE streaming, what-if deferred to v2, in-memory cache (no Redis v1), no LangChain.
-- Created plan: plan-2026-03-barrier-graph-rag (7 tasks, 405 complexity, Sprint 23).
-- All 7 task files written with full objectives, schemas, implementation plans, and acceptance criteria.
-- Trello sync pending: `bpsai-pair trello connect` required to push 7 cards.
-
-### Sprint 18 (2026-03-07) — Security Hardening — COMPLETE
-
-- **T18.7** CI vulnerability scanning: `pip-audit` step added to CI backend job, `npm audit --audit-level=high` added to CI frontend job. Created `docs/SECURITY.md` with 15 fixed findings, 5 accepted risks with rationale, security architecture overview, and CI scanning docs. 472 backend tests pass.
-
-- **T18.6** Rate limiting: extracted shared `RateLimiter` to `app/core/rate_limit.py`. Added rate limiting to POST /generate (5/min) and POST /credit/assess (10/min). Replaced duplicate classes in assessment.py and feedback.py. 7 new tests, 472 total.
-
-- **T18.5** Input validation + info leak fixes: UUID regex on `session_id` path params (plan.py 3 endpoints), pattern on `ResourceFeedbackRequest.session_id`, alphanumeric regex on `snapshot_id` (brightdata.py), logger logs length not raw response (client.py), removed `session_id` from validate endpoint response. 7 new tests, 465 total.
-
-- **T18.4** Container hardening: both Dockerfiles run as non-root `appuser`. Removed hardcoded env overrides from docker-compose.yml and stale ENV defaults from backend Dockerfile.
-- **T18.3** Security headers + CORS: X-Frame-Options DENY, CSP, nosniff, Referrer-Policy, Permissions-Policy in next.config.mjs. CORS methods restricted to GET/POST/OPTIONS, headers to Content-Type/X-Admin-Key.
-- **T18.2** Prompt injection defense: untrusted-data instruction in system prompt, `<user_input>` XML tags wrapping barriers and qualifications in user prompt. 3 new tests, 458 total.
-- **T18.1** Admin auth for BrightData: `app/core/auth.py` with `require_admin_key` dependency (503/403/422). Router-level `Depends` on all 3 BrightData endpoints. `admin_api_key` added to Settings. 4 new tests + 10 updated, 455 total.
-
-### Sprint 18 Planning (2026-03-07) — Security Hardening
-
-- Audited all 26 findings from GitHub Issue #20 (security audit). 3 already fixed (SEC-002 random tokens, SEC-011 free_text max_length, SEC-026 session expiry). 20 still open, 3 partially fixed.
-- Created plan: plan-2026-03-security-hardening (7 tasks, 155 complexity). Synced 7 cards to Trello Planned/Ready.
-- Scope: CRITICAL (SEC-001 admin auth), HIGH (SEC-003 prompt injection, SEC-008 headers, SEC-009 containers), MEDIUM (SEC-012/016/017/023 input validation, SEC-010 rate limiting), LOW (SEC-020 CI scanning).
-- Accepted risks documented in T18.7: SEC-006 (single-worker rate limiter), SEC-007 (credit proxy error), SEC-014 (EmailJS PII), SEC-015 (QR token by design), SEC-019 (DATA_DIR hardcoded).
-
-### Sprint 17 (2026-03-07) — Hackathon Demo Polish — COMPLETE
-
-- **T17.6** Documentation sync: api.md updated with 4 missing endpoints (feedback resource/validate/visit, career-center) with full request/response examples and curl. architecture.md updated with 3 new tables, 5 new modules, profile column, frontend feedback page, 4 new components, data fetching hooks, and haversine proximity scoring description.
-
-- **T17.5** Removed dead `feedback_token_secret` field from Settings class in config.py. No references in codebase. 451 backend tests pass.
-
-- **T17.4** Credit resources: GreenPath Financial Wellness + CCCS of Central Alabama added to community_resources.json with subcategory credit_counseling. 451 backend tests pass.
-- **T17.3** Geocode: lat/lng added to all 13 seed resources, Resource model updated, `_score_proximity` now uses haversine (was hardcoded 0.5). MPACT address+phone added. 2 new tests, 451 backend total.
-- **T17.2** What's Next CTA: Card section at plan page bottom with 3-step instructions, Career Center address/phone/hours, Start New Assessment link. 2 new tests, 146 frontend total.
-- **T17.1** Session recovery: `useSessionId()` hook persists session_id to sessionStorage from URL, recovers on refresh. 3 new tests, 144 frontend total.
-
-### Sprint 17 Planning (2026-03-06)
-
-- Full platform audit: tested API pipeline, frontend UX, data quality. Debunked false "showstopper" (seed_database works correctly). Identified 6 real issues. Created plan: plan-2026-03-hackathon-demo-polish (6 tasks, 125 complexity). Synced to Trello.
-
-### Sprint 15 (2026-03-06) — Career Center Ready Package — COMPLETE
-
-- **T15.6** CareerCenterExport component: fetches package on click, renders CareerCenterPrintLayout offscreen, exports via html2pdf with date-stamped filename (`montgowork-career-center-{date}.pdf`). Added as first CTA on plan page (before PlanExport/EmailExport). 7 new frontend tests, 141 total.
-
-- **T15.7** Frontend types + API client: 6 TS interfaces in types.ts, `getCareerCenterPackage()` in api.ts.
-- **T15.5** CareerCenterPrintLayout: 3-page print component (staff summary, resident plan, credit pathway). forwardRef, 11pt min font, page breaks. 10 new frontend tests, 133 total.
-- **T15.4** Wire WIOA into generate_plan: `WIOAEligibility` moved to `types.py`, `screen_wioa_eligibility()` called in `generate_plan()`, TS interface + 4 test fixture updates. 2 new engine tests, 449 total.
-- **T15.3** Career center endpoint: `GET /api/plan/{session_id}/career-center` rebuilds UserProfile, runs WIOA screening, assembles package. Credit pathway from stored credit_profile. 6 new tests, 447 total.
-- **T15.2** Career Center Package: models in `career_center_types.py` (6 models), `assemble_package()` assembler with staff summary, document checklist, what-to-say scripts, credit pathway. 16 new tests, 441 total.
-- **T15.1** WIOA screener: `WIOAEligibility` model (6 fields), `screen_wioa_eligibility()` with adult/supportive/ITA logic, `has_expired_certification()` helper. 23 new tests, 425 total.
-
-### Sprint 14 (2026-03-06, continued) — COMPLETE
-
-- **T14.8** Resource health check: `check_resource_health()` pure function (HEALTHY/WATCH/FLAGGED thresholds), `get_feedback_stats()` 30-day window, `update_all_health_statuses()` batch, `update_resource_health()` DB setter. Engine filters HIDDEN, sorts FLAGGED last. `health_status` field added to Resource model. 12 new tests, 402 backend total.
-- **T14.7** QR code in PDF export: `PdfFeedbackQR` component with `QRCodeSVG` (level M, size 100) encoding `/feedback/{token}` URL. Added `feedbackToken` prop to PlanExport, wired from sessionStorage, stored during assessment. `feedback_token` added to `AssessmentResponse` TS type. `qrcode.react` installed. 3 new tests, 121 frontend total.
-- **T14.6** Visit feedback form at `/feedback/[token]`: mobile-first 3-question page with token validation on load, conditional Q2 (outcomes checkboxes when Q1=Yes), large touch targets (min-h-11), loading/error/success/duplicate states. Added `validateFeedbackToken()` and `submitVisitFeedback()` to api.ts. 7 new frontend tests, 118 total.
-- **T14.5** Visit feedback API: GET /api/feedback/validate/{token} (200/410/404), POST /api/feedback/visit with token validation, 409 duplicate guard, JSON outcomes. Added `token_exists`, `has_visit_feedback`, `insert_visit_feedback` to queries_feedback.py. 9 new tests, 390 total.
-- **T14.4** Resource feedback UI: thumbs up/down on BarrierCardView with optimistic state, sessionStorage persistence, `submitResourceFeedback` API call, aria-labels. 9 new frontend tests, 110 total.
-
-### Sprint 15 (2026-03-06) — Career Center Ready Package
-
-- **T15.1** WIOA screener: `WIOAEligibility` model (6 fields), `screen_wioa_eligibility()` with adult/supportive/ITA logic, `has_expired_certification()` helper. 23 new tests, 425 total.
-
-### Sprint 16 (2026-03-06)
-
-- **T16.4** Appended Railway, Vercel, and consolidated env vars reference sections to `docs/DEPLOYMENT.md`. Covers Dockerfile reference, volume mount for SQLite persistence, health check config, Vercel root directory setup, and complete backend/frontend env var table.
-- **T16.5** Appended "Known Limitations & Scaling Path" section (6 items) to `docs/architecture.md`. Covers SQLite-to-Postgres migration, static resource refresh, caching, external API resilience, security hardening, and horizontal scaling.
-- **T16.3** Static barrier priority map: childcare=1 through training=7. Wired into `generate_plan()`. 9 new tests, 381 total.
-- **T16.2** Resource affinity routing: new `affinity.py` module with `assign_resources()`, `BARRIER_PROCESSING_ORDER`, `RESOURCE_AFFINITY`. Career Center moved to `immediate_next_steps`. 12 new tests, 372 total.
-- **T16.1** Added `StaticPool` import and `poolclass=StaticPool` to `create_async_engine()` in `database.py`. All 360 tests pass.
-
-### Sprint 14 (2026-03-06)
-
-- **T14.3** Resource feedback API: POST /api/feedback/resource with upsert, session validation. 6 tests added (360 total).
-
-- **T14.1** Feedback schema (3 tables + health_status column), Pydantic + TS types, 17 tests
-- **T14.2** Feedback tokens: generate_token (SHA256+base64url, 12 chars), create/validate DB queries (30-day expiry), wired into assessment route. Fixed assessment + integration test mocks. 354 backend tests passing, all arch checks clean.
-- Created plan: plan-2026-03-career-center-ready-package (7 tasks, 205 complexity)
-- Created plan: plan-2026-03-fix-sprint-review-corrections (5 tasks, 130 complexity)
-- Created plan: plan-2026-03-security-hardening (7 tasks, 155 complexity)
-- Created plan: plan-2026-03-benefits-cliff-engine (4 tasks, 185 complexity, Sprint 25). Synced to Trello.
-
+- **T28.1 done** (2026-03-09) — findhelp.org capability URL integration. Backend: `modules/resources/findhelp.py` with `FINDHELP_CATEGORIES` mapping all 7 barrier types to findhelp.org category paths, `generate_findhelp_url()`. Frontend: `lib/findhelp.ts` (mirrored mapping), `FindhelpLink.tsx` component with external link, wired into `BarrierCardView` with zip code from sessionStorage. Zip stored during assessment. 26 backend tests, 10 frontend tests. All 1097 backend + 368 frontend tests pass.
 
 ## What's Next
 
-T27.0 done. Load BrightData dataset into live app to demo differentiated scoring. Next: wire dataset loading into app startup or add management command. Sprint 27 remaining: T27.1-T27.4.
-
+Sprint 29 COMPLETE (4/4 tasks). BrightData dataset loader merged. Next sprint TBD.
 
 ## Blockers
 
-None.
+- T28.3: Requires findhelp.org API partnership (external dependency).

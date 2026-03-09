@@ -99,6 +99,35 @@ class TestFaissIngestion:
         assert loaded_meta[1]["id"] == "test_2"
 
 
+class TestExtractCity:
+    """Cover _extract_city edge cases in corpus_builder.py."""
+
+    def test_extract_city_returns_none_for_none(self):
+        from app.rag.corpus_builder import _extract_city
+
+        assert _extract_city(None) is None
+
+    def test_extract_city_returns_none_for_empty_string(self):
+        from app.rag.corpus_builder import _extract_city
+
+        assert _extract_city("") is None
+
+    def test_extract_city_no_comma_returns_none(self):
+        from app.rag.corpus_builder import _extract_city
+
+        assert _extract_city("Montgomery") is None
+
+    def test_extract_city_with_full_address(self):
+        from app.rag.corpus_builder import _extract_city
+
+        assert _extract_city("100 Main St, Montgomery, AL") == "Montgomery"
+
+    def test_extract_city_two_part_address(self):
+        from app.rag.corpus_builder import _extract_city
+
+        assert _extract_city("100 Main St, Montgomery") == "100 Main St"
+
+
 class TestRagStore:
     @pytest.mark.anyio
     async def test_build_or_load_creates_store(self, db_session, tmp_path):
@@ -113,3 +142,75 @@ class TestRagStore:
         results = store.search("childcare assistance", n=3)
         assert len(results) <= 3
         assert len(results) > 0
+
+    def test_search_not_ready_returns_empty(self):
+        """Search on a store that has not been built returns empty list."""
+        store = RagStore()
+        results = store.search("anything")
+        assert results == []
+
+    @pytest.mark.anyio
+    async def test_rebuild_no_docs_returns_zero(self, db_session, tmp_path):
+        """When build_corpus returns no docs, rebuild returns 0."""
+        from unittest.mock import AsyncMock, patch
+
+        store = RagStore()
+        with patch("app.rag.store.build_corpus", new_callable=AsyncMock, return_value=[]):
+            count = await store.rebuild(db_session, index_dir=tmp_path)
+        assert count == 0
+        assert not store.is_ready()
+
+    @pytest.mark.anyio
+    async def test_build_or_load_from_disk(self, db_session, tmp_path):
+        """When index.faiss exists on disk, build_or_load loads from disk."""
+        # First, build and save to disk
+        store1 = RagStore()
+        await store1.build_or_load(db_session, index_dir=tmp_path)
+        assert store1.is_ready()
+
+        # Now create a second store and load from disk
+        store2 = RagStore()
+        await store2.build_or_load(db_session, index_dir=tmp_path)
+        assert store2.is_ready()
+
+    @pytest.mark.anyio
+    async def test_search_with_barrier_filter_excludes_non_matching(self, db_session, tmp_path):
+        """Search with barrier_filter skips docs whose tags do not overlap."""
+        store = RagStore()
+        await store.build_or_load(db_session, index_dir=tmp_path)
+
+        # Search with a filter that is very specific
+        results = store.search(
+            "credit counseling help", n=5,
+            barrier_filter=["CREDIT_LOW_SCORE"],
+        )
+        for r in results:
+            # Every returned doc must have at least one tag in the filter set
+            assert "CREDIT_LOW_SCORE" in r.get("barrier_tags", [])
+
+    def test_search_skips_negative_faiss_indices(self):
+        """FAISS returning -1 indices (padding) should be skipped."""
+        from unittest.mock import MagicMock, patch
+
+        import numpy as np
+
+        store = RagStore()
+        store._index = MagicMock()
+        store._index.ntotal = 2
+        store._index.search.return_value = (
+            np.array([[0.9, 0.8, -1.0]], dtype=np.float32),
+            np.array([[0, 1, -1]], dtype=np.int64),
+        )
+        store._metadata = [
+            {"id": "doc_0", "barrier_tags": []},
+            {"id": "doc_1", "barrier_tags": []},
+        ]
+
+        with patch("app.rag.store._get_model") as mock_model:
+            mock_model.return_value.encode.return_value = (
+                np.array([[0.1] * 384], dtype=np.float32)
+            )
+            results = store.search("test query", n=5)
+
+        assert len(results) == 2
+        assert {r["id"] for r in results} == {"doc_0", "doc_1"}

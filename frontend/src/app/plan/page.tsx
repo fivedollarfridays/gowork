@@ -17,6 +17,7 @@ import { ComparisonView } from "@/components/plan/ComparisonView";
 import { CreditResults } from "@/components/plan/CreditResults";
 import { JobReadinessResults } from "@/components/plan/JobReadinessResults";
 import { BenefitsCliffChart } from "@/components/plan/BenefitsCliffChart";
+import { BenefitsEligibility } from "@/components/plan/BenefitsEligibility";
 import { CareerCenterExport } from "@/components/plan/CareerCenterExport";
 import { EmailExport } from "@/components/plan/EmailExport";
 import { PlanExport } from "@/components/plan/PlanExport";
@@ -42,6 +43,7 @@ function buildProfileFromPlan(sessionId: string, barriers: string[]): UserProfil
     schedule_type: AvailableHours.DAYTIME,
     work_history: "",
     target_industries: [],
+    record_profile: null,
   };
 }
 
@@ -113,6 +115,10 @@ function PlanContent() {
 
   const plan = data?.plan ?? null;
 
+  useEffect(() => {
+    if (plan) window.scrollTo(0, 0);
+  }, [plan]);
+
   // Load credit assessment: localStorage first (faster), backend fallback
   const storedCredit = useClientStorage(sessionId ? `credit_${sessionId}` : null);
   const localCredit = useMemo<CreditAssessmentResult | null>(() => {
@@ -125,6 +131,11 @@ function PlanContent() {
     () => data ? buildProfileFromPlan(data.session_id, data.barriers) : null,
     [data],
   );
+
+  const zipCode = useMemo(() => {
+    if (typeof window === "undefined" || !sessionId) return "";
+    return sessionStorage.getItem(`zip_${sessionId}`) ?? "";
+  }, [sessionId]);
 
   const prefersReduced = useReducedMotion();
   const hasFiredConfetti = useRef(false);
@@ -218,6 +229,14 @@ function PlanContent() {
       </section>
       </ScrollReveal>
 
+      {/* Benefits eligibility — programs user may qualify for */}
+      {plan.benefits_eligibility && (
+        <>
+          <Separator />
+          <BenefitsEligibility eligibility={plan.benefits_eligibility} />
+        </>
+      )}
+
       {/* Benefits cliff chart — only when cliff data exists */}
       {plan.benefits_cliff_analysis && (
         <>
@@ -242,7 +261,7 @@ function PlanContent() {
               <h2 className="text-xl font-semibold text-primary">Your Barriers</h2>
               <div className="grid gap-4 sm:grid-cols-2">
                 {plan.barriers.map((barrier) => (
-                  <BarrierCardView key={barrier.type} barrier={barrier} sessionId={sessionId ?? undefined} token={token ?? undefined} />
+                  <BarrierCardView key={barrier.type} barrier={barrier} sessionId={sessionId ?? undefined} token={token ?? undefined} zipCode={zipCode} />
                 ))}
               </div>
             </section>
@@ -330,10 +349,6 @@ function PlanContent() {
 }
 
 export default function PlanPage() {
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
   return (
     <div className="flex min-h-screen">
       <main className="flex-1 px-4 py-8 sm:px-8">

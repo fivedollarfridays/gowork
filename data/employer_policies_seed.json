@@ -1,0 +1,252 @@
+[
+  {
+    "employer_name": "Walmart",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": 7,
+    "bg_check_timing": "post_offer",
+    "industry": "retail",
+    "source": "company_policy",
+    "montgomery_area": true
+  },
+  {
+    "employer_name": "Target",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense", "violence"],
+    "lookback_years": 7,
+    "bg_check_timing": "post_offer",
+    "industry": "retail",
+    "source": "company_policy",
+    "montgomery_area": true
+  },
+  {
+    "employer_name": "Home Depot",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": 7,
+    "bg_check_timing": "post_offer",
+    "industry": "retail",
+    "source": "company_policy",
+    "montgomery_area": true
+  },
+  {
+    "employer_name": "Starbucks",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": null,
+    "bg_check_timing": "post_offer",
+    "industry": "food_service",
+    "source": "company_policy",
+    "montgomery_area": true
+  },
+  {
+    "employer_name": "McDonald's (Montgomery franchises)",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense", "violence"],
+    "lookback_years": 5,
+    "bg_check_timing": "post_offer",
+    "industry": "food_service",
+    "source": "franchise_policy",
+    "montgomery_area": true
+  },
+  {
+    "employer_name": "Hyundai Motor Manufacturing Alabama",
+    "fair_chance": true,
+    "excluded_charges": ["violence", "sex_offense"],
+    "lookback_years": 7,
+    "bg_check_timing": "pre_offer",
+    "industry": "manufacturing",
+    "source": "employer_outreach",
+    "montgomery_area": true
+  },
+  {
+    "employer_name": "Koch Foods",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": 5,
+    "bg_check_timing": "post_offer",
+    "industry": "manufacturing",
+    "source": "employer_outreach",
+    "montgomery_area": true
+  },
+  {
+    "employer_name": "Amazon (Montgomery Fulfillment Center)",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": null,
+    "bg_check_timing": "post_offer",
+    "industry": "warehouse",
+    "source": "company_policy",
+    "montgomery_area": true
+  },
+  {
+    "employer_name": "FedEx Ground",
+    "fair_chance": true,
+    "excluded_charges": ["violence", "sex_offense", "dui"],
+    "lookback_years": 7,
+    "bg_check_timing": "pre_offer",
+    "industry": "warehouse",
+    "source": "company_policy",
+    "montgomery_area": true
+  },
+  {
+    "employer_name": "UPS",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense", "dui"],
+    "lookback_years": 5,
+    "bg_check_timing": "post_offer",
+    "industry": "warehouse",
+    "source": "company_policy",
+    "montgomery_area": true
+  },
+  {
+    "employer_name": "Goodwill Industries of Central Alabama",
+    "fair_chance": true,
+    "excluded_charges": [],
+    "lookback_years": null,
+    "bg_check_timing": "post_offer",
+    "industry": "nonprofit",
+    "source": "direct_partnership",
+    "montgomery_area": true
+  },
+  {
+    "employer_name": "Salvation Army Montgomery",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": null,
+    "bg_check_timing": "post_offer",
+    "industry": "nonprofit",
+    "source": "direct_partnership",
+    "montgomery_area": true
+  },
+  {
+    "employer_name": "Dave's Hot Chicken",
+    "fair_chance": true,
+    "excluded_charges": [],
+    "lookback_years": null,
+    "bg_check_timing": "post_offer",
+    "industry": "food_service",
+    "source": "company_policy",
+    "montgomery_area": true
+  },
+  {
+    "employer_name": "Greystar (apartment maintenance)",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense", "violence"],
+    "lookback_years": 7,
+    "bg_check_timing": "post_offer",
+    "industry": "property_management",
+    "source": "company_policy",
+    "montgomery_area": true
+  },
+  {
+    "employer_name": "Waste Management",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": 5,
+    "bg_check_timing": "post_offer",
+    "industry": "sanitation",
+    "source": "company_policy",
+    "montgomery_area": true
+  },
+  {
+    "employer_name": "Lowe's",
+    "fair_chance": false,
+    "excluded_charges": ["violence", "sex_offense", "theft"],
+    "lookback_years": 7,
+    "bg_check_timing": "pre_offer",
+    "industry": "retail",
+    "source": "company_policy",
+    "montgomery_area": true
+  },
+  {
+    "employer_name": "Baptist Health Montgomery",
+    "fair_chance": false,
+    "excluded_charges": ["violence", "sex_offense", "drug", "theft"],
+    "lookback_years": 10,
+    "bg_check_timing": "pre_offer",
+    "industry": "healthcare",
+    "source": "industry_standard",
+    "montgomery_area": true
+  },
+  {
+    "employer_name": "Jackson Hospital",
+    "fair_chance": false,
+    "excluded_charges": ["violence", "sex_offense", "drug"],
+    "lookback_years": 10,
+    "bg_check_timing": "pre_offer",
+    "industry": "healthcare",
+    "source": "industry_standard",
+    "montgomery_area": true
+  },
+  {
+    "employer_name": "Maxwell Air Force Base (contractors)",
+    "fair_chance": false,
+    "excluded_charges": ["violence", "sex_offense", "drug", "fraud"],
+    "lookback_years": 10,
+    "bg_check_timing": "pre_offer",
+    "industry": "government",
+    "source": "federal_requirement",
+    "montgomery_area": true
+  },
+  {
+    "employer_name": "City of Montgomery",
+    "fair_chance": false,
+    "excluded_charges": ["violence", "sex_offense"],
+    "lookback_years": 7,
+    "bg_check_timing": "pre_offer",
+    "industry": "government",
+    "source": "municipal_policy",
+    "montgomery_area": true
+  },
+  {
+    "employer_name": "ALDOT (Alabama Dept of Transportation)",
+    "fair_chance": false,
+    "excluded_charges": ["violence", "sex_offense", "dui"],
+    "lookback_years": 7,
+    "bg_check_timing": "pre_offer",
+    "industry": "government",
+    "source": "state_policy",
+    "montgomery_area": true
+  },
+  {
+    "employer_name": "Cintas",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": 5,
+    "bg_check_timing": "post_offer",
+    "industry": "services",
+    "source": "company_policy",
+    "montgomery_area": true
+  },
+  {
+    "employer_name": "Waffle House",
+    "fair_chance": true,
+    "excluded_charges": [],
+    "lookback_years": null,
+    "bg_check_timing": "post_offer",
+    "industry": "food_service",
+    "source": "company_policy",
+    "montgomery_area": true
+  },
+  {
+    "employer_name": "Turner Industries",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": 7,
+    "bg_check_timing": "post_offer",
+    "industry": "construction",
+    "source": "company_policy",
+    "montgomery_area": true
+  },
+  {
+    "employer_name": "Bass Pro Shops / Cabela's",
+    "fair_chance": false,
+    "excluded_charges": ["violence", "sex_offense", "theft"],
+    "lookback_years": 7,
+    "bg_check_timing": "pre_offer",
+    "industry": "retail",
+    "source": "company_policy",
+    "montgomery_area": true
+  }
+]

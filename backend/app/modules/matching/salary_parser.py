@@ -58,10 +58,25 @@ def _build_salary_from_annual(
     )
 
 
+_MIN_ANNUAL_SALARY = 5_000  # Reject implausible annual amounts
+
+
 def _parse_annual_amount(raw: str) -> float:
     """Parse an annual salary string like '45,000' or '45' (with K suffix)."""
     cleaned = raw.replace(",", "")
     return float(cleaned)
+
+
+def _try_parse_annual(match) -> SalaryInfo | None:
+    """Parse annual salary from regex match. Returns None if implausible."""
+    raw_amount = match.group(1)
+    full = match.group(0)
+    amount = _parse_annual_amount(raw_amount)
+    if "k" in full.lower() and amount < 1000:
+        amount *= 1000
+    if amount < _MIN_ANNUAL_SALARY:
+        return None
+    return _build_salary_from_annual(amount, is_range=False, raw_text=full)
 
 
 def extract_salary(description: str | None) -> SalaryInfo | None:
@@ -93,15 +108,7 @@ def extract_salary(description: str | None) -> SalaryInfo | None:
     # Annual salary
     match = _ANNUAL_RE.search(description)
     if match:
-        raw_amount = match.group(1)
-        # Check for K suffix in the matched text
-        full = match.group(0)
-        amount = _parse_annual_amount(raw_amount)
-        if "k" in full.lower() and amount < 1000:
-            amount *= 1000
-        return _build_salary_from_annual(
-            amount, is_range=False, raw_text=full,
-        )
+        return _try_parse_annual(match)
 
     return None
 

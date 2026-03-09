@@ -43,6 +43,34 @@ export const CrawlStatus = {
 } as const;
 export type CrawlStatus = (typeof CrawlStatus)[keyof typeof CrawlStatus];
 
+// --- Criminal Record types ---
+
+export const RecordType = {
+  FELONY: "felony",
+  MISDEMEANOR: "misdemeanor",
+  ARREST_ONLY: "arrest_only",
+  EXPUNGED: "expunged",
+} as const;
+export type RecordType = (typeof RecordType)[keyof typeof RecordType];
+
+export const ChargeCategory = {
+  VIOLENCE: "violence",
+  THEFT: "theft",
+  DRUG: "drug",
+  DUI: "dui",
+  SEX_OFFENSE: "sex_offense",
+  FRAUD: "fraud",
+  OTHER: "other",
+} as const;
+export type ChargeCategory = (typeof ChargeCategory)[keyof typeof ChargeCategory];
+
+export interface RecordProfile {
+  record_types: RecordType[];
+  charge_categories: ChargeCategory[];
+  years_since_conviction: number | null;
+  completed_sentence: boolean;
+}
+
 // --- Models ---
 
 export interface ScheduleConstraints {
@@ -69,6 +97,7 @@ export interface AssessmentRequest {
   resume_text?: string;
   certifications?: string[];
   credit_result?: CreditAssessmentResult;
+  record_profile?: RecordProfile;
   benefits_data?: BenefitsFormData;
 }
 
@@ -84,6 +113,7 @@ export interface UserProfile {
   schedule_type: string;
   work_history: string;
   target_industries: string[];
+  record_profile: RecordProfile | null;
 }
 
 export interface Resource {
@@ -98,6 +128,7 @@ export interface Resource {
   services: string[] | null;
   notes: string | null;
   health_status?: ResourceHealth;
+  eligibility_status?: "likely" | "check" | null;
 }
 
 export interface JobMatch {
@@ -111,6 +142,10 @@ export interface JobMatch {
   credit_check_required: string;
   eligible_now: boolean;
   eligible_after: string | null;
+  fair_chance?: boolean;
+  record_eligible?: boolean;
+  background_check_timing?: string | null;
+  record_note?: string | null;
 }
 
 export type CliffSeverity = "mild" | "moderate" | "severe";
@@ -165,6 +200,16 @@ export interface TransitConnection {
   schedule: string;
 }
 
+export type ExpungementEligibility = "eligible_now" | "eligible_future" | "not_eligible" | "unknown";
+
+export interface ExpungementResult {
+  eligibility: ExpungementEligibility;
+  years_remaining: number | null;
+  steps: string[];
+  filing_fee: string | null;
+  notes: string | null;
+}
+
 export interface BarrierCard {
   type: BarrierType;
   severity: BarrierSeverity;
@@ -173,6 +218,7 @@ export interface BarrierCard {
   actions: string[];
   resources: Resource[];
   transit_matches: TransitConnection[];
+  expungement?: ExpungementResult | null;
 }
 
 export type ReadinessBand = "not_ready" | "developing" | "ready" | "strong";
@@ -210,6 +256,36 @@ export interface WIOAEligibility {
   confidence: string;
 }
 
+export type EligibilityConfidence = "likely" | "possible" | "unlikely";
+
+export interface ProgramApplicationInfo {
+  application_url: string;
+  application_steps: string[];
+  required_documents: string[];
+  office_name: string;
+  office_address: string;
+  office_phone: string;
+  processing_time: string;
+}
+
+export interface ProgramEligibility {
+  program: string;
+  eligible: boolean;
+  confidence: EligibilityConfidence;
+  income_threshold: number;
+  income_headroom: number;
+  estimated_monthly_value: number;
+  reason: string;
+  application_info?: ProgramApplicationInfo | null;
+}
+
+export interface BenefitsEligibility {
+  eligible_programs: ProgramEligibility[];
+  ineligible_programs: ProgramEligibility[];
+  total_estimated_monthly: number;
+  disclaimer: string;
+}
+
 export interface ReEntryPlan {
   plan_id: string;
   session_id: string;
@@ -226,6 +302,7 @@ export interface ReEntryPlan {
   wioa_eligibility: WIOAEligibility | null;
   job_readiness: JobReadinessResult | null;
   benefits_cliff_analysis?: CliffAnalysis | null;
+  benefits_eligibility?: BenefitsEligibility | null;
 }
 
 export interface AssessmentResponse {

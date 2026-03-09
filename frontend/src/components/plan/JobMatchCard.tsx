@@ -1,6 +1,6 @@
 "use client";
 
-import { Briefcase, Bus, CreditCard, DollarSign, ExternalLink, MapPin } from "lucide-react";
+import { Briefcase, Bus, CreditCard, DollarSign, ExternalLink, MapPin, Shield } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -56,20 +56,17 @@ export function JobMatchCard({ job, creditResult }: JobMatchCardProps) {
               </Badge>
             )}
             {/* Pay badge */}
-            {(() => {
-              const payRange = isScoredJob(job) ? job.pay_range : null;
-              return payRange ? (
-                <Badge className={`${STATUS_BADGE_STYLES.positive} text-xs`} variant="outline">
-                  <DollarSign className="h-3 w-3 mr-1" />
-                  {payRange}
-                </Badge>
-              ) : (
-                <Badge className={`${STATUS_BADGE_STYLES.warning} text-xs`} variant="outline">
-                  <DollarSign className="h-3 w-3 mr-1" />
-                  Pay not disclosed
-                </Badge>
-              );
-            })()}
+            {isScoredJob(job) && job.pay_range ? (
+              <Badge className={`${STATUS_BADGE_STYLES.positive} text-xs`} variant="outline">
+                <DollarSign className="h-3 w-3 mr-1" />
+                {job.pay_range}
+              </Badge>
+            ) : (
+              <Badge className={`${STATUS_BADGE_STYLES.warning} text-xs`} variant="outline">
+                <DollarSign className="h-3 w-3 mr-1" />
+                Pay not disclosed
+              </Badge>
+            )}
             {job.credit_check_required === "required" && (
               creditResult && job.eligible_now ? (
                 <Badge className={`${STATUS_BADGE_STYLES.positive} text-xs`} variant="outline">
@@ -89,6 +86,20 @@ export function JobMatchCard({ job, creditResult }: JobMatchCardProps) {
                   Credit Check
                 </Badge>
               )
+            )}
+            {/* Fair-chance badge */}
+            {job.fair_chance && (
+              <Badge className={`${STATUS_BADGE_STYLES.positive} text-xs`} variant="outline">
+                <Shield className="h-3 w-3 mr-1" />
+                Fair Chance
+              </Badge>
+            )}
+            {/* Record not eligible badge */}
+            {job.record_eligible === false && (
+              <Badge className={`${STATUS_BADGE_STYLES.negative} text-xs`} variant="outline">
+                <Shield className="h-3 w-3 mr-1" />
+                Record Review Needed
+              </Badge>
             )}
           </div>
         </div>
@@ -130,6 +141,16 @@ export function JobMatchCard({ job, creditResult }: JobMatchCardProps) {
             <Separator />
             <p className="text-sm text-accent-foreground">
               Eligible after: {job.eligible_after}
+            </p>
+          </>
+        )}
+
+        {/* Record note */}
+        {job.record_note && (
+          <>
+            <Separator />
+            <p className="text-sm text-muted-foreground">
+              {job.record_note}
             </p>
           </>
         )}

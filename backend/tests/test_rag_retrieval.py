@@ -54,6 +54,77 @@ class TestFindRootBarriers:
         assert roots[0]["category"] == "childcare"
 
 
+class TestFindRootBarriersCycle:
+    @pytest.mark.anyio
+    async def test_find_root_barriers_cycle(self, test_engine):
+        """When all barriers cause each other (cycle), all are returned as roots."""
+        from sqlalchemy import text as sa_text
+
+        factory = get_async_session_factory()
+        async with factory() as session:
+            # Insert two barriers
+            await session.execute(sa_text(
+                "INSERT OR IGNORE INTO barriers (id, name, category, description, playbook) "
+                "VALUES ('CYCLE_A', 'Cycle A', 'credit', 'test', 'test playbook A')"
+            ))
+            await session.execute(sa_text(
+                "INSERT OR IGNORE INTO barriers (id, name, category, description, playbook) "
+                "VALUES ('CYCLE_B', 'Cycle B', 'credit', 'test', 'test playbook B')"
+            ))
+            # Create mutual CAUSES edges: A->B and B->A
+            await session.execute(sa_text(
+                "INSERT OR IGNORE INTO barrier_relationships "
+                "(source_barrier_id, target_barrier_id, relationship_type, weight) "
+                "VALUES ('CYCLE_A', 'CYCLE_B', 'CAUSES', 1.0)"
+            ))
+            await session.execute(sa_text(
+                "INSERT OR IGNORE INTO barrier_relationships "
+                "(source_barrier_id, target_barrier_id, relationship_type, weight) "
+                "VALUES ('CYCLE_B', 'CYCLE_A', 'CAUSES', 1.0)"
+            ))
+            await session.commit()
+
+            roots = await find_root_barriers(["CYCLE_A", "CYCLE_B"], session)
+            root_ids = {r["id"] for r in roots}
+            assert root_ids == {"CYCLE_A", "CYCLE_B"}
+
+
+class TestFetchBarriersEmpty:
+    @pytest.mark.anyio
+    async def test_fetch_barriers_empty_list(self, db_session):
+        """Calling _fetch_barriers with an empty list returns []."""
+        from app.barrier_graph.traversal import _fetch_barriers
+
+        result = await _fetch_barriers(db_session, [])
+        assert result == []
+
+
+class TestBuildChainSummary:
+    def test_chain_summary_with_non_root(self):
+        """When there are non-root codes, summary uses arrow format with non-root appended."""
+        from app.rag.retrieval import _build_chain_summary
+
+        root_barriers = [{"id": "CHILDCARE_DAY", "name": "No Daytime Childcare"}]
+        all_codes = ["CHILDCARE_DAY", "EMPLOYMENT_LIMITED_HOURS", "HOUSING_UNSTABLE"]
+
+        result = _build_chain_summary(root_barriers, all_codes)
+        assert "No Daytime Childcare" in result
+        assert "EMPLOYMENT_LIMITED_HOURS" in result
+        assert "HOUSING_UNSTABLE" in result
+
+    def test_chain_summary_all_roots_no_arrow_to_non_root(self):
+        """When all codes are roots, no non-root segment appears."""
+        from app.rag.retrieval import _build_chain_summary
+
+        root_barriers = [
+            {"id": "A", "name": "Alpha"},
+            {"id": "B", "name": "Beta"},
+        ]
+        all_codes = ["A", "B"]
+        result = _build_chain_summary(root_barriers, all_codes)
+        assert result == "Alpha \u2192 Beta"
+
+
 class TestBuildEnrichedQuery:
     def test_includes_barriers_and_schedule(self):
         query = build_enriched_query(

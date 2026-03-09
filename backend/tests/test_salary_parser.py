@@ -62,6 +62,11 @@ class TestExtractHourlyRange:
 class TestExtractAnnualSalary:
     """Cycle 4: annual salary parsing."""
 
+    def test_implausible_annual_salary_rejected(self) -> None:
+        """Annual amount below $5,000 minimum -> returns None."""
+        result = extract_salary("$45 per year warehouse job")
+        assert result is None
+
     def test_annual_with_comma(self) -> None:
         result = extract_salary("salary $45,000 per year")
         assert result is not None
