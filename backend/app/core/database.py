@@ -82,7 +82,8 @@ CREATE TABLE IF NOT EXISTS job_listings (
     source TEXT,
     scraped_at TEXT NOT NULL,
     expires_at TEXT,
-    credit_check TEXT DEFAULT 'unknown'
+    credit_check TEXT DEFAULT 'unknown',
+    fair_chance INTEGER DEFAULT 0
 );
 CREATE TABLE IF NOT EXISTS sessions (
     id TEXT PRIMARY KEY,
@@ -156,7 +157,7 @@ ALLOWED_COLUMNS = {
     "transit_stops": {"route_id", "stop_name", "lat", "lng", "sequence"},
     "job_listings": {
         "title", "company", "location", "description", "url",
-        "source", "scraped_at", "expires_at", "credit_check",
+        "source", "scraped_at", "expires_at", "credit_check", "fair_chance",
     },
     "barriers": {"id", "name", "category", "description", "playbook"},
     "barrier_relationships": {
