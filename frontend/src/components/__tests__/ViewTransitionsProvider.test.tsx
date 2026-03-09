@@ -2,8 +2,12 @@ import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 let mockPathname = "/";
+let mockReducedMotion = false;
 vi.mock("next/navigation", () => ({
   usePathname: () => mockPathname,
+}));
+vi.mock("framer-motion", () => ({
+  useReducedMotion: () => mockReducedMotion,
 }));
 
 import { ViewTransitionsProvider } from "../ViewTransitionsProvider";
@@ -11,6 +15,7 @@ import { ViewTransitionsProvider } from "../ViewTransitionsProvider";
 describe("ViewTransitionsProvider", () => {
   beforeEach(() => {
     mockPathname = "/";
+    mockReducedMotion = false;
   });
 
   it("renders children", () => {
@@ -43,6 +48,27 @@ describe("ViewTransitionsProvider", () => {
     expect(mockTransition).toHaveBeenCalledTimes(1);
 
     // Cleanup
+    delete (document as unknown as Record<string, unknown>).startViewTransition;
+  });
+
+  it("does not call startViewTransition when prefers-reduced-motion is set", () => {
+    mockReducedMotion = true;
+    const mockTransition = vi.fn();
+    Object.defineProperty(document, "startViewTransition", {
+      value: mockTransition,
+      writable: true,
+      configurable: true,
+    });
+
+    const { rerender } = render(
+      <ViewTransitionsProvider><p>page1</p></ViewTransitionsProvider>,
+    );
+
+    mockPathname = "/reduced";
+    rerender(<ViewTransitionsProvider><p>page2</p></ViewTransitionsProvider>);
+
+    expect(mockTransition).not.toHaveBeenCalled();
+
     delete (document as unknown as Record<string, unknown>).startViewTransition;
   });
 
