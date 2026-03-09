@@ -26,7 +26,7 @@ const BASE = "https://www.findhelp.org";
  * Returns null if the barrier type has no mapping.
  */
 export function generateFindhelpUrl(
-  barrierType: BarrierType | string,
+  barrierType: BarrierType,
   zipCode: string,
 ): string | null {
   const path = FINDHELP_CATEGORIES[barrierType];
