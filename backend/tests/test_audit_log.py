@@ -2,7 +2,6 @@
 
 import hashlib
 import json
-import os
 
 import pytest
 
@@ -36,9 +35,10 @@ class TestHashSessionId:
 class TestLogLlmInteraction:
     """Test JSONL audit log entries."""
 
-    def test_writes_jsonl_line(self, tmp_path):
+    @pytest.mark.anyio
+    async def test_writes_jsonl_line(self, tmp_path):
         log_path = tmp_path / "audit.jsonl"
-        log_llm_interaction(
+        await log_llm_interaction(
             log_path=str(log_path),
             session_id="raw-session-id",
             provider="anthropic",
@@ -55,10 +55,11 @@ class TestLogLlmInteraction:
         assert entry["response_length"] == 300
         assert entry["latency_ms"] == 450.5
 
-    def test_session_id_is_hashed(self, tmp_path):
+    @pytest.mark.anyio
+    async def test_session_id_is_hashed(self, tmp_path):
         log_path = tmp_path / "audit.jsonl"
         raw_id = "raw-session-id"
-        log_llm_interaction(
+        await log_llm_interaction(
             log_path=str(log_path),
             session_id=raw_id,
             provider="mock",
@@ -73,10 +74,11 @@ class TestLogLlmInteraction:
         expected_hash = hashlib.sha256(raw_id.encode()).hexdigest()
         assert entry["hashed_session"] == expected_hash
 
-    def test_no_pii_in_log(self, tmp_path):
+    @pytest.mark.anyio
+    async def test_no_pii_in_log(self, tmp_path):
         """Log entries must not contain user prompts or response text."""
         log_path = tmp_path / "audit.jsonl"
-        log_llm_interaction(
+        await log_llm_interaction(
             log_path=str(log_path),
             session_id="user-session",
             provider="openai",
@@ -90,10 +92,11 @@ class TestLogLlmInteraction:
         allowed_keys = {"timestamp", "hashed_session", "provider", "prompt_length", "response_length", "latency_ms"}
         assert set(entry.keys()) == allowed_keys
 
-    def test_appends_multiple_entries(self, tmp_path):
+    @pytest.mark.anyio
+    async def test_appends_multiple_entries(self, tmp_path):
         log_path = tmp_path / "audit.jsonl"
         for i in range(3):
-            log_llm_interaction(
+            await log_llm_interaction(
                 log_path=str(log_path),
                 session_id=f"session-{i}",
                 provider="mock",
@@ -107,9 +110,10 @@ class TestLogLlmInteraction:
         for line in lines:
             json.loads(line)
 
-    def test_creates_parent_dirs(self, tmp_path):
+    @pytest.mark.anyio
+    async def test_creates_parent_dirs(self, tmp_path):
         log_path = tmp_path / "subdir" / "deep" / "audit.jsonl"
-        log_llm_interaction(
+        await log_llm_interaction(
             log_path=str(log_path),
             session_id="session",
             provider="mock",
@@ -119,9 +123,10 @@ class TestLogLlmInteraction:
         )
         assert log_path.exists()
 
-    def test_skips_when_no_log_path(self):
+    @pytest.mark.anyio
+    async def test_skips_when_no_log_path(self):
         """Should not raise when log_path is empty string."""
-        log_llm_interaction(
+        await log_llm_interaction(
             log_path="",
             session_id="session",
             provider="mock",
@@ -131,9 +136,10 @@ class TestLogLlmInteraction:
         )
         # No exception = pass
 
-    def test_timestamp_is_iso_format(self, tmp_path):
+    @pytest.mark.anyio
+    async def test_timestamp_is_iso_format(self, tmp_path):
         log_path = tmp_path / "audit.jsonl"
-        log_llm_interaction(
+        await log_llm_interaction(
             log_path=str(log_path),
             session_id="session",
             provider="gemini",

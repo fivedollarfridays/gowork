@@ -5,7 +5,7 @@ import logging
 import time
 
 from app.ai.audit_log import log_llm_interaction
-from app.ai.llm_client import get_llm_stream, resolve_provider
+from app.ai.llm_client import get_llm_stream
 from app.barrier_intel.guardrails import check_hallucinations
 from app.barrier_intel.observability import build_request_log
 from app.barrier_intel.prompts import SYSTEM_PROMPT, build_user_prompt
@@ -56,7 +56,7 @@ async def stream_chat_response(
     yield format_sse("done", {"chunks": chunk_count, "latency_ms": round(latency_ms)})
 
     full_prompt_len = len(user_prompt)
-    _audit_log(
+    await _audit_log(
         session_hash, mode, barrier_ids, ctx, chunk_count, latency_ms,
         guardrail_triggered=guardrail_triggered,
         prompt_length=full_prompt_len,
@@ -64,7 +64,7 @@ async def stream_chat_response(
     )
 
 
-def _audit_log(
+async def _audit_log(
     session_hash: str,
     mode: str,
     barrier_ids: list[str],
@@ -84,18 +84,18 @@ def _audit_log(
         retrieval_doc_count=len(ctx.retrieved_docs),
         retrieval_latency_ms=ctx.retrieval_latency_ms,
         llm_latency_ms=latency_ms,
-        input_tokens=0,
-        output_tokens=chunk_count,
+        input_tokens=prompt_length,
+        output_tokens=response_length,
         cache_hit=False,
         guardrail_triggered=guardrail_triggered,
     )
     logger.info("barrier_intel_chat", extra=log_data)
 
     settings = get_settings()
-    log_llm_interaction(
+    await log_llm_interaction(
         log_path=settings.audit_log_path,
         session_id=session_hash,
-        provider=resolve_provider(),
+        provider=settings.llm_provider,
         prompt_length=prompt_length,
         response_length=response_length,
         latency_ms=latency_ms,
