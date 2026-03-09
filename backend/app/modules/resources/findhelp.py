@@ -4,7 +4,8 @@ from app.modules.matching.types import BarrierType
 
 # Maps each barrier type to a findhelp.org category path.
 # URL pattern: https://www.findhelp.org/{path}--montgomery-al?postal={zip}
-FINDHELP_CATEGORIES: dict[str, str] = {
+# SYNC: frontend/src/lib/findhelp.ts — keep mappings in lockstep
+FINDHELP_CATEGORIES: dict[BarrierType, str] = {
     BarrierType.CREDIT: "money/financial-assistance",
     BarrierType.TRANSPORTATION: "transit/transportation",
     BarrierType.CHILDCARE: "care/childcare",
@@ -17,7 +18,7 @@ FINDHELP_CATEGORIES: dict[str, str] = {
 _BASE = "https://www.findhelp.org"
 
 
-def generate_findhelp_url(barrier_type: str, zip_code: str) -> str | None:
+def generate_findhelp_url(barrier_type: BarrierType | str, zip_code: str) -> str | None:
     """Generate a findhelp.org capability URL for a barrier + zip code.
 
     Returns None if the barrier type has no mapping.

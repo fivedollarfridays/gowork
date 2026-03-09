@@ -1,3 +1,7 @@
+import { Badge } from "@/components/ui/badge";
+import { STATUS_BADGE_STYLES } from "@/lib/constants";
+import { cn } from "@/lib/utils";
+
 interface EligibilityBadgeProps {
   status?: "likely" | "check" | null;
 }
@@ -7,15 +11,15 @@ export function EligibilityBadge({ status }: EligibilityBadgeProps) {
 
   if (status === "likely") {
     return (
-      <span className="inline-flex items-center rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
+      <Badge variant="outline" className={cn("text-xs rounded-full", STATUS_BADGE_STYLES.positive)}>
         Likely eligible
-      </span>
+      </Badge>
     );
   }
 
   return (
-    <span className="inline-flex items-center rounded-full bg-warning/10 px-2 py-0.5 text-xs font-medium text-warning-foreground">
+    <Badge variant="outline" className={cn("text-xs rounded-full", STATUS_BADGE_STYLES.warning)}>
       Check eligibility
-    </span>
+    </Badge>
   );
 }

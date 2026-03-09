@@ -10,7 +10,7 @@ from app.modules.matching.affinity import (
     CAREER_CENTER_STEP,
     RESOURCE_AFFINITY,
 )
-from app.modules.matching.barrier_cards import _build_cards as _build_barrier_cards, _build_next_steps
+from app.modules.matching.barrier_cards import _build_cards, _build_next_steps
 from app.modules.matching.types import (
     BarrierSeverity,
     BarrierType,
@@ -93,7 +93,7 @@ class TestAffinityRouting:
             _make_resource(id=1, name="MATS Transit Center", category="career_center"),
             _make_resource(id=2, name="Credit Counseling", category="social_service"),
         ]
-        cards = _build_barrier_cards(profile, resources)
+        cards = _build_cards(profile, resources)
         trans_card = next(c for c in cards if c.type == BarrierType.TRANSPORTATION)
         credit_card = next(c for c in cards if c.type == BarrierType.CREDIT)
         assert any(r.name == "MATS Transit Center" for r in trans_card.resources)
@@ -107,7 +107,7 @@ class TestAffinityRouting:
         resources = [
             _make_resource(id=1, name="DHR Childcare Services", category="childcare"),
         ]
-        cards = _build_barrier_cards(profile, resources)
+        cards = _build_cards(profile, resources)
         childcare_card = next(c for c in cards if c.type == BarrierType.CHILDCARE)
         assert any(r.name == "DHR Childcare Services" for r in childcare_card.resources)
 
@@ -122,7 +122,7 @@ class TestAffinityRouting:
                 category="training",
             ),
         ]
-        cards = _build_barrier_cards(profile, resources)
+        cards = _build_cards(profile, resources)
         training_card = next(c for c in cards if c.type == BarrierType.TRAINING)
         assert any(
             "Montgomery Regional Workforce" in r.name
@@ -138,7 +138,7 @@ class TestAffinityRouting:
             _make_resource(id=1, name="Montgomery Career Center", category="career_center"),
             _make_resource(id=2, name="Other Service", category="social_service"),
         ]
-        cards = _build_barrier_cards(profile, resources)
+        cards = _build_cards(profile, resources)
         for card in cards:
             assert not any(
                 "career center" in r.name.lower() for r in card.resources
@@ -152,8 +152,8 @@ class TestAffinityRouting:
         resources = [
             _make_resource(id=1, name="Montgomery Career Center", category="career_center"),
         ]
-        cards = _build_barrier_cards(profile, resources)
-        steps = _build_next_steps(profile, cards)
+        cards = _build_cards(profile, resources)
+        steps = _build_next_steps(cards)
         assert steps[0] == CAREER_CENTER_STEP
 
     def test_maria_persona_affinity(self):
@@ -171,7 +171,7 @@ class TestAffinityRouting:
             _make_resource(id=3, name="DHR Childcare Services", category="childcare"),
             _make_resource(id=4, name="Credit Counseling", category="social_service"),
         ]
-        cards = _build_barrier_cards(profile, resources)
+        cards = _build_cards(profile, resources)
 
         trans_card = next(c for c in cards if c.type == BarrierType.TRANSPORTATION)
         child_card = next(c for c in cards if c.type == BarrierType.CHILDCARE)
@@ -202,7 +202,7 @@ class TestAffinityRouting:
                 BarrierType.CHILDCARE,
             ],
         )
-        cards = _build_barrier_cards(profile, [])
+        cards = _build_cards(profile, [])
         card_types = [c.type for c in cards]
         assert card_types == [
             BarrierType.CREDIT,

@@ -74,7 +74,7 @@ def build_barrier_cards_and_steps(
     )
     cards = _build_cards(sorted_profile, resources)
     _annotate_eligibility(cards, benefits_profile)
-    steps = _build_next_steps(profile, cards)
+    steps = _build_next_steps(cards)
     return cards, steps
 
 
@@ -84,11 +84,8 @@ def _annotate_eligibility(
 ) -> None:
     """Set eligibility_status on each resource in barrier cards."""
     for card in cards:
-        for i, resource in enumerate(card.resources):
-            status = check_eligibility(resource, benefits_profile)
-            card.resources[i] = resource.model_copy(
-                update={"eligibility_status": status.value},
-            )
+        for resource in card.resources:
+            resource.eligibility_status = check_eligibility(resource, benefits_profile).value
 
 
 def _build_cards(
@@ -121,9 +118,7 @@ def _build_cards(
     return cards
 
 
-def _build_next_steps(
-    profile: UserProfile, cards: list[BarrierCard],
-) -> list[str]:
+def _build_next_steps(cards: list[BarrierCard]) -> list[str]:
     """Generate prioritized immediate next steps."""
     steps: list[str] = [CAREER_CENTER_STEP]
 

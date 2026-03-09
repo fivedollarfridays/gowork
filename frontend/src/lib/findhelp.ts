@@ -7,8 +7,9 @@
 
 import type { BarrierType } from "@/lib/types";
 
-/** findhelp.org category paths keyed by BarrierType. */
-export const FINDHELP_CATEGORIES: Record<string, string> = {
+/** findhelp.org category paths keyed by BarrierType.
+ *  SYNC: backend/app/modules/resources/findhelp.py — keep mappings in lockstep */
+export const FINDHELP_CATEGORIES: Record<BarrierType, string> = {
   credit: "money/financial-assistance",
   transportation: "transit/transportation",
   childcare: "care/childcare",
