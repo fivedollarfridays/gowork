@@ -43,7 +43,7 @@ describe("ViewTransitionsProvider", () => {
     expect(mockTransition).toHaveBeenCalledTimes(1);
 
     // Cleanup
-    delete (document as Record<string, unknown>).startViewTransition;
+    delete (document as unknown as Record<string, unknown>).startViewTransition;
   });
 
   it("does not call startViewTransition when pathname is the same", () => {
@@ -62,6 +62,6 @@ describe("ViewTransitionsProvider", () => {
 
     expect(mockTransition).not.toHaveBeenCalled();
 
-    delete (document as Record<string, unknown>).startViewTransition;
+    delete (document as unknown as Record<string, unknown>).startViewTransition;
   });
 });
