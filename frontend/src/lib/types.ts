@@ -109,6 +109,8 @@ export interface ScoredJobMatch extends JobMatch {
   match_reason: string;
   bucket: "strong" | "possible" | "after_repair";
   pay_range?: string | null;
+  fair_chance?: boolean;
+  employment_type?: string | null;
 }
 
 export interface TransitConnection {
@@ -209,11 +211,15 @@ export interface EnrichedJob {
   id: number;
   title: string;
   company: string | null;
+  location: string | null;
+  description: string | null;
   url: string | null;
   source: string | null;
   scraped_at: string | null;
   industry: string | null;
   credit_check_required: string;
+  fair_chance: boolean;
+  employment_type: string | null;
   transit_info: TransitInfo | null;
   application_steps: string[];
 }

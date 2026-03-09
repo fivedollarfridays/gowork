@@ -134,31 +134,22 @@ describe("MondayMorning clickable phone numbers", () => {
   });
 });
 
-describe("MondayMorning step titles from immediate_next_steps", () => {
-  const planWithSteps: ReEntryPlan = {
-    ...basePlan,
-    immediate_next_steps: [
-      "Contact Montgomery Career Center for transportation support",
-      "Call Legal Aid for record help",
-    ],
-  };
+describe("MondayMorning fixed step cards", () => {
+  it("renders Career Center step with phone link", () => {
+    renderMondayMorning();
 
-  it("renders each immediate_next_step as a step card title", () => {
-    renderMondayMorning({ plan: planWithSteps });
-
-    // Career center step is detected and structured with phone/location
-    // Other steps render as plain title text
-    expect(screen.getByText(/Call Legal Aid for record help/)).toBeInTheDocument();
-  });
-
-  it("structures career center step with phone link", () => {
-    renderMondayMorning({ plan: planWithSteps });
-
-    // Career center step is detected by name and gets structured phone/address
+    expect(screen.getByText(/Visit the Career Center/)).toBeInTheDocument();
     const phoneLinks = screen.getAllByRole("link").filter(
       (link) => link.getAttribute("href")?.startsWith("tel:")
     );
     expect(phoneLinks.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("renders Job Matches and Barriers steps", () => {
+    renderMondayMorning();
+
+    expect(screen.getByText(/Review Your Job Matches/)).toBeInTheDocument();
+    expect(screen.getByText(/No Barriers Identified/)).toBeInTheDocument();
   });
 });
 
@@ -201,13 +192,18 @@ describe("MondayMorning map links", () => {
     expect(mapLinks[0].getAttribute("href")).toContain("google.com/maps/search");
   });
 
-  it("encodes address in map URL", () => {
+  it("encodes resource address in map URL", () => {
     renderMondayMorning({ plan: planWithAddress });
 
     const mapLinks = screen.getAllByRole("link").filter(
       (link) => link.getAttribute("href")?.includes("google.com/maps")
     );
-    expect(mapLinks[0].getAttribute("href")).toContain(
+    // Find the link that contains the resource address (not the CAREER_CENTER address)
+    const resourceMapLink = mapLinks.find((link) =>
+      link.getAttribute("href")?.includes(encodeURIComponent("100 Main St"))
+    );
+    expect(resourceMapLink).toBeDefined();
+    expect(resourceMapLink!.getAttribute("href")).toContain(
       encodeURIComponent("100 Main St, Montgomery, AL")
     );
   });

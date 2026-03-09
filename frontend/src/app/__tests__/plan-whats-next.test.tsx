@@ -56,8 +56,8 @@ describe("PlanPage What's Next CTA", () => {
     const heading = await screen.findByText(/what.?s next/i);
     expect(heading).toBeInTheDocument();
 
-    expect(screen.getByText(/1060 East South Boulevard/i)).toBeInTheDocument();
-    expect(screen.getByText(/334-286-1746/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/1060 East South Boulevard/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/334-286-1746/i).length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders Start New Assessment link", async () => {
