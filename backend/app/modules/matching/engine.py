@@ -3,6 +3,8 @@
 import json
 import uuid
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.queries import get_all_transit_stops, get_resources_by_categories
 from app.modules.feedback.types import ResourceHealth
 from app.modules.benefits.cliff_calculator import calculate_cliff_analysis
@@ -83,7 +85,7 @@ BARRIER_ACTIONS: dict[BarrierType, list[str]] = {
 
 
 async def query_resources_for_barriers(
-    barriers: list[BarrierType], db_session,
+    barriers: list[BarrierType], db_session: AsyncSession,
 ) -> list[Resource]:
     """Query Montgomery data for resources matching the user's barrier types."""
     categories: set[str] = set()
@@ -128,7 +130,7 @@ def _compute_stop_distances(
 
 
 async def _rank_with_transit(
-    profile: UserProfile, resources: list[Resource], db_session,
+    profile: UserProfile, resources: list[Resource], db_session: AsyncSession,
 ) -> list[Resource]:
     """Rank resources, factoring in transit stop proximity for transit-dependent users."""
     stop_distances: dict[int, float] | None = None
@@ -164,7 +166,7 @@ def _barrier_cards_and_steps(
 
 
 async def generate_plan(
-    profile: UserProfile, db_session,
+    profile: UserProfile, db_session: AsyncSession,
     resume_text: str = "",
     credit_result: dict | None = None,
     benefits_profile: BenefitsProfile | None = None,
