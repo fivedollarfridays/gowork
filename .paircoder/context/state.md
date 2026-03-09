@@ -174,6 +174,8 @@ Sprint 29: Benefits Program Eligibility. The "opportunity system" that complemen
 
 ## What Was Just Done
 
+- **T27.0 BrightData Pre-Built Jobs Dataset Integration** (2026-03-08) — Created `dataset_loader.py` (parse JSON/JSONL/CSV dataset files, normalize to `BrightDataJobRecord`), `salary_embed.py` (embed structured salary data into description text for PVS salary_parser). Sample dataset with 15 Montgomery-area jobs. Code review fixes: renamed private symbols to public in cache.py, corrected misleading metric names in observability.
+
 - **Merge conflict resolution** (2026-03-09) — Resolved conflicts between Sprint 29 (benefits eligibility) and Sprint 28 (resource auto-matching). engine.py: kept `_compute_benefits()` with lazy imports, adopted `build_barrier_cards_and_steps` from barrier_cards.py, `ResourceHealth` from feedback.types. state.md: merged both sprint histories.
 
 - **T29.4 done** (2026-03-08) — Benefits Eligibility Dashboard UI: Created `BenefitsEligibility.tsx` with per-program rows (confidence badges via `STATUS_BADGE_STYLES`, monthly values, income headroom), enrolled vs additional-eligible grouping, expandable "How to apply" sections (steps, required docs, office name/address/phone, processing time, apply link). Uses shadcn Card/Badge, Lucide icons, `PROGRAM_LABELS` from constants. Wired into `plan/page.tsx` after barriers, before cliff chart. 11 frontend tests (null render, heading, values, badges, headroom, disclaimer, expand/collapse, enrolled distinction, a11y). `npx tsc --noEmit` clean.
@@ -190,7 +192,7 @@ Sprint 29: Benefits Program Eligibility. The "opportunity system" that complemen
 
 ## What's Next
 
-Sprint 29 COMPLETE (4/4 tasks). PR #40 open, resolving merge conflicts with Sprint 28. Next sprint TBD.
+Sprint 29 COMPLETE (4/4 tasks). BrightData dataset loader merged. Next sprint TBD.
 
 ## Blockers
 

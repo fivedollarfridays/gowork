@@ -3,6 +3,7 @@
 import json
 import logging
 import time
+from typing import Literal
 
 from app.ai.audit_log import log_llm_interaction_async
 from app.ai.llm_client import get_llm_stream, resolve_provider
@@ -11,6 +12,8 @@ from app.barrier_intel.observability import build_request_log
 from app.barrier_intel.prompts import SYSTEM_PROMPT, build_user_prompt
 from app.core.config import get_settings
 from app.rag.document_schema import RetrievalContext
+
+ChatMode = Literal["next_steps", "explain_plan"]
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +26,7 @@ def format_sse(event_type: str, data: dict | str) -> str:
 
 async def stream_chat_response(
     question: str,
-    mode: str,
+    mode: ChatMode,
     ctx: RetrievalContext,
     session_hash: str,
 ):
@@ -42,9 +45,9 @@ async def stream_chat_response(
         chunk_count += 1
 
     full_response = "".join(collected_text)
-    guardrail_triggered = _check_guardrails(full_response, ctx)
-    if guardrail_triggered:
-        yield format_sse("disclaimer", {"text": guardrail_triggered})
+    guardrail_triggered, disclaimer = _check_response(full_response, ctx)
+    if disclaimer:
+        yield format_sse("disclaimer", {"text": disclaimer})
 
     latency_ms = (time.monotonic() - start) * 1000
     yield format_sse("done", {"chunks": chunk_count, "latency_ms": round(latency_ms)})
@@ -52,17 +55,17 @@ async def stream_chat_response(
     await _audit_log(
         session_hash, provider, mode, barrier_ids, ctx,
         chunk_count, latency_ms,
-        guardrail_triggered=bool(guardrail_triggered),
+        guardrail_triggered=guardrail_triggered,
         prompt_length=len(user_prompt),
         response_length=len(full_response),
     )
 
 
-def _check_guardrails(full_response: str, ctx: RetrievalContext) -> str | None:
-    """Run hallucination check, return disclaimer text or None."""
-    known_names = [r["name"] for r in ctx.top_resources]
-    return check_hallucinations(full_response, known_names)
-
+def _check_response(response: str, ctx: RetrievalContext) -> tuple[bool, str | None]:
+    """Check response for hallucinations. Returns (triggered, disclaimer)."""
+    known_names = [r.get("name", r.get("title", "")) for r in ctx.top_resources]
+    disclaimer = check_hallucinations(response, known_names)
+    return (True, disclaimer) if disclaimer else (False, None)
 
 
 async def _audit_log(
@@ -86,8 +89,8 @@ async def _audit_log(
         retrieval_doc_count=len(ctx.retrieved_docs),
         retrieval_latency_ms=ctx.retrieval_latency_ms,
         llm_latency_ms=latency_ms,
-        input_tokens=0,
-        output_chunks=chunk_count,
+        prompt_chars=prompt_length,
+        response_chars=response_length,
         cache_hit=False,
         guardrail_triggered=guardrail_triggered,
     )
