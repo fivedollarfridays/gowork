@@ -3,10 +3,12 @@
 import { useMemo, useState, useCallback, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { ClipboardList, ListChecks, Clock, CreditCard, FileText, Loader2, Upload, Briefcase } from "lucide-react";
+import { ClipboardList, ListChecks, Clock, CreditCard, FileText, Loader2, Upload, Briefcase, Home } from "lucide-react";
 import { postAssessment, postCredit } from "@/lib/api";
 import { WizardShell, type WizardStepConfig } from "@/components/wizard/WizardShell";
 import { BarrierForm, type BarrierFormData } from "@/components/wizard/BarrierForm";
+import { BenefitsStep, BENEFITS_DEFAULTS } from "@/components/wizard/BenefitsStep";
+import type { BenefitsFormData } from "@/lib/types";
 import { CreditForm, creditFormCanAdvance, ACCOUNT_AGE_RANGES } from "@/components/wizard/CreditForm";
 import { ResumeStep } from "@/components/wizard/ResumeStep";
 import { IndustryForm } from "@/components/wizard/IndustryForm";
@@ -40,6 +42,7 @@ export default function AssessPage() {
   const [resumeText, setResumeText] = useState("");
   const [targetIndustries, setTargetIndustries] = useState<string[]>([]);
   const [certifications, setCertifications] = useState<string[]>([]);
+  const [benefitsData, setBenefitsData] = useState<BenefitsFormData>(BENEFITS_DEFAULTS);
   const [creditData, setCreditData] = useState<CreditFormData>({
     currentScore: 580,
     overallUtilization: 30,
@@ -116,9 +119,11 @@ export default function AssessPage() {
       ...(resumeText ? { resume_text: resumeText } : {}),
       ...(certifications.length > 0 ? { certifications } : {}),
       ...(creditResultRef.current ? { credit_result: creditResultRef.current } : {}),
+      ...(benefitsData.enrolled_programs.length > 0 || benefitsData.household_size > 1 || benefitsData.current_monthly_income > 0
+        ? { benefits_data: benefitsData } : {}),
     };
     mutation.mutate(request);
-  }, [formData, creditData, hasCreditBarrier, mutation, resumeText, targetIndustries, certifications]);
+  }, [formData, creditData, hasCreditBarrier, mutation, resumeText, targetIndustries, certifications, benefitsData]);
 
   const steps: WizardStepConfig[] = useMemo(() => [
     {
@@ -217,6 +222,22 @@ export default function AssessPage() {
               Select at least one barrier to continue.
             </p>
           )}
+        </div>
+      ),
+    },
+    {
+      title: "Benefits",
+      icon: <Home className="h-4 w-4" />,
+      canAdvance: () => true,
+      content: () => (
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-lg font-semibold mb-1">Household &amp; Benefits</h2>
+            <p className="text-sm text-muted-foreground">
+              Tell us about your household and any benefits you receive. This helps us show how a new job might affect your benefits. You can skip this step.
+            </p>
+          </div>
+          <BenefitsStep data={benefitsData} onChange={setBenefitsData} />
         </div>
       ),
     },
@@ -394,7 +415,7 @@ export default function AssessPage() {
         </div>
       ),
     },
-  ], [formData, creditData, zipValid, barrierCount, hasCreditBarrier, mutation.isPending, error, resumeText, targetIndustries, certifications]);
+  ], [formData, benefitsData, creditData, zipValid, barrierCount, hasCreditBarrier, mutation.isPending, error, resumeText, targetIndustries, certifications]);
 
   return (
     <main className="min-h-screen px-4 py-8 sm:px-8">

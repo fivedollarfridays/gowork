@@ -50,6 +50,7 @@ async def lifespan(app: FastAPI):
     async with factory() as session:
         await rag_store.build_or_load(session)
     app.state.rag_store = rag_store
+    app.state.llm_status = llm_status
     yield
     await close_db()
     logger.info("MontGoWork API shutting down")

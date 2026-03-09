@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import type { CreditAssessmentResult, JobMatch, ScoredJobMatch } from "@/lib/types";
 import { STATUS_BADGE_STYLES, safeHref, daysToMonths, mapsUrl } from "@/lib/constants";
+import { CliffBadge } from "./CliffBadge";
 
 export function isScoredJob(job: JobMatch): job is ScoredJobMatch {
   return "relevance_score" in job;
@@ -94,6 +95,9 @@ export function JobMatchCard({ job, creditResult }: JobMatchCardProps) {
       </CardHeader>
 
       <CardContent className="space-y-3">
+        {/* Benefits cliff impact badge */}
+        {isScoredJob(job) && <CliffBadge cliffImpact={job.cliff_impact ?? null} />}
+
         {/* Match reason for scored jobs */}
         {isScoredJob(job) && job.match_reason && (
           <p className="text-sm text-secondary font-medium">{job.match_reason}</p>
@@ -131,13 +135,16 @@ export function JobMatchCard({ job, creditResult }: JobMatchCardProps) {
         )}
 
         {/* Apply link */}
-        {job.url && safeHref(job.url) && (
-          <Button variant="outline" size="sm" className="gap-1.5" asChild>
-            <a href={safeHref(job.url)} target="_blank" rel="noopener noreferrer">
-              Apply <ExternalLink className="h-3.5 w-3.5" />
-            </a>
-          </Button>
-        )}
+        {(() => {
+          const applyHref = job.url ? safeHref(job.url) : undefined;
+          return applyHref ? (
+            <Button variant="outline" size="sm" className="gap-1.5" asChild>
+              <a href={applyHref} target="_blank" rel="noopener noreferrer">
+                Apply <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            </Button>
+          ) : null;
+        })()}
       </CardContent>
     </Card>
   );

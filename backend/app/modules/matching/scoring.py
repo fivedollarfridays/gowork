@@ -72,17 +72,25 @@ def _score_barrier_alignment(resource: Resource, profile: UserProfile) -> float:
     return 0.1  # small base score for any resource
 
 
+def distance_to_score(miles: float) -> float:
+    """Convert distance in miles to a 0.1-1.0 score.
+
+    <=1mi => 1.0, 1-15mi => linear decay, >=15mi => 0.1.
+    """
+    if miles <= 1.0:
+        return 1.0
+    if miles >= 15.0:
+        return 0.1
+    return 1.0 - (miles - 1.0) / 14.0 * 0.9
+
+
 def _score_proximity(resource: Resource, profile: UserProfile) -> float:
     """Score 0-1 based on distance. Closer = higher score."""
     if resource.lat is None or resource.lng is None:
         return 0.5  # neutral when resource location unknown
     user_coords = ZIP_CENTROIDS.get(profile.zip_code, DOWNTOWN_MONTGOMERY)
     miles = haversine_miles(user_coords[0], user_coords[1], resource.lat, resource.lng)
-    if miles <= 1.0:
-        return 1.0
-    if miles >= 15.0:
-        return 0.1
-    return 1.0 - (miles - 1.0) / 14.0 * 0.9
+    return distance_to_score(miles)
 
 
 def _score_transit(

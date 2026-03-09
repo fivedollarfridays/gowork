@@ -95,10 +95,10 @@ class TestHealth:
     @pytest.mark.anyio
     async def test_includes_llm_provider(self, client):
         """Health endpoint reports active LLM provider."""
+        from app.main import app
         up_check = MagicMock(status="up")
-        mock_status = {"providers": {"anthropic": "configured"}, "active": "anthropic"}
-        with patch("app.health.checks.check_database", return_value=up_check), \
-             patch("app.health.checks.check_llm_providers", return_value=mock_status):
+        app.state.llm_status = {"providers": {"anthropic": "configured"}, "active": "anthropic"}
+        with patch("app.health.checks.check_database", return_value=up_check):
             resp = await client.get("/health")
         assert resp.status_code == 200
         body = resp.json()
@@ -107,10 +107,10 @@ class TestHealth:
     @pytest.mark.anyio
     async def test_llm_provider_mock_when_no_keys(self, client):
         """Health endpoint shows mock when no LLM keys configured."""
+        from app.main import app
         up_check = MagicMock(status="up")
-        mock_status = {"providers": {"anthropic": "no_key"}, "active": "mock"}
-        with patch("app.health.checks.check_database", return_value=up_check), \
-             patch("app.health.checks.check_llm_providers", return_value=mock_status):
+        app.state.llm_status = {"providers": {"anthropic": "no_key"}, "active": "mock"}
+        with patch("app.health.checks.check_database", return_value=up_check):
             resp = await client.get("/health")
         assert resp.status_code == 200
         assert resp.json()["llm_provider"] == "mock"

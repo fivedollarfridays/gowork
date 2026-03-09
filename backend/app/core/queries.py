@@ -78,9 +78,9 @@ async def create_session(session: AsyncSession, session_data: dict, session_id: 
     await session.execute(
         text(
             "INSERT INTO sessions (id, created_at, barriers, credit_profile, "
-            "qualifications, plan, profile, expires_at) "
+            "qualifications, plan, profile, benefits_profile, expires_at) "
             "VALUES (:id, :created_at, :barriers, :credit_profile, "
-            ":qualifications, :plan, :profile, :expires_at)"
+            ":qualifications, :plan, :profile, :benefits_profile, :expires_at)"
         ),
         {
             "id": session_id,
@@ -90,6 +90,7 @@ async def create_session(session: AsyncSession, session_data: dict, session_id: 
             "qualifications": session_data.get("qualifications"),
             "plan": session_data.get("plan"),
             "profile": session_data.get("profile"),
+            "benefits_profile": session_data.get("benefits_profile"),
             "expires_at": expires,
         },
     )
