@@ -88,13 +88,15 @@ class TestNetIncomeScoring:
 
         assert score_with_profile == score_without
 
-    def test_undisclosed_salary_still_capped(self) -> None:
-        """No-pay ceiling still applies even with benefits profile."""
+    def test_undisclosed_salary_still_penalized(self) -> None:
+        """No-pay penalty still applies even with benefits profile."""
         profile = _profile()
-        job = _job(description="Great culture!")
+        job_no_pay = _job(description="Great culture!")
+        job_pay = _job(description="Pay: $15.00 per hour")
 
-        score = compute_pvs(job, _ctx(benefits_profile=profile))
-        assert score <= 0.25
+        score_no = compute_pvs(job_no_pay, _ctx(benefits_profile=profile))
+        score_yes = compute_pvs(job_pay, _ctx(benefits_profile=profile))
+        assert score_no < score_yes
 
 
 class TestBackwardCompat:

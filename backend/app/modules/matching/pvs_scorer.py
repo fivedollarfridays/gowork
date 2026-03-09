@@ -33,8 +33,9 @@ W_PROXIMITY = 0.25
 W_TIME_FIT = 0.20
 W_BARRIER_COMPAT = 0.20
 
-# No-pay ceiling: jobs without disclosed salary can never exceed this
-NO_PAY_CEILING = 0.25
+# No-pay penalty: jobs without disclosed salary are scaled down but still
+# differentiate on proximity, time fit, and barrier compatibility
+NO_PAY_MULTIPLIER = 0.55
 
 # Sentinel: distinguishes "not yet parsed" from "parsed but no salary found"
 _NOT_PARSED: SalaryInfo | None = type("_NotParsed", (), {"__repr__": lambda s: "_NOT_PARSED"})()  # type: ignore[assignment]
@@ -141,7 +142,7 @@ def compute_pvs(
     pvs = max(0.0, min(1.0, pvs))
 
     if salary is None:
-        pvs = min(pvs, NO_PAY_CEILING)
+        pvs *= NO_PAY_MULTIPLIER
 
     return round(pvs, 3)
 

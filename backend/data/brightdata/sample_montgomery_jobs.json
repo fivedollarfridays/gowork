@@ -1,0 +1,137 @@
+[
+  {
+    "title": "Warehouse Associate",
+    "company_name": "Amazon",
+    "location": "Montgomery, AL 36104",
+    "description": "Full-time warehouse position. Loading, unloading, and sorting packages. Standing and walking for extended periods. Must be able to lift 50 lbs.",
+    "salary": "$15.50 - $18.00 per hour",
+    "url": "https://amazon.jobs/montgomery/warehouse-001",
+    "job_type": "full_time"
+  },
+  {
+    "title": "Cashier",
+    "company_name": "Walmart",
+    "location": "Montgomery, AL 36117",
+    "description": "Customer service and cash register operation. Friendly attitude required. Flexible scheduling available.",
+    "salary": "$12.00 per hour",
+    "url": "https://careers.walmart.com/montgomery/cashier-001",
+    "job_type": "part_time"
+  },
+  {
+    "title": "Customer Service Representative",
+    "company_name": "ALDOT",
+    "location": "Montgomery, AL 36130",
+    "description": "Answer phones, assist visitors, file documents. State benefits included. Must pass background check.",
+    "salary": "$14.50 per hour",
+    "url": "https://personnel.alabama.gov/jobs/csr-001",
+    "job_type": "full_time"
+  },
+  {
+    "title": "Forklift Operator",
+    "company_name": "Hyundai Motor Manufacturing Alabama",
+    "location": "Montgomery, AL 36108",
+    "description": "Operate forklift in manufacturing plant. Prior forklift experience preferred. Safety training provided.",
+    "salary": "$17.00 - $20.00 per hour",
+    "url": "https://hmma.com/careers/forklift-001",
+    "job_type": "full_time"
+  },
+  {
+    "title": "Food Service Worker",
+    "company_name": "Baptist Medical Center South",
+    "location": "Montgomery, AL 36116",
+    "description": "Prepare and serve meals in hospital cafeteria. Food handling certification helpful. Shifts available mornings and evenings.",
+    "salary": "$11.50 per hour",
+    "url": "https://baptistfirst.org/careers/food-service-001",
+    "job_type": "full_time"
+  },
+  {
+    "title": "Delivery Driver",
+    "company_name": "FedEx Ground",
+    "location": "Montgomery, AL 36109",
+    "description": "Deliver packages on local routes. Must have valid driver's license and clean driving record. Vehicle provided.",
+    "salary": "$16.00 - $19.00 per hour",
+    "url": "https://careers.fedex.com/montgomery/driver-001",
+    "job_type": "full_time"
+  },
+  {
+    "title": "Housekeeper",
+    "company_name": "Renaissance Montgomery Hotel",
+    "location": "Montgomery, AL 36104",
+    "description": "Clean guest rooms and common areas. Prior hotel experience a plus. Flexible schedule.",
+    "salary": "$12.50 per hour",
+    "url": "https://marriottcareers.com/montgomery/housekeeper-001",
+    "job_type": "full_time"
+  },
+  {
+    "title": "Security Guard",
+    "company_name": "Allied Universal",
+    "location": "Montgomery, AL 36106",
+    "description": "Patrol assigned areas, monitor security cameras, write incident reports. Night and weekend shifts available.",
+    "salary": "$13.00 - $15.00 per hour",
+    "url": "https://jobs.aus.com/montgomery/guard-001",
+    "job_type": "full_time"
+  },
+  {
+    "title": "Medical Assistant",
+    "company_name": "Jackson Hospital",
+    "location": "Montgomery, AL 36106",
+    "description": "Assist physicians with patient care. Take vitals, prepare exam rooms. CMA certification preferred.",
+    "salary": "$14.00 - $17.00 per hour",
+    "url": "https://jackson.org/careers/ma-001",
+    "job_type": "full_time"
+  },
+  {
+    "title": "Maintenance Technician",
+    "company_name": "Montgomery Housing Authority",
+    "location": "Montgomery, AL 36104",
+    "description": "Perform repairs and maintenance on residential units. Plumbing, electrical, and HVAC experience helpful.",
+    "salary": "$15.00 - $18.50 per hour",
+    "url": "https://mhatoday.org/careers/maintenance-001",
+    "job_type": "full_time"
+  },
+  {
+    "title": "CNA - Certified Nursing Assistant",
+    "company_name": "Diversicare of Montgomery",
+    "location": "Montgomery, AL 36111",
+    "description": "Provide direct patient care in long-term care facility. Active CNA certification required. Day and evening shifts.",
+    "salary": "$13.50 - $16.00 per hour",
+    "url": "https://diversicare.com/careers/cna-001",
+    "job_type": "full_time"
+  },
+  {
+    "title": "Retail Sales Associate",
+    "company_name": "Dollar General",
+    "location": "Montgomery, AL 36105",
+    "description": "Stock shelves, assist customers, operate register. Flexible scheduling including weekends.",
+    "salary": "$11.00 per hour",
+    "url": "https://careers.dollargeneral.com/montgomery/sa-001",
+    "job_type": "part_time"
+  },
+  {
+    "title": "Line Cook",
+    "company_name": "Chick-fil-A",
+    "location": "Montgomery, AL 36117",
+    "description": "Prepare food items according to recipes. Fast-paced kitchen environment. Training provided.",
+    "salary": "$13.00 per hour",
+    "url": "https://thechickenwire.chick-fil-a.com/montgomery/cook-001",
+    "job_type": "full_time"
+  },
+  {
+    "title": "Bus Driver",
+    "company_name": "Montgomery Area Transit System",
+    "location": "Montgomery, AL 36104",
+    "description": "Operate fixed-route transit buses. CDL Class B required. Paid training available for qualified candidates.",
+    "salary": "$15.00 - $19.00 per hour",
+    "url": "https://montgomerytransit.com/careers/driver-001",
+    "job_type": "full_time"
+  },
+  {
+    "title": "Administrative Assistant",
+    "company_name": "Alabama State University",
+    "location": "Montgomery, AL 36101",
+    "description": "Provide administrative support. Answer phones, schedule appointments, manage correspondence. Proficiency in Microsoft Office required.",
+    "salary": "$13.50 - $16.50 per hour",
+    "url": "https://alasu.edu/careers/admin-001",
+    "job_type": "full_time"
+  }
+]

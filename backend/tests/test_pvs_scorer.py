@@ -40,10 +40,19 @@ class TestComputePvs:
     """Test the composite PVS scoring function."""
 
     def test_no_pay_penalized(self) -> None:
-        """Jobs without pay should score very low."""
+        """Jobs without pay should score lower than those with pay."""
         job = _job(description="Great team culture!")
         score = compute_pvs(job, _ctx())
-        assert score <= 0.25
+        assert score <= 0.40
+
+    def test_no_pay_still_differentiates(self) -> None:
+        """Jobs without pay should still rank differently by barriers."""
+        job = _job(description="Great culture!", location="Montgomery, AL 36101")
+        score_clean = compute_pvs(job, _ctx())
+        score_barriers = compute_pvs(
+            job, _ctx(barriers=[BarrierType.CHILDCARE, BarrierType.CREDIT]),
+        )
+        assert score_clean > score_barriers
 
     def test_with_pay_scores_higher(self) -> None:
         """Jobs with disclosed pay should score higher than without."""

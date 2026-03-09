@@ -137,6 +137,8 @@ Sprint 25: Benefits Cliff Engine. WorkPath's key differentiator — showing user
 
 ## What Was Just Done
 
+- **T27.0 BrightData Pre-Built Jobs Dataset Integration** (2026-03-08) — Created `dataset_loader.py` (parse JSON/JSONL/CSV dataset files, normalize to `BrightDataJobRecord`), `salary_embed.py` (embed structured salary data into description text for PVS salary_parser). Sample dataset with 15 Montgomery-area jobs (real employers: Amazon, Walmart, Hyundai, FedEx, MATS, Jackson Hospital, etc.) with salary ranges $11-$20/hr. Scores now range 0.772-0.959 (was all 25%). Dedup by (title, company), Montgomery-area filter, high-salary exclusion, URL-based DB dedup. 33 new tests, 1105 total passing. All arch checks clean.
+
 - **Fix: frontend test step indices** (2026-03-08) — Updated `assess-industry.test.tsx` and `assess-schedule.test.tsx` to account for new Benefits step (step 4). Schedule moved from step 4→5, Industries from step 5→6, Review from step 6→7. All 9 assess tests pass. 4 pre-existing failures in unrelated files (BarrierCardView, MondayMorning, plan-whats-next).
 
 - **Fix: CliffBadge hardcoded colors** (2026-03-08) — Replaced hardcoded Tailwind colors (`bg-red-50`, `bg-amber-50`, `bg-emerald-50`) with `STATUS_BADGE_STYLES.positive/negative/warning` from constants.ts. Follows project pattern for CSS-variable-based badge styling.
@@ -275,7 +277,7 @@ Sprint 25: Benefits Cliff Engine. WorkPath's key differentiator — showing user
 
 ## What's Next
 
-Sprint 25 COMPLETE. Ready for Sprint 26 (BrightData Phase 2) or cherry-pick from Vinny's PR #33.
+T27.0 done. Load BrightData dataset into live app to demo differentiated scoring. Next: wire dataset loading into app startup or add management command. Sprint 27 remaining: T27.1-T27.4.
 
 
 ## Blockers
