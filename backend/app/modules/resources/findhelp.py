@@ -1,5 +1,7 @@
 """findhelp.org capability URL generation for barrier-based program discovery."""
 
+from urllib.parse import quote
+
 from app.modules.matching.types import BarrierType
 
 # Maps each barrier type to a findhelp.org category path.
@@ -26,4 +28,4 @@ def generate_findhelp_url(barrier_type: BarrierType | str, zip_code: str) -> str
     path = FINDHELP_CATEGORIES.get(barrier_type)
     if path is None:
         return None
-    return f"{_BASE}/{path}--montgomery-al?postal={zip_code}"
+    return f"{_BASE}/{path}--montgomery-al?postal={quote(zip_code, safe='')}"

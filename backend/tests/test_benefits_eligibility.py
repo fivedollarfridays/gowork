@@ -1,5 +1,7 @@
 """Tests for benefits program eligibility screener."""
 
+import pytest
+
 from app.modules.benefits.eligibility_screener import screen_benefits_eligibility
 from app.modules.benefits.thresholds import (
     AMI_MONTGOMERY_2026,
@@ -63,6 +65,14 @@ class TestSnapEligibility:
     def test_eligible_below_130_fpl(self):
         fpl_3 = FPL_2026[3]
         monthly = (fpl_3 * 1.20) / MONTHS_PER_YEAR  # 120% FPL, below 130%
+        result = screen_benefits_eligibility(_profile(current_monthly_income=monthly))
+        snap = _find_program(result, "SNAP")
+        assert snap.eligible is True
+
+    def test_eligible_at_exactly_130_fpl(self):
+        """Boundary: income == 130% FPL threshold should be eligible (<=)."""
+        fpl_3 = FPL_2026[3]
+        monthly = (fpl_3 * 1.30) / MONTHS_PER_YEAR  # exactly 130% FPL
         result = screen_benefits_eligibility(_profile(current_monthly_income=monthly))
         snap = _find_program(result, "SNAP")
         assert snap.eligible is True
@@ -337,3 +347,33 @@ def _find_program(result, name: str):
         if p.program == name:
             return p
     raise ValueError(f"Program {name} not found in result")
+
+
+# ---------------------------------------------------------------------------
+# Enrolled programs + Pydantic validation
+# ---------------------------------------------------------------------------
+
+class TestEnrolledPrograms:
+    def test_screener_with_enrolled_programs(self):
+        """Enrolled programs should not affect eligibility determination."""
+        result = screen_benefits_eligibility(
+            _profile(enrolled_programs=["SNAP", "TANF"]),
+        )
+        snap = _find_program(result, "SNAP")
+        assert snap.eligible is True
+
+    def test_invalid_programs_filtered_out(self):
+        """Unrecognized program names are silently filtered by Pydantic."""
+        profile = _profile(enrolled_programs=["SNAP", "FAKE_PROGRAM"])
+        assert "FAKE_PROGRAM" not in profile.enrolled_programs
+        assert "SNAP" in profile.enrolled_programs
+
+
+class TestPydanticValidation:
+    def test_household_size_above_max_rejected(self):
+        with pytest.raises(Exception):
+            BenefitsProfile(household_size=9)
+
+    def test_negative_income_rejected(self):
+        with pytest.raises(Exception):
+            BenefitsProfile(current_monthly_income=-100)

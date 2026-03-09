@@ -4,7 +4,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-import app.ai.providers as providers_module
 from app.ai.providers import (
     _configure_gemini,
     _get_anthropic_client,
@@ -12,19 +11,16 @@ from app.ai.providers import (
     anthropic_stream,
     gemini_stream,
     openai_stream,
+    reset_provider_cache,
 )
 
 
 @pytest.fixture(autouse=True)
 def reset_provider_state():
     """Reset cached provider clients before and after each test."""
-    providers_module._anthropic_client = None
-    providers_module._openai_client = None
-    providers_module._gemini_configured = False
+    reset_provider_cache()
     yield
-    providers_module._anthropic_client = None
-    providers_module._openai_client = None
-    providers_module._gemini_configured = False
+    reset_provider_cache()
 
 
 # ---------- Client caching ----------

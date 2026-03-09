@@ -72,7 +72,7 @@ def _future_steps(years_remaining: int | None) -> list[str]:
 
 def _check_early_returns(profile: RecordProfile) -> ExpungementResult | None:
     """Handle immediate-return cases: expunged, arrest-only, never-expungeable."""
-    if profile.record_types == [RecordType.EXPUNGED]:
+    if profile.record_types and all(rt == RecordType.EXPUNGED for rt in profile.record_types):
         return ExpungementResult(
             eligibility=ExpungementEligibility.ELIGIBLE_NOW,
             years_remaining=0,

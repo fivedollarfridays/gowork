@@ -84,9 +84,12 @@ def _annotate_eligibility(
     benefits_profile: BenefitsProfile | None,
 ) -> None:
     """Set eligibility_status on each resource in barrier cards."""
+    from app.modules.resources.eligibility import EligibilityStatus
+
     for card in cards:
         for resource in card.resources:
-            resource.eligibility_status = check_eligibility(resource, benefits_profile).value
+            status = check_eligibility(resource, benefits_profile)
+            resource.eligibility_status = status.value if status != EligibilityStatus.UNKNOWN else None
 
 
 def _build_cards(

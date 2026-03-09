@@ -163,3 +163,40 @@ class TestExpungementEligibility:
         )
         result = check_expungement_eligibility(profile)
         assert result.eligibility == ExpungementEligibility.ELIGIBLE_FUTURE
+
+    def test_singular_year_in_steps(self):
+        """1 year remaining should use singular 'year' not 'years'."""
+        profile = RecordProfile(
+            record_types=[RecordType.MISDEMEANOR],
+            charge_categories=[ChargeCategory.THEFT],
+            years_since_conviction=2,
+            completed_sentence=True,
+        )
+        result = check_expungement_eligibility(profile)
+        assert result.eligibility == ExpungementEligibility.ELIGIBLE_FUTURE
+        assert result.years_remaining == 1
+        assert "1 more year " in result.steps[0]  # singular, no trailing 's'
+
+    def test_plural_years_in_steps(self):
+        """2 years remaining should use plural 'years'."""
+        profile = RecordProfile(
+            record_types=[RecordType.MISDEMEANOR],
+            charge_categories=[ChargeCategory.THEFT],
+            years_since_conviction=1,
+            completed_sentence=True,
+        )
+        result = check_expungement_eligibility(profile)
+        assert result.years_remaining == 2
+        assert "2 more years" in result.steps[0]
+
+    def test_singular_year_in_notes(self):
+        """Notes should also use singular form for 1 year."""
+        profile = RecordProfile(
+            record_types=[RecordType.MISDEMEANOR],
+            charge_categories=[ChargeCategory.THEFT],
+            years_since_conviction=2,
+            completed_sentence=True,
+        )
+        result = check_expungement_eligibility(profile)
+        assert "1 year" in result.notes
+        assert "1 years" not in result.notes

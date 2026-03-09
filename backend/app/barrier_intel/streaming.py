@@ -4,7 +4,7 @@ import json
 import logging
 import time
 
-from app.ai.audit_log import log_llm_interaction_async
+from app.ai.audit_log import log_llm_interaction
 from app.ai.llm_client import get_llm_stream, resolve_provider
 from app.barrier_intel.guardrails import check_hallucinations
 from app.barrier_intel.observability import build_request_log
@@ -64,7 +64,6 @@ def _check_guardrails(full_response: str, ctx: RetrievalContext) -> str | None:
     return check_hallucinations(full_response, known_names)
 
 
-
 async def _audit_log(
     session_hash: str,
     provider: str,
@@ -86,7 +85,7 @@ async def _audit_log(
         retrieval_doc_count=len(ctx.retrieved_docs),
         retrieval_latency_ms=ctx.retrieval_latency_ms,
         llm_latency_ms=latency_ms,
-        input_tokens=0,
+        input_tokens=0,  # streaming API doesn't expose token counts; use prompt_length in audit log
         output_chunks=chunk_count,
         cache_hit=False,
         guardrail_triggered=guardrail_triggered,
@@ -94,7 +93,7 @@ async def _audit_log(
     logger.info("barrier_intel_chat", extra=log_data)
 
     settings = get_settings()
-    await log_llm_interaction_async(
+    await log_llm_interaction(
         log_path=settings.audit_log_path,
         session_id=session_hash,
         provider=provider,

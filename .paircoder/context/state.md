@@ -4,13 +4,21 @@
 
 ## Active Plan
 
+**Plan:** plan-2026-03-transit-enhancement
+**Type:** feature
+**Title:** Transit Enhancement — Schedule-Aware Job Matching for Montgomery Residents
+**Status:** Complete (2/2 done)
+**Current Sprint:** 30
+
+## Previous Active Plan
+
 **Plan:** plan-2026-03-benefits-program-eligibility
 **Type:** feature
 **Title:** Benefits Program Eligibility — Screening + Dashboard for Montgomery Residents
-**Status:** Complete (4/4 done)
-**Current Sprint:** 29
+**Status:** Complete (4/4 done, PR #40 open)
+**Sprint:** 29
 
-## Previous Active Plan
+## Previous Active Plan (Sprint 28)
 
 **Plan:** plan-2026-03-resource-auto-matching
 **Type:** feature
@@ -18,7 +26,7 @@
 **Status:** Complete (2/3 done, T28.3 deferred — needs findhelp.org API partnership)
 **Sprint:** 28
 
-## Previous Active Plan (Sprint 25)
+## Previous Active Plan (Sprint 25/26)
 
 **Plan:** plan-2026-03-benefits-cliff-engine
 **Type:** feature
@@ -53,9 +61,18 @@
 
 ## Current Focus
 
-Sprint 29: Benefits Program Eligibility. The "opportunity system" that complements Sprint 25's cliff "warning system." Shows users which benefit programs they qualify for but aren't enrolled in, with estimated monthly values, income headroom, and actionable application steps (URLs, docs, contacts). Alabama/Montgomery-specific.
+Sprint 30: Transit Enhancement. Upgrade transit matching from keyword-based detection to schedule-aware feasibility checking. Use actual M-Transit route data (14 routes, 43 stops) to validate shift times against first/last bus, detect transfers, compute walk distances, and flag Sunday/night service gaps. Display transit route info on job cards with "Plan your trip" Google Maps link.
 
 ## Task Status
+
+### Sprint 30 — Transit Enhancement
+
+| ID | Title | Priority | Complexity | Status | Depends On |
+|----|-------|----------|------------|--------|------------|
+| T30.1 | Transit Schedule Matcher Module | P1 | 45 | done | -- |
+| T30.2 | Transit Info Display on Job Cards | P2 | 30 | done | T30.1 |
+
+**Total: 2 tasks, 75 complexity points (2/2 done) — SPRINT COMPLETE**
 
 ### Sprint 29 — Benefits Program Eligibility
 
@@ -174,6 +191,12 @@ Sprint 29: Benefits Program Eligibility. The "opportunity system" that complemen
 
 ## What Was Just Done
 
+- **T30.2 done** (2026-03-09) — Transit Info Display on Job Cards: Created `TransitInfoDisplay.tsx` with route badges (`#N name`), first/last bus schedule per route, walk distance to nearest stop, transfer count, warning badges (No Sunday service, No night service, Long walk), and "Plan your trip" Google Maps link. Added `TransitWarning`, `RouteFeasibility`, `TransitInfoDetail` TS types to `types.ts`. Added `transit_info` to `ScoredJobMatch` (frontend + backend). Wired into `JobMatchCard.tsx`. Aria-labels, `role="alert"` on warnings. 19 tests, all 1319 backend tests pass, `npx tsc --noEmit` clean.
+
+- **T30.1 done** (2026-03-09) — Transit Schedule Matcher Module: Created `transit_schedule.py` with `find_serving_routes()` (haversine walk distance, per-route nearest stop), `check_schedule_feasibility()` (shift times vs first/last bus, Sunday/night gap detection), `detect_transfer_count()` (Rosa Parks hub transfers), `build_transit_info()` (combined TransitInfo). Added `TransitWarning` enum, `RouteFeasibility`, `TransitInfo` types. Updated `job_matcher._filter_by_transit()` to use route schedule data with keyword fallback for jobs without coordinates. Updated `job_scoring._score_transit()` with walk distance bands (0.25/0.5/1.0 mi), transfer penalty (0.8×/0.6×), and schedule feasibility factor. 30 new tests, 1319 total pass, all arch checks clean.
+
+- **Sprint 30 planned** (2026-03-09) — Created plan-2026-03-transit-enhancement with 2 tasks (75 complexity). T30.1: Transit Schedule Matcher Module (schedule validation, transfer detection, walk distance, Sunday/night gaps, wire into job_matcher pipeline). T30.2: Transit Info Display on Job Cards (frontend component with route badges, walk distance, schedule info, warnings, Google Maps link). Synced 2 cards to Trello Planned/Ready.
+
 - **Merge conflict resolution** (2026-03-09) — Resolved conflicts between Sprint 29 (benefits eligibility) and Sprint 28 (resource auto-matching). engine.py: kept `_compute_benefits()` with lazy imports, adopted `build_barrier_cards_and_steps` from barrier_cards.py, `ResourceHealth` from feedback.types. state.md: merged both sprint histories.
 
 - **T29.4 done** (2026-03-08) — Benefits Eligibility Dashboard UI: Created `BenefitsEligibility.tsx` with per-program rows (confidence badges via `STATUS_BADGE_STYLES`, monthly values, income headroom), enrolled vs additional-eligible grouping, expandable "How to apply" sections (steps, required docs, office name/address/phone, processing time, apply link). Uses shadcn Card/Badge, Lucide icons, `PROGRAM_LABELS` from constants. Wired into `plan/page.tsx` after barriers, before cliff chart. 11 frontend tests (null render, heading, values, badges, headroom, disclaimer, expand/collapse, enrolled distinction, a11y). `npx tsc --noEmit` clean.
@@ -190,7 +213,7 @@ Sprint 29: Benefits Program Eligibility. The "opportunity system" that complemen
 
 ## What's Next
 
-Sprint 29 COMPLETE (4/4 tasks). PR #40 open, resolving merge conflicts with Sprint 28. Next sprint TBD.
+Sprint 30 complete (2/2 tasks done). Ready for branch finish + PR.
 
 ## Blockers
 

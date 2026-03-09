@@ -33,7 +33,7 @@ def matches_record(policy: EmployerPolicy, profile: RecordProfile) -> bool:
     - If years_since_conviction is None, lookback does not block.
     """
     # Expunged records are sealed — always eligible
-    if profile.record_types == [RecordType.EXPUNGED]:
+    if profile.record_types and all(rt == RecordType.EXPUNGED for rt in profile.record_types):
         return True
 
     # Empty profile — no record to screen against
