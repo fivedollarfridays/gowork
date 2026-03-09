@@ -18,6 +18,12 @@ vi.mock("@/lib/resume", () => ({
   extractResumeText: vi.fn(),
 }));
 
+// Skip framer-motion animations to prevent timeouts during multi-step navigation
+vi.mock("framer-motion", async () => {
+  const actual = await vi.importActual("framer-motion");
+  return { ...actual, useReducedMotion: () => true };
+});
+
 function renderWithClient(ui: React.ReactElement) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -50,7 +56,7 @@ async function advanceToScheduleStep(user: ReturnType<typeof userEvent.setup>) {
 }
 
 describe("AssessPage schedule step", () => {
-  it("renders schedule step with heading", async () => {
+  it("renders schedule step with heading", { timeout: 15_000 }, async () => {
     const user = userEvent.setup();
     await advanceToScheduleStep(user);
 
@@ -59,7 +65,7 @@ describe("AssessPage schedule step", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows all four schedule options", async () => {
+  it("shows all four schedule options", { timeout: 15_000 }, async () => {
     const user = userEvent.setup();
     await advanceToScheduleStep(user);
 
@@ -75,7 +81,7 @@ describe("AssessPage schedule step", () => {
     expect(within(listbox).getByText(/flexible/i)).toBeInTheDocument();
   });
 
-  it("defaults to daytime", async () => {
+  it("defaults to daytime", { timeout: 15_000 }, async () => {
     const user = userEvent.setup();
     await advanceToScheduleStep(user);
 
@@ -83,7 +89,7 @@ describe("AssessPage schedule step", () => {
     expect(trigger).toHaveTextContent(/daytime/i);
   });
 
-  it("shows schedule in review summary", async () => {
+  it("shows schedule in review summary", { timeout: 15_000 }, async () => {
     const user = userEvent.setup();
 
     // Use a flow WITHOUT credit barrier to simplify navigation

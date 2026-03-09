@@ -96,7 +96,7 @@ export function CreditForm({ data, onChange }: CreditFormProps) {
       {/* Credit Score */}
       <Card className="p-4 space-y-3">
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium">Credit Score</label>
+          <label id="credit-score-label" className="text-sm font-medium">Credit Score</label>
           <span className={cn("text-sm font-semibold", band.color)}>
             {data.currentScore}
           </span>
@@ -108,6 +108,7 @@ export function CreditForm({ data, onChange }: CreditFormProps) {
           value={[data.currentScore]}
           onValueChange={([v]) => update({ currentScore: v })}
           className="w-full"
+          aria-label="Credit Score"
         />
         <div className="flex justify-between text-xs text-muted-foreground">
           <span>300</span>
@@ -118,7 +119,7 @@ export function CreditForm({ data, onChange }: CreditFormProps) {
       {/* Utilization */}
       <Card className="p-4 space-y-3">
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium">Credit Utilization</label>
+          <label id="credit-utilization-label" className="text-sm font-medium">Credit Utilization</label>
           <span className={cn("text-sm font-semibold", utilizationColor(data.overallUtilization))}>
             {data.overallUtilization}%
           </span>
@@ -130,6 +131,7 @@ export function CreditForm({ data, onChange }: CreditFormProps) {
           value={[data.overallUtilization]}
           onValueChange={([v]) => update({ overallUtilization: v })}
           className="w-full"
+          aria-label="Credit Utilization"
         />
         <p className="text-xs text-muted-foreground">
           Percentage of available credit you&apos;re currently using. Below 30% is ideal.
@@ -139,7 +141,7 @@ export function CreditForm({ data, onChange }: CreditFormProps) {
       {/* Payment History */}
       <Card className="p-4 space-y-3">
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium">On-time Payment History</label>
+          <label id="payment-history-label" className="text-sm font-medium">On-time Payment History</label>
           <span className="text-sm font-semibold">{data.paymentHistoryPct}%</span>
         </div>
         <Slider
@@ -149,6 +151,7 @@ export function CreditForm({ data, onChange }: CreditFormProps) {
           value={[data.paymentHistoryPct]}
           onValueChange={([v]) => update({ paymentHistoryPct: v })}
           className="w-full"
+          aria-label="On-time Payment History"
         />
         <p className="text-xs text-muted-foreground">
           What percentage of your payments have been on time?
@@ -183,8 +186,9 @@ export function CreditForm({ data, onChange }: CreditFormProps) {
         </p>
         <div className="grid grid-cols-3 gap-3">
           <div>
-            <label className="text-xs text-muted-foreground">Total accounts</label>
+            <label htmlFor="cf-total-accounts" className="text-xs text-muted-foreground">Total accounts</label>
             <Input
+              id="cf-total-accounts"
               type="number"
               min={0}
               value={data.totalAccounts || ""}
@@ -193,8 +197,9 @@ export function CreditForm({ data, onChange }: CreditFormProps) {
             />
           </div>
           <div>
-            <label className="text-xs text-muted-foreground">Still open</label>
+            <label htmlFor="cf-open-accounts" className="text-xs text-muted-foreground">Still open</label>
             <Input
+              id="cf-open-accounts"
               type="number"
               min={0}
               max={data.totalAccounts}
@@ -204,8 +209,9 @@ export function CreditForm({ data, onChange }: CreditFormProps) {
             />
           </div>
           <div>
-            <label className="text-xs text-muted-foreground">In collections</label>
+            <label htmlFor="cf-collections" className="text-xs text-muted-foreground">In collections</label>
             <Input
+              id="cf-collections"
               type="number"
               min={0}
               value={data.collectionAccounts || ""}

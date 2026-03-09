@@ -20,7 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { toTelHref, mapsUrl } from "@/lib/constants";
 import type { TimelinePhase, ActionCategory, ActionItem } from "@/lib/types";
 
-const PHONE_RE = /(\+?1?[-.\s]?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4})/g;
+const PHONE_RE = /(\+?1?[-.\s]?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4})/;
 
 function linkifyPhones(text: string): ReactNode {
   const parts = text.split(PHONE_RE);
