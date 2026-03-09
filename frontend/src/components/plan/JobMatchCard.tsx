@@ -1,6 +1,6 @@
 "use client";
 
-import { Briefcase, Bus, CreditCard, DollarSign, ExternalLink, MapPin, Shield } from "lucide-react";
+import { Briefcase, Bus, Car, CreditCard, DollarSign, ExternalLink, Footprints, MapPin, Shield } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,7 @@ interface JobMatchCardProps {
 export function JobMatchCard({ job, creditResult }: JobMatchCardProps) {
   const unmetThreshold = creditResult?.thresholds.find((t) => !t.already_met);
   const source = sourceLabel(job.source);
+  const scored = isScoredJob(job);
 
   return (
     <Card>
@@ -43,9 +44,9 @@ export function JobMatchCard({ job, creditResult }: JobMatchCardProps) {
           <p className="text-xs text-muted-foreground">
             {job.company}{source ? ` · ${source}` : ""}
           </p>
-          {isScoredJob(job) && job.relevance_score > 0 && (
+          {scored && job.relevance_score > 0 && (
             <Badge className="bg-secondary/10 text-secondary border-secondary/30 text-[10px]" variant="outline">
-              {Math.round(job.relevance_score * 100)}%
+              {Math.round(job.relevance_score * 100)}% Match
             </Badge>
           )}
         </div>
@@ -61,7 +62,7 @@ export function JobMatchCard({ job, creditResult }: JobMatchCardProps) {
               <Bus className="h-2.5 w-2.5 mr-0.5" /> No Bus
             </Badge>
           )}
-          {isScoredJob(job) && job.pay_range ? (
+          {scored && job.pay_range ? (
             <Badge className={`${STATUS_BADGE_STYLES.positive} text-[10px] px-1.5 py-0`} variant="outline">
               <DollarSign className="h-2.5 w-2.5 mr-0.5" /> {job.pay_range}
             </Badge>
@@ -101,10 +102,10 @@ export function JobMatchCard({ job, creditResult }: JobMatchCardProps) {
 
       <CardContent className="space-y-2 pt-0 text-center">
         {/* Benefits cliff impact badge */}
-        {isScoredJob(job) && <CliffBadge cliffImpact={job.cliff_impact ?? null} />}
+        {scored && <CliffBadge cliffImpact={job.cliff_impact ?? null} />}
 
         {/* Match reason for scored jobs */}
-        {isScoredJob(job) && job.match_reason && (
+        {scored && job.match_reason && (
           <p className="text-xs text-secondary font-medium">{job.match_reason}</p>
         )}
 
@@ -117,20 +118,42 @@ export function JobMatchCard({ job, creditResult }: JobMatchCardProps) {
               rel="noopener noreferrer"
               className="flex items-center gap-1 text-secondary hover:underline"
             >
-              <MapPin className="h-3 w-3 shrink-0" />
+              <MapPin className="h-3 w-3 shrink-0" aria-hidden="true" />
               {job.location}
             </a>
           )}
           {job.route && (
             <span className="flex items-center gap-1 text-muted-foreground">
-              <Bus className="h-3 w-3 shrink-0" />
+              <Bus className="h-3 w-3 shrink-0" aria-hidden="true" />
               {job.route}
             </span>
           )}
         </div>
 
+        {/* Commute estimate */}
+        {scored && job.commute_estimate && (
+          <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground" aria-label="Estimated commute times">
+            <span className="flex items-center gap-1.5" aria-label={`${job.commute_estimate.drive_min} minute drive`}>
+              <Car className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              {job.commute_estimate.drive_min} min drive
+            </span>
+            {job.commute_estimate.transit_min != null && (
+              <span className="flex items-center gap-1.5" aria-label={`${job.commute_estimate.transit_min} minute transit`}>
+                <Bus className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                {job.commute_estimate.transit_min} min transit
+              </span>
+            )}
+            {job.commute_estimate.walk_min != null && (
+              <span className="flex items-center gap-1.5" aria-label={`${job.commute_estimate.walk_min} minute walk`}>
+                <Footprints className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                {job.commute_estimate.walk_min} min walk
+              </span>
+            )}
+          </div>
+        )}
+
         {/* Transit schedule info */}
-        {isScoredJob(job) && job.transit_info && (
+        {scored && job.transit_info && (
           <>
             <Separator />
             <TransitInfoDisplay transitInfo={job.transit_info} />

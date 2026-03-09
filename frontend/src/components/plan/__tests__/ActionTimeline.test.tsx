@@ -13,6 +13,7 @@ function makeAction(overrides: Partial<ActionItem> = {}): ActionItem {
     source_module: "career_center",
     resource_name: "Montgomery Career Center",
     resource_phone: "(334) 286-1746",
+    resource_address: null,
     ...overrides,
   };
 }
@@ -213,6 +214,84 @@ describe("ActionTimeline", () => {
     );
     const checkbox = screen.getByRole("checkbox");
     expect(checkbox).toBeChecked();
+  });
+
+  it("renders resource_address as clickable Google Maps link", () => {
+    const plan = makePlan({
+      phases: [
+        makePhase({
+          phase_id: "week_1_2",
+          label: "Week 1-2",
+          actions: [makeAction({ resource_address: "1060 East South Blvd, Montgomery, AL 36116" })],
+        }),
+      ],
+      total_actions: 1,
+    });
+    render(<ActionTimeline actionPlan={plan} />);
+    const addressLink = screen.getByRole("link", { name: /1060 East South Blvd/i });
+    expect(addressLink).toHaveAttribute(
+      "href",
+      expect.stringContaining("google.com/maps"),
+    );
+  });
+
+  it("auto-links phone numbers in detail text", () => {
+    const plan = makePlan({
+      phases: [
+        makePhase({
+          phase_id: "week_1_2",
+          label: "Week 1-2",
+          actions: [makeAction({ detail: "1-800-550-1961", resource_name: null, resource_phone: null, resource_address: null })],
+        }),
+      ],
+      total_actions: 1,
+    });
+    render(<ActionTimeline actionPlan={plan} />);
+    const phoneLink = screen.getByRole("link", { name: "1-800-550-1961" });
+    expect(phoneLink).toHaveAttribute("href", "tel:18005501961");
+  });
+
+  it("auto-links phone embedded in detail text with surrounding words", () => {
+    const plan = makePlan({
+      phases: [
+        makePhase({
+          phase_id: "week_1_2",
+          label: "Week 1-2",
+          actions: [makeAction({ detail: "Free consultation: 1-866-456-4995", resource_name: null, resource_phone: null, resource_address: null })],
+        }),
+      ],
+      total_actions: 1,
+    });
+    render(<ActionTimeline actionPlan={plan} />);
+    expect(screen.getByText(/Free consultation:/)).toBeInTheDocument();
+    const phoneLink = screen.getByRole("link", { name: "1-866-456-4995" });
+    expect(phoneLink).toHaveAttribute("href", "tel:18664564995");
+  });
+
+  it("auto-links multiple phone numbers in same detail text", () => {
+    const plan = makePlan({
+      phases: [
+        makePhase({
+          phase_id: "week_1_2",
+          label: "Week 1-2",
+          actions: [makeAction({
+            detail: "Call (334) 286-1746 or (334) 832-9060 for info",
+            resource_name: null,
+            resource_phone: null,
+            resource_address: null,
+          })],
+        }),
+      ],
+      total_actions: 1,
+    });
+    render(<ActionTimeline actionPlan={plan} />);
+    const links = screen.getAllByRole("link");
+    const phoneLinks = links.filter(
+      (l) => l.getAttribute("href")?.startsWith("tel:"),
+    );
+    expect(phoneLinks).toHaveLength(2);
+    expect(phoneLinks[0]).toHaveTextContent("(334) 286-1746");
+    expect(phoneLinks[1]).toHaveTextContent("(334) 832-9060");
   });
 
   it("calls onToggle with action key when checkbox clicked", async () => {

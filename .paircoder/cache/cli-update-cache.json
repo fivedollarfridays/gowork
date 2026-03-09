@@ -42,5 +42,17 @@
   "T23.1": {
     "last_cli_update": "2026-03-07T14:36:45.479726",
     "last_status": "in_progress"
+  },
+  "T31.2": {
+    "last_cli_update": "2026-03-09T04:29:57.965584",
+    "last_status": "done"
+  },
+  "T31.3": {
+    "last_cli_update": "2026-03-09T04:41:07.107919",
+    "last_status": "done"
+  },
+  "T31.4": {
+    "last_cli_update": "2026-03-09T04:46:24.122990",
+    "last_status": "done"
   }
 }

@@ -13,6 +13,7 @@ from app.modules.benefits.program_calculators import (
 )
 from app.modules.benefits.thresholds import HOURS_PER_YEAR, MONTHS_PER_YEAR
 from app.modules.benefits.types import BenefitsProfile
+from app.modules.matching.commute_estimator import estimate_commute
 from app.modules.matching.proximity_scorer import score_proximity
 from app.modules.matching.salary_parser import (
     EARNINGS_BENCHMARK,
@@ -192,22 +193,30 @@ def _build_pvs_reason(
     return "; ".join(parts)
 
 
+def _cliff_for_job(
+    salary: SalaryInfo | None, benefits_profile: BenefitsProfile | None,
+    current_benefits: float, current_net_monthly: float,
+) -> CliffImpact | None:
+    """Compute cliff impact for a single job, or None if not applicable."""
+    if not (salary and benefits_profile and benefits_profile.enrolled_programs):
+        return None
+    job_net = calculate_net_at_wage(salary.hourly_rate, benefits_profile)
+    return _compute_cliff_impact(
+        salary, benefits_profile, current_benefits, current_net_monthly,
+        job_net_monthly=job_net,
+    )
+
+
 def _build_match(
     job: dict, salary: SalaryInfo | None, pvs: float,
     benefits_profile: BenefitsProfile | None,
     current_benefits: float = 0.0, current_net_monthly: float = 0.0,
     target_industries: Sequence[str] = (),
     resume_keywords: Sequence[str] = (),
+    user_zip: str = "",
 ) -> ScoredJobMatch:
     """Build a ScoredJobMatch from a raw job dict."""
-    cliff_impact = None
-    if salary and benefits_profile and benefits_profile.enrolled_programs:
-        job_net = calculate_net_at_wage(salary.hourly_rate, benefits_profile)
-        cliff_impact = _compute_cliff_impact(
-            salary, benefits_profile, current_benefits, current_net_monthly,
-            job_net_monthly=job_net,
-        )
-
+    transit_info = job.get("transit_info")
     return ScoredJobMatch(
         title=job["title"],
         company=job.get("company"),
@@ -224,8 +233,9 @@ def _build_match(
         match_reason=_build_pvs_reason(job, salary, target_industries, resume_keywords),
         pay_range=_format_pay_range(salary),
         bucket=MatchBucket.AFTER_REPAIR if job.get("credit_blocked") else MatchBucket.STRONG,
-        cliff_impact=cliff_impact,
-        transit_info=job.get("transit_info"),
+        cliff_impact=_cliff_for_job(salary, benefits_profile, current_benefits, current_net_monthly),
+        transit_info=transit_info,
+        commute_estimate=estimate_commute(user_zip, job.get("location", ""), transit_info),
     )
 
 
@@ -250,6 +260,7 @@ def rank_all_jobs(
             job, salary, pvs, bp, cur_benefits, cur_net,
             target_industries=ctx.target_industries,
             resume_keywords=ctx.resume_keywords,
+            user_zip=ctx.user_zip,
         ))
     results.sort(key=lambda m: m.relevance_score, reverse=True)
     return results

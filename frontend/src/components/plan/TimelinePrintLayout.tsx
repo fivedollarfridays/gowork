@@ -35,6 +35,9 @@ export function TimelinePrintLayout({ actionPlan }: TimelinePrintLayoutProps) {
                 <li key={i} style={{ marginBottom: "2px" }}>
                   {prefix && <span style={{ color: "#6b7280" }}>[{prefix}] </span>}
                   {action.title}
+                  {action.resource_address && (
+                    <span style={{ color: "#6b7280" }}> — {action.resource_address}</span>
+                  )}
                   {action.detail && (
                     <span style={{ color: "#6b7280" }}> — {action.detail}</span>
                   )}

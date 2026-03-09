@@ -10,6 +10,7 @@ from app.modules.criminal.record_profile import RecordProfile
 from app.modules.feedback.types import ResourceHealth
 from app.modules.matching.job_readiness_types import JobReadinessResult
 from app.modules.matching.types_transit import (  # noqa: F401 — re-export
+    CommuteEstimate,
     RouteFeasibility,
     TransitConnection,
     TransitInfo,
@@ -102,11 +103,19 @@ class AssessmentRequest(BaseModel):
     employment_status: EmploymentStatus
     barriers: dict[BarrierType, bool]  # validated against BarrierType enum keys
     work_history: str = Field(..., max_length=500)
-    target_industries: list[str] = Field(default_factory=list)
+    target_industries: list[str] = Field(default_factory=list, max_length=10)
     has_vehicle: bool = False
     schedule_constraints: ScheduleConstraints = Field(default_factory=ScheduleConstraints)
     resume_text: str = Field(default="", max_length=5000)
-    certifications: list[str] = Field(default_factory=list)
+    certifications: list[str] = Field(default_factory=list, max_length=10)
+
+    @field_validator("target_industries", "certifications")
+    @classmethod
+    def validate_item_length(cls, v: list[str]) -> list[str]:
+        for item in v:
+            if len(item) > 100:
+                raise ValueError("List items must be 100 characters or fewer")
+        return v
     credit_result: Optional[CreditAssessmentResult] = None
     record_profile: Optional[RecordProfile] = None
     benefits_data: Optional[BenefitsFormData] = None
@@ -184,6 +193,7 @@ class ScoredJobMatch(JobMatch):
     pay_range: Optional[str] = None
     cliff_impact: Optional[CliffImpact] = None
     transit_info: Optional[TransitInfo] = None
+    commute_estimate: Optional[CommuteEstimate] = None
 
 
 class BarrierCard(BaseModel):

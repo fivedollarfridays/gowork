@@ -395,3 +395,64 @@ class TestAssessmentEndpoint:
                 # 11th should be rate limited
                 resp = await client.post("/api/assessment/", json=payload)
                 assert resp.status_code == 429
+
+
+class TestListBoundsValidation:
+    """Tests for S-M2: unbounded list field validation."""
+
+    def test_target_industries_rejects_over_10(self):
+        with pytest.raises(Exception):
+            from app.modules.matching.types import AssessmentRequest
+            AssessmentRequest(
+                zip_code="36104",
+                employment_status="unemployed",
+                barriers={"credit": True},
+                work_history="Some work",
+                target_industries=["industry"] * 11,
+            )
+
+    def test_certifications_rejects_over_10(self):
+        with pytest.raises(Exception):
+            from app.modules.matching.types import AssessmentRequest
+            AssessmentRequest(
+                zip_code="36104",
+                employment_status="unemployed",
+                barriers={"credit": True},
+                work_history="Some work",
+                certifications=["cert"] * 11,
+            )
+
+    def test_target_industries_item_rejects_over_100_chars(self):
+        with pytest.raises(Exception):
+            from app.modules.matching.types import AssessmentRequest
+            AssessmentRequest(
+                zip_code="36104",
+                employment_status="unemployed",
+                barriers={"credit": True},
+                work_history="Some work",
+                target_industries=["x" * 101],
+            )
+
+    def test_certifications_item_rejects_over_100_chars(self):
+        with pytest.raises(Exception):
+            from app.modules.matching.types import AssessmentRequest
+            AssessmentRequest(
+                zip_code="36104",
+                employment_status="unemployed",
+                barriers={"credit": True},
+                work_history="Some work",
+                certifications=["x" * 101],
+            )
+
+    def test_valid_lists_accepted(self):
+        from app.modules.matching.types import AssessmentRequest
+        req = AssessmentRequest(
+            zip_code="36104",
+            employment_status="unemployed",
+            barriers={"credit": True},
+            work_history="Some work",
+            target_industries=["healthcare", "retail"],
+            certifications=["CNA", "forklift"],
+        )
+        assert len(req.target_industries) == 2
+        assert len(req.certifications) == 2

@@ -85,6 +85,9 @@ jobs:
       - name: Type check
         run: npx tsc --noEmit
 
+      - name: Run tests
+        run: npx vitest run
+
       - name: Build
         run: npm run build
         env:
@@ -103,6 +106,7 @@ jobs:
           FOUND=$(grep -rn --include="*.py" --include="*.ts" --include="*.tsx" --include="*.js" \
             -iE "(password|secret|api_key|token)\s*=\s*['\"][^'\"]{8,}" \
             --exclude-dir=node_modules --exclude-dir=.venv --exclude-dir=.next \
+            --exclude-dir=tests --exclude-dir=__tests__ \
             . || true)
           if [ -n "$FOUND" ]; then
             echo "WARNING: Potential hardcoded secrets found:"

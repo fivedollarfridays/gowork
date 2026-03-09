@@ -108,7 +108,8 @@ export async function streamBarrierIntelChat(
   mode: ChatMode,
   onEvent: (event: ChatSSEEvent) => void,
 ): Promise<void> {
-  const res = await fetch(`${API_BASE}/api/barrier-intel/chat`, {
+  const token = typeof window !== "undefined" ? sessionStorage.getItem("session_token") ?? "" : "";
+  const res = await fetch(`${API_BASE}/api/barrier-intel/chat${tokenQs(token)}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ session_id: sessionId, user_question: question, mode }),
@@ -130,17 +131,44 @@ export async function streamBarrierIntelChat(
   if (!reader) return;
   const decoder = new TextDecoder();
   let buffer = "";
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split("\n");
-    buffer = lines.pop() || "";
-    for (const line of lines) {
-      if (line.startsWith("data: ")) {
-        const event: ChatSSEEvent = JSON.parse(line.slice(6));
-        onEvent(event);
+  const TIMEOUT_MS = 30_000;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const abortCtrl = new AbortController();
+
+  const resetTimer = () => {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => {
+      reader.cancel();
+      abortCtrl.abort();
+    }, TIMEOUT_MS);
+  };
+
+  try {
+    resetTimer();
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done || abortCtrl.signal.aborted) break;
+      resetTimer();
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+      for (const line of lines) {
+        if (line.startsWith("data: ")) {
+          try {
+            const event: ChatSSEEvent = JSON.parse(line.slice(6));
+            onEvent(event);
+          } catch {
+            // Skip malformed SSE data
+          }
+        }
       }
     }
+    if (abortCtrl.signal.aborted) {
+      throw new Error("Stream timed out after 30 seconds of inactivity");
+    }
+  } finally {
+    if (timer) clearTimeout(timer);
+    reader.releaseLock();
   }
 }

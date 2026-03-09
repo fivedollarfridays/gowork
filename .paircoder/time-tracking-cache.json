@@ -111,10 +111,46 @@
     ],
     "total_seconds": 89.375955
   },
-  "_active": {
-    "task_id": "T23.1",
-    "timer_id": "local-20260307143645",
-    "description": "T23.1: Barrier graph DB schema: Alembic migration + seed data",
-    "start": "2026-03-07T14:36:45.670984"
+  "T31.2": {
+    "entries": [
+      {
+        "id": "local-20260309042234",
+        "task_id": "T31.2",
+        "description": "T31.2: Remove JSearch Integration",
+        "start": "2026-03-09T04:22:34.570574",
+        "end": "2026-03-09T04:29:58.272529",
+        "duration_seconds": 443.701955,
+        "provider_id": null
+      }
+    ],
+    "total_seconds": 443.701955
+  },
+  "T31.3": {
+    "entries": [
+      {
+        "id": "local-20260309043046",
+        "task_id": "T31.3",
+        "description": "T31.3: Commute Time Estimator Module",
+        "start": "2026-03-09T04:30:46.281644",
+        "end": "2026-03-09T04:41:07.444241",
+        "duration_seconds": 621.162597,
+        "provider_id": null
+      }
+    ],
+    "total_seconds": 621.162597
+  },
+  "T31.4": {
+    "entries": [
+      {
+        "id": "local-20260309044255",
+        "task_id": "T31.4",
+        "description": "T31.4: Commute Time Display on Job Cards",
+        "start": "2026-03-09T04:42:55.931225",
+        "end": "2026-03-09T04:46:24.388923",
+        "duration_seconds": 208.457698,
+        "provider_id": null
+      }
+    ],
+    "total_seconds": 208.457698
   }
 }

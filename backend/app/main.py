@@ -90,13 +90,15 @@ app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=_trusted)
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
-    """Set security headers on all responses (LOW-6)."""
+    """Set security headers on all responses (LOW-6, S-M4)."""
 
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         response = await call_next(request)
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        if _is_production:
+            response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains"
         return response
 
 

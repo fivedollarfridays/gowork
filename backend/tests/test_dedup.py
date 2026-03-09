@@ -72,7 +72,7 @@ class TestSimilarityScore:
 class TestDeduplicateListings:
     def test_exact_duplicate_removed(self):
         listings = [
-            {"title": "Warehouse Worker", "company": "Amazon", "source": "jsearch:1",
+            {"title": "Warehouse Worker", "company": "Amazon", "source": "honestjobs",
              "location": "Montgomery, AL", "description": "Pack boxes"},
             {"title": "Warehouse Worker", "company": "Amazon", "source": "brightdata:1",
              "location": "Montgomery, AL", "description": "Pack and ship boxes daily"},
@@ -82,16 +82,16 @@ class TestDeduplicateListings:
 
     def test_different_jobs_kept(self):
         listings = [
-            {"title": "Warehouse Worker", "company": "Amazon", "source": "jsearch:1"},
-            {"title": "Delivery Driver", "company": "FedEx", "source": "jsearch:1"},
+            {"title": "Warehouse Worker", "company": "Amazon", "source": "honestjobs"},
+            {"title": "Delivery Driver", "company": "FedEx", "source": "honestjobs"},
         ]
         result = deduplicate_listings(listings)
         assert len(result) == 2
 
     def test_same_title_different_company_kept(self):
         listings = [
-            {"title": "Warehouse Worker", "company": "Amazon", "source": "jsearch:1"},
-            {"title": "Warehouse Worker", "company": "FedEx", "source": "jsearch:1"},
+            {"title": "Warehouse Worker", "company": "Amazon", "source": "honestjobs"},
+            {"title": "Warehouse Worker", "company": "FedEx", "source": "honestjobs"},
         ]
         result = deduplicate_listings(listings)
         assert len(result) == 2
@@ -101,7 +101,7 @@ class TestDeduplicateListings:
         listings = [
             {"title": "CNA", "company": "Baptist", "source": "brightdata:1",
              "description": None},
-            {"title": "CNA", "company": "Baptist", "source": "jsearch:1",
+            {"title": "CNA", "company": "Baptist", "source": "honestjobs",
              "description": "Certified nursing assistant role"},
         ]
         result = deduplicate_listings(listings)
@@ -136,7 +136,7 @@ class TestDeduplicateListings:
         """Slight title variations for same company should dedup."""
         listings = [
             {"title": "Warehouse Associate", "company": "Amazon Inc.",
-             "source": "jsearch:1"},
+             "source": "honestjobs"},
             {"title": "Warehouse Associate - Montgomery", "company": "Amazon",
              "source": "brightdata:1"},
         ]
@@ -147,7 +147,7 @@ class TestDeduplicateListings:
         assert deduplicate_listings([]) == []
 
     def test_single_listing(self):
-        listings = [{"title": "CNA", "company": "Baptist", "source": "jsearch:1"}]
+        listings = [{"title": "CNA", "company": "Baptist", "source": "honestjobs"}]
         result = deduplicate_listings(listings)
         assert len(result) == 1
 
@@ -155,11 +155,11 @@ class TestDeduplicateListings:
         """Merged listing keeps source from the listing with more data."""
         listings = [
             {"title": "CNA", "company": "Baptist", "source": "brightdata:1"},
-            {"title": "CNA", "company": "Baptist", "source": "jsearch:1",
+            {"title": "CNA", "company": "Baptist", "source": "honestjobs",
              "description": "Full description here", "url": "https://apply.com"},
         ]
         result = deduplicate_listings(listings)
-        assert result[0]["source"] == "jsearch:1"
+        assert result[0]["source"] == "honestjobs"
 
 
 class TestMergePair:

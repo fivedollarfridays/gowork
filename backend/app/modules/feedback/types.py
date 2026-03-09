@@ -38,6 +38,14 @@ class VisitFeedbackRequest(BaseModel):
     plan_accuracy: int = Field(ge=1, le=3)
     free_text: Optional[str] = Field(default=None, max_length=1000)
 
+    @field_validator("outcomes")
+    @classmethod
+    def validate_outcome_length(cls, v: list[str]) -> list[str]:
+        for item in v:
+            if len(item) > 100:
+                raise ValueError("Outcome items must be 100 characters or fewer")
+        return v
+
     @field_validator("free_text", mode="before")
     @classmethod
     def sanitize_free_text(cls, v: str | None) -> str | None:

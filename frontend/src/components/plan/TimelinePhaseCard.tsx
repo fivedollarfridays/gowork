@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { ReactNode } from "react";
 import {
   ChevronDown,
   Briefcase,
@@ -12,12 +13,31 @@ import {
   Home,
   Baby,
   ExternalLink,
+  MapPin,
   type LucideIcon,
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toTelHref, mapsUrl, CAREER_CENTER } from "@/lib/constants";
 import type { TimelinePhase, ActionCategory, ActionItem } from "@/lib/types";
+
+/* ── Phone linkification ──────────────────────────────────────────────── */
+
+const PHONE_RE = /(\+?1?[-.\s]?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4})/;
+
+function linkifyPhones(text: string): ReactNode {
+  const parts = text.split(PHONE_RE);
+  if (parts.length === 1) return text;
+  return parts.map((part, i) =>
+    PHONE_RE.test(part) ? (
+      <a key={i} href={toTelHref(part)} className="text-primary underline">
+        {part}
+      </a>
+    ) : (
+      part
+    ),
+  );
+}
 
 /* ── Action link mapping ─────────────────────────────────────────────── */
 
@@ -121,7 +141,7 @@ function ActionRow({ action, actionKey, checked, onToggle }: ActionRowProps) {
   const Icon = CATEGORY_ICONS[action.category] ?? Building2;
   const link = getActionLink(action);
   const [expanded, setExpanded] = useState(false);
-  const hasDetails = !!(action.detail || action.resource_name || action.resource_phone);
+  const hasDetails = !!(action.detail || action.resource_name || action.resource_phone || action.resource_address);
 
   return (
     <li className="flex items-start gap-3 py-2">
@@ -168,8 +188,19 @@ function ActionRow({ action, actionKey, checked, onToggle }: ActionRowProps) {
         >
           <div className="overflow-hidden">
             <div className="pt-1 space-y-0.5">
+              {action.resource_address && (
+                <a
+                  href={mapsUrl(action.resource_address)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-xs text-primary underline"
+                >
+                  <MapPin className="h-3 w-3 shrink-0" aria-hidden="true" />
+                  {action.resource_address}
+                </a>
+              )}
               {action.detail && (
-                <p className="text-xs text-muted-foreground">{action.detail}</p>
+                <p className="text-xs text-muted-foreground">{linkifyPhones(action.detail)}</p>
               )}
               {action.resource_name && (
                 <p className="text-xs text-muted-foreground">{action.resource_name}</p>

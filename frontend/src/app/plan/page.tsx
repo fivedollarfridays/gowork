@@ -282,7 +282,7 @@ function PlanContent() {
           <ScrollReveal>
             <section className="space-y-4">
               <h2 className="text-xl font-semibold text-primary">Your Barriers</h2>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-2 auto-rows-fr">
                 {plan.barriers.map((barrier) => (
                   <BarrierCardView key={barrier.type} barrier={barrier} sessionId={sessionId ?? undefined} token={token ?? undefined} zipCode={zipCode} />
                 ))}
