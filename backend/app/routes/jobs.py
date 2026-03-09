@@ -2,14 +2,20 @@
 
 import asyncio
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.queries import get_all_employers, get_all_transit_routes
 from app.core.queries_jobs import get_job_listing_by_id
+from app.core.rate_limit import RateLimiter, require_rate_limit
 
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
+
+_list_rate_limiter = RateLimiter(max_requests=60, window_seconds=60)
+_check_list_rate = require_rate_limit(_list_rate_limiter)
+_detail_rate_limiter = RateLimiter(max_requests=120, window_seconds=60)
+_check_detail_rate = require_rate_limit(_detail_rate_limiter)
 
 CREDIT_CHECK_INDUSTRIES = {"banking", "finance", "insurance"}
 
@@ -82,6 +88,7 @@ async def list_jobs(
     industry: str | None = Query(None),
     source: str | None = Query(None, description="Filter by source (brightdata, jsearch, honestjobs)"),
     fair_chance: bool | None = Query(None, description="Filter to fair-chance employers only"),
+    _: None = Depends(_check_list_rate),
 ) -> dict:
     """List aggregated jobs with optional filters."""
     from app.integrations.job_aggregator import JobAggregator
@@ -117,6 +124,7 @@ async def list_jobs(
 async def get_job(
     job_id: int,
     db: AsyncSession = Depends(get_db),
+    _: None = Depends(_check_detail_rate),
 ) -> dict:
     """Get a single job with details, transit info, and application steps."""
     job = await get_job_listing_by_id(db, job_id)

@@ -201,6 +201,57 @@ class TestTransitSchedule:
         assert is_transit_accessible({"weekday_end": ""}, "night") is True
 
 
+class TestJobsRateLimit:
+    """Rate limiting on jobs endpoints (MED-3)."""
+
+    @pytest.mark.asyncio
+    async def test_list_jobs_rate_limited(self):
+        """GET /api/jobs/ returns 429 after exceeding rate limit."""
+        from app.main import app
+        from app.routes.jobs import _list_rate_limiter
+
+        _list_rate_limiter.clear()
+
+        with (
+            patch(_AGG_SEARCH_PATCH, new_callable=AsyncMock, return_value=[]),
+            patch(_EMPLOYERS_PATCH, new_callable=AsyncMock, return_value=[]),
+            patch(_TRANSIT_PATCH, new_callable=AsyncMock, return_value=[]),
+        ):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                # Send 60 requests (the limit)
+                for _ in range(60):
+                    await client.get("/api/jobs/")
+                # 61st should be blocked
+                resp = await client.get("/api/jobs/")
+        assert resp.status_code == 429
+        _list_rate_limiter.clear()
+
+    @pytest.mark.asyncio
+    async def test_get_job_rate_limited(self):
+        """GET /api/jobs/{id} returns 429 after exceeding rate limit."""
+        from app.main import app
+        from app.routes.jobs import _detail_rate_limiter
+
+        _detail_rate_limiter.clear()
+
+        job = _sample_jobs()[0]
+        with (
+            patch(_JOB_PATCH, new_callable=AsyncMock, return_value=job),
+            patch(_EMPLOYERS_PATCH, new_callable=AsyncMock, return_value=_sample_employers()),
+            patch(_TRANSIT_PATCH, new_callable=AsyncMock, return_value=_sample_transit()),
+        ):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                # Send 120 requests (the limit)
+                for _ in range(120):
+                    await client.get("/api/jobs/1")
+                # 121st should be blocked
+                resp = await client.get("/api/jobs/1")
+        assert resp.status_code == 429
+        _detail_rate_limiter.clear()
+
+
 class TestCreditBarrierFilter:
     def test_filters_credit_check_jobs(self):
         """Jobs with license_type=banking are credit-check-required."""

@@ -162,5 +162,10 @@ class TestPlanTokenAuth:
 class TestConfigCreditUrlValidation:
     def test_production_with_public_ip_allowed(self):
         """Public IP in credit_api_url should pass production validation."""
-        s = Settings(environment="production", credit_api_url="http://8.8.8.8:8001")
+        s = Settings(
+            environment="production",
+            credit_api_url="http://8.8.8.8:8001",
+            audit_hash_salt="test-production-salt-value",
+            admin_api_key="a" * 32,
+        )
         assert s.credit_api_url == "http://8.8.8.8:8001"

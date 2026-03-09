@@ -36,7 +36,7 @@ const barrier: BarrierCard = {
 };
 
 beforeEach(() => {
-  localStorage.clear();
+  sessionStorage.clear();
   vi.clearAllMocks();
 });
 
@@ -78,14 +78,14 @@ describe("Resource feedback buttons", () => {
     });
   });
 
-  it("persists state to localStorage", async () => {
+  it("persists state to sessionStorage", async () => {
     render(<BarrierCardView barrier={barrier} sessionId={SESSION_ID} token={TOKEN} />);
 
     const helpfulBtn = screen.getByRole("button", { name: "Mark as helpful" });
     fireEvent.click(helpfulBtn);
 
     await waitFor(() => {
-      const stored = localStorage.getItem(`feedback_${SESSION_ID}_1`);
+      const stored = sessionStorage.getItem(`feedback_${SESSION_ID}_1`);
       expect(stored).toBe("true");
     });
   });
@@ -128,8 +128,8 @@ describe("Resource feedback buttons", () => {
     });
   });
 
-  it("restores state from localStorage on mount", () => {
-    localStorage.setItem(`feedback_${SESSION_ID}_1`, "true");
+  it("restores state from sessionStorage on mount", () => {
+    sessionStorage.setItem(`feedback_${SESSION_ID}_1`, "true");
 
     render(<BarrierCardView barrier={barrier} sessionId={SESSION_ID} token={TOKEN} />);
 

@@ -67,7 +67,7 @@ function useClientStorage(key: string | null): { value: string | null; ready: bo
   const [state, setState] = useState<{ value: string | null; ready: boolean }>({ value: null, ready: false });
   useEffect(() => {
     if (!key) { setState({ value: null, ready: true }); return; }
-    try { setState({ value: localStorage.getItem(key), ready: true }); } catch { setState({ value: null, ready: true }); }
+    try { setState({ value: sessionStorage.getItem(key), ready: true }); } catch { setState({ value: null, ready: true }); }
   }, [key]);
   return state;
 }
@@ -79,7 +79,7 @@ function useSessionId(): { id: string | null; ready: boolean } {
 
   useEffect(() => {
     if (fromUrl) {
-      try { localStorage.setItem("montgowork_session_id", fromUrl); } catch {}
+      try { sessionStorage.setItem("montgowork_session_id", fromUrl); } catch {}
     }
   }, [fromUrl]);
 
@@ -95,7 +95,7 @@ function useToken(sessionId: string | null): { token: string | null; ready: bool
 
   useEffect(() => {
     if (fromUrl && sessionId) {
-      try { localStorage.setItem(`feedback_token_${sessionId}`, fromUrl); } catch {}
+      try { sessionStorage.setItem(`feedback_token_${sessionId}`, fromUrl); } catch {}
     }
   }, [fromUrl, sessionId]);
 
@@ -119,7 +119,7 @@ function PlanContent() {
     if (plan) window.scrollTo(0, 0);
   }, [plan]);
 
-  // Load credit assessment: localStorage first (faster), backend fallback
+  // Load credit assessment: sessionStorage first (in-tab cache), backend fallback
   const storedCredit = useClientStorage(sessionId ? `credit_${sessionId}` : null);
   const localCredit = useMemo<CreditAssessmentResult | null>(() => {
     if (!storedCredit.value) return null;

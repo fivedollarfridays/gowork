@@ -1,0 +1,170 @@
+"""Tests for production security validators in Settings."""
+
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
+from app.core.config import Settings, get_settings
+
+_SAFE_SALT = "a-real-production-salt-value-here"
+_SAFE_ADMIN_KEY = "a]" * 16  # 32 chars
+
+
+class TestAuditHashSaltValidator:
+    """HIGH-3 / LOW-4: Reject weak default audit hash salt in production."""
+
+    def setup_method(self):
+        get_settings.cache_clear()
+
+    def test_rejects_default_salt_in_production(self):
+        """Production must not use the hardcoded default salt."""
+        with pytest.raises(ValueError, match="audit_hash_salt"):
+            Settings(
+                environment="production",
+                audit_hash_salt="montgowork-default-salt",
+                credit_api_url="https://credit.example.com",
+            )
+
+    def test_rejects_default_salt_implicitly_in_production(self):
+        """Production with no explicit salt (uses default) must fail."""
+        with pytest.raises(ValueError, match="audit_hash_salt"):
+            Settings(
+                environment="production",
+                credit_api_url="https://credit.example.com",
+            )
+
+    def test_accepts_custom_salt_in_production(self):
+        """Production with a custom salt should pass."""
+        s = Settings(
+            environment="production",
+            audit_hash_salt=_SAFE_SALT,
+            admin_api_key=_SAFE_ADMIN_KEY,
+            credit_api_url="https://credit.example.com",
+        )
+        assert s.audit_hash_salt == _SAFE_SALT
+
+    def test_allows_default_salt_in_development(self):
+        """Development can use the default salt without error."""
+        s = Settings(environment="development")
+        assert s.audit_hash_salt == "montgowork-default-salt"
+
+    def test_allows_default_salt_in_test(self):
+        """Test environment can use the default salt without error."""
+        s = Settings(environment="test")
+        assert s.audit_hash_salt == "montgowork-default-salt"
+
+
+class TestAdminApiKeyValidator:
+    """MED-6: Reject weak admin key in production."""
+
+    def setup_method(self):
+        get_settings.cache_clear()
+
+    def test_rejects_short_admin_key_in_production(self):
+        """Production admin_api_key must be >= 32 characters."""
+        with pytest.raises(ValueError, match="admin_api_key"):
+            Settings(
+                environment="production",
+                admin_api_key="short-key",
+                audit_hash_salt=_SAFE_SALT,
+                credit_api_url="https://credit.example.com",
+            )
+
+    def test_rejects_empty_admin_key_in_production(self):
+        """Production with empty admin_api_key must fail."""
+        with pytest.raises(ValueError, match="admin_api_key"):
+            Settings(
+                environment="production",
+                admin_api_key="",
+                audit_hash_salt=_SAFE_SALT,
+                credit_api_url="https://credit.example.com",
+            )
+
+    def test_accepts_long_admin_key_in_production(self):
+        """Production with a 32+ char admin key should pass."""
+        s = Settings(
+            environment="production",
+            admin_api_key=_SAFE_ADMIN_KEY,
+            audit_hash_salt=_SAFE_SALT,
+            credit_api_url="https://credit.example.com",
+        )
+        assert s.admin_api_key == _SAFE_ADMIN_KEY
+
+    def test_allows_empty_admin_key_in_development(self):
+        """Development can use empty admin key."""
+        s = Settings(environment="development", admin_api_key="")
+        assert s.admin_api_key == ""
+
+    def test_allows_short_admin_key_in_development(self):
+        """Development can use a short admin key."""
+        s = Settings(environment="development", admin_api_key="dev-key")
+        assert s.admin_api_key == "dev-key"
+
+    def test_allows_short_admin_key_in_test(self):
+        """Test environment can use a short admin key."""
+        s = Settings(environment="test", admin_api_key="test-key")
+        assert s.admin_api_key == "test-key"
+
+
+def _mock_rag_store():
+    """Return a patch that replaces RagStore with a no-op mock."""
+    mock_store = MagicMock()
+    mock_store.build_or_load = AsyncMock()
+    return patch("app.main.RagStore", return_value=mock_store)
+
+
+class TestStartupEnvironmentWarning:
+    """LOW-1: Warn on startup if ENVIRONMENT is not explicitly set."""
+
+    @pytest.mark.anyio
+    async def test_warns_when_environment_defaults_to_development(self):
+        """Startup should log a warning when ENVIRONMENT env var is not set."""
+        import os
+        from app.main import lifespan, app
+
+        mock_engine = AsyncMock()
+        mock_status = {
+            "providers": {"mock": "available"},
+            "active": "mock",
+        }
+        # Build env dict without ENVIRONMENT key
+        clean_env = {k: v for k, v in os.environ.items() if k != "ENVIRONMENT"}
+        with patch("app.main.get_engine", return_value=mock_engine), \
+             patch("app.main.init_db", new_callable=AsyncMock), \
+             patch("app.main.close_db", new_callable=AsyncMock), \
+             patch("app.main.upsert_barrier_graph", new_callable=AsyncMock), \
+             patch("app.main.seed_employer_policies", new_callable=AsyncMock), \
+             patch("app.main.seed_honestjobs_listings", new_callable=AsyncMock), \
+             _mock_rag_store(), \
+             patch("app.main.check_llm_providers", return_value=mock_status), \
+             patch("app.main.logger") as mock_logger, \
+             patch.dict("os.environ", clean_env, clear=True):
+            async with lifespan(app):
+                pass
+        warning_calls = [str(c) for c in mock_logger.warning.call_args_list]
+        assert any("ENVIRONMENT" in c for c in warning_calls)
+
+    @pytest.mark.anyio
+    async def test_no_env_warning_when_environment_is_set(self):
+        """No warning when ENVIRONMENT env var is explicitly set."""
+        from app.main import lifespan, app
+
+        mock_engine = AsyncMock()
+        mock_status = {
+            "providers": {"mock": "available"},
+            "active": "mock",
+        }
+        with patch("app.main.get_engine", return_value=mock_engine), \
+             patch("app.main.init_db", new_callable=AsyncMock), \
+             patch("app.main.close_db", new_callable=AsyncMock), \
+             patch("app.main.upsert_barrier_graph", new_callable=AsyncMock), \
+             patch("app.main.seed_employer_policies", new_callable=AsyncMock), \
+             patch("app.main.seed_honestjobs_listings", new_callable=AsyncMock), \
+             _mock_rag_store(), \
+             patch("app.main.check_llm_providers", return_value=mock_status), \
+             patch("app.main.logger") as mock_logger, \
+             patch.dict("os.environ", {"ENVIRONMENT": "staging"}, clear=False):
+            async with lifespan(app):
+                pass
+        warning_calls = [str(c) for c in mock_logger.warning.call_args_list]
+        assert not any("ENVIRONMENT" in c for c in warning_calls)

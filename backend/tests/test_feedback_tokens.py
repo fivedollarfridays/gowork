@@ -1,5 +1,7 @@
 """Tests for feedback token generation and validation."""
 
+from unittest.mock import patch
+
 import pytest
 
 from app.modules.feedback.tokens import generate_token
@@ -110,3 +112,74 @@ class TestCreateAndValidateToken:
 
             result = await validate_token(session, token)
             assert result is None
+
+
+class TestTimingSafeTokenValidation:
+    """HIGH-4: validate_token uses hmac.compare_digest for constant-time comparison."""
+
+    @pytest.mark.anyio
+    async def test_validate_uses_hmac_compare_digest(self, test_engine):
+        """validate_token should call hmac.compare_digest for the token comparison."""
+        from sqlalchemy import text
+        from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
+        from app.core.queries_feedback import create_feedback_token, validate_token
+
+        factory = async_sessionmaker(test_engine, class_=AsyncSession)
+        async with factory() as session:
+            await session.execute(text(
+                "INSERT INTO sessions (id, created_at, barriers, expires_at) "
+                "VALUES ('sess-hmac', '2026-03-05', '[]', '2026-04-05')"
+            ))
+            await session.commit()
+
+            token = await create_feedback_token(session, "sess-hmac")
+
+            with patch("app.core.queries_feedback.hmac.compare_digest", return_value=True) as mock_cmp:
+                result = await validate_token(session, token)
+                assert result == "sess-hmac"
+                mock_cmp.assert_called_once()
+
+    @pytest.mark.anyio
+    async def test_validate_rejects_when_compare_digest_false(self, test_engine):
+        """If hmac.compare_digest returns False, validate_token returns None."""
+        from sqlalchemy import text
+        from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
+        from app.core.queries_feedback import create_feedback_token, validate_token
+
+        factory = async_sessionmaker(test_engine, class_=AsyncSession)
+        async with factory() as session:
+            await session.execute(text(
+                "INSERT INTO sessions (id, created_at, barriers, expires_at) "
+                "VALUES ('sess-reject', '2026-03-05', '[]', '2026-04-05')"
+            ))
+            await session.commit()
+
+            token = await create_feedback_token(session, "sess-reject")
+
+            # Force compare_digest to return False (simulates edge case)
+            with patch("app.core.queries_feedback.hmac.compare_digest", return_value=False):
+                result = await validate_token(session, token)
+                assert result is None
+
+    @pytest.mark.anyio
+    async def test_validate_still_works_end_to_end(self, test_engine):
+        """End-to-end: validate_token returns session_id for correct token."""
+        from sqlalchemy import text
+        from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
+        from app.core.queries_feedback import create_feedback_token, validate_token
+
+        factory = async_sessionmaker(test_engine, class_=AsyncSession)
+        async with factory() as session:
+            await session.execute(text(
+                "INSERT INTO sessions (id, created_at, barriers, expires_at) "
+                "VALUES ('sess-e2e', '2026-03-05', '[]', '2026-04-05')"
+            ))
+            await session.commit()
+
+            token = await create_feedback_token(session, "sess-e2e")
+            # No mocking — real hmac.compare_digest
+            result = await validate_token(session, token)
+            assert result == "sess-e2e"
