@@ -82,8 +82,8 @@ export function BenefitsCliffChart({ analysis }: BenefitsCliffChartProps) {
                   width={65}
                 />
                 <Tooltip
-                  formatter={(value: number) => [formatDollar(value), "Net Monthly"]}
-                  labelFormatter={(label: number) => `$${label}/hr`}
+                  formatter={(value) => [formatDollar(Number(value)), "Net Monthly"]}
+                  labelFormatter={(label) => `$${label}/hr`}
                 />
                 <Area
                   type="monotone"

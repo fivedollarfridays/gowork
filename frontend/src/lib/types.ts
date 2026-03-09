@@ -225,7 +225,7 @@ export interface ReEntryPlan {
   eligible_after_repair: string[];
   wioa_eligibility: WIOAEligibility | null;
   job_readiness: JobReadinessResult | null;
-  benefits_cliff_analysis: CliffAnalysis | null;
+  benefits_cliff_analysis?: CliffAnalysis | null;
 }
 
 export interface AssessmentResponse {
