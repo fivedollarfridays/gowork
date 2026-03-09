@@ -307,6 +307,7 @@ export interface ActionItem {
   source_module: string;
   resource_name: string | null;
   resource_phone: string | null;
+  resource_address: string | null;
 }
 
 export interface TimelinePhase {

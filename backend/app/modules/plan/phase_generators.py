@@ -24,11 +24,11 @@ def generate_career_center_action() -> ActionItem:
     return ActionItem(
         category=ActionCategory.CAREER_CENTER,
         title=f"Visit {_CAREER_CENTER_NAME}",
-        detail=_CAREER_CENTER_ADDRESS,
         priority=0,
         source_module="career_center",
         resource_name=_CAREER_CENTER_NAME,
         resource_phone=_CAREER_CENTER_PHONE,
+        resource_address=_CAREER_CENTER_ADDRESS,
     )
 
 

@@ -24,6 +24,7 @@ class ActionItem(BaseModel):
     source_module: str
     resource_name: str | None = None
     resource_phone: str | None = None
+    resource_address: str | None = None
 
 
 class TimelinePhase(BaseModel):

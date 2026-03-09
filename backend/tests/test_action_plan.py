@@ -197,6 +197,12 @@ class TestCareerCenterAction:
         cc = plan.phases[0].actions[0]
         assert cc.resource_phone is not None
 
+    def test_career_center_has_address(self):
+        plan = build_action_plan(assessment_date=date(2026, 3, 9))
+        cc = plan.phases[0].actions[0]
+        assert cc.resource_address is not None
+        assert "Montgomery" in cc.resource_address
+
 
 # ---------------------------------------------------------------------------
 # Job actions

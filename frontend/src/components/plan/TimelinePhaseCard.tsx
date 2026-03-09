@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { ReactNode } from "react";
 import {
   ChevronDown,
   Briefcase,
@@ -11,12 +12,29 @@ import {
   Building2,
   Home,
   Baby,
+  MapPin,
   type LucideIcon,
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { toTelHref } from "@/lib/constants";
+import { toTelHref, mapsUrl } from "@/lib/constants";
 import type { TimelinePhase, ActionCategory, ActionItem } from "@/lib/types";
+
+const PHONE_RE = /(\+?1?[-.\s]?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4})/g;
+
+function linkifyPhones(text: string): ReactNode {
+  const parts = text.split(PHONE_RE);
+  if (parts.length === 1) return text;
+  return parts.map((part, i) =>
+    PHONE_RE.test(part) ? (
+      <a key={i} href={toTelHref(part)} className="text-primary underline">
+        {part}
+      </a>
+    ) : (
+      part
+    ),
+  );
+}
 
 const CATEGORY_ICONS: Record<ActionCategory, LucideIcon> = {
   job_application: Briefcase,
@@ -61,8 +79,19 @@ function ActionRow({ action, actionKey, checked, onToggle }: ActionRowProps) {
       <Icon className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" aria-hidden="true" />
       <div className="min-w-0 space-y-0.5">
         <p className="text-sm font-medium">{action.title}</p>
+        {action.resource_address && (
+          <a
+            href={mapsUrl(action.resource_address)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 text-xs text-primary underline"
+          >
+            <MapPin className="h-3 w-3 shrink-0" aria-hidden="true" />
+            {action.resource_address}
+          </a>
+        )}
         {action.detail && (
-          <p className="text-xs text-muted-foreground">{action.detail}</p>
+          <p className="text-xs text-muted-foreground">{linkifyPhones(action.detail)}</p>
         )}
         {action.resource_name && (
           <p className="text-xs text-muted-foreground">{action.resource_name}</p>
