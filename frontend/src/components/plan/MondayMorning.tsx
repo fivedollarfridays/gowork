@@ -47,9 +47,9 @@ export function MondayMorning({ plan, profile, firstStepAction }: MondayMorningP
   const topJobs = useMemo(() => getTopJobs(plan), [plan]);
 
   return (
-    <section className="space-y-8">
+    <section className="space-y-4">
       <ScrollReveal>
-        <div className="space-y-3">
+        <div className="space-y-2">
           <h1 className="text-3xl sm:text-4xl font-bold text-primary tracking-tight">
             Here&apos;s what you can do {getNextActionableDay()}.
           </h1>
@@ -63,8 +63,8 @@ export function MondayMorning({ plan, profile, firstStepAction }: MondayMorningP
       </ScrollReveal>
 
       <div>
-        <h2 className="text-xl font-semibold text-primary mb-4">Your Next Steps</h2>
-        <StaggerContainer className="grid gap-4 sm:grid-cols-3">
+        <h2 className="text-xl font-semibold text-primary mb-3">Your Next Steps</h2>
+        <StaggerContainer className="grid gap-3 sm:grid-cols-3">
           <StaggerItem>
             <CareerCenterStep action={firstStepAction} />
           </StaggerItem>
@@ -82,7 +82,7 @@ export function MondayMorning({ plan, profile, firstStepAction }: MondayMorningP
 
 function CareerCenterStep({ action }: { action?: ReactNode }) {
   return (
-    <Card className="flex flex-col transition-shadow hover:shadow-md">
+    <Card className="h-full flex flex-col hover:shadow-[0_0_20px_rgba(45,149,150,0.2)] hover:border-secondary/30 hover:-translate-y-0.5">
       <CardContent className="p-4 flex flex-col gap-3 flex-1">
         <div className="flex items-start gap-2">
           <span className={stepNumber}>1</span>
@@ -134,7 +134,7 @@ function JobsStep({ jobs }: { jobs: ScoredJobMatch[] }) {
   };
 
   return (
-    <Card className="flex flex-col transition-shadow hover:shadow-md">
+    <Card className="h-full flex flex-col hover:shadow-[0_0_20px_rgba(45,149,150,0.2)] hover:border-secondary/30 hover:-translate-y-0.5">
       <CardContent className="p-4 flex flex-col gap-3 flex-1">
         <div className="flex items-start gap-2">
           <span className={stepNumber}>2</span>
@@ -184,7 +184,7 @@ function JobsStep({ jobs }: { jobs: ScoredJobMatch[] }) {
 function BarrierStep({ barriers }: { barriers: BarrierCard[] }) {
   if (barriers.length === 0) {
     return (
-      <Card className="flex flex-col transition-shadow hover:shadow-md">
+      <Card className="h-full flex flex-col hover:shadow-[0_0_20px_rgba(45,149,150,0.2)] hover:border-secondary/30 hover:-translate-y-0.5">
         <CardContent className="p-4 flex flex-col gap-3 flex-1">
           <div className="flex items-start gap-2">
             <span className={stepNumber}>3</span>
@@ -204,7 +204,7 @@ function BarrierStep({ barriers }: { barriers: BarrierCard[] }) {
   const additional = barriers.slice(1);
 
   return (
-    <Card className="flex flex-col transition-shadow hover:shadow-md">
+    <Card className="h-full flex flex-col hover:shadow-[0_0_20px_rgba(45,149,150,0.2)] hover:border-secondary/30 hover:-translate-y-0.5">
       <CardContent className="p-4 flex flex-col gap-3 flex-1">
         <div className="flex items-start gap-2">
           <span className={stepNumber}>3</span>

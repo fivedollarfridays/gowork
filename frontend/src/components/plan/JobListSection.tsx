@@ -34,7 +34,7 @@ export function JobListSection({ jobs, pageSize = 10, creditResult }: JobListSec
   const hasMore = displayCount < filtered.length;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <h2 className="text-xl font-semibold text-primary">
         Matched Jobs
         {filtersActive && (
@@ -51,7 +51,7 @@ export function JobListSection({ jobs, pageSize = 10, creditResult }: JobListSec
         </p>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2">
             {visible.map((job, i) => (
               <JobMatchCard
                 key={`job-${job.title}-${job.company}-${i}`}

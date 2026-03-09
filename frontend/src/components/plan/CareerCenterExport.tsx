@@ -50,26 +50,27 @@ export function CareerCenterExport({ sessionId, token }: CareerCenterExportProps
 
   return (
     <>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col items-center gap-1.5">
         <Button
+          size="sm"
           onClick={handleDownload}
           disabled={generating}
-          className="gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/90"
+          className="gap-1.5 text-xs bg-secondary text-secondary-foreground hover:bg-secondary/90"
           aria-label={generating ? "Generating PDF, please wait" : "Career Center PDF"}
         >
           {generating ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
               Generating...
             </>
           ) : (
             <>
-              <FileText className="h-4 w-4" />
-              Career Center PDF
+              <FileText className="h-3.5 w-3.5" />
+              Download PDF
             </>
           )}
         </Button>
-        {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+        {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
       </div>
 
       {packageData && (

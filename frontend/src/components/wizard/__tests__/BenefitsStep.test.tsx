@@ -70,6 +70,8 @@ describe("BenefitsStep", () => {
   it("displays with defaults when no overrides", () => {
     renderStep();
     const householdInput = screen.getByLabelText(/household size/i) as HTMLInputElement;
-    expect(householdInput.value).toBe("1");
+    // Default household_size=1 shows empty (placeholder "1" visible instead)
+    expect(householdInput.value).toBe("");
+    expect(householdInput.placeholder).toBe("1");
   });
 });

@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // Mock framer-motion
 const mockUseReducedMotion = vi.fn(() => false);
@@ -63,33 +63,40 @@ const fakePlanResponse = {
 describe("PlanPage animations", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.useFakeTimers({ shouldAdvanceTime: true });
     mockUseReducedMotion.mockReturnValue(false);
     mockSearchParams.set("session", "sess-anim-test");
     mockSearchParams.set("token", "test-token-anim");
   });
 
-  it("renders ShimmerBar during loading state", async () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("shows transition screen with motivational message while loading", async () => {
     const { getPlan } = await import("@/lib/api");
     (getPlan as ReturnType<typeof vi.fn>).mockReturnValue(new Promise(() => {}));
 
-    const { container } = renderWithClient(<PlanPage />);
-    const shimmerBars = container.querySelectorAll("[class*='bg-muted']");
-    expect(shimmerBars.length).toBeGreaterThan(0);
-    expect(screen.getByLabelText(/loading your plan/i)).toBeInTheDocument();
+    renderWithClient(<PlanPage />);
+    // Transition screen shows motivational text and loading indicator
+    expect(screen.getByText(/analyzing your profile/i)).toBeInTheDocument();
   });
 
-  it("fires confetti once when data loads", async () => {
+  it("fires confetti after transition completes with data", async () => {
+    mockUseReducedMotion.mockReturnValue(false);
     const { getPlan } = await import("@/lib/api");
     (getPlan as ReturnType<typeof vi.fn>).mockResolvedValue(fakePlanResponse);
 
     renderWithClient(<PlanPage />);
-    await screen.findByText(/here.?s what you can do/i);
+
+    // Advance through transition phases (2.5s + 2.5s + 0.6s)
+    await vi.advanceTimersByTimeAsync(6000);
 
     await waitFor(() => {
       expect(mockConfetti).toHaveBeenCalledTimes(1);
-    });
+    }, { timeout: 2000 });
     expect(mockConfetti).toHaveBeenCalledWith(
-      expect.objectContaining({ particleCount: 60 }),
+      expect.objectContaining({ particleCount: 80, spread: 70 }),
     );
   });
 
@@ -99,10 +106,14 @@ describe("PlanPage animations", () => {
     (getPlan as ReturnType<typeof vi.fn>).mockResolvedValue(fakePlanResponse);
 
     renderWithClient(<PlanPage />);
-    await screen.findByText(/here.?s what you can do/i);
+
+    // With reduced motion, transition completes immediately when data ready
+    await waitFor(() => {
+      expect(screen.getByText(/here.?s what you can do/i)).toBeInTheDocument();
+    }, { timeout: 2000 });
 
     // Give time for any potential confetti call
-    await new Promise((r) => setTimeout(r, 50));
+    await vi.advanceTimersByTimeAsync(500);
     expect(mockConfetti).not.toHaveBeenCalled();
   });
 });

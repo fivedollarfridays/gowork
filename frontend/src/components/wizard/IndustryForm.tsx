@@ -10,6 +10,8 @@ interface IndustryFormProps {
   certifications: string[];
   onIndustriesChange: (industries: string[]) => void;
   onCertificationsChange: (certs: string[]) => void;
+  recommendedIndustries?: string[];
+  recommendedCertifications?: string[];
 }
 
 export function IndustryForm({
@@ -17,6 +19,8 @@ export function IndustryForm({
   certifications,
   onIndustriesChange,
   onCertificationsChange,
+  recommendedIndustries = [],
+  recommendedCertifications = [],
 }: IndustryFormProps) {
   function toggleIndustry(value: string) {
     if (targetIndustries.includes(value)) {
@@ -64,7 +68,12 @@ export function IndustryForm({
                   onCheckedChange={() => toggleIndustry(opt.value)}
                   onClick={(e) => e.stopPropagation()}
                 />
-                <span className="text-sm font-medium">{opt.label}</span>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium">{opt.label}</span>
+                  {recommendedIndustries.includes(opt.value) && (
+                    <span className="text-[10px] font-semibold text-secondary">Recommended</span>
+                  )}
+                </div>
               </div>
             </Card>
           );
@@ -90,6 +99,9 @@ export function IndustryForm({
                   className="text-sm font-medium cursor-pointer"
                 >
                   {opt.label}
+                  {recommendedCertifications.includes(opt.value) && (
+                    <span className="ml-2 text-[10px] font-semibold text-secondary">From Resume</span>
+                  )}
                 </label>
               </div>
             );

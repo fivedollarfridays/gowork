@@ -116,7 +116,7 @@ export function WizardShell({ steps, onComplete, completeLabel = "Submit" }: Wiz
                 initial={{ opacity: 0, x: directionRef.current * 30 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: directionRef.current * -30 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
               >
                 {step.content({ onNext: handleNext, onBack: handleBack })}
               </m.div>

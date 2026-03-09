@@ -27,6 +27,7 @@ import { AvailableHours, BarrierType } from "@/lib/types";
 import type { AssessmentRequest, CreditAssessmentResult, CreditFormData, EmploymentStatus, RecordProfile } from "@/lib/types";
 import { EMPLOYMENT_OPTIONS, isValidMontgomeryZip, humanizeLabel } from "@/lib/constants";
 import { useDemoMode } from "@/hooks/useDemoMode";
+import { getResumeRecommendations } from "@/lib/resume/recommend";
 
 const DEFAULT_FORM_DATA: BarrierFormData = {
   zipCode: "",
@@ -77,6 +78,17 @@ export default function AssessPage() {
   const hasCriminalBarrier = formData.barriers[BarrierType.CRIMINAL_RECORD];
   const hasResume = resumeText.trim().length > 0;
   const resumeWordCount = useMemo(() => resumeText.split(/\s+/).filter(Boolean).length, [resumeText]);
+  const resumeRecs = useMemo(() => getResumeRecommendations(resumeText), [resumeText]);
+
+  // Auto-populate certifications from resume (additive — don't remove manual selections)
+  useEffect(() => {
+    if (resumeRecs.certifications.length > 0) {
+      setCertifications((prev) => {
+        const merged = new Set([...prev, ...resumeRecs.certifications]);
+        return merged.size !== prev.length ? Array.from(merged) : prev;
+      });
+    }
+  }, [resumeRecs.certifications]);
 
   const mutation = useMutation({
     mutationFn: postAssessment,
@@ -327,6 +339,8 @@ export default function AssessPage() {
             certifications={certifications}
             onIndustriesChange={setTargetIndustries}
             onCertificationsChange={setCertifications}
+            recommendedIndustries={resumeRecs.industries}
+            recommendedCertifications={resumeRecs.certifications}
           />
         </div>
       ),
@@ -364,7 +378,7 @@ export default function AssessPage() {
         />
       ),
     },
-  ], [formData, benefitsData, creditData, zipValid, barrierCount, hasCreditBarrier, hasCriminalBarrier, recordProfile, mutation.isPending, error, resumeText, resumeWordCount, targetIndustries, certifications, hasResume]);
+  ], [formData, benefitsData, creditData, zipValid, barrierCount, hasCreditBarrier, hasCriminalBarrier, recordProfile, mutation.isPending, error, resumeText, resumeWordCount, targetIndustries, certifications, hasResume, resumeRecs]);
 
   return (
     <main className="min-h-screen px-4 py-8 sm:px-8">

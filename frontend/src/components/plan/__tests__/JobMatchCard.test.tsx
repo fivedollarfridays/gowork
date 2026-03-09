@@ -41,16 +41,16 @@ describe("JobMatchCard — fair-chance badge", () => {
     expect(screen.queryByText("Fair Chance")).not.toBeInTheDocument();
   });
 
-  it("shows Record Review Needed badge when not eligible", () => {
+  it("shows Record Review badge when not eligible", () => {
     const job = makeJob({ record_eligible: false });
     render(<JobMatchCard job={job} />);
-    expect(screen.getByText("Record Review Needed")).toBeInTheDocument();
+    expect(screen.getByText("Record Review")).toBeInTheDocument();
   });
 
-  it("hides Record Review Needed when eligible", () => {
+  it("hides Record Review badge when eligible", () => {
     const job = makeJob({ record_eligible: true });
     render(<JobMatchCard job={job} />);
-    expect(screen.queryByText("Record Review Needed")).not.toBeInTheDocument();
+    expect(screen.queryByText("Record Review")).not.toBeInTheDocument();
   });
 
   it("shows record note when present", () => {
@@ -66,29 +66,35 @@ describe("JobMatchCard — fair-chance badge", () => {
   });
 });
 
-describe("JobMatchCard — source badge", () => {
+describe("JobMatchCard — source label", () => {
   it("shows 'via Honest Jobs' for honestjobs source", () => {
     const job = makeJob({ source: "honestjobs" });
     render(<JobMatchCard job={job} />);
-    expect(screen.getByText("via Honest Jobs")).toBeInTheDocument();
+    expect(screen.getByText(/via Honest Jobs/)).toBeInTheDocument();
   });
 
   it("shows 'via Indeed' for brightdata source", () => {
     const job = makeJob({ source: "brightdata:dataset" });
     render(<JobMatchCard job={job} />);
-    expect(screen.getByText("via Indeed")).toBeInTheDocument();
+    expect(screen.getByText(/via Indeed/)).toBeInTheDocument();
   });
 
-  it("hides source badge for unknown source", () => {
+  it("shows 'via JSearch' for jsearch source", () => {
+    const job = makeJob({ source: "jsearch:req-123" });
+    render(<JobMatchCard job={job} />);
+    expect(screen.getByText(/via JSearch/)).toBeInTheDocument();
+  });
+
+  it("hides source label for unknown source", () => {
     const job = makeJob({ source: "test" });
     render(<JobMatchCard job={job} />);
-    expect(screen.queryByText(/^via /)).not.toBeInTheDocument();
+    expect(screen.queryByText(/via /)).not.toBeInTheDocument();
   });
 
-  it("hides source badge when source is null", () => {
+  it("hides source label when source is null", () => {
     const job = makeJob({ source: null });
     render(<JobMatchCard job={job} />);
-    expect(screen.queryByText(/^via /)).not.toBeInTheDocument();
+    expect(screen.queryByText(/via /)).not.toBeInTheDocument();
   });
 });
 

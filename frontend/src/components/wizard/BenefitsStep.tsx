@@ -43,6 +43,9 @@ export function BenefitsStep({ data, onChange }: BenefitsStepProps) {
     }
   }
 
+  // Show empty string instead of 0 so the placeholder shows and typing doesn't prepend zeros
+  const numDisplay = (v: number) => (v === 0 ? "" : String(v));
+
   return (
     <div className="space-y-5">
       <div className="grid gap-4 sm:grid-cols-2">
@@ -52,29 +55,37 @@ export function BenefitsStep({ data, onChange }: BenefitsStepProps) {
           </label>
           <Input
             id="household-size"
-            type="number"
-            min={1}
-            max={8}
-            value={data.household_size}
-            onChange={(e) =>
-              onChange({ ...data, household_size: Math.max(1, Math.min(8, parseInt(e.target.value) || 1)) })
-            }
+            type="text"
+            inputMode="numeric"
+            placeholder="1"
+            value={data.household_size === 1 ? "" : String(data.household_size)}
+            onChange={(e) => {
+              const raw = e.target.value.replace(/\D/g, "");
+              const num = raw === "" ? 1 : Math.max(1, Math.min(8, parseInt(raw)));
+              onChange({ ...data, household_size: num });
+            }}
           />
         </div>
         <div className="space-y-2">
           <label htmlFor="monthly-income" className="text-sm font-medium">
-            Current Monthly Income ($)
+            Current Monthly Income
           </label>
-          <Input
-            id="monthly-income"
-            type="number"
-            min={0}
-            step={50}
-            value={data.current_monthly_income}
-            onChange={(e) =>
-              onChange({ ...data, current_monthly_income: Math.max(0, parseFloat(e.target.value) || 0) })
-            }
-          />
+          <div className="relative">
+            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
+            <Input
+              id="monthly-income"
+              type="text"
+              inputMode="numeric"
+              placeholder="0"
+              className="pl-6"
+              value={numDisplay(data.current_monthly_income)}
+              onChange={(e) => {
+                const raw = e.target.value.replace(/[^\d.]/g, "");
+                const num = raw === "" ? 0 : Math.max(0, parseFloat(raw) || 0);
+                onChange({ ...data, current_monthly_income: num });
+              }}
+            />
+          </div>
         </div>
       </div>
 
@@ -113,12 +124,15 @@ export function BenefitsStep({ data, onChange }: BenefitsStepProps) {
           </label>
           <Input
             id="dep-under-6"
-            type="number"
-            min={0}
-            value={data.dependents_under_6}
-            onChange={(e) =>
-              onChange({ ...data, dependents_under_6: Math.max(0, parseInt(e.target.value) || 0) })
-            }
+            type="text"
+            inputMode="numeric"
+            placeholder="0"
+            value={numDisplay(data.dependents_under_6)}
+            onChange={(e) => {
+              const raw = e.target.value.replace(/\D/g, "");
+              const num = raw === "" ? 0 : Math.max(0, parseInt(raw));
+              onChange({ ...data, dependents_under_6: num });
+            }}
           />
         </div>
         <div className="space-y-2">
@@ -127,12 +141,15 @@ export function BenefitsStep({ data, onChange }: BenefitsStepProps) {
           </label>
           <Input
             id="dep-6-17"
-            type="number"
-            min={0}
-            value={data.dependents_6_to_17}
-            onChange={(e) =>
-              onChange({ ...data, dependents_6_to_17: Math.max(0, parseInt(e.target.value) || 0) })
-            }
+            type="text"
+            inputMode="numeric"
+            placeholder="0"
+            value={numDisplay(data.dependents_6_to_17)}
+            onChange={(e) => {
+              const raw = e.target.value.replace(/\D/g, "");
+              const num = raw === "" ? 0 : Math.max(0, parseInt(raw));
+              onChange({ ...data, dependents_6_to_17: num });
+            }}
           />
         </div>
       </div>
