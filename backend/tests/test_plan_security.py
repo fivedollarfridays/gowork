@@ -167,5 +167,6 @@ class TestConfigCreditUrlValidation:
             credit_api_url="http://8.8.8.8:8001",
             audit_hash_salt="test-production-salt-value",
             admin_api_key="a" * 32,
+            cors_origins="https://app.example.com",
         )
         assert s.credit_api_url == "http://8.8.8.8:8001"

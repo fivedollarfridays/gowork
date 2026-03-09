@@ -6,6 +6,7 @@ import {
   SOURCE_LABELS,
   SCHEDULE_LABELS,
   type JobFilterState,
+  type SortOption,
 } from "@/lib/jobFilters";
 
 const SOURCE_OPTIONS = [
@@ -18,12 +19,19 @@ const SCHEDULE_OPTIONS = [
   ...Object.entries(SCHEDULE_LABELS).map(([value, label]) => ({ value, label })),
 ] as const;
 
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: "relevance", label: "Relevance" },
+  { value: "pay", label: "Pay (High to Low)" },
+];
+
 interface JobFiltersProps {
   filters: JobFilterState;
   onChange: (filters: JobFilterState) => void;
+  sort?: SortOption;
+  onSortChange?: (sort: SortOption) => void;
 }
 
-export function JobFilters({ filters, onChange }: JobFiltersProps) {
+export function JobFilters({ filters, onChange, sort = "relevance", onSortChange }: JobFiltersProps) {
   const count = activeFilterCount(filters);
 
   return (
@@ -88,6 +96,26 @@ export function JobFilters({ filters, onChange }: JobFiltersProps) {
             Fair-chance only
           </label>
         </div>
+
+        {onSortChange && (
+          <div className="space-y-1">
+            <label htmlFor="sort-select" className="text-xs text-muted-foreground">
+              Sort by
+            </label>
+            <select
+              id="sort-select"
+              value={sort}
+              onChange={(e) => onSortChange(e.target.value as SortOption)}
+              className="block w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm"
+            >
+              {SORT_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
     </div>
   );

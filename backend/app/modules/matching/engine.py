@@ -129,6 +129,35 @@ def _compute_benefits(
     return cliff, eligibility
 
 
+def _assemble_plan(
+    profile: UserProfile, barrier_cards: list, strong: list[ScoredJobMatch],
+    after_repair: list[ScoredJobMatch], next_steps: list,
+    wioa, readiness, credit_result: dict | None, cliff, eligibility, action_plan,
+) -> ReEntryPlan:
+    """Build the final ReEntryPlan from all computed outputs."""
+    credit_score = (
+        credit_result.get("readiness", {}).get("score")
+        if credit_result else None
+    )
+    return ReEntryPlan(
+        plan_id=str(uuid.uuid4()),
+        session_id=profile.session_id,
+        barriers=barrier_cards,
+        strong_matches=strong,
+        possible_matches=[],  # Deprecated: PVS replaces 3-bucket system
+        after_repair=after_repair,
+        immediate_next_steps=next_steps,
+        eligible_now=[m.title for m in strong],
+        eligible_after_repair=[m.title for m in after_repair],
+        wioa_eligibility=wioa,
+        job_readiness=readiness,
+        credit_readiness_score=credit_score,
+        benefits_cliff_analysis=cliff,
+        benefits_eligibility=eligibility,
+        action_plan=action_plan,
+    )
+
+
 async def generate_plan(
     profile: UserProfile, db_session: AsyncSession,
     resume_text: str = "",
@@ -152,20 +181,7 @@ async def generate_plan(
     action_plan = _build_action_plan(
         strong, eligibility, benefits_profile, wioa, cliff, credit_result, barrier_cards,
     )
-
-    return ReEntryPlan(
-        plan_id=str(uuid.uuid4()),
-        session_id=profile.session_id,
-        barriers=barrier_cards,
-        strong_matches=strong,
-        possible_matches=[],  # Deprecated: PVS replaces 3-bucket system
-        after_repair=after_repair,
-        immediate_next_steps=next_steps,
-        eligible_now=[m.title for m in strong],
-        eligible_after_repair=[m.title for m in after_repair],
-        wioa_eligibility=wioa,
-        job_readiness=readiness,
-        benefits_cliff_analysis=cliff,
-        benefits_eligibility=eligibility,
-        action_plan=action_plan,
+    return _assemble_plan(
+        profile, barrier_cards, strong, after_repair, next_steps,
+        wioa, readiness, credit_result, cliff, eligibility, action_plan,
     )

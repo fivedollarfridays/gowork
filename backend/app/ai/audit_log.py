@@ -45,6 +45,10 @@ async def log_llm_interaction(
     await asyncio.to_thread(_write_log_entry, log_path, entry)
 
 
+# Alias for backwards compatibility
+log_llm_interaction_async = log_llm_interaction
+
+
 def _build_entry(
     session_id: str, provider: str,
     prompt_length: int, response_length: int, latency_ms: float,

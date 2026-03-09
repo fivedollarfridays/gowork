@@ -274,11 +274,12 @@ class TestAssessmentWithRecordProfile:
                 })
         assert resp.status_code == 201
         data = resp.json()
-        assert data["profile"]["record_profile"] is None
+        # record_profile excluded from response for PII safety
+        assert "record_profile" not in data["profile"]
 
     @pytest.mark.asyncio
-    async def test_record_profile_in_response(self):
-        """Record profile should appear in profile response."""
+    async def test_record_profile_excluded_from_response(self):
+        """Record profile must NOT appear in API response (PII safety)."""
         from app.main import app
 
         with (
@@ -304,7 +305,5 @@ class TestAssessmentWithRecordProfile:
                 })
         assert resp.status_code == 201
         data = resp.json()
-        rp = data["profile"]["record_profile"]
-        assert rp is not None
-        assert "felony" in rp["record_types"]
-        assert rp["years_since_conviction"] == 6
+        # Criminal record data must not be echoed in the response
+        assert "record_profile" not in data["profile"]

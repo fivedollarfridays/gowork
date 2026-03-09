@@ -25,11 +25,14 @@ const BASE = "https://www.findhelp.org";
  * Generate a findhelp.org capability URL for a barrier type + zip code.
  * Returns null if the barrier type has no mapping.
  */
+const ZIP_RE = /^\d{5}$/;
+
 export function generateFindhelpUrl(
   barrierType: BarrierType,
   zipCode: string,
 ): string | null {
   const path = FINDHELP_CATEGORIES[barrierType];
   if (!path) return null;
-  return `${BASE}/${path}--montgomery-al?postal=${encodeURIComponent(zipCode)}`;
+  if (!ZIP_RE.test(zipCode)) return null;
+  return `${BASE}/${path}--montgomery-al?postal=${zipCode}`;
 }

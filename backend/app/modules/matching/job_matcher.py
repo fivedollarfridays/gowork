@@ -144,5 +144,6 @@ async def match_jobs(
         schedule_type=profile.schedule_type,
         barriers=profile.primary_barriers,
         benefits_profile=benefits_profile,
+        target_industries=profile.target_industries,
     )
     return rank_all_jobs(jobs, ctx)

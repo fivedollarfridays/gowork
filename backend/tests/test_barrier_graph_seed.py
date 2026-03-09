@@ -93,8 +93,8 @@ class TestUpsertMissingFile:
 
         factory = get_async_session_factory()
         async with factory() as session:
-            # Patch _resolve_data_dir to return a tmp dir without the seed file
-            with patch("app.barrier_graph.seed._resolve_data_dir") as mock_dir:
+            # Patch resolve_data_dir to return a tmp dir without the seed file
+            with patch("app.barrier_graph.seed.resolve_data_dir") as mock_dir:
                 import tempfile
                 from pathlib import Path
 

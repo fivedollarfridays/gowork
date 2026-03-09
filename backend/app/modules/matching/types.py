@@ -76,6 +76,8 @@ class ScoringContext(BaseModel):
     schedule_type: AvailableHours
     barriers: list[BarrierType]
     benefits_profile: Optional[BenefitsProfile] = None
+    target_industries: list[str] = []
+    resume_keywords: list[str] = []
 
 
 class BenefitsFormData(BaseModel):

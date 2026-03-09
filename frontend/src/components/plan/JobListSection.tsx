@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { JobMatchCard } from "./JobMatchCard";
 import { JobFilters } from "./JobFilters";
 import { JobFilterPills } from "./JobFilterPills";
-import { defaultFilters, filterJobs, activeFilterCount } from "@/lib/jobFilters";
-import type { JobFilterState } from "@/lib/jobFilters";
+import { defaultFilters, filterJobs, sortJobs, activeFilterCount } from "@/lib/jobFilters";
+import type { JobFilterState, SortOption } from "@/lib/jobFilters";
 import type { CreditAssessmentResult, ScoredJobMatch } from "@/lib/types";
 
 interface JobListSectionProps {
@@ -18,13 +18,14 @@ interface JobListSectionProps {
 export function JobListSection({ jobs, pageSize = 10, creditResult }: JobListSectionProps) {
   const [displayCount, setDisplayCount] = useState(pageSize);
   const [filters, setFilters] = useState<JobFilterState>(defaultFilters);
+  const [sort, setSort] = useState<SortOption>("relevance");
 
   const handleFilterChange = (next: JobFilterState) => {
     setFilters(next);
     setDisplayCount(pageSize);
   };
 
-  const filtered = useMemo(() => filterJobs(jobs, filters), [jobs, filters]);
+  const filtered = useMemo(() => sortJobs(filterJobs(jobs, filters), sort), [jobs, filters, sort]);
   const filtersActive = activeFilterCount(filters) > 0;
 
   if (jobs.length === 0) return null;
@@ -42,7 +43,7 @@ export function JobListSection({ jobs, pageSize = 10, creditResult }: JobListSec
           </span>
         )}
       </h2>
-      <JobFilters filters={filters} onChange={handleFilterChange} />
+      <JobFilters filters={filters} onChange={handleFilterChange} sort={sort} onSortChange={setSort} />
       <JobFilterPills filters={filters} onClear={handleFilterChange} />
       {filtered.length === 0 ? (
         <p className="text-center text-sm text-muted-foreground py-6">

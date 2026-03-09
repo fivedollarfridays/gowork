@@ -6,14 +6,14 @@ import logging
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import _resolve_data_dir
+from app.core.database import resolve_data_dir
 
 logger = logging.getLogger(__name__)
 
 
 async def upsert_barrier_graph(session: AsyncSession) -> None:
     """Idempotently insert barrier nodes and edges. Safe to call multiple times."""
-    _SEED_FILE = _resolve_data_dir() / "barrier_graph_seed.json"
+    _SEED_FILE = resolve_data_dir() / "barrier_graph_seed.json"
     if not _SEED_FILE.exists():
         logger.warning("barrier_graph_seed.json not found at %s", _SEED_FILE)
         return

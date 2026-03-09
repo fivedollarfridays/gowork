@@ -128,7 +128,7 @@ export interface Resource {
   services: string[] | null;
   notes: string | null;
   health_status?: ResourceHealth;
-  eligibility_status?: "likely" | "check" | null;
+  eligibility_status?: "likely" | "check" | "unknown" | null;
 }
 
 export interface JobMatch {

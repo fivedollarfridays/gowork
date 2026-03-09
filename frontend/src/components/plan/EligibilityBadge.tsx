@@ -3,7 +3,7 @@ import { STATUS_BADGE_STYLES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 interface EligibilityBadgeProps {
-  status?: "likely" | "check" | null;
+  status?: "likely" | "check" | "unknown" | null;
 }
 
 export function EligibilityBadge({ status }: EligibilityBadgeProps) {
