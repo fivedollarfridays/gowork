@@ -1,6 +1,7 @@
 """Configuration management."""
 
 import ipaddress
+import logging
 from functools import lru_cache
 from urllib.parse import urlparse
 
@@ -78,13 +79,17 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def _reject_default_salt_in_production(self) -> "Settings":
         """HIGH-3 / LOW-4: Weak default audit hash salt must not reach production."""
-        if self.environment != "production":
-            return self
         if self.audit_hash_salt == "montgowork-default-salt":
-            raise ValueError(
-                "audit_hash_salt must be changed from the default value "
-                "in production — set AUDIT_HASH_SALT env var"
-            )
+            if self.environment == "production":
+                raise ValueError(
+                    "audit_hash_salt must be changed from the default value "
+                    "in production — set AUDIT_HASH_SALT env var"
+                )
+            if self.environment not in ("development", "test"):
+                logging.getLogger(__name__).warning(
+                    "audit_hash_salt is set to the default value — "
+                    "set AUDIT_HASH_SALT for non-development environments"
+                )
         return self
 
     @model_validator(mode="after")
@@ -96,6 +101,18 @@ class Settings(BaseSettings):
             raise ValueError(
                 "admin_api_key must be at least 32 characters in production "
                 "— set ADMIN_API_KEY env var"
+            )
+        return self
+
+    @model_validator(mode="after")
+    def _reject_localhost_cors_in_production(self) -> "Settings":
+        """Reject localhost CORS origins in production."""
+        if self.environment != "production":
+            return self
+        if "localhost" in self.cors_origins:
+            raise ValueError(
+                "cors_origins must not contain localhost in production "
+                "— set CORS_ORIGINS env var to production domains"
             )
         return self
 

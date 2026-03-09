@@ -149,16 +149,16 @@ class TestDataDirConfig:
         s = Settings()
         assert s.data_dir == ""
 
-    def test_resolve_data_dir_uses_configured_path(self, tmp_path):
-        """_resolve_data_dir returns configured path when data_dir is set."""
+    def testresolve_data_dir_uses_configured_path(self, tmp_path):
+        """resolve_data_dir returns configured path when data_dir is set."""
         from unittest.mock import MagicMock
-        from app.core.database import _resolve_data_dir
+        from app.core.database import resolve_data_dir
 
         mock_settings = MagicMock()
         mock_settings.data_dir = str(tmp_path / "custom_data")
 
         with patch("app.core.database.get_settings", return_value=mock_settings):
-            result = _resolve_data_dir()
+            result = resolve_data_dir()
 
         assert result == (tmp_path / "custom_data").resolve()
 
@@ -174,7 +174,7 @@ class TestDataDirConfig:
                 if stmt:
                     await conn.execute(text(stmt))
         fake_dir = tmp_path / "nonexistent"
-        with patch.object(db_module, "_resolve_data_dir", return_value=fake_dir):
+        with patch.object(db_module, "resolve_data_dir", return_value=fake_dir):
             with caplog.at_level(logging.WARNING):
                 await seed_database(engine)
         assert any("DATA_DIR" in r.message and "does not exist" in r.message for r in caplog.records)
@@ -194,7 +194,7 @@ class TestDataDirConfig:
         # Empty directory — all seed files missing
         empty_dir = tmp_path / "emptydata"
         empty_dir.mkdir()
-        with patch.object(db_module, "_resolve_data_dir", return_value=empty_dir):
+        with patch.object(db_module, "resolve_data_dir", return_value=empty_dir):
             with caplog.at_level(logging.WARNING):
                 await seed_database(engine)
         warning_msgs = [r.message for r in caplog.records if r.levelno == logging.WARNING]
@@ -223,10 +223,10 @@ class TestSeedEdgeCases:
         engine = create_async_engine(
             f"sqlite+aiosqlite:///{tmp_path / 'missing.db'}", echo=False
         )
-        # Point _resolve_data_dir to empty tmp_path so no seed files exist
+        # Point resolve_data_dir to empty tmp_path so no seed files exist
         empty_dir = tmp_path / "emptydir"
         empty_dir.mkdir()
-        with patch.object(db_module, "_resolve_data_dir", return_value=empty_dir):
+        with patch.object(db_module, "resolve_data_dir", return_value=empty_dir):
             async with engine.begin() as conn:
                 for stmt in db_module.DDL_SQL.strip().split(";"):
                     stmt = stmt.strip()
@@ -262,7 +262,7 @@ class TestSeedEdgeCases:
                    "community_resources.json"]:
             (seed_dir / f).write_text("[]")
 
-        with patch.object(db_module, "_resolve_data_dir", return_value=seed_dir):
+        with patch.object(db_module, "resolve_data_dir", return_value=seed_dir):
             await seed_database(engine)
         async with engine.begin() as conn:
             result = await conn.execute(text("SELECT COUNT(*) FROM resources"))

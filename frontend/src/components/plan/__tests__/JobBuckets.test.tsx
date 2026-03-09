@@ -44,7 +44,7 @@ describe("JobMatchCard with ScoredJobMatch", () => {
 
   it("displays relevance score badge for strong matches", () => {
     render(<JobMatchCard job={strongJob} />);
-    expect(screen.getByText("85%")).toBeInTheDocument();
+    expect(screen.getByText("85% Match")).toBeInTheDocument();
   });
 
   it("displays credit badge for credit-required jobs", () => {

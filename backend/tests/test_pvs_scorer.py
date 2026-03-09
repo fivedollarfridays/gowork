@@ -230,6 +230,54 @@ class TestRankAllJobs:
         assert ranked[0].record_note == "Not eligible based on charge type"
 
 
+class TestBuildPvsReasonEnriched:
+    """Test enriched match reasons with specific industries and resume keywords."""
+
+    def test_industry_match_shows_specific_name(self) -> None:
+        """When industry matches, reason should name the specific industry."""
+        jobs = [_job(description="Healthcare assistant needed. $15/hr", industry_match=True)]
+        ctx = _ctx(target_industries=["healthcare"])
+        ranked = rank_all_jobs(jobs, ctx)
+        assert "healthcare" in ranked[0].match_reason.lower()
+
+    def test_resume_keyword_match_in_reason(self) -> None:
+        """When resume keyword appears in job, reason should reference it."""
+        jobs = [_job(title="CNA Position", description="Looking for CNA certified staff. $14/hr")]
+        ctx = _ctx(resume_keywords=["CNA"])
+        ranked = rank_all_jobs(jobs, ctx)
+        assert "CNA" in ranked[0].match_reason
+
+    def test_both_industry_and_keyword(self) -> None:
+        """When both industry and keyword match, both should appear."""
+        jobs = [_job(title="CNA Position", description="Healthcare CNA role. $14/hr", industry_match=True)]
+        ctx = _ctx(target_industries=["healthcare"], resume_keywords=["CNA"])
+        ranked = rank_all_jobs(jobs, ctx)
+        reason = ranked[0].match_reason
+        assert "healthcare" in reason.lower()
+        assert "CNA" in reason
+
+    def test_fallback_without_enrichment_data(self) -> None:
+        """Without target_industries or resume_keywords, falls back to generic."""
+        jobs = [_job(description="Great opportunity!")]
+        ctx = _ctx()
+        ranked = rank_all_jobs(jobs, ctx)
+        assert ranked[0].match_reason == "Entry-level opportunity"
+
+    def test_generic_industry_match_without_target_list(self) -> None:
+        """industry_match=True but no target_industries → generic message."""
+        jobs = [_job(description="$15/hr", industry_match=True)]
+        ctx = _ctx()
+        ranked = rank_all_jobs(jobs, ctx)
+        assert "target industry" in ranked[0].match_reason.lower()
+
+    def test_keyword_not_in_job_no_mention(self) -> None:
+        """Resume keyword that doesn't appear in job should not be in reason."""
+        jobs = [_job(title="Cashier", description="Retail store. $12/hr")]
+        ctx = _ctx(resume_keywords=["forklift"])
+        ranked = rank_all_jobs(jobs, ctx)
+        assert "forklift" not in ranked[0].match_reason
+
+
 class TestFormatPayRange:
     """Test _format_pay_range helper."""
 

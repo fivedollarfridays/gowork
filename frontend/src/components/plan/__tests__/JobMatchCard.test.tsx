@@ -65,3 +65,35 @@ describe("JobMatchCard — fair-chance badge", () => {
     expect(screen.queryByText(/Eligible after/)).not.toBeInTheDocument();
   });
 });
+
+describe("JobMatchCard — source badge", () => {
+  it("shows 'via Honest Jobs' for honestjobs source", () => {
+    const job = makeJob({ source: "honestjobs" });
+    render(<JobMatchCard job={job} />);
+    expect(screen.getByText("via Honest Jobs")).toBeInTheDocument();
+  });
+
+  it("shows 'via Indeed' for brightdata source", () => {
+    const job = makeJob({ source: "brightdata:dataset" });
+    render(<JobMatchCard job={job} />);
+    expect(screen.getByText("via Indeed")).toBeInTheDocument();
+  });
+
+  it("shows 'via JSearch' for jsearch source", () => {
+    const job = makeJob({ source: "jsearch:req-123" });
+    render(<JobMatchCard job={job} />);
+    expect(screen.getByText("via JSearch")).toBeInTheDocument();
+  });
+
+  it("hides source badge for unknown source", () => {
+    const job = makeJob({ source: "test" });
+    render(<JobMatchCard job={job} />);
+    expect(screen.queryByText(/^via /)).not.toBeInTheDocument();
+  });
+
+  it("hides source badge when source is null", () => {
+    const job = makeJob({ source: null });
+    render(<JobMatchCard job={job} />);
+    expect(screen.queryByText(/^via /)).not.toBeInTheDocument();
+  });
+});

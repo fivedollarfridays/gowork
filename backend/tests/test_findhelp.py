@@ -90,3 +90,16 @@ class TestGenerateFindhelpUrl:
         assert "36101" in url1
         assert "36117" in url2
         assert url1 != url2
+
+    def test_rejects_malformed_zip(self) -> None:
+        """Zip codes with injected params must be rejected."""
+        assert generate_findhelp_url(BarrierType.CREDIT, "36104&injected=evil") is None
+
+    def test_rejects_empty_zip(self) -> None:
+        assert generate_findhelp_url(BarrierType.CREDIT, "") is None
+
+    def test_rejects_non_numeric_zip(self) -> None:
+        assert generate_findhelp_url(BarrierType.CREDIT, "abcde") is None
+
+    def test_rejects_short_zip(self) -> None:
+        assert generate_findhelp_url(BarrierType.CREDIT, "361") is None

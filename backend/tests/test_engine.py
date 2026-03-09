@@ -490,6 +490,47 @@ class TestGeneratePlanWithBenefitsEligibility:
             assert p.application_info is not None, f"{p.program} missing app info"
 
 
+class TestCreditReadinessScoreWiring:
+    @pytest.mark.asyncio
+    async def test_credit_readiness_score_populated_from_credit_result(self):
+        """credit_readiness_score should be set when credit_result has readiness.score."""
+        profile = _make_profile()
+        mock_session = AsyncMock()
+        credit = {"readiness": {"score": 75}}
+
+        with patch(_QUERY_PATCH, return_value=[]):
+            plan = await generate_plan(
+                profile, mock_session, credit_result=credit,
+            )
+
+        assert plan.credit_readiness_score == 75
+
+    @pytest.mark.asyncio
+    async def test_credit_readiness_score_none_without_credit_result(self):
+        """credit_readiness_score should remain None when no credit assessment."""
+        profile = _make_profile()
+        mock_session = AsyncMock()
+
+        with patch(_QUERY_PATCH, return_value=[]):
+            plan = await generate_plan(profile, mock_session)
+
+        assert plan.credit_readiness_score is None
+
+    @pytest.mark.asyncio
+    async def test_credit_readiness_score_none_when_no_readiness_key(self):
+        """credit_readiness_score should remain None when credit_result lacks readiness."""
+        profile = _make_profile()
+        mock_session = AsyncMock()
+        credit = {"some_other_key": "value"}
+
+        with patch(_QUERY_PATCH, return_value=[]):
+            plan = await generate_plan(
+                profile, mock_session, credit_result=credit,
+            )
+
+        assert plan.credit_readiness_score is None
+
+
 class TestComputeStopDistances:
     def test_empty_stops_returns_empty_dict(self):
         """When stops list is empty, should return an empty dict."""

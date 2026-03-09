@@ -92,7 +92,7 @@ function ProgramRow({ program, defaultOpen }: { program: ProgramEligibility; def
 
               {safeHref(info.application_url) && (
                 <a
-                  href={safeHref(info.application_url)}
+                  href={safeHref(info.application_url)!}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-xs text-primary hover:underline"

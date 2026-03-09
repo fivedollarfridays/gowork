@@ -14,6 +14,14 @@ export function isScoredJob(job: JobMatch): job is ScoredJobMatch {
   return "relevance_score" in job;
 }
 
+function sourceLabel(source: string | null): string | null {
+  if (!source) return null;
+  if (source === "honestjobs") return "via Honest Jobs";
+  if (source.startsWith("brightdata:")) return "via Indeed";
+  if (source.startsWith("jsearch:")) return "via JSearch";
+  return null;
+}
+
 interface JobMatchCardProps {
   job: JobMatch | ScoredJobMatch;
   creditResult?: CreditAssessmentResult | null;
@@ -21,6 +29,7 @@ interface JobMatchCardProps {
 
 export function JobMatchCard({ job, creditResult }: JobMatchCardProps) {
   const unmetThreshold = creditResult?.thresholds.find((t) => !t.already_met);
+  const source = sourceLabel(job.source);
 
   return (
     <Card>
@@ -34,6 +43,9 @@ export function JobMatchCard({ job, creditResult }: JobMatchCardProps) {
               <CardTitle className="text-base">{job.title}</CardTitle>
               {job.company && (
                 <p className="text-sm text-muted-foreground">{job.company}</p>
+              )}
+              {source && (
+                <p className="text-xs text-muted-foreground/70">{source}</p>
               )}
             </div>
           </div>

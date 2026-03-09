@@ -4,6 +4,8 @@ Replaces 3-bucket system with a single ranked list scored by:
   PVS = 0.35 * net_income + 0.25 * proximity + 0.20 * time_fit + 0.20 * barrier_compat
 """
 
+from collections.abc import Sequence
+
 from app.modules.benefits.cliff_calculator import calculate_net_at_wage, classify_cliff_severity
 from app.modules.benefits.program_calculators import (
     PROGRAM_CALCULATORS,
@@ -38,7 +40,10 @@ W_BARRIER_COMPAT = 0.20
 NO_PAY_MULTIPLIER = 0.55
 
 # Sentinel: distinguishes "not yet parsed" from "parsed but no salary found"
-_NOT_PARSED = object()
+class _NotParsedType:
+    """Sentinel type for unparsed salary."""
+
+_NOT_PARSED = _NotParsedType()
 
 # Barrier compatibility
 _CREDIT_BLOCKED_SCORE = 0.2
@@ -128,7 +133,7 @@ def _format_pay_range(salary: SalaryInfo | None) -> str | None:
 def compute_pvs(
     job: dict,
     ctx: ScoringContext,
-    salary: SalaryInfo | None | object = _NOT_PARSED,
+    salary: SalaryInfo | None | _NotParsedType = _NOT_PARSED,
 ) -> float:
     """Compute Practical Value Score (0.0-1.0) for a job.
 
@@ -163,11 +168,23 @@ def compute_pvs(
     return round(pvs, 3)
 
 
-def _build_pvs_reason(job: dict, salary: SalaryInfo | None) -> str:
+def _build_pvs_reason(
+    job: dict, salary: SalaryInfo | None,
+    target_industries: Sequence[str] = (),
+    resume_keywords: Sequence[str] = (),
+) -> str:
     """Generate match reason for PVS-ranked job."""
     parts: list[str] = []
-    if job.get("industry_match"):
+    searchable = f"{job.get('title', '')} {job.get('description', '')}".lower()
+    if job.get("industry_match") and target_industries:
+        matched = next((i for i in target_industries if i.lower() in searchable), None)
+        parts.append(f"Matches your target: {matched}" if matched else "Matches your target industry")
+    elif job.get("industry_match"):
         parts.append("Matches your target industry")
+    if resume_keywords:
+        matched_kw = next((kw for kw in resume_keywords if kw.lower() in searchable), None)
+        if matched_kw:
+            parts.append(f"Matches your {matched_kw} experience")
     if salary:
         parts.append(f"Pays ${salary.hourly_rate:.2f}/hr")
     if not parts:
@@ -179,6 +196,8 @@ def _build_match(
     job: dict, salary: SalaryInfo | None, pvs: float,
     benefits_profile: BenefitsProfile | None,
     current_benefits: float = 0.0, current_net_monthly: float = 0.0,
+    target_industries: Sequence[str] = (),
+    resume_keywords: Sequence[str] = (),
 ) -> ScoredJobMatch:
     """Build a ScoredJobMatch from a raw job dict."""
     cliff_impact = None
@@ -202,7 +221,7 @@ def _build_match(
         background_check_timing=job.get("background_check_timing"),
         record_note=job.get("record_note"),
         relevance_score=pvs,
-        match_reason=_build_pvs_reason(job, salary),
+        match_reason=_build_pvs_reason(job, salary, target_industries, resume_keywords),
         pay_range=_format_pay_range(salary),
         bucket=MatchBucket.AFTER_REPAIR if job.get("credit_blocked") else MatchBucket.STRONG,
         cliff_impact=cliff_impact,
@@ -229,6 +248,8 @@ def rank_all_jobs(
         pvs = compute_pvs(job, ctx, salary=salary)
         results.append(_build_match(
             job, salary, pvs, bp, cur_benefits, cur_net,
+            target_industries=ctx.target_industries,
+            resume_keywords=ctx.resume_keywords,
         ))
     results.sort(key=lambda m: m.relevance_score, reverse=True)
     return results
