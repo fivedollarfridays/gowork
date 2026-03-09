@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,6 +26,8 @@ export function WizardShell({ steps, onComplete, completeLabel = "Submit" }: Wiz
   const totalSteps = steps.length;
   const stepContentRef = useRef<HTMLDivElement>(null);
   const hasMountedRef = useRef(false);
+  const directionRef = useRef(1);
+  const prefersReduced = useReducedMotion();
 
   // Clamp currentStep when steps array shrinks (e.g. credit step removed)
   useEffect(() => {
@@ -53,12 +56,16 @@ export function WizardShell({ steps, onComplete, completeLabel = "Submit" }: Wiz
     if (isLast) {
       onComplete();
     } else {
+      directionRef.current = 1;
       setCurrentStep((s) => s + 1);
     }
   }
 
   function handleBack() {
-    if (!isFirst) setCurrentStep((s) => s - 1);
+    if (!isFirst) {
+      directionRef.current = -1;
+      setCurrentStep((s) => s - 1);
+    }
   }
 
   return (
@@ -100,7 +107,21 @@ export function WizardShell({ steps, onComplete, completeLabel = "Submit" }: Wiz
       {/* Step content */}
       <Card>
         <CardContent ref={stepContentRef} tabIndex={-1} className="p-6 outline-none">
-          {step.content({ onNext: handleNext, onBack: handleBack })}
+          {prefersReduced ? (
+            step.content({ onNext: handleNext, onBack: handleBack })
+          ) : (
+            <AnimatePresence mode="wait" initial={false}>
+              <m.div
+                key={currentStep}
+                initial={{ opacity: 0, x: directionRef.current * 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: directionRef.current * -30 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+              >
+                {step.content({ onNext: handleNext, onBack: handleBack })}
+              </m.div>
+            </AnimatePresence>
+          )}
         </CardContent>
       </Card>
 

@@ -69,16 +69,218 @@ class TestPrompts:
 
 class TestChatRequestValidation:
     def test_valid_next_steps_mode(self):
-        req = ChatRequest(session_id="abc", user_question="What next?", mode="next_steps")
+        req = ChatRequest(session_id="00000000-0000-0000-0000-000000000001", user_question="What next?", mode="next_steps")
         assert req.mode == "next_steps"
 
     def test_valid_explain_plan_mode(self):
-        req = ChatRequest(session_id="abc", user_question="Why?", mode="explain_plan")
+        req = ChatRequest(session_id="00000000-0000-0000-0000-000000000001", user_question="Why?", mode="explain_plan")
         assert req.mode == "explain_plan"
 
     def test_invalid_mode_rejected(self):
         with pytest.raises(Exception):
-            ChatRequest(session_id="abc", user_question="What if?", mode="what_if")
+            ChatRequest(session_id="00000000-0000-0000-0000-000000000001", user_question="What if?", mode="what_if")
+
+    def test_invalid_session_id_rejected(self):
+        with pytest.raises(Exception):
+            ChatRequest(session_id="not-a-uuid", user_question="Hello", mode="next_steps")
+
+
+class TestReindexEndpoint:
+    @pytest.mark.anyio
+    async def test_reindex_without_admin_key_returns_422(self, client):
+        """POST /reindex without X-Admin-Key header returns 422 (missing header)."""
+        resp = await client.post("/api/barrier-intel/reindex")
+        assert resp.status_code == 422
+
+    @pytest.mark.anyio
+    async def test_reindex_with_wrong_admin_key_returns_403(self, client, test_engine):
+        """POST /reindex with wrong admin key returns 403."""
+        with patch("app.core.auth.get_settings") as mock_settings:
+            s = MagicMock()
+            s.admin_api_key = "ok-key"
+            mock_settings.return_value = s
+            resp = await client.post(
+                "/api/barrier-intel/reindex",
+                headers={"X-Admin-Key": "bad-key"},
+            )
+        assert resp.status_code == 403
+
+
+class TestChatStreaming:
+    @pytest.mark.anyio
+    async def test_chat_returns_streaming_response(self, client, test_engine):
+        """POST /chat with valid session returns SSE stream (200)."""
+        from app.core.database import get_async_session_factory
+        from app.core.queries import create_session
+        from app.main import app
+        from app.rag.store import RagStore
+
+        # Ensure rag_store is available on app.state
+        store = RagStore()
+        app.state.rag_store = store
+
+        factory = get_async_session_factory()
+        async with factory() as session:
+            await create_session(session, {
+                "barriers": '["CREDIT_LOW_SCORE"]',
+                "profile": '{"zip_code": "36104"}',
+            }, session_id="00000000-0000-0000-0000-000000000002")
+
+        with patch("app.barrier_intel.streaming.get_llm_stream") as mock_stream:
+            async def fake_stream(*args, **kwargs):
+                yield "Hello"
+                yield " world"
+
+            mock_stream.return_value = fake_stream()
+
+            resp = await client.post(
+                "/api/barrier-intel/chat",
+                json={"session_id": "00000000-0000-0000-0000-000000000002", "user_question": "What should I do first?", "mode": "next_steps"},
+            )
+        assert resp.status_code == 200
+        assert "text/event-stream" in resp.headers.get("content-type", "")
+
+
+class TestGetRetrievalCtxCache:
+    @pytest.mark.anyio
+    async def test_get_retrieval_ctx_uses_cache(self):
+        """Second call with same cache_key should return cached result."""
+        from app.barrier_intel.cache import RETRIEVAL_CACHE
+        from app.barrier_intel.router import _get_retrieval_ctx
+
+        RETRIEVAL_CACHE.clear()
+
+        fake_ctx = {"root_barriers": ["X"], "docs": []}
+        cache_key = "test-cache-key-123"
+
+        # Pre-populate cache
+        RETRIEVAL_CACHE[cache_key] = fake_ctx
+
+        # Call with a cache_key that already exists; should NOT call retrieve_context
+        result = await _get_retrieval_ctx(
+            cache_key, ["CREDIT_LOW_SCORE"], None, None, {}
+        )
+        assert result == fake_ctx
+        RETRIEVAL_CACHE.clear()
+
+    @pytest.mark.anyio
+    async def test_get_retrieval_ctx_cache_miss(self):
+        """Cache miss calls retrieve_context and caches the result."""
+        from app.barrier_intel.cache import RETRIEVAL_CACHE
+        from app.barrier_intel.router import _get_retrieval_ctx
+
+        RETRIEVAL_CACHE.clear()
+        fake_ctx = _mock_retrieval_context()
+
+        with patch(
+            "app.barrier_intel.router.retrieve_context",
+            new_callable=AsyncMock,
+            return_value=fake_ctx,
+        ) as mock_retrieve:
+            result = await _get_retrieval_ctx(
+                "miss-key", ["CREDIT_LOW_SCORE"], MagicMock(), MagicMock(),
+                {"zip_code": "36104"},
+            )
+
+        mock_retrieve.assert_called_once()
+        assert result == fake_ctx
+        assert RETRIEVAL_CACHE.get("miss-key") == fake_ctx
+        RETRIEVAL_CACHE.clear()
+
+
+class TestReindexDirect:
+    """Direct unit tests for the reindex endpoint function."""
+
+    @pytest.mark.anyio
+    async def test_reindex_success(self):
+        """Calling reindex rebuilds the store and returns document count."""
+        from app.barrier_intel.router import reindex
+
+        mock_store = MagicMock()
+        mock_store.rebuild = AsyncMock(return_value=42)
+        mock_request = MagicMock()
+        mock_request.app.state.rag_store = mock_store
+        mock_db = AsyncMock()
+
+        result = await reindex(request=mock_request, db=mock_db)
+
+        mock_store.rebuild.assert_awaited_once_with(mock_db)
+        assert result == {"status": "ok", "documents_indexed": 42}
+
+
+class TestChatDirect:
+    """Direct unit tests for the chat endpoint function (bypasses ASGI)."""
+
+    @pytest.mark.anyio
+    async def test_missing_session_raises_404(self):
+        from app.barrier_intel.router import chat
+        from app.barrier_intel.schemas import ChatRequest
+        from fastapi import HTTPException
+
+        body = ChatRequest(
+            session_id="00000000-0000-0000-0000-000000000099", user_question="Hi", mode="next_steps",
+        )
+        mock_request = MagicMock()
+        mock_db = AsyncMock()
+
+        with patch(
+            "app.barrier_intel.router.get_session_by_id",
+            new_callable=AsyncMock,
+            return_value=None,
+        ):
+            with pytest.raises(HTTPException) as exc_info:
+                await chat(body=body, request=mock_request, db=mock_db)
+            assert exc_info.value.status_code == 404
+
+    @pytest.mark.anyio
+    async def test_disallowed_topic_returns_safe_message(self):
+        from app.barrier_intel.router import chat
+        from app.barrier_intel.schemas import ChatRequest
+
+        body = ChatRequest(
+            session_id="00000000-0000-0000-0000-000000000001", user_question="Give me legal advice", mode="next_steps",
+        )
+        mock_request = MagicMock()
+        mock_db = AsyncMock()
+
+        with patch(
+            "app.barrier_intel.router.get_session_by_id",
+            new_callable=AsyncMock,
+            return_value=_mock_session_row(),
+        ):
+            result = await chat(body=body, request=mock_request, db=mock_db)
+
+        assert result["guardrail_triggered"] is True
+        assert "not able" in result["message"].lower()
+
+    @pytest.mark.anyio
+    async def test_valid_question_returns_streaming_response(self):
+        from fastapi.responses import StreamingResponse
+
+        from app.barrier_intel.router import chat
+        from app.barrier_intel.schemas import ChatRequest
+
+        body = ChatRequest(
+            session_id="00000000-0000-0000-0000-000000000001", user_question="What should I do first?",
+            mode="next_steps",
+        )
+        mock_request = MagicMock()
+        mock_request.app.state.rag_store = MagicMock()
+        mock_db = AsyncMock()
+
+        with patch(
+            "app.barrier_intel.router.get_session_by_id",
+            new_callable=AsyncMock,
+            return_value=_mock_session_row(),
+        ), patch(
+            "app.barrier_intel.router._get_retrieval_ctx",
+            new_callable=AsyncMock,
+            return_value=_mock_retrieval_context(),
+        ):
+            result = await chat(body=body, request=mock_request, db=mock_db)
+
+        assert isinstance(result, StreamingResponse)
+        assert result.media_type == "text/event-stream"
 
 
 class TestChatEndpoint:
@@ -86,7 +288,7 @@ class TestChatEndpoint:
     async def test_missing_session_returns_404(self, client):
         resp = await client.post(
             "/api/barrier-intel/chat",
-            json={"session_id": "nonexistent", "user_question": "Hello", "mode": "next_steps"},
+            json={"session_id": "00000000-0000-0000-0000-999999999999", "user_question": "Hello", "mode": "next_steps"},
         )
         assert resp.status_code == 404
 
@@ -100,11 +302,11 @@ class TestChatEndpoint:
             await create_session(session, {
                 "barriers": '["CREDIT_LOW_SCORE"]',
                 "profile": '{"zip_code": "36104"}',
-            }, session_id="guard-test")
+            }, session_id="00000000-0000-0000-0000-000000000002")
 
         resp = await client.post(
             "/api/barrier-intel/chat",
-            json={"session_id": "guard-test", "user_question": "Give me legal advice", "mode": "next_steps"},
+            json={"session_id": "00000000-0000-0000-0000-000000000002", "user_question": "Give me legal advice", "mode": "next_steps"},
         )
         assert resp.status_code == 200
         body = resp.json()

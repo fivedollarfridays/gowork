@@ -1,0 +1,158 @@
+"use client";
+
+import {
+  LazyMotion, domAnimation, m, useReducedMotion,
+  useInView, useSpring, useMotionValue, useTransform,
+} from "framer-motion";
+import { useRef, useEffect, type ReactNode } from "react";
+
+export function MotionProvider({ children }: { children: ReactNode }) {
+  return (
+    <LazyMotion features={domAnimation} strict>
+      {children}
+    </LazyMotion>
+  );
+}
+
+interface ScrollRevealProps {
+  children: ReactNode;
+  delay?: number;
+  className?: string;
+  direction?: "up" | "down" | "left" | "right";
+}
+
+const directionOffset = { up: [0, 24], down: [0, -24], left: [24, 0], right: [-24, 0] };
+
+export function ScrollReveal({ children, delay = 0, className, direction = "up" }: ScrollRevealProps) {
+  const prefersReduced = useReducedMotion();
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-50px" });
+  if (prefersReduced) return <div className={className}>{children}</div>;
+  const [x, y] = directionOffset[direction];
+  return (
+    <m.div
+      ref={ref}
+      className={className}
+      initial={{ opacity: 0, x, y }}
+      animate={inView ? { opacity: 1, x: 0, y: 0 } : undefined}
+      transition={{ duration: 0.5, ease: "easeOut", delay }}
+    >
+      {children}
+    </m.div>
+  );
+}
+
+interface StaggerContainerProps { children: ReactNode; className?: string; delay?: number }
+
+export function StaggerContainer({ children, className, delay = 0 }: StaggerContainerProps) {
+  const prefersReduced = useReducedMotion();
+  if (prefersReduced) return <div className={className}>{children}</div>;
+  return (
+    <m.div
+      className={className}
+      initial="hidden"
+      animate="visible"
+      variants={{ visible: { transition: { staggerChildren: 0.1, delayChildren: delay } } }}
+    >
+      {children}
+    </m.div>
+  );
+}
+
+interface StaggerItemProps { children: ReactNode; className?: string }
+
+export function StaggerItem({ children, className }: StaggerItemProps) {
+  const prefersReduced = useReducedMotion();
+  if (prefersReduced) return <div className={className}>{children}</div>;
+  return (
+    <m.div
+      className={className}
+      variants={{
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
+      }}
+    >
+      {children}
+    </m.div>
+  );
+}
+
+interface AnimatedCounterProps {
+  from?: number; to: number; prefix?: string;
+  suffix?: string; duration?: number; decimals?: number;
+}
+
+export function AnimatedCounter({
+  from = 0, to, prefix = "", suffix = "", duration = 1, decimals = 0,
+}: AnimatedCounterProps) {
+  const prefersReduced = useReducedMotion();
+  const motionValue = useMotionValue(from);
+  const spring = useSpring(motionValue, { duration: duration * 1000, bounce: 0.1 });
+  const display = useTransform(spring, (v) => `${prefix}${v.toFixed(decimals)}${suffix}`);
+  useEffect(() => { motionValue.set(to); }, [motionValue, to]);
+
+  if (prefersReduced) {
+    return <span>{prefix}{to.toFixed(decimals)}{suffix}</span>;
+  }
+  return <m.span>{display}</m.span>;
+}
+
+interface TypewriterProps { text: string; delay?: number; className?: string }
+
+export function Typewriter({ text, delay = 0, className }: TypewriterProps) {
+  const prefersReduced = useReducedMotion();
+  if (prefersReduced) return <span className={className}>{text}</span>;
+  const words = text.split(" ");
+  return (
+    <StaggerContainer className={className} delay={delay}>
+      {words.map((word, i) => (
+        <StaggerItem key={i}>
+          <span style={{ display: "inline-block" }}>{word}</span>
+          {i < words.length - 1 && "\u00A0"}
+        </StaggerItem>
+      ))}
+    </StaggerContainer>
+  );
+}
+
+interface SlideInProps {
+  children: ReactNode; direction?: "left" | "right" | "up" | "down";
+  delay?: number; className?: string;
+}
+
+export function SlideIn({ children, direction = "left", delay = 0, className }: SlideInProps) {
+  const prefersReduced = useReducedMotion();
+  if (prefersReduced) return <div className={className}>{children}</div>;
+  const [x, y] = directionOffset[direction];
+  return (
+    <m.div
+      className={className}
+      initial={{ opacity: 0, x, y }}
+      animate={{ opacity: 1, x: 0, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut", delay }}
+    >
+      {children}
+    </m.div>
+  );
+}
+
+interface ShimmerBarProps { width?: string; height?: string; className?: string }
+
+export function ShimmerBar({ width = "100%", height = "1rem", className }: ShimmerBarProps) {
+  const prefersReduced = useReducedMotion();
+  if (prefersReduced) {
+    return <div className={`rounded bg-muted ${className ?? ""}`} style={{ width, height }} />;
+  }
+  return (
+    <div className={`rounded bg-muted overflow-hidden ${className ?? ""}`} style={{ width, height }}>
+      <m.div
+        className="h-full w-full"
+        style={{
+          background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)",
+        }}
+        animate={{ x: ["-100%", "100%"] }}
+        transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+      />
+    </div>
+  );
+}

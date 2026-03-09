@@ -34,6 +34,7 @@ class Settings(BaseSettings):
 
     # Audit logging
     audit_log_path: str = ""
+    audit_hash_salt: str = "montgowork-default-salt"
 
     brightdata_api_key: str = ""
     brightdata_dataset_id: str = ""

@@ -1,10 +1,13 @@
 """Async query helpers for SQLite database."""
 
+import json
 import uuid
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.modules.criminal.record_profile import RecordProfile
 
 
 async def get_all_resources(session: AsyncSession) -> list[dict]:
@@ -121,3 +124,43 @@ async def update_session_plan(session: AsyncSession, session_id: str, plan_json:
     await session.commit()
 
 
+async def insert_record_profile(
+    session: AsyncSession, session_id: str, profile: RecordProfile,
+) -> None:
+    """Insert or replace a criminal record profile for a session."""
+    await session.execute(
+        text(
+            "INSERT OR REPLACE INTO record_profiles "
+            "(session_id, record_types, charge_categories, "
+            "years_since_conviction, completed_sentence) "
+            "VALUES (:sid, :rt, :cc, :ysc, :cs)"
+        ),
+        {
+            "sid": session_id,
+            "rt": json.dumps([t.value for t in profile.record_types]),
+            "cc": json.dumps([c.value for c in profile.charge_categories]),
+            "ysc": profile.years_since_conviction,
+            "cs": 1 if profile.completed_sentence else 0,
+        },
+    )
+    await session.commit()
+
+
+async def get_record_profile(
+    session: AsyncSession, session_id: str,
+) -> RecordProfile | None:
+    """Fetch a criminal record profile by session_id, or None."""
+    result = await session.execute(
+        text("SELECT * FROM record_profiles WHERE session_id = :sid"),
+        {"sid": session_id},
+    )
+    row = result.first()
+    if row is None:
+        return None
+    data = dict(row._mapping)
+    return RecordProfile(
+        record_types=json.loads(data["record_types"]),
+        charge_categories=json.loads(data["charge_categories"]),
+        years_since_conviction=data["years_since_conviction"],
+        completed_sentence=bool(data["completed_sentence"]),
+    )

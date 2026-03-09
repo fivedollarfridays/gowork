@@ -26,6 +26,10 @@ RESOURCE_AFFINITY: dict[str, BarrierType] = {
     "mrwtc": BarrierType.TRAINING,
     "montgomery regional workforce": BarrierType.TRAINING,
     "workforce training": BarrierType.TRAINING,
+    "legal aid": BarrierType.CRIMINAL_RECORD,
+    "re-entry": BarrierType.CRIMINAL_RECORD,
+    "reentry": BarrierType.CRIMINAL_RECORD,
+    "expungement": BarrierType.CRIMINAL_RECORD,
 }
 
 CAREER_CENTER_STEP = (

@@ -16,6 +16,8 @@ vi.mock("@/lib/api", () => ({
   getJobs: vi.fn(),
 }));
 
+vi.mock("canvas-confetti", () => ({ default: vi.fn() }));
+
 function renderWithClient(ui: React.ReactElement) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },

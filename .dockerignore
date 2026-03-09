@@ -1,0 +1,25 @@
+# Environment and secrets
+.env
+.env.*
+backend/.env
+frontend/.env.local
+
+# Dependencies (rebuilt in container)
+.venv
+node_modules
+frontend/node_modules
+
+# Build artifacts
+frontend/.next
+backend/__pycache__
+**/__pycache__
+*.pyc
+
+# Dev/tooling
+.git
+.github
+.claude
+.paircoder
+.coverage
+*.db
+docs/

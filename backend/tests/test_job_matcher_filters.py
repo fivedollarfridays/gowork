@@ -129,6 +129,47 @@ class TestCreditAnnotation:
         assert result[0]["credit_blocked"] is False
 
 
+class TestRecordEnrichment:
+    def test_record_enrichment_adds_fields(self):
+        """Jobs should get record fields when annotated with record data."""
+        from app.modules.criminal.employer_policy import EmployerPolicy
+        from app.modules.criminal.job_filter import filter_jobs_by_record
+        from app.modules.criminal.record_profile import (
+            ChargeCategory,
+            RecordProfile,
+            RecordType,
+        )
+
+        policies = [
+            EmployerPolicy(
+                employer_name="Walmart",
+                fair_chance=True,
+                excluded_charges=[],
+                lookback_years=7,
+                background_check_timing="post_offer",
+            ),
+        ]
+        profile = RecordProfile(
+            record_types=[RecordType.MISDEMEANOR],
+            charge_categories=[ChargeCategory.THEFT],
+            years_since_conviction=10,
+        )
+        jobs = [_make_job("Cashier", company="Walmart")]
+        result = filter_jobs_by_record(jobs, profile, policies)
+        assert result[0]["fair_chance"] is True
+        assert result[0]["record_eligible"] is True
+        assert result[0]["background_check_timing"] == "post_offer"
+
+    def test_record_enrichment_no_profile_passthrough(self):
+        """No record profile → defaults (eligible, not fair-chance)."""
+        from app.modules.criminal.job_filter import filter_jobs_by_record
+
+        jobs = [_make_job("Cashier", company="Walmart")]
+        result = filter_jobs_by_record(jobs, None, [])
+        assert result[0]["fair_chance"] is False
+        assert result[0]["record_eligible"] is True
+
+
 class TestMatchJobsEmpty:
     @pytest.mark.anyio
     async def test_empty_listings_returns_empty(self, test_engine):

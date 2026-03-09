@@ -3,6 +3,7 @@
 import { useMemo, type ReactNode } from "react";
 import { Briefcase, ExternalLink, MapPin, Phone, Shield, Clock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { ScrollReveal, StaggerContainer, StaggerItem } from "@/lib/motion";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import type { BarrierCard, ReEntryPlan, ScoredJobMatch, UserProfile } from "@/lib/types";
 import { CAREER_CENTER, mapsUrl, safeHref, humanizeLabel, toTelHref } from "@/lib/constants";
@@ -24,7 +25,7 @@ function getTopJobs(plan: ReEntryPlan): ScoredJobMatch[] {
   const seen = new Set<string>();
   const unique: ScoredJobMatch[] = [];
   for (const job of all) {
-    const key = `${job.title}|${job.company}`;
+    const key = `${job.title}|${job.company}|${job.location ?? ""}`;
     if (!seen.has(key)) {
       seen.add(key);
       unique.push(job);
@@ -47,25 +48,33 @@ export function MondayMorning({ plan, profile, firstStepAction }: MondayMorningP
 
   return (
     <section className="space-y-8">
-      <div className="space-y-3">
-        <h1 className="text-3xl sm:text-4xl font-bold text-primary tracking-tight">
-          Here&apos;s what you can do {getNextActionableDay()}.
-        </h1>
-        <p className="text-lg text-muted-foreground">
-          Your personalized action plan for Montgomery, AL
-          {profile.barrier_count > 0 && (
-            <>, addressing {profile.barrier_count} barrier{profile.barrier_count > 1 ? "s" : ""}</>
-          )}
-        </p>
-      </div>
+      <ScrollReveal>
+        <div className="space-y-3">
+          <h1 className="text-3xl sm:text-4xl font-bold text-primary tracking-tight">
+            Here&apos;s what you can do {getNextActionableDay()}.
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            Your personalized action plan for Montgomery, AL
+            {profile.barrier_count > 0 && (
+              <>, addressing {profile.barrier_count} barrier{profile.barrier_count > 1 ? "s" : ""}</>
+            )}
+          </p>
+        </div>
+      </ScrollReveal>
 
       <div>
         <h2 className="text-xl font-semibold text-primary mb-4">Your Next Steps</h2>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <CareerCenterStep action={firstStepAction} />
-          <JobsStep jobs={topJobs} />
-          <BarrierStep barriers={plan.barriers} />
-        </div>
+        <StaggerContainer className="grid gap-4 sm:grid-cols-3">
+          <StaggerItem>
+            <CareerCenterStep action={firstStepAction} />
+          </StaggerItem>
+          <StaggerItem>
+            <JobsStep jobs={topJobs} />
+          </StaggerItem>
+          <StaggerItem>
+            <BarrierStep barriers={plan.barriers} />
+          </StaggerItem>
+        </StaggerContainer>
       </div>
     </section>
   );

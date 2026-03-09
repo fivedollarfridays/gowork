@@ -7,6 +7,7 @@ import {
   ChevronUp,
   MapPin,
   Phone,
+  Scale,
   ThumbsUp,
   ThumbsDown,
 } from "lucide-react";
@@ -16,8 +17,10 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import type { BarrierCard as BarrierCardType } from "@/lib/types";
-import { BARRIER_ICONS, SEVERITY_BADGE_STYLES, humanizeLabel, mapsUrl, toTelHref } from "@/lib/constants";
+import { BARRIER_ICONS, SEVERITY_BADGE_STYLES, STATUS_BADGE_STYLES, humanizeLabel, mapsUrl, toTelHref } from "@/lib/constants";
 import { submitResourceFeedback } from "@/lib/api";
+import { EligibilityBadge } from "./EligibilityBadge";
+import { FindhelpLink } from "./FindhelpLink";
 
 const INITIAL_RESOURCE_COUNT = 2;
 
@@ -37,9 +40,10 @@ interface BarrierCardViewProps {
   barrier: BarrierCardType;
   sessionId?: string;
   token?: string;
+  zipCode?: string;
 }
 
-export function BarrierCardView({ barrier, sessionId, token }: BarrierCardViewProps) {
+export function BarrierCardView({ barrier, sessionId, token, zipCode }: BarrierCardViewProps) {
   const [expanded, setExpanded] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackState>(() =>
     sessionId ? loadFeedbackState(sessionId, barrier.resources.map((r) => r.id)) : {},
@@ -109,6 +113,54 @@ export function BarrierCardView({ barrier, sessionId, token }: BarrierCardViewPr
           </div>
         )}
 
+        {/* Expungement pathway */}
+        {barrier.expungement && barrier.expungement.eligibility !== "unknown" && (
+          <>
+            <Separator />
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Scale className="h-4 w-4" />
+                <h4 className="text-sm font-medium">Expungement Eligibility</h4>
+                {barrier.expungement.eligibility === "eligible_now" && (
+                  <Badge className={`${STATUS_BADGE_STYLES.positive} text-xs`} variant="outline">
+                    May Be Eligible
+                  </Badge>
+                )}
+                {barrier.expungement.eligibility === "eligible_future" && (
+                  <Badge className={`${STATUS_BADGE_STYLES.warning} text-xs`} variant="outline">
+                    {barrier.expungement.years_remaining
+                      ? `${barrier.expungement.years_remaining} year${barrier.expungement.years_remaining !== 1 ? "s" : ""} remaining`
+                      : "Pending"}
+                  </Badge>
+                )}
+                {barrier.expungement.eligibility === "not_eligible" && (
+                  <Badge className={`${STATUS_BADGE_STYLES.negative} text-xs`} variant="outline">
+                    Not Eligible
+                  </Badge>
+                )}
+              </div>
+              {barrier.expungement.notes && (
+                <p className="text-sm text-muted-foreground">{barrier.expungement.notes}</p>
+              )}
+              {barrier.expungement.steps.length > 0 && (
+                <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
+                  {barrier.expungement.steps.map((step, i) => (
+                    <li key={i}>{step}</li>
+                  ))}
+                </ol>
+              )}
+              {barrier.expungement.filing_fee && (
+                <p className="text-xs text-muted-foreground">
+                  Filing fee: {barrier.expungement.filing_fee} (waivable for indigent)
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground italic">
+                This is not legal advice. Consult Legal Services Alabama for a formal assessment.
+              </p>
+            </div>
+          </>
+        )}
+
         {/* Matched resources */}
         {barrier.resources.length > 0 && (
           <>
@@ -124,6 +176,7 @@ export function BarrierCardView({ barrier, sessionId, token }: BarrierCardViewPr
                         <Badge variant="outline" className="text-xs">
                           {humanizeLabel(resource.category)}
                         </Badge>
+                        <EligibilityBadge status={resource.eligibility_status} />
                       </div>
                       {resource.address && (
                         <a
@@ -194,6 +247,9 @@ export function BarrierCardView({ barrier, sessionId, token }: BarrierCardViewPr
                     <>+{barrier.resources.length - INITIAL_RESOURCE_COUNT} more <ChevronDown className="h-3 w-3 ml-1" /></>
                   )}
                 </Button>
+              )}
+              {zipCode && (
+                <FindhelpLink barrierType={barrier.type} zipCode={zipCode} />
               )}
             </div>
           </>

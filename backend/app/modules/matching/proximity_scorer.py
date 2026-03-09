@@ -11,6 +11,9 @@ from app.modules.matching.scoring import (
 
 _ZIP_RE = re.compile(r"\b(\d{5})\b")
 
+# Re-export for existing test imports
+_distance_to_score = distance_to_score
+
 
 def extract_zip(location: str) -> str | None:
     """Extract 5-digit zip from location string. Returns last match."""

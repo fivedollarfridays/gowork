@@ -55,6 +55,12 @@ class TestResolveProvider:
             mock_settings.return_value.openai_api_key = ""
             assert resolve_provider() == "mock"
 
+    def test_config_provider_mock_returns_mock(self):
+        """When settings.llm_provider is 'mock' (no override), returns 'mock'."""
+        with patch("app.ai.llm_client.get_settings") as mock_settings:
+            mock_settings.return_value.llm_provider = "mock"
+            assert resolve_provider() == "mock"
+
 
 # ---------- mock_stream ----------
 
@@ -101,29 +107,31 @@ class TestGetLlmStream:
             mock_resolve.assert_called_once_with(override="mock")
 
     async def test_fallback_on_provider_error(self):
-        """If configured provider raises, falls back to mock."""
-        async def failing_stream(*args, **kwargs):
+        """If configured provider raises before yielding, falls back to mock."""
+        def failing_provider(provider, system_prompt, user_prompt):
             raise ConnectionError("API down")
-            yield  # noqa: unreachable - makes this an async generator
 
         with patch("app.ai.llm_client.resolve_provider", return_value="anthropic"):
-            with patch("app.ai.llm_client._get_provider_stream", side_effect=failing_stream):
-                with patch("app.ai.llm_client._get_provider_stream") as mock_get:
-                    # First call raises, second call (mock fallback) works
-                    call_count = 0
+            with patch("app.ai.llm_client._get_provider_stream", side_effect=failing_provider):
+                chunks = []
+                async for chunk in get_llm_stream("sys", "user"):
+                    chunks.append(chunk)
+                assert len(chunks) > 0  # Mock fallback produced output
 
-                    def side_effect(provider, system_prompt, user_prompt):
-                        nonlocal call_count
-                        call_count += 1
-                        if call_count == 1:
-                            raise ConnectionError("API down")
-                        return mock_stream(system_prompt, user_prompt)
+    async def test_mid_stream_failure_raises(self):
+        """If provider yields then raises, error must propagate (no mock fallback)."""
+        async def partial_then_fail(sys_prompt, usr_prompt):
+            yield "partial-chunk"
+            raise ConnectionError("connection dropped mid-stream")
 
-                    mock_get.side_effect = side_effect
-                    chunks = []
-                    async for chunk in get_llm_stream("sys", "user"):
-                        chunks.append(chunk)
-                    assert len(chunks) > 0
+        with patch("app.ai.llm_client.resolve_provider", return_value="anthropic"):
+            with patch(
+                "app.ai.llm_client._PROVIDER_STREAMS",
+                {"anthropic": partial_then_fail, "mock": mock_stream},
+            ):
+                with pytest.raises(ConnectionError, match="mid-stream"):
+                    async for _ in get_llm_stream("sys", "user"):
+                        pass
 
 
 # ---------- anthropic_stream ----------

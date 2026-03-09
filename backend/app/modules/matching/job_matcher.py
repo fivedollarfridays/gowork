@@ -4,6 +4,8 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.queries_jobs import get_all_job_listings
+from app.modules.criminal.job_filter import filter_jobs_by_record
+from app.modules.criminal.queries import get_all_employer_policies
 from app.modules.matching.job_keywords import INDUSTRY_KEYWORDS, SCHEDULE_CONFLICT_KEYWORDS, SUNDAY_KEYWORDS
 from app.modules.matching.job_scoring import job_search_text
 from app.modules.benefits.types import BenefitsProfile
@@ -111,6 +113,9 @@ async def match_jobs(
     jobs = _filter_by_schedule(jobs, profile.schedule_type)
     jobs = _filter_by_transit(jobs, profile.transit_dependent, transit_stops)
     jobs = _annotate_credit(jobs)
+
+    policies = await get_all_employer_policies(db_session)
+    jobs = filter_jobs_by_record(jobs, profile.record_profile, policies)
 
     ctx = ScoringContext(
         user_zip=profile.zip_code,

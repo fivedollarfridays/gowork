@@ -89,6 +89,15 @@ class TestCheckHallucinations:
         result = check_hallucinations(response, known_names)
         assert result is None
 
+    def test_day_name_in_org_not_flagged(self):
+        """Proper-noun phrase containing a day/month name is skipped as false positive."""
+        response = "Visit Monday Morning Services for help with your job search."
+        known_names = ["GreenPath Financial"]
+        result = check_hallucinations(response, known_names)
+        # "Monday Morning Services" matches _ORG_PATTERN but "monday" is in
+        # _FALSE_POSITIVE_WORDS so it should be filtered out (continue branch).
+        assert result is None
+
 
 class TestHallucinationDisclaimer:
     """Verify disclaimer format."""
