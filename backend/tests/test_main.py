@@ -72,6 +72,7 @@ class TestLifespan:
              patch("app.main.close_db", new_callable=AsyncMock) as mock_close, \
              patch("app.main.upsert_barrier_graph", new_callable=AsyncMock), \
              patch("app.main.seed_employer_policies", new_callable=AsyncMock), \
+             patch("app.main.seed_honestjobs_listings", new_callable=AsyncMock), \
              _mock_rag_store():
             async with lifespan(app):
                 mock_ge.assert_called_once()
@@ -89,6 +90,7 @@ class TestLifespan:
              patch("app.main.close_db", new_callable=AsyncMock) as mock_close, \
              patch("app.main.upsert_barrier_graph", new_callable=AsyncMock), \
              patch("app.main.seed_employer_policies", new_callable=AsyncMock), \
+             patch("app.main.seed_honestjobs_listings", new_callable=AsyncMock), \
              _mock_rag_store():
             async with lifespan(app):
                 pass
@@ -105,6 +107,7 @@ class TestLifespan:
              patch("app.main.close_db", new_callable=AsyncMock), \
              patch("app.main.upsert_barrier_graph", new_callable=AsyncMock), \
              patch("app.main.seed_employer_policies", new_callable=AsyncMock), \
+             patch("app.main.seed_honestjobs_listings", new_callable=AsyncMock), \
              _mock_rag_store(), \
              patch("app.main.logger") as mock_logger, \
              patch.dict("os.environ", {"WEB_CONCURRENCY": "4"}):
@@ -127,6 +130,7 @@ class TestLifespan:
              patch("app.main.close_db", new_callable=AsyncMock), \
              patch("app.main.upsert_barrier_graph", new_callable=AsyncMock), \
              patch("app.main.seed_employer_policies", new_callable=AsyncMock), \
+             patch("app.main.seed_honestjobs_listings", new_callable=AsyncMock), \
              _mock_rag_store(), \
              patch("app.main.logger") as mock_logger, \
              patch.dict("os.environ", {"WEB_CONCURRENCY": "1"}):
@@ -152,6 +156,7 @@ class TestLifespan:
              patch("app.main.close_db", new_callable=AsyncMock), \
              patch("app.main.upsert_barrier_graph", new_callable=AsyncMock), \
              patch("app.main.seed_employer_policies", new_callable=AsyncMock), \
+             patch("app.main.seed_honestjobs_listings", new_callable=AsyncMock), \
              _mock_rag_store(), \
              patch("app.main.check_llm_providers", return_value=mock_status), \
              patch("app.main.logger") as mock_logger:
@@ -175,6 +180,7 @@ class TestLifespan:
              patch("app.main.close_db", new_callable=AsyncMock), \
              patch("app.main.upsert_barrier_graph", new_callable=AsyncMock), \
              patch("app.main.seed_employer_policies", new_callable=AsyncMock), \
+             patch("app.main.seed_honestjobs_listings", new_callable=AsyncMock), \
              _mock_rag_store(), \
              patch("app.main.check_llm_providers", return_value=mock_status), \
              patch("app.main.logger") as mock_logger:
@@ -198,6 +204,7 @@ class TestLifespan:
              patch("app.main.close_db", new_callable=AsyncMock), \
              patch("app.main.upsert_barrier_graph", new_callable=AsyncMock), \
              patch("app.main.seed_employer_policies", new_callable=AsyncMock), \
+             patch("app.main.seed_honestjobs_listings", new_callable=AsyncMock), \
              _mock_rag_store(), \
              patch("app.main.check_llm_providers", return_value=mock_status):
             async with lifespan(app):

@@ -107,6 +107,16 @@ export const READINESS_BAND_STYLES: Record<string, { bg: string; text: string; b
   strong: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20" },
 };
 
+export const PROGRAM_LABELS: Record<string, string> = {
+  SNAP: "SNAP",
+  TANF: "TANF",
+  Medicaid: "Medicaid",
+  ALL_Kids: "ALL Kids",
+  Childcare_Subsidy: "Childcare",
+  Section_8: "Section 8",
+  LIHEAP: "LIHEAP",
+};
+
 /** Hex colors for PDF inline styles (html2pdf.js can't use CSS vars). */
 export const PDF_SEVERITY_COLORS: Record<string, { bg: string; text: string }> = {
   low: { bg: "#dcfce7", text: "#166534" },

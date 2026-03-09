@@ -64,6 +64,7 @@ def _check_guardrails(full_response: str, ctx: RetrievalContext) -> str | None:
     return check_hallucinations(full_response, known_names)
 
 
+
 async def _audit_log(
     session_hash: str,
     provider: str,

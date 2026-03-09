@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.queries import get_all_employers, get_all_transit_routes
-from app.core.queries_jobs import get_all_job_listings, get_job_listing_by_id
+from app.core.queries_jobs import get_job_listing_by_id
 
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 
@@ -57,6 +57,7 @@ def _enrich_job(job: dict, employer_map: dict, transit_routes: list[dict]) -> di
         **job,
         "industry": industry,
         "credit_check_required": credit_required,
+        "fair_chance": bool(job.get("fair_chance")),
         "transit_info": transit_info,
         "application_steps": _application_steps(job, credit_required),
     }
@@ -79,10 +80,15 @@ async def list_jobs(
     barriers: str | None = Query(None, description="Comma-separated barriers (e.g. credit,transportation)"),
     transit_accessible: bool | None = Query(None),
     industry: str | None = Query(None),
+    source: str | None = Query(None, description="Filter by source (brightdata, jsearch, honestjobs)"),
+    fair_chance: bool | None = Query(None, description="Filter to fair-chance employers only"),
 ) -> dict:
-    """List jobs with optional filters."""
+    """List aggregated jobs with optional filters."""
+    from app.integrations.job_aggregator import JobAggregator
+
+    agg = JobAggregator(db)
     jobs, employers, transit_routes = await asyncio.gather(
-        get_all_job_listings(db),
+        agg.search(source=source, fair_chance=bool(fair_chance)),
         get_all_employers(db),
         get_all_transit_routes(db),
     )

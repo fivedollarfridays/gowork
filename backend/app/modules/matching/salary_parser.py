@@ -3,7 +3,7 @@
 import re
 from dataclasses import dataclass
 
-HOURS_PER_YEAR = 2080
+from app.modules.benefits.thresholds import HOURS_PER_YEAR
 
 # Hourly range: $12.00 to $12.50 per hour, $15.50 - $20.00 per hour
 _HOURLY_RANGE_RE = re.compile(

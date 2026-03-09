@@ -66,19 +66,16 @@ class TestScoreProximityFallbacks:
 
     def test_large_distance_scores_minimum(self) -> None:
         """Distance >= 15mi should score 0.1."""
-        # 36117 is east (~8mi from downtown).  Use a user zip far away.
-        # We use 36116 (south) to 36117 (east) which is ~7mi, not enough.
-        # Instead, test _distance_to_score directly for 15+ miles.
-        from app.modules.matching.proximity_scorer import _distance_to_score
+        from app.modules.matching.scoring import distance_to_score
 
-        assert _distance_to_score(15.0) == 0.1
-        assert _distance_to_score(20.0) == 0.1
-        assert _distance_to_score(100.0) == 0.1
+        assert distance_to_score(15.0) == 0.1
+        assert distance_to_score(20.0) == 0.1
+        assert distance_to_score(100.0) == 0.1
 
     def test_very_close_distance_scores_max(self) -> None:
         """Distance <= 1mi should score 1.0."""
-        from app.modules.matching.proximity_scorer import _distance_to_score
+        from app.modules.matching.scoring import distance_to_score
 
-        assert _distance_to_score(0.0) == 1.0
-        assert _distance_to_score(0.5) == 1.0
-        assert _distance_to_score(1.0) == 1.0
+        assert distance_to_score(0.0) == 1.0
+        assert distance_to_score(0.5) == 1.0
+        assert distance_to_score(1.0) == 1.0

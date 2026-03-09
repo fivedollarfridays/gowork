@@ -1,8 +1,9 @@
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, Field, computed_field, field_validator
 
+from app.modules.benefits.types import BenefitsProfile, CliffAnalysis, CliffSeverity
 from app.modules.credit.types import CreditAssessmentResult
 from app.modules.criminal.expungement import ExpungementResult
 from app.modules.criminal.record_profile import RecordProfile
@@ -55,6 +56,33 @@ class ScheduleConstraints(BaseModel):
     available_hours: AvailableHours = AvailableHours.DAYTIME
 
 
+class ScoringContext(BaseModel):
+    """Bundles user-level scoring parameters passed to PVS computation."""
+
+    user_zip: str
+    transit_dependent: bool
+    schedule_type: AvailableHours
+    barriers: list[BarrierType]
+    benefits_profile: Optional[BenefitsProfile] = None
+
+
+class BenefitsFormData(BaseModel):
+    """Household benefits data from assessment wizard."""
+
+    household_size: int = Field(default=1, ge=1, le=8)
+    current_monthly_income: float = Field(default=0.0, ge=0)
+    enrolled_programs: list[str] = Field(default_factory=list)
+    dependents_under_6: int = Field(default=0, ge=0)
+    dependents_6_to_17: int = Field(default=0, ge=0)
+
+    @field_validator("enrolled_programs")
+    @classmethod
+    def validate_programs(cls, v: list[str]) -> list[str]:
+        """Filter out unrecognized program names."""
+        from app.modules.benefits.types import VALID_PROGRAMS
+        return [p for p in v if p in VALID_PROGRAMS]
+
+
 class AssessmentRequest(BaseModel):
     zip_code: str = Field(..., pattern=r"^361\d{2}$", description="Montgomery area zip (361xx)")
     employment_status: EmploymentStatus
@@ -67,6 +95,7 @@ class AssessmentRequest(BaseModel):
     certifications: list[str] = Field(default_factory=list)
     credit_result: Optional[CreditAssessmentResult] = None
     record_profile: Optional[RecordProfile] = None
+    benefits_data: Optional[BenefitsFormData] = None
 
 
 class UserProfile(BaseModel):
@@ -123,11 +152,22 @@ class JobMatch(BaseModel):
     record_note: Optional[str] = None
 
 
+class CliffImpact(BaseModel):
+    """Benefits cliff impact for a specific job at its wage level."""
+
+    benefits_change: float  # monthly change in total benefits vs current
+    net_monthly_change: float  # net monthly income change vs current situation
+    has_cliff: bool  # True if taking this job causes a net income drop from benefits loss
+    severity: Optional[CliffSeverity] = None  # "mild", "moderate", "severe" — only set if has_cliff
+    affected_programs: list[str] = Field(default_factory=list)  # programs that decrease
+
+
 class ScoredJobMatch(JobMatch):
     relevance_score: float = Field(ge=0.0, le=1.0)
     match_reason: str = ""
     bucket: MatchBucket = MatchBucket.POSSIBLE
     pay_range: Optional[str] = None
+    cliff_impact: Optional[CliffImpact] = None
 
 
 class TransitConnection(BaseModel):
@@ -162,6 +202,7 @@ class ReEntryPlan(BaseModel):
     eligible_after_repair: list[str] = Field(default_factory=list)
     wioa_eligibility: Optional["WIOAEligibility"] = None
     job_readiness: Optional[JobReadinessResult] = None
+    benefits_cliff_analysis: Optional[CliffAnalysis] = None
 
     @computed_field  # type: ignore[prop-decorator]
     @property

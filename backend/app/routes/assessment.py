@@ -11,6 +11,7 @@ from app.core.database import get_db
 from app.core.queries import create_session, insert_record_profile, update_session_plan
 from app.core.queries_feedback import create_feedback_token
 from app.core.rate_limit import RateLimiter, require_rate_limit
+from app.modules.benefits.types import BenefitsProfile
 from app.modules.matching.engine import generate_plan
 from app.modules.matching.types import (
     AssessmentRequest,
@@ -52,6 +53,25 @@ def _build_profile(session_id: str, request: AssessmentRequest) -> UserProfile:
     )
 
 
+def _session_data(profile: UserProfile, request: AssessmentRequest) -> dict:
+    """Build the dict for create_session from profile and request."""
+    return {
+        "barriers": json.dumps([b.value for b in profile.primary_barriers]),
+        "credit_profile": request.credit_result.model_dump_json() if request.credit_result else None,
+        "qualifications": request.work_history,
+        "plan": None,
+        "profile": json.dumps(profile.model_dump()),
+        "benefits_profile": request.benefits_data.model_dump_json() if request.benefits_data else None,
+    }
+
+
+def _to_benefits_profile(request: AssessmentRequest) -> BenefitsProfile | None:
+    """Convert form data to BenefitsProfile if present."""
+    if not request.benefits_data:
+        return None
+    return BenefitsProfile(**request.benefits_data.model_dump())
+
+
 @router.post("/", status_code=201)
 async def create_assessment(
     request: AssessmentRequest,
@@ -63,13 +83,7 @@ async def create_assessment(
     session_id = str(uuid.uuid4())
     profile = _build_profile(session_id, request)
 
-    await create_session(db, {
-        "barriers": json.dumps([b.value for b in profile.primary_barriers]),
-        "credit_profile": request.credit_result.model_dump_json() if request.credit_result else None,
-        "qualifications": request.work_history,
-        "plan": None,
-        "profile": json.dumps(profile.model_dump()),
-    }, session_id=session_id)
+    await create_session(db, _session_data(profile, request), session_id=session_id)
 
     if request.record_profile:
         await insert_record_profile(db, session_id, request.record_profile)
@@ -78,10 +92,9 @@ async def create_assessment(
         profile, db,
         resume_text=request.resume_text,
         credit_result=request.credit_result.model_dump() if request.credit_result else None,
+        benefits_profile=_to_benefits_profile(request),
     )
-
     await update_session_plan(db, session_id, json.dumps(plan.model_dump()))
-
     feedback_token = await create_feedback_token(db, session_id)
 
     audit_log("session_created", session_id=session_id, client_ip=get_client_ip(raw_request),

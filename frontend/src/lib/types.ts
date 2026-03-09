@@ -78,6 +78,14 @@ export interface ScheduleConstraints {
   available_hours: AvailableHours;
 }
 
+export interface BenefitsFormData {
+  household_size: number;
+  current_monthly_income: number;
+  enrolled_programs: string[];
+  dependents_under_6: number;
+  dependents_6_to_17: number;
+}
+
 export interface AssessmentRequest {
   zip_code: string;
   employment_status: EmploymentStatus;
@@ -90,6 +98,7 @@ export interface AssessmentRequest {
   certifications?: string[];
   credit_result?: CreditAssessmentResult;
   record_profile?: RecordProfile;
+  benefits_data?: BenefitsFormData;
 }
 
 export interface UserProfile {
@@ -138,11 +147,49 @@ export interface JobMatch {
   record_note?: string | null;
 }
 
+export type CliffSeverity = "mild" | "moderate" | "severe";
+
+export interface CliffImpact {
+  benefits_change: number;
+  net_monthly_change: number;
+  has_cliff: boolean;
+  severity: CliffSeverity | null;
+  affected_programs: string[];
+}
+
 export interface ScoredJobMatch extends JobMatch {
   relevance_score: number;
   match_reason: string;
   bucket: "strong" | "possible" | "after_repair";
   pay_range?: string | null;
+  cliff_impact?: CliffImpact | null;
+  fair_chance?: boolean;
+  employment_type?: string | null;
+}
+
+export interface WageStep {
+  wage: number;
+  gross_monthly: number;
+  benefits_total: number;
+  net_monthly: number;
+}
+
+export interface CliffPoint {
+  hourly_wage: number;
+  annual_income: number;
+  net_monthly_income: number;
+  lost_program: string;
+  monthly_loss: number;
+  severity: CliffSeverity;
+}
+
+export interface CliffAnalysis {
+  wage_steps: WageStep[];
+  cliff_points: CliffPoint[];
+  current_net_monthly: number;
+  programs: { program: string; monthly_value: number; eligible: boolean }[];
+  worst_cliff_wage: number | null;
+  recovery_wage: number | null;
 }
 
 export interface TransitConnection {
@@ -223,6 +270,7 @@ export interface ReEntryPlan {
   eligible_after_repair: string[];
   wioa_eligibility: WIOAEligibility | null;
   job_readiness: JobReadinessResult | null;
+  benefits_cliff_analysis?: CliffAnalysis | null;
 }
 
 export interface AssessmentResponse {
@@ -254,11 +302,15 @@ export interface EnrichedJob {
   id: number;
   title: string;
   company: string | null;
+  location: string | null;
+  description: string | null;
   url: string | null;
   source: string | null;
   scraped_at: string | null;
   industry: string | null;
   credit_check_required: string;
+  fair_chance: boolean;
+  employment_type: string | null;
   transit_info: TransitInfo | null;
   application_steps: string[];
 }

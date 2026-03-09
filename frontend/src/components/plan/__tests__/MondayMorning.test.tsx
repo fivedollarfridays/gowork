@@ -134,22 +134,22 @@ describe("MondayMorning clickable phone numbers", () => {
   });
 });
 
-describe("MondayMorning step cards", () => {
-  it("renders hardcoded step card titles", () => {
+describe("MondayMorning fixed step cards", () => {
+  it("renders Career Center step with phone link", () => {
     renderMondayMorning();
 
-    // Component renders 3 hardcoded steps: Career Center, Jobs, Barriers
     expect(screen.getByText(/Visit the Career Center/)).toBeInTheDocument();
-    expect(screen.getByText(/Review Your Job Matches/)).toBeInTheDocument();
-  });
-
-  it("career center step has phone link", () => {
-    renderMondayMorning();
-
     const phoneLinks = screen.getAllByRole("link").filter(
       (link) => link.getAttribute("href")?.startsWith("tel:")
     );
     expect(phoneLinks.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("renders Job Matches and Barriers steps", () => {
+    renderMondayMorning();
+
+    expect(screen.getByText(/Review Your Job Matches/)).toBeInTheDocument();
+    expect(screen.getByText(/No Barriers Identified/)).toBeInTheDocument();
   });
 });
 
@@ -192,18 +192,20 @@ describe("MondayMorning map links", () => {
     expect(mapLinks[0].getAttribute("href")).toContain("google.com/maps/search");
   });
 
-  it("encodes address in map URL", () => {
+  it("encodes resource address in map URL", () => {
     renderMondayMorning({ plan: planWithAddress });
 
     const mapLinks = screen.getAllByRole("link").filter(
       (link) => link.getAttribute("href")?.includes("google.com/maps")
     );
-    // First map link is the hardcoded Career Center; barrier resource address
-    // appears in a subsequent link
-    const hasBarrierAddress = mapLinks.some((link) =>
-      link.getAttribute("href")?.includes(encodeURIComponent("100 Main St, Montgomery, AL"))
+    // Find the link that contains the resource address (not the CAREER_CENTER address)
+    const resourceMapLink = mapLinks.find((link) =>
+      link.getAttribute("href")?.includes(encodeURIComponent("100 Main St"))
     );
-    expect(hasBarrierAddress).toBe(true);
+    expect(resourceMapLink).toBeDefined();
+    expect(resourceMapLink!.getAttribute("href")).toContain(
+      encodeURIComponent("100 Main St, Montgomery, AL")
+    );
   });
 });
 
