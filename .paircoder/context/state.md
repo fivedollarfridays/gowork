@@ -4,11 +4,19 @@
 
 ## Active Plan
 
+**Plan:** plan-2026-03-brightdata-consolidation
+**Type:** refactor
+**Title:** BrightData Consolidation + Commute Time — Replace JSearch, Multi-Domain Crawling, Estimated Commute Display
+**Status:** Complete (4/4 done)
+**Current Sprint:** 31
+
+## Previous Active Plan
+
 **Plan:** plan-2026-03-transit-enhancement
 **Type:** feature
 **Title:** Transit Enhancement — Schedule-Aware Job Matching for Montgomery Residents
 **Status:** Complete (2/2 done)
-**Current Sprint:** 30
+**Sprint:** 30
 
 ## Previous Active Plan
 
@@ -61,9 +69,20 @@
 
 ## Current Focus
 
-Sprint 30: Transit Enhancement. Upgrade transit matching from keyword-based detection to schedule-aware feasibility checking. Use actual M-Transit route data (14 routes, 43 stops) to validate shift times against first/last bus, detect transfers, compute walk distances, and flag Sunday/night service gaps. Display transit route info on job cards with "Plan your trip" Google Maps link.
+Sprint 31: BrightData Consolidation + Commute Time. Two workstreams: (1) Replace JSearch/RapidAPI (200 req/month ceiling) with BrightData multi-domain crawling (Indeed, LinkedIn, Glassdoor, ZipRecruiter, Snagajob). Consolidates external job API surface from two vendors to one. (2) Add estimated commute time display on job cards using haversine distance + average speed formulas (drive ~25mph, transit with walk+wait+ride, walk for <2mi). No external API needed.
 
 ## Task Status
+
+### Sprint 31 — BrightData Consolidation + Commute Time
+
+| ID | Title | Priority | Complexity | Status | Depends On |
+|----|-------|----------|------------|--------|------------|
+| T31.1 | Expand BrightData Precrawl to Multi-Domain Job Discovery | P0 | 40 | done | -- |
+| T31.2 | Remove JSearch Integration | P0 | 30 | done | T31.1 |
+| T31.3 | Commute Time Estimator Module | P1 | 35 | done | -- |
+| T31.4 | Commute Time Display on Job Cards | P1 | 25 | done | T31.3 |
+
+**Total: 4 tasks, 130 complexity points (4/4 done) — SPRINT COMPLETE**
 
 ### Sprint 30 — Transit Enhancement
 
@@ -191,6 +210,20 @@ Sprint 30: Transit Enhancement. Upgrade transit matching from keyword-based dete
 
 ## What Was Just Done
 
+- **T31.4 done** (auto-updated by hook)
+
+- **T31.4 done** (2026-03-09) — Commute Time Display on Job Cards: Added `CommuteEstimate` TS interface to `types.ts` (drive_min, transit_min, walk_min). Added `commute_estimate` field to `ScoredJobMatch`. Updated `JobMatchCard.tsx` with commute row: Car icon + drive time, Bus icon + transit time (when available), Footprints icon + walk time (when available). Used Lucide `Car`, `Bus`, `Footprints` icons. 6 new tests (drive/transit/walk display, null transit/walk hidden, undefined/null estimate hidden). All 476 frontend tests pass, `npx tsc --noEmit` clean.
+
+- **T31.3 done** (auto-updated by hook)
+
+- **T31.3 done** (2026-03-09) — Commute Time Estimator Module: Created `commute_estimator.py` with `estimate_commute(user_zip, job_location, transit_info)` returning `CommuteEstimate(drive_min, transit_min, walk_min)`. Formulas: drive at 25 mph, transit = walk-to-stop (3 mph) + 10 min wait + ride (12 mph) + 5 min walk-from-stop (only when transit_info has serving routes), walk at 3 mph (only if <= 2 miles). All times minimum 1 min. Added `CommuteEstimate` model to `types_transit.py`. Added `commute_estimate: Optional[CommuteEstimate]` to `ScoredJobMatch` in `types.py`. Wired into `pvs_scorer.py` `_build_match()` — every `ScoredJobMatch` from `rank_all_jobs()` now has commute estimate attached. Extracted `_cliff_for_job()` helper to keep `_build_match` under arch function length limit. 18 tests (4 drive time, 3 walk time, 4 transit time, 4 edge cases, 3 PVS wiring integration). All 1476 backend tests pass, all arch checks clean (no errors).
+
+- **T31.2 done** (auto-updated by hook)
+
+- **T31.2 done** (2026-03-09) — Remove JSearch Integration: Deleted `app/integrations/jsearch/` directory (305 lines: client.py, cache.py, types.py). Removed JSearch from `job_aggregator.py` (`_jsearch_fetch()`, `_record_to_raw()`, `_record_to_dict()`, jsearch branch in `search()`, jsearch import). Removed `jsearch_api_key` and `jsearch_host` from `config.py` Settings. Updated `routes/jobs.py` source filter description. Removed "via JSearch" source label from `JobMatchCard.tsx`. Removed `jsearch` from `jobFilters.ts` type union, `SOURCE_LABELS`, and `matchesSource()`. Deleted `test_jsearch_client.py` and `test_jsearch_cache.py`. Updated `test_job_aggregator.py` (removed JSearch tests, added `test_jsearch_source_filter_returns_empty`), `test_dedup.py` (replaced jsearch:1 source strings), `jobFilters.test.ts` and `JobFilters.test.tsx` (removed jsearch references). All 1458 backend tests pass, 470 frontend tests pass, `npx tsc --noEmit` clean.
+
+- **T31.1 done** (2026-03-09) — Expand BrightData Precrawl to Multi-Domain Job Discovery: Added `brightdata_job_domains` setting to `config.py` (comma-separated, default "indeed.com"). Created `get_crawl_domains()` in `precrawl.py` to parse domains with whitespace/empty fallback handling. Updated `build_keyword_searches()` to iterate configured domains. Refactored `precrawl_montgomery_jobs()` to crawl each domain independently with partial failure tolerance (per-domain try/except, errors list in response, aggregated cached count). Added `deduplicate_by_company_title()` to `cache.py` for cross-domain dedup by (company, title) pair (case-insensitive, None-company skipped, first occurrence wins). Wired dedup into `store_crawl_results()`. 22 new tests (5 domain parsing, 3 multi-domain searches, 3 partial failure, 6 company+title dedup, 1 integration dedup, 4 updated existing). All 1499 backend tests pass, all arch checks clean.
+
 - **T30.2 done** (2026-03-09) — Transit Info Display on Job Cards: Created `TransitInfoDisplay.tsx` with route badges (`#N name`), first/last bus schedule per route, walk distance to nearest stop, transfer count, warning badges (No Sunday service, No night service, Long walk), and "Plan your trip" Google Maps link. Added `TransitWarning`, `RouteFeasibility`, `TransitInfoDetail` TS types to `types.ts`. Added `transit_info` to `ScoredJobMatch` (frontend + backend). Wired into `JobMatchCard.tsx`. Aria-labels, `role="alert"` on warnings. 19 tests, all 1319 backend tests pass, `npx tsc --noEmit` clean.
 
 - **T30.1 done** (2026-03-09) — Transit Schedule Matcher Module: Created `transit_schedule.py` with `find_serving_routes()` (haversine walk distance, per-route nearest stop), `check_schedule_feasibility()` (shift times vs first/last bus, Sunday/night gap detection), `detect_transfer_count()` (Rosa Parks hub transfers), `build_transit_info()` (combined TransitInfo). Added `TransitWarning` enum, `RouteFeasibility`, `TransitInfo` types. Updated `job_matcher._filter_by_transit()` to use route schedule data with keyword fallback for jobs without coordinates. Updated `job_scoring._score_transit()` with walk distance bands (0.25/0.5/1.0 mi), transfer penalty (0.8×/0.6×), and schedule feasibility factor. 30 new tests, 1319 total pass, all arch checks clean.
@@ -215,7 +248,7 @@ Sprint 30: Transit Enhancement. Upgrade transit matching from keyword-based dete
 
 ## What's Next
 
-Sprint 30 complete (2/2 tasks done). Ready for branch finish + PR.
+Sprint 31 complete. All 4 tasks done. Ready for branch finish + PR.
 
 ## Blockers
 
