@@ -373,7 +373,7 @@ function PlanContent() {
 
 export default function PlanPage() {
   return (
-    <div className="flex min-h-[100dvh] overscroll-none">
+    <div className="flex overscroll-none">
       <main className="flex-1 px-4 pt-8 pb-6 sm:px-8">
         <div className="mx-auto max-w-3xl">
           <Suspense fallback={<PlanSkeleton />}>

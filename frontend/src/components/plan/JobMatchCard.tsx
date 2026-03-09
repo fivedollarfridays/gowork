@@ -132,7 +132,7 @@ export function JobMatchCard({ job, creditResult }: JobMatchCardProps) {
 
         {/* Commute estimate */}
         {scored && job.commute_estimate && (
-          <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground" aria-label="Estimated commute times">
+          <div className="flex flex-wrap items-center justify-center gap-3 text-sm text-muted-foreground" aria-label="Estimated commute times">
             <span className="flex items-center gap-1.5" aria-label={`${job.commute_estimate.drive_min} minute drive`}>
               <Car className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
               {job.commute_estimate.drive_min} min drive

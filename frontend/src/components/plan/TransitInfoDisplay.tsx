@@ -24,10 +24,10 @@ export function TransitInfoDisplay({ transitInfo }: TransitInfoDisplayProps) {
   const nearest = hasRoutes ? serving_routes[0] : null;
 
   return (
-    <div className="space-y-2 text-sm" aria-label="Transit information">
+    <div className="space-y-2 text-sm text-center" aria-label="Transit information">
       {/* Route badges */}
       {hasRoutes ? (
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex flex-wrap items-center justify-center gap-1.5">
           <Bus className="h-3.5 w-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
           {serving_routes.map((r) => (
             <Badge
@@ -42,7 +42,7 @@ export function TransitInfoDisplay({ transitInfo }: TransitInfoDisplayProps) {
           ))}
         </div>
       ) : (
-        <p className="flex items-center gap-1.5 text-muted-foreground">
+        <p className="flex items-center justify-center gap-1.5 text-muted-foreground">
           <Bus className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
           No bus routes nearby
         </p>
@@ -50,7 +50,7 @@ export function TransitInfoDisplay({ transitInfo }: TransitInfoDisplayProps) {
 
       {/* First/last bus schedule per route */}
       {hasRoutes && (
-        <div className="flex flex-wrap items-center gap-3 text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-center gap-3 text-muted-foreground">
           <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
           {serving_routes.map((r) => (
             <span key={r.route_number}>
@@ -62,7 +62,7 @@ export function TransitInfoDisplay({ transitInfo }: TransitInfoDisplayProps) {
 
       {/* Walk distance + nearest stop */}
       {nearest && (
-        <p className="flex items-center gap-1.5 text-muted-foreground">
+        <p className="flex items-center justify-center gap-1.5 text-muted-foreground">
           <Footprints className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
           {nearest.walk_miles.toFixed(1)} mi walk to {nearest.nearest_stop}
         </p>
@@ -70,7 +70,7 @@ export function TransitInfoDisplay({ transitInfo }: TransitInfoDisplayProps) {
 
       {/* Transfer count */}
       {transfer_count > 0 && (
-        <p className="flex items-center gap-1.5 text-muted-foreground">
+        <p className="flex items-center justify-center gap-1.5 text-muted-foreground">
           <RefreshCw className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
           {transfer_count} transfer{transfer_count > 1 ? "s" : ""}
         </p>
@@ -78,7 +78,7 @@ export function TransitInfoDisplay({ transitInfo }: TransitInfoDisplayProps) {
 
       {/* Warnings */}
       {warnings.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5" role="status">
+        <div className="flex flex-wrap items-center justify-center gap-1.5" role="status">
           <AlertTriangle className="h-3.5 w-3.5 text-warning shrink-0" aria-hidden="true" />
           {warnings.map((w) => (
             <Badge key={w} className={`${STATUS_BADGE_STYLES.warning} text-xs`} variant="outline">
