@@ -10,7 +10,7 @@ const nextConfig = {
     // connect-src: include localhost only in dev (S-M5)
     const connectSrc = isDev
       ? "connect-src 'self' http://localhost:8000 https://*.railway.app https://*.up.railway.app"
-      : "connect-src 'self' https://*.railway.app https://*.up.railway.app";
+      : "connect-src 'self' https://*.montgowork.com https://*.railway.app https://*.up.railway.app";
 
     const securityHeaders = [
       { key: 'X-Frame-Options', value: 'DENY' },
