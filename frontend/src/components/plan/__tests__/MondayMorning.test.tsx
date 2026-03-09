@@ -135,6 +135,34 @@ describe("MondayMorning clickable phone numbers", () => {
 });
 
 describe("MondayMorning fixed step cards", () => {
+  it("renders the three fixed step card titles", () => {
+    renderMondayMorning();
+
+    expect(screen.getByText("Visit the Career Center")).toBeInTheDocument();
+    expect(screen.getByText("Review Your Job Matches")).toBeInTheDocument();
+    expect(screen.getByText("No Barriers Identified")).toBeInTheDocument();
+  });
+
+  it("shows 'Address Your Barriers' when barriers exist", () => {
+    const planWithBarriers: ReEntryPlan = {
+      ...basePlan,
+      barriers: [
+        {
+          type: BarrierType.CREDIT,
+          severity: "medium",
+          title: "Credit Barrier",
+          timeline_days: null,
+          actions: [],
+          transit_matches: [],
+          resources: [],
+        },
+      ],
+    };
+    renderMondayMorning({ plan: planWithBarriers });
+
+    expect(screen.getByText("Address Your Barriers")).toBeInTheDocument();
+  });
+
   it("renders Career Center step with phone link", () => {
     renderMondayMorning();
 
@@ -198,9 +226,8 @@ describe("MondayMorning map links", () => {
     const mapLinks = screen.getAllByRole("link").filter(
       (link) => link.getAttribute("href")?.includes("google.com/maps")
     );
-    // Find the link that contains the resource address (not the CAREER_CENTER address)
     const resourceMapLink = mapLinks.find((link) =>
-      link.getAttribute("href")?.includes(encodeURIComponent("100 Main St"))
+      link.getAttribute("href")?.includes(encodeURIComponent("100 Main St, Montgomery, AL"))
     );
     expect(resourceMapLink).toBeDefined();
     expect(resourceMapLink!.getAttribute("href")).toContain(

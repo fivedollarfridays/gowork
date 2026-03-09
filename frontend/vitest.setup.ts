@@ -18,3 +18,17 @@ if (!Element.prototype.hasPointerCapture) {
 if (!Element.prototype.scrollIntoView) {
   Element.prototype.scrollIntoView = () => {};
 }
+
+// framer-motion useInView requires IntersectionObserver (not available in jsdom)
+if (!globalThis.IntersectionObserver) {
+  globalThis.IntersectionObserver = class IntersectionObserver {
+    constructor(_cb: IntersectionObserverCallback, _opts?: IntersectionObserverInit) {}
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+    get root() { return null; }
+    get rootMargin() { return ''; }
+    get thresholds() { return []; }
+    takeRecords() { return []; }
+  } as unknown as typeof globalThis.IntersectionObserver;
+}
