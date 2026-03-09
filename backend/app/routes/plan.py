@@ -5,12 +5,14 @@ import logging
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
+from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ai.client import build_fallback_narrative, generate_narrative
 from app.core.audit import audit_log, get_client_ip
 from app.core.auth import require_session_token
 from app.core.database import get_db
+from app.core.progress_queries import get_action_checklist, store_previous_plan, update_action_checklist
 from app.core.queries import get_session_by_id, update_session_plan
 from app.core.rate_limit import RateLimiter, require_rate_limit
 from app.modules.matching.engine import generate_plan
@@ -60,12 +62,14 @@ async def get_plan(
     plan = _safe_json(row["plan"])
     barriers = _safe_json(row["barriers"], [])
     credit_profile = _safe_json(row.get("credit_profile"))
+    checklist = _safe_json(row.get("action_checklist"), {})
     return {
         "session_id": session_id,
         "barriers": barriers,
         "qualifications": row.get("qualifications"),
         "plan": plan,
         "credit_profile": credit_profile,
+        "action_checklist": checklist,
     }
 
 
@@ -84,12 +88,14 @@ async def generate_plan_narrative(
     barriers = _safe_json(row["barriers"], [])
     plan_data = _safe_json(row["plan"])
     qualifications = row.get("qualifications", "")
+    action_plan = plan_data.get("action_plan") if plan_data else None
 
     try:
         narrative = await generate_narrative(
             barriers=barriers,
             qualifications=qualifications,
             plan_data=plan_data,
+            action_plan=action_plan,
         )
     except Exception:
         logger.warning("Claude API unavailable, using fallback", exc_info=True)
@@ -97,12 +103,33 @@ async def generate_plan_narrative(
             barriers=barriers,
             qualifications=qualifications,
             plan_data=plan_data,
+            action_plan=action_plan,
         )
 
     await update_session_plan(db, session_id, json.dumps({**plan_data, "resident_summary": narrative.summary}))
 
     audit_log("plan_generated", session_id=session_id, client_ip=get_client_ip(request))
     return narrative.model_dump()
+
+
+class ToggleActionRequest(BaseModel):
+    action_key: str = Field(pattern=r"^[a-z_0-9]+:\d+$")
+    completed: bool
+
+
+@router.patch("/{session_id}/actions")
+async def toggle_action(
+    session_id: SessionId,
+    body: ToggleActionRequest,
+    token: str = Query(...),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Toggle an action item's completion status."""
+    await require_session_token(db, session_id, token)
+    checklist = await get_action_checklist(db, session_id)
+    checklist[body.action_key] = body.completed
+    await update_action_checklist(db, session_id, checklist)
+    return {"checklist": checklist}
 
 
 @router.post("/{session_id}/refresh")
@@ -126,6 +153,8 @@ async def refresh_plan(
         raise HTTPException(status_code=400, detail="Stored profile is corrupt. Re-run the assessment.")
 
     credit_result = _safe_json(row.get("credit_profile"))
+
+    await store_previous_plan(db, session_id)
 
     new_plan = await generate_plan(
         profile, db,

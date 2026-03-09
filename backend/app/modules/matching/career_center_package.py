@@ -102,6 +102,19 @@ def _build_programs(wioa: WIOAEligibility) -> list[str]:
     return programs
 
 
+def _build_action_timeline(plan: ReEntryPlan) -> list[dict]:
+    """Extract concise timeline from action_plan for print package."""
+    if not plan.action_plan:
+        return []
+    result: list[dict] = []
+    for phase in plan.action_plan.phases:
+        if not phase.actions:
+            continue
+        titles = [a.title for a in phase.actions]
+        result.append({"label": phase.label, "actions": titles})
+    return result
+
+
 def assemble_package(
     profile: UserProfile,
     plan: ReEntryPlan,
@@ -115,6 +128,8 @@ def assemble_package(
 
     has_credit = BarrierType.CREDIT in profile.primary_barriers
     credit_pathway = _build_credit_pathway(credit_result) if has_credit and credit_result else None
+
+    timeline = _build_action_timeline(plan)
 
     return CareerCenterPackage(
         staff_summary=StaffSummary(
@@ -130,6 +145,7 @@ def assemble_package(
             what_to_expect=_WHAT_TO_EXPECT,
             career_center=CAREER_CENTER,
             programs=_build_programs(wioa),
+            action_timeline=timeline,
         ),
         credit_pathway=credit_pathway,
     )

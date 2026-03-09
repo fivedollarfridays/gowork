@@ -86,6 +86,18 @@ export function submitVisitFeedback(data: VisitFeedbackRequest): Promise<VisitFe
   return apiFetch("/api/feedback/visit", { method: "POST", body: JSON.stringify(data) });
 }
 
+export function toggleAction(
+  sessionId: string,
+  actionKey: string,
+  completed: boolean,
+  token?: string,
+): Promise<{ checklist: Record<string, boolean> }> {
+  return apiFetch(`/api/plan/${sessionId}/actions${tokenQs(token)}`, {
+    method: "PATCH",
+    body: JSON.stringify({ action_key: actionKey, completed }),
+  });
+}
+
 export function getCareerCenterPackage(sessionId: string, token?: string): Promise<CareerCenterPackage> {
   return apiFetch(`/api/plan/${sessionId}/career-center${tokenQs(token)}`);
 }

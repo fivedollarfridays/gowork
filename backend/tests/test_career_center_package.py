@@ -310,3 +310,47 @@ class TestAssemblePackage:
         )
         assert pkg.credit_pathway is None
         assert pkg.staff_summary.barrier_profile == ["transportation"]
+
+
+class TestActionTimeline:
+    def test_resident_plan_has_action_timeline_field(self):
+        """ResidentActionPlan model has action_timeline list field."""
+        pkg = assemble_package(
+            _profile([BarrierType.CREDIT]),
+            _plan([BarrierType.CREDIT]),
+            _wioa(True, ["credit"]),
+        )
+        assert hasattr(pkg.resident_plan, "action_timeline")
+        assert isinstance(pkg.resident_plan.action_timeline, list)
+
+    def test_timeline_populated_from_action_plan(self):
+        """When plan has action_plan, timeline is populated with phase data."""
+        from app.modules.plan.action_plan import build_action_plan
+        from datetime import date
+
+        plan = _plan([BarrierType.CREDIT])
+        action_plan = build_action_plan(
+            strong_matches=[],
+            assessment_date=date(2026, 3, 9),
+        )
+        plan.action_plan = action_plan
+        pkg = assemble_package(
+            _profile([BarrierType.CREDIT]),
+            plan,
+            _wioa(True, ["credit"]),
+        )
+        timeline = pkg.resident_plan.action_timeline
+        assert len(timeline) > 0
+        first = timeline[0]
+        assert "label" in first
+        assert "actions" in first
+
+    def test_timeline_empty_without_action_plan(self):
+        """When plan has no action_plan, timeline is empty list."""
+        plan = _plan([BarrierType.CREDIT])
+        pkg = assemble_package(
+            _profile([BarrierType.CREDIT]),
+            plan,
+            _wioa(True, ["credit"]),
+        )
+        assert pkg.resident_plan.action_timeline == []

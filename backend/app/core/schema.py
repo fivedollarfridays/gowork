@@ -66,6 +66,8 @@ CREATE TABLE IF NOT EXISTS sessions (
     plan TEXT,
     profile TEXT,
     benefits_profile TEXT,
+    action_checklist TEXT,
+    previous_plan TEXT,
     expires_at TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS feedback_tokens (

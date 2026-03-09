@@ -287,6 +287,42 @@ export interface BenefitsEligibility {
   disclaimer: string;
 }
 
+// --- Action Plan types ---
+
+export type ActionCategory =
+  | "job_application"
+  | "benefits_enrollment"
+  | "credit_repair"
+  | "criminal_record"
+  | "training"
+  | "career_center"
+  | "housing"
+  | "childcare";
+
+export interface ActionItem {
+  category: ActionCategory;
+  title: string;
+  detail: string | null;
+  priority: number;
+  source_module: string;
+  resource_name: string | null;
+  resource_phone: string | null;
+}
+
+export interface TimelinePhase {
+  phase_id: string;
+  label: string;
+  start_day: number;
+  end_day: number;
+  actions: ActionItem[];
+}
+
+export interface ActionPlan {
+  assessment_date: string;
+  phases: TimelinePhase[];
+  total_actions: number;
+}
+
 export interface ReEntryPlan {
   plan_id: string;
   session_id: string;
@@ -304,6 +340,7 @@ export interface ReEntryPlan {
   job_readiness: JobReadinessResult | null;
   benefits_cliff_analysis?: CliffAnalysis | null;
   benefits_eligibility?: BenefitsEligibility | null;
+  action_plan?: ActionPlan | null;
 }
 
 export interface AssessmentResponse {
@@ -319,11 +356,13 @@ export interface PlanResponse {
   qualifications: string | null;
   plan: ReEntryPlan | null;
   credit_profile: CreditAssessmentResult | null;
+  action_checklist?: Record<string, boolean>;
 }
 
 export interface PlanNarrative {
   summary: string;
   key_actions: string[];
+  phase_summaries?: string[];
 }
 
 export interface JobsResponse {
@@ -513,6 +552,11 @@ export interface StaffSummary {
   staff_next_steps: string[];
 }
 
+export interface TimelinePrintPhase {
+  label: string;
+  actions: string[];
+}
+
 export interface ResidentActionPlan {
   document_checklist: DocumentChecklistItem[];
   work_history: string;
@@ -520,6 +564,7 @@ export interface ResidentActionPlan {
   what_to_expect: string[];
   career_center: CareerCenterInfo;
   programs: string[];
+  action_timeline?: TimelinePrintPhase[];
 }
 
 export interface CreditPathway {

@@ -20,6 +20,7 @@ from app.modules.matching.types_wioa import (  # noqa: F401 — re-export
     WIOAConfidence,
     WIOAEligibility,
 )
+from app.modules.plan.types import ActionPlan  # noqa: F401 — re-export
 
 
 class BarrierType(str, Enum):
@@ -212,6 +213,7 @@ class ReEntryPlan(BaseModel):
     job_readiness: Optional[JobReadinessResult] = None
     benefits_cliff_analysis: Optional[CliffAnalysis] = None
     benefits_eligibility: Optional[BenefitsEligibility] = None
+    action_plan: Optional["ActionPlan"] = None
 
     @computed_field  # type: ignore[prop-decorator]
     @property

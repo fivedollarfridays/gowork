@@ -421,6 +421,7 @@ class TestCareerCenterEndpoint:
 # --- POST /api/plan/{session_id}/refresh ---
 
 _GENERATE_PLAN_PATCH = "app.routes.plan.generate_plan"
+_STORE_PREV_PLAN_PATCH = "app.routes.plan.store_previous_plan"
 
 
 def _seed_session_with_profile(session_id=_VALID_UUID, with_plan=True):
@@ -513,6 +514,7 @@ class TestRefreshPlan:
             patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row),
             patch(_GENERATE_PLAN_PATCH, new_callable=AsyncMock, return_value=new_plan),
             patch(_UPDATE_SESSION_PATCH, new_callable=AsyncMock) as mock_update,
+            patch(_STORE_PREV_PLAN_PATCH, new_callable=AsyncMock),
         ):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -554,6 +556,7 @@ class TestRefreshPlan:
             patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row),
             patch(_GENERATE_PLAN_PATCH, new_callable=AsyncMock, return_value=new_plan) as mock_gen,
             patch(_UPDATE_SESSION_PATCH, new_callable=AsyncMock),
+            patch(_STORE_PREV_PLAN_PATCH, new_callable=AsyncMock),
         ):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -571,6 +574,7 @@ class TestRefreshPlan:
             patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row),
             patch(_GENERATE_PLAN_PATCH, new_callable=AsyncMock, return_value=new_plan),
             patch(_UPDATE_SESSION_PATCH, new_callable=AsyncMock),
+            patch(_STORE_PREV_PLAN_PATCH, new_callable=AsyncMock),
         ):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:

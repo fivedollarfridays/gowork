@@ -6,6 +6,8 @@ import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import type { ReEntryPlan, CreditAssessmentResult } from "@/lib/types";
 import { PDF_SEVERITY_COLORS } from "@/lib/constants";
+import { TimelinePrintLayout } from "@/components/plan/TimelinePrintLayout";
+import { sectionHeading, sectionSpacing } from "./pdf-styles";
 
 interface PlanExportProps {
   plan: ReEntryPlan;
@@ -93,6 +95,7 @@ export function PlanExport({ plan, creditResult, feedbackToken }: PlanExportProp
         <PdfHeader date={today} />
         <PdfSummary summary={plan.resident_summary} />
         <PdfBarriers barriers={plan.barriers} />
+        {plan.action_plan && <TimelinePrintLayout actionPlan={plan.action_plan} />}
         <PdfJobMatches jobs={plan.job_matches} />
         <PdfNextSteps steps={plan.immediate_next_steps} />
         {creditResult && <PdfCreditInfo creditResult={creditResult} />}
@@ -102,8 +105,6 @@ export function PlanExport({ plan, creditResult, feedbackToken }: PlanExportProp
   );
 }
 
-const sectionHeading = { fontSize: "16px", fontWeight: "bold", marginBottom: "8px" } as const;
-const sectionSpacing = { marginBottom: "16px" } as const;
 
 function PdfHeader({ date }: { date: string }) {
   return (
