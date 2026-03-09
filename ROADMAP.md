@@ -94,22 +94,71 @@ Current state as of March 2026. Organized by what's done, what's in progress, an
 - [x] SSR guard on window.location in PDF QR component
 - [x] Free-text feedback field length validation (max 1000 chars)
 
+### Barrier Graph & AI Chat (Sprint 23)
+- [x] Barrier graph DAG (barriers, relationships, resources tables)
+- [x] Root barrier detection and causal chain traversal
+- [x] RAG knowledge base -- FAISS vector store with barrier-filtered search
+- [x] Barrier intelligence SSE streaming chat with guardrails
+- [x] Response caching and rate limiting (10 req/60s)
+- [x] Admin reindex endpoint for rebuilding RAG index
+
+### PVS Scoring System (Sprint 24)
+- [x] Practical Value Score (PVS) -- 4-factor: net income (35%), proximity (25%), time fit (20%), barrier compatibility (20%)
+- [x] Benefits cliff detection -- wage-step analysis with severity classification (mild/moderate/severe)
+- [x] No-pay ceiling (0.25 max PVS for undisclosed salary jobs)
+- [x] Replaces legacy 5-factor scoring for job ranking
+
+### Benefits Eligibility (Sprint 29)
+- [x] Benefits eligibility screener for 7 Alabama programs (SNAP, TANF, Medicaid, ALL Kids, Childcare Subsidy, Section 8, LIHEAP)
+- [x] Benefits cliff calculator -- net income at wage steps ($8-$25/hr), cliff point detection
+- [x] Benefits step in assessment wizard
+- [x] BenefitsEligibility and BenefitsCliffChart frontend components
+
+### Criminal Record Module (Sprint 28)
+- [x] Criminal record form in assessment wizard
+- [x] Record profile model (charge categories, record types, years since conviction)
+- [x] Expungement eligibility screening (Alabama Act 2021-507, wait periods, filing steps)
+- [x] Employer policy matching -- fair-chance job filtering, background check timing
+- [x] Employer policies seed data (20+ Montgomery-area employers)
+
+### Job Aggregation (Sprint 26-28)
+- [x] JSearch API integration (RapidAPI) with rate limit tracking
+- [x] Honest Jobs fair-chance employer listings
+- [x] BrightData dataset crawls (Indeed/LinkedIn)
+- [x] Aggregated /api/jobs/ endpoint with filters (barrier, transit, industry, fair-chance)
+- [x] Job detail enrichment (industry, credit check, transit, application steps)
+
+### Multi-Provider LLM (Sprint 27)
+- [x] LLM client supporting Anthropic Claude, OpenAI, Google Gemini
+- [x] Auto-detection of available provider from configured API keys
+- [x] Fallback to mock provider when no keys configured
+- [x] PII-safe audit logging (JSONL, hashed session IDs)
+
+### findhelp.org Integration (Sprint 28)
+- [x] Barrier-to-category mapping for findhelp.org resource directories
+- [x] Deep links with ZIP code validation
+- [x] Frontend FindhelpLink component on barrier cards
+
+### Security Audit (Sprint 30)
+- [x] SSRF prevention on external API calls
+- [x] Timing-safe admin key comparison (hmac.compare_digest)
+- [x] Production config validators (audit salt, admin key, CORS localhost)
+- [x] Backend SecurityHeadersMiddleware
+- [x] PII exclusion -- criminal record data excluded from API responses
+- [x] safeHref XSS prevention on external URLs
+- [x] Prompt injection defense via XML user_input tags
+
 ---
 
 ## Known Gaps (Not Blockers)
 
 These are documented trade-offs, not missing features. See `docs/architecture.md` "Known Limitations" for details.
 
-### Dead Config Field
-- `FEEDBACK_TOKEN_SECRET` exists in `config.py` but is no longer used -- tokens are now `secrets.token_urlsafe()`. Config field should be removed.
-
 ### Documentation Drift
-- `docs/setup.md` says "277 backend / 82 frontend tests" -- actual is 449 / 141
-- `docs/api.md` is missing feedback endpoints and career-center endpoint
-- `docs/architecture.md` is missing: `profile` column on sessions, `health_status` column on resources, feedback/WIOA/affinity/priority modules, frontend feedback page
+- Documentation is current as of Sprint 30. Test counts and endpoint references may drift between sprints.
 
 ### Employers Seed Data
-- `data/montgomery_businesses.json` is `[]` (empty array). Job matching uses `job_listings` table instead, but the employers table is effectively unused.
+- `data/montgomery_businesses.json` is `[]` (empty array). Job matching uses `job_listings` table instead. The `employer_policies` table has 20+ records for fair-chance employer matching.
 
 ### Resource Coordinates
 - Proximity scoring factor (20% weight) returns neutral 0.5 for all resources because `lat`/`lng` are not populated in seed data. Scoring works but proximity is not differentiated.
@@ -117,9 +166,6 @@ These are documented trade-offs, not missing features. See `docs/architecture.md
 ---
 
 ## Planned Next
-
-### Phase: BrightData Sponsor Demo
-Crawl live jobs from Indeed/LinkedIn for Montgomery, wire into plan view. Routes and infrastructure exist; needs end-to-end wiring with real API keys and frontend "Explore More Jobs" section.
 
 ### Phase: Admin Dashboard
 - Resource management (add/edit/hide resources)
@@ -129,8 +175,7 @@ Crawl live jobs from Indeed/LinkedIn for Montgomery, wire into plan view. Routes
 
 ### Phase: Data Quality
 - Populate resource coordinates from address geocoding
-- Activate proximity scoring (currently neutral)
-- Populate employers seed data or remove unused table
+- Activate proximity scoring (currently neutral -- returns 0.5 for all resources)
 - Add transit stop coordinates for route-to-resource distance calculation
 
 ### Phase: Infrastructure Scaling
@@ -151,3 +196,4 @@ Crawl live jobs from Indeed/LinkedIn for Montgomery, wire into plan view. Routes
 - Montgomery Housing Authority API
 - MATS real-time bus tracking
 - 211 resource directory sync
+- findhelp.org expanded category coverage

@@ -87,6 +87,24 @@
 
 ---
 
+### 3b. Criminal Record -- Step 2b (conditional)
+
+**Page:** `/assess` -- Criminal record form (only appears because criminal record barrier was selected)
+
+**Actions:**
+1. Select "Misdemeanor" from record type
+2. Select "Theft" from charge category
+3. Enter **4** years since conviction
+4. Check "Sentence completed"
+5. Click "Next"
+
+**Say:**
+> "Because she selected criminal record, she gets an extra step. Misdemeanor theft, 4 years ago, sentence complete. The system checks Alabama Act 2021-507 -- she may qualify for expungement. It also filters employers by their hiring policies."
+
+**Highlight:** This step is conditional -- only appears when criminal record barrier is selected.
+
+---
+
 ### 4. Credit Check -- Step 3 (0:50 - 1:20)
 
 **Page:** `/assess` -- Step 3 (only appears because credit barrier was selected)
@@ -139,19 +157,36 @@
 
 ---
 
+### 6b. Benefits & Criminal Record Results (in plan view)
+
+**Scroll to** benefits eligibility and expungement sections.
+
+**Say:**
+> "Because Maria has a criminal record, the system checked Alabama's expungement law -- Act 2021-507. With a misdemeanor theft and 4 years since conviction, she's potentially eligible for expungement. It shows the filing steps and the $300 fee."
+
+> "Benefits eligibility is screened automatically -- SNAP, childcare subsidy, Section 8. The cliff chart shows what happens to her net income as her wages increase. See that drop at $14/hour? That's where childcare subsidy phases out. The system flags these cliffs so case workers can plan around them."
+
+**Highlight:**
+- Expungement eligibility status
+- Benefits eligibility cards with program details
+- Benefits cliff chart showing net income trajectory and cliff points
+
+---
+
 ### 7. Barrier Cards + Job Matches (2:10 - 2:30)
 
 **Scroll down** through the plan page.
 
 **Say:**
-> "Below the narrative, every barrier gets its own card with a timeline and specific action steps. Credit barrier -- 90-day repair plan. Transportation -- M-Transit routes mapped to her jobs and resources."
+> "Below the narrative, every barrier gets its own card with a timeline and specific action steps. Credit barrier -- 90-day repair plan. Transportation -- M-Transit routes mapped to her jobs and resources. Each card has a findhelp.org link for discovering more local resources."
 
-> "Job matches are split: 'Qualified Now' are jobs with no credit check -- warehouse, food service. 'After Credit Repair' shows what opens up once she hits a 650 score. Each card shows the employer, transit route, and apply link."
+> "Jobs are ranked by Practical Value Score -- it combines net income, proximity, schedule fit, and barrier compatibility. Fair-chance employers appear first. Each card shows the employer, transit route, and apply link."
 
 **Highlight:**
 - Barrier severity badges (high = red, medium = yellow)
-- "Qualified Now" vs "After Credit Repair" job sections
-- Transit route tags on job cards
+- Fair-chance employer badges on job cards
+- findhelp.org links on barrier cards
+- PVS-ranked job listings
 
 ---
 
@@ -199,10 +234,13 @@
 > No. It's a self-reported assessment. No SSN, no hard pull. We use the data to match job credit requirements and estimate a repair timeline.
 
 **Q: Where do the jobs come from?**
-> Two sources. Seed data from Montgomery employer partnerships, and live scraping from Indeed/LinkedIn via BrightData. Jobs refresh every 24 hours.
+> Three sources. BrightData crawls Indeed and LinkedIn, JSearch aggregates from RapidAPI, and Honest Jobs provides fair-chance employer listings. Jobs refresh every 24 hours.
 
-**Q: How does the AI narrative work?**
-> We send the plan data to Claude with a Montgomery-specific persona prompt. It writes like a career counselor at the Alabama Career Center -- warm, specific, actionable. If the API is down, a handwritten fallback kicks in.
+**Q: How does the AI work?**
+> Multi-provider -- supports Claude, OpenAI, and Gemini. The plan narrative uses whichever LLM is configured. The barrier intelligence chat uses RAG with a FAISS vector store built from Montgomery resource data, combined with barrier graph traversal for context. If all APIs are down, template-based fallbacks kick in.
+
+**Q: What about the criminal record screening?**
+> We check Alabama Act 2021-507 for expungement eligibility based on what the user reports -- charge type, years since conviction, sentence completion. We also match employer hiring policies to filter jobs by fair-chance status and excluded charges. No legal advice -- we point them to legal aid.
 
 **Q: What about data privacy?**
 > No accounts, no PII stored permanently. Session data lives in SQLite during the session and can be cleared. Credit data stays in the browser's sessionStorage only.

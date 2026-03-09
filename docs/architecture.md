@@ -6,7 +6,7 @@ Technical architecture documentation for MontGoWork, a workforce navigator for M
 
 ## System Overview
 
-MontGoWork is a full-stack application that helps Montgomery residents identify employment barriers and generate personalized re-entry plans. The system matches users with local resources, jobs, and transit routes, and optionally generates AI-powered narrative summaries.
+MontGoWork is a full-stack application that helps Montgomery residents identify employment barriers and generate personalized re-entry plans. The system matches users with local resources and jobs using Practical Value Score (PVS) scoring, screens benefits eligibility with cliff detection, routes criminal records through fair-chance employer matching and expungement guidance, and provides AI-powered barrier intelligence chat via RAG-augmented LLM streaming.
 
 ```mermaid
 graph TB
@@ -18,6 +18,8 @@ graph TB
         API[FastAPI Application]
         ME[Matching Engine]
         AI[AI Client]
+        RAG[RAG / FAISS Store]
+        BGraph[Barrier Graph]
     end
 
     subgraph Data ["Data Layer"]
@@ -26,16 +28,25 @@ graph TB
 
     subgraph External ["External Services"]
         Claude[Claude API]
+        OpenAI[OpenAI API]
+        Gemini[Gemini API]
         Credit[Credit Microservice]
         BD[BrightData API]
+        JSearch[JSearch API]
+        HonestJobs[Honest Jobs]
     end
 
     UI -- "HTTP (JSON)" --> API
     API --> ME
     API --> AI
+    API --> RAG
+    API --> BGraph
     API --> DB
+    API --> JSearch
     ME --> DB
     AI -- "Anthropic SDK" --> Claude
+    AI --> OpenAI
+    AI --> Gemini
     API -- "httpx proxy" --> Credit
     API -- "httpx async" --> BD
     BD -- "crawl results" --> DB
@@ -51,7 +62,9 @@ graph TB
 | Backend | FastAPI + Uvicorn | 0.1.0 |
 | ORM / DB Driver | SQLAlchemy (async) + aiosqlite | -- |
 | Database | SQLite | -- |
-| AI | Anthropic Python SDK (Claude) | -- |
+| AI | Multi-provider: Anthropic Claude, OpenAI, Google Gemini | -- |
+| RAG | FAISS + sentence-transformers | -- |
+| Jobs | BrightData + JSearch (RapidAPI) + Honest Jobs | -- |
 | HTTP Client | httpx (async) | -- |
 | Config | pydantic-settings (.env) | -- |
 
@@ -76,7 +89,7 @@ sequenceDiagram
     API->>ME: generate_plan(profile, db)
     ME->>DB: Query resources by barrier categories
     ME->>DB: Query all job listings
-    ME-->>ME: rank_resources() (5-factor scoring)
+    ME-->>ME: compute_pvs() (4-factor PVS scoring)
     ME-->>ME: apply_credit_filter() (split eligible now / after repair)
     ME-->>ME: build_barrier_cards() + build_next_steps()
     ME-->>API: ReEntryPlan
@@ -129,6 +142,8 @@ sequenceDiagram
 | `/api/jobs` | `routes/jobs.py` | `GET /`, `GET /{job_id}` | Job listings with barrier/transit/industry filters |
 | `/api/feedback` | `routes/feedback.py` | `POST /resource`, `GET /validate/{token}`, `POST /visit` | Resource helpfulness and post-visit feedback |
 | `/api/plan` | `routes/plan.py` | `GET /{session_id}/career-center` | Career Center Ready Package assembly |
+| `/api/barrier-intel` | `routes/barrier_intel.py` | `POST /chat`, `POST /reindex` | AI barrier intelligence chat (SSE streaming), RAG reindex |
+| `/api/plan` | `routes/career_center.py` | `GET /{session_id}/career-center` | Career Center Ready Package |
 | `/api/brightdata` | `routes/brightdata.py` | `POST /crawl`, `GET /status/{id}`, `POST /precrawl` | BrightData crawl lifecycle |
 | `/health` | `health/checks.py` | `GET /health`, `GET /health/live`, `GET /health/ready` | Service health checks |
 
@@ -143,6 +158,7 @@ sequenceDiagram
 | WIOA Screener | `modules/matching/wioa_screener.py` | WIOA eligibility screening: `screen_wioa_eligibility()` evaluates adult program, supportive services, ITA, and dislocated worker eligibility. `has_expired_certification()` helper for certification renewal detection. |
 | Affinity | `modules/matching/affinity.py` | Resource affinity routing: `assign_resources()` maps barriers to specific resources using `RESOURCE_AFFINITY` and `BARRIER_PROCESSING_ORDER`. Routes Career Center to `immediate_next_steps`. |
 | Barrier Priority | `modules/matching/barrier_priority.py` | Static barrier priority ordering: `get_barrier_priority()` returns a numeric priority (childcare=1 through training=7) for deterministic barrier card ordering. |
+| PVS Scorer | `modules/matching/pvs_scorer.py` | Practical Value Score: 4-factor weighted scoring -- net income (35%), proximity (25%), time fit (20%), barrier compatibility (20%). Includes benefits cliff impact tracking. |
 | Career Center Package | `modules/matching/career_center_package.py` | `assemble_package()` builds a Career Center Ready Package with staff summary, document checklist, what-to-say scripts, and credit pathway. |
 
 ### AI Module
@@ -171,6 +187,61 @@ sequenceDiagram
 | Cache | `integrations/brightdata/cache.py` | Parses raw BrightData JSON into `BrightDataJobRecord`, deduplicates by URL, and bulk-inserts into `job_listings`. |
 | Pre-crawl | `integrations/brightdata/precrawl.py` | Admin utility to pre-populate Montgomery job data. Targets Indeed and LinkedIn searches for Montgomery, AL. Skips if data less than 24 hours old exists. |
 | Types | `integrations/brightdata/types.py` | `CrawlStatus`, `CrawlProgress`, `CrawlResult`, `BrightDataJobRecord`, request/response models, custom exceptions. |
+
+### Barrier Graph
+
+| Module | File | Responsibility |
+|--------|------|---------------|
+| Queries | `barrier_graph/queries.py` | Barrier graph queries: get barriers by category, find root barriers, get top resources by impact strength. |
+| Traversal | `barrier_graph/traversal.py` | DAG traversal: identify root barriers (not caused by other user barriers), build causal chain summaries. |
+| Seed | `barrier_graph/seed.py` | Idempotent upsert of barrier graph data (barriers, relationships, resources) from JSON seed file. |
+
+### Barrier Intelligence
+
+| Module | File | Responsibility |
+|--------|------|---------------|
+| Router | `barrier_intel/router.py` | SSE streaming chat endpoint with rate limiting (10/60s). Admin reindex endpoint. |
+| Streaming | `barrier_intel/streaming.py` | Assembles retrieval context, streams LLM response chunks, emits audit log entries. |
+| Guardrails | `barrier_intel/guardrails.py` | Filters disallowed topics, returns safe fallback responses when guardrails trigger. |
+
+### RAG Store
+
+| Module | File | Responsibility |
+|--------|------|---------------|
+| Store | `rag/store.py` | In-memory FAISS index + metadata. Build from database or load from disk. Barrier-filtered vector search. |
+| Retrieval | `rag/retrieval.py` | Hybrid context assembly: root barriers from graph + top resources + vector search (8 docs). Returns `RetrievalContext`. |
+| Corpus Builder | `rag/corpus_builder.py` | Builds document corpus from database resources and barrier graph for FAISS indexing. |
+
+### Benefits Module
+
+| Module | File | Responsibility |
+|--------|------|---------------|
+| Eligibility Screener | `modules/benefits/eligibility_screener.py` | Screens eligibility for 7 Alabama programs (SNAP, TANF, Medicaid, ALL Kids, Childcare Subsidy, Section 8, LIHEAP). |
+| Cliff Calculator | `modules/benefits/cliff_calculator.py` | Net income at wage steps ($8-$25/hr, $0.50 increments). Detects cliff points: severe (>=$200 loss), moderate (>=$50), mild (<$50). |
+| Program Calculators | `modules/benefits/program_calculators.py` | Per-program benefit amount calculators using Alabama-specific thresholds and phase-out rates. |
+
+### Criminal Record Module
+
+| Module | File | Responsibility |
+|--------|------|---------------|
+| Record Profile | `modules/criminal/record_profile.py` | `RecordProfile` model: charge categories, record types, years since conviction, sentence completion. |
+| Expungement | `modules/criminal/expungement.py` | Alabama Act 2021-507 eligibility: wait periods (misdemeanor 3yr, felony 5yr), never-expungeable categories, filing steps. |
+| Job Filter | `modules/criminal/job_filter.py` | Enriches jobs with fair_chance, record_eligible, background_check_timing. Matches employer policies. |
+| Employer Policy | `modules/criminal/employer_policy.py` | `EmployerPolicy` model and `matches_record()` logic. `query_eligible_employers()` filters and sorts by fair-chance status. |
+| Employer Seed | `modules/criminal/employer_seed.py` | Idempotent seed loader for employer_policies from JSON. |
+
+### Resources Module
+
+| Module | File | Responsibility |
+|--------|------|---------------|
+| findhelp.org | `modules/resources/findhelp.py` | Maps barrier types to findhelp.org category URLs. ZIP code validated. |
+
+### Job Integrations
+
+| Module | File | Responsibility |
+|--------|------|---------------|
+| JSearch | `integrations/jsearch/client.py` | Async JSearch (RapidAPI) client. Montgomery, AL default. Rate limit tracking with monthly quota warnings. |
+| Honest Jobs | `integrations/honestjobs/client.py` | Queries fair-chance employer job listings from local database. |
 
 ### Core Layer
 
@@ -320,6 +391,56 @@ Individual stops along transit routes.
 | lat, lng | REAL | Coordinates |
 | sequence | INTEGER | Stop order on route |
 
+#### barriers
+
+Barrier nodes in the causal graph. Seeded from barrier graph JSON.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | TEXT | Primary key |
+| name | TEXT | Barrier name |
+| category | TEXT | One of: childcare, transportation, credit, housing, health, training, criminal, employment |
+| description | TEXT | Barrier description |
+| playbook | TEXT | Intervention playbook text |
+
+#### barrier_relationships
+
+Directed edges between barriers (causal relationships).
+
+| Column | Type | Notes |
+|--------|------|-------|
+| source_barrier_id | TEXT | FK to barriers |
+| target_barrier_id | TEXT | FK to barriers |
+| relationship_type | TEXT | Relationship classification |
+| weight | REAL | Edge weight |
+
+#### barrier_resources
+
+Links barriers to resources with impact strength.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| barrier_id | TEXT | FK to barriers |
+| resource_id | INTEGER | FK to resources |
+| impact_strength | REAL | How strongly this resource addresses the barrier |
+| notes | TEXT | Additional context |
+
+#### employer_policies
+
+Employer hiring policies for criminal record screening.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | INTEGER | Primary key (auto) |
+| employer_name | TEXT | UNIQUE employer name |
+| fair_chance | INTEGER | 1 = fair-chance employer |
+| excluded_charges | TEXT | JSON array of excluded charge categories |
+| lookback_years | INTEGER | Years of criminal history considered |
+| bg_check_timing | TEXT | `pre_offer` or `post_offer` |
+| industry | TEXT | Industry classification |
+| source | TEXT | Data source |
+| montgomery_area | INTEGER | 1 = Montgomery area employer |
+
 ### Seed Data
 
 The database is seeded on first startup from JSON files in the `data/` directory:
@@ -333,6 +454,8 @@ The database is seeded on first startup from JSON files in the `data/` directory
 | `childcare_providers.json` | resources (category: childcare) |
 | `community_resources.json` | resources (category: social_service) |
 | `job_listings.json` | job_listings |
+| `barrier_graph_seed.json` | barriers, barrier_relationships, barrier_resources |
+| `employer_policies_seed.json` | employer_policies |
 
 ---
 
@@ -359,6 +482,9 @@ app/
       WizardShell                   -- Step navigation, progress, next/back/submit
         BarrierForm                 -- Barrier checkbox grid with descriptions
         CreditForm                  -- Credit self-assessment sliders and inputs
+        CriminalRecordForm          -- Criminal record self-assessment
+        BenefitsStep                -- Household income and benefits data
+        IndustryForm                -- Target industry preferences
     plan/page.tsx                   -- Plan results
       MondayMorning                 -- AI narrative hero section (summary + key actions)
       BarrierCardView               -- Individual barrier card (actions + matched resources)
@@ -369,6 +495,11 @@ app/
       EmailExport                   -- Email plan via mailto link
       CareerCenterExport            -- Download Career Center Ready Package as PDF
       PdfFeedbackQR                 -- QR code linking to feedback page
+      BenefitsEligibility           -- Benefits program eligibility cards
+      BenefitsCliffChart            -- Wage-step net income chart with cliff markers
+      JobFilters                    -- Filter pills for barrier, transit, industry, fair-chance
+      FindhelpLink                  -- Deep link to findhelp.org for a barrier type
+      EligibilityBadge              -- Status badge for eligibility (likely/check/unknown)
     credit/page.tsx                 -- Standalone credit form
     feedback/[token]/page.tsx       -- Post-visit feedback form
       FeedbackForm                  -- Mobile-first 3-question form with token validation
@@ -446,22 +577,44 @@ All configuration is managed via environment variables loaded by pydantic-settin
 | `BRIGHTDATA_DATASET_ID` | (empty) | BrightData dataset identifier |
 | `CORS_ORIGINS` | `http://localhost:3000` | Comma-separated allowed origins |
 | `LOG_LEVEL` | `INFO` | Python logging level |
+| `OPENAI_API_KEY` | (empty) | OpenAI API key |
+| `GEMINI_API_KEY` | (empty) | Google Gemini API key |
+| `LLM_PROVIDER` | (auto-detect) | Force LLM provider: `anthropic`, `openai`, `gemini`, `mock` |
+| `JSEARCH_API_KEY` | (empty) | JSearch (RapidAPI) key |
+| `ADMIN_API_KEY` | (empty) | Admin endpoint authentication |
+| `ENVIRONMENT` | `development` | Environment: development, test, staging, production |
+| `AUDIT_LOG_PATH` | (empty) | JSONL audit log file path |
+| `AUDIT_HASH_SALT` | `montgowork-default-salt` | Salt for session ID hashing in audit logs |
+| `DATA_DIR` | (empty) | Custom seed data directory path |
 
 ---
 
 ## Scoring Algorithm
 
-The matching engine scores each resource against a user profile using five weighted factors:
+### Practical Value Score (PVS)
+
+The matching engine scores each job against a user profile using four weighted factors:
 
 | Factor | Weight | Description |
 |--------|--------|-------------|
-| Barrier alignment | 0.40 | Does the resource category match the user's barriers? (1.0 if match, 0.1 base) |
-| Proximity | 0.20 | Haversine distance from user ZIP centroid to resource lat/lng. Linear decay: 1mi=1.0, 15mi=0.1. Returns 0.5 (neutral) when coordinates are unavailable. |
-| Transit accessibility | 0.15 | Penalizes transit-dependent users needing night (0.2) or flexible/Sunday (0.6) access due to M-Transit constraints. |
-| Schedule compatibility | 0.15 | Matches resource hours to user schedule preference (daytime, evening, night, flexible). |
-| Industry alignment | 0.10 | Checks if resource services/notes mention user's target industries. |
+| Net income | 0.35 | Normalized to earnings benchmark. Uses net income (wages + benefits - taxes) when benefits profile available; falls back to gross earnings. No-pay jobs get a 0.55 multiplier (max 0.25 PVS). |
+| Proximity | 0.25 | Distance from user ZIP to job location. Linear decay from 1.0 at 1 mile to 0.1 at 15 miles. |
+| Time fit | 0.20 | Job schedule compatibility with user availability (daytime, evening, night, flexible). |
+| Barrier compatibility | 0.20 | Credit barrier: 0.2 if credit-blocked. Criminal record: fair-chance=1.0, eligible=0.8, blocked=0.2, unknown=0.5. |
 
-Resources are ranked by descending score. Score bands: strong_match (>= 0.80), good_match (>= 0.60), possible_match (>= 0.40), weak_match (< 0.40).
+Jobs are ranked by descending PVS.
+
+### Resource Scoring (Legacy)
+
+Resources are still scored using the 5-factor system for barrier card ordering:
+
+| Factor | Weight | Description |
+|--------|--------|-------------|
+| Barrier alignment | 0.40 | Resource category matches user's barriers (1.0 match, 0.1 base) |
+| Proximity | 0.20 | Haversine distance, linear decay. Returns 0.5 neutral when coordinates unavailable. |
+| Transit accessibility | 0.15 | Penalizes transit-dependent users needing night/Sunday access. |
+| Schedule compatibility | 0.15 | Resource hours vs user schedule preference. |
+| Industry alignment | 0.10 | Resource services mention user's target industries. |
 
 ---
 
@@ -493,6 +646,6 @@ Barrier severity is determined by count: 1 barrier = LOW, 2 = MEDIUM, 3+ = HIGH.
 
 4. **External API resilience:** BrightData polling already has exponential backoff with jitter (2-60s, 30 retries). Credit API returns 503/504/502 on failure. Claude API falls back to template narrative. Missing: circuit breaker pattern. Path: `tenacity` for retry decorators, `pybreaker` for circuit breakers on future integrations.
 
-5. **Security hardening:** Rate limiting exists on `/api/assessment` (10 req/60s per IP). Missing: per-endpoint limits on all routes. Path: `slowapi` for full route coverage, Cloudflare proxy for DDoS protection.
+5. **Security hardening:** Rate limiting exists on all endpoint groups. Sprint 30 audit addressed SSRF, timing-safe auth, production config validators, PII protection, and prompt injection defense. See `docs/SECURITY.md` for full posture.
 
 6. **Horizontal scaling:** Single process, single SQLite file. Decomposition path: API service and scraping workers as separate Railway services, PostgreSQL as managed addon, Redis as Railway plugin. No application code changes required — infrastructure decomposition only.
