@@ -11,7 +11,7 @@ from app.integrations.brightdata.types import BrightDataJobRecord
 from app.modules.benefits.thresholds import HOURS_PER_YEAR as _HOURS_PER_YEAR
 
 
-_FIELD_LIMITS = {"title": 500, "company": 200, "location": 200, "description": 5000, "url": 2000}
+FIELD_LIMITS = {"title": 500, "company": 200, "location": 200, "description": 5000, "url": 2000}
 
 _TITLE_EXCLUDE = re.compile(
     r"\b(?:CEO|CFO|CTO|COO|VP|Vice\s+President|Director|Attorney|"
@@ -35,7 +35,7 @@ def _parse_salary_yearly(salary: str) -> float | None:
     return None
 
 
-def _should_exclude(job: dict) -> bool:
+def should_exclude(job: dict) -> bool:
     """Return True if job should be excluded (executive title or high salary)."""
     title = job.get("title")
     if not title:
@@ -50,7 +50,7 @@ def _should_exclude(job: dict) -> bool:
     return False
 
 
-def _truncate(value: str | None, limit: int) -> str | None:
+def truncate(value: str | None, limit: int) -> str | None:
     """Truncate a string to limit length, or return None."""
     if value is None:
         return None
@@ -75,19 +75,19 @@ def parse_brightdata_jobs(raw_jobs: list[dict]) -> list[BrightDataJobRecord]:
             continue
         # Normalize for exclusion check
         normalized = {**job, "title": title}
-        if _should_exclude(normalized):
+        if should_exclude(normalized):
             continue
         results.append(BrightDataJobRecord(
-            title=_truncate(title, _FIELD_LIMITS["title"]),
-            company=_truncate(_get_field(job, "company", "company_name"), _FIELD_LIMITS["company"]),
-            location=_truncate(_get_field(job, "location"), _FIELD_LIMITS["location"]),
-            description=_truncate(_get_field(job, "description", "description_text"), _FIELD_LIMITS["description"]),
-            url=_truncate(_get_field(job, "url", "apply_link"), _FIELD_LIMITS["url"]),
+            title=truncate(title, FIELD_LIMITS["title"]),
+            company=truncate(_get_field(job, "company", "company_name"), FIELD_LIMITS["company"]),
+            location=truncate(_get_field(job, "location"), FIELD_LIMITS["location"]),
+            description=truncate(_get_field(job, "description", "description_text"), FIELD_LIMITS["description"]),
+            url=truncate(_get_field(job, "url", "apply_link"), FIELD_LIMITS["url"]),
         ))
     return results
 
 
-async def _get_existing_urls(
+async def get_existing_urls(
     session: AsyncSession, urls: list[str],
 ) -> set[str]:
     """Fetch URLs that already exist in job_listings for deduplication."""
@@ -111,7 +111,7 @@ async def store_crawl_results(
         return 0
 
     incoming_urls = [j.url for j in parsed if j.url]
-    existing_urls = await _get_existing_urls(session, incoming_urls)
+    existing_urls = await get_existing_urls(session, incoming_urls)
 
     now_dt = datetime.now(timezone.utc)
     now = now_dt.isoformat()

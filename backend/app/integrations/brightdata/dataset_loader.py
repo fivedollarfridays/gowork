@@ -15,10 +15,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.queries_jobs import insert_job_listings
 from app.integrations.brightdata.cache import (
-    _FIELD_LIMITS,
-    _get_existing_urls,
-    _should_exclude,
-    _truncate,
+    FIELD_LIMITS,
+    get_existing_urls,
+    should_exclude,
+    truncate,
 )
 from app.integrations.brightdata.salary_embed import embed_salary_text, is_high_salary
 from app.integrations.brightdata.types import BrightDataJobRecord
@@ -55,7 +55,7 @@ def normalize_dataset_record(record: dict) -> BrightDataJobRecord | None:
         return None
 
     normalized = {**record, "title": title}
-    if _should_exclude(normalized):
+    if should_exclude(normalized):
         return None
 
     salary = _get(record, "salary", "salary_range", "compensation")
@@ -65,14 +65,14 @@ def normalize_dataset_record(record: dict) -> BrightDataJobRecord | None:
     description = embed_salary_text(description, salary)
 
     return BrightDataJobRecord(
-        title=_truncate(title, _FIELD_LIMITS["title"]),
-        company=_truncate(
+        title=truncate(title, FIELD_LIMITS["title"]),
+        company=truncate(
             _get(record, "company", "company_name", "employer"),
-            _FIELD_LIMITS["company"],
+            FIELD_LIMITS["company"],
         ),
-        location=_truncate(_build_location(record), _FIELD_LIMITS["location"]),
-        description=_truncate(description, _FIELD_LIMITS["description"]),
-        url=_truncate(_get(record, "url", "apply_link", "apply_url"), _FIELD_LIMITS["url"]),
+        location=truncate(_build_location(record), FIELD_LIMITS["location"]),
+        description=truncate(description, FIELD_LIMITS["description"]),
+        url=truncate(_get(record, "url", "apply_link", "apply_url"), FIELD_LIMITS["url"]),
     )
 
 
@@ -166,7 +166,7 @@ async def store_dataset_records(
         return 0
 
     incoming_urls = [r.url for r in records if r.url]
-    existing_urls = await _get_existing_urls(session, incoming_urls)
+    existing_urls = await get_existing_urls(session, incoming_urls)
 
     now_dt = datetime.now(timezone.utc)
     now = now_dt.isoformat()

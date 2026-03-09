@@ -299,7 +299,7 @@ class TestStoreDatasetRecords:
             ),
         ]
         with patch(
-            "app.integrations.brightdata.dataset_loader._get_existing_urls",
+            "app.integrations.brightdata.dataset_loader.get_existing_urls",
             return_value=set(),
         ), patch(
             "app.integrations.brightdata.dataset_loader.insert_job_listings",
@@ -333,7 +333,7 @@ class TestStoreDatasetRecords:
             ),
         ]
         with patch(
-            "app.integrations.brightdata.dataset_loader._get_existing_urls",
+            "app.integrations.brightdata.dataset_loader.get_existing_urls",
             return_value={"https://example.com/existing"},
         ), patch(
             "app.integrations.brightdata.dataset_loader.insert_job_listings",

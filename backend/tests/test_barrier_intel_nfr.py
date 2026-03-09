@@ -71,8 +71,8 @@ class TestObservability:
             retrieval_doc_count=3,
             retrieval_latency_ms=15.2,
             llm_latency_ms=850.0,
-            input_tokens=500,
-            output_tokens=200,
+            prompt_chars=500,
+            response_chars=200,
             cache_hit=False,
             guardrail_triggered=False,
         )
@@ -90,8 +90,8 @@ class TestObservability:
             retrieval_doc_count=0,
             retrieval_latency_ms=0,
             llm_latency_ms=0,
-            input_tokens=0,
-            output_tokens=0,
+            prompt_chars=0,
+            response_chars=0,
             cache_hit=True,
             guardrail_triggered=False,
         )
