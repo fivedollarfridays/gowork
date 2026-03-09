@@ -13,6 +13,14 @@ _openai_client = None
 _gemini_configured = False
 
 
+def reset_provider_cache() -> None:
+    """Reset cached client instances. Call from test fixtures to prevent leakage."""
+    global _anthropic_client, _openai_client, _gemini_configured
+    _anthropic_client = None
+    _openai_client = None
+    _gemini_configured = False
+
+
 class MockProvider:
     """Mock LLM provider for testing and graceful degradation."""
 

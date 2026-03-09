@@ -161,7 +161,7 @@ def _check_section_8(
 
 
 def _check_liheap(
-    annual: float, hs: int, _children: int, _profile: BenefitsProfile,
+    annual: float, hs: int, children: int, profile: BenefitsProfile,
 ) -> ProgramEligibility:
     fpl = FPL_2026[hs]
     threshold = fpl * LIHEAP_FPL_LIMIT_PCT
@@ -177,7 +177,7 @@ def _check_liheap(
         confidence=_confidence(annual, threshold),
         income_threshold=threshold,
         income_headroom=round(threshold - annual, 2),
-        estimated_monthly_value=round(_benefit_value("LIHEAP", annual, _profile), 2) if is_eligible else 0.0,
+        estimated_monthly_value=round(_benefit_value("LIHEAP", annual, profile), 2) if is_eligible else 0.0,
         reason=reason,
     )
 

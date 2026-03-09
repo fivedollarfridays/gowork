@@ -185,7 +185,7 @@ export function BarrierCardView({ barrier, sessionId, token, zipCode }: BarrierC
                           rel="noopener noreferrer"
                           className="flex items-center gap-1.5 mt-1 text-xs text-secondary hover:underline"
                         >
-                          <MapPin className="h-3 w-3 shrink-0" />
+                          <MapPin className="h-3 w-3 shrink-0" aria-hidden="true" />
                           {resource.address}
                         </a>
                       )}
@@ -194,7 +194,7 @@ export function BarrierCardView({ barrier, sessionId, token, zipCode }: BarrierC
                           href={toTelHref(resource.phone)}
                           className="flex items-center gap-1.5 mt-0.5 text-xs text-secondary hover:underline"
                         >
-                          <Phone className="h-3 w-3 shrink-0" />
+                          <Phone className="h-3 w-3 shrink-0" aria-hidden="true" />
                           {resource.phone}
                         </a>
                       )}

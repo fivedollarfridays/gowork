@@ -3,13 +3,8 @@
 import re
 
 from app.modules.matching.filters import CERT_DB
-from app.modules.matching.types import (
-    BarrierType,
-    DislocatedWorkerStatus,
-    EligibilityConfidence,
-    UserProfile,
-    WIOAEligibility,
-)
+from app.modules.matching.types import BarrierType, UserProfile
+from app.modules.matching.types_wioa import DislocatedWorkerStatus, WIOAConfidence, WIOAEligibility
 
 # Barriers that independently qualify for WIOA Adult program
 QUALIFYING_BARRIERS = {
@@ -48,5 +43,5 @@ def screen_wioa_eligibility(profile: UserProfile) -> WIOAEligibility:
         supportive_services=adult_eligible and has_supportive,
         ita_training=adult_eligible and has_expired_certification(profile.work_history),
         dislocated_worker=DislocatedWorkerStatus.NEEDS_VERIFICATION,
-        confidence=EligibilityConfidence.LIKELY,
+        confidence=WIOAConfidence.LIKELY,
     )

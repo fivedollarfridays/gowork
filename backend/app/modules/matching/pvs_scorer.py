@@ -225,6 +225,7 @@ def _build_match(
         pay_range=_format_pay_range(salary),
         bucket=MatchBucket.AFTER_REPAIR if job.get("credit_blocked") else MatchBucket.STRONG,
         cliff_impact=cliff_impact,
+        transit_info=job.get("transit_info"),
     )
 
 

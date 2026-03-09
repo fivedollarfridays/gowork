@@ -9,6 +9,17 @@ from app.modules.criminal.expungement import ExpungementResult
 from app.modules.criminal.record_profile import RecordProfile
 from app.modules.feedback.types import ResourceHealth
 from app.modules.matching.job_readiness_types import JobReadinessResult
+from app.modules.matching.types_transit import (  # noqa: F401 — re-export
+    RouteFeasibility,
+    TransitConnection,
+    TransitInfo,
+    TransitWarning,
+)
+from app.modules.matching.types_wioa import (  # noqa: F401 — re-export
+    DislocatedWorkerStatus,
+    WIOAConfidence,
+    WIOAEligibility,
+)
 
 
 class BarrierType(str, Enum):
@@ -171,13 +182,7 @@ class ScoredJobMatch(JobMatch):
     bucket: MatchBucket = MatchBucket.POSSIBLE
     pay_range: Optional[str] = None
     cliff_impact: Optional[CliffImpact] = None
-
-
-class TransitConnection(BaseModel):
-    route_number: int
-    route_name: str
-    connects_to: list[str]
-    schedule: str  # e.g. "Mon-Sat 5am-9pm, no Sunday"
+    transit_info: Optional[TransitInfo] = None
 
 
 class BarrierCard(BaseModel):
@@ -215,24 +220,3 @@ class ReEntryPlan(BaseModel):
         return list(self.strong_matches) + list(self.possible_matches) + list(self.after_repair)
 
 
-class DislocatedWorkerStatus(str, Enum):
-    ELIGIBLE = "eligible"
-    INELIGIBLE = "ineligible"
-    NEEDS_VERIFICATION = "needs_verification"
-
-
-class EligibilityConfidence(str, Enum):
-    LIKELY = "likely"
-    CONFIRMED = "confirmed"
-    UNLIKELY = "unlikely"
-
-
-class WIOAEligibility(BaseModel):
-    """WIOA program eligibility screening result."""
-
-    adult_program: bool
-    adult_reasons: list[str]
-    supportive_services: bool
-    ita_training: bool
-    dislocated_worker: DislocatedWorkerStatus
-    confidence: EligibilityConfidence

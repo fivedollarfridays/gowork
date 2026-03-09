@@ -61,10 +61,15 @@ ELIGIBILITY_RULES: dict[str, dict] = {
 }
 
 
+# Pre-compute lowercase keys for efficient substring matching
+_RULES_LOWER = {key.lower(): rule for key, rule in ELIGIBILITY_RULES.items()}
+
+
 def _match_rule(resource_name: str) -> Optional[dict]:
     """Find the first matching rule by substring."""
-    for key, rule in ELIGIBILITY_RULES.items():
-        if key.lower() in resource_name.lower():
+    name_lower = resource_name.lower()
+    for key, rule in _RULES_LOWER.items():
+        if key in name_lower:
             return rule
     return None
 

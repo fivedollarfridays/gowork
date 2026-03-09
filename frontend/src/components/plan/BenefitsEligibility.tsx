@@ -90,19 +90,16 @@ function ProgramRow({ program, defaultOpen }: { program: ProgramEligibility; def
                 </ul>
               </div>
 
-              {(() => {
-                const appHref = safeHref(info.application_url);
-                return appHref ? (
-                  <a
-                    href={appHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                  >
-                    Apply online <ExternalLink className="h-3 w-3" aria-hidden="true" />
-                  </a>
-                ) : null;
-              })()}
+              {safeHref(info.application_url) && (
+                <a
+                  href={safeHref(info.application_url)!}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                >
+                  Apply online <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                </a>
+              )}
             </div>
           )}
         </>

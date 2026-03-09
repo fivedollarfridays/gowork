@@ -14,7 +14,7 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 
-def hash_session_id(session_id: str, salt: str = "") -> str:
+def hash_session_id(session_id: str, salt: str) -> str:
     """Hash a session ID with salted sha256 for PII-safe logging."""
     return hashlib.sha256((salt + session_id).encode()).hexdigest()
 

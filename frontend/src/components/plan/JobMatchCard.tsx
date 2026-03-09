@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import type { CreditAssessmentResult, JobMatch, ScoredJobMatch } from "@/lib/types";
 import { STATUS_BADGE_STYLES, safeHref, daysToMonths, mapsUrl } from "@/lib/constants";
 import { CliffBadge } from "./CliffBadge";
+import { TransitInfoDisplay } from "./TransitInfoDisplay";
 
 export function isScoredJob(job: JobMatch): job is ScoredJobMatch {
   return "relevance_score" in job;
@@ -146,6 +147,14 @@ export function JobMatchCard({ job, creditResult }: JobMatchCardProps) {
             </span>
           )}
         </div>
+
+        {/* Transit schedule info */}
+        {isScoredJob(job) && job.transit_info && (
+          <>
+            <Separator />
+            <TransitInfoDisplay transitInfo={job.transit_info} />
+          </>
+        )}
 
         {/* Eligibility */}
         {!job.eligible_now && job.eligible_after && (

@@ -88,6 +88,9 @@ export default function AssessPage() {
         sessionStorage.setItem(`feedback_token_${data.session_id}`, data.feedback_token);
       }
       sessionStorage.setItem(`zip_${data.session_id}`, formData.zipCode);
+      if (benefitsData.enrolled_programs.length > 0) {
+        sessionStorage.setItem(`enrolled_${data.session_id}`, JSON.stringify(benefitsData.enrolled_programs));
+      }
       router.push(`/plan?session=${data.session_id}`);
     },
     onError: () => {

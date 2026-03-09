@@ -160,6 +160,46 @@ class TestEnrichJobEdgeCases:
         assert result["background_check_timing"] is None
         assert result["record_note"] is None
 
+    def test_record_note_singular_year(self):
+        """Lookback with 1 year remaining uses singular 'year'."""
+        policies = [
+            EmployerPolicy(
+                employer_name="TestCo",
+                fair_chance=False,
+                excluded_charges=[],
+                lookback_years=5,
+                background_check_timing="pre_offer",
+            ),
+        ]
+        profile = RecordProfile(
+            record_types=[RecordType.FELONY],
+            charge_categories=[ChargeCategory.THEFT],
+            years_since_conviction=4,
+        )
+        job = {"title": "Clerk", "company": "TestCo"}
+        result = enrich_job_with_record_status(job, profile, policies)
+        assert result["record_note"] == "Eligible after 1 more year"
+
+    def test_record_note_plural_years(self):
+        """Lookback with 3 years remaining uses plural 'years'."""
+        policies = [
+            EmployerPolicy(
+                employer_name="TestCo",
+                fair_chance=False,
+                excluded_charges=[],
+                lookback_years=7,
+                background_check_timing="pre_offer",
+            ),
+        ]
+        profile = RecordProfile(
+            record_types=[RecordType.FELONY],
+            charge_categories=[ChargeCategory.THEFT],
+            years_since_conviction=4,
+        )
+        job = {"title": "Clerk", "company": "TestCo"}
+        result = enrich_job_with_record_status(job, profile, policies)
+        assert result["record_note"] == "Eligible after 3 more years"
+
     def test_record_note_charge_type_exclusion(self):
         """Excluded charge with no lookback -> 'Not eligible based on charge type'."""
         # Policy with excluded charges but NO lookback_years
