@@ -1,14 +1,22 @@
 # Current State
 
-> Last updated: 2026-03-08
+> Last updated: 2026-03-09
 
 ## Active Plan
+
+**Plan:** plan-2026-03-resource-auto-matching
+**Type:** feature
+**Title:** Resource Auto-Matching — findhelp.org Integration + Eligibility Engine
+**Status:** Complete (2/3 done, T28.3 deferred — needs findhelp.org API partnership)
+**Sprint:** 28
+
+## Previous Active Plan (Sprint 25)
 
 **Plan:** plan-2026-03-benefits-cliff-engine
 **Type:** feature
 **Title:** Benefits Cliff Engine — Cliff-Aware Job Ranking for Montgomery Residents
-**Status:** Planned (synced to Trello)
-**Current Sprint:** 25
+**Status:** Complete (4/4 done)
+**Sprint:** 25
 
 ## Previous Active Plan
 
@@ -37,9 +45,19 @@
 
 ## Current Focus
 
-Sprint 25: Benefits Cliff Engine. WorkPath's key differentiator — showing users that "taking this $15/hr job costs you $400/month in benefits." Alabama-specific benefit program modeling (SNAP, TANF, Medicaid, Childcare, Section 8, LIHEAP), cliff-aware PVS scoring, and visualization.
+Sprint 28: Resource Auto-Matching. Auto-match findhelp.org's 602 Montgomery programs to users based on barrier profile. Capability URL integration + eligibility engine.
 
 ## Task Status
+
+### Sprint 28 — Resource Auto-Matching
+
+| ID | Title | Priority | Complexity | Status | Depends On |
+|----|-------|----------|------------|--------|------------|
+| T28.1 | findhelp.org Integration (Capability URLs) | P1 | 45 | done | -- |
+| T28.2 | Resource Eligibility Engine | P1 | 50 | done | T28.1 |
+| T28.3 | findhelp.org Deep Integration (V2) | P2 | 60 | deferred | API access |
+
+**Total: 3 tasks, 155 complexity points (2/3 done, 1 deferred) — SPRINT COMPLETE**
 
 ### Sprint 25 — Benefits Cliff Engine
 
@@ -136,6 +154,12 @@ Sprint 25: Benefits Cliff Engine. WorkPath's key differentiator — showing user
 **Total: 6 tasks, 125 complexity points (6/6 done)**
 
 ## What Was Just Done
+
+- **T28.2 done** (auto-updated by hook)
+
+- **T28.2 done** (2026-03-09) — Resource Eligibility Engine. Backend: `modules/resources/eligibility.py` with `ELIGIBILITY_RULES` (15+ rules: open, enrollment, compound income+dependents), `EligibilityStatus` enum (likely/check/unknown), `check_eligibility()` function. Added `eligibility_status: Optional[str]` to Resource model. Extracted barrier card builders to `matching/barrier_cards.py` (`build_barrier_cards_and_steps`, `_annotate_eligibility`, `_build_cards`, `_build_next_steps`, `BARRIER_TITLES`, `BARRIER_ACTIONS`) to fix engine.py arch violations (17→13 imports, 264→120 lines). Frontend: `EligibilityBadge.tsx` (green "Likely eligible" / yellow "Check eligibility" using semantic `bg-success/10` / `bg-warning/10` tokens), wired into `BarrierCardView.tsx` next to resource names. 20 backend tests, 6 frontend tests. All 1117 backend + 375 frontend tests pass, all arch checks clean.
+
+- **T28.1 done** (2026-03-09) — findhelp.org capability URL integration. Backend: `modules/resources/findhelp.py` with `FINDHELP_CATEGORIES` mapping all 7 barrier types to findhelp.org category paths, `generate_findhelp_url()`. Frontend: `lib/findhelp.ts` (mirrored mapping), `FindhelpLink.tsx` component with external link, wired into `BarrierCardView` with zip code from sessionStorage. Zip stored during assessment. 26 backend tests, 10 frontend tests. All 1097 backend + 368 frontend tests pass.
 
 - **Fix: frontend test step indices** (2026-03-08) — Updated `assess-industry.test.tsx` and `assess-schedule.test.tsx` to account for new Benefits step (step 4). Schedule moved from step 4→5, Industries from step 5→6, Review from step 6→7. All 9 assess tests pass. 4 pre-existing failures in unrelated files (BarrierCardView, MondayMorning, plan-whats-next).
 
@@ -275,9 +299,9 @@ Sprint 25: Benefits Cliff Engine. WorkPath's key differentiator — showing user
 
 ## What's Next
 
-Sprint 25 COMPLETE. Ready for Sprint 26 (BrightData Phase 2) or cherry-pick from Vinny's PR #33.
+Sprint 28 complete. T28.3 deferred until findhelp.org API partnership secured. Next sprint TBD.
 
 
 ## Blockers
 
-None.
+- T28.3: Requires findhelp.org API partnership (external dependency).
