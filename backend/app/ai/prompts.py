@@ -40,7 +40,7 @@ USER_PROMPT_TEMPLATE = (
     "- Barriers: <user_input>{barriers}</user_input>\n"
     "- Work history / qualifications: <user_input>{qualifications}</user_input>\n\n"
     "Matched resources, job opportunities, and plan details:\n"
-    "{plan_data}\n\n"
+    "<user_input>{plan_data}</user_input>\n\n"
     "Instructions:\n"
     "1. The summary should read like a Monday morning pep talk — what is the very "
     "first thing they should do, where should they go, and who should they talk to?\n"

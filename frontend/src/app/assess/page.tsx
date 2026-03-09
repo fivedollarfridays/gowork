@@ -82,10 +82,10 @@ export default function AssessPage() {
     mutationFn: postAssessment,
     onSuccess: (data) => {
       if (creditResultRef.current) {
-        localStorage.setItem(`credit_${data.session_id}`, JSON.stringify(creditResultRef.current));
+        sessionStorage.setItem(`credit_${data.session_id}`, JSON.stringify(creditResultRef.current));
       }
       if (data.feedback_token) {
-        localStorage.setItem(`feedback_token_${data.session_id}`, data.feedback_token);
+        sessionStorage.setItem(`feedback_token_${data.session_id}`, data.feedback_token);
       }
       sessionStorage.setItem(`zip_${data.session_id}`, formData.zipCode);
       router.push(`/plan?session=${data.session_id}`);
