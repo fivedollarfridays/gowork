@@ -35,6 +35,7 @@ class ResidentActionPlan(BaseModel):
     what_to_expect: list[str]
     career_center: CareerCenterInfo
     programs: list[str]
+    action_timeline: list[dict] = Field(default_factory=list)
 
 
 class CreditPathway(BaseModel):

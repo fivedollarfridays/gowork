@@ -312,4 +312,61 @@ describe("PlanExport", () => {
     render(<PlanExport plan={basePlan} />);
     expect(screen.queryByText(/how did your visit go/i)).not.toBeInTheDocument();
   });
+
+  it("renders action timeline section when action_plan exists", () => {
+    const planWithTimeline: ReEntryPlan = {
+      ...basePlan,
+      action_plan: {
+        assessment_date: "2026-03-09",
+        total_actions: 2,
+        phases: [
+          {
+            phase_id: "week_1_2",
+            label: "Week 1-2: Immediate Actions",
+            start_day: 0,
+            end_day: 14,
+            actions: [
+              {
+                category: "career_center",
+                title: "Visit Alabama Career Center",
+                detail: "1060 East South Blvd",
+                priority: 0,
+                source_module: "career_center",
+                resource_name: "Alabama Career Center",
+                resource_phone: "334-286-1746",
+              },
+            ],
+          },
+          {
+            phase_id: "month_1",
+            label: "Month 1: Foundations",
+            start_day: 14,
+            end_day: 30,
+            actions: [
+              {
+                category: "credit_repair",
+                title: "Request free credit reports",
+                detail: null,
+                priority: 0,
+                source_module: "credit",
+                resource_name: null,
+                resource_phone: null,
+              },
+            ],
+          },
+        ],
+      },
+    };
+    render(<PlanExport plan={planWithTimeline} />);
+    expect(screen.getByText("Action Plan Timeline")).toBeInTheDocument();
+    expect(screen.getByText("Week 1-2: Immediate Actions")).toBeInTheDocument();
+    expect(screen.getAllByText("Visit Alabama Career Center").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Month 1: Foundations")).toBeInTheDocument();
+    expect(screen.getByText("Request free credit reports")).toBeInTheDocument();
+  });
+
+  it("does not render timeline section when action_plan is null", () => {
+    render(<PlanExport plan={basePlan} />);
+    expect(screen.queryByText("Action Plan Timeline")).not.toBeInTheDocument();
+  });
 });

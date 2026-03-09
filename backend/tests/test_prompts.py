@@ -110,6 +110,7 @@ class TestUserPromptTemplate:
             barriers="credit (high severity), transportation (medium severity)",
             qualifications="Former CNA at Baptist Hospital, 3 years experience",
             plan_data='{"barriers": [], "job_matches": []}',
+            timeline_context="",
         )
         assert "credit" in rendered
         assert "Former CNA" in rendered
@@ -123,6 +124,7 @@ class TestUserPromptTemplate:
             barriers="credit, transportation",
             qualifications="test",
             plan_data="{}",
+            timeline_context="",
         )
         assert "<user_input>credit, transportation</user_input>" in rendered
 
@@ -134,6 +136,7 @@ class TestUserPromptTemplate:
             barriers="credit",
             qualifications="Former CNA, 3 years",
             plan_data="{}",
+            timeline_context="",
         )
         assert "<user_input>Former CNA, 3 years</user_input>" in rendered
 
@@ -145,6 +148,7 @@ class TestUserPromptTemplate:
             barriers="credit",
             qualifications="test",
             plan_data='{"barriers": [], "job_matches": []}',
+            timeline_context="",
         )
         assert '<user_input>{"barriers": [], "job_matches": []}</user_input>' in rendered
 

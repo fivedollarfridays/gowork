@@ -110,11 +110,7 @@ class TestAdminApiKeyValidator:
         assert s.admin_api_key == _TEST_KEY
 
 
-def _mock_rag_store():
-    """Return a patch that replaces RagStore with a no-op mock."""
-    mock_store = MagicMock()
-    mock_store.build_or_load = AsyncMock()
-    return patch("app.main.RagStore", return_value=mock_store)
+_MOCK_SEEDS = "app.core.startup.run_seeds_and_rag"
 
 
 class TestStartupEnvironmentWarning:
@@ -136,10 +132,7 @@ class TestStartupEnvironmentWarning:
         with patch("app.main.get_engine", return_value=mock_engine), \
              patch("app.main.init_db", new_callable=AsyncMock), \
              patch("app.main.close_db", new_callable=AsyncMock), \
-             patch("app.main.upsert_barrier_graph", new_callable=AsyncMock), \
-             patch("app.main.seed_employer_policies", new_callable=AsyncMock), \
-             patch("app.main.seed_honestjobs_listings", new_callable=AsyncMock), \
-             _mock_rag_store(), \
+             patch(_MOCK_SEEDS, new_callable=AsyncMock, return_value=MagicMock()), \
              patch("app.main.check_llm_providers", return_value=mock_status), \
              patch("app.main.logger") as mock_logger, \
              patch.dict("os.environ", clean_env, clear=True):
@@ -161,10 +154,7 @@ class TestStartupEnvironmentWarning:
         with patch("app.main.get_engine", return_value=mock_engine), \
              patch("app.main.init_db", new_callable=AsyncMock), \
              patch("app.main.close_db", new_callable=AsyncMock), \
-             patch("app.main.upsert_barrier_graph", new_callable=AsyncMock), \
-             patch("app.main.seed_employer_policies", new_callable=AsyncMock), \
-             patch("app.main.seed_honestjobs_listings", new_callable=AsyncMock), \
-             _mock_rag_store(), \
+             patch(_MOCK_SEEDS, new_callable=AsyncMock, return_value=MagicMock()), \
              patch("app.main.check_llm_providers", return_value=mock_status), \
              patch("app.main.logger") as mock_logger, \
              patch.dict("os.environ", {"ENVIRONMENT": "staging"}, clear=False):

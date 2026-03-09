@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class AnalysisResult(BaseModel):
@@ -12,3 +12,4 @@ class PlanNarrative(BaseModel):
     """Claude API generates the Monday Morning summary paragraph."""
     summary: str  # "Monday morning, walk to the Route 7 bus stop..."
     key_actions: list[str]  # Top 3-5 prioritized actions
+    phase_summaries: list[str] = Field(default_factory=list)

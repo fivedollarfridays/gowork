@@ -1,9 +1,9 @@
 "use client";
 
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { getPlan } from "@/lib/api";
+import { getPlan, toggleAction } from "@/lib/api";
+import { useClientStorage, useSessionId, useToken } from "./hooks";
 import { useReducedMotion } from "framer-motion";
 import { ScrollReveal, ShimmerBar } from "@/lib/motion";
 import { Clock, MapPin, Phone, Search } from "lucide-react";
@@ -18,6 +18,8 @@ import { CreditResults } from "@/components/plan/CreditResults";
 import { JobReadinessResults } from "@/components/plan/JobReadinessResults";
 import { BenefitsCliffChart } from "@/components/plan/BenefitsCliffChart";
 import { BenefitsEligibility } from "@/components/plan/BenefitsEligibility";
+import { ActionTimeline } from "@/components/plan/ActionTimeline";
+import { ProgressSummary } from "@/components/plan/ProgressSummary";
 import { CareerCenterExport } from "@/components/plan/CareerCenterExport";
 import { EmailExport } from "@/components/plan/EmailExport";
 import { PlanExport } from "@/components/plan/PlanExport";
@@ -63,46 +65,6 @@ function PlanSkeleton() {
   );
 }
 
-function useClientStorage(key: string | null): { value: string | null; ready: boolean } {
-  const [state, setState] = useState<{ value: string | null; ready: boolean }>({ value: null, ready: false });
-  useEffect(() => {
-    if (!key) { setState({ value: null, ready: true }); return; }
-    try { setState({ value: sessionStorage.getItem(key), ready: true }); } catch { setState({ value: null, ready: true }); }
-  }, [key]);
-  return state;
-}
-
-function useSessionId(): { id: string | null; ready: boolean } {
-  const searchParams = useSearchParams();
-  const fromUrl = searchParams.get("session");
-  const stored = useClientStorage(fromUrl ? null : "montgowork_session_id");
-
-  useEffect(() => {
-    if (fromUrl) {
-      try { sessionStorage.setItem("montgowork_session_id", fromUrl); } catch {}
-    }
-  }, [fromUrl]);
-
-  if (fromUrl) return { id: fromUrl, ready: true };
-  return { id: stored.value, ready: stored.ready };
-}
-
-function useToken(sessionId: string | null): { token: string | null; ready: boolean } {
-  const searchParams = useSearchParams();
-  const fromUrl = searchParams.get("token");
-  const storageKey = (!fromUrl && sessionId) ? `feedback_token_${sessionId}` : null;
-  const stored = useClientStorage(storageKey);
-
-  useEffect(() => {
-    if (fromUrl && sessionId) {
-      try { sessionStorage.setItem(`feedback_token_${sessionId}`, fromUrl); } catch {}
-    }
-  }, [fromUrl, sessionId]);
-
-  if (fromUrl) return { token: fromUrl, ready: true };
-  return { token: stored.value, ready: stored.ready };
-}
-
 function PlanContent() {
   const { id: sessionId, ready: sessionReady } = useSessionId();
   const { token, ready: tokenReady } = useToken(sessionId);
@@ -114,6 +76,20 @@ function PlanContent() {
   });
 
   const plan = data?.plan ?? null;
+
+  const [checklist, setChecklist] = useState<Record<string, boolean>>(data?.action_checklist ?? {});
+  useEffect(() => {
+    if (data?.action_checklist) setChecklist(data.action_checklist);
+  }, [data?.action_checklist]);
+
+  const handleToggle = async (key: string, completed: boolean) => {
+    setChecklist((prev) => ({ ...prev, [key]: completed }));
+    try {
+      await toggleAction(sessionId ?? "", key, completed, token ?? undefined);
+    } catch {
+      setChecklist((prev) => ({ ...prev, [key]: !completed }));
+    }
+  };
 
   useEffect(() => {
     if (plan) window.scrollTo(0, 0);
@@ -132,16 +108,13 @@ function PlanContent() {
     [data],
   );
 
-  const [zipCode, setZipCode] = useState("");
-  const [enrolledPrograms, setEnrolledPrograms] = useState<string[]>([]);
-  useEffect(() => {
-    if (typeof window === "undefined" || !sessionId) return;
-    setZipCode(sessionStorage.getItem(`zip_${sessionId}`) ?? "");
-    try {
-      const raw = sessionStorage.getItem(`enrolled_${sessionId}`);
-      if (raw) setEnrolledPrograms(JSON.parse(raw));
-    } catch { /* ignore corrupt data */ }
-  }, [sessionId]);
+  const storedZip = useClientStorage(sessionId ? `zip_${sessionId}` : null);
+  const zipCode = storedZip.value ?? "";
+  const storedEnrolled = useClientStorage(sessionId ? `enrolled_${sessionId}` : null);
+  const enrolledPrograms = useMemo<string[]>(() => {
+    if (!storedEnrolled.value) return [];
+    try { return JSON.parse(storedEnrolled.value); } catch { return []; }
+  }, [storedEnrolled.value]);
 
   const prefersReduced = useReducedMotion();
   const hasFiredConfetti = useRef(false);
@@ -212,6 +185,24 @@ function PlanContent() {
           }
         />
       </ScrollReveal>
+
+      {/* Action Timeline */}
+      {plan.action_plan && (
+        <>
+          <Separator />
+          <ScrollReveal>
+            <ProgressSummary
+              completed={Object.values(checklist).filter(Boolean).length}
+              total={plan.action_plan.total_actions}
+            />
+            <ActionTimeline
+              actionPlan={plan.action_plan}
+              checklist={checklist}
+              onToggle={handleToggle}
+            />
+          </ScrollReveal>
+        </>
+      )}
 
       <Separator />
 

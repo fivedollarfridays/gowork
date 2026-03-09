@@ -73,11 +73,11 @@ async def get_all_employers(session: AsyncSession) -> list[dict]:
 
 
 async def create_session(session: AsyncSession, session_data: dict, session_id: str | None = None) -> str:
-    """Insert a new session row with UUID and 24h expiry. Returns session id."""
+    """Insert a new session row with UUID and 30-day expiry. Returns session id."""
     session_id = session_id or str(uuid.uuid4())
     now_dt = datetime.now(timezone.utc)
     now = now_dt.isoformat()
-    expires = (now_dt + timedelta(hours=24)).isoformat()
+    expires = (now_dt + timedelta(days=30)).isoformat()
     await session.execute(
         text(
             "INSERT INTO sessions (id, created_at, barriers, credit_profile, "
@@ -164,3 +164,5 @@ async def get_record_profile(
         years_since_conviction=data["years_since_conviction"],
         completed_sentence=bool(data["completed_sentence"]),
     )
+
+

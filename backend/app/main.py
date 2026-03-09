@@ -11,11 +11,7 @@ from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from app.ai.llm_client import check_llm_providers
 from app.core.config import get_settings
-from app.barrier_graph.seed import upsert_barrier_graph
-from app.modules.criminal.employer_seed import seed_employer_policies
-from app.integrations.honestjobs.seed import seed_honestjobs_listings
 from app.core.database import close_db, get_async_session_factory, get_engine, init_db
-from app.rag.store import RagStore
 from app.core.exception_handlers import register_exception_handlers
 from app.routes import all_routers
 
@@ -54,19 +50,13 @@ async def lifespan(app: FastAPI):
     configure_logging()
     logger.info("MontGoWork API starting up")
     get_settings()
+    from app.core.startup import run_seeds_and_rag
+
     llm_status = _log_startup_warnings()
     engine = get_engine()
     await init_db(engine)
     factory = get_async_session_factory()
-    async with factory() as session:
-        await upsert_barrier_graph(session)
-        await seed_employer_policies(session)
-    async with factory() as session:
-        await seed_honestjobs_listings(session)
-    rag_store = RagStore()
-    async with factory() as session:
-        await rag_store.build_or_load(session)
-    app.state.rag_store = rag_store
+    app.state.rag_store = await run_seeds_and_rag(factory)
     app.state.llm_status = llm_status
     yield
     await close_db()

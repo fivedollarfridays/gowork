@@ -41,6 +41,7 @@ USER_PROMPT_TEMPLATE = (
     "- Work history / qualifications: <user_input>{qualifications}</user_input>\n\n"
     "Matched resources, job opportunities, and plan details:\n"
     "<user_input>{plan_data}</user_input>\n\n"
+    "{timeline_context}"
     "Instructions:\n"
     "1. The summary should read like a Monday morning pep talk — what is the very "
     "first thing they should do, where should they go, and who should they talk to?\n"
@@ -48,7 +49,10 @@ USER_PROMPT_TEMPLATE = (
     "3. If they have transportation barriers, mention specific M-Transit routes or "
     "alternatives.\n"
     "4. Each key_action should be a single concrete step with a place, contact, or "
-    "deadline — not a vague suggestion.\n\n"
+    "deadline — not a vague suggestion.\n"
+    "5. If a phased timeline is provided above, weave the timeline phases into "
+    "the narrative — mention what to do first, what comes next month, and the "
+    "longer-term goals.\n\n"
     "Respond with JSON only:\n"
     '{{"summary": "Your Monday morning narrative here...", '
     '"key_actions": ["Step 1...", "Step 2...", "Step 3..."]}}'

@@ -121,6 +121,17 @@ export const PROGRAM_LABELS: Record<string, string> = {
   LIHEAP: "LIHEAP",
 };
 
+export function formatDateRange(assessmentDate: string, startDay: number, endDay: number): string {
+  const base = new Date(assessmentDate + "T00:00:00");
+  const start = new Date(base);
+  start.setDate(base.getDate() + startDay);
+  const end = new Date(base);
+  end.setDate(base.getDate() + endDay);
+  const fmt = (d: Date) =>
+    d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return `${fmt(start)} - ${fmt(end)}`;
+}
+
 /** Hex colors for PDF inline styles (html2pdf.js can't use CSS vars). */
 export const PDF_SEVERITY_COLORS: Record<string, { bg: string; text: string }> = {
   low: { bg: "#dcfce7", text: "#166534" },

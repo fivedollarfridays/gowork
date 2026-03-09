@@ -7,16 +7,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.queries import get_all_transit_stops, get_resources_by_categories
 from app.modules.benefits.types import BenefitsProfile
-from app.modules.feedback.types import ResourceHealth
+from app.modules.matching import scoring, wioa_screener
 from app.modules.matching.barrier_cards import build_barrier_cards_and_steps
 from app.modules.matching.job_matcher import match_jobs
 from app.modules.matching.job_readiness import assess_job_readiness
 from app.modules.matching.resume_parser import parse_resume
-from app.modules.matching.scoring import (
-    BARRIER_CATEGORY_MAP,
-    haversine_miles,
-    rank_resources,
-)
 from app.modules.matching.types import (
     BarrierType,
     ReEntryPlan,
@@ -24,7 +19,6 @@ from app.modules.matching.types import (
     ScoredJobMatch,
     UserProfile,
 )
-from app.modules.matching.wioa_screener import screen_wioa_eligibility
 
 
 async def query_resources_for_barriers(
@@ -33,7 +27,7 @@ async def query_resources_for_barriers(
     """Query Montgomery data for resources matching the user's barrier types."""
     categories: set[str] = set()
     for barrier in barriers:
-        categories.update(BARRIER_CATEGORY_MAP.get(barrier, set()))
+        categories.update(scoring.BARRIER_CATEGORY_MAP.get(barrier, set()))
 
     rows = await get_resources_by_categories(db_session, categories)
 
@@ -42,7 +36,7 @@ async def query_resources_for_barriers(
     for row in rows:
         if row["id"] not in seen_ids:
             # Exclude HIDDEN resources
-            if row.get("health_status") == ResourceHealth.HIDDEN.value:
+            if row.get("health_status") == "hidden":
                 continue
             seen_ids.add(row["id"])
             fields = {k: row[k] for k in Resource.model_fields if k in row}
@@ -65,7 +59,7 @@ def _compute_stop_distances(
         if r.lat is None or r.lng is None:
             continue
         min_dist = min(
-            haversine_miles(r.lat, r.lng, slat, slng)
+            scoring.haversine_miles(r.lat, r.lng, slat, slng)
             for slat, slng in stop_coords
         )
         distances[r.id] = min_dist
@@ -81,7 +75,7 @@ async def _rank_with_transit(
         stops = await get_all_transit_stops(db_session)
         if stops:
             stop_distances = _compute_stop_distances(resources, stops)
-    return rank_resources(resources, profile, stop_distances=stop_distances)
+    return scoring.rank_resources(resources, profile, stop_distances=stop_distances)
 
 
 def _split_legacy_buckets(
@@ -93,6 +87,32 @@ def _split_legacy_buckets(
     for j in jobs:
         (after_repair if j.credit_check_required == "required" else strong).append(j)
     return strong, after_repair
+
+
+def _build_action_plan(
+    strong_matches: list[ScoredJobMatch],
+    eligibility: "BenefitsEligibility | None",
+    benefits_profile: BenefitsProfile | None,
+    wioa: "WIOAEligibility | None",
+    cliff: "CliffAnalysis | None",
+    credit_result: dict | None,
+    barriers: list,
+) -> "ActionPlan":
+    """Build phased action plan from all module outputs."""
+    from datetime import date
+    from app.modules.plan import action_plan as plan_mod
+
+    enrolled = benefits_profile.enrolled_programs if benefits_profile else []
+    return plan_mod.build_action_plan(
+        strong_matches=strong_matches,
+        benefits_eligibility=eligibility,
+        enrolled_programs=enrolled,
+        wioa_eligibility=wioa,
+        cliff_analysis=cliff,
+        credit_result=credit_result,
+        barriers=barriers,
+        assessment_date=date.today(),
+    )
 
 
 def _compute_benefits(
@@ -128,6 +148,10 @@ async def generate_plan(
     parsed_resume = parse_resume(resume_text) if resume_text else None
     readiness = assess_job_readiness(profile, parsed_resume, ranked_jobs, credit_result)
     cliff, eligibility = _compute_benefits(benefits_profile)
+    wioa = wioa_screener.screen_wioa_eligibility(profile)
+    action_plan = _build_action_plan(
+        strong, eligibility, benefits_profile, wioa, cliff, credit_result, barrier_cards,
+    )
 
     return ReEntryPlan(
         plan_id=str(uuid.uuid4()),
@@ -139,8 +163,9 @@ async def generate_plan(
         immediate_next_steps=next_steps,
         eligible_now=[m.title for m in strong],
         eligible_after_repair=[m.title for m in after_repair],
-        wioa_eligibility=screen_wioa_eligibility(profile),
+        wioa_eligibility=wioa,
         job_readiness=readiness,
         benefits_cliff_analysis=cliff,
         benefits_eligibility=eligibility,
+        action_plan=action_plan,
     )

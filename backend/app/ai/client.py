@@ -14,16 +14,22 @@ async def generate_narrative(
     barriers: list[str],
     qualifications: str,
     plan_data: dict,
+    action_plan: dict | None = None,
 ) -> PlanNarrative:
     """Call LLM to generate a personalized plan narrative.
 
     Streams the response, collects it, and parses JSON.
     Falls back to mock provider when no API keys are configured.
     """
+    timeline_text = format_timeline_context(action_plan)
+    timeline_section = (
+        f"Phased action timeline:\n{timeline_text}\n\n" if timeline_text else ""
+    )
     user_prompt = USER_PROMPT_TEMPLATE.format(
         barriers=", ".join(barriers),
         qualifications=qualifications,
         plan_data=json.dumps(plan_data, default=str),
+        timeline_context=timeline_section,
     )
 
     chunks: list[str] = []
@@ -39,6 +45,36 @@ async def generate_narrative(
         logger.warning("LLM returned invalid JSON (length=%d)", len(raw))
         raise ValueError("LLM returned invalid JSON") from exc
     return PlanNarrative(**parsed)
+
+
+def format_timeline_context(action_plan: dict | None) -> str:
+    """Format ActionPlan phases into human-readable text for the LLM prompt.
+
+    Each phase is rendered with its label and a list of actions including
+    category, title, detail, and contact info when available.
+    """
+    if not action_plan:
+        return ""
+    phases = action_plan.get("phases", [])
+    if not phases:
+        return ""
+    sections: list[str] = []
+    for phase in phases:
+        label = phase.get("label", "")
+        lines = [f"## {label}"]
+        for action in phase.get("actions", []):
+            category = action.get("category", "")
+            title = action.get("title", "")
+            detail = action.get("detail")
+            phone = action.get("resource_phone")
+            parts = [f"- [{category}] {title}"]
+            if detail:
+                parts.append(f"  ({detail})")
+            if phone:
+                parts.append(f"  Phone: {phone}")
+            lines.append("".join(parts))
+        sections.append("\n".join(lines))
+    return "\n\n".join(sections)
 
 
 def _extract_actions_and_contacts(plan_data: dict) -> tuple[list[str], list[str], list[str]]:
@@ -63,12 +99,18 @@ def build_fallback_narrative(
     barriers: list[str],
     qualifications: str,
     plan_data: dict,
+    action_plan: dict | None = None,
 ) -> PlanNarrative:
     """Build a warm, Montgomery-specific narrative when the AI API is unavailable."""
     actions, contacts, job_titles = _extract_actions_and_contacts(plan_data)
     summary = _build_fallback_summary(barriers, contacts, job_titles)
     key_actions = _build_fallback_actions(actions)
-    return PlanNarrative(summary=summary, key_actions=key_actions)
+    phase_summaries = _build_fallback_phase_summaries(action_plan)
+    return PlanNarrative(
+        summary=summary,
+        key_actions=key_actions,
+        phase_summaries=phase_summaries,
+    )
 
 
 def _fallback_opening(barriers: list[str]) -> str:
@@ -135,3 +177,23 @@ def _build_fallback_actions(actions: list[str]) -> list[str]:
         "Visit the Alabama Career Center on Carter Hill Road in Montgomery "
         "for personalized guidance"
     ]
+
+
+def _build_fallback_phase_summaries(action_plan: dict | None) -> list[str]:
+    """Build one summary sentence per timeline phase for the fallback narrative."""
+    if not action_plan:
+        return []
+    phases = action_plan.get("phases", [])
+    if not phases:
+        return []
+    summaries: list[str] = []
+    for phase in phases:
+        label = phase.get("label", "")
+        actions = phase.get("actions", [])
+        titles = [a.get("title", "") for a in actions if a.get("title")]
+        if titles:
+            joined = ", ".join(titles[:3])
+            summaries.append(f"{label}: {joined}")
+        else:
+            summaries.append(label)
+    return summaries
