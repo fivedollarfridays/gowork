@@ -7,6 +7,11 @@ from app.core.config import get_settings
 
 logger = logging.getLogger(__name__)
 
+# Cached client instances (created lazily, reused across requests)
+_anthropic_client = None
+_openai_client = None
+_gemini_configured = False
+
 
 class MockProvider:
     """Mock LLM provider for testing and graceful degradation."""
@@ -32,12 +37,40 @@ async def mock_stream(system_prompt: str, user_prompt: str) -> AsyncIterator[str
         yield word if i == 0 else f" {word}"
 
 
+def _get_anthropic_client():
+    """Get or create cached Anthropic client."""
+    global _anthropic_client
+    if _anthropic_client is None:
+        from anthropic import AsyncAnthropic
+        settings = get_settings()
+        _anthropic_client = AsyncAnthropic(api_key=settings.anthropic_api_key)
+    return _anthropic_client
+
+
+def _get_openai_client():
+    """Get or create cached OpenAI client."""
+    global _openai_client
+    if _openai_client is None:
+        from openai import AsyncOpenAI
+        settings = get_settings()
+        _openai_client = AsyncOpenAI(api_key=settings.openai_api_key)
+    return _openai_client
+
+
+def _configure_gemini():
+    """Configure Gemini SDK once (global state)."""
+    global _gemini_configured
+    if not _gemini_configured:
+        import google.generativeai as genai
+        settings = get_settings()
+        genai.configure(api_key=settings.gemini_api_key)
+        _gemini_configured = True
+
+
 async def anthropic_stream(system_prompt: str, user_prompt: str) -> AsyncIterator[str]:
     """Stream from the Anthropic (Claude) API."""
-    from anthropic import AsyncAnthropic
-
     settings = get_settings()
-    client = AsyncAnthropic(api_key=settings.anthropic_api_key)
+    client = _get_anthropic_client()
     async with client.messages.stream(
         model=settings.claude_model,
         max_tokens=1024,
@@ -50,10 +83,8 @@ async def anthropic_stream(system_prompt: str, user_prompt: str) -> AsyncIterato
 
 async def openai_stream(system_prompt: str, user_prompt: str) -> AsyncIterator[str]:
     """Stream from the OpenAI API."""
-    from openai import AsyncOpenAI
-
     settings = get_settings()
-    client = AsyncOpenAI(api_key=settings.openai_api_key)
+    client = _get_openai_client()
     response = await client.chat.completions.create(
         model=settings.openai_model,
         stream=True,
@@ -71,8 +102,8 @@ async def gemini_stream(system_prompt: str, user_prompt: str) -> AsyncIterator[s
     """Stream from the Google Gemini API."""
     import google.generativeai as genai
 
+    _configure_gemini()
     settings = get_settings()
-    genai.configure(api_key=settings.gemini_api_key)
     model = genai.GenerativeModel(
         settings.gemini_model,
         system_instruction=system_prompt,

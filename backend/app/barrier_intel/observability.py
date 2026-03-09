@@ -9,7 +9,7 @@ def build_request_log(
     retrieval_latency_ms: float,
     llm_latency_ms: float,
     input_tokens: int,
-    output_tokens: int,
+    output_chunks: int,
     cache_hit: bool,
     guardrail_triggered: bool,
 ) -> dict:
@@ -22,7 +22,7 @@ def build_request_log(
         "retrieval_latency_ms": round(retrieval_latency_ms, 1),
         "llm_latency_ms": round(llm_latency_ms, 1),
         "input_tokens": input_tokens,
-        "output_tokens": output_tokens,
+        "output_chunks": output_chunks,
         "cache_hit": cache_hit,
         "guardrail_triggered": guardrail_triggered,
     }

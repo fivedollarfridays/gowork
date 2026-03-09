@@ -4,6 +4,7 @@ import time
 
 from fastapi import APIRouter, Request, Response, status
 from sqlalchemy import text
+from app.ai.llm_client import check_llm_providers
 from app.core.database import get_engine
 from app.health.models import (
     HealthStatus,
@@ -16,6 +17,17 @@ router = APIRouter(prefix="/health", tags=["health"])
 
 APP_START_TIME = time.time()
 APP_VERSION = "0.1.0"
+
+# Cached at module load — LLM provider status rarely changes at runtime
+_LLM_STATUS: dict | None = None
+
+
+def get_llm_status() -> dict:
+    """Return cached LLM provider status (computed once)."""
+    global _LLM_STATUS
+    if _LLM_STATUS is None:
+        _LLM_STATUS = check_llm_providers()
+    return _LLM_STATUS
 
 
 async def check_database() -> ServiceCheck:
@@ -70,7 +82,7 @@ async def health(request: Request):
         health_status = "healthy" if db_check.status == "up" else "degraded"
     except Exception:
         health_status = "unhealthy"
-    llm_status = getattr(request.app.state, "llm_status", None) or {"active": "unknown"}
+    llm_status = get_llm_status()
     return HealthStatus(
         status=health_status,
         version=APP_VERSION,

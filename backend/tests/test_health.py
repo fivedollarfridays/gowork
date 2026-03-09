@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from app.health.checks import check_database
+from app.health.checks import check_database, check_rag_store
 from app.health.models import ServiceCheck
 
 
@@ -32,6 +32,56 @@ class TestCheckDatabase:
             result = await check_database()
         assert result.status == "down"
         assert result.error == "no db"
+
+
+class TestCheckRagStore:
+    def _make_request(self, rag_store=None, *, omit_attr: bool = False):
+        """Build a mock Request with optional rag_store on app.state."""
+        state = MagicMock()
+        if omit_attr:
+            del state.rag_store  # getattr will return None
+        else:
+            state.rag_store = rag_store
+        app = MagicMock()
+        app.state = state
+        request = MagicMock()
+        request.app = app
+        return request
+
+    def test_rag_store_none_returns_down(self):
+        """store is None -> status down, error 'Not initialized'."""
+        request = self._make_request(omit_attr=True)
+        result = check_rag_store(request)
+        assert result.status == "down"
+        assert result.error == "Not initialized"
+        assert result.name == "rag_store"
+
+    def test_rag_store_ready_returns_up(self):
+        """store.is_ready() True -> status up."""
+        store = MagicMock()
+        store.is_ready.return_value = True
+        request = self._make_request(rag_store=store)
+        result = check_rag_store(request)
+        assert result.status == "up"
+        assert result.latency_ms == 0
+
+    def test_rag_store_not_ready_returns_down(self):
+        """store.is_ready() False -> status down, 'Index not loaded'."""
+        store = MagicMock()
+        store.is_ready.return_value = False
+        request = self._make_request(rag_store=store)
+        result = check_rag_store(request)
+        assert result.status == "down"
+        assert result.error == "Index not loaded"
+
+    def test_rag_store_exception_returns_down(self):
+        """store.is_ready() raises -> status down with error message."""
+        store = MagicMock()
+        store.is_ready.side_effect = RuntimeError("boom")
+        request = self._make_request(rag_store=store)
+        result = check_rag_store(request)
+        assert result.status == "down"
+        assert result.error == "boom"
 
 
 class TestLiveness:
@@ -97,8 +147,9 @@ class TestHealth:
         """Health endpoint reports active LLM provider."""
         from app.main import app
         up_check = MagicMock(status="up")
-        app.state.llm_status = {"providers": {"anthropic": "configured"}, "active": "anthropic"}
-        with patch("app.health.checks.check_database", return_value=up_check):
+        mock_status = {"providers": {"anthropic": "configured"}, "active": "anthropic"}
+        with patch("app.health.checks.check_database", return_value=up_check), \
+             patch("app.health.checks.get_llm_status", return_value=mock_status):
             resp = await client.get("/health")
         assert resp.status_code == 200
         body = resp.json()
@@ -109,8 +160,9 @@ class TestHealth:
         """Health endpoint shows mock when no LLM keys configured."""
         from app.main import app
         up_check = MagicMock(status="up")
-        app.state.llm_status = {"providers": {"anthropic": "no_key"}, "active": "mock"}
-        with patch("app.health.checks.check_database", return_value=up_check):
+        mock_status = {"providers": {"anthropic": "no_key"}, "active": "mock"}
+        with patch("app.health.checks.check_database", return_value=up_check), \
+             patch("app.health.checks.get_llm_status", return_value=mock_status):
             resp = await client.get("/health")
         assert resp.status_code == 200
         assert resp.json()["llm_provider"] == "mock"

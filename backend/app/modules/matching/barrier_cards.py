@@ -1,6 +1,7 @@
 """Barrier card construction — builds BarrierCards with eligibility annotations."""
 
 from app.modules.benefits.types import BenefitsProfile
+from app.modules.criminal.expungement import check_expungement_eligibility
 from app.modules.matching.affinity import CAREER_CENTER_STEP, assign_resources
 from app.modules.matching.barrier_priority import prioritize_barriers
 from app.modules.matching.filters import get_certification_renewal
@@ -97,6 +98,7 @@ def _build_cards(
     cards: list[BarrierCard] = []
     for barrier in profile.primary_barriers:
         actions = list(BARRIER_ACTIONS.get(barrier, []))
+        expungement = None
 
         if barrier == BarrierType.TRAINING:
             cert_renewals = get_certification_renewal(profile.work_history)
@@ -107,12 +109,16 @@ def _build_cards(
                     f"({cert['renewal_body'].get('phone', 'N/A')})"
                 )
 
+        if barrier == BarrierType.CRIMINAL_RECORD:
+            expungement = check_expungement_eligibility(profile.record_profile)
+
         cards.append(BarrierCard(
             type=barrier,
             severity=profile.barrier_severity,
             title=BARRIER_TITLES.get(barrier, barrier.value.replace("_", " ").title()),
             actions=actions,
             resources=card_resources.get(barrier, []),
+            expungement=expungement,
         ))
 
     return cards

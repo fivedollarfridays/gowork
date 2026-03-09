@@ -3,13 +3,14 @@
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { ClipboardList, ListChecks, Clock, CreditCard, FileText, Upload, Briefcase, Home } from "lucide-react";
+import { ClipboardList, ListChecks, Clock, CreditCard, FileText, Upload, Briefcase, Home, Shield } from "lucide-react";
 import { postAssessment, postCredit } from "@/lib/api";
 import { WizardShell, type WizardStepConfig } from "@/components/wizard/WizardShell";
 import { BarrierForm, type BarrierFormData } from "@/components/wizard/BarrierForm";
 import { BenefitsStep, BENEFITS_DEFAULTS } from "@/components/wizard/BenefitsStep";
 import type { BenefitsFormData } from "@/lib/types";
 import { CreditForm, creditFormCanAdvance, ACCOUNT_AGE_RANGES } from "@/components/wizard/CreditForm";
+import { CriminalRecordForm } from "@/components/wizard/CriminalRecordForm";
 import { ResumeStep } from "@/components/wizard/ResumeStep";
 import { IndustryForm } from "@/components/wizard/IndustryForm";
 import { ReviewStep } from "./ReviewStep";
@@ -23,8 +24,8 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AvailableHours, BarrierType } from "@/lib/types";
-import type { AssessmentRequest, CreditAssessmentResult, CreditFormData, EmploymentStatus } from "@/lib/types";
-import { EMPLOYMENT_OPTIONS, isValidMontgomeryZip } from "@/lib/constants";
+import type { AssessmentRequest, CreditAssessmentResult, CreditFormData, EmploymentStatus, RecordProfile } from "@/lib/types";
+import { EMPLOYMENT_OPTIONS, isValidMontgomeryZip, humanizeLabel } from "@/lib/constants";
 import { useDemoMode } from "@/hooks/useDemoMode";
 
 const DEFAULT_FORM_DATA: BarrierFormData = {
@@ -62,11 +63,18 @@ export default function AssessPage() {
     negativeItems: [],
   });
   const [creditResult, setCreditResult] = useState<CreditAssessmentResult | null>(null);
+  const [recordProfile, setRecordProfile] = useState<RecordProfile>({
+    record_types: [],
+    charge_categories: [],
+    years_since_conviction: null,
+    completed_sentence: false,
+  });
   const [error, setError] = useState<string | null>(null);
 
   const zipValid = isValidMontgomeryZip(formData.zipCode);
   const barrierCount = Object.values(formData.barriers).filter(Boolean).length;
   const hasCreditBarrier = formData.barriers[BarrierType.CREDIT];
+  const hasCriminalBarrier = formData.barriers[BarrierType.CRIMINAL_RECORD];
   const hasResume = resumeText.trim().length > 0;
   const resumeWordCount = useMemo(() => resumeText.split(/\s+/).filter(Boolean).length, [resumeText]);
 
@@ -128,11 +136,12 @@ export default function AssessPage() {
       ...(resumeText ? { resume_text: resumeText } : {}),
       ...(certifications.length > 0 ? { certifications } : {}),
       ...(creditResultRef.current ? { credit_result: creditResultRef.current } : {}),
+      ...(hasCriminalBarrier && recordProfile.record_types.length > 0 ? { record_profile: recordProfile } : {}),
       ...(benefitsData.enrolled_programs.length > 0 || benefitsData.household_size > 1 || benefitsData.current_monthly_income > 0
         ? { benefits_data: benefitsData } : {}),
     };
     mutation.mutate(request);
-  }, [formData, creditData, hasCreditBarrier, mutation, resumeText, targetIndustries, certifications, benefitsData]);
+  }, [formData, creditData, hasCreditBarrier, hasCriminalBarrier, mutation, resumeText, targetIndustries, certifications, recordProfile, benefitsData]);
 
   const steps: WizardStepConfig[] = useMemo(() => [
     {
@@ -234,6 +243,22 @@ export default function AssessPage() {
         </div>
       ),
     },
+    ...(hasCriminalBarrier ? [{
+      title: "Record Details",
+      icon: <Shield className="h-4 w-4" />,
+      canAdvance: () => true,
+      content: () => (
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-lg font-semibold mb-1">Criminal Record Details</h2>
+            <p className="text-sm text-muted-foreground">
+              Help us find fair-chance employers and check expungement eligibility. All fields are optional — skip if you prefer.
+            </p>
+          </div>
+          <CriminalRecordForm data={recordProfile} onChange={setRecordProfile} />
+        </div>
+      ),
+    }] as WizardStepConfig[] : []),
     {
       title: "Benefits",
       icon: <Home className="h-4 w-4" />,
@@ -336,7 +361,7 @@ export default function AssessPage() {
         />
       ),
     },
-  ], [formData, benefitsData, creditData, zipValid, barrierCount, hasCreditBarrier, mutation.isPending, error, resumeText, resumeWordCount, targetIndustries, certifications, hasResume]);
+  ], [formData, benefitsData, creditData, zipValid, barrierCount, hasCreditBarrier, hasCriminalBarrier, recordProfile, mutation.isPending, error, resumeText, resumeWordCount, targetIndustries, certifications, hasResume]);
 
   return (
     <main className="min-h-screen px-4 py-8 sm:px-8">

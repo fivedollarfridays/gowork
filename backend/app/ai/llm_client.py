@@ -92,11 +92,15 @@ async def get_llm_stream(
     resolved = resolve_provider(override=provider)
 
     if resolved != "mock":
+        yielded = False
         try:
             async for chunk in _get_provider_stream(resolved, system_prompt, user_prompt):
+                yielded = True
                 yield chunk
             return
-        except Exception:
+        except (ConnectionError, TimeoutError, OSError, RuntimeError):
+            if yielded:
+                raise  # Mid-stream failure: don't mask with mock
             logger.warning(
                 "Provider '%s' failed, falling back to mock", resolved, exc_info=True,
             )
