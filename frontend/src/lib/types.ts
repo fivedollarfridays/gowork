@@ -210,6 +210,36 @@ export interface WIOAEligibility {
   confidence: string;
 }
 
+export type EligibilityConfidence = "likely" | "possible" | "unlikely";
+
+export interface ProgramApplicationInfo {
+  application_url: string;
+  application_steps: string[];
+  required_documents: string[];
+  office_name: string;
+  office_address: string;
+  office_phone: string;
+  processing_time: string;
+}
+
+export interface ProgramEligibility {
+  program: string;
+  eligible: boolean;
+  confidence: EligibilityConfidence;
+  income_threshold: number;
+  income_headroom: number;
+  estimated_monthly_value: number;
+  reason: string;
+  application_info?: ProgramApplicationInfo | null;
+}
+
+export interface BenefitsEligibility {
+  eligible_programs: ProgramEligibility[];
+  ineligible_programs: ProgramEligibility[];
+  total_estimated_monthly: number;
+  disclaimer: string;
+}
+
 export interface ReEntryPlan {
   plan_id: string;
   session_id: string;
@@ -226,6 +256,7 @@ export interface ReEntryPlan {
   wioa_eligibility: WIOAEligibility | null;
   job_readiness: JobReadinessResult | null;
   benefits_cliff_analysis?: CliffAnalysis | null;
+  benefits_eligibility?: BenefitsEligibility | null;
 }
 
 export interface AssessmentResponse {

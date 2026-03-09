@@ -4,8 +4,6 @@ import json
 import uuid
 
 from app.core.queries import get_all_transit_stops, get_resources_by_categories
-from app.modules.feedback.types import ResourceHealth
-from app.modules.benefits.cliff_calculator import calculate_cliff_analysis
 from app.modules.benefits.types import BenefitsProfile
 from app.modules.matching.affinity import (
     CAREER_CENTER_STEP,
@@ -15,7 +13,7 @@ from app.modules.matching.barrier_priority import prioritize_barriers
 from app.modules.matching.filters import get_certification_renewal
 from app.modules.matching.job_matcher import match_jobs
 from app.modules.matching.job_readiness import assess_job_readiness
-from app.modules.matching.resume_parser import ParsedResume, parse_resume
+from app.modules.matching.resume_parser import parse_resume
 from app.modules.matching.scoring import (
     BARRIER_CATEGORY_MAP,
     haversine_miles,
@@ -26,6 +24,7 @@ from app.modules.matching.types import (
     BarrierType,
     ReEntryPlan,
     Resource,
+    ResourceHealth,
     ScoredJobMatch,
     UserProfile,
 )
@@ -163,6 +162,20 @@ def _barrier_cards_and_steps(
     return cards, steps
 
 
+def _compute_benefits(
+    profile: BenefitsProfile | None,
+) -> tuple:  # (CliffAnalysis | None, BenefitsEligibility | None)
+    """Compute cliff analysis and eligibility screening for benefits profile."""
+    from app.modules.benefits.cliff_calculator import calculate_cliff_analysis
+    from app.modules.benefits.eligibility_screener import screen_benefits_eligibility
+
+    if not profile:
+        return None, None
+    cliff = calculate_cliff_analysis(profile) if profile.enrolled_programs else None
+    eligibility = screen_benefits_eligibility(profile)
+    return cliff, eligibility
+
+
 async def generate_plan(
     profile: UserProfile, db_session,
     resume_text: str = "",
@@ -179,9 +192,7 @@ async def generate_plan(
 
     parsed_resume = parse_resume(resume_text) if resume_text else None
     readiness = assess_job_readiness(profile, parsed_resume, ranked_jobs, credit_result)
-    cliff = calculate_cliff_analysis(benefits_profile) if (
-        benefits_profile and benefits_profile.enrolled_programs
-    ) else None
+    cliff, eligibility = _compute_benefits(benefits_profile)
 
     return ReEntryPlan(
         plan_id=str(uuid.uuid4()),
@@ -196,6 +207,7 @@ async def generate_plan(
         wioa_eligibility=screen_wioa_eligibility(profile),
         job_readiness=readiness,
         benefits_cliff_analysis=cliff,
+        benefits_eligibility=eligibility,
     )
 
 

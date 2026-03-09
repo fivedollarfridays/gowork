@@ -71,6 +71,10 @@ export const SEVERITY_BADGE_STYLES: Record<BarrierSeverity, string> = {
   high: STATUS_BADGE_STYLES.negative,
 };
 
+export function formatDollar(n: number): string {
+  return n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+}
+
 export function daysToMonths(days: number): string {
   if (days <= 30) return `${days} days`;
   const months = Math.round(days / 30);

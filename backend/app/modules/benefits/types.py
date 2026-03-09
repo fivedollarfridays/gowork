@@ -17,6 +17,14 @@ ProgramName = Literal[
 ]
 
 
+class EligibilityConfidence(str, Enum):
+    """Confidence level for a program eligibility determination."""
+
+    LIKELY = "likely"
+    POSSIBLE = "possible"
+    UNLIKELY = "unlikely"
+
+
 class CliffSeverity(str, Enum):
     """Severity of a benefits cliff drop."""
 
@@ -93,3 +101,37 @@ class CliffAnalysis(BaseModel):
     programs: list[ProgramBenefit]
     worst_cliff_wage: float | None = None
     recovery_wage: float | None = None
+
+
+class ProgramApplicationInfo(BaseModel):
+    """Application details for a benefit program."""
+
+    application_url: str
+    application_steps: list[str]
+    required_documents: list[str]
+    office_name: str
+    office_address: str
+    office_phone: str
+    processing_time: str
+
+
+class ProgramEligibility(BaseModel):
+    """Eligibility status for a single benefit program."""
+
+    program: str
+    eligible: bool
+    confidence: EligibilityConfidence
+    income_threshold: float  # annual income threshold for this program
+    income_headroom: float  # dollars of annual income before losing eligibility
+    estimated_monthly_value: float
+    reason: str
+    application_info: ProgramApplicationInfo | None = None
+
+
+class BenefitsEligibility(BaseModel):
+    """Complete benefits eligibility screening result."""
+
+    eligible_programs: list[ProgramEligibility]
+    ineligible_programs: list[ProgramEligibility]
+    total_estimated_monthly: float
+    disclaimer: str

@@ -4,13 +4,21 @@
 
 ## Active Plan
 
+**Plan:** plan-2026-03-benefits-program-eligibility
+**Type:** feature
+**Title:** Benefits Program Eligibility — Screening + Dashboard for Montgomery Residents
+**Status:** Planned (synced to Trello)
+**Current Sprint:** 29
+
+## Previous Active Plan
+
 **Plan:** plan-2026-03-benefits-cliff-engine
 **Type:** feature
 **Title:** Benefits Cliff Engine — Cliff-Aware Job Ranking for Montgomery Residents
-**Status:** Planned (synced to Trello)
-**Current Sprint:** 25
+**Status:** Complete (PR #36 merged)
+**Sprint:** 25
 
-## Previous Active Plan
+## Older Plans
 
 **Plan:** plan-2026-03-barrier-graph-rag
 **Type:** feature
@@ -37,11 +45,22 @@
 
 ## Current Focus
 
-Sprint 25: Benefits Cliff Engine. WorkPath's key differentiator — showing users that "taking this $15/hr job costs you $400/month in benefits." Alabama-specific benefit program modeling (SNAP, TANF, Medicaid, Childcare, Section 8, LIHEAP), cliff-aware PVS scoring, and visualization.
+Sprint 29: Benefits Program Eligibility. The "opportunity system" that complements Sprint 25's cliff "warning system." Shows users which benefit programs they qualify for but aren't enrolled in, with estimated monthly values, income headroom, and actionable application steps (URLs, docs, contacts). Alabama/Montgomery-specific.
 
 ## Task Status
 
-### Sprint 25 — Benefits Cliff Engine
+### Sprint 29 — Benefits Program Eligibility
+
+| ID | Title | Priority | Complexity | Status | Depends On |
+|----|-------|----------|------------|--------|------------|
+| T29.1 | Program Eligibility Screener Module | P0 | 45 | done | -- |
+| T29.2 | Program Application Data (steps, URLs, contacts) | P0 | 30 | done | T29.1 |
+| T29.3 | Engine Integration + Frontend Types | P0 | 25 | done | T29.1, T29.2 |
+| T29.4 | Benefits Eligibility Dashboard UI | P1 | 40 | done | T29.3 |
+
+**Total: 4 tasks, 140 complexity points (4/4 done) — SPRINT COMPLETE**
+
+### Sprint 25 — Benefits Cliff Engine (COMPLETE)
 
 | ID | Title | Priority | Complexity | Status | Depends On |
 |----|-------|----------|------------|--------|------------|
@@ -136,6 +155,18 @@ Sprint 25: Benefits Cliff Engine. WorkPath's key differentiator — showing user
 **Total: 6 tasks, 125 complexity points (6/6 done)**
 
 ## What Was Just Done
+
+- **T29.4 done** (2026-03-08) — Benefits Eligibility Dashboard UI: Created `BenefitsEligibility.tsx` with per-program rows (confidence badges via `STATUS_BADGE_STYLES`, monthly values, income headroom), enrolled vs additional-eligible grouping, expandable "How to apply" sections (steps, required docs, office name/address/phone, processing time, apply link). Uses shadcn Card/Badge, Lucide icons, `PROGRAM_LABELS` from constants. Wired into `plan/page.tsx` after barriers, before cliff chart. 11 frontend tests (null render, heading, values, badges, headroom, disclaimer, expand/collapse, enrolled distinction, a11y). `npx tsc --noEmit` clean.
+
+- **T29.3 done** (2026-03-08) — Engine Integration + Frontend Types: Wired `screen_benefits_eligibility()` into `generate_plan()` via `_compute_benefits()` helper. Added `benefits_eligibility: Optional[BenefitsEligibility] = None` to `ReEntryPlan`. Added `EligibilityConfidence`, `ProgramApplicationInfo`, `ProgramEligibility`, `BenefitsEligibility` TS interfaces to `types.ts`. 3 new engine tests. Refactored engine imports to stay under arch limit (lazy imports for benefits modules). `npx tsc --noEmit` passes.
+
+- **T29.2 done** (2026-03-08) — Program Application Data: Added `ProgramApplicationInfo` model to `types.py`. Created `application_data.py` with Montgomery-specific data for all 7 programs (SNAP/TANF/Medicaid/ALL_Kids/Childcare_Subsidy/Section_8/LIHEAP) — application URLs, steps, required documents, office names/addresses/phones, processing times. Section 8 includes waitlist note, LIHEAP includes seasonal note. Wired into screener: eligible programs get `application_info` attached, ineligible programs get `None`. 13 new tests in `test_benefits_application_data.py`. Split test file to satisfy arch check (49→36+15 functions). All 47 benefits tests pass, all arch checks clean.
+
+- **T29.1 done** (2026-03-08) — Program Eligibility Screener Module: Created `eligibility_screener.py` (entry point) and `eligibility_checks.py` (per-program check functions). 7 program checks with income thresholds from `thresholds.py`, benefit value estimates from `program_calculators.py`, confidence levels (likely/possible/unlikely within 10% band). Added `EligibilityConfidence` enum, `ProgramEligibility`, `BenefitsEligibility` models to `types.py`. 34 tests covering all programs, confidence, edge cases. All arch checks clean.
+
+- **Sprint 29 planned** (2026-03-08) — Created plan-2026-03-benefits-program-eligibility with 4 tasks (140 complexity). Synced 4 cards to Trello Planned/Ready. Builds on Sprint 25's cliff engine with eligibility screening + actionable application steps.
+
+- **Sprint 25 COMPLETE — PR #36 merged** (2026-03-08) — Benefits Cliff Engine shipped. 54 files, +4,589 lines. Benefits module (7 Alabama programs), cliff-aware PVS scoring (net income replaces gross), recovery wage algorithm, BenefitsStep wizard, BenefitsCliffChart (Recharts), CliffBadge. 100% test coverage on all Sprint 25 modules (124 backend tests). Code review fixes: async audit logging, shared distance_to_score, float drift fix, recovery_wage rename, program validator, Recharts tooltip types. CI green after merge conflict resolution (types.ts) and type check fixes.
 
 - **Fix: frontend test step indices** (2026-03-08) — Updated `assess-industry.test.tsx` and `assess-schedule.test.tsx` to account for new Benefits step (step 4). Schedule moved from step 4→5, Industries from step 5→6, Review from step 6→7. All 9 assess tests pass. 4 pre-existing failures in unrelated files (BarrierCardView, MondayMorning, plan-whats-next).
 
@@ -275,7 +306,7 @@ Sprint 25: Benefits Cliff Engine. WorkPath's key differentiator — showing user
 
 ## What's Next
 
-Sprint 25 COMPLETE. Ready for Sprint 26 (BrightData Phase 2) or cherry-pick from Vinny's PR #33.
+Sprint 29 COMPLETE (4/4 tasks). Ready for `/finishing-branches` to create PR.
 
 
 ## Blockers
