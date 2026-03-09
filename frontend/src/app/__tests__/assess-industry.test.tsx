@@ -41,10 +41,12 @@ async function advanceToIndustryStep(user: ReturnType<typeof userEvent.setup>) {
   const transportCard = screen.getByText("Transportation").closest("[role='button']")!;
   await user.click(transportCard);
 
-  // Step 3 -> 4 (Schedule)
+  // Step 3 -> 4 (Benefits)
   await user.click(screen.getByRole("button", { name: /go to step 4/i }));
-  // Step 4 -> 5 (Industries)
+  // Step 4 -> 5 (Schedule)
   await user.click(screen.getByRole("button", { name: /go to step 5/i }));
+  // Step 5 -> 6 (Industries)
+  await user.click(screen.getByRole("button", { name: /go to step 6/i }));
 }
 
 describe("AssessPage industry step", () => {
@@ -84,7 +86,7 @@ describe("AssessPage industry step", () => {
     const user = userEvent.setup();
     await advanceToIndustryStep(user);
 
-    const nextBtn = screen.getByRole("button", { name: /go to step 6/i });
+    const nextBtn = screen.getByRole("button", { name: /go to step 7/i });
     expect(nextBtn).not.toBeDisabled();
   });
 

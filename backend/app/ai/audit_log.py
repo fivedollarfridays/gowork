@@ -4,6 +4,7 @@ Writes one JSON object per line (JSONL) with hashed session IDs.
 No user content is logged — only metadata (lengths, provider, latency).
 """
 
+import asyncio
 import hashlib
 import json
 import logging
@@ -12,13 +13,26 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
+_dirs_ensured: set[str] = set()
+
 
 def hash_session_id(session_id: str) -> str:
     """Hash a session ID with sha256 for PII-safe logging."""
     return hashlib.sha256(session_id.encode()).hexdigest()
 
 
-def log_llm_interaction(
+def _write_entry(log_path: str, entry: dict) -> None:
+    """Synchronous JSONL append (runs in thread pool)."""
+    path = Path(log_path)
+    parent = str(path.parent)
+    if parent not in _dirs_ensured:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        _dirs_ensured.add(parent)
+    with path.open("a") as f:
+        f.write(json.dumps(entry) + "\n")
+
+
+async def log_llm_interaction(
     log_path: str,
     session_id: str,
     provider: str,
@@ -27,6 +41,8 @@ def log_llm_interaction(
     latency_ms: float,
 ) -> None:
     """Append a JSONL audit entry for an LLM interaction.
+
+    Runs file I/O in a thread pool to avoid blocking the event loop.
 
     Args:
         log_path: File path for the JSONL log. Skips if empty.
@@ -49,9 +65,6 @@ def log_llm_interaction(
     }
 
     try:
-        path = Path(log_path)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with path.open("a") as f:
-            f.write(json.dumps(entry) + "\n")
+        await asyncio.to_thread(_write_entry, log_path, entry)
     except OSError:
         logger.warning("Failed to write audit log to %s", log_path, exc_info=True)

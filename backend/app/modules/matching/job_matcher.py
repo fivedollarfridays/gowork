@@ -6,8 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.queries_jobs import get_all_job_listings
 from app.modules.matching.job_keywords import INDUSTRY_KEYWORDS, SCHEDULE_CONFLICT_KEYWORDS, SUNDAY_KEYWORDS
 from app.modules.matching.job_scoring import job_search_text
+from app.modules.benefits.types import BenefitsProfile
 from app.modules.matching.pvs_scorer import rank_all_jobs
-from app.modules.matching.types import AvailableHours, ScoredJobMatch, UserProfile
+from app.modules.matching.types import AvailableHours, ScoredJobMatch, ScoringContext, UserProfile
 
 
 async def _get_transit_stops(db_session: AsyncSession) -> list[dict]:
@@ -97,6 +98,7 @@ def _annotate_credit(jobs: list[dict]) -> list[dict]:
 
 async def match_jobs(
     profile: UserProfile, db_session: AsyncSession,
+    benefits_profile: BenefitsProfile | None = None,
 ) -> list[ScoredJobMatch]:
     """Run the full filter→score→rank pipeline. Returns flat PVS-ranked list."""
     listings = await get_all_job_listings(db_session)
@@ -110,10 +112,11 @@ async def match_jobs(
     jobs = _filter_by_transit(jobs, profile.transit_dependent, transit_stops)
     jobs = _annotate_credit(jobs)
 
-    return rank_all_jobs(
-        jobs,
+    ctx = ScoringContext(
         user_zip=profile.zip_code,
         transit_dependent=profile.transit_dependent,
         schedule_type=profile.schedule_type,
         barriers=profile.primary_barriers,
+        benefits_profile=benefits_profile,
     )
+    return rank_all_jobs(jobs, ctx)

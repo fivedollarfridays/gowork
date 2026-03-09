@@ -58,13 +58,8 @@ describe("PlanPage What's Next CTA", () => {
     const heading = await screen.findByText(/what.?s next/i);
     expect(heading).toBeInTheDocument();
 
-    // Address and phone appear in both the MondayMorning CareerCenterStep
-    // and the What's Next card, so use getAllByText
-    const addressElements = screen.getAllByText(/1060 East South Boulevard/i);
-    expect(addressElements.length).toBeGreaterThanOrEqual(1);
-
-    const phoneElements = screen.getAllByText(/334-286-1746/i);
-    expect(phoneElements.length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/1060 East South Boulevard/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/334-286-1746/i).length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders Start New Assessment link", async () => {

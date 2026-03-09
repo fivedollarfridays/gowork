@@ -271,17 +271,20 @@ function BarrierDetail({ barrier }: { barrier: BarrierCard }) {
               {resource.address}
             </a>
           )}
-          {resource.url && safeHref(resource.url) && (
-            <a
-              href={safeHref(resource.url)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-secondary hover:underline"
-            >
-              <ExternalLink className="h-3 w-3 shrink-0" />
-              Website
-            </a>
-          )}
+          {(() => {
+            const href = resource.url ? safeHref(resource.url) : undefined;
+            return href ? (
+              <a
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-secondary hover:underline"
+              >
+                <ExternalLink className="h-3 w-3 shrink-0" />
+                Website
+              </a>
+            ) : null;
+          })()}
         </div>
       )}
     </div>

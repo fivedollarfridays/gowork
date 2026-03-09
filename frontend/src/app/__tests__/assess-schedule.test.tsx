@@ -43,8 +43,10 @@ async function advanceToScheduleStep(user: ReturnType<typeof userEvent.setup>) {
   const creditCard = screen.getByText("Credit / Financial").closest("[role='button']")!;
   await user.click(creditCard);
 
-  // Step 3 -> 4 (Schedule)
+  // Step 3 -> 4 (Benefits)
   await user.click(screen.getByRole("button", { name: /go to step 4/i }));
+  // Step 4 -> 5 (Schedule)
+  await user.click(screen.getByRole("button", { name: /go to step 5/i }));
 }
 
 describe("AssessPage schedule step", () => {
@@ -99,12 +101,14 @@ describe("AssessPage schedule step", () => {
     const transportCard = screen.getByText("Transportation").closest("[role='button']")!;
     await user.click(transportCard);
 
-    // Step 3 -> 4 (Schedule)
+    // Step 3 -> 4 (Benefits)
     await user.click(screen.getByRole("button", { name: /go to step 4/i }));
-    // Step 4 -> 5 (Industries)
+    // Step 4 -> 5 (Schedule)
     await user.click(screen.getByRole("button", { name: /go to step 5/i }));
-    // Step 5 -> 6 (Review & Submit — no credit barrier)
+    // Step 5 -> 6 (Industries)
     await user.click(screen.getByRole("button", { name: /go to step 6/i }));
+    // Step 6 -> 7 (Review & Submit — no credit barrier)
+    await user.click(screen.getByRole("button", { name: /go to step 7/i }));
 
     // Review summary should show default schedule value
     const summarySection = screen.getByText("Your Assessment Summary").closest("div")!;

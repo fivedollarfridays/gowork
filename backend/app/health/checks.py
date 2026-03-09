@@ -4,8 +4,6 @@ import time
 
 from fastapi import APIRouter, Request, Response, status
 from sqlalchemy import text
-
-from app.ai.llm_client import check_llm_providers
 from app.core.database import get_engine
 from app.health.models import (
     HealthStatus,
@@ -64,7 +62,7 @@ async def readiness(request: Request, response: Response):
 
 
 @router.get("", response_model=HealthStatus)
-async def health():
+async def health(request: Request):
     """General health check with version and uptime."""
     uptime = time.time() - APP_START_TIME
     try:
@@ -72,7 +70,7 @@ async def health():
         health_status = "healthy" if db_check.status == "up" else "degraded"
     except Exception:
         health_status = "unhealthy"
-    llm_status = check_llm_providers()
+    llm_status = getattr(request.app.state, "llm_status", None) or {"active": "unknown"}
     return HealthStatus(
         status=health_status,
         version=APP_VERSION,

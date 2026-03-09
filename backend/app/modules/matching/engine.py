@@ -5,6 +5,8 @@ import uuid
 
 from app.core.queries import get_all_transit_stops, get_resources_by_categories
 from app.modules.feedback.types import ResourceHealth
+from app.modules.benefits.cliff_calculator import calculate_cliff_analysis
+from app.modules.benefits.types import BenefitsProfile
 from app.modules.matching.affinity import (
     CAREER_CENTER_STEP,
     assign_resources,
@@ -137,33 +139,49 @@ async def _rank_with_transit(
     return rank_resources(resources, profile, stop_distances=stop_distances)
 
 
+def _split_legacy_buckets(
+    jobs: list[ScoredJobMatch],
+) -> tuple[list[ScoredJobMatch], list[ScoredJobMatch]]:
+    """Split flat PVS list into legacy strong/after_repair buckets."""
+    strong: list[ScoredJobMatch] = []
+    after_repair: list[ScoredJobMatch] = []
+    for j in jobs:
+        (after_repair if j.credit_check_required == "required" else strong).append(j)
+    return strong, after_repair
+
+
+def _barrier_cards_and_steps(
+    profile: UserProfile, resources: list[Resource],
+) -> tuple[list[BarrierCard], list[str]]:
+    """Build sorted barrier cards and immediate next steps."""
+    sorted_barriers = prioritize_barriers([b.value for b in profile.primary_barriers])
+    sorted_profile = profile.model_copy(
+        update={"primary_barriers": [BarrierType(b) for b in sorted_barriers]},
+    )
+    cards = _build_barrier_cards(sorted_profile, resources)
+    steps = _build_next_steps(profile, cards)
+    return cards, steps
+
+
 async def generate_plan(
     profile: UserProfile, db_session,
     resume_text: str = "",
     credit_result: dict | None = None,
+    benefits_profile: BenefitsProfile | None = None,
 ) -> ReEntryPlan:
     """Orchestrate the full matching pipeline."""
     resources = await query_resources_for_barriers(profile.primary_barriers, db_session)
     resources = await _rank_with_transit(profile, resources, db_session)
 
-    ranked_jobs = await match_jobs(profile, db_session)
-
-    # Backward compat: split flat PVS list into legacy buckets
-    strong: list[ScoredJobMatch] = []
-    after_repair: list[ScoredJobMatch] = []
-    for j in ranked_jobs:
-        (after_repair if j.credit_check_required == "required" else strong).append(j)
-
-    sorted_barriers = prioritize_barriers([b.value for b in profile.primary_barriers])
-    sorted_profile = profile.model_copy(
-        update={"primary_barriers": [BarrierType(b) for b in sorted_barriers]},
-    )
-    barrier_cards = _build_barrier_cards(sorted_profile, resources)
-    next_steps = _build_next_steps(profile, barrier_cards)
-    wioa = screen_wioa_eligibility(profile)
+    ranked_jobs = await match_jobs(profile, db_session, benefits_profile=benefits_profile)
+    strong, after_repair = _split_legacy_buckets(ranked_jobs)
+    barrier_cards, next_steps = _barrier_cards_and_steps(profile, resources)
 
     parsed_resume = parse_resume(resume_text) if resume_text else None
     readiness = assess_job_readiness(profile, parsed_resume, ranked_jobs, credit_result)
+    cliff = calculate_cliff_analysis(benefits_profile) if (
+        benefits_profile and benefits_profile.enrolled_programs
+    ) else None
 
     return ReEntryPlan(
         plan_id=str(uuid.uuid4()),
@@ -175,8 +193,9 @@ async def generate_plan(
         immediate_next_steps=next_steps,
         eligible_now=[m.title for m in strong],
         eligible_after_repair=[m.title for m in after_repair],
-        wioa_eligibility=wioa,
+        wioa_eligibility=screen_wioa_eligibility(profile),
         job_readiness=readiness,
+        benefits_cliff_analysis=cliff,
     )
 
 

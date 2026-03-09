@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.queries_jobs import insert_job_listings
 from app.integrations.brightdata.types import BrightDataJobRecord
+from app.modules.benefits.thresholds import HOURS_PER_YEAR as _HOURS_PER_YEAR
 
 
 _FIELD_LIMITS = {"title": 500, "company": 200, "location": 200, "description": 5000, "url": 2000}
@@ -20,7 +21,6 @@ _TITLE_EXCLUDE = re.compile(
 _SALARY_YEARLY = re.compile(r"\$[\d,]+(?:\.\d+)?/(?:yr|year)", re.IGNORECASE)
 _SALARY_HOURLY = re.compile(r"\$([\d,]+(?:\.\d+)?)/hr", re.IGNORECASE)
 _SALARY_THRESHOLD = 80_000
-_HOURS_PER_YEAR = 2080
 
 
 def _parse_salary_yearly(salary: str) -> float | None:

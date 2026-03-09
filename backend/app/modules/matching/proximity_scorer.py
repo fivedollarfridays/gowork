@@ -5,6 +5,7 @@ import re
 from app.modules.matching.scoring import (
     DOWNTOWN_MONTGOMERY,
     ZIP_CENTROIDS,
+    distance_to_score,
     haversine_miles,
 )
 
@@ -17,18 +18,6 @@ def extract_zip(location: str) -> str | None:
     if not matches:
         return None
     return matches[-1]
-
-
-def _distance_to_score(miles: float) -> float:
-    """Convert distance in miles to a 0.1-1.0 score.
-
-    <=1mi => 1.0, 1-15mi => linear decay, >=15mi => 0.1.
-    """
-    if miles <= 1.0:
-        return 1.0
-    if miles >= 15.0:
-        return 0.1
-    return 1.0 - (miles - 1.0) / 14.0 * 0.9
 
 
 def score_proximity(
@@ -48,7 +37,7 @@ def score_proximity(
         user_coords[0], user_coords[1], job_coords[0], job_coords[1]
     )
 
-    score = _distance_to_score(miles)
+    score = distance_to_score(miles)
 
     if transit_dependent:
         score = score ** 1.5
