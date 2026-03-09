@@ -428,6 +428,68 @@ class TestGeneratePlanWithResume:
         assert plan.job_readiness is not None
 
 
+class TestGeneratePlanWithBenefitsEligibility:
+    @pytest.mark.asyncio
+    async def test_eligibility_populated_with_benefits_profile(self):
+        """generate_plan attaches benefits_eligibility when benefits_profile provided."""
+        from app.modules.benefits.types import BenefitsProfile
+
+        profile = _make_profile()
+        mock_session = AsyncMock()
+        bp = BenefitsProfile(
+            household_size=3,
+            current_monthly_income=1000,
+            enrolled_programs=["SNAP"],
+            dependents_under_6=1,
+        )
+
+        with patch(_QUERY_PATCH, return_value=[]):
+            plan = await generate_plan(
+                profile, mock_session, benefits_profile=bp,
+            )
+
+        assert plan.benefits_eligibility is not None
+        all_progs = {
+            p.program
+            for p in plan.benefits_eligibility.eligible_programs
+            + plan.benefits_eligibility.ineligible_programs
+        }
+        assert "SNAP" in all_progs
+
+    @pytest.mark.asyncio
+    async def test_eligibility_none_without_profile(self):
+        """generate_plan without benefits_profile leaves eligibility None."""
+        profile = _make_profile()
+        mock_session = AsyncMock()
+
+        with patch(_QUERY_PATCH, return_value=[]):
+            plan = await generate_plan(profile, mock_session)
+
+        assert plan.benefits_eligibility is None
+
+    @pytest.mark.asyncio
+    async def test_eligible_programs_have_application_info(self):
+        """Eligible programs in screener output should include application info."""
+        from app.modules.benefits.types import BenefitsProfile
+
+        profile = _make_profile()
+        mock_session = AsyncMock()
+        bp = BenefitsProfile(
+            household_size=3,
+            current_monthly_income=0,
+            enrolled_programs=[],
+        )
+
+        with patch(_QUERY_PATCH, return_value=[]):
+            plan = await generate_plan(
+                profile, mock_session, benefits_profile=bp,
+            )
+
+        assert plan.benefits_eligibility is not None
+        for p in plan.benefits_eligibility.eligible_programs:
+            assert p.application_info is not None, f"{p.program} missing app info"
+
+
 class TestComputeStopDistances:
     def test_empty_stops_returns_empty_dict(self):
         """When stops list is empty, should return an empty dict."""

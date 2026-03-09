@@ -6,7 +6,6 @@ import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.queries import get_all_transit_stops, get_resources_by_categories
-from app.modules.benefits.cliff_calculator import calculate_cliff_analysis
 from app.modules.benefits.types import BenefitsProfile
 from app.modules.feedback.types import ResourceHealth
 from app.modules.matching.barrier_cards import build_barrier_cards_and_steps
@@ -96,6 +95,20 @@ def _split_legacy_buckets(
     return strong, after_repair
 
 
+def _compute_benefits(
+    profile: BenefitsProfile | None,
+) -> tuple:  # (CliffAnalysis | None, BenefitsEligibility | None)
+    """Compute cliff analysis and eligibility screening for benefits profile."""
+    from app.modules.benefits.cliff_calculator import calculate_cliff_analysis
+    from app.modules.benefits.eligibility_screener import screen_benefits_eligibility
+
+    if not profile:
+        return None, None
+    cliff = calculate_cliff_analysis(profile) if profile.enrolled_programs else None
+    eligibility = screen_benefits_eligibility(profile)
+    return cliff, eligibility
+
+
 async def generate_plan(
     profile: UserProfile, db_session: AsyncSession,
     resume_text: str = "",
@@ -114,9 +127,7 @@ async def generate_plan(
 
     parsed_resume = parse_resume(resume_text) if resume_text else None
     readiness = assess_job_readiness(profile, parsed_resume, ranked_jobs, credit_result)
-    cliff = calculate_cliff_analysis(benefits_profile) if (
-        benefits_profile and benefits_profile.enrolled_programs
-    ) else None
+    cliff, eligibility = _compute_benefits(benefits_profile)
 
     return ReEntryPlan(
         plan_id=str(uuid.uuid4()),
@@ -131,4 +142,5 @@ async def generate_plan(
         wioa_eligibility=screen_wioa_eligibility(profile),
         job_readiness=readiness,
         benefits_cliff_analysis=cliff,
+        benefits_eligibility=eligibility,
     )

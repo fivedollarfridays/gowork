@@ -17,6 +17,7 @@ import { ComparisonView } from "@/components/plan/ComparisonView";
 import { CreditResults } from "@/components/plan/CreditResults";
 import { JobReadinessResults } from "@/components/plan/JobReadinessResults";
 import { BenefitsCliffChart } from "@/components/plan/BenefitsCliffChart";
+import { BenefitsEligibility } from "@/components/plan/BenefitsEligibility";
 import { CareerCenterExport } from "@/components/plan/CareerCenterExport";
 import { EmailExport } from "@/components/plan/EmailExport";
 import { PlanExport } from "@/components/plan/PlanExport";
@@ -227,6 +228,14 @@ function PlanContent() {
         )}
       </section>
       </ScrollReveal>
+
+      {/* Benefits eligibility — programs user may qualify for */}
+      {plan.benefits_eligibility && (
+        <>
+          <Separator />
+          <BenefitsEligibility eligibility={plan.benefits_eligibility} />
+        </>
+      )}
 
       {/* Benefits cliff chart — only when cliff data exists */}
       {plan.benefits_cliff_analysis && (

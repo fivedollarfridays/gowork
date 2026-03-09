@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, computed_field, field_validator
 
-from app.modules.benefits.types import BenefitsProfile, CliffAnalysis, CliffSeverity
+from app.modules.benefits.types import BenefitsEligibility, BenefitsProfile, CliffAnalysis, CliffSeverity
 from app.modules.credit.types import CreditAssessmentResult
 from app.modules.criminal.expungement import ExpungementResult
 from app.modules.criminal.record_profile import RecordProfile
@@ -204,6 +204,7 @@ class ReEntryPlan(BaseModel):
     wioa_eligibility: Optional["WIOAEligibility"] = None
     job_readiness: Optional[JobReadinessResult] = None
     benefits_cliff_analysis: Optional[CliffAnalysis] = None
+    benefits_eligibility: Optional[BenefitsEligibility] = None
 
     @computed_field  # type: ignore[prop-decorator]
     @property

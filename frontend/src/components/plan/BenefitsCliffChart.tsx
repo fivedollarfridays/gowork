@@ -11,7 +11,7 @@ import {
   YAxis,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PROGRAM_LABELS } from "@/lib/constants";
+import { PROGRAM_LABELS, formatDollar } from "@/lib/constants";
 import type { CliffAnalysis } from "@/lib/types";
 
 interface BenefitsCliffChartProps {
@@ -33,10 +33,6 @@ function buildSummary(analysis: CliffAnalysis): string {
     text += ` Net income does not fully recover within the analyzed wage range.`;
   }
   return text;
-}
-
-function formatDollar(value: number): string {
-  return `$${Math.round(value).toLocaleString()}`;
 }
 
 export function BenefitsCliffChart({ analysis }: BenefitsCliffChartProps) {
