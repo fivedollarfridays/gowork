@@ -2,7 +2,7 @@
 
 import json
 import logging
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -36,7 +36,7 @@ async def _fetch_session(db: AsyncSession, session_id: str, token: str) -> dict:
     return row
 
 
-def _safe_json(raw: str | None, default=None):
+def _safe_json(raw: str | None, default: Any = None) -> Any:
     """Parse a JSON string, raising 500 on corrupt data."""
     if not raw:
         return default

@@ -69,16 +69,20 @@ class TestPrompts:
 
 class TestChatRequestValidation:
     def test_valid_next_steps_mode(self):
-        req = ChatRequest(session_id="abc", user_question="What next?", mode="next_steps")
+        req = ChatRequest(session_id="00000000-0000-0000-0000-000000000001", user_question="What next?", mode="next_steps")
         assert req.mode == "next_steps"
 
     def test_valid_explain_plan_mode(self):
-        req = ChatRequest(session_id="abc", user_question="Why?", mode="explain_plan")
+        req = ChatRequest(session_id="00000000-0000-0000-0000-000000000001", user_question="Why?", mode="explain_plan")
         assert req.mode == "explain_plan"
 
     def test_invalid_mode_rejected(self):
         with pytest.raises(Exception):
-            ChatRequest(session_id="abc", user_question="What if?", mode="what_if")
+            ChatRequest(session_id="00000000-0000-0000-0000-000000000001", user_question="What if?", mode="what_if")
+
+    def test_invalid_session_id_rejected(self):
+        with pytest.raises(Exception):
+            ChatRequest(session_id="not-a-uuid", user_question="Hello", mode="next_steps")
 
 
 class TestReindexEndpoint:
@@ -120,7 +124,7 @@ class TestChatStreaming:
             await create_session(session, {
                 "barriers": '["CREDIT_LOW_SCORE"]',
                 "profile": '{"zip_code": "36104"}',
-            }, session_id="stream-test")
+            }, session_id="00000000-0000-0000-0000-000000000002")
 
         with patch("app.barrier_intel.streaming.get_llm_stream") as mock_stream:
             async def fake_stream(*args, **kwargs):
@@ -131,7 +135,7 @@ class TestChatStreaming:
 
             resp = await client.post(
                 "/api/barrier-intel/chat",
-                json={"session_id": "stream-test", "user_question": "What should I do first?", "mode": "next_steps"},
+                json={"session_id": "00000000-0000-0000-0000-000000000002", "user_question": "What should I do first?", "mode": "next_steps"},
             )
         assert resp.status_code == 200
         assert "text/event-stream" in resp.headers.get("content-type", "")
@@ -214,7 +218,7 @@ class TestChatDirect:
         from fastapi import HTTPException
 
         body = ChatRequest(
-            session_id="missing", user_question="Hi", mode="next_steps",
+            session_id="00000000-0000-0000-0000-000000000099", user_question="Hi", mode="next_steps",
         )
         mock_request = MagicMock()
         mock_db = AsyncMock()
@@ -234,7 +238,7 @@ class TestChatDirect:
         from app.barrier_intel.schemas import ChatRequest
 
         body = ChatRequest(
-            session_id="s1", user_question="Give me legal advice", mode="next_steps",
+            session_id="00000000-0000-0000-0000-000000000001", user_question="Give me legal advice", mode="next_steps",
         )
         mock_request = MagicMock()
         mock_db = AsyncMock()
@@ -257,7 +261,7 @@ class TestChatDirect:
         from app.barrier_intel.schemas import ChatRequest
 
         body = ChatRequest(
-            session_id="s1", user_question="What should I do first?",
+            session_id="00000000-0000-0000-0000-000000000001", user_question="What should I do first?",
             mode="next_steps",
         )
         mock_request = MagicMock()
@@ -284,7 +288,7 @@ class TestChatEndpoint:
     async def test_missing_session_returns_404(self, client):
         resp = await client.post(
             "/api/barrier-intel/chat",
-            json={"session_id": "nonexistent", "user_question": "Hello", "mode": "next_steps"},
+            json={"session_id": "00000000-0000-0000-0000-999999999999", "user_question": "Hello", "mode": "next_steps"},
         )
         assert resp.status_code == 404
 
@@ -298,11 +302,11 @@ class TestChatEndpoint:
             await create_session(session, {
                 "barriers": '["CREDIT_LOW_SCORE"]',
                 "profile": '{"zip_code": "36104"}',
-            }, session_id="guard-test")
+            }, session_id="00000000-0000-0000-0000-000000000002")
 
         resp = await client.post(
             "/api/barrier-intel/chat",
-            json={"session_id": "guard-test", "user_question": "Give me legal advice", "mode": "next_steps"},
+            json={"session_id": "00000000-0000-0000-0000-000000000002", "user_question": "Give me legal advice", "mode": "next_steps"},
         )
         assert resp.status_code == 200
         body = resp.json()

@@ -91,5 +91,5 @@ for _router in all_routers:
 
 
 @app.get("/")
-async def root():
+async def root() -> dict:
     return {"message": "MontGoWork API", "status": "running"}

@@ -13,6 +13,7 @@ from app.core.auth import require_admin_key
 from app.core.database import get_db
 from app.core.queries import get_session_by_id
 from app.core.rate_limit import RateLimiter, require_rate_limit
+from app.rag.document_schema import RetrievalContext
 from app.rag.retrieval import retrieve_context
 
 router = APIRouter(prefix="/api/barrier-intel", tags=["barrier-intel"])
@@ -28,7 +29,7 @@ async def reindex(request: Request, db=Depends(get_db)):
     return {"status": "ok", "documents_indexed": count}
 
 
-async def _get_retrieval_ctx(cache_key, barriers, db, store, profile):
+async def _get_retrieval_ctx(cache_key, barriers, db, store, profile) -> RetrievalContext:
     """Fetch retrieval context, using cache when available."""
     cached = get_cached_retrieval(cache_key)
     if cached:
