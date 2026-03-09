@@ -1,6 +1,6 @@
 """Tests for unified job aggregator — parallel fetch, dedup, filters."""
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
 import pytest
 from sqlalchemy import text
@@ -8,7 +8,6 @@ from sqlalchemy import text
 from app.core.database import get_async_session_factory
 from app.core.queries_jobs import insert_job_listings
 from app.integrations.job_aggregator import JobAggregator, _matches_source
-from app.integrations.jsearch.types import JSearchJobRecord, JSearchResponse
 
 
 @pytest.fixture
@@ -55,7 +54,6 @@ async def _seed_honestjobs(session, count=2):
     ][:count]
     for listing in listings:
         listing["fair_chance"] = 1
-    # Insert with fair_chance
     for listing in listings:
         await session.execute(
             text(
@@ -67,19 +65,6 @@ async def _seed_honestjobs(session, count=2):
         )
     await session.commit()
     return listings
-
-
-def _mock_jsearch_response(jobs=None):
-    """Create a mock JSearchResponse."""
-    if jobs is None:
-        jobs = [
-            JSearchJobRecord(
-                title="Delivery Driver", company="FedEx",
-                location="Montgomery, AL",
-                url="https://fedex.com/apply",
-            ),
-        ]
-    return JSearchResponse(status="OK", request_id="req-test", data=jobs)
 
 
 class TestAggregatorSearch:
@@ -111,53 +96,23 @@ class TestAggregatorSearch:
         assert len(results) == 3  # 2 + 1
 
     @pytest.mark.anyio
-    async def test_includes_jsearch_results(self, db_session):
-        """When JSearch client provided, includes its results."""
-        mock_client = AsyncMock()
-        mock_client.search_jobs = AsyncMock(return_value=_mock_jsearch_response())
-        agg = JobAggregator(db_session, jsearch_client=mock_client)
-        results = await agg.search(query="driver")
-        jsearch = [j for j in results if j["source"].startswith("jsearch:")]
-        assert len(jsearch) == 1
-        assert jsearch[0]["title"] == "Delivery Driver"
-
-    @pytest.mark.anyio
     async def test_deduplicates_across_sources(self, db_session):
-        """Same job from BrightData and JSearch appears once."""
+        """Same job from BrightData and HonestJobs appears once."""
         await insert_job_listings(db_session, [
-            _make_listing("Delivery Driver", "FedEx", "brightdata:snap-1",
+            _make_listing("Forklift Operator", "Goodwill", "brightdata:snap-1",
                            location="Montgomery, AL"),
         ])
-        mock_client = AsyncMock()
-        mock_client.search_jobs = AsyncMock(return_value=_mock_jsearch_response([
-            JSearchJobRecord(
-                title="Delivery Driver", company="FedEx",
-                location="Montgomery, AL",
-            ),
-        ]))
-        agg = JobAggregator(db_session, jsearch_client=mock_client)
+        await _seed_honestjobs(db_session, 2)
+        agg = JobAggregator(db_session)
         results = await agg.search()
-        fedex = [j for j in results if j.get("company") == "FedEx"]
-        assert len(fedex) == 1
-
-    @pytest.mark.anyio
-    async def test_graceful_jsearch_failure(self, db_session):
-        """If JSearch fails, still returns BrightData + Honest Jobs."""
-        await _seed_brightdata(db_session, 2)
-        await _seed_honestjobs(db_session, 1)
-        mock_client = AsyncMock()
-        mock_client.search_jobs = AsyncMock(
-            return_value=JSearchResponse(status="ERROR", request_id="", data=[])
-        )
-        agg = JobAggregator(db_session, jsearch_client=mock_client)
-        results = await agg.search()
-        assert len(results) == 3  # BrightData + Honest Jobs only
+        goodwill = [j for j in results if j.get("company") == "Goodwill"]
+        assert len(goodwill) == 1
 
 
 class TestAggregatorExceptionHandling:
     @pytest.mark.anyio
     async def test_continues_when_source_raises_exception(self, db_session):
-        """When one source raises, others still return (lines 43-44)."""
+        """When one source raises, others still return."""
         await _seed_honestjobs(db_session, 1)
         agg = JobAggregator(db_session)
         with patch.object(
@@ -165,38 +120,30 @@ class TestAggregatorExceptionHandling:
             side_effect=RuntimeError("BrightData DB error"),
         ):
             results = await agg.search()
-        # Honest Jobs still returned despite BrightData failure
         assert len(results) >= 1
         assert all(j["source"] == "honestjobs" for j in results)
 
 
 class TestMatchesSource:
     def test_brightdata_filter_matches_prefix(self):
-        """source='brightdata' matches 'brightdata:snap-1' (line 121)."""
         assert _matches_source({"source": "brightdata:snap-1"}, "brightdata") is True
 
     def test_brightdata_filter_rejects_other(self):
         assert _matches_source({"source": "honestjobs"}, "brightdata") is False
 
-    def test_jsearch_filter_matches_prefix(self):
-        """source='jsearch' matches 'jsearch:req-abc' (line 123)."""
-        assert _matches_source({"source": "jsearch:req-abc"}, "jsearch") is True
-
-    def test_jsearch_filter_rejects_other(self):
-        assert _matches_source({"source": "brightdata:snap-1"}, "jsearch") is False
-
     def test_exact_source_match(self):
-        """Non-prefix sources match exactly."""
         assert _matches_source({"source": "honestjobs"}, "honestjobs") is True
 
     def test_exact_source_no_match(self):
-        assert _matches_source({"source": "honestjobs"}, "jsearch") is False
+        assert _matches_source({"source": "honestjobs"}, "brightdata") is False
+
+    def test_unknown_source_returns_false(self):
+        assert _matches_source({"source": "brightdata:snap-1"}, "jsearch") is False
 
 
 class TestAggregatorFilters:
     @pytest.mark.anyio
     async def test_filter_by_source(self, db_session):
-        """source filter returns only matching source."""
         await _seed_brightdata(db_session, 2)
         await _seed_honestjobs(db_session, 1)
         agg = JobAggregator(db_session)
@@ -206,7 +153,6 @@ class TestAggregatorFilters:
 
     @pytest.mark.anyio
     async def test_filter_fair_chance_only(self, db_session):
-        """fair_chance=True returns only fair-chance listings."""
         await _seed_brightdata(db_session, 2)
         await _seed_honestjobs(db_session, 1)
         agg = JobAggregator(db_session)
@@ -216,18 +162,24 @@ class TestAggregatorFilters:
 
     @pytest.mark.anyio
     async def test_no_filter_returns_all(self, db_session):
-        """No filters returns all sources."""
         await _seed_brightdata(db_session, 2)
         await _seed_honestjobs(db_session, 1)
         agg = JobAggregator(db_session)
         results = await agg.search()
         assert len(results) == 3
 
+    @pytest.mark.anyio
+    async def test_jsearch_source_filter_returns_empty(self, db_session):
+        """Filtering by removed jsearch source returns nothing, no error."""
+        await _seed_brightdata(db_session, 2)
+        agg = JobAggregator(db_session)
+        results = await agg.search(source="jsearch")
+        assert len(results) == 0
+
 
 class TestJobsRoute:
     @pytest.mark.anyio
     async def test_list_jobs_returns_aggregated(self, client):
-        """GET /api/jobs/ returns job listings."""
         resp = await client.get("/api/jobs/")
         assert resp.status_code == 200
         body = resp.json()
@@ -236,7 +188,6 @@ class TestJobsRoute:
 
     @pytest.mark.anyio
     async def test_source_filter_param(self, client):
-        """GET /api/jobs/?source=honestjobs filters by source."""
         resp = await client.get("/api/jobs/?source=honestjobs")
         assert resp.status_code == 200
         body = resp.json()
@@ -245,7 +196,6 @@ class TestJobsRoute:
 
     @pytest.mark.anyio
     async def test_fair_chance_filter_param(self, client):
-        """GET /api/jobs/?fair_chance=true filters to fair-chance only."""
         resp = await client.get("/api/jobs/?fair_chance=true")
         assert resp.status_code == 200
         body = resp.json()

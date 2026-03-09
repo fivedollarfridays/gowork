@@ -123,7 +123,7 @@ describe("JobFilterPills", () => {
     const onClear = vi.fn();
     const filters: JobFilterState = {
       ...defaultFilters,
-      source: "jsearch",
+      source: "honestjobs",
       fairChanceOnly: true,
     };
     render(<JobFilterPills filters={filters} onClear={onClear} />);

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { JobMatchCard } from "../JobMatchCard";
-import type { ScoredJobMatch } from "@/lib/types";
+import type { CommuteEstimate, ScoredJobMatch } from "@/lib/types";
 
 function makeJob(overrides: Partial<ScoredJobMatch> = {}): ScoredJobMatch {
   return {
@@ -79,12 +79,6 @@ describe("JobMatchCard — source badge", () => {
     expect(screen.getByText("via Indeed")).toBeInTheDocument();
   });
 
-  it("shows 'via JSearch' for jsearch source", () => {
-    const job = makeJob({ source: "jsearch:req-123" });
-    render(<JobMatchCard job={job} />);
-    expect(screen.getByText("via JSearch")).toBeInTheDocument();
-  });
-
   it("hides source badge for unknown source", () => {
     const job = makeJob({ source: "test" });
     render(<JobMatchCard job={job} />);
@@ -95,5 +89,62 @@ describe("JobMatchCard — source badge", () => {
     const job = makeJob({ source: null });
     render(<JobMatchCard job={job} />);
     expect(screen.queryByText(/^via /)).not.toBeInTheDocument();
+  });
+});
+
+describe("JobMatchCard — commute estimate", () => {
+  const fullCommute: CommuteEstimate = {
+    drive_min: 12,
+    transit_min: 25,
+    walk_min: 40,
+  };
+
+  it("shows drive time when commute_estimate present", () => {
+    const job = makeJob({ commute_estimate: fullCommute });
+    render(<JobMatchCard job={job} />);
+    expect(screen.getByText("12 min drive")).toBeInTheDocument();
+  });
+
+  it("shows transit time when transit_min present", () => {
+    const job = makeJob({ commute_estimate: fullCommute });
+    render(<JobMatchCard job={job} />);
+    expect(screen.getByText("25 min transit")).toBeInTheDocument();
+  });
+
+  it("shows walk time when walk_min present", () => {
+    const job = makeJob({ commute_estimate: fullCommute });
+    render(<JobMatchCard job={job} />);
+    expect(screen.getByText("40 min walk")).toBeInTheDocument();
+  });
+
+  it("hides transit when transit_min is null", () => {
+    const job = makeJob({
+      commute_estimate: { drive_min: 15, transit_min: null, walk_min: null },
+    });
+    render(<JobMatchCard job={job} />);
+    expect(screen.getByText("15 min drive")).toBeInTheDocument();
+    expect(screen.queryByText(/min transit/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/min walk/)).not.toBeInTheDocument();
+  });
+
+  it("hides commute section when commute_estimate is undefined", () => {
+    const job = makeJob();
+    render(<JobMatchCard job={job} />);
+    expect(screen.queryByText(/min drive/)).not.toBeInTheDocument();
+  });
+
+  it("hides commute section when commute_estimate is null", () => {
+    const job = makeJob({ commute_estimate: null });
+    render(<JobMatchCard job={job} />);
+    expect(screen.queryByText(/min drive/)).not.toBeInTheDocument();
+  });
+
+  it("has aria-labels on commute badges", () => {
+    const job = makeJob({ commute_estimate: fullCommute });
+    render(<JobMatchCard job={job} />);
+    expect(screen.getByLabelText("Estimated commute times")).toBeInTheDocument();
+    expect(screen.getByLabelText("12 minute drive")).toBeInTheDocument();
+    expect(screen.getByLabelText("25 minute transit")).toBeInTheDocument();
+    expect(screen.getByLabelText("40 minute walk")).toBeInTheDocument();
   });
 });

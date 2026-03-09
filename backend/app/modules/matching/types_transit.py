@@ -35,6 +35,14 @@ class TransitInfo(BaseModel):
     google_maps_url: Optional[str] = None
 
 
+class CommuteEstimate(BaseModel):
+    """Estimated commute times in minutes."""
+
+    drive_min: int
+    transit_min: Optional[int] = None
+    walk_min: Optional[int] = None
+
+
 class TransitConnection(BaseModel):
     route_number: int
     route_name: str

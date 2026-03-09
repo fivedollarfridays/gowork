@@ -3,7 +3,7 @@ import type { ScoredJobMatch } from "@/lib/types";
 export type SortOption = "relevance" | "pay";
 
 export interface JobFilterState {
-  source: "all" | "brightdata" | "jsearch" | "honestjobs";
+  source: "all" | "brightdata" | "honestjobs";
   fairChanceOnly: boolean;
   schedule: "all" | "full-time" | "part-time";
   minPay: number;
@@ -11,7 +11,6 @@ export interface JobFilterState {
 
 export const SOURCE_LABELS: Record<string, string> = {
   brightdata: "BrightData",
-  jsearch: "JSearch",
   honestjobs: "Honest Jobs",
 };
 
@@ -31,7 +30,6 @@ function matchesSource(job: ScoredJobMatch, source: string): boolean {
   if (source === "all") return true;
   const jobSource = job.source ?? "";
   if (source === "brightdata") return jobSource.startsWith("brightdata:");
-  if (source === "jsearch") return jobSource.startsWith("jsearch:");
   return jobSource === source;
 }
 

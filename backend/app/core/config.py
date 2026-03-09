@@ -39,11 +39,8 @@ class Settings(BaseSettings):
 
     brightdata_api_key: str = ""
     brightdata_dataset_id: str = ""
+    brightdata_job_domains: str = "indeed.com"
     admin_api_key: str = ""
-
-    # JSearch (RapidAPI)
-    jsearch_api_key: str = ""
-    jsearch_host: str = "jsearch.p.rapidapi.com"
 
     # Data
     data_dir: str = ""
