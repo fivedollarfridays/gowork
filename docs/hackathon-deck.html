@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MontGoWork — Hackathon Supplementary Deck</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #1a1a2e;
+      background: #fff;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .slide {
+      width: 100%;
+      min-height: 100vh;
+      padding: 60px 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      page-break-after: always;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide:last-child { page-break-after: avoid; }
+
+    /* Slide 1: Cover */
+    .slide-cover {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #2563eb 100%);
+      color: #fff;
+      text-align: center;
+      justify-content: center;
+      align-items: center;
+    }
+    .slide-cover .logo {
+      font-size: 72px;
+      font-weight: 800;
+      letter-spacing: -2px;
+      margin-bottom: 8px;
+    }
+    .slide-cover .logo span { color: #60a5fa; }
+    .slide-cover .tagline {
+      font-size: 24px;
+      font-weight: 300;
+      color: #93c5fd;
+      margin-bottom: 48px;
+      max-width: 600px;
+    }
+    .slide-cover .subtitle {
+      font-size: 16px;
+      color: #94a3b8;
+      margin-top: 32px;
+    }
+    .slide-cover .stats-row {
+      display: flex;
+      gap: 48px;
+      margin-top: 48px;
+    }
+    .slide-cover .stat { text-align: center; }
+    .slide-cover .stat-number {
+      font-size: 36px;
+      font-weight: 700;
+      color: #60a5fa;
+    }
+    .slide-cover .stat-label {
+      font-size: 13px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Slide headers */
+    .slide-header {
+      margin-bottom: 40px;
+    }
+    .slide-header h2 {
+      font-size: 36px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+    .slide-header .accent-line {
+      width: 60px;
+      height: 4px;
+      background: #2563eb;
+      border-radius: 2px;
+    }
+
+    .page-num {
+      position: absolute;
+      bottom: 30px;
+      right: 40px;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .page-brand {
+      position: absolute;
+      bottom: 30px;
+      left: 40px;
+      font-size: 12px;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+
+    /* Problem slide */
+    .problem-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+    .problem-card {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 28px;
+      border-left: 4px solid #ef4444;
+    }
+    .problem-card h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+    .problem-card p {
+      font-size: 14px;
+      color: #475569;
+      line-height: 1.6;
+    }
+    .problem-callout {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+      margin-top: 32px;
+      text-align: center;
+    }
+    .problem-callout .big-stat {
+      font-size: 48px;
+      font-weight: 800;
+      color: #dc2626;
+    }
+    .problem-callout p {
+      font-size: 15px;
+      color: #991b1b;
+      margin-top: 4px;
+    }
+
+    /* Solution slide */
+    .solution-flow {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-top: 12px;
+    }
+    .solution-step {
+      flex: 1;
+      text-align: center;
+      padding: 24px 16px;
+      background: #f8fafc;
+      border-radius: 12px;
+    }
+    .solution-step .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background: #2563eb;
+      color: #fff;
+      border-radius: 50%;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .solution-step h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .solution-step p {
+      font-size: 13px;
+      color: #64748b;
+      line-height: 1.5;
+    }
+    .solution-arrow {
+      display: flex;
+      align-items: center;
+      padding-top: 36px;
+      font-size: 24px;
+      color: #cbd5e1;
+    }
+    .value-props {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      margin-top: 36px;
+    }
+    .value-prop {
+      padding: 20px;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+    }
+    .value-prop h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #2563eb;
+      margin-bottom: 6px;
+    }
+    .value-prop p {
+      font-size: 13px;
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    /* Features slide */
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .feature-card {
+      padding: 24px;
+      background: #f8fafc;
+      border-radius: 12px;
+      border-top: 3px solid #2563eb;
+    }
+    .feature-card.accent-green { border-top-color: #16a34a; }
+    .feature-card.accent-amber { border-top-color: #d97706; }
+    .feature-card.accent-purple { border-top-color: #9333ea; }
+    .feature-card.accent-rose { border-top-color: #e11d48; }
+    .feature-card.accent-teal { border-top-color: #0d9488; }
+    .feature-card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .feature-card p {
+      font-size: 13px;
+      color: #475569;
+      line-height: 1.6;
+    }
+    .feature-card .tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      color: #2563eb;
+      background: #dbeafe;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-top: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .feature-card .tag.green { color: #16a34a; background: #dcfce7; }
+    .feature-card .tag.amber { color: #d97706; background: #fef3c7; }
+    .feature-card .tag.purple { color: #9333ea; background: #f3e8ff; }
+    .feature-card .tag.rose { color: #e11d48; background: #ffe4e6; }
+    .feature-card .tag.teal { color: #0d9488; background: #ccfbf1; }
+
+    /* Journey slide */
+    .journey-timeline {
+      position: relative;
+      padding-left: 40px;
+    }
+    .journey-timeline::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: #e2e8f0;
+      border-radius: 2px;
+    }
+    .journey-step {
+      position: relative;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .journey-step::before {
+      content: '';
+      position: absolute;
+      left: -31px;
+      top: 6px;
+      width: 14px;
+      height: 14px;
+      background: #2563eb;
+      border-radius: 50%;
+      border: 3px solid #fff;
+      box-shadow: 0 0 0 2px #2563eb;
+    }
+    .journey-step .j-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .journey-step .j-desc {
+      font-size: 13px;
+      color: #64748b;
+      line-height: 1.5;
+      margin-top: 2px;
+    }
+
+    /* Architecture slide */
+    .arch-diagram {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    .arch-box {
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .arch-box h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .arch-box ul {
+      list-style: none;
+      padding: 0;
+    }
+    .arch-box li {
+      font-size: 13px;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      color: #334155;
+    }
+    .arch-box li:last-child { border-bottom: none; }
+    .arch-frontend { background: #eff6ff; border: 1px solid #bfdbfe; }
+    .arch-frontend h3 { color: #1d4ed8; }
+    .arch-backend { background: #f0fdf4; border: 1px solid #bbf7d0; }
+    .arch-backend h3 { color: #15803d; }
+    .arch-external { background: #faf5ff; border: 1px solid #e9d5ff; }
+    .arch-external h3 { color: #7e22ce; }
+    .arch-note {
+      margin-top: 28px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .arch-metric {
+      text-align: center;
+      padding: 16px;
+      background: #f8fafc;
+      border-radius: 8px;
+    }
+    .arch-metric .num {
+      font-size: 28px;
+      font-weight: 700;
+      color: #2563eb;
+    }
+    .arch-metric .label {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    /* Impact slide */
+    .impact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+    .impact-col h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #0f172a;
+    }
+    .impact-item {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      align-items: flex-start;
+    }
+    .impact-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .impact-icon.green { background: #dcfce7; }
+    .impact-icon.blue { background: #dbeafe; }
+    .impact-item p {
+      font-size: 14px;
+      color: #475569;
+      line-height: 1.5;
+    }
+    .impact-item strong {
+      color: #0f172a;
+    }
+    .diff-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+    .diff-table th, .diff-table td {
+      text-align: left;
+      padding: 10px 14px;
+      font-size: 13px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .diff-table th {
+      background: #f1f5f9;
+      font-weight: 600;
+      color: #334155;
+    }
+    .diff-table td { color: #475569; }
+    .diff-table .highlight { color: #2563eb; font-weight: 600; }
+
+    /* Roadmap slide */
+    .roadmap-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+    .roadmap-col h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    .roadmap-item {
+      margin-bottom: 14px;
+      padding-left: 16px;
+      border-left: 3px solid #2563eb;
+    }
+    .roadmap-item.done { border-left-color: #16a34a; }
+    .roadmap-item.future { border-left-color: #94a3b8; }
+    .roadmap-item h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .roadmap-item p {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+    .team-section {
+      margin-top: 36px;
+      padding-top: 24px;
+      border-top: 1px solid #e2e8f0;
+    }
+    .team-section h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .team-grid {
+      display: flex;
+      gap: 24px;
+    }
+    .team-card {
+      padding: 20px;
+      background: #f8fafc;
+      border-radius: 10px;
+      flex: 1;
+    }
+    .team-card h4 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .team-card p {
+      font-size: 13px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    @media print {
+      .slide {
+        min-height: 100vh;
+        padding: 48px 60px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- SLIDE 1: Cover -->
+<div class="slide slide-cover">
+  <div class="logo">Mont<span>Go</span>Work</div>
+  <div class="tagline">AI-Powered Workforce Navigator for Montgomery, Alabama</div>
+  <p style="font-size: 15px; color: #cbd5e1; max-width: 640px; line-height: 1.7;">
+    From "I can't get a job" to a personalized, barrier-aware re-entry plan —
+    with real Montgomery resources, transit schedules, benefits screening, and
+    AI-generated action steps a resident can use <strong style="color: #fff;">Monday morning</strong>.
+  </p>
+  <div class="stats-row">
+    <div class="stat">
+      <div class="stat-number">1,900+</div>
+      <div class="stat-label">Tests Passing</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">40</div>
+      <div class="stat-label">PRs Merged</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">30</div>
+      <div class="stat-label">Sprints Shipped</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">7</div>
+      <div class="stat-label">Barrier Types</div>
+    </div>
+  </div>
+  <div style="display: flex; gap: 36px; margin-top: 40px;">
+    <div style="text-align: center;">
+      <p style="font-size: 14px; font-weight: 600; color: #fff;">Kevin Masterson</p>
+      <p style="font-size: 12px; color: #94a3b8;">Team Lead &amp; Lead Dev</p>
+    </div>
+    <div style="text-align: center;">
+      <p style="font-size: 14px; font-weight: 600; color: #fff;">Shawn Sanchez</p>
+      <p style="font-size: 12px; color: #94a3b8;">Credit Assessment &amp; Frontend</p>
+    </div>
+    <div style="text-align: center;">
+      <p style="font-size: 14px; font-weight: 600; color: #fff;">Vinny Babu Manjaly</p>
+      <p style="font-size: 12px; color: #94a3b8;">Python, RAG &amp; Multi-Provider LLM</p>
+    </div>
+  </div>
+  <div class="subtitle">World Wide Vibes Hackathon &mdash; Workforce Growth Track &mdash; March 9, 2026</div>
+</div>
+
+<!-- SLIDE 2: The Problem -->
+<div class="slide">
+  <div class="slide-header">
+    <h2>The Problem</h2>
+    <div class="accent-line"></div>
+  </div>
+  <p style="font-size: 16px; color: #475569; margin-bottom: 32px; max-width: 720px; line-height: 1.7;">
+    Montgomery residents re-entering the workforce face interconnected barriers that generic job boards ignore.
+    A single barrier — like no car or a criminal record — can disqualify someone from 60% of available jobs.
+    Multiple barriers compound exponentially.
+  </p>
+  <div class="problem-grid">
+    <div class="problem-card">
+      <h3>Fragmented Resources</h3>
+      <p>Career centers, childcare providers, credit counselors, and legal aid exist — but there's no single system that connects them to a resident's specific situation.</p>
+    </div>
+    <div class="problem-card">
+      <h3>Benefits Cliffs</h3>
+      <p>Taking a job at the wrong wage can cost more in lost benefits than the paycheck provides. A $1/hr raise can mean losing $400/month in childcare subsidy.</p>
+    </div>
+    <div class="problem-card">
+      <h3>Transit Blindness</h3>
+      <p>Jobs that look great on paper are unreachable without a car. No Sunday bus service. Last bus at 9 PM kills second-shift jobs. Generic job boards don't know this.</p>
+    </div>
+    <div class="problem-card">
+      <h3>Criminal Record Barriers</h3>
+      <p>Alabama residents with records don't know which employers are fair-chance, whether they qualify for expungement, or how to navigate background check timing.</p>
+    </div>
+  </div>
+  <div class="problem-callout">
+    <div class="big-stat">7 Barriers</div>
+    <p>MontGoWork addresses credit, transportation, childcare, housing, health, training, and criminal record barriers in a single integrated system</p>
+  </div>
+  <span class="page-brand">MontGoWork</span>
+  <span class="page-num">2 / 8</span>
+</div>
+
+<!-- SLIDE 3: The Solution -->
+<div class="slide">
+  <div class="slide-header">
+    <h2>How MontGoWork Works</h2>
+    <div class="accent-line"></div>
+  </div>
+  <div class="solution-flow">
+    <div class="solution-step">
+      <div class="step-num">1</div>
+      <h3>Assess</h3>
+      <p>5-minute wizard captures ZIP, barriers, credit profile, criminal record, household income, and work history.</p>
+    </div>
+    <div class="solution-arrow">&rarr;</div>
+    <div class="solution-step">
+      <div class="step-num">2</div>
+      <h3>Match</h3>
+      <p>Engine scores jobs by Practical Value Score (net income + proximity + schedule + barrier fit). Screens 7 benefits programs. Checks transit feasibility.</p>
+    </div>
+    <div class="solution-arrow">&rarr;</div>
+    <div class="solution-step">
+      <div class="step-num">3</div>
+      <h3>Plan</h3>
+      <p>AI generates a personalized "Monday Morning" plan with barrier cards, ranked jobs, benefits eligibility, cliff warnings, and exportable PDFs.</p>
+    </div>
+  </div>
+  <div class="value-props">
+    <div class="value-prop">
+      <h4>Montgomery-Specific</h4>
+      <p>Real M-Transit routes (14 routes, 42 stops), local career centers, childcare providers, and training programs — not national aggregations.</p>
+    </div>
+    <div class="value-prop">
+      <h4>No Account Required</h4>
+      <p>No sign-up, no PII stored permanently. Session-based with 30-day expiry. Credit data stays in browser only. Privacy by design.</p>
+    </div>
+    <div class="value-prop">
+      <h4>Case Worker Ready</h4>
+      <p>Career Center Ready Package generates a staff-facing PDF with WIOA eligibility, document checklist, and "what to say" scripts.</p>
+    </div>
+  </div>
+  <span class="page-brand">MontGoWork</span>
+  <span class="page-num">3 / 8</span>
+</div>
+
+<!-- SLIDE 4: User Journey -->
+<div class="slide">
+  <div class="slide-header">
+    <h2>Maria's Journey</h2>
+    <div class="accent-line"></div>
+  </div>
+  <p style="font-size: 14px; color: #64748b; margin-bottom: 28px;">
+    Maria, 34, recently released. Single mother of 2 in Montgomery (36104). No car. Credit score ~580. Criminal record (misdemeanor theft, 4 years ago). Four barriers.
+  </p>
+  <div class="journey-timeline">
+    <div class="journey-step">
+      <div>
+        <div class="j-title">Assessment Wizard (3 minutes)</div>
+        <div class="j-desc">ZIP 36104, unemployed, no vehicle. Selects credit, transportation, childcare, and criminal record barriers. Self-reports credit at 580, 65% utilization. Misdemeanor theft, 4 years ago, sentence complete. Work history: retail + food service, forklift certified.</div>
+      </div>
+    </div>
+    <div class="journey-step">
+      <div>
+        <div class="j-title">Matching Engine Runs</div>
+        <div class="j-desc">PVS scores jobs (4-factor weighted). Credit filter splits eligible-now vs. after-repair. Transit schedule matcher validates shift times against M-Transit first/last bus. Benefits screener checks SNAP, childcare subsidy, Medicaid, Section 8. Cliff calculator detects a $200 drop at $14/hr. Expungement check: eligible under Alabama Act 2021-507.</div>
+      </div>
+    </div>
+    <div class="journey-step">
+      <div>
+        <div class="j-title">"Monday Morning" Plan Generated</div>
+        <div class="j-desc">AI writes a personalized narrative with Montgomery-specific guidance. Four barrier cards with timelines and local resources. Ranked job matches with fair-chance badges and transit routes. Benefits eligibility dashboard. Cliff chart showing safe wage ranges. Expungement filing steps.</div>
+      </div>
+    </div>
+    <div class="journey-step">
+      <div>
+        <div class="j-title">Export & Take Action</div>
+        <div class="j-desc">Downloads PDF to bring to the Alabama Career Center on Ripley Street. Career Center Ready Package gives the case worker a staff-facing summary, WIOA eligibility, and a "what to say" script. QR code on the PDF links to a 30-day follow-up feedback form.</div>
+      </div>
+    </div>
+  </div>
+  <span class="page-brand">MontGoWork</span>
+  <span class="page-num">4 / 8</span>
+</div>
+
+<!-- SLIDE 5: Key Features Deep Dive -->
+<div class="slide">
+  <div class="slide-header">
+    <h2>Key Features</h2>
+    <div class="accent-line"></div>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <h3>Practical Value Score (PVS)</h3>
+      <p>Jobs ranked by real-world value: 35% net income (with benefits cliff impact), 25% proximity, 20% schedule fit, 20% barrier compatibility. No-pay jobs penalized with 0.55x multiplier. Fair-chance employers boosted.</p>
+      <span class="tag">Scoring Engine</span>
+    </div>
+    <div class="feature-card accent-green">
+      <h3>Benefits Cliff Detection</h3>
+      <p>Calculates net income across $8-$25/hr in $0.50 steps for 7 Alabama programs. Flags severe cliffs (>$200 loss) so residents and case workers avoid wage traps. Visual cliff chart in the plan.</p>
+      <span class="tag green">Financial Safety</span>
+    </div>
+    <div class="feature-card accent-amber">
+      <h3>Transit Schedule Matching</h3>
+      <p>14 M-Transit routes, 42 stops. Validates shift times against first/last bus. Detects transfers via Rosa Parks hub. Flags no-Sunday and no-night service. Walk distance to nearest stop. Google Maps trip planning link.</p>
+      <span class="tag amber">Montgomery-Specific</span>
+    </div>
+    <div class="feature-card accent-purple">
+      <h3>Criminal Record Intelligence</h3>
+      <p>Alabama Act 2021-507 expungement eligibility check. Fair-chance employer matching. Background check timing awareness (pre-offer vs. post-offer). Excluded charge category filtering.</p>
+      <span class="tag purple">Legal Guidance</span>
+    </div>
+    <div class="feature-card accent-rose">
+      <h3>AI-Powered Plan Narrative</h3>
+      <p>Multi-provider LLM (Claude, OpenAI, Gemini) generates Montgomery-specific "Monday Morning" action plans. Template fallback if APIs are down. Prompt injection defense. Rate limiting.</p>
+      <span class="tag rose">AI / LLM</span>
+    </div>
+    <div class="feature-card accent-teal">
+      <h3>Resource Ecosystem</h3>
+      <p>Local career centers, childcare providers, training programs, social services — with findhelp.org deep links, eligibility badges, feedback-driven health scoring, and barrier graph traversal for root-cause analysis.</p>
+      <span class="tag teal">Community</span>
+    </div>
+  </div>
+  <span class="page-brand">MontGoWork</span>
+  <span class="page-num">5 / 8</span>
+</div>
+
+<!-- SLIDE 6: Architecture -->
+<div class="slide">
+  <div class="slide-header">
+    <h2>Architecture</h2>
+    <div class="accent-line"></div>
+  </div>
+  <div class="arch-diagram">
+    <div class="arch-box arch-frontend">
+      <h3>Frontend</h3>
+      <ul>
+        <li><strong>Next.js 15</strong> (App Router)</li>
+        <li>React + TypeScript</li>
+        <li>Tailwind CSS + shadcn/ui</li>
+        <li>TanStack React Query</li>
+        <li>html2pdf.js (PDF export)</li>
+        <li>WCAG 2.1 AA accessible</li>
+        <li>Mobile-responsive</li>
+      </ul>
+    </div>
+    <div class="arch-box arch-backend">
+      <h3>Backend</h3>
+      <ul>
+        <li><strong>FastAPI</strong> + Uvicorn</li>
+        <li>Python 3.11+</li>
+        <li>SQLAlchemy (async) + aiosqlite</li>
+        <li>SQLite database</li>
+        <li>FAISS + sentence-transformers (RAG)</li>
+        <li>Multi-provider LLM client</li>
+        <li>Matching engine + PVS scorer</li>
+        <li>Benefits cliff calculator</li>
+        <li>Transit schedule matcher</li>
+        <li>Barrier graph + causal traversal</li>
+      </ul>
+    </div>
+    <div class="arch-box arch-external">
+      <h3>External Services</h3>
+      <ul>
+        <li>Anthropic Claude API</li>
+        <li>OpenAI API</li>
+        <li>Google Gemini API</li>
+        <li>BrightData (job scraping)</li>
+        <li>JSearch / RapidAPI</li>
+        <li>Honest Jobs (fair-chance)</li>
+        <li>Credit Microservice</li>
+        <li>findhelp.org (resource links)</li>
+        <li>EmailJS (plan delivery)</li>
+      </ul>
+    </div>
+  </div>
+  <div class="arch-note">
+    <div class="arch-metric">
+      <div class="num">1,499</div>
+      <div class="label">Backend Tests</div>
+    </div>
+    <div class="arch-metric">
+      <div class="num">469</div>
+      <div class="label">Frontend Tests</div>
+    </div>
+    <div class="arch-metric">
+      <div class="num">100%</div>
+      <div class="label">TDD via PairCoder</div>
+    </div>
+    <div class="arch-metric">
+      <div class="num">14</div>
+      <div class="label">DB Tables</div>
+    </div>
+  </div>
+  <p style="font-size: 13px; color: #64748b; margin-top: 20px; text-align: center;">
+    Graceful degradation: app works without any external service. Template narratives, seed jobs, and local resources provide full functionality offline.
+  </p>
+  <span class="page-brand">MontGoWork</span>
+  <span class="page-num">6 / 8</span>
+</div>
+
+<!-- SLIDE 7: What Sets Us Apart -->
+<div class="slide">
+  <div class="slide-header">
+    <h2>What Sets Us Apart</h2>
+    <div class="accent-line"></div>
+  </div>
+  <div class="impact-grid">
+    <div class="impact-col">
+      <h3>vs. Generic Job Boards</h3>
+      <table class="diff-table">
+        <tr>
+          <th>Capability</th>
+          <th>Job Boards</th>
+          <th>MontGoWork</th>
+        </tr>
+        <tr>
+          <td>Transit feasibility</td>
+          <td>None</td>
+          <td class="highlight">Schedule-aware</td>
+        </tr>
+        <tr>
+          <td>Benefits cliff warnings</td>
+          <td>None</td>
+          <td class="highlight">7 programs</td>
+        </tr>
+        <tr>
+          <td>Criminal record matching</td>
+          <td>Checkbox filter</td>
+          <td class="highlight">Policy-level matching</td>
+        </tr>
+        <tr>
+          <td>Credit barrier awareness</td>
+          <td>None</td>
+          <td class="highlight">Filter + repair path</td>
+        </tr>
+        <tr>
+          <td>Barrier-aware scoring</td>
+          <td>Keyword match</td>
+          <td class="highlight">4-factor PVS</td>
+        </tr>
+        <tr>
+          <td>Local resource connection</td>
+          <td>None</td>
+          <td class="highlight">Barrier cards + findhelp</td>
+        </tr>
+        <tr>
+          <td>Case worker handoff</td>
+          <td>None</td>
+          <td class="highlight">Career Center PDF</td>
+        </tr>
+      </table>
+    </div>
+    <div class="impact-col">
+      <h3>Design Principles</h3>
+      <div class="impact-item">
+        <div class="impact-icon green">&#x2713;</div>
+        <p><strong>Privacy First:</strong> No accounts, no PII storage. Session-based with 30-day expiry. Credit data in browser sessionStorage only.</p>
+      </div>
+      <div class="impact-item">
+        <div class="impact-icon green">&#x2713;</div>
+        <p><strong>Graceful Degradation:</strong> Every external service has a fallback. AI down? Template narrative. No BrightData? Seed jobs. No credit API? Skip credit scoring.</p>
+      </div>
+      <div class="impact-item">
+        <div class="impact-icon green">&#x2713;</div>
+        <p><strong>City-Portable:</strong> Architecture is city-agnostic. Swap seed data (resources, transit, employers) and prompts for any city. Zero code changes.</p>
+      </div>
+      <div class="impact-item">
+        <div class="impact-icon blue">&#x2713;</div>
+        <p><strong>Feedback Loop:</strong> Resource health scoring via user feedback. Watch/Flagged/Hidden statuses. 30-day decay detection. QR-linked post-visit surveys.</p>
+      </div>
+      <div class="impact-item">
+        <div class="impact-icon blue">&#x2713;</div>
+        <p><strong>Security Hardened:</strong> Rate limiting, CORS, prompt injection defense, admin auth, input validation, Docker hardening, CI vulnerability scanning.</p>
+      </div>
+    </div>
+  </div>
+  <span class="page-brand">MontGoWork</span>
+  <span class="page-num">7 / 8</span>
+</div>
+
+<!-- SLIDE 8: Roadmap & Closing -->
+<div class="slide">
+  <div class="slide-header">
+    <h2>Built With & What's Next</h2>
+    <div class="accent-line"></div>
+  </div>
+  <div class="roadmap-cols">
+    <div class="roadmap-col">
+      <h3>Completed (30 Sprints)</h3>
+      <div class="roadmap-item done">
+        <h4>Core Platform</h4>
+        <p>Assessment wizard, matching engine, plan generation, PDF/email export</p>
+      </div>
+      <div class="roadmap-item done">
+        <h4>AI Integration</h4>
+        <p>Multi-provider LLM narratives, barrier intelligence RAG chat, prompt guardrails</p>
+      </div>
+      <div class="roadmap-item done">
+        <h4>Job Intelligence</h4>
+        <p>BrightData scraping, PVS scoring, fair-chance matching, credit filters</p>
+      </div>
+      <div class="roadmap-item done">
+        <h4>Benefits Engine</h4>
+        <p>7-program eligibility screening, cliff calculator, visualization</p>
+      </div>
+      <div class="roadmap-item done">
+        <h4>Transit System</h4>
+        <p>Schedule-aware matching, walk distance, transfer detection, Sunday/night gaps</p>
+      </div>
+      <div class="roadmap-item done">
+        <h4>Security & Quality</h4>
+        <p>1,900+ tests enforced by PairCoder TDD gates, security audit, Docker hardening, accessibility</p>
+      </div>
+    </div>
+    <div class="roadmap-col">
+      <h3>Roadmap</h3>
+      <div class="roadmap-item future">
+        <h4>findhelp.org API Integration</h4>
+        <p>Deep API partnership for real-time resource availability and eligibility</p>
+      </div>
+      <div class="roadmap-item future">
+        <h4>Multi-City Expansion</h4>
+        <p>Deploy for Birmingham, Mobile, Huntsville — swap seed data, same codebase</p>
+      </div>
+      <div class="roadmap-item future">
+        <h4>PostgreSQL + Redis</h4>
+        <p>Production database, caching layer, horizontal scaling for concurrent users</p>
+      </div>
+      <div class="roadmap-item future">
+        <h4>Case Worker Dashboard</h4>
+        <p>Admin portal for career center staff to track outcomes and manage resources</p>
+      </div>
+      <div class="roadmap-item future">
+        <h4>Employer Portal</h4>
+        <p>Fair-chance employers can register policies, receive matched candidate referrals</p>
+      </div>
+      <div class="roadmap-item future">
+        <h4>Outcome Tracking</h4>
+        <p>30/60/90-day employment outcomes via feedback loop. Measure real impact.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="team-section">
+    <div style="text-align: center; padding: 24px;">
+      <p style="font-size: 20px; font-weight: 600; color: #0f172a; margin-bottom: 8px;">
+        Built with PairCoder &mdash; the enforcement layer that made it possible
+      </p>
+      <p style="font-size: 14px; color: #475569; max-width: 660px; margin: 0 auto; line-height: 1.7;">
+        PairCoder is an AI pair programming framework that enforced TDD (tests before code), architecture constraints (400-line file limits, 50-line function limits), acceptance criteria gates, and role-based workflows (Navigator/Driver/Reviewer) across every sprint. It managed task lifecycle with Trello sync, budget validation, and context persistence across sessions &mdash; ensuring 30 sprints, 40 PRs, and 1,900+ tests shipped with consistent quality.
+      </p>
+      <p style="font-size: 13px; color: #94a3b8; margin-top: 16px;">
+        PairCoder &middot; Python &middot; FastAPI &middot; Next.js &middot; React &middot; TypeScript &middot; SQLite &middot; Claude API &middot; FAISS &middot; Docker
+      </p>
+    </div>
+  </div>
+
+  <span class="page-brand">MontGoWork</span>
+  <span class="page-num">8 / 8</span>
+</div>
+
+</body>
+</html>
