@@ -35,7 +35,7 @@ export function ScrollReveal({ children, delay = 0, className, direction = "up" 
       className={className}
       initial={{ opacity: 0, x, y }}
       animate={inView ? { opacity: 1, x: 0, y: 0 } : undefined}
-      transition={{ duration: 0.5, ease: "easeOut", delay }}
+      transition={{ duration: 1.0, ease: "easeOut", delay }}
     >
       {children}
     </m.div>
@@ -52,7 +52,7 @@ export function StaggerContainer({ children, className, delay = 0 }: StaggerCont
       className={className}
       initial="hidden"
       animate="visible"
-      variants={{ visible: { transition: { staggerChildren: 0.1, delayChildren: delay } } }}
+      variants={{ visible: { transition: { staggerChildren: 0.25, delayChildren: delay } } }}
     >
       {children}
     </m.div>
@@ -63,13 +63,14 @@ interface StaggerItemProps { children: ReactNode; className?: string }
 
 export function StaggerItem({ children, className }: StaggerItemProps) {
   const prefersReduced = useReducedMotion();
-  if (prefersReduced) return <div className={className}>{children}</div>;
+  const cls = className ? `h-full ${className}` : "h-full";
+  if (prefersReduced) return <div className={cls}>{children}</div>;
   return (
     <m.div
-      className={className}
+      className={cls}
       variants={{
         hidden: { opacity: 0, y: 20 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
       }}
     >
       {children}
@@ -83,18 +84,20 @@ interface AnimatedCounterProps {
 }
 
 export function AnimatedCounter({
-  from = 0, to, prefix = "", suffix = "", duration = 1, decimals = 0,
+  from = 0, to, prefix = "", suffix = "", duration = 2.5, decimals = 0,
 }: AnimatedCounterProps) {
   const prefersReduced = useReducedMotion();
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-50px" });
   const motionValue = useMotionValue(from);
   const spring = useSpring(motionValue, { duration: duration * 1000, bounce: 0.1 });
   const display = useTransform(spring, (v) => `${prefix}${v.toFixed(decimals)}${suffix}`);
-  useEffect(() => { motionValue.set(to); }, [motionValue, to]);
+  useEffect(() => { if (inView) motionValue.set(to); }, [inView, motionValue, to]);
 
   if (prefersReduced) {
     return <span>{prefix}{to.toFixed(decimals)}{suffix}</span>;
   }
-  return <m.span>{display}</m.span>;
+  return <m.span ref={ref}>{display}</m.span>;
 }
 
 interface TypewriterProps { text: string; delay?: number; className?: string }
@@ -110,7 +113,7 @@ export function Typewriter({ text, delay = 0, className }: TypewriterProps) {
       animate="show"
       variants={{
         hidden: {},
-        show: { transition: { staggerChildren: 0.08, delayChildren: delay } },
+        show: { transition: { staggerChildren: 0.12, delayChildren: delay } },
       }}
     >
       {words.map((word, i) => (
@@ -141,7 +144,7 @@ export function SlideIn({ children, direction = "left", delay = 0, className }: 
       className={className}
       initial={{ opacity: 0, x, y }}
       animate={{ opacity: 1, x: 0, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut", delay }}
+      transition={{ duration: 0.6, ease: "easeOut", delay }}
     >
       {children}
     </m.div>
@@ -156,14 +159,15 @@ export function ShimmerBar({ width = "100%", height = "1rem", className }: Shimm
     return <div className={`rounded bg-muted ${className ?? ""}`} style={{ width, height }} />;
   }
   return (
-    <div className={`rounded bg-muted overflow-hidden ${className ?? ""}`} style={{ width, height }}>
+    <div className={`relative rounded bg-muted/80 overflow-hidden ${className ?? ""}`} style={{ width, height }}>
       <m.div
-        className="h-full w-full"
+        className="absolute inset-0"
         style={{
-          background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)",
+          background: "linear-gradient(90deg, transparent 25%, rgba(255,255,255,0.25) 50%, transparent 75%)",
+          backgroundSize: "200% 100%",
         }}
-        animate={{ x: ["-100%", "100%"] }}
-        transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+        animate={{ backgroundPosition: ["-200% 0", "200% 0"] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
       />
     </div>
   );

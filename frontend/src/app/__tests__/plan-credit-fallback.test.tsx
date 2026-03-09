@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import PlanPage from "../plan/page";
@@ -49,9 +49,14 @@ function renderWithClient(ui: React.ReactElement) {
 
 describe("PlanPage credit data fallback", () => {
   beforeEach(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
     mockSearchParams.delete("session");
     mockSearchParams.delete("token");
     sessionStorage.clear();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("falls back to backend credit_profile when sessionStorage is empty", async () => {
@@ -75,6 +80,9 @@ describe("PlanPage credit data fallback", () => {
     });
 
     renderWithClient(<PlanPage />);
+
+    // Advance through transition screen
+    await vi.advanceTimersByTimeAsync(6000);
 
     await waitFor(() => {
       expect(screen.getAllByText(/credit assessment/i).length).toBeGreaterThan(0);
@@ -103,6 +111,9 @@ describe("PlanPage credit data fallback", () => {
     });
 
     renderWithClient(<PlanPage />);
+
+    // Advance through transition screen
+    await vi.advanceTimersByTimeAsync(6000);
 
     await waitFor(() => {
       expect(screen.getAllByText(/credit assessment/i).length).toBeGreaterThan(0);

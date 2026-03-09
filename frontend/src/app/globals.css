@@ -78,6 +78,9 @@
     @apply border-border;
     transition: background-color 150ms ease-in-out, border-color 150ms ease-in-out, color 150ms ease-in-out;
   }
+  html, body {
+    overscroll-behavior: none;
+  }
   body {
     @apply bg-background text-foreground;
   }

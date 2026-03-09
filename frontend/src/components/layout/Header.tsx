@@ -19,12 +19,14 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-8">
-        {/* Logo */}
+        {/* Logo - centered */}
         <Link href="/" className="flex items-center gap-2">
-          <span className="text-xl font-bold text-primary">MontGoWork</span>
+          <span className="text-2xl font-extrabold tracking-tight text-primary drop-shadow-[0_0_12px_rgba(255,255,255,0.7)]">
+            MontGoWork
+          </span>
         </Link>
 
-        {/* Desktop nav */}
+        {/* Desktop nav - right */}
         <nav className="hidden sm:flex items-center gap-1">
           {NAV_LINKS.map((link) => (
             <Button key={link.href} variant="ghost" size="sm" asChild>

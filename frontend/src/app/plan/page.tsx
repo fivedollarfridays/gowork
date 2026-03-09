@@ -1,11 +1,11 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getPlan, toggleAction } from "@/lib/api";
 import { useClientStorage, useSessionId, useToken } from "./hooks";
 import { useReducedMotion } from "framer-motion";
-import { ScrollReveal, ShimmerBar } from "@/lib/motion";
+import { ScrollReveal } from "@/lib/motion";
 import { Clock, MapPin, Phone, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +25,8 @@ import { EmailExport } from "@/components/plan/EmailExport";
 import { PlanExport } from "@/components/plan/PlanExport";
 import { EmptyState } from "@/components/EmptyState";
 import { BarrierIntelChat } from "@/components/barrier-intel/BarrierIntelChat";
+import { PlanTransition } from "@/components/plan/PlanTransition";
+import { PlanSkeleton } from "@/components/plan/PlanSkeleton";
 import { BarrierType, EmploymentStatus, AvailableHours } from "@/lib/types";
 import type { CreditAssessmentResult, UserProfile } from "@/lib/types";
 import { barrierCountToSeverity, CAREER_CENTER, mapsUrl, toTelHref } from "@/lib/constants";
@@ -50,21 +52,6 @@ function buildProfileFromPlan(sessionId: string, barriers: string[]): UserProfil
 }
 
 
-function PlanSkeleton() {
-  return (
-    <div className="space-y-6" aria-busy="true" aria-label="Loading your plan">
-      <ShimmerBar height="2.5rem" width="75%" />
-      <ShimmerBar height="1.25rem" width="50%" />
-      <ShimmerBar height="10rem" />
-      <div className="grid gap-4 sm:grid-cols-2">
-        <ShimmerBar height="8rem" />
-        <ShimmerBar height="8rem" />
-      </div>
-      <ShimmerBar height="12rem" />
-    </div>
-  );
-}
-
 function PlanContent() {
   const { id: sessionId, ready: sessionReady } = useSessionId();
   const { token, ready: tokenReady } = useToken(sessionId);
@@ -77,23 +64,68 @@ function PlanContent() {
 
   const plan = data?.plan ?? null;
 
-  const [checklist, setChecklist] = useState<Record<string, boolean>>(data?.action_checklist ?? {});
+  const [checklist, setChecklist] = useState<Record<string, boolean>>({});
+  const checklistInitRef = useRef(false);
   useEffect(() => {
-    if (data?.action_checklist) setChecklist(data.action_checklist);
+    if (data?.action_checklist && !checklistInitRef.current) {
+      setChecklist(data.action_checklist);
+      checklistInitRef.current = true;
+    }
   }, [data?.action_checklist]);
 
-  const handleToggle = async (key: string, completed: boolean) => {
-    setChecklist((prev) => ({ ...prev, [key]: completed }));
-    try {
-      await toggleAction(sessionId ?? "", key, completed, token ?? undefined);
-    } catch {
-      setChecklist((prev) => ({ ...prev, [key]: !completed }));
-    }
-  };
+  const prefersReduced = useReducedMotion();
 
-  useEffect(() => {
-    if (plan) window.scrollTo(0, 0);
-  }, [plan]);
+  // --- Transition screen state ---
+  const [transitionDone, setTransitionDone] = useState(false);
+  const handleTransitionComplete = useCallback(() => {
+    setTransitionDone(true);
+    window.scrollTo(0, 0);
+    // Fire confetti after transition reveals plan
+    if (!prefersReduced) {
+      setTimeout(() => {
+        import("canvas-confetti").then((mod) => {
+          mod.default({
+            particleCount: 80, spread: 70, origin: { y: 0.6 },
+            ticks: 300, gravity: 0.8, disableForReducedMotion: true,
+            colors: ["#1e3a5f", "#2d9596", "#d4a843"],
+          });
+        }).catch(() => {});
+      }, 300);
+    }
+  }, [prefersReduced]);
+
+  // --- Phase completion confetti ---
+  const completedPhasesRef = useRef<Set<string>>(new Set());
+
+  const handleToggle = useCallback((key: string, completed: boolean) => {
+    setChecklist((prev) => {
+      const next = { ...prev, [key]: completed };
+
+      // Check if any phase just became fully complete
+      if (completed && plan?.action_plan && !prefersReduced) {
+        for (const phase of plan.action_plan.phases) {
+          if (completedPhasesRef.current.has(phase.phase_id)) continue;
+          const allDone = phase.actions.every((_, i) => {
+            const k = `${phase.phase_id}:${i}`;
+            return k === key ? completed : next[k];
+          });
+          if (allDone && phase.actions.length > 0) {
+            completedPhasesRef.current.add(phase.phase_id);
+            import("canvas-confetti").then((mod) => {
+              mod.default({
+                particleCount: 50, spread: 60, origin: { y: 0.7 },
+                ticks: 200, gravity: 0.9, disableForReducedMotion: true,
+                colors: ["#1e3a5f", "#2d9596", "#d4a843"],
+              });
+            }).catch(() => {});
+          }
+        }
+      }
+
+      return next;
+    });
+    toggleAction(sessionId ?? "", key, completed, token ?? undefined).catch(() => {});
+  }, [plan, prefersReduced, sessionId, token]);
 
   // Load credit assessment: sessionStorage first (in-tab cache), backend fallback
   const storedCredit = useClientStorage(sessionId ? `credit_${sessionId}` : null);
@@ -116,22 +148,17 @@ function PlanContent() {
     try { return JSON.parse(storedEnrolled.value); } catch { return []; }
   }, [storedEnrolled.value]);
 
-  const prefersReduced = useReducedMotion();
-  const hasFiredConfetti = useRef(false);
+  // Skip transition for error/missing-session states
   useEffect(() => {
-    if (data && !hasFiredConfetti.current && !prefersReduced) {
-      hasFiredConfetti.current = true;
-      import("canvas-confetti").then((mod) => {
-        mod.default({
-          particleCount: 60,
-          spread: 50,
-          origin: { y: 0.7 },
-          disableForReducedMotion: true,
-          colors: ["#1e3a5f", "#2d9596", "#d4a843"],
-        });
-      }).catch(() => {});
+    if (!transitionDone && sessionReady && tokenReady && (!sessionId || !token || error)) {
+      setTransitionDone(true);
     }
-  }, [data, prefersReduced]);
+  }, [transitionDone, sessionReady, tokenReady, sessionId, token, error]);
+
+  // Show transition screen while loading or until transition completes
+  if (!transitionDone) {
+    return <PlanTransition dataReady={!!data} onComplete={handleTransitionComplete} />;
+  }
 
   if (!sessionReady || !tokenReady || isLoading) return <PlanSkeleton />;
 
@@ -174,7 +201,7 @@ function PlanContent() {
   }
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-6">
       {/* Monday Morning hero */}
       <ScrollReveal>
         <MondayMorning
@@ -188,9 +215,8 @@ function PlanContent() {
 
       {/* Action Timeline */}
       {plan.action_plan && (
-        <>
-          <Separator />
-          <ScrollReveal>
+        <ScrollReveal>
+          <div className="space-y-3">
             <ProgressSummary
               completed={Object.values(checklist).filter(Boolean).length}
               total={plan.action_plan.total_actions}
@@ -200,15 +226,15 @@ function PlanContent() {
               checklist={checklist}
               onToggle={handleToggle}
             />
-          </ScrollReveal>
-        </>
+          </div>
+        </ScrollReveal>
       )}
 
       <Separator />
 
       {/* Job matches — unified ranked list with pagination */}
       <ScrollReveal>
-      <section id="matched-jobs" className="space-y-6 scroll-mt-8">
+      <section id="matched-jobs" className="space-y-3 scroll-mt-8">
         {(plan.job_matches?.length ?? 0) > 0 ? (
           <JobListSection
             jobs={plan.job_matches}
@@ -347,8 +373,8 @@ function PlanContent() {
 
 export default function PlanPage() {
   return (
-    <div className="flex min-h-screen">
-      <main className="flex-1 px-4 py-8 sm:px-8">
+    <div className="flex min-h-[100dvh] overscroll-none">
+      <main className="flex-1 px-4 pt-8 pb-6 sm:px-8">
         <div className="mx-auto max-w-3xl">
           <Suspense fallback={<PlanSkeleton />}>
             <PlanContent />

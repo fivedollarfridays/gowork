@@ -59,7 +59,7 @@ export function CreditResults({ result }: CreditResultsProps) {
         factors[key] = value * 100;
       }
       setAnimatedFactors(factors);
-    }, 300);
+    }, 500);
     return () => clearTimeout(timer);
   }, [readiness.factors]);
 

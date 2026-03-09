@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import PlanPage from "../plan/page";
 
@@ -27,6 +27,7 @@ function renderWithClient(ui: React.ReactElement) {
 
 describe("PlanPage What's Next CTA", () => {
   beforeEach(async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
     mockSearchParams.set("session", "sess-cta-test");
     mockSearchParams.set("token", "test-token-cta");
     const { getPlan } = await import("@/lib/api");
@@ -52,11 +53,19 @@ describe("PlanPage What's Next CTA", () => {
     });
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("renders What's Next section with career center info", async () => {
     renderWithClient(<PlanPage />);
 
-    const heading = await screen.findByText(/what.?s next/i);
-    expect(heading).toBeInTheDocument();
+    // Advance through transition screen
+    await vi.advanceTimersByTimeAsync(6000);
+
+    await waitFor(() => {
+      expect(screen.getByText(/what.?s next/i)).toBeInTheDocument();
+    });
 
     expect(screen.getAllByText(/1060 East South Boulevard/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText(/334-286-1746/i).length).toBeGreaterThanOrEqual(1);
@@ -65,7 +74,13 @@ describe("PlanPage What's Next CTA", () => {
   it("renders Start New Assessment link", async () => {
     renderWithClient(<PlanPage />);
 
-    await screen.findByText(/what.?s next/i);
+    // Advance through transition screen
+    await vi.advanceTimersByTimeAsync(6000);
+
+    await waitFor(() => {
+      expect(screen.getByText(/what.?s next/i)).toBeInTheDocument();
+    });
+
     const link = screen.getByRole("link", { name: /start new assessment/i });
     expect(link).toHaveAttribute("href", "/assess");
   });

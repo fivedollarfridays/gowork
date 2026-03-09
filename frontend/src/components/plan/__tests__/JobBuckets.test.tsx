@@ -44,7 +44,7 @@ describe("JobMatchCard with ScoredJobMatch", () => {
 
   it("displays relevance score badge for strong matches", () => {
     render(<JobMatchCard job={strongJob} />);
-    expect(screen.getByText("85% Match")).toBeInTheDocument();
+    expect(screen.getByText("85%")).toBeInTheDocument();
   });
 
   it("displays credit badge for credit-required jobs", () => {
@@ -57,14 +57,14 @@ describe("JobMatchCard with ScoredJobMatch", () => {
     expect(screen.getByText("$15.00/hr")).toBeInTheDocument();
   });
 
-  it("displays amber 'Pay not disclosed' badge when pay_range is null", () => {
+  it("displays amber 'No pay listed' badge when pay_range is null", () => {
     render(<JobMatchCard job={{ ...strongJob, pay_range: null }} />);
-    expect(screen.getByText("Pay not disclosed")).toBeInTheDocument();
+    expect(screen.getByText("No pay listed")).toBeInTheDocument();
   });
 
   it("displays amber badge when pay_range is undefined", () => {
     render(<JobMatchCard job={strongJob} />);
-    expect(screen.getByText("Pay not disclosed")).toBeInTheDocument();
+    expect(screen.getByText("No pay listed")).toBeInTheDocument();
   });
 });
 
