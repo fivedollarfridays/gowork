@@ -1,8 +1,20 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { PlanExport } from "../PlanExport";
 import type { ReEntryPlan, CreditAssessmentResult } from "@/lib/types";
+
+// Shared mock controller for html2pdf dynamic import.
+// Tests configure `mockSave` before clicking the download button.
+let mockSave: () => Promise<void> = () => Promise.resolve();
+
+vi.mock("html2pdf.js", () => ({
+  default: () => ({
+    set: vi.fn().mockReturnThis(),
+    from: vi.fn().mockReturnThis(),
+    save: () => mockSave(),
+  }),
+}));
 
 // --- Fixtures ---
 
@@ -106,6 +118,11 @@ const baseCreditResult: CreditAssessmentResult = {
 // --- Tests ---
 
 describe("PlanExport", () => {
+  afterEach(() => {
+    cleanup();
+    mockSave = () => Promise.resolve();
+  });
+
   it("renders a Download PDF button", () => {
     render(<PlanExport plan={basePlan} />);
     const button = screen.getByRole("button", { name: /download pdf/i });
@@ -202,17 +219,9 @@ describe("PlanExport", () => {
   });
 
   it("shows loading state when download is clicked", async () => {
-    // Mock html2pdf dynamic import to return a controllable promise
     let resolveSave!: () => void;
-    const savePromise = new Promise<void>((r) => {
-      resolveSave = r;
-    });
-    const mockHtml2pdf = vi.fn(() => ({
-      set: vi.fn().mockReturnThis(),
-      from: vi.fn().mockReturnThis(),
-      save: vi.fn(() => savePromise),
-    }));
-    vi.doMock("html2pdf.js", () => ({ default: mockHtml2pdf }));
+    const savePromise = new Promise<void>((r) => { resolveSave = r; });
+    mockSave = () => savePromise;
 
     render(<PlanExport plan={basePlan} />);
     const user = userEvent.setup();
@@ -226,21 +235,10 @@ describe("PlanExport", () => {
 
     // Resolve the save promise and let it complete
     resolveSave();
-
-    vi.doUnmock("html2pdf.js");
   });
 
   it("error message has role=alert", async () => {
-    // Reset module cache so previous test's mock doesn't leak
-    vi.resetModules();
-    // Mock html2pdf to throw an error
-    vi.doMock("html2pdf.js", () => ({
-      default: () => ({
-        set: vi.fn().mockReturnThis(),
-        from: vi.fn().mockReturnThis(),
-        save: vi.fn(() => Promise.reject(new Error("PDF failed"))),
-      }),
-    }));
+    mockSave = () => Promise.reject(new Error("PDF failed"));
 
     render(<PlanExport plan={basePlan} />);
     const user = userEvent.setup();
@@ -250,22 +248,12 @@ describe("PlanExport", () => {
     // Wait for the error to appear
     const errorEl = await screen.findByRole("alert");
     expect(errorEl).toHaveTextContent(/failed to generate pdf/i);
-
-    vi.doUnmock("html2pdf.js");
   });
 
   it("button has aria-label during generation", async () => {
     let resolveSave!: () => void;
-    const savePromise = new Promise<void>((r) => {
-      resolveSave = r;
-    });
-    vi.doMock("html2pdf.js", () => ({
-      default: () => ({
-        set: vi.fn().mockReturnThis(),
-        from: vi.fn().mockReturnThis(),
-        save: vi.fn(() => savePromise),
-      }),
-    }));
+    const savePromise = new Promise<void>((r) => { resolveSave = r; });
+    mockSave = () => savePromise;
 
     render(<PlanExport plan={basePlan} />);
     const user = userEvent.setup();
@@ -276,7 +264,6 @@ describe("PlanExport", () => {
     expect(button).toHaveAttribute("aria-label", "Generating PDF, please wait");
 
     resolveSave();
-    vi.doUnmock("html2pdf.js");
   });
 
   it("handles empty barriers and jobs gracefully", () => {
