@@ -97,11 +97,11 @@ class TestReindexEndpoint:
         """POST /reindex with wrong admin key returns 403."""
         with patch("app.core.auth.get_settings") as mock_settings:
             s = MagicMock()
-            s.admin_api_key = "correct-key"
+            s.admin_api_key = "ok-key"
             mock_settings.return_value = s
             resp = await client.post(
                 "/api/barrier-intel/reindex",
-                headers={"X-Admin-Key": "wrong-key"},
+                headers={"X-Admin-Key": "bad-key"},
             )
         assert resp.status_code == 403
 

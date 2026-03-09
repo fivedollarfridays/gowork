@@ -33,6 +33,7 @@ const baseProfile: UserProfile = {
   schedule_type: AvailableHours.DAYTIME,
   work_history: "",
   target_industries: [],
+  record_profile: null,
 };
 
 function renderMondayMorning(overrides?: Partial<Parameters<typeof MondayMorning>[0]>) {

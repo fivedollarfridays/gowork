@@ -42,6 +42,7 @@ function buildProfileFromPlan(sessionId: string, barriers: string[]): UserProfil
     schedule_type: AvailableHours.DAYTIME,
     work_history: "",
     target_industries: [],
+    record_profile: null,
   };
 }
 
