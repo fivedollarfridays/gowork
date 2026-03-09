@@ -1,4 +1,9 @@
 import "@testing-library/jest-dom/vitest";
+import { vi } from "vitest";
+
+// canvas-confetti uses requestAnimationFrame + canvas context which are unavailable
+// in jsdom. Mock globally to prevent uncaught exceptions during parallel test runs.
+vi.mock("canvas-confetti", () => ({ default: vi.fn() }));
 
 // Radix UI components require ResizeObserver (not available in jsdom)
 globalThis.ResizeObserver = class ResizeObserver {

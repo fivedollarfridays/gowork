@@ -139,7 +139,7 @@ function PlanContent() {
           disableForReducedMotion: true,
           colors: ["#1e3a5f", "#2d9596", "#d4a843"],
         });
-      });
+      }).catch(() => {});
     }
   }, [data, prefersReduced]);
 
