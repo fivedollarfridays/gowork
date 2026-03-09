@@ -2,14 +2,14 @@
 
 import json
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
 
 from app.barrier_intel.cache import get_cache_key, get_cached_retrieval, set_cached_retrieval
 from app.barrier_intel.guardrails import SAFE_FALLBACK, is_disallowed_topic
 from app.barrier_intel.schemas import ChatRequest
 from app.barrier_intel.streaming import stream_chat_response
-from app.core.auth import require_admin_key
+from app.core.auth import require_admin_key, require_session_token
 from app.core.database import get_db
 from app.core.queries import get_session_by_id
 from app.core.rate_limit import RateLimiter, require_rate_limit
@@ -46,8 +46,9 @@ async def _get_retrieval_ctx(cache_key, barriers, db, store, profile) -> Retriev
 
 
 @router.post("/chat", dependencies=[Depends(_check_rate)])
-async def chat(body: ChatRequest, request: Request, db=Depends(get_db)):
+async def chat(body: ChatRequest, request: Request, db=Depends(get_db), token: str = Query(...)):
     """Barrier intelligence chat with SSE streaming."""
+    await require_session_token(db, body.session_id, token)
     session = await get_session_by_id(db, body.session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found or expired")
@@ -56,8 +57,14 @@ async def chat(body: ChatRequest, request: Request, db=Depends(get_db)):
         return {"message": SAFE_FALLBACK, "guardrail_triggered": True}
 
     store = request.app.state.rag_store
-    barriers = json.loads(session["barriers"])
-    profile = json.loads(session.get("profile") or "{}")
+    try:
+        barriers = json.loads(session["barriers"])
+    except (json.JSONDecodeError, TypeError):
+        raise HTTPException(status_code=400, detail="Corrupt session data: barriers")
+    try:
+        profile = json.loads(session.get("profile") or "{}")
+    except (json.JSONDecodeError, TypeError):
+        raise HTTPException(status_code=400, detail="Corrupt session data: profile")
     cache_key = get_cache_key(body.session_id, body.user_question, body.mode)
     ctx = await _get_retrieval_ctx(cache_key, barriers, db, store, profile)
 

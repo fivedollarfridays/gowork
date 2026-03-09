@@ -80,7 +80,7 @@ export function BarrierCardView({ barrier, sessionId, token, zipCode }: BarrierC
   const visibleResources = expanded ? barrier.resources : barrier.resources.slice(0, INITIAL_RESOURCE_COUNT);
 
   return (
-    <Card>
+    <Card className="h-full flex flex-col">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -100,7 +100,7 @@ export function BarrierCardView({ barrier, sessionId, token, zipCode }: BarrierC
         )}
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 flex-1">
         {/* Action steps */}
         {barrier.actions.length > 0 && (
           <div className="space-y-2">

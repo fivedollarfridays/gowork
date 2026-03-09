@@ -46,44 +46,50 @@ export default function CreditPage() {
       {!result ? (
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium">Credit Score (300-850)</label>
+            <label htmlFor="credit-score" className="block text-sm font-medium">Credit Score (300-850)</label>
             <Input
+              id="credit-score"
               type="number" min={300} max={850} value={score}
               onChange={(e) => setScore(e.target.value)} required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium">Credit Utilization (%)</label>
+            <label htmlFor="credit-utilization" className="block text-sm font-medium">Credit Utilization (%)</label>
             <Input
+              id="credit-utilization"
               type="number" min={0} max={100} step={0.1} value={utilization}
               onChange={(e) => setUtilization(e.target.value)} required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium">Payment History (%)</label>
+            <label htmlFor="payment-history" className="block text-sm font-medium">Payment History (%)</label>
             <Input
+              id="payment-history"
               type="number" min={0} max={100} step={0.1} value={paymentHistory}
               onChange={(e) => setPaymentHistory(e.target.value)} required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium">Average Account Age (months)</label>
+            <label htmlFor="account-age" className="block text-sm font-medium">Average Account Age (months)</label>
             <Input
+              id="account-age"
               type="number" min={0} value={accountAge}
               onChange={(e) => setAccountAge(e.target.value)} required
             />
           </div>
           <div className="flex gap-4">
             <div className="flex-1">
-              <label className="block text-sm font-medium">Total Accounts</label>
+              <label htmlFor="total-accounts" className="block text-sm font-medium">Total Accounts</label>
               <Input
+                id="total-accounts"
                 type="number" min={0} value={totalAccounts}
                 onChange={(e) => setTotalAccounts(e.target.value)}
               />
             </div>
             <div className="flex-1">
-              <label className="block text-sm font-medium">Open Accounts</label>
+              <label htmlFor="open-accounts" className="block text-sm font-medium">Open Accounts</label>
               <Input
+                id="open-accounts"
                 type="number" min={0} value={openAccounts}
                 onChange={(e) => setOpenAccounts(e.target.value)}
               />

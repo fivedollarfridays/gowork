@@ -180,7 +180,7 @@ class TestGeneratePlan:
 
     @pytest.mark.asyncio
     async def test_fallback_on_api_failure(self):
-        """Falls back to template narrative when Claude API fails."""
+        """Falls back to template narrative when Claude API fails with connection error."""
         row = _seed_session_row(with_plan=True)
         fallback = PlanNarrative(
             summary="Based on your assessment, here are your next steps.",
@@ -188,7 +188,7 @@ class TestGeneratePlan:
         )
         with (
             patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row),
-            patch(_GENERATE_PATCH, new_callable=AsyncMock, side_effect=Exception("API down")),
+            patch(_GENERATE_PATCH, new_callable=AsyncMock, side_effect=ConnectionError("API down")),
             patch(_FALLBACK_PATCH, return_value=fallback),
             patch(_UPDATE_SESSION_PATCH, new_callable=AsyncMock),
         ):
@@ -198,6 +198,19 @@ class TestGeneratePlan:
         assert resp.status_code == 200
         data = resp.json()
         assert "next steps" in data["summary"]
+
+    @pytest.mark.asyncio
+    async def test_programming_error_propagates(self):
+        """TypeError/KeyError in generate_narrative propagates (not caught by fallback)."""
+        row = _seed_session_row(with_plan=True)
+        with (
+            patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row),
+            patch(_GENERATE_PATCH, new_callable=AsyncMock, side_effect=TypeError("bad arg")),
+        ):
+            transport = ASGITransport(app=app, raise_app_exceptions=False)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.post(f"/api/plan/{_VALID_UUID}/generate{_token_query(_VALID_UUID)}")
+        assert resp.status_code == 500
 
     @pytest.mark.asyncio
     async def test_fallback_runs_without_mock(self):
@@ -214,7 +227,7 @@ class TestGeneratePlan:
         })
         with (
             patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row),
-            patch(_GENERATE_PATCH, new_callable=AsyncMock, side_effect=Exception("Claude down")),
+            patch(_GENERATE_PATCH, new_callable=AsyncMock, side_effect=ConnectionError("Claude down")),
             # DO NOT mock _FALLBACK_PATCH — let real fallback run
             patch(_UPDATE_SESSION_PATCH, new_callable=AsyncMock),
         ):

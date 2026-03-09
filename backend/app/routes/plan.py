@@ -97,7 +97,7 @@ async def generate_plan_narrative(
             plan_data=plan_data,
             action_plan=action_plan,
         )
-    except Exception:
+    except (ConnectionError, TimeoutError, OSError, RuntimeError, ValueError):
         logger.warning("Claude API unavailable, using fallback", exc_info=True)
         narrative = build_fallback_narrative(
             barriers=barriers,

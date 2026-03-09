@@ -268,6 +268,32 @@ describe("ActionTimeline", () => {
     expect(phoneLink).toHaveAttribute("href", "tel:18664564995");
   });
 
+  it("auto-links multiple phone numbers in same detail text", () => {
+    const plan = makePlan({
+      phases: [
+        makePhase({
+          phase_id: "week_1_2",
+          label: "Week 1-2",
+          actions: [makeAction({
+            detail: "Call (334) 286-1746 or (334) 832-9060 for info",
+            resource_name: null,
+            resource_phone: null,
+            resource_address: null,
+          })],
+        }),
+      ],
+      total_actions: 1,
+    });
+    render(<ActionTimeline actionPlan={plan} />);
+    const links = screen.getAllByRole("link");
+    const phoneLinks = links.filter(
+      (l) => l.getAttribute("href")?.startsWith("tel:"),
+    );
+    expect(phoneLinks).toHaveLength(2);
+    expect(phoneLinks[0]).toHaveTextContent("(334) 286-1746");
+    expect(phoneLinks[1]).toHaveTextContent("(334) 832-9060");
+  });
+
   it("calls onToggle with action key when checkbox clicked", async () => {
     const user = userEvent.setup();
     const onToggle = vi.fn();

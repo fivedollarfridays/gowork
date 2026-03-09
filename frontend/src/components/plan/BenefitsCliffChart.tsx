@@ -63,14 +63,14 @@ export function BenefitsCliffChart({ analysis }: BenefitsCliffChartProps) {
             aria-label={`Benefits cliff chart. ${summary}`}
             className="w-full"
           >
-            <ResponsiveContainer width="100%" height={280}>
-              <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+            <ResponsiveContainer width="100%" height={320}>
+              <AreaChart data={data} margin={{ top: 20, right: 10, left: 0, bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                 <XAxis
                   dataKey="wage"
                   tickFormatter={(v: number) => `$${v}`}
                   fontSize={12}
-                  label={{ value: "Hourly Wage", position: "insideBottom", offset: -2, fontSize: 12 }}
+                  label={{ value: "Hourly Wage", position: "insideBottom", offset: -5, fontSize: 12 }}
                 />
                 <YAxis
                   tickFormatter={(v: number) => formatDollar(v)}

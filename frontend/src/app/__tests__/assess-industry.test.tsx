@@ -18,6 +18,12 @@ vi.mock("@/lib/resume", () => ({
   extractResumeText: vi.fn(),
 }));
 
+// Skip framer-motion animations to prevent timeouts during multi-step navigation
+vi.mock("framer-motion", async () => {
+  const actual = await vi.importActual("framer-motion");
+  return { ...actual, useReducedMotion: () => true };
+});
+
 function renderWithClient(ui: React.ReactElement) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -50,7 +56,7 @@ async function advanceToIndustryStep(user: ReturnType<typeof userEvent.setup>) {
 }
 
 describe("AssessPage industry step", () => {
-  it("renders industry step heading", async () => {
+  it("renders industry step heading", { timeout: 15_000 }, async () => {
     const user = userEvent.setup();
     await advanceToIndustryStep(user);
 
@@ -59,7 +65,7 @@ describe("AssessPage industry step", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows all 7 industry options", async () => {
+  it("shows all 7 industry options", { timeout: 15_000 }, async () => {
     const user = userEvent.setup();
     await advanceToIndustryStep(user);
 
@@ -72,7 +78,7 @@ describe("AssessPage industry step", () => {
     expect(screen.getByText("Transportation")).toBeInTheDocument();
   });
 
-  it("shows certification checkboxes", async () => {
+  it("shows certification checkboxes", { timeout: 15_000 }, async () => {
     const user = userEvent.setup();
     await advanceToIndustryStep(user);
 
@@ -82,7 +88,7 @@ describe("AssessPage industry step", () => {
     expect(screen.getByLabelText(/LPN/i)).toBeInTheDocument();
   });
 
-  it("can advance without selecting (optional step)", async () => {
+  it("can advance without selecting (optional step)", { timeout: 15_000 }, async () => {
     const user = userEvent.setup();
     await advanceToIndustryStep(user);
 
@@ -90,7 +96,7 @@ describe("AssessPage industry step", () => {
     expect(nextBtn).not.toBeDisabled();
   });
 
-  it("toggles industry selection", async () => {
+  it("toggles industry selection", { timeout: 15_000 }, async () => {
     const user = userEvent.setup();
     await advanceToIndustryStep(user);
 

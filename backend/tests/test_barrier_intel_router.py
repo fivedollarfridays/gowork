@@ -4,11 +4,19 @@ import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from fastapi import HTTPException
+from fastapi.responses import StreamingResponse
 
+from app.barrier_intel.cache import RETRIEVAL_CACHE
 from app.barrier_intel.guardrails import is_disallowed_topic
 from app.barrier_intel.prompts import SYSTEM_PROMPT, build_user_prompt
+from app.barrier_intel.router import _get_retrieval_ctx, _rate_limiter, chat, reindex
 from app.barrier_intel.schemas import ChatRequest
+from app.core.database import get_async_session_factory
+from app.core.queries import create_session
+from app.main import app
 from app.rag.document_schema import RetrievalContext
+from app.rag.store import RagStore
 
 
 _RETRIEVE_PATCH = "app.barrier_intel.router.retrieve_context"
@@ -110,11 +118,6 @@ class TestChatStreaming:
     @pytest.mark.anyio
     async def test_chat_returns_streaming_response(self, client, test_engine):
         """POST /chat with valid session returns SSE stream (200)."""
-        from app.core.database import get_async_session_factory
-        from app.core.queries import create_session
-        from app.main import app
-        from app.rag.store import RagStore
-
         # Ensure rag_store is available on app.state
         store = RagStore()
         app.state.rag_store = store
@@ -126,7 +129,8 @@ class TestChatStreaming:
                 "profile": '{"zip_code": "36104"}',
             }, session_id="00000000-0000-0000-0000-000000000002")
 
-        with patch("app.barrier_intel.streaming.get_llm_stream") as mock_stream:
+        with patch("app.barrier_intel.streaming.get_llm_stream") as mock_stream, \
+             patch(_TOKEN_PATCH, new_callable=AsyncMock):
             async def fake_stream(*args, **kwargs):
                 yield "Hello"
                 yield " world"
@@ -134,7 +138,7 @@ class TestChatStreaming:
             mock_stream.return_value = fake_stream()
 
             resp = await client.post(
-                "/api/barrier-intel/chat",
+                "/api/barrier-intel/chat?token=test",
                 json={"session_id": "00000000-0000-0000-0000-000000000002", "user_question": "What should I do first?", "mode": "next_steps"},
             )
         assert resp.status_code == 200
@@ -145,9 +149,6 @@ class TestGetRetrievalCtxCache:
     @pytest.mark.anyio
     async def test_get_retrieval_ctx_uses_cache(self):
         """Second call with same cache_key should return cached result."""
-        from app.barrier_intel.cache import RETRIEVAL_CACHE
-        from app.barrier_intel.router import _get_retrieval_ctx
-
         RETRIEVAL_CACHE.clear()
 
         fake_ctx = {"root_barriers": ["X"], "docs": []}
@@ -166,9 +167,6 @@ class TestGetRetrievalCtxCache:
     @pytest.mark.anyio
     async def test_get_retrieval_ctx_cache_miss(self):
         """Cache miss calls retrieve_context and caches the result."""
-        from app.barrier_intel.cache import RETRIEVAL_CACHE
-        from app.barrier_intel.router import _get_retrieval_ctx
-
         RETRIEVAL_CACHE.clear()
         fake_ctx = _mock_retrieval_context()
 
@@ -194,8 +192,6 @@ class TestReindexDirect:
     @pytest.mark.anyio
     async def test_reindex_success(self):
         """Calling reindex rebuilds the store and returns document count."""
-        from app.barrier_intel.router import reindex
-
         mock_store = MagicMock()
         mock_store.rebuild = AsyncMock(return_value=42)
         mock_request = MagicMock()
@@ -208,15 +204,14 @@ class TestReindexDirect:
         assert result == {"status": "ok", "documents_indexed": 42}
 
 
+_TOKEN_PATCH = "app.barrier_intel.router.require_session_token"
+
+
 class TestChatDirect:
     """Direct unit tests for the chat endpoint function (bypasses ASGI)."""
 
     @pytest.mark.anyio
     async def test_missing_session_raises_404(self):
-        from app.barrier_intel.router import chat
-        from app.barrier_intel.schemas import ChatRequest
-        from fastapi import HTTPException
-
         body = ChatRequest(
             session_id="00000000-0000-0000-0000-000000000099", user_question="Hi", mode="next_steps",
         )
@@ -227,16 +222,13 @@ class TestChatDirect:
             "app.barrier_intel.router.get_session_by_id",
             new_callable=AsyncMock,
             return_value=None,
-        ):
+        ), patch(_TOKEN_PATCH, new_callable=AsyncMock):
             with pytest.raises(HTTPException) as exc_info:
-                await chat(body=body, request=mock_request, db=mock_db)
+                await chat(body=body, request=mock_request, db=mock_db, token="t")
             assert exc_info.value.status_code == 404
 
     @pytest.mark.anyio
     async def test_disallowed_topic_returns_safe_message(self):
-        from app.barrier_intel.router import chat
-        from app.barrier_intel.schemas import ChatRequest
-
         body = ChatRequest(
             session_id="00000000-0000-0000-0000-000000000001", user_question="Give me legal advice", mode="next_steps",
         )
@@ -247,19 +239,14 @@ class TestChatDirect:
             "app.barrier_intel.router.get_session_by_id",
             new_callable=AsyncMock,
             return_value=_mock_session_row(),
-        ):
-            result = await chat(body=body, request=mock_request, db=mock_db)
+        ), patch(_TOKEN_PATCH, new_callable=AsyncMock):
+            result = await chat(body=body, request=mock_request, db=mock_db, token="t")
 
         assert result["guardrail_triggered"] is True
         assert "not able" in result["message"].lower()
 
     @pytest.mark.anyio
     async def test_valid_question_returns_streaming_response(self):
-        from fastapi.responses import StreamingResponse
-
-        from app.barrier_intel.router import chat
-        from app.barrier_intel.schemas import ChatRequest
-
         body = ChatRequest(
             session_id="00000000-0000-0000-0000-000000000001", user_question="What should I do first?",
             mode="next_steps",
@@ -276,27 +263,136 @@ class TestChatDirect:
             "app.barrier_intel.router._get_retrieval_ctx",
             new_callable=AsyncMock,
             return_value=_mock_retrieval_context(),
-        ):
-            result = await chat(body=body, request=mock_request, db=mock_db)
+        ), patch(_TOKEN_PATCH, new_callable=AsyncMock):
+            result = await chat(body=body, request=mock_request, db=mock_db, token="t")
 
         assert isinstance(result, StreamingResponse)
         assert result.media_type == "text/event-stream"
 
 
+class TestChatAuth:
+    """Tests for session token authentication on chat endpoint (B-H2)."""
+
+    @pytest.mark.anyio
+    async def test_missing_token_returns_401(self):
+        body = ChatRequest(
+            session_id="00000000-0000-0000-0000-000000000001",
+            user_question="What should I do?",
+            mode="next_steps",
+        )
+        mock_request = MagicMock()
+        mock_db = AsyncMock()
+
+        with patch(
+            "app.barrier_intel.router.get_session_by_id",
+            new_callable=AsyncMock,
+            return_value=_mock_session_row(),
+        ), patch(
+            "app.barrier_intel.router.require_session_token",
+            new_callable=AsyncMock,
+            side_effect=HTTPException(status_code=401, detail="Invalid token"),
+        ):
+            with pytest.raises(HTTPException) as exc_info:
+                await chat(body=body, request=mock_request, db=mock_db, token="bad-token")
+            assert exc_info.value.status_code == 401
+
+    @pytest.mark.anyio
+    async def test_valid_token_proceeds(self):
+        body = ChatRequest(
+            session_id="00000000-0000-0000-0000-000000000001",
+            user_question="What should I do first?",
+            mode="next_steps",
+        )
+        mock_request = MagicMock()
+        mock_request.app.state.rag_store = MagicMock()
+        mock_db = AsyncMock()
+
+        with patch(
+            "app.barrier_intel.router.get_session_by_id",
+            new_callable=AsyncMock,
+            return_value=_mock_session_row(),
+        ), patch(
+            "app.barrier_intel.router.require_session_token",
+            new_callable=AsyncMock,
+        ), patch(
+            "app.barrier_intel.router._get_retrieval_ctx",
+            new_callable=AsyncMock,
+            return_value=_mock_retrieval_context(),
+        ):
+            result = await chat(body=body, request=mock_request, db=mock_db, token="valid-token")
+
+        assert isinstance(result, StreamingResponse)
+
+
+class TestChatCorruptSession:
+    """Tests for corrupt session data handling (B-H3)."""
+
+    @pytest.mark.anyio
+    async def test_corrupt_barriers_json_returns_400(self):
+        body = ChatRequest(
+            session_id="00000000-0000-0000-0000-000000000001",
+            user_question="What should I do?",
+            mode="next_steps",
+        )
+        mock_request = MagicMock()
+        mock_request.app.state.rag_store = MagicMock()
+        mock_db = AsyncMock()
+
+        with patch(
+            "app.barrier_intel.router.get_session_by_id",
+            new_callable=AsyncMock,
+            return_value=_mock_session_row(barriers="{corrupt json!!!"),
+        ), patch(_TOKEN_PATCH, new_callable=AsyncMock):
+            with pytest.raises(HTTPException) as exc_info:
+                await chat(body=body, request=mock_request, db=mock_db, token="t")
+            assert exc_info.value.status_code == 400
+            assert "corrupt" in exc_info.value.detail.lower()
+
+    @pytest.mark.anyio
+    async def test_corrupt_profile_json_returns_400(self):
+        body = ChatRequest(
+            session_id="00000000-0000-0000-0000-000000000001",
+            user_question="What should I do?",
+            mode="next_steps",
+        )
+        row = _mock_session_row()
+        row["profile"] = "{not valid json"
+        mock_request = MagicMock()
+        mock_request.app.state.rag_store = MagicMock()
+        mock_db = AsyncMock()
+
+        with patch(
+            "app.barrier_intel.router.get_session_by_id",
+            new_callable=AsyncMock,
+            return_value=row,
+        ), patch(_TOKEN_PATCH, new_callable=AsyncMock):
+            with pytest.raises(HTTPException) as exc_info:
+                await chat(body=body, request=mock_request, db=mock_db, token="t")
+            assert exc_info.value.status_code == 400
+            assert "corrupt" in exc_info.value.detail.lower()
+
+
 class TestChatEndpoint:
     @pytest.mark.anyio
-    async def test_missing_session_returns_404(self, client):
+    async def test_missing_token_returns_422(self, client):
+        """POST /chat without token query param returns 422."""
         resp = await client.post(
             "/api/barrier-intel/chat",
             json={"session_id": "00000000-0000-0000-0000-999999999999", "user_question": "Hello", "mode": "next_steps"},
         )
+        assert resp.status_code == 422
+
+    @pytest.mark.anyio
+    async def test_missing_session_returns_404(self, client):
+        with patch(_TOKEN_PATCH, new_callable=AsyncMock):
+            resp = await client.post(
+                "/api/barrier-intel/chat?token=test",
+                json={"session_id": "00000000-0000-0000-0000-999999999999", "user_question": "Hello", "mode": "next_steps"},
+            )
         assert resp.status_code == 404
 
     @pytest.mark.anyio
     async def test_disallowed_topic_returns_safe_response(self, client, test_engine):
-        from app.core.database import get_async_session_factory
-        from app.core.queries import create_session
-
         factory = get_async_session_factory()
         async with factory() as session:
             await create_session(session, {
@@ -304,21 +400,21 @@ class TestChatEndpoint:
                 "profile": '{"zip_code": "36104"}',
             }, session_id="00000000-0000-0000-0000-000000000002")
 
-        resp = await client.post(
-            "/api/barrier-intel/chat",
-            json={"session_id": "00000000-0000-0000-0000-000000000002", "user_question": "Give me legal advice", "mode": "next_steps"},
-        )
+        with patch(_TOKEN_PATCH, new_callable=AsyncMock):
+            resp = await client.post(
+                "/api/barrier-intel/chat?token=test",
+                json={"session_id": "00000000-0000-0000-0000-000000000002", "user_question": "Give me legal advice", "mode": "next_steps"},
+            )
         assert resp.status_code == 200
         body = resp.json()
         assert "not able" in body["message"].lower() or "counselor" in body["message"].lower()
 
     @pytest.mark.anyio
     async def test_rate_limiting(self, client, test_engine):
-        from app.barrier_intel.router import _rate_limiter
         _rate_limiter.clear()
         for _ in range(11):
             resp = await client.post(
-                "/api/barrier-intel/chat",
+                "/api/barrier-intel/chat?token=test",
                 json={"session_id": "x", "user_question": "Hello", "mode": "next_steps"},
             )
         assert resp.status_code == 429
