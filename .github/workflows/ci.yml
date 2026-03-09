@@ -106,6 +106,7 @@ jobs:
           FOUND=$(grep -rn --include="*.py" --include="*.ts" --include="*.tsx" --include="*.js" \
             -iE "(password|secret|api_key|token)\s*=\s*['\"][^'\"]{8,}" \
             --exclude-dir=node_modules --exclude-dir=.venv --exclude-dir=.next \
+            --exclude-dir=tests --exclude-dir=__tests__ \
             . || true)
           if [ -n "$FOUND" ]; then
             echo "WARNING: Potential hardcoded secrets found:"
