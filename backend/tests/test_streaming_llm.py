@@ -1,7 +1,7 @@
 """Tests for streaming.py wired to multi-provider LLM client."""
 
 import json
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -98,7 +98,7 @@ class TestStreamChatResponseWithLlmClient:
         """Verify correct prompts are passed to get_llm_stream."""
         captured_args = {}
 
-        async def capturing_stream(system_prompt, user_prompt):
+        async def capturing_stream(system_prompt, user_prompt, **kwargs):
             captured_args["system"] = system_prompt
             captured_args["user"] = user_prompt
             yield "response"
@@ -246,7 +246,7 @@ class TestHallucinationGuardIntegration:
 
         ctx = _mock_ctx()
         with patch("app.barrier_intel.streaming.get_llm_stream", return_value=fake_stream("s", "u")), \
-             patch("app.barrier_intel.streaming._audit_log") as mock_audit:
+             patch("app.barrier_intel.streaming._audit_log", new_callable=AsyncMock) as mock_audit:
             events = []
             async for event in stream_chat_response(
                 question="What should I do?",

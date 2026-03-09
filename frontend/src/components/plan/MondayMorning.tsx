@@ -24,7 +24,7 @@ function getTopJobs(plan: ReEntryPlan): ScoredJobMatch[] {
   const seen = new Set<string>();
   const unique: ScoredJobMatch[] = [];
   for (const job of all) {
-    const key = `${job.title}|${job.company}`;
+    const key = `${job.title}|${job.company}|${job.location ?? ""}`;
     if (!seen.has(key)) {
       seen.add(key);
       unique.push(job);

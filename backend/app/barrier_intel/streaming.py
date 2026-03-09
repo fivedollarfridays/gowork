@@ -4,7 +4,7 @@ import json
 import logging
 import time
 
-from app.ai.audit_log import log_llm_interaction
+from app.ai.audit_log import log_llm_interaction_async
 from app.ai.llm_client import get_llm_stream, resolve_provider
 from app.barrier_intel.guardrails import check_hallucinations
 from app.barrier_intel.observability import build_request_log
@@ -29,43 +29,44 @@ async def stream_chat_response(
 ):
     """Async generator yielding SSE events for the chat response."""
     start = time.monotonic()
+    provider = resolve_provider()
     barrier_ids = [b["id"] for b in ctx.root_barriers]
-    ctx_event = {
-        "root_barriers": barrier_ids,
-        "chain": ctx.barrier_chain_summary,
-    }
-    yield format_sse("context", ctx_event)
+    yield format_sse("context", {"root_barriers": barrier_ids, "chain": ctx.barrier_chain_summary})
 
     user_prompt = build_user_prompt(question, mode, ctx)
     chunk_count = 0
-    collected_text = []
-    async for text in get_llm_stream(SYSTEM_PROMPT, user_prompt):
+    collected_text: list[str] = []
+    async for text in get_llm_stream(SYSTEM_PROMPT, user_prompt, provider=provider):
         yield format_sse("token", {"text": text})
         collected_text.append(text)
         chunk_count += 1
 
-    guardrail_triggered = False
     full_response = "".join(collected_text)
-    known_names = [r["name"] for r in ctx.top_resources]
-    disclaimer = check_hallucinations(full_response, known_names)
-    if disclaimer:
-        guardrail_triggered = True
-        yield format_sse("disclaimer", {"text": disclaimer})
+    guardrail_triggered = _check_guardrails(full_response, ctx)
+    if guardrail_triggered:
+        yield format_sse("disclaimer", {"text": guardrail_triggered})
 
     latency_ms = (time.monotonic() - start) * 1000
     yield format_sse("done", {"chunks": chunk_count, "latency_ms": round(latency_ms)})
 
-    full_prompt_len = len(user_prompt)
-    _audit_log(
-        session_hash, mode, barrier_ids, ctx, chunk_count, latency_ms,
-        guardrail_triggered=guardrail_triggered,
-        prompt_length=full_prompt_len,
+    await _audit_log(
+        session_hash, provider, mode, barrier_ids, ctx,
+        chunk_count, latency_ms,
+        guardrail_triggered=bool(guardrail_triggered),
+        prompt_length=len(user_prompt),
         response_length=len(full_response),
     )
 
 
-def _audit_log(
+def _check_guardrails(full_response: str, ctx: RetrievalContext) -> str | None:
+    """Run hallucination check, return disclaimer text or None."""
+    known_names = [r["name"] for r in ctx.top_resources]
+    return check_hallucinations(full_response, known_names)
+
+
+async def _audit_log(
     session_hash: str,
+    provider: str,
     mode: str,
     barrier_ids: list[str],
     ctx: RetrievalContext,
@@ -85,17 +86,17 @@ def _audit_log(
         retrieval_latency_ms=ctx.retrieval_latency_ms,
         llm_latency_ms=latency_ms,
         input_tokens=0,
-        output_tokens=chunk_count,
+        output_chunks=chunk_count,
         cache_hit=False,
         guardrail_triggered=guardrail_triggered,
     )
     logger.info("barrier_intel_chat", extra=log_data)
 
     settings = get_settings()
-    log_llm_interaction(
+    await log_llm_interaction_async(
         log_path=settings.audit_log_path,
         session_id=session_hash,
-        provider=resolve_provider(),
+        provider=provider,
         prompt_length=prompt_length,
         response_length=response_length,
         latency_ms=latency_ms,

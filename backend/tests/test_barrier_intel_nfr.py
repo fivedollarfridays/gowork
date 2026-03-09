@@ -72,7 +72,7 @@ class TestObservability:
             retrieval_latency_ms=15.2,
             llm_latency_ms=850.0,
             input_tokens=500,
-            output_tokens=200,
+            output_chunks=200,
             cache_hit=False,
             guardrail_triggered=False,
         )
@@ -91,7 +91,7 @@ class TestObservability:
             retrieval_latency_ms=0,
             llm_latency_ms=0,
             input_tokens=0,
-            output_tokens=0,
+            output_chunks=0,
             cache_hit=True,
             guardrail_triggered=False,
         )

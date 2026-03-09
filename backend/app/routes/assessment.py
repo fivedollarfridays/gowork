@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.audit import audit_log, get_client_ip
 from app.core.database import get_db
-from app.core.queries import create_session, update_session_plan
+from app.core.queries import create_session, insert_record_profile, update_session_plan
 from app.core.queries_feedback import create_feedback_token
 from app.core.rate_limit import RateLimiter, require_rate_limit
 from app.modules.matching.engine import generate_plan
@@ -48,6 +48,7 @@ def _build_profile(session_id: str, request: AssessmentRequest) -> UserProfile:
         schedule_type=request.schedule_constraints.available_hours,
         work_history=request.work_history,
         target_industries=request.target_industries,
+        record_profile=request.record_profile,
     )
 
 
@@ -69,6 +70,9 @@ async def create_assessment(
         "plan": None,
         "profile": json.dumps(profile.model_dump()),
     }, session_id=session_id)
+
+    if request.record_profile:
+        await insert_record_profile(db, session_id, request.record_profile)
 
     plan = await generate_plan(
         profile, db,

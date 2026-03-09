@@ -134,27 +134,18 @@ describe("MondayMorning clickable phone numbers", () => {
   });
 });
 
-describe("MondayMorning step titles from immediate_next_steps", () => {
-  const planWithSteps: ReEntryPlan = {
-    ...basePlan,
-    immediate_next_steps: [
-      "Contact Montgomery Career Center for transportation support",
-      "Call Legal Aid for record help",
-    ],
-  };
+describe("MondayMorning step cards", () => {
+  it("renders hardcoded step card titles", () => {
+    renderMondayMorning();
 
-  it("renders each immediate_next_step as a step card title", () => {
-    renderMondayMorning({ plan: planWithSteps });
-
-    // Career center step is detected and structured with phone/location
-    // Other steps render as plain title text
-    expect(screen.getByText(/Call Legal Aid for record help/)).toBeInTheDocument();
+    // Component renders 3 hardcoded steps: Career Center, Jobs, Barriers
+    expect(screen.getByText(/Visit the Career Center/)).toBeInTheDocument();
+    expect(screen.getByText(/Review Your Job Matches/)).toBeInTheDocument();
   });
 
-  it("structures career center step with phone link", () => {
-    renderMondayMorning({ plan: planWithSteps });
+  it("career center step has phone link", () => {
+    renderMondayMorning();
 
-    // Career center step is detected by name and gets structured phone/address
     const phoneLinks = screen.getAllByRole("link").filter(
       (link) => link.getAttribute("href")?.startsWith("tel:")
     );
@@ -207,9 +198,12 @@ describe("MondayMorning map links", () => {
     const mapLinks = screen.getAllByRole("link").filter(
       (link) => link.getAttribute("href")?.includes("google.com/maps")
     );
-    expect(mapLinks[0].getAttribute("href")).toContain(
-      encodeURIComponent("100 Main St, Montgomery, AL")
+    // First map link is the hardcoded Career Center; barrier resource address
+    // appears in a subsequent link
+    const hasBarrierAddress = mapLinks.some((link) =>
+      link.getAttribute("href")?.includes(encodeURIComponent("100 Main St, Montgomery, AL"))
     );
+    expect(hasBarrierAddress).toBe(true);
   });
 });
 

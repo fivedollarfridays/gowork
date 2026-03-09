@@ -11,6 +11,7 @@ from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 from app.ai.llm_client import check_llm_providers
 from app.core.config import get_settings
 from app.barrier_graph.seed import upsert_barrier_graph
+from app.modules.criminal.employer_seed import seed_employer_policies
 from app.core.database import close_db, get_async_session_factory, get_engine, init_db
 from app.rag.store import RagStore
 from app.core.exception_handlers import register_exception_handlers
@@ -46,6 +47,7 @@ async def lifespan(app: FastAPI):
     factory = get_async_session_factory()
     async with factory() as session:
         await upsert_barrier_graph(session)
+        await seed_employer_policies(session)
     rag_store = RagStore()
     async with factory() as session:
         await rag_store.build_or_load(session)

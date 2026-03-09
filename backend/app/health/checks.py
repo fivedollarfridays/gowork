@@ -19,6 +19,17 @@ router = APIRouter(prefix="/health", tags=["health"])
 APP_START_TIME = time.time()
 APP_VERSION = "0.1.0"
 
+# Cached at module load — LLM provider status rarely changes at runtime
+_LLM_STATUS: dict | None = None
+
+
+def get_llm_status() -> dict:
+    """Return cached LLM provider status (computed once)."""
+    global _LLM_STATUS
+    if _LLM_STATUS is None:
+        _LLM_STATUS = check_llm_providers()
+    return _LLM_STATUS
+
 
 async def check_database() -> ServiceCheck:
     """Check database connectivity."""
@@ -72,7 +83,7 @@ async def health():
         health_status = "healthy" if db_check.status == "up" else "degraded"
     except Exception:
         health_status = "unhealthy"
-    llm_status = check_llm_providers()
+    llm_status = get_llm_status()
     return HealthStatus(
         status=health_status,
         version=APP_VERSION,

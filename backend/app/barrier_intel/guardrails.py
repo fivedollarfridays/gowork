@@ -24,6 +24,10 @@ HALLUCINATION_DISCLAIMER = (
 
 # Matches capitalized multi-word proper nouns (2+ words, each capitalized)
 _ORG_PATTERN = re.compile(r"\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\b")
+# Matches acronym-style org names (3+ uppercase letters followed by "of [Place]")
+_ACRONYM_ORG_PATTERN = re.compile(
+    r"\b([A-Z]{3,}\s+(?:of(?:\s+the)?)\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\b"
+)
 
 # Common false positives: street/geographic suffixes, generic phrases
 _FALSE_POSITIVE_SUFFIXES = {
@@ -54,7 +58,7 @@ def check_hallucinations(
     if not response.strip() or not known_resource_names:
         return None
 
-    mentioned = set(_ORG_PATTERN.findall(response))
+    mentioned = set(_ORG_PATTERN.findall(response)) | set(_ACRONYM_ORG_PATTERN.findall(response))
     if not mentioned:
         return None
 

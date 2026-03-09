@@ -2,11 +2,17 @@
 
 import hashlib
 import json
+import logging
 import os
 
 import pytest
 
-from app.ai.audit_log import hash_session_id, log_llm_interaction
+from app.ai.audit_log import (
+    _write_log_entry,
+    hash_session_id,
+    log_llm_interaction,
+    log_llm_interaction_async,
+)
 
 
 class TestHashSessionId:
@@ -69,8 +75,10 @@ class TestLogLlmInteraction:
         entry = json.loads(log_path.read_text().strip())
         # Must NOT contain raw session ID
         assert raw_id not in json.dumps(entry)
-        # Must contain hashed version
-        expected_hash = hashlib.sha256(raw_id.encode()).hexdigest()
+        # Must contain salted hashed version
+        from app.core.config import get_settings
+        salt = get_settings().audit_hash_salt
+        expected_hash = hashlib.sha256((salt + raw_id).encode()).hexdigest()
         assert entry["hashed_session"] == expected_hash
 
     def test_no_pii_in_log(self, tmp_path):
@@ -144,3 +152,48 @@ class TestLogLlmInteraction:
         entry = json.loads(log_path.read_text().strip())
         # ISO format contains 'T' separator
         assert "T" in entry["timestamp"]
+
+    def test_write_failure_logs_warning(self, caplog):
+        """OSError during write should log a warning, not raise."""
+        # /dev/null/impossible is not a valid directory, triggers OSError
+        bad_path = "/dev/null/impossible/audit.jsonl"
+        with caplog.at_level(logging.WARNING, logger="app.ai.audit_log"):
+            _write_log_entry(bad_path, {"test": "entry"})
+        assert "Failed to write audit log" in caplog.text
+
+
+@pytest.mark.anyio
+class TestLogLlmInteractionAsync:
+    """Tests for the async audit log writer."""
+
+    async def test_async_writes_jsonl_line(self, tmp_path):
+        """Async version should write a valid JSONL entry to disk."""
+        log_path = tmp_path / "async_audit.jsonl"
+        await log_llm_interaction_async(
+            log_path=str(log_path),
+            session_id="async-session",
+            provider="anthropic",
+            prompt_length=200,
+            response_length=400,
+            latency_ms=123.4,
+        )
+        assert log_path.exists()
+        entry = json.loads(log_path.read_text().strip())
+        assert entry["provider"] == "anthropic"
+        assert entry["prompt_length"] == 200
+        assert entry["response_length"] == 400
+        assert entry["latency_ms"] == 123.4
+        assert "hashed_session" in entry
+        assert "timestamp" in entry
+
+    async def test_async_skips_when_no_log_path(self):
+        """Async version should not raise when log_path is empty."""
+        # Should return without error
+        await log_llm_interaction_async(
+            log_path="",
+            session_id="session",
+            provider="mock",
+            prompt_length=10,
+            response_length=20,
+            latency_ms=5.0,
+        )

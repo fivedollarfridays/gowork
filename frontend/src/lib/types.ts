@@ -43,6 +43,34 @@ export const CrawlStatus = {
 } as const;
 export type CrawlStatus = (typeof CrawlStatus)[keyof typeof CrawlStatus];
 
+// --- Criminal Record types ---
+
+export const RecordType = {
+  FELONY: "felony",
+  MISDEMEANOR: "misdemeanor",
+  ARREST_ONLY: "arrest_only",
+  EXPUNGED: "expunged",
+} as const;
+export type RecordType = (typeof RecordType)[keyof typeof RecordType];
+
+export const ChargeCategory = {
+  VIOLENCE: "violence",
+  THEFT: "theft",
+  DRUG: "drug",
+  DUI: "dui",
+  SEX_OFFENSE: "sex_offense",
+  FRAUD: "fraud",
+  OTHER: "other",
+} as const;
+export type ChargeCategory = (typeof ChargeCategory)[keyof typeof ChargeCategory];
+
+export interface RecordProfile {
+  record_types: RecordType[];
+  charge_categories: ChargeCategory[];
+  years_since_conviction: number | null;
+  completed_sentence: boolean;
+}
+
 // --- Models ---
 
 export interface ScheduleConstraints {
@@ -61,6 +89,7 @@ export interface AssessmentRequest {
   resume_text?: string;
   certifications?: string[];
   credit_result?: CreditAssessmentResult;
+  record_profile?: RecordProfile;
 }
 
 export interface UserProfile {
@@ -75,6 +104,7 @@ export interface UserProfile {
   schedule_type: string;
   work_history: string;
   target_industries: string[];
+  record_profile: RecordProfile | null;
 }
 
 export interface Resource {
@@ -102,6 +132,10 @@ export interface JobMatch {
   credit_check_required: string;
   eligible_now: boolean;
   eligible_after: string | null;
+  fair_chance?: boolean;
+  record_eligible?: boolean;
+  background_check_timing?: string | null;
+  record_note?: string | null;
 }
 
 export interface ScoredJobMatch extends JobMatch {
@@ -118,6 +152,16 @@ export interface TransitConnection {
   schedule: string;
 }
 
+export type ExpungementEligibility = "eligible_now" | "eligible_future" | "not_eligible" | "unknown";
+
+export interface ExpungementResult {
+  eligibility: ExpungementEligibility;
+  years_remaining: number | null;
+  steps: string[];
+  filing_fee: string | null;
+  notes: string | null;
+}
+
 export interface BarrierCard {
   type: BarrierType;
   severity: BarrierSeverity;
@@ -126,6 +170,7 @@ export interface BarrierCard {
   actions: string[];
   resources: Resource[];
   transit_matches: TransitConnection[];
+  expungement?: ExpungementResult | null;
 }
 
 export type ReadinessBand = "not_ready" | "developing" | "ready" | "strong";

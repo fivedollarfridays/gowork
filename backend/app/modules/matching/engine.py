@@ -4,6 +4,7 @@ import json
 import uuid
 
 from app.core.queries import get_all_transit_stops, get_resources_by_categories
+from app.modules.criminal.expungement import check_expungement_eligibility
 from app.modules.feedback.types import ResourceHealth
 from app.modules.matching.affinity import (
     CAREER_CENTER_STEP,
@@ -137,6 +138,17 @@ async def _rank_with_transit(
     return rank_resources(resources, profile, stop_distances=stop_distances)
 
 
+def _split_job_buckets(
+    ranked_jobs: list[ScoredJobMatch],
+) -> tuple[list[ScoredJobMatch], list[ScoredJobMatch]]:
+    """Split flat PVS list into legacy strong/after_repair buckets."""
+    strong: list[ScoredJobMatch] = []
+    after_repair: list[ScoredJobMatch] = []
+    for j in ranked_jobs:
+        (after_repair if j.credit_check_required == "required" else strong).append(j)
+    return strong, after_repair
+
+
 async def generate_plan(
     profile: UserProfile, db_session,
     resume_text: str = "",
@@ -145,14 +157,8 @@ async def generate_plan(
     """Orchestrate the full matching pipeline."""
     resources = await query_resources_for_barriers(profile.primary_barriers, db_session)
     resources = await _rank_with_transit(profile, resources, db_session)
-
     ranked_jobs = await match_jobs(profile, db_session)
-
-    # Backward compat: split flat PVS list into legacy buckets
-    strong: list[ScoredJobMatch] = []
-    after_repair: list[ScoredJobMatch] = []
-    for j in ranked_jobs:
-        (after_repair if j.credit_check_required == "required" else strong).append(j)
+    strong, after_repair = _split_job_buckets(ranked_jobs)
 
     sorted_barriers = prioritize_barriers([b.value for b in profile.primary_barriers])
     sorted_profile = profile.model_copy(
@@ -161,7 +167,6 @@ async def generate_plan(
     barrier_cards = _build_barrier_cards(sorted_profile, resources)
     next_steps = _build_next_steps(profile, barrier_cards)
     wioa = screen_wioa_eligibility(profile)
-
     parsed_resume = parse_resume(resume_text) if resume_text else None
     readiness = assess_job_readiness(profile, parsed_resume, ranked_jobs, credit_result)
 
@@ -189,6 +194,7 @@ def _build_barrier_cards(
     cards: list[BarrierCard] = []
     for barrier in profile.primary_barriers:
         actions = list(BARRIER_ACTIONS.get(barrier, []))
+        expungement = None
 
         if barrier == BarrierType.TRAINING:
             cert_renewals = get_certification_renewal(profile.work_history)
@@ -199,12 +205,16 @@ def _build_barrier_cards(
                     f"({cert['renewal_body'].get('phone', 'N/A')})"
                 )
 
+        if barrier == BarrierType.CRIMINAL_RECORD:
+            expungement = check_expungement_eligibility(profile.record_profile)
+
         cards.append(BarrierCard(
             type=barrier,
             severity=profile.barrier_severity,
             title=BARRIER_TITLES.get(barrier, barrier.value.replace("_", " ").title()),
             actions=actions,
             resources=card_resources.get(barrier, []),
+            expungement=expungement,
         ))
 
     return cards
