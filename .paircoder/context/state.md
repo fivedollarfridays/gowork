@@ -1,8 +1,16 @@
 # Current State
 
-> Last updated: 2026-03-09
+> Last updated: 2026-04-11
 
 ## Active Plan
+
+**Plan:** plan-sprint-1-engage
+**Type:** feature
+**Title:** City Framework Scaffold — Multi-city config, loader, and settings
+**Status:** In Progress (2/8 tasks done)
+**Current Sprint:** S1
+
+## Previous Active Plan
 
 **Plan:** plan-2026-03-brightdata-consolidation
 **Type:** refactor
@@ -208,7 +216,30 @@ Sprint 31: BrightData Consolidation + Commute Time. Two workstreams: (1) Replace
 
 **Total: 6 tasks, 125 complexity points (6/6 done)**
 
+## Task Status
+
+### Sprint S1 — City Framework Scaffold
+
+| ID | Title | Priority | Complexity | Status | Depends On |
+|----|-------|----------|------------|--------|------------|
+| T1.1 | CityConfig schema + YAML loader | P0 | 25 | done | -- |
+| T1.2 | Seed cities/ and data/cities/ directory structure | P0 | 10 | done | T1.1 |
+| T1.3 | City-aware adapter registry stub | P0 | 25 | pending | T1.1 |
+| T1.4 | Seed montgomery.yaml with real data | P1 | 15 | pending | T1.1 |
+| T1.5 | City config CLI command | P1 | 20 | pending | T1.1 |
+| T1.6 | City config validation tests | P1 | 20 | pending | T1.1 |
+| T1.7 | City config documentation | P2 | 15 | pending | T1.1 |
+| T1.8 | Fort Worth scaffold YAML | P2 | 10 | pending | T1.1 |
+
 ## What Was Just Done
+
+- **T1.2 done** (auto-updated by hook)
+
+- **T1.2 done** (2026-04-11) — Seed cities/ and data/cities/ directory structure: Updated `cities/montgomery.yaml` (adapters: brightdata + honestjobs, data_dir: data/cities/montgomery) and `cities/fort-worth.yaml` (adapters: twc + usajobs, data_dir: data/cities/fort-worth). Created `data/cities/montgomery/.gitkeep` and `data/cities/fort-worth/.gitkeep`. 10 new tests (4 montgomery yaml, 4 fort-worth yaml, 2 gitkeep). All 28 city config tests pass, arch checks clean.
+
+- **T1.1 done** (auto-updated by hook)
+
+- **T1.1 done** (2026-04-11) — CityConfig schema + YAML loader: Created `backend/app/cities/` package with Pydantic `CityConfig` model (name, state, zip_ranges, job_adapters, data_dir), `CityConfigNotFoundError`, `load_city_config(city)` YAML loader, and `get_city_config()` helper using active CITY setting. Added `city: str = "montgomery"` to `Settings` in `backend/app/core/config.py`. Created `cities/montgomery.yaml` and `cities/fort-worth.yaml`. 18 tests (8 model validation, 5 loader, 3 settings, 2 get_city_config). All arch checks pass.
 
 - **T31.4 done** (auto-updated by hook)
 
@@ -248,7 +279,7 @@ Sprint 31: BrightData Consolidation + Commute Time. Two workstreams: (1) Replace
 
 ## What's Next
 
-Sprint 31 complete. All 4 tasks done. Ready for branch finish + PR.
+Continue Sprint S1: T1.3 (City-aware adapter registry stub), T1.4 (Seed montgomery.yaml with real data), and remaining tasks.
 
 ## Blockers
 
