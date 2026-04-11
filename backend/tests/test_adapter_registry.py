@@ -15,7 +15,7 @@ class TestJobAdapterProtocol:
 
     def test_concrete_class_satisfies_protocol(self):
         from app.integrations.adapters.base import JobAdapter
-        from typing import runtime_checkable, Protocol
+        from typing import Protocol
 
         assert issubclass(JobAdapter, Protocol)
 
@@ -79,22 +79,3 @@ class TestGetAdapter:
                 f"Found BrightData import at module level: {line}"
             )
 
-    def test_registry_uses_lazy_import(self):
-        """Verify no BrightData symbols imported at module top level."""
-        import pathlib
-        import importlib.util
-
-        spec = importlib.util.find_spec("app.integrations.adapters.base")
-        src = pathlib.Path(spec.origin).read_text()
-
-        import_lines = [
-            line.strip()
-            for line in src.splitlines()
-            if (line.strip().startswith("import ") or line.strip().startswith("from "))
-            and not line.strip().startswith("#")
-        ]
-
-        for line in import_lines:
-            assert "brightdata" not in line.lower(), (
-                f"Found BrightData import at module level: {line}"
-            )

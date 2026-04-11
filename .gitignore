@@ -28,3 +28,9 @@ coverage/
 
 # docs internal
 docs/internal
+
+# paircoder license (contains PII — must never be committed)
+.paircoder/license.json
+
+# Personal deploy helpers (contain hardcoded local paths)
+deploy.sh

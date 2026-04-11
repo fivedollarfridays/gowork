@@ -1,15 +1,17 @@
-"""HonestJobs job adapter — wraps cached query logic from JobAggregator."""
+"""HonestJobs job adapter — delegates to HonestJobsClient for cached listings."""
 
 from __future__ import annotations
 
-from sqlalchemy import text
+from typing import TYPE_CHECKING
+
+from app.integrations.honestjobs.client import HonestJobsClient
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class HonestJobsJobAdapter:
     async def fetch_jobs(
-        self, session, query: str, location: str
+        self, session: AsyncSession, query: str, location: str
     ) -> list[dict]:
-        result = await session.execute(
-            text("SELECT * FROM job_listings WHERE source = 'honestjobs'")
-        )
-        return [dict(row._mapping) for row in result]
+        return await HonestJobsClient(session).get_listings()

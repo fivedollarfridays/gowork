@@ -2,6 +2,7 @@
 
 import pytest
 import yaml
+from pydantic import ValidationError
 
 from pathlib import Path
 
@@ -35,7 +36,7 @@ class TestCityConfigModel:
         assert cfg.data_dir == "data/montgomery"
 
     def test_missing_name_raises(self):
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             CityConfig(
                 state="AL",
                 location="Montgomery, AL",
@@ -45,7 +46,7 @@ class TestCityConfigModel:
             )
 
     def test_missing_state_raises(self):
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             CityConfig(
                 name="Montgomery",
                 location="Montgomery, AL",
@@ -55,7 +56,7 @@ class TestCityConfigModel:
             )
 
     def test_missing_location_raises(self):
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             CityConfig(
                 name="Montgomery",
                 state="AL",
@@ -65,7 +66,7 @@ class TestCityConfigModel:
             )
 
     def test_missing_zip_ranges_raises(self):
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             CityConfig(
                 name="Montgomery",
                 state="AL",
@@ -75,7 +76,7 @@ class TestCityConfigModel:
             )
 
     def test_missing_job_adapters_raises(self):
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             CityConfig(
                 name="Montgomery",
                 state="AL",
@@ -85,7 +86,7 @@ class TestCityConfigModel:
             )
 
     def test_missing_data_dir_raises(self):
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             CityConfig(
                 name="Montgomery",
                 state="AL",
@@ -95,7 +96,7 @@ class TestCityConfigModel:
             )
 
     def test_zip_ranges_must_be_list(self):
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             CityConfig(
                 name="Montgomery",
                 state="AL",
@@ -106,7 +107,7 @@ class TestCityConfigModel:
             )
 
     def test_job_adapters_must_be_list(self):
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             CityConfig(
                 name="Montgomery",
                 state="AL",
@@ -231,6 +232,36 @@ class TestDataDirectories:
         assert gitkeep.exists()
 
 
+class TestLoadCityConfigTraversalGuard:
+    def test_rejects_dot_dot_traversal(self):
+        with pytest.raises(CityConfigNotFoundError):
+            load_city_config("../etc/passwd")
+
+    def test_rejects_backslash_traversal(self):
+        with pytest.raises(CityConfigNotFoundError):
+            load_city_config("..\\windows\\system32")
+
+    def test_rejects_absolute_path(self):
+        with pytest.raises(CityConfigNotFoundError):
+            load_city_config("/etc/passwd")
+
+    def test_rejects_uppercase(self):
+        with pytest.raises(CityConfigNotFoundError):
+            load_city_config("Montgomery")
+
+    def test_rejects_null_byte(self):
+        with pytest.raises(CityConfigNotFoundError):
+            load_city_config("montgomery\x00")
+
+    def test_error_message_does_not_leak_filesystem_path(self):
+        with pytest.raises(CityConfigNotFoundError) as exc_info:
+            load_city_config("nonexistent-city")
+        msg = str(exc_info.value)
+        assert "/Users/" not in msg
+        assert "/home/" not in msg
+        assert str(Path(__file__).resolve().parent.parent.parent) not in msg
+
+
 class TestGetCityConfig:
     def test_returns_config_for_default_city(self):
         cfg = get_city_config()
@@ -238,9 +269,11 @@ class TestGetCityConfig:
 
     def test_uses_settings_city(self, monkeypatch):
         get_settings.cache_clear()
+        load_city_config.cache_clear()
         monkeypatch.setenv("CITY", "fort-worth")
         try:
             cfg = get_city_config()
             assert cfg.name == "Fort Worth"
         finally:
             get_settings.cache_clear()
+            load_city_config.cache_clear()

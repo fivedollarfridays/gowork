@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 _logger = logging.getLogger(__name__)
 _stub_logged = False
@@ -15,11 +19,9 @@ def _log_stub_once() -> None:
         _stub_logged = True
 
 
-_log_stub_once()
-
-
 class USAJobsJobAdapter:
     async def fetch_jobs(
-        self, session, query: str, location: str
+        self, session: AsyncSession, query: str, location: str
     ) -> list[dict]:
+        _log_stub_once()
         return []
