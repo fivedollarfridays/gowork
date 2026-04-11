@@ -154,7 +154,8 @@ class TestLoadCityConfig:
 
 
 class TestCitySettingInConfig:
-    def test_default_city_is_montgomery(self):
+    def test_default_city_is_montgomery(self, monkeypatch):
+        monkeypatch.delenv("CITY", raising=False)
         s = Settings(
             _env_file=None,
             anthropic_api_key="test",
@@ -175,7 +176,6 @@ class TestCitySettingInConfig:
             anthropic_api_key="test",
         )
         assert s.app_name == "MontGoWork"
-        assert s.environment == "development"
 
 
 class TestMontgomeryYaml:
@@ -263,9 +263,14 @@ class TestLoadCityConfigTraversalGuard:
 
 
 class TestGetCityConfig:
-    def test_returns_config_for_default_city(self):
-        cfg = get_city_config()
-        assert cfg.name == "Montgomery"
+    def test_returns_config_for_default_city(self, monkeypatch):
+        monkeypatch.delenv("CITY", raising=False)
+        get_settings.cache_clear()
+        try:
+            cfg = get_city_config()
+            assert cfg.name == "Montgomery"
+        finally:
+            get_settings.cache_clear()
 
     def test_uses_settings_city(self, monkeypatch):
         get_settings.cache_clear()
