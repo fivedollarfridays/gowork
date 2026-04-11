@@ -3,5 +3,6 @@ state: TX
 zip_ranges:
   - "76101-76199"
 job_adapters:
-  - brightdata
-data_dir: data/fort-worth
+  - twc
+  - usajobs
+data_dir: data/cities/fort-worth
