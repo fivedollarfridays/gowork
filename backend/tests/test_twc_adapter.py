@@ -47,12 +47,17 @@ class TestTWCAdapterProtocol:
 
 
 class TestTWCAdapterLogging:
-    def test_logs_stub_warning_once(self, caplog):
-        import importlib
+    @pytest.mark.anyio
+    async def test_logs_stub_warning_once_across_fetches(self, caplog, monkeypatch):
         import app.integrations.adapters.twc_adapter as mod
 
-        mod._stub_logged = False
-        importlib.reload(mod)
+        monkeypatch.setattr(mod, "_stub_logged", False)
+        caplog.clear()
+        adapter = mod.TWCJobAdapter()
+        with caplog.at_level(logging.WARNING):
+            await adapter.fetch_jobs(None, "jobs", "Fort Worth, TX")
+            await adapter.fetch_jobs(None, "jobs", "Fort Worth, TX")
+            await adapter.fetch_jobs(None, "jobs", "Fort Worth, TX")
 
         warnings = [
             r for r in caplog.records
@@ -61,18 +66,16 @@ class TestTWCAdapterLogging:
         assert len(warnings) == 1
         assert "S2" in warnings[0].message or "s2" in warnings[0].message.lower()
 
-    @pytest.mark.anyio
-    async def test_no_log_on_fetch(self, caplog):
-        from app.integrations.adapters.twc_adapter import TWCJobAdapter
+    def test_no_log_at_import_time(self, caplog, monkeypatch):
+        import importlib
+        import app.integrations.adapters.twc_adapter as mod
 
+        monkeypatch.setattr(mod, "_stub_logged", False)
         caplog.clear()
-        adapter = TWCJobAdapter()
         with caplog.at_level(logging.WARNING):
-            await adapter.fetch_jobs(None, "jobs", "Fort Worth, TX")
-            await adapter.fetch_jobs(None, "jobs", "Fort Worth, TX")
-
-        fetch_warnings = [
+            importlib.reload(mod)
+        import_warnings = [
             r for r in caplog.records
             if r.levelno == logging.WARNING and "twc" in r.message.lower()
         ]
-        assert len(fetch_warnings) == 0
+        assert len(import_warnings) == 0

@@ -155,7 +155,7 @@ class TestAggregatorLocationFromConfig:
         sig = inspect.signature(JobAggregator.search)
         loc_param = sig.parameters.get("location")
         assert loc_param is not None
-        assert loc_param.default is None or loc_param.default == inspect.Parameter.empty or loc_param.default == "Montgomery, AL"
+        assert loc_param.default is None or loc_param.default == inspect.Parameter.empty
 
 
 class TestAggregatorNoHardcodedAdapters:

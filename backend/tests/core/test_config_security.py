@@ -209,3 +209,46 @@ class TestStartupEnvironmentWarning:
                 pass
         warning_calls = [str(c) for c in mock_logger.warning.call_args_list]
         assert not any("ENVIRONMENT" in c for c in warning_calls)
+
+
+class TestCitySlugValidator:
+    """City field must be a safe slug to prevent path traversal via load_city_config."""
+
+    def setup_method(self):
+        get_settings.cache_clear()
+
+    def test_accepts_valid_slug(self):
+        s = Settings(_env_file=None, city="fort-worth", anthropic_api_key="test")
+        assert s.city == "fort-worth"
+
+    def test_accepts_default_slug(self):
+        s = Settings(_env_file=None, anthropic_api_key="test")
+        assert s.city == "montgomery"
+
+    def test_rejects_path_traversal(self):
+        with pytest.raises(ValueError, match="city"):
+            Settings(_env_file=None, city="../../etc/passwd", anthropic_api_key="test")
+
+    def test_rejects_absolute_path(self):
+        with pytest.raises(ValueError, match="city"):
+            Settings(_env_file=None, city="/etc/passwd", anthropic_api_key="test")
+
+    def test_rejects_uppercase(self):
+        with pytest.raises(ValueError, match="city"):
+            Settings(_env_file=None, city="Montgomery", anthropic_api_key="test")
+
+    def test_rejects_empty(self):
+        with pytest.raises(ValueError, match="city"):
+            Settings(_env_file=None, city="", anthropic_api_key="test")
+
+    def test_rejects_leading_digit(self):
+        with pytest.raises(ValueError, match="city"):
+            Settings(_env_file=None, city="1city", anthropic_api_key="test")
+
+    def test_rejects_special_chars(self):
+        with pytest.raises(ValueError, match="city"):
+            Settings(_env_file=None, city="city;rm", anthropic_api_key="test")
+
+    def test_rejects_overlong(self):
+        with pytest.raises(ValueError, match="city"):
+            Settings(_env_file=None, city="a" * 60, anthropic_api_key="test")

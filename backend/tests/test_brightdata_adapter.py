@@ -76,6 +76,24 @@ async def _seed_honestjobs(session):
     await session.commit()
 
 
+async def _seed_null_expiry(session):
+    await session.execute(
+        text(
+            "INSERT INTO job_listings "
+            "(title, company, location, source, scraped_at, expires_at) "
+            "VALUES (:title, :company, :location, :source, :scraped_at, NULL)"
+        ),
+        {
+            "title": "No Expiry Job",
+            "company": "Permanent Co",
+            "location": "Montgomery, AL",
+            "source": "brightdata:snap-perm",
+            "scraped_at": "2026-03-08T00:00:00Z",
+        },
+    )
+    await session.commit()
+
+
 class TestBrightDataAdapterFetchJobs:
     @pytest.mark.anyio
     async def test_returns_brightdata_rows(self, db_session):
@@ -110,7 +128,7 @@ class TestBrightDataAdapterFetchJobs:
 
     @pytest.mark.anyio
     async def test_includes_null_expires_at(self, db_session):
-        await session_insert_null_expiry(db_session)
+        await _seed_null_expiry(db_session)
         from app.integrations.adapters.brightdata_adapter import BrightDataJobAdapter
 
         adapter = BrightDataJobAdapter()
@@ -180,21 +198,3 @@ class TestBrightDataAdapterProtocol:
 
         adapter = get_adapter("brightdata")
         assert isinstance(adapter, JobAdapter)
-
-
-async def session_insert_null_expiry(session):
-    await session.execute(
-        text(
-            "INSERT INTO job_listings "
-            "(title, company, location, source, scraped_at, expires_at) "
-            "VALUES (:title, :company, :location, :source, :scraped_at, NULL)"
-        ),
-        {
-            "title": "No Expiry Job",
-            "company": "Permanent Co",
-            "location": "Montgomery, AL",
-            "source": "brightdata:snap-perm",
-            "scraped_at": "2026-03-08T00:00:00Z",
-        },
-    )
-    await session.commit()
