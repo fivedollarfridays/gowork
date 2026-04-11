@@ -182,6 +182,72 @@ class TestCitySettingInConfig:
         assert s.environment == "development"
 
 
+class TestMontgomeryYaml:
+    def test_validates_against_schema(self):
+        from app.cities.config import load_city_config
+
+        cfg = load_city_config("montgomery")
+        assert cfg.name == "Montgomery"
+        assert cfg.state == "AL"
+
+    def test_has_expected_adapters(self):
+        from app.cities.config import load_city_config
+
+        cfg = load_city_config("montgomery")
+        assert cfg.job_adapters == ["brightdata", "honestjobs"]
+
+    def test_has_zip_ranges(self):
+        from app.cities.config import load_city_config
+
+        cfg = load_city_config("montgomery")
+        assert len(cfg.zip_ranges) >= 3
+        assert any("36101" in z for z in cfg.zip_ranges)
+
+    def test_data_dir_points_to_cities_subdir(self):
+        from app.cities.config import load_city_config
+
+        cfg = load_city_config("montgomery")
+        assert cfg.data_dir == "data/cities/montgomery"
+
+
+class TestFortWorthYaml:
+    def test_validates_against_schema(self):
+        from app.cities.config import load_city_config
+
+        cfg = load_city_config("fort-worth")
+        assert cfg.name == "Fort Worth"
+        assert cfg.state == "TX"
+
+    def test_has_expected_adapters(self):
+        from app.cities.config import load_city_config
+
+        cfg = load_city_config("fort-worth")
+        assert cfg.job_adapters == ["twc", "usajobs"]
+
+    def test_has_zip_ranges(self):
+        from app.cities.config import load_city_config
+
+        cfg = load_city_config("fort-worth")
+        assert len(cfg.zip_ranges) >= 1
+        assert any("76" in z for z in cfg.zip_ranges)
+
+    def test_data_dir_points_to_cities_subdir(self):
+        from app.cities.config import load_city_config
+
+        cfg = load_city_config("fort-worth")
+        assert cfg.data_dir == "data/cities/fort-worth"
+
+
+class TestDataDirectories:
+    def test_montgomery_data_dir_has_gitkeep(self):
+        gitkeep = Path(__file__).resolve().parent.parent.parent / "data" / "cities" / "montgomery" / ".gitkeep"
+        assert gitkeep.exists()
+
+    def test_fort_worth_data_dir_has_gitkeep(self):
+        gitkeep = Path(__file__).resolve().parent.parent.parent / "data" / "cities" / "fort-worth" / ".gitkeep"
+        assert gitkeep.exists()
+
+
 class TestGetCityConfig:
     def test_returns_config_for_default_city(self):
         from app.cities.config import get_city_config

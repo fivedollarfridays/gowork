@@ -6,4 +6,5 @@ zip_ranges:
   - "36140-36142"
 job_adapters:
   - brightdata
-data_dir: data/montgomery
+  - honestjobs
+data_dir: data/cities/montgomery
