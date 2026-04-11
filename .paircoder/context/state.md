@@ -7,7 +7,7 @@
 **Plan:** plan-sprint-1-engage
 **Type:** feature
 **Title:** City Framework Scaffold — Multi-city config, loader, and settings
-**Status:** In Progress (2/8 tasks done)
+**Status:** In Progress (4/8 tasks done)
 **Current Sprint:** S1
 
 ## Previous Active Plan
@@ -224,14 +224,20 @@ Sprint 31: BrightData Consolidation + Commute Time. Two workstreams: (1) Replace
 |----|-------|----------|------------|--------|------------|
 | T1.1 | CityConfig schema + YAML loader | P0 | 25 | done | -- |
 | T1.2 | Seed cities/ and data/cities/ directory structure | P0 | 10 | done | T1.1 |
-| T1.3 | City-aware adapter registry stub | P0 | 25 | pending | T1.1 |
-| T1.4 | Seed montgomery.yaml with real data | P1 | 15 | pending | T1.1 |
+| T1.3 | City-aware adapter registry stub | P0 | 25 | done | T1.1 |
+| T1.4 | BrightData adapter wrapper | P0 | 15 | done | T1.3 |
 | T1.5 | City config CLI command | P1 | 20 | pending | T1.1 |
 | T1.6 | City config validation tests | P1 | 20 | pending | T1.1 |
 | T1.7 | City config documentation | P2 | 15 | pending | T1.1 |
 | T1.8 | Fort Worth scaffold YAML | P2 | 10 | pending | T1.1 |
 
 ## What Was Just Done
+
+- **T1.4 done** (2026-04-11) — BrightData adapter wrapper: Implemented `BrightDataJobAdapter.fetch_jobs()` in `backend/app/integrations/adapters/brightdata_adapter.py`, delegating to the same SQL query as `JobAggregator._brightdata_cached()` (SELECT from job_listings WHERE source LIKE 'brightdata:%' AND not expired). Already registered in T1.3's lazy-import registry. 9 tests (cache fetch, expiry filtering, source filtering, null expiry, empty table, byte-identical to aggregator, protocol conformance, registry integration). All 35 related tests pass, arch checks clean. No files in `brightdata/` modified.
+
+- **T1.3 done** (auto-updated by hook)
+
+- **T1.3 done** (2026-04-11) — JobAdapter protocol and registry: Created `backend/app/integrations/adapters/` package with `JobAdapter` typing.Protocol (`async def fetch_jobs`), `AdapterNotFoundError`, and `get_adapter(name)` registry using lazy imports (importlib). BrightData adapter stub registered at `brightdata_adapter:BrightDataJobAdapter` (implementation deferred to T1.4). No BrightData symbols imported at module level in base.py. 9 tests (3 protocol, 2 error, 2 registry, 2 lazy-import verification). All pass, arch checks clean.
 
 - **T1.2 done** (auto-updated by hook)
 
@@ -279,7 +285,7 @@ Sprint 31: BrightData Consolidation + Commute Time. Two workstreams: (1) Replace
 
 ## What's Next
 
-Continue Sprint S1: T1.3 (City-aware adapter registry stub), T1.4 (Seed montgomery.yaml with real data), and remaining tasks.
+Continue Sprint S1: T1.5 (City config CLI command), T1.6 (City config validation tests), and remaining tasks.
 
 ## Blockers
 
