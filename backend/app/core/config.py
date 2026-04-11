@@ -42,6 +42,9 @@ class Settings(BaseSettings):
     brightdata_job_domains: str = "indeed.com"
     admin_api_key: str = ""
 
+    # City
+    city: str = "montgomery"
+
     # Data
     data_dir: str = ""
 
