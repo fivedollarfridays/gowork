@@ -20,6 +20,8 @@ class AdapterNotFoundError(Exception):
 
 _ADAPTER_REGISTRY: dict[str, str] = {
     "brightdata": "app.integrations.adapters.brightdata_adapter:BrightDataJobAdapter",
+    "twc": "app.integrations.adapters.twc_adapter:TWCJobAdapter",
+    "usajobs": "app.integrations.adapters.usajobs_adapter:USAJobsJobAdapter",
 }
 
 
