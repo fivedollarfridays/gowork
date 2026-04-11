@@ -1,0 +1,9 @@
+name: Fort Worth
+state: TX
+location: "Fort Worth, TX"
+zip_ranges:
+  - "76101-76199"
+job_adapters:
+  - twc
+  - usajobs
+data_dir: data/cities/fort-worth

@@ -1,254 +1,54 @@
 # Current State
 
-> Last updated: 2026-03-09
+> Last updated: 2026-04-11
 
 ## Active Plan
 
-**Plan:** plan-2026-03-brightdata-consolidation
-**Type:** refactor
-**Title:** BrightData Consolidation + Commute Time — Replace JSearch, Multi-Domain Crawling, Estimated Commute Display
-**Status:** Complete (4/4 done)
-**Current Sprint:** 31
-
-## Previous Active Plan
-
-**Plan:** plan-2026-03-transit-enhancement
+**Plan:** plan-sprint-1-engage
 **Type:** feature
-**Title:** Transit Enhancement — Schedule-Aware Job Matching for Montgomery Residents
-**Status:** Complete (2/2 done)
-**Sprint:** 30
-
-## Previous Active Plan
-
-**Plan:** plan-2026-03-benefits-program-eligibility
-**Type:** feature
-**Title:** Benefits Program Eligibility — Screening + Dashboard for Montgomery Residents
-**Status:** Complete (4/4 done, PR #40 open)
-**Sprint:** 29
-
-## Previous Active Plan (Sprint 28)
-
-**Plan:** plan-2026-03-resource-auto-matching
-**Type:** feature
-**Title:** Resource Auto-Matching — findhelp.org Integration + Eligibility Engine
-**Status:** Complete (2/3 done, T28.3 deferred — needs findhelp.org API partnership)
-**Sprint:** 28
-
-## Previous Active Plan (Sprint 25/26)
-
-**Plan:** plan-2026-03-benefits-cliff-engine
-**Type:** feature
-**Title:** Benefits Cliff Engine — Cliff-Aware Job Ranking for Montgomery Residents
-**Status:** Complete (PR #36 merged)
-**Sprint:** 25
-
-## Older Plans
-
-**Plan:** plan-2026-03-barrier-graph-rag
-**Type:** feature
-**Title:** Barrier Graph + RAG — Barrier Intelligence Assistant
-**Status:** In Progress (1/7 done)
-**Sprint:** 23
-
-## Previous Plans
-
-- plan-2026-03-security-hardening (Complete, 7/7 done -- Sprint 18)
-- plan-2026-03-hackathon-demo-polish (Complete, 6/6 done -- Sprint 17)
-- plan-2026-03-intelligent-job-matching (Complete, 6/6 done -- Sprint 13)
-- plan-2026-03-monday-morning-ux (Complete, 1/1 done -- Sprint 12)
-- plan-2026-03-launch-prep-polish (Complete, 8/8 done -- Sprint 11)
-- plan-2026-03-a11y-and-demo (Complete, 5/5 done -- Sprint 10)
-- plan-2026-03-docs-and-readme (Complete, 5/5 done -- Sprint 9)
-- plan-2026-03-export-and-polish (Complete, 4/4 done -- Sprint 8)
-- plan-2026-03-brightdata-live-jobs (Complete, 6/6 done -- Sprint 7)
-- plan-2026-03-demo-killer-frontend (Complete, 10/10 done -- Sprint 5)
-- plan-2026-03-plan-2026-03-implementation (Complete, 9/9 done -- Sprint 4)
-- plan-2026-03-test-coverage (Complete, 4/4 done -- Sprint 3)
-- plan-2026-03-plan-2026-03-review-fixes (Complete, 3/3 done)
-- plan-2026-03-module-skeletons (Complete, 7/7 done)
-
-## Current Focus
-
-Sprint 31: BrightData Consolidation + Commute Time. Two workstreams: (1) Replace JSearch/RapidAPI (200 req/month ceiling) with BrightData multi-domain crawling (Indeed, LinkedIn, Glassdoor, ZipRecruiter, Snagajob). Consolidates external job API surface from two vendors to one. (2) Add estimated commute time display on job cards using haversine distance + average speed formulas (drive ~25mph, transit with walk+wait+ride, walk for <2mi). No external API needed.
+**Title:** City Framework Scaffold — Multi-city config, loader, and settings
+**Status:** Complete (8/8 tasks done)
+**Current Sprint:** S1
 
 ## Task Status
 
-### Sprint 31 — BrightData Consolidation + Commute Time
+### Sprint S1 — City Framework Scaffold
 
 | ID | Title | Priority | Complexity | Status | Depends On |
 |----|-------|----------|------------|--------|------------|
-| T31.1 | Expand BrightData Precrawl to Multi-Domain Job Discovery | P0 | 40 | done | -- |
-| T31.2 | Remove JSearch Integration | P0 | 30 | done | T31.1 |
-| T31.3 | Commute Time Estimator Module | P1 | 35 | done | -- |
-| T31.4 | Commute Time Display on Job Cards | P1 | 25 | done | T31.3 |
+| T1.1 | CityConfig schema + YAML loader | P0 | 25 | done | -- |
+| T1.2 | Seed cities/ and data/cities/ directory structure | P0 | 10 | done | T1.1 |
+| T1.3 | JobAdapter protocol and registry | P0 | 25 | done | T1.1 |
+| T1.4 | BrightData adapter wrapper | P0 | 15 | done | T1.3 |
+| T1.5 | TWC and USAJobs stub adapters | P1 | 15 | done | T1.3 |
+| T1.6 | Wire CITY env var into JobAggregator | P0 | 20 | done | T1.1, T1.4 |
+| T1.7 | Tests: city config, adapter protocol, CITY selection | P0 | 20 | done | T1.6 |
+| T1.8 | Integration gate | P0 | 10 | done | T1.1-T1.7 |
 
-**Total: 4 tasks, 130 complexity points (4/4 done) — SPRINT COMPLETE**
+**Total: 8 tasks, 140 complexity points (8/8 done) — SPRINT COMPLETE**
 
-### Sprint 30 — Transit Enhancement
+## Previous Sprints (summary)
 
-| ID | Title | Priority | Complexity | Status | Depends On |
-|----|-------|----------|------------|--------|------------|
-| T30.1 | Transit Schedule Matcher Module | P1 | 45 | done | -- |
-| T30.2 | Transit Info Display on Job Cards | P2 | 30 | done | T30.1 |
+Older sprint task tables, session histories, and plan details have been archived to `.paircoder/archive/state-pre-s1.md`. One-line summary:
 
-**Total: 2 tasks, 75 complexity points (2/2 done) — SPRINT COMPLETE**
-
-### Sprint 29 — Benefits Program Eligibility
-
-| ID | Title | Priority | Complexity | Status | Depends On |
-|----|-------|----------|------------|--------|------------|
-| T29.1 | Program Eligibility Screener Module | P0 | 45 | done | -- |
-| T29.2 | Program Application Data (steps, URLs, contacts) | P0 | 30 | done | T29.1 |
-| T29.3 | Engine Integration + Frontend Types | P0 | 25 | done | T29.1, T29.2 |
-| T29.4 | Benefits Eligibility Dashboard UI | P1 | 40 | done | T29.3 |
-
-**Total: 4 tasks, 140 complexity points (4/4 done) — SPRINT COMPLETE**
-
-### Sprint 28 — Resource Auto-Matching
-
-| ID | Title | Priority | Complexity | Status | Depends On |
-|----|-------|----------|------------|--------|------------|
-| T28.1 | findhelp.org Integration (Capability URLs) | P1 | 45 | done | -- |
-| T28.2 | Resource Eligibility Engine | P1 | 50 | done | T28.1 |
-| T28.3 | findhelp.org Deep Integration (V2) | P2 | 60 | deferred | API access |
-
-**Total: 3 tasks, 155 complexity points (2/3 done, 1 deferred) — SPRINT COMPLETE**
-
-### Sprint 25 — Benefits Cliff Engine (COMPLETE)
-
-| ID | Title | Priority | Complexity | Status | Depends On |
-|----|-------|----------|------------|--------|------------|
-| T25.1 | Benefits Cliff Calculator Module | P0 | 60 | done | -- |
-| T25.2 | Benefits Profile in Assessment Wizard | P0 | 40 | done | T25.1 |
-| T25.3 | Cliff-Aware Job Ranking | P0 | 50 | done | T25.1, T25.2 |
-| T25.4 | Benefits Cliff Visualization | P1 | 35 | done | T25.1, T25.3 |
-
-**Total: 4 tasks, 185 complexity points (4/4 done) — SPRINT COMPLETE**
-
-### Sprint 23 — Barrier Graph + RAG (Barrier Intelligence Assistant)
-
-| ID | Title | Priority | Complexity | Status | Depends On |
-|----|-------|----------|------------|--------|------------|
-| T23.1 | Barrier graph DB schema: Alembic migration + seed data | P0 | 55 | done | -- |
-| T23.2 | Barrier-resource mapping: join table, impact scores, top-N query | P0 | 45 | pending | T23.1 |
-| T23.3 | RAG knowledge base: document schema + FAISS ingestion pipeline | P0 | 60 | pending | T23.1, T23.2 |
-| T23.4 | Hybrid retrieval layer: vector + metadata filter + graph context assembly | P0 | 50 | pending | T23.2, T23.3 |
-| T23.5 | LLM orchestration + guardrails: POST /api/barrier-intel/chat + SSE streaming | P0 | 70 | pending | T23.4 |
-| T23.6 | Frontend: BarrierIntelChat + SSE streaming + explainability UI | P1 | 70 | pending | T23.5 |
-| T23.7 | NFRs: caching, observability, rate limiting + eval suite | P2 | 55 | pending | T23.5, T23.6 |
-
-**Total: 7 tasks, 405 complexity points (1/7 done)**
-
-### Sprint 18 -- Security Hardening (GitHub Issue #20)
-
-| ID | Title | Priority | Complexity | Status |
-|----|-------|----------|------------|--------|
-| T18.1 | Admin auth for BrightData endpoints (SEC-001) | P0 | 25 | done |
-| T18.2 | Prompt injection defense (SEC-003) | P0 | 20 | done |
-| T18.3 | Security headers + CORS hardening (SEC-008, SEC-013) | P0 | 20 | done |
-| T18.4 | Container + Docker hardening (SEC-009, SEC-018) | P1 | 15 | done |
-| T18.5 | Input validation + info leak fixes (SEC-012, SEC-016, SEC-017, SEC-023) | P1 | 30 | done ✓ |
-| T18.6 | Rate limiting on expensive endpoints (SEC-010) | P1 | 25 | done ✓ |
-| T18.7 | CI vulnerability scanning + accepted risks docs (SEC-020) | P2 | 20 | done ✓ |
-
-**Total: 7 tasks, 155 complexity points (7/7 done)**
-
-
-### Sprint 14 -- Feedback Loop
-
-| ID | Title | Priority | Complexity | Status |
-|----|-------|----------|------------|--------|
-| T14.1 | Schema + types (feedback tables, ResourceHealth) | P0 | 25 | done |
-| T14.2 | Feedback token generation, validation, expiry | P0 | 25 | done |
-| T14.3 | Resource feedback API | P0 | 30 | done  |
-| T14.4 | Resource feedback UI (thumbs up/down) | P1 | 30 | done |
-| T14.5 | Visit feedback API | P0 | 35 | done |
-| T14.6 | Visit feedback form (/feedback/[token]) | P1 | 40 | done |
-| T14.7 | QR code in PDF export | P2 | 25 | done |
-| T14.8 | Resource health check (decay detection) | P1 | 50 | done |
-
-**Total: 8 tasks, 260 complexity points (8/8 done)**
-
-### Sprint 15 -- Career Center Ready Package
-
-| ID | Title | Priority | Complexity | Status | Depends On |
-|----|-------|----------|------------|--------|------------|
-| T15.1 | WIOA screener types + eligibility logic | P0 | 30 | done | -- |
-| T15.2 | Career Center Package data model + assembler | P0 | 35 | done | T15.1 |
-| T15.3 | GET /api/plan/{session_id}/career-center | P0 | 25 | done | T15.1, T15.2 |
-| T15.4 | Wire WIOA eligibility into generate_plan | P0 | 25 | done | T15.1 |
-| T15.5 | CareerCenterPackage frontend component | P0 | 50 | done | T15.7 |
-| T15.6 | Career Center Ready PDF export button | P1 | 25 | done | T15.3, T15.5 |
-| T15.7 | Frontend types + API client | P0 | 15 | done | T15.2 |
-
-**Total: 7 tasks, 205 complexity points (7/7 done)**
-
-### Sprint 16 -- Fix Sprint: Review Corrections
-
-| ID | Title | Priority | Complexity | Status | Depends On |
-|----|-------|----------|------------|--------|------------|
-| T16.1 | SQLAlchemy StaticPool warning fix | P0 | 10 | done | -- |
-| T16.2 | Resource affinity routing | P0 | 40 | done | T16.1 |
-| T16.3 | Barrier priority ordering | P0 | 30 | done | T16.2 |
-| T16.4 | Cloud deployment documentation | P1 | 25 | done | -- |
-| T16.5 | Architecture known limitations section | P1 | 25 | done | -- |
-
-**Total: 5 tasks, 130 complexity points (5/5 done)**
-
-### Sprint 17 -- Hackathon Demo Polish
-
-| ID | Title | Priority | Complexity | Status | Depends On |
-|----|-------|----------|------------|--------|------------|
-| T17.1 | Session recovery on plan page refresh | P0 | 20 | done | -- |
-| T17.2 | Post-plan What's Next CTA section | P0 | 20 | done | -- |
-| T17.3 | Geocode seed resources for proximity scoring | P1 | 30 | done | -- |
-| T17.4 | Add credit counseling resources + complete addresses | P1 | 20 | done | T17.3 |
-| T17.5 | Remove dead feedback_token_secret config | P2 | 5 | done | -- |
-| T17.6 | Documentation sync — api.md and architecture.md | P1 | 30 | done | -- |
-
-**Total: 6 tasks, 125 complexity points (6/6 done)**
+- **Sprint 31** — BrightData Consolidation + Commute Time (4/4 done)
+- **Sprint 30** — Transit Enhancement (2/2 done)
+- **Sprint 29** — Benefits Program Eligibility (4/4 done, PR #40)
+- **Sprint 28** — Resource Auto-Matching (2/3 done, T28.3 deferred — needs findhelp.org API)
+- **Sprint 25** — Benefits Cliff Engine (4/4 done, PR #36 merged)
+- **Sprint 23** — Barrier Graph + RAG (1/7 done, paused)
+- **Sprint 18** — Security Hardening (7/7 done)
+- **Sprints 7-17** — Launch prep, demo polish, live jobs, intelligent matching, a11y, docs (all complete)
 
 ## What Was Just Done
 
-- **T31.4 done** (auto-updated by hook)
+- **Sprint S1 complete** (2026-04-11) — City Framework Scaffold: multi-city YAML config (Pydantic `CityConfig`, slug-validated loader with path traversal guards), city-scoped `JobAdapter` protocol + lazy-import registry, BrightData/HonestJobs/TWC/USAJobs adapters, `CITY` env var threaded through `JobAggregator.search()`. 145 S1 tests passing across test_city_config, test_adapter_protocol, test_adapter_registry, test_brightdata_adapter, test_twc_adapter, test_usajobs_adapter, test_honestjobs_adapter, test_aggregator_city_config, test_job_aggregator_city. Arch checks clean on all new files.
 
-- **T31.4 done** (2026-03-09) — Commute Time Display on Job Cards: Added `CommuteEstimate` TS interface to `types.ts` (drive_min, transit_min, walk_min). Added `commute_estimate` field to `ScoredJobMatch`. Updated `JobMatchCard.tsx` with commute row: Car icon + drive time, Bus icon + transit time (when available), Footprints icon + walk time (when available). Used Lucide `Car`, `Bus`, `Footprints` icons. 6 new tests (drive/transit/walk display, null transit/walk hidden, undefined/null estimate hidden). All 476 frontend tests pass, `npx tsc --noEmit` clean.
-
-- **T31.3 done** (auto-updated by hook)
-
-- **T31.3 done** (2026-03-09) — Commute Time Estimator Module: Created `commute_estimator.py` with `estimate_commute(user_zip, job_location, transit_info)` returning `CommuteEstimate(drive_min, transit_min, walk_min)`. Formulas: drive at 25 mph, transit = walk-to-stop (3 mph) + 10 min wait + ride (12 mph) + 5 min walk-from-stop (only when transit_info has serving routes), walk at 3 mph (only if <= 2 miles). All times minimum 1 min. Added `CommuteEstimate` model to `types_transit.py`. Added `commute_estimate: Optional[CommuteEstimate]` to `ScoredJobMatch` in `types.py`. Wired into `pvs_scorer.py` `_build_match()` — every `ScoredJobMatch` from `rank_all_jobs()` now has commute estimate attached. Extracted `_cliff_for_job()` helper to keep `_build_match` under arch function length limit. 18 tests (4 drive time, 3 walk time, 4 transit time, 4 edge cases, 3 PVS wiring integration). All 1476 backend tests pass, all arch checks clean (no errors).
-
-- **T31.2 done** (auto-updated by hook)
-
-- **T31.2 done** (2026-03-09) — Remove JSearch Integration: Deleted `app/integrations/jsearch/` directory (305 lines: client.py, cache.py, types.py). Removed JSearch from `job_aggregator.py` (`_jsearch_fetch()`, `_record_to_raw()`, `_record_to_dict()`, jsearch branch in `search()`, jsearch import). Removed `jsearch_api_key` and `jsearch_host` from `config.py` Settings. Updated `routes/jobs.py` source filter description. Removed "via JSearch" source label from `JobMatchCard.tsx`. Removed `jsearch` from `jobFilters.ts` type union, `SOURCE_LABELS`, and `matchesSource()`. Deleted `test_jsearch_client.py` and `test_jsearch_cache.py`. Updated `test_job_aggregator.py` (removed JSearch tests, added `test_jsearch_source_filter_returns_empty`), `test_dedup.py` (replaced jsearch:1 source strings), `jobFilters.test.ts` and `JobFilters.test.tsx` (removed jsearch references). All 1458 backend tests pass, 470 frontend tests pass, `npx tsc --noEmit` clean.
-
-- **T31.1 done** (2026-03-09) — Expand BrightData Precrawl to Multi-Domain Job Discovery: Added `brightdata_job_domains` setting to `config.py` (comma-separated, default "indeed.com"). Created `get_crawl_domains()` in `precrawl.py` to parse domains with whitespace/empty fallback handling. Updated `build_keyword_searches()` to iterate configured domains. Refactored `precrawl_montgomery_jobs()` to crawl each domain independently with partial failure tolerance (per-domain try/except, errors list in response, aggregated cached count). Added `deduplicate_by_company_title()` to `cache.py` for cross-domain dedup by (company, title) pair (case-insensitive, None-company skipped, first occurrence wins). Wired dedup into `store_crawl_results()`. 22 new tests (5 domain parsing, 3 multi-domain searches, 3 partial failure, 6 company+title dedup, 1 integration dedup, 4 updated existing). All 1499 backend tests pass, all arch checks clean.
-
-- **T30.2 done** (2026-03-09) — Transit Info Display on Job Cards: Created `TransitInfoDisplay.tsx` with route badges (`#N name`), first/last bus schedule per route, walk distance to nearest stop, transfer count, warning badges (No Sunday service, No night service, Long walk), and "Plan your trip" Google Maps link. Added `TransitWarning`, `RouteFeasibility`, `TransitInfoDetail` TS types to `types.ts`. Added `transit_info` to `ScoredJobMatch` (frontend + backend). Wired into `JobMatchCard.tsx`. Aria-labels, `role="alert"` on warnings. 19 tests, all 1319 backend tests pass, `npx tsc --noEmit` clean.
-
-- **T30.1 done** (2026-03-09) — Transit Schedule Matcher Module: Created `transit_schedule.py` with `find_serving_routes()` (haversine walk distance, per-route nearest stop), `check_schedule_feasibility()` (shift times vs first/last bus, Sunday/night gap detection), `detect_transfer_count()` (Rosa Parks hub transfers), `build_transit_info()` (combined TransitInfo). Added `TransitWarning` enum, `RouteFeasibility`, `TransitInfo` types. Updated `job_matcher._filter_by_transit()` to use route schedule data with keyword fallback for jobs without coordinates. Updated `job_scoring._score_transit()` with walk distance bands (0.25/0.5/1.0 mi), transfer penalty (0.8×/0.6×), and schedule feasibility factor. 30 new tests, 1319 total pass, all arch checks clean.
-
-- **Sprint 30 planned** (2026-03-09) — Created plan-2026-03-transit-enhancement with 2 tasks (75 complexity). T30.1: Transit Schedule Matcher Module (schedule validation, transfer detection, walk distance, Sunday/night gaps, wire into job_matcher pipeline). T30.2: Transit Info Display on Job Cards (frontend component with route badges, walk distance, schedule info, warnings, Google Maps link). Synced 2 cards to Trello Planned/Ready.
-
-- **T27.0 BrightData Pre-Built Jobs Dataset Integration** (2026-03-08) — Created `dataset_loader.py` (parse JSON/JSONL/CSV dataset files, normalize to `BrightDataJobRecord`), `salary_embed.py` (embed structured salary data into description text for PVS salary_parser). Sample dataset with 15 Montgomery-area jobs. Code review fixes: renamed private symbols to public in cache.py, corrected misleading metric names in observability.
-
-- **Merge conflict resolution** (2026-03-09) — Resolved conflicts between Sprint 29 (benefits eligibility) and Sprint 28 (resource auto-matching). engine.py: kept `_compute_benefits()` with lazy imports, adopted `build_barrier_cards_and_steps` from barrier_cards.py, `ResourceHealth` from feedback.types. state.md: merged both sprint histories.
-
-- **T29.4 done** (2026-03-08) — Benefits Eligibility Dashboard UI: Created `BenefitsEligibility.tsx` with per-program rows (confidence badges via `STATUS_BADGE_STYLES`, monthly values, income headroom), enrolled vs additional-eligible grouping, expandable "How to apply" sections (steps, required docs, office name/address/phone, processing time, apply link). Uses shadcn Card/Badge, Lucide icons, `PROGRAM_LABELS` from constants. Wired into `plan/page.tsx` after barriers, before cliff chart. 11 frontend tests (null render, heading, values, badges, headroom, disclaimer, expand/collapse, enrolled distinction, a11y). `npx tsc --noEmit` clean.
-
-- **T29.3 done** (2026-03-08) — Engine Integration + Frontend Types: Wired `screen_benefits_eligibility()` into `generate_plan()` via `_compute_benefits()` helper. Added `benefits_eligibility: Optional[BenefitsEligibility] = None` to `ReEntryPlan`. Added `EligibilityConfidence`, `ProgramApplicationInfo`, `ProgramEligibility`, `BenefitsEligibility` TS interfaces to `types.ts`. 3 new engine tests. Refactored engine imports to stay under arch limit (lazy imports for benefits modules). `npx tsc --noEmit` passes.
-
-- **T29.2 done** (2026-03-08) — Program Application Data: Added `ProgramApplicationInfo` model to `types.py`. Created `application_data.py` with Montgomery-specific data for all 7 programs (SNAP/TANF/Medicaid/ALL_Kids/Childcare_Subsidy/Section_8/LIHEAP) — application URLs, steps, required documents, office names/addresses/phones, processing times. Section 8 includes waitlist note, LIHEAP includes seasonal note. Wired into screener: eligible programs get `application_info` attached, ineligible programs get `None`. 13 new tests in `test_benefits_application_data.py`. Split test file to satisfy arch check (49→36+15 functions). All 47 benefits tests pass, all arch checks clean.
-
-- **T29.1 done** (2026-03-08) — Program Eligibility Screener Module: Created `eligibility_screener.py` (entry point) and `eligibility_checks.py` (per-program check functions). 7 program checks with income thresholds from `thresholds.py`, benefit value estimates from `program_calculators.py`, confidence levels (likely/possible/unlikely within 10% band). Added `EligibilityConfidence` enum, `ProgramEligibility`, `BenefitsEligibility` models to `types.py`. 34 tests covering all programs, confidence, edge cases. All arch checks clean.
-
-- **T28.2 done** (2026-03-09) — Resource Eligibility Engine. Backend: `modules/resources/eligibility.py` with `ELIGIBILITY_RULES` (15+ rules: open, enrollment, compound income+dependents), `EligibilityStatus` enum (likely/check/unknown), `check_eligibility()` function. Added `eligibility_status: Optional[str]` to Resource model. Extracted barrier card builders to `matching/barrier_cards.py` (`build_barrier_cards_and_steps`, `_annotate_eligibility`, `_build_cards`, `_build_next_steps`, `BARRIER_TITLES`, `BARRIER_ACTIONS`) to fix engine.py arch violations (17→13 imports, 264→120 lines). Frontend: `EligibilityBadge.tsx` (green "Likely eligible" / yellow "Check eligibility" using semantic `bg-success/10` / `bg-warning/10` tokens), wired into `BarrierCardView.tsx` next to resource names. 20 backend tests, 6 frontend tests. All 1117 backend + 375 frontend tests pass, all arch checks clean.
-
-- **T28.1 done** (2026-03-09) — findhelp.org capability URL integration. Backend: `modules/resources/findhelp.py` with `FINDHELP_CATEGORIES` mapping all 7 barrier types to findhelp.org category paths, `generate_findhelp_url()`. Frontend: `lib/findhelp.ts` (mirrored mapping), `FindhelpLink.tsx` component with external link, wired into `BarrierCardView` with zip code from sessionStorage. Zip stored during assessment. 26 backend tests, 10 frontend tests. All 1097 backend + 368 frontend tests pass.
+- **Review + fix pass** (2026-04-11) — Addressed all Must Fix / Should Fix items from S1 review: path traversal guard on `load_city_config` (slug regex + `is_relative_to()` + non-leaking error), city slug validator on `Settings.city`, adapter instance caching via `lru_cache` in `get_adapter`, stub log moved from import side effect into `fetch_jobs`, `AsyncSession` type annotations on `JobAdapter` protocol + all concrete adapters, `encoding="utf-8"` on YAML open, dict-type check on parsed YAML, test exception narrowing, duplicate-test cleanup, dead-`or` branch removal in `test_aggregator_city_config.py`.
 
 ## What's Next
 
-Sprint 31 complete. All 4 tasks done. Ready for branch finish + PR.
+Sprint S2 (TBD) — live TWC + USAJobs integration for Fort Worth, plus any remaining polish from S1 review feedback.
 
 ## Blockers
 

@@ -9,6 +9,61 @@ import sys
 import re
 from pathlib import Path
 
+_AC_CHECKED = re.compile(r"^\s*-\s*\[x\]\s*(.+)$")
+_AC_UNCHECKED = re.compile(r"^\s*-\s*\[ \]\s*(.+)$")
+_AC_HEADER = re.compile(r"^#{1,2}\s+Acceptance Criteria\s*$")
+_SECTION_HEADER = re.compile(r"^#{1,6}\s+")
+
+
+def _find_task_file(task_id: str) -> Path | None:
+    """Find a task file matching the given ID in .paircoder/tasks/."""
+    tasks_dir = Path.cwd() / ".paircoder" / "tasks"
+    if not tasks_dir.exists():
+        return None
+    # Check direct children and subdirectories
+    for f in tasks_dir.rglob(f"{task_id}*.task.md"):
+        return f
+    return None
+
+
+def check_acceptance_criteria(task_id: str) -> tuple[bool, str]:
+    """Check that all acceptance criteria checkboxes are checked."""
+    task_file = _find_task_file(task_id)
+    if task_file is None:
+        return False, f"Task file not found for {task_id}"
+
+    content = task_file.read_text(encoding="utf-8")
+    lines = content.splitlines()
+
+    # Find the AC section
+    in_ac_section = False
+    checked: list[str] = []
+    unchecked: list[str] = []
+
+    for line in lines:
+        if _AC_HEADER.match(line):
+            in_ac_section = True
+            continue
+        if in_ac_section and _SECTION_HEADER.match(line):
+            break  # Stop at next header
+        if not in_ac_section:
+            continue
+        m_checked = _AC_CHECKED.match(line)
+        if m_checked:
+            checked.append(m_checked.group(1).strip())
+            continue
+        m_unchecked = _AC_UNCHECKED.match(line)
+        if m_unchecked:
+            unchecked.append(m_unchecked.group(1).strip())
+
+    total = len(checked) + len(unchecked)
+    if total == 0:
+        return False, "No acceptance criteria items found"
+    if unchecked:
+        items = "\n  - ".join(unchecked)
+        return False, f"{len(unchecked)} unchecked AC items:\n  - {items}"
+    return True, f"All {total} acceptance criteria verified"
+
 
 def run_command(cmd: list[str]) -> tuple[bool, str]:
     """Run a command and return (success, output)."""
@@ -83,6 +138,7 @@ def main():
     print("=" * 40)
 
     checks = [
+        ("Acceptance criteria", lambda: check_acceptance_criteria(task_id)),
         ("Task file", lambda: check_task_file(task_id)),
         ("Tests", check_tests),
         ("Linting", check_linting),

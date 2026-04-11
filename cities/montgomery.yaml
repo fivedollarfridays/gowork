@@ -1,0 +1,11 @@
+name: Montgomery
+state: AL
+location: "Montgomery, AL"
+zip_ranges:
+  - "36101-36120"
+  - "36130"
+  - "36140-36142"
+job_adapters:
+  - brightdata
+  - honestjobs
+data_dir: data/cities/montgomery

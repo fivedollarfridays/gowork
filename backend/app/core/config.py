@@ -2,10 +2,11 @@
 
 import ipaddress
 import logging
+import re
 from functools import lru_cache
 from urllib.parse import urlparse
 
-from pydantic import model_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _BLOCKED_NETWORKS = [
@@ -15,6 +16,8 @@ _BLOCKED_NETWORKS = [
     ipaddress.ip_network("192.168.0.0/16"),
     ipaddress.ip_network("169.254.0.0/16"),
 ]
+
+_CITY_SLUG_RE = re.compile(r"^[a-z][a-z0-9-]{0,49}$")
 
 
 class Settings(BaseSettings):
@@ -42,6 +45,9 @@ class Settings(BaseSettings):
     brightdata_job_domains: str = "indeed.com"
     admin_api_key: str = ""
 
+    # City
+    city: str = "montgomery"
+
     # Data
     data_dir: str = ""
 
@@ -55,6 +61,16 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:3000,http://localhost:3001"
 
     model_config = SettingsConfigDict(env_file=".env")
+
+    @field_validator("city")
+    @classmethod
+    def _validate_city_slug(cls, v: str) -> str:
+        if not _CITY_SLUG_RE.match(v):
+            raise ValueError(
+                "city must be a lowercase slug (letters, digits, hyphens, "
+                "starting with a letter, max 50 chars)"
+            )
+        return v
 
     @model_validator(mode="after")
     def _reject_private_credit_url_in_production(self) -> "Settings":
