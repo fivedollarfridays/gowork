@@ -2,19 +2,19 @@
   "task_types": {
     "feature": {
       "task_type": "feature",
-      "sample_count": 22,
-      "avg_tokens": 2742.590909090909,
-      "std_dev": 3490.7681840051782,
-      "p80_tokens": 5949.000000000001,
-      "avg_duration_seconds": 137.3181818181818,
-      "success_rate": 0.6818181818181818,
+      "sample_count": 24,
+      "avg_tokens": 2518.6666666666665,
+      "std_dev": 3423.7153389588652,
+      "p80_tokens": 5401.434982070031,
+      "avg_duration_seconds": 126.00000000000001,
+      "success_rate": 0.6666666666666666,
       "recommended_model": "haiku",
       "model": "aggregate",
       "recommended_effort": "high",
-      "_m2_tokens": 268080175.3181818,
-      "_m2_duration": 565072.7727272727,
-      "estimation_mape": null,
-      "estimation_sample_count": 0,
+      "_m2_tokens": 281323841.33333325,
+      "_m2_duration": 598896.0,
+      "estimation_mape": 2263.063063063063,
+      "estimation_sample_count": 1,
       "cx_per_minute": 26.140075289480265
     },
     "refactor": {
@@ -51,6 +51,23 @@
       "estimation_sample_count": 0,
       "cx_per_minute": 4.325846981826184
     },
+    "feature:unknown": {
+      "task_type": "feature",
+      "sample_count": 4,
+      "avg_tokens": 0.0,
+      "std_dev": 0.0,
+      "p80_tokens": 0.0,
+      "avg_duration_seconds": 81.0,
+      "success_rate": 0.0,
+      "recommended_model": "haiku",
+      "model": "unknown",
+      "recommended_effort": "high",
+      "_m2_tokens": 0.0,
+      "_m2_duration": 29131.999999999996,
+      "estimation_mape": null,
+      "estimation_sample_count": 0,
+      "cx_per_minute": null
+    },
     "feature:claude-opus-4-6[1m]": {
       "task_type": "feature",
       "sample_count": 3,
@@ -70,37 +87,20 @@
     },
     "feature:claude-opus-4-6": {
       "task_type": "feature",
-      "sample_count": 12,
-      "avg_tokens": 2785.75,
-      "std_dev": 2835.549774000332,
-      "p80_tokens": 4948.0,
-      "avg_duration_seconds": 159.5,
-      "success_rate": 0.9166666666666666,
+      "sample_count": 13,
+      "avg_tokens": 2580.0,
+      "std_dev": 2815.999180506874,
+      "p80_tokens": 4951.071309986788,
+      "avg_duration_seconds": 147.46153846153845,
+      "success_rate": 0.9230769230769231,
       "recommended_model": "haiku",
       "model": "claude-opus-4-6",
       "recommended_effort": "high",
-      "_m2_tokens": 96484110.25,
-      "_m2_duration": 414671.0,
-      "estimation_mape": null,
-      "estimation_sample_count": 0,
+      "_m2_tokens": 103088068.0,
+      "_m2_duration": 437279.23076923075,
+      "estimation_mape": 2263.063063063063,
+      "estimation_sample_count": 1,
       "cx_per_minute": 34.50281814539627
-    },
-    "feature:unknown": {
-      "task_type": "feature",
-      "sample_count": 3,
-      "avg_tokens": 0.0,
-      "std_dev": 0.0,
-      "p80_tokens": 0.0,
-      "avg_duration_seconds": 108.0,
-      "success_rate": 0.0,
-      "recommended_model": "haiku",
-      "model": "unknown",
-      "recommended_effort": "high",
-      "_m2_tokens": 0.0,
-      "_m2_duration": 20384.000000000004,
-      "estimation_mape": null,
-      "estimation_sample_count": 0,
-      "cx_per_minute": null
     },
     "feature:sonnet": {
       "task_type": "feature",
@@ -171,6 +171,6 @@
       "cx_per_minute": 4.325846981826184
     }
   },
-  "last_calibrated": "2026-04-11T20:41:58.939749+00:00",
-  "total_records": 27
+  "last_calibrated": "2026-04-11T20:42:08.799718+00:00",
+  "total_records": 29
 }
