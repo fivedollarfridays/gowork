@@ -15,6 +15,7 @@ class CityConfigNotFoundError(FileNotFoundError):
 class CityConfig(BaseModel):
     name: str
     state: str
+    location: str
     zip_ranges: list[str]
     job_adapters: list[str]
     data_dir: str

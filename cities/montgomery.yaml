@@ -1,5 +1,6 @@
 name: Montgomery
 state: AL
+location: "Montgomery, AL"
 zip_ranges:
   - "36101-36120"
   - "36130"

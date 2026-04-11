@@ -139,19 +139,27 @@ class TestBrightDataAdapterFetchJobs:
 class TestBrightDataAdapterMatchesAggregator:
     @pytest.mark.anyio
     async def test_byte_identical_to_aggregator(self, db_session):
-        """Adapter returns same rows as JobAggregator._brightdata_cached()."""
+        """Adapter returns same BrightData rows as aggregator search."""
         await _seed_brightdata(db_session)
         await _seed_expired(db_session)
         await _seed_honestjobs(db_session)
 
+        from unittest.mock import patch
+        from app.cities.config import CityConfig
         from app.integrations.adapters.brightdata_adapter import BrightDataJobAdapter
         from app.integrations.job_aggregator import JobAggregator
 
         adapter = BrightDataJobAdapter()
-        agg = JobAggregator(db_session)
-
         adapter_rows = await adapter.fetch_jobs(db_session, "jobs", "Montgomery, AL")
-        agg_rows = await agg._brightdata_cached()
+
+        cfg = CityConfig(
+            name="Montgomery", state="AL", location="Montgomery, AL",
+            zip_ranges=["36101-36120"], job_adapters=["brightdata", "honestjobs"],
+            data_dir="data/cities/montgomery",
+        )
+        with patch("app.integrations.job_aggregator.get_city_config", return_value=cfg):
+            agg = JobAggregator(db_session)
+            agg_rows = await agg.search(source="brightdata")
 
         assert len(adapter_rows) == len(agg_rows)
         adapter_sorted = sorted(adapter_rows, key=lambda r: r["title"])
