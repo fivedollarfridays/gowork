@@ -1,0 +1,2 @@
+{"timestamp": "2026-04-11T15:03:58.702370", "command": "task_done --allow-dirty", "task_id": "T31.1", "reason": "Uncommitted changes in working tree"}
+{"timestamp": "2026-04-11T15:03:59.886210", "command": "task_done --allow-dirty", "task_id": "T23.1", "reason": "Uncommitted changes in working tree"}
