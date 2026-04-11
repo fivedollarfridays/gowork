@@ -1,13 +1,20 @@
 """Tests for unified job aggregator — parallel fetch, dedup, filters."""
 
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from sqlalchemy import text
 
+from app.cities.config import CityConfig
 from app.core.database import get_async_session_factory
 from app.core.queries_jobs import insert_job_listings
 from app.integrations.job_aggregator import JobAggregator, _matches_source
+
+_MONTGOMERY_CFG = CityConfig(
+    name="Montgomery", state="AL", location="Montgomery, AL",
+    zip_ranges=["36101-36120"], job_adapters=["brightdata", "honestjobs"],
+    data_dir="data/cities/montgomery",
+)
 
 
 @pytest.fixture
@@ -16,6 +23,15 @@ async def db_session(test_engine):
     factory = get_async_session_factory()
     async with factory() as session:
         yield session
+
+
+@pytest.fixture(autouse=True)
+def _mock_city_config():
+    with patch(
+        "app.integrations.job_aggregator.get_city_config",
+        return_value=_MONTGOMERY_CFG,
+    ):
+        yield
 
 
 def _make_listing(title, company, source, **kwargs):
@@ -112,13 +128,20 @@ class TestAggregatorSearch:
 class TestAggregatorExceptionHandling:
     @pytest.mark.anyio
     async def test_continues_when_source_raises_exception(self, db_session):
-        """When one source raises, others still return."""
+        """When one adapter raises, others still return."""
         await _seed_honestjobs(db_session, 1)
-        agg = JobAggregator(db_session)
-        with patch.object(
-            agg, "_brightdata_cached",
-            side_effect=RuntimeError("BrightData DB error"),
+        broken_adapter = AsyncMock(side_effect=RuntimeError("BrightData DB error"))
+        with patch(
+            "app.integrations.job_aggregator.get_adapter",
+            side_effect=lambda name: (
+                type("Broken", (), {"fetch_jobs": broken_adapter})()
+                if name == "brightdata"
+                else __import__(
+                    "app.integrations.adapters.base", fromlist=["get_adapter"]
+                ).get_adapter(name)
+            ),
         ):
+            agg = JobAggregator(db_session)
             results = await agg.search()
         assert len(results) >= 1
         assert all(j["source"] == "honestjobs" for j in results)

@@ -1,19 +1,19 @@
-"""Unified job aggregator — parallel fetch from all sources with dedup."""
+"""Unified job aggregator — parallel fetch from city-configured adapters with dedup."""
 
 import asyncio
 import logging
-from datetime import datetime, timezone
 
-from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.cities.config import get_city_config
+from app.integrations.adapters.base import get_adapter
 from app.integrations.dedup import deduplicate_listings
 
 logger = logging.getLogger(__name__)
 
 
 class JobAggregator:
-    """Aggregates jobs from BrightData and Honest Jobs."""
+    """Aggregates jobs from adapters configured in the active city's YAML."""
 
     def __init__(self, session: AsyncSession):
         self._session = session
@@ -21,15 +21,18 @@ class JobAggregator:
     async def search(
         self,
         query: str = "jobs",
-        location: str = "Montgomery, AL",
+        location: str | None = None,
         source: str | None = None,
         fair_chance: bool = False,
     ) -> list[dict]:
-        """Fetch from all sources, deduplicate, and return unified list."""
-        tasks = [
-            self._brightdata_cached(),
-            self._honestjobs_cached(),
-        ]
+        """Fetch from all city-configured adapters, deduplicate, and return unified list."""
+        city_config = get_city_config()
+        loc = location or city_config.location
+
+        tasks = []
+        for adapter_name in city_config.job_adapters:
+            adapter = get_adapter(adapter_name)
+            tasks.append(adapter.fetch_jobs(self._session, query, loc))
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
         all_jobs = []
@@ -47,26 +50,6 @@ class JobAggregator:
             deduped = [j for j in deduped if j.get("fair_chance") == 1]
 
         return deduped
-
-    async def _brightdata_cached(self) -> list[dict]:
-        """Fetch non-expired BrightData jobs from cache."""
-        now = datetime.now(timezone.utc).isoformat()
-        result = await self._session.execute(
-            text(
-                "SELECT * FROM job_listings "
-                "WHERE source LIKE 'brightdata:%' "
-                "AND (expires_at IS NULL OR expires_at > :now)"
-            ),
-            {"now": now},
-        )
-        return [dict(row._mapping) for row in result]
-
-    async def _honestjobs_cached(self) -> list[dict]:
-        """Fetch all Honest Jobs listings from cache."""
-        result = await self._session.execute(
-            text("SELECT * FROM job_listings WHERE source = 'honestjobs'")
-        )
-        return [dict(row._mapping) for row in result]
 
 
 def _matches_source(job: dict, source_filter: str) -> bool:
