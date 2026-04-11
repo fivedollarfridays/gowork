@@ -9,51 +9,49 @@ import re
 from pathlib import Path
 
 
-def _parse_frontmatter(content: str) -> tuple[str | None, str, list[str]]:
-    """Parse task file content into frontmatter and body.
+def validate_task_file(filepath: str) -> tuple[bool, list[str]]:
+    """Validate a task file.
 
     Returns:
-        (frontmatter, body, errors) — frontmatter is None if parsing fails.
+        Tuple of (is_valid, list of error messages)
     """
     errors = []
-    if not content.startswith("---"):
-        return None, "", ["Missing YAML frontmatter (must start with ---)"]
-
-    parts = content.split("---", 2)
-    if len(parts) < 3:
-        return None, "", ["Invalid frontmatter format (missing closing ---)"]
-
-    return parts[1], parts[2] if len(parts) > 2 else "", errors
-
-
-def _validate_frontmatter(frontmatter: str) -> list[str]:
-    """Check required fields and valid status in frontmatter."""
-    errors = []
-    for field in ["id", "title", "status"]:
-        if f"{field}:" not in frontmatter:
-            errors.append(f"Missing required field: {field}")
-
-    valid_statuses = ["pending", "in_progress", "blocked", "review", "done"]
-    status_match = re.search(r"status:\s*(\w+)", frontmatter)
-    if status_match and status_match.group(1) not in valid_statuses:
-        errors.append(f"Invalid status '{status_match.group(1)}'. Must be one of: {valid_statuses}")
-
-    return errors
-
-
-def validate_task_file(filepath: str) -> tuple[bool, list[str]]:
-    """Validate a task file. Returns (is_valid, error messages)."""
     path = Path(filepath)
+
     if not path.exists():
         return False, [f"File not found: {filepath}"]
 
     content = path.read_text(encoding="utf-8")
-    frontmatter, body, errors = _parse_frontmatter(content)
-    if frontmatter is None:
+
+    # Check frontmatter exists
+    if not content.startswith("---"):
+        errors.append("Missing YAML frontmatter (must start with ---)")
         return False, errors
 
-    errors.extend(_validate_frontmatter(frontmatter))
+    # Extract frontmatter
+    parts = content.split("---", 2)
+    if len(parts) < 3:
+        errors.append("Invalid frontmatter format (missing closing ---)")
+        return False, errors
 
+    frontmatter = parts[1]
+
+    # Required fields
+    required = ["id", "title", "status"]
+    for field in required:
+        if f"{field}:" not in frontmatter:
+            errors.append(f"Missing required field: {field}")
+
+    # Valid status values
+    valid_statuses = ["pending", "in_progress", "blocked", "review", "done"]
+    status_match = re.search(r"status:\s*(\w+)", frontmatter)
+    if status_match:
+        status = status_match.group(1)
+        if status not in valid_statuses:
+            errors.append(f"Invalid status '{status}'. Must be one of: {valid_statuses}")
+
+    # Check for acceptance criteria section
+    body = parts[2] if len(parts) > 2 else ""
     if "## Acceptance Criteria" not in body and "## acceptance criteria" not in body.lower():
         errors.append("Missing '## Acceptance Criteria' section")
 
