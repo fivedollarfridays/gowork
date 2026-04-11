@@ -3,6 +3,7 @@ name: navigator
 description: Design and planning specialist. Use proactively for architecture decisions, feature design, and creating implementation plans. Operates in read-only mode - does not write code.
 tools: Read, Grep, Glob, Bash
 model: opus
+memory: project
 permissionMode: plan
 skills:
   - designing-and-implementing

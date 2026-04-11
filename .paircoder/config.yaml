@@ -1,11 +1,11 @@
-version: 2.15.11
+version: 2.21.4
 project:
   name: MontGoWork
   description: "MontGoWork helps Montgomery residents overcome the real barriers between\
-    \ them and\n  employment. It's not just a job board — it's a navigator that identifies\
-    \ what's\n  actually blocking someone from working (transportation, childcare,\
-    \ credit history,\n   skills gaps) and builds a personalized action plan to address\
-    \ each barrier."
+    \ them and\n  employment. It's not just a job board \u2014 it's a navigator that\
+    \ identifies what's\n  actually blocking someone from working (transportation,\
+    \ childcare, credit history,\n   skills gaps) and builds a personalized action\
+    \ plan to address each barrier."
   primary_goal: Give a Montgomery resident a clear, actionable path from "I can't
     get a job" to employment by connecting barrier assessment, credit building tools,
     local job matching, and community resources into a personalized re-entry plan.
@@ -73,12 +73,12 @@ trello:
   board_name: MontGoWork
   defaults:
     project: MontGoWork
-    stack: 'Frontend: Next.js 15 + shadcn/ui + Tailwind Backend: FastAPI (Python 3.11+)
-      Database: SQLite AI: Claude API (Sonnet) Credit: Shawn''s Credit Assessment
-      API (735 tests, FCRA-compliant, /v1/assess via X-API-Key) Scraping: Bright Data
-      Crawl API PDF Export: html2pdf.js Email Export: EmailJS free tier Scaffold:
-      DualStack kit Workflow: PairCoder + git worktrees + GitHub Actions CI Hosting:
-      Vercel (frontend) + Railway/Render (backend) — free tiers'
+    stack: "Frontend: Next.js 15 + shadcn/ui + Tailwind Backend: FastAPI (Python 3.11+)\
+      \ Database: SQLite AI: Claude API (Sonnet) Credit: Shawn's Credit Assessment\
+      \ API (735 tests, FCRA-compliant, /v1/assess via X-API-Key) Scraping: Bright\
+      \ Data Crawl API PDF Export: html2pdf.js Email Export: EmailJS free tier Scaffold:\
+      \ DualStack kit Workflow: PairCoder + git worktrees + GitHub Actions CI Hosting:\
+      \ Vercel (frontend) + Railway/Render (backend) \u2014 free tiers"
     repo_url: https://github.com/fivedollarfridays/montgowork
   board_structure:
     lists:
@@ -295,33 +295,36 @@ metrics:
 hooks:
   enabled: true
   on_task_ready:
-  - sync_trello
+  - sync_pm
   - update_state
+  - sync_trello
   on_task_start:
   - select_model
   - check_token_budget
   - start_timer
-  - sync_trello
+  - sync_pm
   - update_state
+  - sync_trello
   on_task_review:
-  - sync_trello
+  - sync_pm
   - update_state
+  - sync_trello
   on_task_complete:
   - arch_check_modified
   - contract_break_check
   - stop_timer
-  - record_token_usage
-  - apply_token_learning
   - workspace_impact_scan
   - telemetry_snapshot
   - calibration_update_incremental
   - feedback_calibrate
-  - sync_trello
+  - sync_pm
   - update_state
   - check_unblocked
-  on_task_block:
   - sync_trello
+  on_task_block:
+  - sync_pm
   - update_state
+  - sync_trello
 containment:
   enabled: false
   mode: strict
@@ -385,3 +388,6 @@ mcp:
   port: 3000
 toggl:
   enabled: false
+pm:
+  provider: none
+  workflow: simple
