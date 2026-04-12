@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     default: 'MontGoWork',
     template: '%s | MontGoWork',
   },
-  description: 'Workforce Navigator for Montgomery, Alabama',
+  description: 'Workforce Navigator — overcome barriers and find your path to employment',
 };
 
 export default function RootLayout({
