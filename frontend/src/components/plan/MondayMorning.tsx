@@ -6,7 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/lib/motion";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import type { BarrierCard, ReEntryPlan, ScoredJobMatch, UserProfile } from "@/lib/types";
-import { CAREER_CENTER, mapsUrl, safeHref, humanizeLabel, toTelHref } from "@/lib/constants";
+import { getCareerCenter, getCityLabel, mapsUrl, safeHref, humanizeLabel, toTelHref } from "@/lib/constants";
+import { useCityConfig } from "@/hooks/useCityConfig";
 
 function getNextActionableDay(): string {
   const day = new Date().getDay();
@@ -44,6 +45,7 @@ interface MondayMorningProps {
 }
 
 export function MondayMorning({ plan, profile, firstStepAction }: MondayMorningProps) {
+  const city = useCityConfig();
   const topJobs = useMemo(() => getTopJobs(plan), [plan]);
 
   return (
@@ -54,7 +56,7 @@ export function MondayMorning({ plan, profile, firstStepAction }: MondayMorningP
             Here&apos;s what you can do {getNextActionableDay()}.
           </h1>
           <p className="text-lg text-muted-foreground">
-            Your personalized action plan for Montgomery, AL
+            Your personalized action plan for {getCityLabel(city.state)}
             {profile.barrier_count > 0 && (
               <>, addressing {profile.barrier_count} barrier{profile.barrier_count > 1 ? "s" : ""}</>
             )}
@@ -81,6 +83,7 @@ export function MondayMorning({ plan, profile, firstStepAction }: MondayMorningP
 }
 
 function CareerCenterStep({ action }: { action?: ReactNode }) {
+  const cc = getCareerCenter(useCityConfig().state);
   return (
     <Card className="h-full flex flex-col hover:shadow-[0_0_20px_rgba(45,149,150,0.2)] hover:border-secondary/30 hover:-translate-y-0.5">
       <CardContent className="p-4 flex flex-col gap-3 flex-1">
@@ -97,24 +100,24 @@ function CareerCenterStep({ action }: { action?: ReactNode }) {
 
         <div className="text-xs space-y-1.5 ml-9">
           <a
-            href={mapsUrl(CAREER_CENTER.address)}
+            href={mapsUrl(cc.address)}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 text-secondary hover:underline"
           >
             <MapPin className="h-3.5 w-3.5 shrink-0" />
-            {CAREER_CENTER.address}
+            {cc.address}
           </a>
           <a
-            href={toTelHref(CAREER_CENTER.phone)}
+            href={toTelHref(cc.phone)}
             className="flex items-center gap-1.5 text-secondary hover:underline"
           >
             <Phone className="h-3.5 w-3.5 shrink-0" />
-            {CAREER_CENTER.phone}
+            {cc.phone}
           </a>
           <p className="flex items-center gap-1.5 text-muted-foreground">
             <Clock className="h-3.5 w-3.5 shrink-0" />
-            {CAREER_CENTER.hours}
+            {cc.hours}
           </p>
         </div>
 

@@ -162,6 +162,65 @@ export function getProgramLabels(state?: string): Record<string, string> {
 /** @deprecated Use getProgramLabels instead */
 export const PROGRAM_LABELS = PROGRAM_LABELS_AL;
 
+/** City display label (e.g. "Montgomery, AL" or "Fort Worth, TX"). */
+export function getCityLabel(state?: string): string {
+  return state === "TX" ? "Fort Worth, TX" : "Montgomery, AL";
+}
+
+/** Area description for the assess page intro text. */
+export function getCityAreaDescription(state?: string): string {
+  return state === "TX"
+    ? "We serve the Fort Worth, Texas area. Enter your ZIP code to get started."
+    : "We serve the Montgomery, Alabama area. Enter your ZIP code to get started.";
+}
+
+/** Example ZIP placeholder for the input field. */
+export function getZipPlaceholder(state?: string): string {
+  return state === "TX" ? "76102" : "36104";
+}
+
+/** Error message when ZIP is invalid for the active city. */
+export function getZipErrorMessage(state?: string): string {
+  return state === "TX"
+    ? "Please enter a Fort Worth area ZIP (761xx)"
+    : "Please enter a Montgomery area ZIP (361xx)";
+}
+
+/** State job board URL. */
+export function getJobBoardUrl(state?: string): string {
+  return state === "TX"
+    ? "https://www.workintexas.com/"
+    : "https://joblink.alabama.gov/";
+}
+
+/** Legal services URL for the active state. */
+export function getLegalServicesUrl(state?: string): string {
+  return state === "TX"
+    ? "https://www.lanwt.org/"
+    : "https://www.legalservicesalabama.org/";
+}
+
+/** Housing authority URL for the active city. */
+export function getHousingUrl(state?: string): string {
+  return state === "TX"
+    ? "https://www.fwhs.org/"
+    : "https://www.hamd.org/";
+}
+
+/** Childcare assistance URL for the active state. */
+export function getChildcareUrl(state?: string): string {
+  return state === "TX"
+    ? "https://www.twc.texas.gov/programs/child-care-services"
+    : "https://dhr.alabama.gov/child-care/";
+}
+
+/** Fallback benefits portal URL for the active state. */
+export function getBenefitsFallbackUrl(state?: string): string {
+  return state === "TX"
+    ? "https://www.yourtexasbenefits.com/"
+    : "https://www.alabamabenefits.gov/";
+}
+
 export function formatDateRange(assessmentDate: string, startDay: number, endDay: number): string {
   const base = new Date(assessmentDate + "T00:00:00");
   const start = new Date(base);
