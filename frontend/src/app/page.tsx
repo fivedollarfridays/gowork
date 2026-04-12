@@ -18,7 +18,7 @@ const FLOW_STEPS = [
   {
     icon: Target,
     title: "Match",
-    description: "We match you with jobs, resources, and transit routes in Montgomery",
+    description: "We match you with jobs, resources, and transit routes in your area",
   },
   {
     icon: Map,
@@ -43,8 +43,8 @@ export default function Home() {
         </h1>
         <ScrollReveal delay={0.2}>
           <p className="mt-4 text-lg sm:text-xl text-muted-foreground max-w-xl">
-            MontGoWork is a workforce navigator built for Montgomery, Alabama.
-            We help you overcome barriers and find your path to employment.
+            MontGoWork is a workforce navigator that helps you overcome barriers
+            and find your path to employment.
           </p>
         </ScrollReveal>
         <ScrollReveal delay={0.4}>
@@ -93,10 +93,10 @@ export default function Home() {
       <section className="px-4 py-10">
         <div className="mx-auto max-w-4xl text-center">
           <h2 className="text-2xl font-semibold text-primary mb-2">
-            Montgomery by the Numbers
+            By the Numbers
           </h2>
           <p className="text-muted-foreground mb-6">
-            Understanding the workforce landscape we&apos;re built to serve
+            Understanding the workforce landscape we are built to serve
           </p>
           <div className="grid gap-6 sm:grid-cols-3">
             {STATS.map((stat) => (

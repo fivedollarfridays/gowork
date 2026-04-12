@@ -4,6 +4,7 @@ import math
 import re
 
 from app.modules.feedback.types import ResourceHealth
+from app.modules.matching.geo_router import get_downtown_coords, get_zip_centroids
 from app.modules.matching.types import BarrierType, Resource, UserProfile
 
 # Weights for scoring factors (must sum to 1.0)
@@ -24,10 +25,9 @@ BARRIER_CATEGORY_MAP: dict[BarrierType, set[str]] = {
     BarrierType.CRIMINAL_RECORD: {"career_center", "social_service"},
 }
 
-# Fallback for ZIPs not in the centroid table
+# --- Legacy constants kept for backward compatibility (geo_router imports them) ---
 DOWNTOWN_MONTGOMERY = (32.3668, -86.3000)
 
-# Montgomery, AL zip code centroids (approximate lat/lng)
 ZIP_CENTROIDS: dict[str, tuple[float, float]] = {
     "36101": (32.3668, -86.3000),
     "36104": (32.3750, -86.2960),
@@ -44,9 +44,8 @@ ZIP_CENTROIDS: dict[str, tuple[float, float]] = {
     "36117": (32.3700, -86.1800),
 }
 
-# M-Transit schedule hours (approximate)
-TRANSIT_START_HOUR = 5   # 5am
-TRANSIT_END_HOUR = 21    # 9pm
+TRANSIT_START_HOUR = 5
+TRANSIT_END_HOUR = 21
 
 
 def haversine_miles(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
@@ -85,10 +84,12 @@ def distance_to_score(miles: float) -> float:
 
 
 def _score_proximity(resource: Resource, profile: UserProfile) -> float:
-    """Score 0-1 based on distance. Closer = higher score."""
+    """Score 0-1 based on distance. Closer = higher score. City-aware."""
     if resource.lat is None or resource.lng is None:
         return 0.5  # neutral when resource location unknown
-    user_coords = ZIP_CENTROIDS.get(profile.zip_code, DOWNTOWN_MONTGOMERY)
+    centroids = get_zip_centroids()
+    downtown = get_downtown_coords()
+    user_coords = centroids.get(profile.zip_code, downtown)
     miles = haversine_miles(user_coords[0], user_coords[1], resource.lat, resource.lng)
     return distance_to_score(miles)
 

@@ -2,9 +2,10 @@
 
 from app.modules.benefits.types import BenefitsProfile
 from app.modules.criminal.expungement import check_expungement_eligibility
-from app.modules.matching.affinity import CAREER_CENTER_STEP, assign_resources
+from app.modules.matching.affinity import assign_resources
 from app.modules.matching.barrier_priority import prioritize_barriers
 from app.modules.matching.filters import get_certification_renewal
+from app.modules.matching.resource_router import get_barrier_actions, get_career_center_step
 from app.modules.matching.types import (
     BarrierCard,
     BarrierType,
@@ -24,7 +25,7 @@ BARRIER_TITLES: dict[BarrierType, str] = {
     BarrierType.CRIMINAL_RECORD: "Record & Legal Support",
 }
 
-# Default action steps per barrier type
+# Legacy constant for backward compatibility (imports by other modules)
 BARRIER_ACTIONS: dict[BarrierType, list[str]] = {
     BarrierType.CREDIT: [
         "Request free credit report from annualcreditreport.com",
@@ -98,9 +99,10 @@ def _build_cards(
     """Create a BarrierCard for each primary barrier with affinity routing."""
     card_resources = assign_resources(set(profile.primary_barriers), resources)
 
+    city_actions = get_barrier_actions()
     cards: list[BarrierCard] = []
     for barrier in profile.primary_barriers:
-        actions = list(BARRIER_ACTIONS.get(barrier, []))
+        actions = list(city_actions.get(barrier, []))
         expungement = None
 
         if barrier == BarrierType.TRAINING:
@@ -129,7 +131,7 @@ def _build_cards(
 
 def _build_next_steps(cards: list[BarrierCard]) -> list[str]:
     """Generate prioritized immediate next steps."""
-    steps: list[str] = [CAREER_CENTER_STEP]
+    steps: list[str] = [get_career_center_step()]
 
     for card in cards[:3]:
         if card.resources:

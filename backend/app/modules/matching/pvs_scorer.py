@@ -7,10 +7,7 @@ Replaces 3-bucket system with a single ranked list scored by:
 from collections.abc import Sequence
 
 from app.modules.benefits.cliff_calculator import calculate_net_at_wage, classify_cliff_severity
-from app.modules.benefits.program_calculators import (
-    PROGRAM_CALCULATORS,
-    sum_program_benefits,
-)
+from app.modules.benefits.router import get_program_calculators, get_sum_program_benefits
 from app.modules.benefits.thresholds import HOURS_PER_YEAR, MONTHS_PER_YEAR
 from app.modules.benefits.types import BenefitsProfile
 from app.modules.matching.commute_estimator import estimate_commute
@@ -85,9 +82,10 @@ def _affected_programs(
     annual_job: float, annual_current: float, profile: BenefitsProfile,
 ) -> list[str]:
     """List programs that decrease going from current to job income."""
+    calculators = get_program_calculators()
     return [
         prog for prog in profile.enrolled_programs
-        if (calc := PROGRAM_CALCULATORS.get(prog))
+        if (calc := calculators.get(prog))
         and calc(annual_job, profile) < calc(annual_current, profile)
     ]
 
@@ -108,8 +106,9 @@ def _compute_cliff_impact(
     """Calculate benefits cliff impact for a job at a given wage."""
     annual_job = salary.hourly_rate * HOURS_PER_YEAR
     annual_current = profile.current_monthly_income * MONTHS_PER_YEAR
+    sum_fn = get_sum_program_benefits()
     benefits_change = round(
-        sum_program_benefits(annual_job, profile) - current_benefits, 2,
+        sum_fn(annual_job, profile) - current_benefits, 2,
     )
     net_change = round(job_net_monthly - current_net_monthly, 2)
     has_cliff = benefits_change < -1.0
@@ -249,7 +248,8 @@ def rank_all_jobs(
     cur_benefits = cur_net = 0.0
     if bp and bp.enrolled_programs:
         annual_current = bp.current_monthly_income * MONTHS_PER_YEAR
-        cur_benefits = sum_program_benefits(annual_current, bp)
+        sum_fn = get_sum_program_benefits()
+        cur_benefits = sum_fn(annual_current, bp)
         cur_net = _current_net(bp)
 
     results: list[ScoredJobMatch] = []
