@@ -75,7 +75,7 @@ const BENEFIT_URLS_TX: Record<string, string> = {
 };
 
 function getBenefitUrls(state?: string): Record<string, string> {
-  return state === "TX" ? { ...BENEFIT_URLS_AL, ...BENEFIT_URLS_TX } : BENEFIT_URLS_AL;
+  return state === "TX" ? BENEFIT_URLS_TX : BENEFIT_URLS_AL;
 }
 
 function getActionLink(action: ActionItem, state?: string): ActionLink | null {

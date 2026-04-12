@@ -7,6 +7,7 @@ based on the active city, replacing the hardcoded ^361\\d{2}$ regex.
 from __future__ import annotations
 
 import re
+from functools import lru_cache
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -25,17 +26,22 @@ def parse_zip_ranges(ranges: list[str]) -> set[str]:
         if "-" in entry:
             start, end = entry.split("-", 1)
             for z in range(int(start), int(end) + 1):
-                valid.add(str(z))
+                valid.add(f"{z:05d}")
         else:
             valid.add(entry)
     return valid
+
+
+@lru_cache(maxsize=8)
+def _cached_zip_set(ranges_key: tuple[str, ...]) -> frozenset[str]:
+    return frozenset(parse_zip_ranges(list(ranges_key)))
 
 
 def is_valid_zip_for_city(zip_code: str, city_config: CityConfig) -> bool:
     """Check if a ZIP code is valid for the given city config."""
     if not _ZIP_RE.match(zip_code):
         return False
-    valid_zips = parse_zip_ranges(city_config.zip_ranges)
+    valid_zips = _cached_zip_set(tuple(city_config.zip_ranges))
     return zip_code in valid_zips
 
 
