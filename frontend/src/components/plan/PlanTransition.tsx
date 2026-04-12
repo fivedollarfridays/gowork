@@ -9,7 +9,7 @@ const MESSAGES = [
   "Your journey to employment starts right now.",
   "We're building your personalized action plan...",
   "Every step forward matters. You've already taken the first one.",
-  "Montgomery has opportunities waiting for you.",
+  "Your city has opportunities waiting for you.",
   "You're taking a powerful step toward a brighter future.",
   "Your skills matter. Let's find where they fit.",
   "New doors are about to open. Let's walk through them together.",

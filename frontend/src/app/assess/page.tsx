@@ -8,25 +8,20 @@ import { postAssessment, postCredit } from "@/lib/api";
 import { WizardShell, type WizardStepConfig } from "@/components/wizard/WizardShell";
 import { BarrierForm, type BarrierFormData } from "@/components/wizard/BarrierForm";
 import { BenefitsStep, BENEFITS_DEFAULTS } from "@/components/wizard/BenefitsStep";
-import type { BenefitsFormData } from "@/lib/types";
 import { CreditForm, creditFormCanAdvance, ACCOUNT_AGE_RANGES } from "@/components/wizard/CreditForm";
 import { CriminalRecordForm } from "@/components/wizard/CriminalRecordForm";
 import { ResumeStep } from "@/components/wizard/ResumeStep";
 import { IndustryForm } from "@/components/wizard/IndustryForm";
 import { ReviewStep } from "./ReviewStep";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import type { BenefitsFormData } from "@/lib/types";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AvailableHours, BarrierType } from "@/lib/types";
 import type { AssessmentRequest, CreditAssessmentResult, CreditFormData, EmploymentStatus, RecordProfile } from "@/lib/types";
-import { EMPLOYMENT_OPTIONS, isValidMontgomeryZip, humanizeLabel } from "@/lib/constants";
+import { EMPLOYMENT_OPTIONS, isValidCityZip, humanizeLabel, getCityAreaDescription, getZipPlaceholder, getZipErrorMessage } from "@/lib/constants";
 import { useDemoMode } from "@/hooks/useDemoMode";
+import { useCityConfig } from "@/hooks/useCityConfig";
 import { getResumeRecommendations } from "@/lib/resume/recommend";
 
 const DEFAULT_FORM_DATA: BarrierFormData = {
@@ -42,6 +37,7 @@ const DEFAULT_FORM_DATA: BarrierFormData = {
 
 export default function AssessPage() {
   const router = useRouter();
+  const city = useCityConfig();
   const demoData = useDemoMode();
 
   const [formData, setFormData] = useState<BarrierFormData>(DEFAULT_FORM_DATA);
@@ -72,7 +68,7 @@ export default function AssessPage() {
   });
   const [error, setError] = useState<string | null>(null);
 
-  const zipValid = isValidMontgomeryZip(formData.zipCode);
+  const zipValid = isValidCityZip(formData.zipCode, city.state);
   const barrierCount = Object.values(formData.barriers).filter(Boolean).length;
   const hasCreditBarrier = formData.barriers[BarrierType.CREDIT];
   const hasCriminalBarrier = formData.barriers[BarrierType.CRIMINAL_RECORD];
@@ -168,23 +164,23 @@ export default function AssessPage() {
           <div>
             <h2 className="text-lg font-semibold mb-1">Tell us about yourself</h2>
             <p className="text-sm text-muted-foreground">
-              We serve the Montgomery, Alabama area. Enter your ZIP code to get started.
+              {getCityAreaDescription(city.state)}
             </p>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <label htmlFor="zip" className="text-sm font-medium">Montgomery ZIP Code</label>
+              <label htmlFor="zip" className="text-sm font-medium">ZIP Code</label>
               <Input
                 id="zip"
                 type="text"
                 value={formData.zipCode}
                 onChange={(e) => setFormData({ ...formData, zipCode: e.target.value })}
-                placeholder="36104"
+                placeholder={getZipPlaceholder(city.state)}
                 maxLength={5}
               />
               {formData.zipCode.length === 5 && !zipValid && (
-                <p className="text-xs text-destructive">Please enter a Montgomery area ZIP (361xx)</p>
+                <p className="text-xs text-destructive">{getZipErrorMessage(city.state)}</p>
               )}
             </div>
 
@@ -378,7 +374,7 @@ export default function AssessPage() {
         />
       ),
     },
-  ], [formData, benefitsData, creditData, zipValid, barrierCount, hasCreditBarrier, hasCriminalBarrier, recordProfile, mutation.isPending, error, resumeText, resumeWordCount, targetIndustries, certifications, hasResume, resumeRecs]);
+  ], [formData, benefitsData, creditData, zipValid, barrierCount, hasCreditBarrier, hasCriminalBarrier, recordProfile, mutation.isPending, error, resumeText, resumeWordCount, targetIndustries, certifications, hasResume, resumeRecs, city.state]);
 
   return (
     <main className="min-h-screen px-4 py-8 sm:px-8">

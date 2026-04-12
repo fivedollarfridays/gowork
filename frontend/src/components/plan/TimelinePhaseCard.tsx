@@ -18,7 +18,17 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { toTelHref, mapsUrl, CAREER_CENTER } from "@/lib/constants";
+import {
+  toTelHref,
+  mapsUrl,
+  getCareerCenter,
+  getJobBoardUrl,
+  getLegalServicesUrl,
+  getHousingUrl,
+  getChildcareUrl,
+  getBenefitsFallbackUrl,
+} from "@/lib/constants";
+import { useCityConfig } from "@/hooks/useCityConfig";
 import type { TimelinePhase, ActionCategory, ActionItem } from "@/lib/types";
 
 /* ── Phone linkification ──────────────────────────────────────────────── */
@@ -43,7 +53,7 @@ function linkifyPhones(text: string): ReactNode {
 
 interface ActionLink { label: string; url: string }
 
-const BENEFIT_URLS: Record<string, string> = {
+const BENEFIT_URLS_AL: Record<string, string> = {
   snap: "https://www.alabamabenefits.gov/",
   tanf: "https://www.alabamabenefits.gov/",
   medicaid: "https://www.alabamabenefits.gov/",
@@ -54,41 +64,59 @@ const BENEFIT_URLS: Record<string, string> = {
   wic: "https://www.alabamapublichealth.gov/wic/",
 };
 
-function getActionLink(action: ActionItem): ActionLink | null {
+const BENEFIT_URLS_TX: Record<string, string> = {
+  snap: "https://www.yourtexasbenefits.com/",
+  tanf: "https://www.yourtexasbenefits.com/",
+  medicaid: "https://www.yourtexasbenefits.com/",
+  chip: "https://www.yourtexasbenefits.com/",
+  childcare_subsidy: "https://www.twc.texas.gov/programs/child-care-services",
+  section_8: "https://www.fwhs.org/",
+  ceap: "https://www.capunited.org/",
+};
+
+function getBenefitUrls(state?: string): Record<string, string> {
+  return state === "TX" ? BENEFIT_URLS_TX : BENEFIT_URLS_AL;
+}
+
+function getActionLink(action: ActionItem, state?: string): ActionLink | null {
   const t = action.title.toLowerCase();
+  const cc = getCareerCenter(state);
 
-  // Career Center → Google Maps
+  // Career Center -> Google Maps
   if (action.category === "career_center" && t.includes("visit")) {
-    return { label: "Visit", url: mapsUrl(CAREER_CENTER.address) };
+    return { label: "Visit", url: mapsUrl(cc.address) };
   }
 
-  // Job applications → Alabama JobLink
+  // Job applications -> state job board
   if (action.category === "job_application" && t.startsWith("apply")) {
-    return { label: "Apply", url: "https://joblink.alabama.gov/" };
+    return { label: "Apply", url: getJobBoardUrl(state) };
   }
 
-  // Benefits enrollment — match program name in title
+  // Benefits enrollment -- match program name in title
   if (action.category === "benefits_enrollment") {
-    for (const [prog, url] of Object.entries(BENEFIT_URLS)) {
+    const urls = getBenefitUrls(state);
+    for (const [prog, url] of Object.entries(urls)) {
       if (t.includes(prog.toLowerCase().replace("_", " ")) || t.includes(prog.toLowerCase())) {
         return { label: "Apply", url };
       }
     }
     if (t.includes("benefit")) {
-      return { label: "Apply", url: "https://www.alabamabenefits.gov/" };
+      return { label: "Apply", url: getBenefitsFallbackUrl(state) };
     }
   }
 
   // WIOA / Training
   if (action.category === "training") {
     if (t.includes("wioa")) return { label: "Enroll", url: "https://www.careeronestop.org/LocalHelp/AmericanJobCenters/find-american-job-centers.aspx" };
-    return { label: "Enroll", url: mapsUrl(CAREER_CENTER.address) };
+    return { label: "Enroll", url: mapsUrl(cc.address) };
   }
 
   // Criminal record
   if (action.category === "criminal_record") {
-    if (t.includes("legal services")) return { label: "Contact", url: "https://www.legalservicesalabama.org/" };
-    if (t.includes("expungement")) return { label: "Learn More", url: "https://www.legalservicesalabama.org/get-legal-help.html" };
+    if (t.includes("legal")) return { label: "Contact", url: getLegalServicesUrl(state) };
+    if (t.includes("expungement") || t.includes("expunction") || t.includes("nondisclosure")) {
+      return { label: "Learn More", url: getLegalServicesUrl(state) };
+    }
   }
 
   // Credit repair
@@ -100,12 +128,12 @@ function getActionLink(action: ActionItem): ActionLink | null {
 
   // Housing
   if (action.category === "housing") {
-    return { label: "Apply", url: "https://www.hamd.org/" };
+    return { label: "Apply", url: getHousingUrl(state) };
   }
 
   // Childcare
   if (action.category === "childcare") {
-    return { label: "Apply", url: "https://dhr.alabama.gov/child-care/" };
+    return { label: "Apply", url: getChildcareUrl(state) };
   }
 
   return null;
@@ -132,14 +160,15 @@ interface TimelinePhaseCardProps {
 
 interface ActionRowProps {
   action: ActionItem;
+  cityState?: string;
   actionKey?: string;
   checked?: boolean;
   onToggle?: (key: string, completed: boolean) => void;
 }
 
-function ActionRow({ action, actionKey, checked, onToggle }: ActionRowProps) {
+function ActionRow({ action, cityState, actionKey, checked, onToggle }: ActionRowProps) {
   const Icon = CATEGORY_ICONS[action.category] ?? Building2;
-  const link = getActionLink(action);
+  const link = getActionLink(action, cityState);
   const [expanded, setExpanded] = useState(false);
   const hasDetails = !!(action.detail || action.resource_name || action.resource_phone || action.resource_address);
 
@@ -223,6 +252,7 @@ function ActionRow({ action, actionKey, checked, onToggle }: ActionRowProps) {
 
 export function TimelinePhaseCard({ phase, dateRange, defaultOpen = false, checklist, onToggle }: TimelinePhaseCardProps) {
   const [open, setOpen] = useState(defaultOpen);
+  const cityState = useCityConfig().state;
   const count = phase.actions.length;
   const countLabel = count === 1 ? "1 action" : `${count} actions`;
 
@@ -258,6 +288,7 @@ export function TimelinePhaseCard({ phase, dateRange, defaultOpen = false, check
                 <ActionRow
                   key={key}
                   action={action}
+                  cityState={cityState}
                   actionKey={checklist != null ? key : undefined}
                   checked={checklist?.[key]}
                   onToggle={onToggle}

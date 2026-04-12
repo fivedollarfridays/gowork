@@ -23,6 +23,7 @@ class ChargeCategory(str, Enum):
     """Broad charge categories for employer policy matching."""
 
     VIOLENCE = "violence"
+    PROPERTY = "property"
     THEFT = "theft"
     DRUG = "drug"
     DUI = "dui"
@@ -38,3 +39,8 @@ class RecordProfile(BaseModel):
     charge_categories: list[ChargeCategory] = Field(default_factory=list)
     years_since_conviction: int | None = None
     completed_sentence: bool = False
+
+    # Texas-specific fields (optional, used by texas_expunction module)
+    was_acquitted: bool = False
+    completed_deferred_adjudication: bool = False
+    is_family_violence: bool = False
