@@ -160,7 +160,7 @@ def _check_section_8(
 
 
 def _check_ceap(
-    annual: float, hs: int, children: int, profile: BenefitsProfile,
+    annual: float, hs: int, _children: int, profile: BenefitsProfile,
 ) -> ProgramEligibility:
     fpl = FPL_2026[hs]
     threshold = fpl * CEAP_FPL_LIMIT_PCT

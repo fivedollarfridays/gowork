@@ -15,12 +15,19 @@ vi.mock("@/hooks/useCityConfig", () => ({
 }));
 
 const PLAN: ReEntryPlan = {
+  plan_id: "plan-fw-001",
+  session_id: "test-123",
+  resident_summary: null,
   barriers: [],
   job_matches: [],
-  narrative: "",
-  action_plan: null,
-  benefits_eligibility: null,
-  benefits_cliff_analysis: null,
+  strong_matches: [],
+  possible_matches: [],
+  after_repair: [],
+  immediate_next_steps: [],
+  credit_readiness_score: null,
+  eligible_now: [],
+  eligible_after_repair: [],
+  wioa_eligibility: null,
   job_readiness: null,
 };
 

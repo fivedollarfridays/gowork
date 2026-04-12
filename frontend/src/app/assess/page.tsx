@@ -8,31 +8,18 @@ import { postAssessment, postCredit } from "@/lib/api";
 import { WizardShell, type WizardStepConfig } from "@/components/wizard/WizardShell";
 import { BarrierForm, type BarrierFormData } from "@/components/wizard/BarrierForm";
 import { BenefitsStep, BENEFITS_DEFAULTS } from "@/components/wizard/BenefitsStep";
-import type { BenefitsFormData } from "@/lib/types";
 import { CreditForm, creditFormCanAdvance, ACCOUNT_AGE_RANGES } from "@/components/wizard/CreditForm";
 import { CriminalRecordForm } from "@/components/wizard/CriminalRecordForm";
 import { ResumeStep } from "@/components/wizard/ResumeStep";
 import { IndustryForm } from "@/components/wizard/IndustryForm";
 import { ReviewStep } from "./ReviewStep";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import type { BenefitsFormData } from "@/lib/types";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AvailableHours, BarrierType } from "@/lib/types";
 import type { AssessmentRequest, CreditAssessmentResult, CreditFormData, EmploymentStatus, RecordProfile } from "@/lib/types";
-import {
-  EMPLOYMENT_OPTIONS,
-  isValidCityZip,
-  humanizeLabel,
-  getCityAreaDescription,
-  getZipPlaceholder,
-  getZipErrorMessage,
-} from "@/lib/constants";
+import { EMPLOYMENT_OPTIONS, isValidCityZip, humanizeLabel, getCityAreaDescription, getZipPlaceholder, getZipErrorMessage } from "@/lib/constants";
 import { useDemoMode } from "@/hooks/useDemoMode";
 import { useCityConfig } from "@/hooks/useCityConfig";
 import { getResumeRecommendations } from "@/lib/resume/recommend";
