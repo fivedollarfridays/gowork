@@ -43,7 +43,7 @@ function linkifyPhones(text: string): ReactNode {
 
 interface ActionLink { label: string; url: string }
 
-const BENEFIT_URLS: Record<string, string> = {
+const BENEFIT_URLS_AL: Record<string, string> = {
   snap: "https://www.alabamabenefits.gov/",
   tanf: "https://www.alabamabenefits.gov/",
   medicaid: "https://www.alabamabenefits.gov/",
@@ -53,6 +53,19 @@ const BENEFIT_URLS: Record<string, string> = {
   liheap: "https://adeca.alabama.gov/liheap/",
   wic: "https://www.alabamapublichealth.gov/wic/",
 };
+
+const BENEFIT_URLS_TX: Record<string, string> = {
+  snap: "https://www.yourtexasbenefits.com/",
+  tanf: "https://www.yourtexasbenefits.com/",
+  medicaid: "https://www.yourtexasbenefits.com/",
+  chip: "https://www.yourtexasbenefits.com/",
+  childcare_subsidy: "https://www.twc.texas.gov/programs/child-care-services",
+  section_8: "https://www.fwhs.org/",
+  ceap: "https://www.capunited.org/",
+};
+
+// TODO: Make city-aware via API config. For now, detect by ZIP prefix in plan data.
+const BENEFIT_URLS = { ...BENEFIT_URLS_AL, ...BENEFIT_URLS_TX };
 
 function getActionLink(action: ActionItem): ActionLink | null {
   const t = action.title.toLowerCase();
