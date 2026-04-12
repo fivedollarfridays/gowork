@@ -54,11 +54,13 @@ Older sprint task tables, session histories, and plan details have been archived
 
 ## What Was Just Done
 
+- **Sprint S3 Phase 2 -- Evolution + Hardening** (2026-04-11): S2 routing audit and S3 feature evolution. Fixed all Alabama bypasses in cliff_calculator (uses TX AMI $78K for Fort Worth), eligibility_screener (HHSC disclaimer), types.py (dynamic ZIP validation), pvs_scorer, scoring.py, commute_estimator, barrier_cards, affinity, career_center_package, filters, phase_generators, job_readiness_pathway -- all now route through city-aware routers. Built barrier sequencing engine (topological sort of 33 barriers, 53 edges). Evolved ProgressTracker (localStorage persistence), BenefitsCliffSimulator (loading/error states, ARIA), ResourceMap (category filtering), i18n (locale persistence). 28 new tests. 1742 backend / 630 frontend tests passing. Zero regressions.
+
 - **Sprint S2 complete** (2026-04-12) -- Fort Worth Data + Texas Rules: Full multi-city port for HackFW 2026. Created Texas benefits screener with HHSC programs (CHIP replaces ALL_Kids at 200% FPL, CEAP replaces LIHEAP, TX TANF at ~$308/mo vs AL $215), Texas expunction (Art. 55) + nondisclosure (Gov Code Ch. 411 E-1) dual record clearing, Fort Worth geo data (36 ZIP centroids, Trinity Metro hours), city-aware module routing (benefits, criminal, geo, resources, AI prompts), live TWC and USAJobs API adapters replacing stubs, Fort Worth seed data (10 community resources, 12 employers with fair-chance index), and frontend city-aware constants. 112 new S2 tests + 1707 total backend tests passing (zero regressions). 512 frontend tests passing.
 
 ## What's Next
 
-Sprint S3 (TBD) -- Trinity Metro GTFS data ingestion, frontend UI dynamic city switching, deeper Fort Worth resource integration, hackathon demo polish.
+Sprint S3 Phase 2 remaining -- SharedPlanView backend endpoints (POST /api/plan/{session_id}/share, GET /api/plan/shared/{token}), share plan frontend wiring, remaining matching module routing (prompts.py -- already has prompt_router.py), push test coverage to 95%+, hackathon demo polish.
 
 ## Blockers
 
