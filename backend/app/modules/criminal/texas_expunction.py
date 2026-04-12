@@ -126,6 +126,35 @@ def _is_nondisclosure_barred(profile: RecordProfile) -> bool:
     return False
 
 
+def _nondisclosure_wait_result(
+    wait_years: int, years_since: int | None,
+) -> ExpungementResult:
+    """Build the nondisclosure result based on wait period status."""
+    if years_since is None:
+        return ExpungementResult(
+            eligibility=ExpungementEligibility.ELIGIBLE_FUTURE,
+            steps=_nondisclosure_steps(),
+            filing_fee=_FILING_FEE,
+            notes=f"May be eligible after {wait_years} years from deferred adjudication completion.",
+        )
+    years_remaining = max(0, wait_years - years_since)
+    if years_remaining == 0:
+        return ExpungementResult(
+            eligibility=ExpungementEligibility.ELIGIBLE_NOW,
+            years_remaining=0,
+            steps=_nondisclosure_steps(),
+            filing_fee=_FILING_FEE,
+            notes="You may be eligible to file for nondisclosure now.",
+        )
+    return ExpungementResult(
+        eligibility=ExpungementEligibility.ELIGIBLE_FUTURE,
+        years_remaining=years_remaining,
+        steps=_nondisclosure_steps(),
+        filing_fee=_FILING_FEE,
+        notes=f"Eligible to file in approximately {years_remaining} year{'s' if years_remaining != 1 else ''}.",
+    )
+
+
 def _check_nondisclosure(profile: RecordProfile) -> ExpungementResult:
     """Check Texas nondisclosure eligibility (Gov Code Ch. 411 E-1)."""
     if not profile.completed_deferred_adjudication:
@@ -142,32 +171,7 @@ def _check_nondisclosure(profile: RecordProfile) -> ExpungementResult:
 
     has_felony = RecordType.FELONY in profile.record_types
     wait_years = _NONDISCLOSURE_WAIT_FELONY_YEARS if has_felony else _NONDISCLOSURE_WAIT_MISD_YEARS
-
-    if profile.years_since_conviction is None:
-        return ExpungementResult(
-            eligibility=ExpungementEligibility.ELIGIBLE_FUTURE,
-            steps=_nondisclosure_steps(),
-            filing_fee=_FILING_FEE,
-            notes=f"May be eligible after {wait_years} years from deferred adjudication completion.",
-        )
-
-    years_remaining = max(0, wait_years - profile.years_since_conviction)
-    if years_remaining == 0:
-        return ExpungementResult(
-            eligibility=ExpungementEligibility.ELIGIBLE_NOW,
-            years_remaining=0,
-            steps=_nondisclosure_steps(),
-            filing_fee=_FILING_FEE,
-            notes="You may be eligible to file for nondisclosure now.",
-        )
-
-    return ExpungementResult(
-        eligibility=ExpungementEligibility.ELIGIBLE_FUTURE,
-        years_remaining=years_remaining,
-        steps=_nondisclosure_steps(),
-        filing_fee=_FILING_FEE,
-        notes=f"Eligible to file in approximately {years_remaining} year{'s' if years_remaining != 1 else ''}.",
-    )
+    return _nondisclosure_wait_result(wait_years, profile.years_since_conviction)
 
 
 def check_texas_record_clearing(
