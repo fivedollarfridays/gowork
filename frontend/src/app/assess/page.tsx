@@ -23,6 +23,7 @@ import { EMPLOYMENT_OPTIONS, isValidCityZip, humanizeLabel, getCityAreaDescripti
 import { useDemoMode } from "@/hooks/useDemoMode";
 import { useCityConfig } from "@/hooks/useCityConfig";
 import { getResumeRecommendations } from "@/lib/resume/recommend";
+import { t } from "@/lib/i18n";
 
 const DEFAULT_FORM_DATA: BarrierFormData = {
   zipCode: "",
@@ -76,7 +77,6 @@ export default function AssessPage() {
   const resumeWordCount = useMemo(() => resumeText.split(/\s+/).filter(Boolean).length, [resumeText]);
   const resumeRecs = useMemo(() => getResumeRecommendations(resumeText), [resumeText]);
 
-  // Auto-populate certifications from resume (additive — don't remove manual selections)
   useEffect(() => {
     if (resumeRecs.certifications.length > 0) {
       setCertifications((prev) => {
@@ -112,8 +112,6 @@ export default function AssessPage() {
 
   const handleSubmit = useCallback(async () => {
     setError(null);
-
-    // If credit barrier selected, run credit assessment first
     if (hasCreditBarrier && !creditResultRef.current) {
       try {
         const ageRange = ACCOUNT_AGE_RANGES.find((r) => r.value === creditData.accountAgeRange);
@@ -162,7 +160,7 @@ export default function AssessPage() {
       content: () => (
         <div className="space-y-6">
           <div>
-            <h2 className="text-lg font-semibold mb-1">Tell us about yourself</h2>
+            <h2 className="text-lg font-semibold mb-1">{t("assess.basicInfoTitle")}</h2>
             <p className="text-sm text-muted-foreground">
               {getCityAreaDescription(city.state)}
             </p>
@@ -224,9 +222,9 @@ export default function AssessPage() {
       content: () => (
         <div className="space-y-4">
           <div>
-            <h2 className="text-lg font-semibold mb-1">Upload Your Resume</h2>
+            <h2 className="text-lg font-semibold mb-1">{t("assess.resumeTitle")}</h2>
             <p className="text-sm text-muted-foreground">
-              Upload a resume to improve your job matches. This step is optional.
+              {t("assess.resumeDesc")}
             </p>
           </div>
           <ResumeStep resumeText={resumeText} onResumeTextChange={setResumeText} />
@@ -240,15 +238,15 @@ export default function AssessPage() {
       content: () => (
         <div className="space-y-4">
           <div>
-            <h2 className="text-lg font-semibold mb-1">What&apos;s in your way?</h2>
+            <h2 className="text-lg font-semibold mb-1">{t("assess.barriersTitle")}</h2>
             <p className="text-sm text-muted-foreground">
-              Choose all that apply. We&apos;ll match you with resources and jobs that work around these.
+              {t("assess.barriersDesc")}
             </p>
           </div>
           <BarrierForm data={formData} onChange={setFormData} />
           {barrierCount === 0 && (
             <p className="text-sm text-muted-foreground">
-              Select at least one barrier to continue.
+              {t("assess.barriersMinOne")}
             </p>
           )}
         </div>
@@ -261,9 +259,9 @@ export default function AssessPage() {
       content: () => (
         <div className="space-y-4">
           <div>
-            <h2 className="text-lg font-semibold mb-1">Criminal Record Details</h2>
+            <h2 className="text-lg font-semibold mb-1">{t("assess.recordTitle")}</h2>
             <p className="text-sm text-muted-foreground">
-              Help us find fair-chance employers and check expungement eligibility. All fields are optional — skip if you prefer.
+              {t("assess.recordDesc")}
             </p>
           </div>
           <CriminalRecordForm data={recordProfile} onChange={setRecordProfile} />
@@ -277,9 +275,9 @@ export default function AssessPage() {
       content: () => (
         <div className="space-y-4">
           <div>
-            <h2 className="text-lg font-semibold mb-1">Household &amp; Benefits</h2>
+            <h2 className="text-lg font-semibold mb-1">{t("assess.benefitsTitle")}</h2>
             <p className="text-sm text-muted-foreground">
-              Tell us about your household and any benefits you receive. This helps us show how a new job might affect your benefits. You can skip this step.
+              {t("assess.benefitsDesc")}
             </p>
           </div>
           <BenefitsStep data={benefitsData} onChange={setBenefitsData} />
@@ -293,9 +291,9 @@ export default function AssessPage() {
       content: () => (
         <div className="space-y-4">
           <div>
-            <h2 className="text-lg font-semibold mb-1">When can you work?</h2>
+            <h2 className="text-lg font-semibold mb-1">{t("assess.scheduleTitle")}</h2>
             <p className="text-sm text-muted-foreground">
-              Let us know your availability so we can match you with the right shifts and transit options.
+              {t("assess.scheduleDesc")}
             </p>
           </div>
           <div className="space-y-2">
@@ -325,9 +323,9 @@ export default function AssessPage() {
       content: () => (
         <div className="space-y-4">
           <div>
-            <h2 className="text-lg font-semibold mb-1">Target Industries</h2>
+            <h2 className="text-lg font-semibold mb-1">{t("assess.industriesTitle")}</h2>
             <p className="text-sm text-muted-foreground">
-              Select industries you&apos;re interested in. This helps us find better job matches.
+              {t("assess.industriesDesc")}
             </p>
           </div>
           <IndustryForm
@@ -348,9 +346,9 @@ export default function AssessPage() {
       content: () => (
         <div className="space-y-4">
           <div>
-            <h2 className="text-lg font-semibold mb-1">Credit Self-Assessment</h2>
+            <h2 className="text-lg font-semibold mb-1">{t("assess.creditTitle")}</h2>
             <p className="text-sm text-muted-foreground">
-              Help us understand your credit situation. This stays private and helps us match you with the right resources.
+              {t("assess.creditDesc")}
             </p>
           </div>
           <CreditForm data={creditData} onChange={setCreditData} />
@@ -380,9 +378,13 @@ export default function AssessPage() {
     <main className="min-h-screen px-4 py-8 sm:px-8">
       <div className="mx-auto max-w-2xl space-y-6">
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-primary">Workforce Navigator</h1>
+          <h1 className="text-3xl font-bold text-primary">{t("assess.navTitle")}</h1>
           <p className="text-muted-foreground">
-            Answer a few questions to get your personalized re-entry plan
+            {t("assess.navDesc")}
+          </p>
+          <p className="text-xs text-muted-foreground/70 flex items-center justify-center gap-1">
+            <Shield className="h-3 w-3" />
+            {t("assess.privacyBadge")}
           </p>
         </div>
 

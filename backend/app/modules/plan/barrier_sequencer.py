@@ -17,6 +17,17 @@ _GRAPH_PATH = Path(__file__).resolve().parent.parent.parent.parent.parent / "dat
 # Relationship types that define ordering (source should come before target)
 _ORDERING_RELS = {"CAUSES", "PRE_REQ_FOR", "WORSENS"}
 
+# Estimated resolution time in weeks per barrier type
+_WEEKS_PER_BARRIER: dict[str, int] = {
+    "criminal_record": 12,
+    "credit": 8,
+    "transportation": 2,
+    "childcare": 4,
+    "housing": 6,
+    "health": 4,
+    "training": 8,
+}
+
 
 @lru_cache(maxsize=1)
 def _load_graph() -> dict:
@@ -125,6 +136,7 @@ def sequence_barriers(barrier_ids: list[str]) -> BarrierSequence:
     steps = []
     for order, bid in enumerate(sorted_ids, start=1):
         info = lookup.get(bid, {})
+        weeks = _WEEKS_PER_BARRIER.get(bid, 4)
         steps.append(SequenceStep(
             order=order,
             barrier_id=bid,
@@ -132,10 +144,14 @@ def sequence_barriers(barrier_ids: list[str]) -> BarrierSequence:
             category=info.get("category", "unknown"),
             playbook=info.get("playbook", ""),
             unlocks=_compute_unlocks(bid, graph, active_ids),
+            estimated_weeks=weeks,
         ))
+
+    total_weeks = sum(s.estimated_weeks for s in steps)
 
     return BarrierSequence(
         steps=steps,
         total_barriers=len(barrier_ids),
         has_cycles=has_cycles,
+        estimated_total_weeks=total_weeks,
     )

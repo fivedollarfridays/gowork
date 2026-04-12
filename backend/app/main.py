@@ -1,4 +1,4 @@
-"""MontGoWork API — Workforce Navigator for Montgomery, Alabama"""
+"""MontGoWork API — Workforce Navigator (city-aware)."""
 
 import logging
 import os
@@ -10,6 +10,7 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from app.ai.llm_client import check_llm_providers
+from app.cities.config import get_city_config
 from app.core.config import get_settings
 from app.core.database import close_db, get_async_session_factory, get_engine, init_db
 from app.core.exception_handlers import register_exception_handlers
@@ -66,9 +67,12 @@ async def lifespan(app: FastAPI):
 settings = get_settings()
 _is_production = settings.environment == "production"
 
+_city = get_city_config()
+_api_desc = f"Workforce Navigator for {_city.location}"
+
 app = FastAPI(
     title="MontGoWork API",
-    description="Workforce Navigator for Montgomery, Alabama",
+    description=_api_desc,
     version="0.1.0",
     lifespan=lifespan,
     docs_url=None if _is_production else "/docs",

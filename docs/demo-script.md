@@ -1,37 +1,36 @@
 # MontGoWork Demo Script
 
-> 3-minute live demo + 2-minute Q&A. Presenter walks through the Maria persona end-to-end.
+> 3-minute live demo + 2-minute Q&A. Two city personas: **Carlos (Fort Worth)** for HackFW 2026, **Maria (Montgomery)** as alternate.
 
 ---
 
 ## Pre-Demo Checklist
 
-- [ ] Backend running: `cd backend && uvicorn app.main:app --reload` (port 8000)
+- [ ] Backend running: `cd backend && CITY=fort-worth uvicorn app.main:app --reload` (port 8000)
 - [ ] Frontend running: `cd frontend && npm run dev` (port 3000)
 - [ ] `ANTHROPIC_API_KEY` set in `backend/.env` (for AI narrative)
-- [ ] Database auto-seeds on first startup (resources, transit routes — no manual step needed)
-- [ ] BrightData API key set (optional -- live jobs section only shows if crawled data exists)
+- [ ] Database auto-seeds on first startup (resources, transit routes -- no manual step needed)
 - [ ] Browser at `http://localhost:3000`, zoomed to 125% for visibility
 - [ ] Screen sharing active, dark/light mode matches projector
 
 ---
 
-## Maria Persona
+## Primary Persona: Carlos (Fort Worth / HackFW 2026)
 
 | Field | Value |
 |-------|-------|
-| Name | Maria |
-| Age | 34 |
-| Location | Montgomery, AL (ZIP 36104) |
-| Situation | Recently released, single mother of 2 |
+| Name | Carlos |
+| Age | 29 |
+| Location | Fort Worth, TX (ZIP 76119) |
+| Situation | Recently released, single father of 1 |
 | Vehicle | No |
 | Employment | Unemployed |
-| Work history | 3 years retail and food service before incarceration |
-| Credit score | ~580 (Very Poor) |
-| Utilization | 65% |
-| Payment history | 75% on-time |
+| Work history | 4 years warehouse and logistics before incarceration |
+| Credit score | ~540 (Very Poor) |
+| Utilization | 72% |
+| Payment history | 68% on-time |
 | Account age | 1-3 years |
-| Accounts | 4 total, 2 open, 1 in collections |
+| Accounts | 3 total, 1 open, 1 in collections |
 | Negative items | Late payments, collections |
 | Barriers | Credit, Transportation, Childcare, Criminal Record |
 
@@ -46,9 +45,9 @@
 **Click:** "Get Your Plan" button (hero section)
 
 **Say:**
-> "Meet Maria. She's 34, lives in Montgomery, just came home from incarceration. Two kids, no car, credit score around 580. She's got barriers -- but she's ready to work. Let's see what MontGoWork does for her."
+> "Meet Carlos. He's 29, lives in Fort Worth, just came home from incarceration. One kid, no car, credit score around 540. He's got real barriers -- but he's ready to work. Let's see what MontGoWork does for him."
 
-**Highlight:** The three-step flow cards (Assess, Match, Plan) and Montgomery stats.
+**Highlight:** The three-step flow cards (Assess, Match, Plan) and Fort Worth stats (15.3% poverty, 64% labor participation, 950K+ metro population).
 
 ---
 
@@ -57,15 +56,15 @@
 **Page:** `/assess` -- Step 1 of wizard
 
 **Actions:**
-1. Type `36104` in ZIP Code field
+1. Type `76119` in ZIP Code field
 2. Select "Unemployed" from Employment dropdown (already default)
 3. Leave "I have a vehicle" unchecked
 4. Click "Next"
 
 **Say:**
-> "ZIP code 36104 -- downtown Montgomery. Unemployed, no vehicle. That already tells us a lot about what resources she'll need."
+> "ZIP 76119 -- southeast Fort Worth. Unemployed, no vehicle. That tells us he needs Trinity Metro transit routes and barrier-compatible employers near transit stops."
 
-**Highlight:** ZIP validation (only accepts Montgomery-area 361xx codes).
+**Highlight:** ZIP validation (only accepts Fort Worth-area 761xx codes).
 
 ---
 
@@ -81,7 +80,7 @@
 5. Click "Next"
 
 **Say:**
-> "Four barriers. Credit history, no car, needs childcare, and a criminal record. Notice the severity badge -- it updates live. Four barriers puts her in 'high' severity. The system will prioritize resources for her most critical needs."
+> "Four barriers. Credit history, no car, needs childcare, and a criminal record. The severity badge updates live -- four barriers is 'high' severity. The system will prioritize resources for his most critical needs."
 
 **Highlight:** Severity badge changing as barriers are selected. Cards highlight with checkmarks.
 
@@ -94,12 +93,12 @@
 **Actions:**
 1. Select "Misdemeanor" from record type
 2. Select "Theft" from charge category
-3. Enter **4** years since conviction
+3. Enter **3** years since conviction
 4. Check "Sentence completed"
 5. Click "Next"
 
 **Say:**
-> "Because she selected criminal record, she gets an extra step. Misdemeanor theft, 4 years ago, sentence complete. The system checks Alabama Act 2021-507 -- she may qualify for expungement. It also filters employers by their hiring policies."
+> "Because he selected criminal record, he gets an extra step. Misdemeanor theft, 3 years ago, sentence complete. The system checks Texas Government Code Chapter 411 Subchapter E-1 for nondisclosure eligibility -- he may qualify to seal his record. It also checks Article 55 expunction. And it filters employers by their fair-chance hiring policies."
 
 **Highlight:** This step is conditional -- only appears when criminal record barrier is selected.
 
@@ -110,16 +109,16 @@
 **Page:** `/assess` -- Step 3 (only appears because credit barrier was selected)
 
 **Actions:**
-1. Drag credit score slider to **580** (should show "Very Poor" in red)
-2. Drag utilization slider to **65%** (shows red -- above 30% threshold)
-3. Drag payment history to **75%**
+1. Drag credit score slider to **540** (should show "Very Poor" in red)
+2. Drag utilization slider to **72%** (shows red -- above 30% threshold)
+3. Drag payment history to **68%**
 4. Select "1-3 years" from account age dropdown
-5. Enter **4** total accounts, **2** open, **1** in collections
+5. Enter **3** total accounts, **1** open, **1** in collections
 6. Check "Late Payments" and "Collections" under negative items
 7. Click "Next"
 
 **Say:**
-> "This is the credit self-assessment. No hard pull -- Maria enters what she knows. Score of 580, high utilization, some late payments and a collections account. The system will use this to figure out which employers she can apply to right now, and which ones she'll qualify for after credit repair."
+> "Self-reported credit assessment -- no hard pull, no SSN. Score of 540, high utilization, late payments and collections. The system uses this to separate which employers he can apply to NOW versus which ones unlock after credit repair."
 
 **Highlight:** The color-coded score band (Very Poor = red), utilization turning red above 30%.
 
@@ -130,14 +129,14 @@
 **Page:** `/assess` -- Step 4 of wizard
 
 **Actions:**
-1. Type in Work History: `3 years retail at Dollar General. Food service at Popeyes. Forklift certified.`
+1. Type in Work History: `4 years warehouse at Amazon FC (DFW5). Forklift certified. Loading dock experience.`
 2. Review the summary card (ZIP, Employment, Barriers, Vehicle, Credit Score)
 3. Click "Submit Assessment"
 
 **Say:**
-> "She adds her work history -- retail and food service, plus a forklift cert. That opens up warehouse jobs. The summary shows everything at a glance. When she submits, the backend scores her profile, runs matching filters, builds her plan, and kicks off the AI narrative -- all in one request."
+> "He adds his work history -- warehouse logistics and forklift cert. That opens up logistics jobs along the Trinity Metro 6 and 8 routes. The summary shows everything. When he submits, the backend scores his profile, runs matching filters, checks Texas benefits eligibility, and builds a personalized plan -- all in one request."
 
-**Highlight:** The summary card with all her data. The loading spinner with "Analyzing your profile and matching resources..."
+**Highlight:** The summary card with all data. Loading spinner with "Analyzing your profile..."
 
 ---
 
@@ -146,7 +145,7 @@
 **Page:** `/plan?session=<id>` -- auto-redirected after submit
 
 **Say:**
-> "Here's the magic. 'What you can do Monday morning.' The AI writes a personalized narrative -- not generic advice, but Montgomery-specific. It knows about M-Transit routes, the Alabama Career Center on Ripley Street, GreenPath Financial for credit counseling. Every action step has a phone number, address, or link."
+> "Here's the magic. 'What you can do Monday morning.' The AI writes a personalized narrative -- not generic advice, but Fort Worth-specific. It knows about Trinity Metro routes, the Workforce Solutions office on E. Belknap, HHSC for benefits, Legal Aid of NorthWest Texas for record clearing. Every action step has a phone number, address, or link."
 
 **Highlight:**
 - AI narrative card with sparkle icon (may show loading spinner briefly)
@@ -162,14 +161,14 @@
 **Scroll to** benefits eligibility and expungement sections.
 
 **Say:**
-> "Because Maria has a criminal record, the system checked Alabama's expungement law -- Act 2021-507. With a misdemeanor theft and 4 years since conviction, she's potentially eligible for expungement. It shows the filing steps and the $300 fee."
+> "The system checks Texas benefits programs automatically -- SNAP, CHIP for his kid, CEAP for utility assistance, Texas TANF. The cliff chart shows what happens to net income as wages increase. See that drop around $15/hour? That's where SNAP phases out. We flag these cliffs so case workers can plan a wage trajectory that avoids them."
 
-> "Benefits eligibility is screened automatically -- SNAP, childcare subsidy, Section 8. The cliff chart shows what happens to her net income as her wages increase. See that drop at $14/hour? That's where childcare subsidy phases out. The system flags these cliffs so case workers can plan around them."
+> "For the criminal record, it checked both pathways: Article 55 expunction AND Government Code Chapter 411 nondisclosure. With a misdemeanor theft and 3 years completed, he likely qualifies for nondisclosure -- sealing the record from most employer background checks. It shows the steps and connects to Legal Aid of NorthWest Texas."
 
 **Highlight:**
-- Expungement eligibility status
-- Benefits eligibility cards with program details
-- Benefits cliff chart showing net income trajectory and cliff points
+- Texas-specific benefits programs (CHIP, CEAP, TX TANF)
+- Benefits cliff chart with cliff points
+- Nondisclosure eligibility (Texas-specific, dual pathway)
 
 ---
 
@@ -178,15 +177,15 @@
 **Scroll down** through the plan page.
 
 **Say:**
-> "Below the narrative, every barrier gets its own card with a timeline and specific action steps. Credit barrier -- 90-day repair plan. Transportation -- M-Transit routes mapped to her jobs and resources. Each card has a findhelp.org link for discovering more local resources."
+> "Every barrier gets its own card with a timeline and specific action steps. Credit barrier -- 90-day repair plan. Transportation -- Trinity Metro routes mapped to his jobs. Each barrier card links to findhelp.org for discovering more local resources."
 
-> "Jobs are ranked by Practical Value Score -- it combines net income, proximity, schedule fit, and barrier compatibility. Fair-chance employers appear first. Each card shows the employer, transit route, and apply link."
+> "Jobs are ranked by Practical Value Score -- net income, transit proximity, schedule fit, and barrier compatibility combined. Fair-chance employers appear first. Each card shows the employer, transit route, and apply link."
 
 **Highlight:**
 - Barrier severity badges (high = red, medium = yellow)
 - Fair-chance employer badges on job cards
-- findhelp.org links on barrier cards
-- PVS-ranked job listings
+- Transit route info on job cards
+- PVS-ranked listings
 
 ---
 
@@ -195,7 +194,7 @@
 **Scroll to** "What Changes in 3 Months" section.
 
 **Say:**
-> "The comparison view shows Maria today versus where she'll be in 3 months. Four barriers addressed, more jobs unlocked, credit improving. This is the motivation."
+> "The comparison view shows Carlos today versus where he'll be in 3 months. Four barriers addressed, more jobs unlocked, credit improving. This is the motivation."
 
 **Actions:**
 1. Click "Download PDF" button
@@ -203,11 +202,12 @@
 3. Point out "Email My Plan" button
 
 **Say:**
-> "She can download everything as a PDF to take to her case worker, or email it to herself. This is the plan she walks into the Alabama Career Center with on Monday morning."
+> "He can download everything as a PDF to take to his case worker at Workforce Solutions, or email it to himself. This is the plan he walks in with Monday morning."
 
 **Highlight:**
 - Today vs In 3 Months side-by-side cards
-- PDF download (show the generated file briefly if time permits)
+- PDF download
+- Share plan link for case worker
 
 ---
 
@@ -226,27 +226,40 @@
 
 ---
 
+## Alternate Persona: Maria (Montgomery)
+
+For demos in Montgomery or non-HackFW contexts, set `CITY=montgomery`.
+
+| Field | Value |
+|-------|-------|
+| Name | Maria |
+| Age | 34 |
+| Location | Montgomery, AL (ZIP 36104) |
+| Barriers | Credit, Transportation, Childcare, Criminal Record |
+| Criminal Record | Misdemeanor theft, 4 years ago, sentence complete |
+| Credit score | ~580 |
+| Work history | 3 years retail and food service |
+
+Key differences: Alabama Act 2021-507 (not Texas nondisclosure), M-Transit (not Trinity Metro), DHR (not HHSC), Alabama Career Center on Ripley Street.
+
+---
+
 ## Q&A Prep (2 minutes)
 
-**Likely questions and answers:**
-
 **Q: Is this a real credit check?**
-> No. It's a self-reported assessment. No SSN, no hard pull. We use the data to match job credit requirements and estimate a repair timeline.
+> No. Self-reported assessment. No SSN, no hard pull. We match job credit requirements and estimate repair timelines.
 
 **Q: Where do the jobs come from?**
-> Three sources. BrightData crawls Indeed and LinkedIn, JSearch aggregates from RapidAPI, and Honest Jobs provides fair-chance employer listings. Jobs refresh every 24 hours.
+> City-specific adapters. Fort Worth uses Texas Workforce Commission (TWC) and USAJobs APIs. Montgomery uses BrightData web scraping and Honest Jobs fair-chance listings. Jobs refresh regularly.
 
-**Q: How does the AI work?**
-> Multi-provider -- supports Claude, OpenAI, and Gemini. The plan narrative uses whichever LLM is configured. The barrier intelligence chat uses RAG with a FAISS vector store built from Montgomery resource data, combined with barrier graph traversal for context. If all APIs are down, template-based fallbacks kick in.
-
-**Q: What about the criminal record screening?**
-> We check Alabama Act 2021-507 for expungement eligibility based on what the user reports -- charge type, years since conviction, sentence completion. We also match employer hiring policies to filter jobs by fair-chance status and excluded charges. No legal advice -- we point them to legal aid.
-
-**Q: What about data privacy?**
-> No accounts, no PII stored permanently. Session data lives in SQLite during the session and can be cleared. Credit data stays in the browser's sessionStorage only.
+**Q: How does the criminal record screening work?**
+> State-specific. Texas checks both Article 55 expunction AND Government Code Chapter 411 nondisclosure (the dual-pathway system). Alabama checks Act 2021-507. We also match employer fair-chance policies. No legal advice -- we point to Legal Aid.
 
 **Q: Could this work for other cities?**
-> The architecture is city-agnostic. Resources, transit routes, and employer data are all in the database. Swap the seed data and prompts for a new city.
+> Yes. The architecture is city-agnostic. Each city is a YAML config + seed data. Swap the data for a new city and everything adapts: benefits programs, criminal record laws, transit, employer data, AI prompts.
+
+**Q: What about data privacy?**
+> No accounts, no PII stored permanently. Session data lives in SQLite during the session (30-day expiry). Credit data stays in the browser's sessionStorage only.
 
 ---
 
@@ -254,7 +267,7 @@
 
 If something breaks during the demo:
 
-- **Backend down:** The frontend will show a friendly error. Refresh and retry. Have a backup video recording ready.
-- **AI narrative fails:** The fallback narrative auto-generates (warm, Montgomery-specific, no API needed). Point this out as a resilience feature.
-- **Credit API timeout:** Assessment continues without credit data. Plan still generates with barrier-based matching.
-- **BrightData not configured:** "Explore More Jobs" section simply doesn't appear. Core job matches still show from seed data.
+- **Backend down:** Frontend shows a friendly error. Refresh and retry. Have a backup video ready.
+- **AI narrative fails:** Fallback narrative auto-generates (warm, city-specific, no API needed). Point this out as a resilience feature.
+- **Credit API timeout:** Assessment continues without credit data. Plan still generates.
+- **Job APIs unavailable:** Core job matches still show from seed data.

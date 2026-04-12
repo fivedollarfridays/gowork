@@ -39,7 +39,34 @@
     "workHistoryPlaceholder": "Tell us about your work experience...",
     "vehicleLabel": "Do you have a vehicle?",
     "scheduleLabel": "Available Hours",
-    "submitBtn": "Get My Plan"
+    "submitBtn": "Get My Plan",
+    "basicInfoTitle": "Tell us about yourself",
+    "resumeTitle": "Upload Your Resume",
+    "resumeDesc": "Upload a resume to improve your job matches. This step is optional.",
+    "barriersTitle": "What's in your way?",
+    "barriersDesc": "Choose all that apply. We'll match you with resources and jobs that work around these.",
+    "barriersMinOne": "Select at least one barrier to continue.",
+    "recordTitle": "Criminal Record Details",
+    "recordDesc": "Help us find fair-chance employers and check expungement eligibility. All fields are optional -- skip if you prefer.",
+    "benefitsTitle": "Household & Benefits",
+    "benefitsDesc": "Tell us about your household and any benefits you receive. This helps us show how a new job might affect your benefits. You can skip this step.",
+    "scheduleTitle": "When can you work?",
+    "scheduleDesc": "Let us know your availability so we can match you with the right shifts and transit options.",
+    "industriesTitle": "Target Industries",
+    "industriesDesc": "Select industries you're interested in. This helps us find better job matches.",
+    "creditTitle": "Credit Self-Assessment",
+    "creditDesc": "Help us understand your credit situation. This stays private and helps us match you with the right resources.",
+    "reviewTitle": "Review & Submit",
+    "navTitle": "Workforce Navigator",
+    "navDesc": "Answer a few questions to get your personalized re-entry plan",
+    "analyzing": "Analyzing...",
+    "submitAssessment": "Submit Assessment",
+    "daytime": "Daytime (8am - 5pm)",
+    "evening": "Evening (5pm - 10pm)",
+    "overnight": "Overnight (10pm - 6am)",
+    "flexible": "Flexible / Any shift",
+    "iHaveVehicle": "I have a vehicle",
+    "privacyBadge": "We don't store your identity. No login. No tracking. Your data stays on your device."
   },
   "plan": {
     "heading": "Your Action Plan",
@@ -102,6 +129,49 @@
     "expiredOrInvalid": "This shared plan link has expired or is invalid.",
     "generatedOn": "Generated on",
     "copyLink": "Copy Link",
-    "copied": "Copied!"
+    "copied": "Copied!",
+    "shareButton": "Share Plan",
+    "sharing": "Sharing...",
+    "shareFailed": "Failed"
+  },
+  "sequence": {
+    "heading": "Barrier Resolution Order",
+    "description": "Resolve barriers in this order to maximize cascading benefits",
+    "noBarriers": "No barriers identified -- you are ready to move forward!",
+    "estimatedTotal": "Estimated total",
+    "weeks": "weeks",
+    "unlocks": "Unlocks",
+    "cycleWarning": "Cycle detected"
+  },
+  "simulator": {
+    "heading": "What Happens If...?",
+    "description": "Toggle barriers to see the cascading effect on your job matches and benefits",
+    "noBarriers": "No barriers identified to simulate.",
+    "reset": "Reset",
+    "calculating": "Calculating impact...",
+    "jobsAccessible": "Additional jobs accessible",
+    "benefitsUnlocked": "Benefits unlocked",
+    "cascadingUnlocks": "Cascading unlocks",
+    "summarySentence": "Resolving these barriers unlocks more jobs and benefits."
+  },
+  "voice": {
+    "startVoice": "Voice",
+    "stopVoice": "Stop",
+    "listening": "Listening...",
+    "unsupported": "Voice input not supported in this browser. Try Chrome or Edge."
+  },
+  "dashboard": {
+    "heading": "Case Manager Dashboard",
+    "description": "Aggregate metrics from MontGoWork assessments",
+    "totalAssessments": "Total Assessments",
+    "barrierInstances": "Barrier Instances",
+    "avgBarriers": "Avg Barriers/Person",
+    "commonBarriers": "Most Common Barriers",
+    "loadingStats": "Loading stats...",
+    "loadFailed": "Failed to load dashboard data."
+  },
+  "outcomes": {
+    "assessmentsCompleted": "assessments completed",
+    "improvingRecommendations": "barrier intelligence improving recommendations"
   }
 }

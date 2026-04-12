@@ -39,7 +39,34 @@
     "workHistoryPlaceholder": "Cuentanos sobre tu experiencia laboral...",
     "vehicleLabel": "Tienes vehiculo?",
     "scheduleLabel": "Horas Disponibles",
-    "submitBtn": "Obtener Mi Plan"
+    "submitBtn": "Obtener Mi Plan",
+    "basicInfoTitle": "Cuentanos sobre ti",
+    "resumeTitle": "Sube Tu Curriculum",
+    "resumeDesc": "Sube un curriculum para mejorar tus coincidencias de empleo. Este paso es opcional.",
+    "barriersTitle": "Que te impide avanzar?",
+    "barriersDesc": "Elige todas las que apliquen. Te emparejaremos con recursos y empleos que funcionen con estas.",
+    "barriersMinOne": "Selecciona al menos una barrera para continuar.",
+    "recordTitle": "Detalles de Antecedentes Penales",
+    "recordDesc": "Ayudanos a encontrar empleadores de segunda oportunidad y verificar la elegibilidad de expuncion. Todos los campos son opcionales.",
+    "benefitsTitle": "Hogar y Beneficios",
+    "benefitsDesc": "Cuentanos sobre tu hogar y los beneficios que recibes. Esto nos ayuda a mostrar como un nuevo empleo podria afectar tus beneficios. Puedes omitir este paso.",
+    "scheduleTitle": "Cuando puedes trabajar?",
+    "scheduleDesc": "Indicanos tu disponibilidad para emparejarte con los turnos y opciones de transporte correctos.",
+    "industriesTitle": "Industrias Objetivo",
+    "industriesDesc": "Selecciona industrias que te interesen. Esto nos ayuda a encontrar mejores coincidencias de empleo.",
+    "creditTitle": "Autoevaluacion de Credito",
+    "creditDesc": "Ayudanos a entender tu situacion crediticia. Esto es privado y nos ayuda a emparejarte con los recursos correctos.",
+    "reviewTitle": "Revisar y Enviar",
+    "navTitle": "Navegador Laboral",
+    "navDesc": "Responde algunas preguntas para obtener tu plan personalizado de reinsercion",
+    "analyzing": "Analizando...",
+    "submitAssessment": "Enviar Evaluacion",
+    "daytime": "Dia (8am - 5pm)",
+    "evening": "Tarde (5pm - 10pm)",
+    "overnight": "Noche (10pm - 6am)",
+    "flexible": "Flexible / Cualquier turno",
+    "iHaveVehicle": "Tengo vehiculo",
+    "privacyBadge": "No almacenamos tu identidad. Sin cuenta. Sin rastreo. Tus datos permanecen en tu dispositivo."
   },
   "plan": {
     "heading": "Tu Plan de Accion",
@@ -102,6 +129,49 @@
     "expiredOrInvalid": "Este enlace de plan compartido ha expirado o no es valido.",
     "generatedOn": "Generado el",
     "copyLink": "Copiar Enlace",
-    "copied": "Copiado!"
+    "copied": "Copiado!",
+    "shareButton": "Compartir Plan",
+    "sharing": "Compartiendo...",
+    "shareFailed": "Error"
+  },
+  "sequence": {
+    "heading": "Orden de Resolucion de Barreras",
+    "description": "Resuelve las barreras en este orden para maximizar los beneficios en cascada",
+    "noBarriers": "No se identificaron barreras -- estas listo para avanzar!",
+    "estimatedTotal": "Total estimado",
+    "weeks": "semanas",
+    "unlocks": "Desbloquea",
+    "cycleWarning": "Ciclo detectado"
+  },
+  "simulator": {
+    "heading": "Que Pasa Si...?",
+    "description": "Activa las barreras para ver el efecto en cascada en tus empleos y beneficios",
+    "noBarriers": "No se identificaron barreras para simular.",
+    "reset": "Reiniciar",
+    "calculating": "Calculando impacto...",
+    "jobsAccessible": "Empleos adicionales accesibles",
+    "benefitsUnlocked": "Beneficios desbloqueados",
+    "cascadingUnlocks": "Desbloqueos en cascada",
+    "summarySentence": "Resolver estas barreras desbloquea mas empleos y beneficios."
+  },
+  "voice": {
+    "startVoice": "Voz",
+    "stopVoice": "Parar",
+    "listening": "Escuchando...",
+    "unsupported": "La entrada de voz no es compatible con este navegador. Prueba Chrome o Edge."
+  },
+  "dashboard": {
+    "heading": "Panel del Gestor de Casos",
+    "description": "Metricas agregadas de las evaluaciones de MontGoWork",
+    "totalAssessments": "Total de Evaluaciones",
+    "barrierInstances": "Instancias de Barreras",
+    "avgBarriers": "Barreras Promedio/Persona",
+    "commonBarriers": "Barreras Mas Comunes",
+    "loadingStats": "Cargando estadisticas...",
+    "loadFailed": "Error al cargar los datos del panel."
+  },
+  "outcomes": {
+    "assessmentsCompleted": "evaluaciones completadas",
+    "improvingRecommendations": "inteligencia de barreras mejorando recomendaciones"
   }
 }
