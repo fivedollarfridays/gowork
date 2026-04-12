@@ -82,9 +82,14 @@ export function VoiceInput({ onTranscript }: Props) {
         {listening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
         <span className="ml-1 text-xs">{listening ? "Stop" : "Voice"}</span>
       </Button>
+      {listening && (
+        <span className="text-xs text-destructive animate-pulse font-medium">
+          Listening...
+        </span>
+      )}
       {unsupported && (
         <span className="text-xs text-muted-foreground">
-          Voice input not supported in this browser
+          Voice input not supported in this browser. Try Chrome or Edge.
         </span>
       )}
     </div>

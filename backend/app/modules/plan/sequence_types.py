@@ -12,6 +12,7 @@ class SequenceStep(BaseModel):
     category: str
     playbook: str
     unlocks: list[str] = Field(default_factory=list)
+    estimated_weeks: int = 4
 
 
 class BarrierSequence(BaseModel):
@@ -20,3 +21,4 @@ class BarrierSequence(BaseModel):
     steps: list[SequenceStep]
     total_barriers: int
     has_cycles: bool = False
+    estimated_total_weeks: int = 0

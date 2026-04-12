@@ -40,6 +40,7 @@ class SimulateResponse(BaseModel):
     jobs_unlocked_estimate: int
     benefits_unlocked: list[str]
     sequence_after: dict
+    confidence: str = "medium"
 
 
 # Rough estimates for job accessibility improvement per barrier resolution
@@ -115,6 +116,12 @@ async def simulate_barrier_resolution(
     # Compute new sequence for remaining barriers
     sequence_after = sequence_barriers(remaining)
 
+    # Confidence: high if all resolved are known types, low if many unknown
+    known = sum(1 for b in body.resolved_barriers if b in _JOBS_PER_BARRIER)
+    total = len(body.resolved_barriers) if body.resolved_barriers else 1
+    ratio = known / total
+    confidence = "high" if ratio >= 1.0 else "medium" if ratio >= 0.5 else "low"
+
     return SimulateResponse(
         barriers_resolved=body.resolved_barriers,
         barriers_remaining=remaining,
@@ -122,4 +129,5 @@ async def simulate_barrier_resolution(
         jobs_unlocked_estimate=jobs_estimate,
         benefits_unlocked=benefits,
         sequence_after=sequence_after.model_dump(),
+        confidence=confidence,
     )

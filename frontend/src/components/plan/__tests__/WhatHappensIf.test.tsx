@@ -42,7 +42,55 @@ describe("WhatHappensIf", () => {
     render(
       <WhatHappensIf barriers={BARRIERS} onSimulate={vi.fn()} simulationResults={results} />,
     );
-    expect(screen.getByText(/15/)).toBeInTheDocument();
+    expect(screen.getAllByText(/\+15/).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText(/Fair-chance employer pool/i)).toBeInTheDocument();
+  });
+
+  it("shows summary sentence with jobs and benefits count", () => {
+    const results = {
+      barriers_resolved: ["criminal_record", "credit", "childcare"],
+      barriers_remaining: [],
+      unlocked_barriers: [],
+      jobs_unlocked_estimate: 33,
+      benefits_unlocked: ["Fair-chance pool", "Credit counseling", "Childcare subsidy"],
+      sequence_after: { steps: [], total_barriers: 0, has_cycles: false },
+    };
+    render(
+      <WhatHappensIf barriers={BARRIERS} onSimulate={vi.fn()} simulationResults={results} />,
+    );
+    expect(screen.getByText(/Resolving these 3 barriers/i)).toBeInTheDocument();
+  });
+
+  it("renders reset button when barriers are toggled", () => {
+    render(<WhatHappensIf barriers={BARRIERS} onSimulate={vi.fn()} />);
+    // Toggle one barrier
+    const toggle = screen.getAllByRole("switch")[0];
+    fireEvent.click(toggle);
+    // Reset button should appear
+    expect(screen.getByRole("button", { name: /Reset/i })).toBeInTheDocument();
+  });
+
+  it("reset button clears all toggled barriers", () => {
+    const onSimulate = vi.fn();
+    render(<WhatHappensIf barriers={BARRIERS} onSimulate={onSimulate} />);
+    // Toggle two barriers
+    const toggles = screen.getAllByRole("switch");
+    fireEvent.click(toggles[0]);
+    fireEvent.click(toggles[1]);
+    // Click reset
+    const resetBtn = screen.getByRole("button", { name: /Reset/i });
+    fireEvent.click(resetBtn);
+    // All switches should be unchecked
+    const switches = screen.getAllByRole("switch");
+    switches.forEach((s) => {
+      expect(s.getAttribute("aria-checked")).toBe("false");
+    });
+  });
+
+  it("shows loading state when isLoading prop is true", () => {
+    render(
+      <WhatHappensIf barriers={BARRIERS} onSimulate={vi.fn()} isLoading={true} />,
+    );
+    expect(screen.getByText(/Calculating/i)).toBeInTheDocument();
   });
 });
