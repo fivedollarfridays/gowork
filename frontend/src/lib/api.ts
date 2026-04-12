@@ -132,6 +132,21 @@ export function simulateBarriers(
   });
 }
 
+export function getDashboardStats(): Promise<{
+  total_assessments: number;
+  common_barriers: Array<{ barrier: string; count: number }>;
+  total_barrier_instances: number;
+}> {
+  return apiFetch("/api/dashboard/stats");
+}
+
+export function getAggregateOutcomes(): Promise<{
+  assessment_count: number;
+  top_barriers: Array<{ barrier: string; count: number }>;
+}> {
+  return apiFetch("/api/outcomes/aggregate");
+}
+
 export async function streamBarrierIntelChat(
   sessionId: string,
   question: string,

@@ -2,26 +2,16 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Users } from "lucide-react";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
-interface AggregateData {
-  assessment_count: number;
-  top_barriers: Array<{ barrier: string; count: number }>;
-}
+import { getAggregateOutcomes } from "@/lib/api";
 
 /**
  * Displays aggregate outcome stats on the landing page.
  * Shows assessment count and improvement messaging.
  */
 export function OutcomesBadge() {
-  const { data, isLoading } = useQuery<AggregateData>({
+  const { data, isLoading } = useQuery({
     queryKey: ["outcomes-aggregate"],
-    queryFn: async () => {
-      const res = await fetch(`${API_BASE}/api/outcomes/aggregate`);
-      if (!res.ok) throw new Error("Failed to fetch outcomes");
-      return res.json();
-    },
+    queryFn: getAggregateOutcomes,
     staleTime: 60_000,
   });
 
