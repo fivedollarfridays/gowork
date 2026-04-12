@@ -4,9 +4,9 @@ import { VoiceInput } from "../VoiceInput";
 
 afterEach(() => {
   // Clean up any window overrides
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   delete (window as any).SpeechRecognition;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   delete (window as any).webkitSpeechRecognition;
 });
 
@@ -25,7 +25,7 @@ describe("VoiceInput", () => {
 
   it("calls start when Speech API is available", () => {
     const startFn = vi.fn();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
     (window as any).SpeechRecognition = class {
       start = startFn;
       stop = vi.fn();
@@ -44,7 +44,7 @@ describe("VoiceInput", () => {
 
   it("shows stop button while listening", () => {
     const startFn = vi.fn();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
     (window as any).SpeechRecognition = class {
       start = startFn;
       stop = vi.fn();
@@ -65,7 +65,7 @@ describe("VoiceInput", () => {
   it("delivers transcript to callback when result received", () => {
     const onTranscript = vi.fn();
     let capturedOnResult: ((e: { results: Record<number, { transcript: string }[]>; resultIndex: number }) => void) | null = null;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
     (window as any).SpeechRecognition = class {
       start = vi.fn();
       stop = vi.fn();
@@ -78,7 +78,6 @@ describe("VoiceInput", () => {
       constructor() {
         // Capture onresult after it's set
         setTimeout(() => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           capturedOnResult = this.onresult as any;
         }, 0);
       }
@@ -94,7 +93,7 @@ describe("VoiceInput", () => {
 
   it("calls stop when clicking stop button", () => {
     const stopFn = vi.fn();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
     (window as any).SpeechRecognition = class {
       start = vi.fn();
       stop = stopFn;
@@ -116,7 +115,7 @@ describe("VoiceInput", () => {
 
   it("shows listening indicator while recording", () => {
     const startFn = vi.fn();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
     (window as any).SpeechRecognition = class {
       start = startFn;
       stop = vi.fn();
@@ -135,7 +134,7 @@ describe("VoiceInput", () => {
 
   it("uses webkitSpeechRecognition as fallback", () => {
     const startFn = vi.fn();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
     (window as any).webkitSpeechRecognition = class {
       start = startFn;
       stop = vi.fn();

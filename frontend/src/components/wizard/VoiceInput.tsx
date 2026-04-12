@@ -21,8 +21,7 @@ type SpeechRecognitionType = {
 
 function getSpeechRecognition(): (new () => SpeechRecognitionType) | null {
   if (typeof window === "undefined") return null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const W = window as any;
+  const W = window as any; // SpeechRecognition is browser-specific, not in standard TS types
   return W.SpeechRecognition || W.webkitSpeechRecognition || null;
 }
 
