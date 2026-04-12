@@ -8,6 +8,7 @@ from app.routes.credit import router as credit_router
 from app.routes.dashboard import router as dashboard_router
 from app.routes.feedback import router as feedback_router
 from app.routes.jobs import router as jobs_router
+from app.routes.pathway import router as pathway_router
 from app.routes.plan import router as plan_router
 from app.routes.sequence import router as sequence_router
 from app.routes.share import router as share_router
@@ -27,4 +28,5 @@ all_routers = [
     feedback_router,
     dashboard_router,
     barrier_intel_router,
+    pathway_router,
 ]
