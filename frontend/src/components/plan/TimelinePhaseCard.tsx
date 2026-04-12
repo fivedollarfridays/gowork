@@ -160,14 +160,14 @@ interface TimelinePhaseCardProps {
 
 interface ActionRowProps {
   action: ActionItem;
+  cityState?: string;
   actionKey?: string;
   checked?: boolean;
   onToggle?: (key: string, completed: boolean) => void;
 }
 
-function ActionRow({ action, actionKey, checked, onToggle }: ActionRowProps) {
+function ActionRow({ action, cityState, actionKey, checked, onToggle }: ActionRowProps) {
   const Icon = CATEGORY_ICONS[action.category] ?? Building2;
-  const cityState = useCityConfig().state;
   const link = getActionLink(action, cityState);
   const [expanded, setExpanded] = useState(false);
   const hasDetails = !!(action.detail || action.resource_name || action.resource_phone || action.resource_address);
@@ -252,6 +252,7 @@ function ActionRow({ action, actionKey, checked, onToggle }: ActionRowProps) {
 
 export function TimelinePhaseCard({ phase, dateRange, defaultOpen = false, checklist, onToggle }: TimelinePhaseCardProps) {
   const [open, setOpen] = useState(defaultOpen);
+  const cityState = useCityConfig().state;
   const count = phase.actions.length;
   const countLabel = count === 1 ? "1 action" : `${count} actions`;
 
@@ -287,6 +288,7 @@ export function TimelinePhaseCard({ phase, dateRange, defaultOpen = false, check
                 <ActionRow
                   key={key}
                   action={action}
+                  cityState={cityState}
                   actionKey={checklist != null ? key : undefined}
                   checked={checklist?.[key]}
                   onToggle={onToggle}
