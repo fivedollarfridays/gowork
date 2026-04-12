@@ -102,6 +102,51 @@ export function getCareerCenterPackage(sessionId: string, token?: string): Promi
   return apiFetch(`/api/plan/${sessionId}/career-center${tokenQs(token)}`);
 }
 
+export function createShareLink(sessionId: string, token?: string): Promise<{ share_token: string; url: string }> {
+  return apiFetch(`/api/plan/${sessionId}/share${tokenQs(token)}`, { method: "POST" });
+}
+
+export function getBarrierSequence(sessionId: string, token?: string): Promise<{
+  steps: Array<{ order: number; barrier_id: string; barrier_name: string; category: string; playbook: string; unlocks: string[] }>;
+  total_barriers: number;
+  has_cycles: boolean;
+}> {
+  return apiFetch(`/api/plan/${sessionId}/sequence${tokenQs(token)}`);
+}
+
+export function simulateBarriers(
+  sessionId: string,
+  resolvedBarriers: string[],
+  token?: string,
+): Promise<{
+  barriers_resolved: string[];
+  barriers_remaining: string[];
+  unlocked_barriers: string[];
+  jobs_unlocked_estimate: number;
+  benefits_unlocked: string[];
+  sequence_after: { steps: unknown[]; total_barriers: number; has_cycles: boolean };
+}> {
+  return apiFetch(`/api/simulate${tokenQs(token)}`, {
+    method: "POST",
+    body: JSON.stringify({ session_id: sessionId, resolved_barriers: resolvedBarriers }),
+  });
+}
+
+export function getDashboardStats(): Promise<{
+  total_assessments: number;
+  common_barriers: Array<{ barrier: string; count: number }>;
+  total_barrier_instances: number;
+}> {
+  return apiFetch("/api/dashboard/stats");
+}
+
+export function getAggregateOutcomes(): Promise<{
+  assessment_count: number;
+  top_barriers: Array<{ barrier: string; count: number }>;
+}> {
+  return apiFetch("/api/outcomes/aggregate");
+}
+
 export async function streamBarrierIntelChat(
   sessionId: string,
   question: string,

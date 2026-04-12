@@ -140,6 +140,12 @@ CREATE TABLE IF NOT EXISTS record_profiles (
     completed_sentence INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+CREATE TABLE IF NOT EXISTS share_tokens (
+    token TEXT PRIMARY KEY,
+    session_id TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    expires_at TEXT NOT NULL
+);
 """
 
 ALLOWED_COLUMNS = {
@@ -168,6 +174,7 @@ ALLOWED_COLUMNS = {
         "session_id", "record_types", "charge_categories",
         "years_since_conviction", "completed_sentence",
     },
+    "share_tokens": {"token", "session_id", "created_at", "expires_at"},
 }
 
 JSON_FIELDS = {"services"}
