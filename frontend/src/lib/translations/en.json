@@ -1,0 +1,107 @@
+{
+  "common": {
+    "getStarted": "Get Started",
+    "learnMore": "Learn More",
+    "next": "Next",
+    "back": "Back",
+    "submit": "Submit",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Try Again",
+    "yes": "Yes",
+    "no": "No",
+    "close": "Close",
+    "save": "Save",
+    "cancel": "Cancel",
+    "language": "Language"
+  },
+  "hero": {
+    "title": "What's standing between you and a job?",
+    "subtitle": "MontGoWork is a workforce navigator that helps you overcome barriers and find your path to employment.",
+    "cta": "Get Your Plan",
+    "creditCta": "Check Credit"
+  },
+  "howItWorks": {
+    "heading": "How It Works",
+    "step1Title": "Assess",
+    "step1Desc": "Answer a few questions about your situation, barriers, and work history",
+    "step2Title": "Match",
+    "step2Desc": "We match you with jobs, resources, and transit routes in your area",
+    "step3Title": "Plan",
+    "step3Desc": "Get a personalized action plan: what to do Monday morning"
+  },
+  "assess": {
+    "heading": "Workforce Assessment",
+    "zipLabel": "ZIP Code",
+    "employmentLabel": "Employment Status",
+    "barriersLabel": "What barriers are you facing?",
+    "workHistoryLabel": "Work History",
+    "workHistoryPlaceholder": "Tell us about your work experience...",
+    "vehicleLabel": "Do you have a vehicle?",
+    "scheduleLabel": "Available Hours",
+    "submitBtn": "Get My Plan"
+  },
+  "plan": {
+    "heading": "Your Action Plan",
+    "barriers": "Barriers Identified",
+    "jobs": "Job Matches",
+    "strongMatches": "Strong Matches",
+    "possibleMatches": "Possible Matches",
+    "afterRepair": "After Barrier Repair",
+    "nextSteps": "Immediate Next Steps",
+    "timeline": "Action Timeline",
+    "benefits": "Benefits Analysis",
+    "cliffAnalysis": "Benefits Cliff Analysis",
+    "netIncome": "Net Income vs. Hourly Wage",
+    "noCliff": "No significant benefits cliff detected at any wage level.",
+    "biggestCliff": "Your biggest cliff is at",
+    "recoveryAt": "Net income recovers at",
+    "noRecovery": "Net income does not fully recover within the analyzed wage range.",
+    "sharePlan": "Share Plan",
+    "downloadPdf": "Download PDF",
+    "progress": "Progress"
+  },
+  "barriers": {
+    "credit": "Credit",
+    "transportation": "Transportation",
+    "childcare": "Childcare",
+    "housing": "Housing",
+    "health": "Health",
+    "training": "Training",
+    "criminal_record": "Criminal Record"
+  },
+  "cliffSimulator": {
+    "heading": "Benefit Cliff Simulator",
+    "description": "Drag the slider to see how your benefits change as your hourly wage increases.",
+    "hourlyWage": "Hourly Wage",
+    "monthlyGross": "Monthly Gross",
+    "benefitsTotal": "Total Benefits",
+    "netMonthly": "Net Monthly Income",
+    "safeZone": "Safe Zone",
+    "cliffZone": "Cliff Zone",
+    "currentWage": "Current",
+    "programLoss": "Program Loss"
+  },
+  "resourceMap": {
+    "heading": "Community Resources Near You",
+    "description": "Resources and services available in your area",
+    "noResources": "No resources found for this area.",
+    "directions": "Get Directions",
+    "call": "Call",
+    "website": "Website"
+  },
+  "progressTracker": {
+    "heading": "Your Progress",
+    "description": "Track your action plan completion",
+    "completed": "Completed",
+    "remaining": "Remaining",
+    "allDone": "All steps completed! Great work!"
+  },
+  "share": {
+    "heading": "Shared Action Plan",
+    "expiredOrInvalid": "This shared plan link has expired or is invalid.",
+    "generatedOn": "Generated on",
+    "copyLink": "Copy Link",
+    "copied": "Copied!"
+  }
+}

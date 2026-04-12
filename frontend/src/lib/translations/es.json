@@ -1,0 +1,107 @@
+{
+  "common": {
+    "getStarted": "Comenzar",
+    "learnMore": "Aprender Mas",
+    "next": "Siguiente",
+    "back": "Atras",
+    "submit": "Enviar",
+    "loading": "Cargando...",
+    "error": "Algo salio mal",
+    "retry": "Intentar de Nuevo",
+    "yes": "Si",
+    "no": "No",
+    "close": "Cerrar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "language": "Idioma"
+  },
+  "hero": {
+    "title": "Que te impide conseguir un trabajo?",
+    "subtitle": "MontGoWork es un navegador laboral que te ayuda a superar barreras y encontrar tu camino al empleo.",
+    "cta": "Obtener Tu Plan",
+    "creditCta": "Verificar Credito"
+  },
+  "howItWorks": {
+    "heading": "Como Funciona",
+    "step1Title": "Evaluar",
+    "step1Desc": "Responde algunas preguntas sobre tu situacion, barreras e historial laboral",
+    "step2Title": "Emparejar",
+    "step2Desc": "Te emparejamos con empleos, recursos y rutas de transporte en tu area",
+    "step3Title": "Planificar",
+    "step3Desc": "Obtiene un plan de accion personalizado: que hacer el lunes por la manana"
+  },
+  "assess": {
+    "heading": "Evaluacion Laboral",
+    "zipLabel": "Codigo Postal",
+    "employmentLabel": "Estado de Empleo",
+    "barriersLabel": "Que barreras enfrentas?",
+    "workHistoryLabel": "Historial Laboral",
+    "workHistoryPlaceholder": "Cuentanos sobre tu experiencia laboral...",
+    "vehicleLabel": "Tienes vehiculo?",
+    "scheduleLabel": "Horas Disponibles",
+    "submitBtn": "Obtener Mi Plan"
+  },
+  "plan": {
+    "heading": "Tu Plan de Accion",
+    "barriers": "Barreras Identificadas",
+    "jobs": "Empleos Compatibles",
+    "strongMatches": "Mejores Coincidencias",
+    "possibleMatches": "Coincidencias Posibles",
+    "afterRepair": "Despues de Reparar Barreras",
+    "nextSteps": "Proximos Pasos Inmediatos",
+    "timeline": "Linea de Tiempo de Acciones",
+    "benefits": "Analisis de Beneficios",
+    "cliffAnalysis": "Analisis de Acantilado de Beneficios",
+    "netIncome": "Ingreso Neto vs. Salario por Hora",
+    "noCliff": "No se detecto ningun acantilado significativo de beneficios en ningun nivel salarial.",
+    "biggestCliff": "Tu mayor acantilado es a",
+    "recoveryAt": "El ingreso neto se recupera a",
+    "noRecovery": "El ingreso neto no se recupera completamente dentro del rango salarial analizado.",
+    "sharePlan": "Compartir Plan",
+    "downloadPdf": "Descargar PDF",
+    "progress": "Progreso"
+  },
+  "barriers": {
+    "credit": "Credito",
+    "transportation": "Transporte",
+    "childcare": "Cuidado Infantil",
+    "housing": "Vivienda",
+    "health": "Salud",
+    "training": "Capacitacion",
+    "criminal_record": "Antecedentes Penales"
+  },
+  "cliffSimulator": {
+    "heading": "Simulador de Acantilado de Beneficios",
+    "description": "Arrastra el control deslizante para ver como cambian tus beneficios a medida que aumenta tu salario por hora.",
+    "hourlyWage": "Salario por Hora",
+    "monthlyGross": "Ingreso Bruto Mensual",
+    "benefitsTotal": "Total de Beneficios",
+    "netMonthly": "Ingreso Neto Mensual",
+    "safeZone": "Zona Segura",
+    "cliffZone": "Zona de Acantilado",
+    "currentWage": "Actual",
+    "programLoss": "Perdida de Programa"
+  },
+  "resourceMap": {
+    "heading": "Recursos Comunitarios Cerca de Ti",
+    "description": "Recursos y servicios disponibles en tu area",
+    "noResources": "No se encontraron recursos para esta area.",
+    "directions": "Obtener Direcciones",
+    "call": "Llamar",
+    "website": "Sitio Web"
+  },
+  "progressTracker": {
+    "heading": "Tu Progreso",
+    "description": "Sigue el progreso de tu plan de accion",
+    "completed": "Completados",
+    "remaining": "Pendientes",
+    "allDone": "Todos los pasos completados! Buen trabajo!"
+  },
+  "share": {
+    "heading": "Plan de Accion Compartido",
+    "expiredOrInvalid": "Este enlace de plan compartido ha expirado o no es valido.",
+    "generatedOn": "Generado el",
+    "copyLink": "Copiar Enlace",
+    "copied": "Copiado!"
+  }
+}
