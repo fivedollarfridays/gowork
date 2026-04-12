@@ -99,7 +99,7 @@ class BenefitsFormData(BaseModel):
 
 
 class AssessmentRequest(BaseModel):
-    zip_code: str = Field(..., pattern=r"^361\d{2}$", description="Montgomery area zip (361xx)")
+    zip_code: str = Field(..., description="Valid ZIP for the active city")
     employment_status: EmploymentStatus
     barriers: dict[BarrierType, bool]  # validated against BarrierType enum keys
     work_history: str = Field(..., max_length=500)
@@ -108,6 +108,18 @@ class AssessmentRequest(BaseModel):
     schedule_constraints: ScheduleConstraints = Field(default_factory=ScheduleConstraints)
     resume_text: str = Field(default="", max_length=5000)
     certifications: list[str] = Field(default_factory=list, max_length=10)
+
+    @field_validator("zip_code")
+    @classmethod
+    def validate_zip_for_city(cls, v: str) -> str:
+        """Validate ZIP code against the active city's zip_ranges."""
+        from app.cities.config import get_city_config
+        from app.modules.matching.zip_validation import is_valid_zip_for_city
+
+        city_config = get_city_config()
+        if not is_valid_zip_for_city(v, city_config):
+            raise ValueError(f"ZIP {v} is not valid for {city_config.name}")
+        return v
 
     @field_validator("target_industries", "certifications")
     @classmethod

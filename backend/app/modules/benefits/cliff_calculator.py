@@ -1,7 +1,17 @@
-"""Benefits cliff calculator — computes net income across wage levels."""
+"""Benefits cliff calculator -- computes net income across wage levels.
+
+City-aware: uses benefits.router to select correct thresholds and
+program calculators based on the active city (CITY env var).
+"""
 
 import logging
 
+from app.modules.benefits.router import (
+    get_program_calculators,
+    get_sum_program_benefits,
+    get_thresholds,
+)
+from app.modules.benefits.thresholds import HOURS_PER_YEAR, MONTHS_PER_YEAR
 from app.modules.benefits.types import (
     BenefitsProfile,
     CliffAnalysis,
@@ -10,24 +20,6 @@ from app.modules.benefits.types import (
     CliffType,
     ProgramBenefit,
     WageStep,
-)
-from app.modules.benefits.thresholds import (
-    ALL_KIDS_FPL_PCT,
-    AMI_MONTGOMERY_2026,
-    CHILDCARE_SMI_LIMIT_PCT,
-    FICA_RATE,
-    FPL_2026,
-    HOURS_PER_YEAR,
-    LIHEAP_FPL_LIMIT_PCT,
-    MONTHS_PER_YEAR,
-    SECTION_8_AMI_LIMIT_PCT,
-    SMI_2026,
-    TAX_BRACKETS,
-    TANF_MAX_MONTHLY,
-)
-from app.modules.benefits.program_calculators import (
-    PROGRAM_CALCULATORS,
-    sum_program_benefits,
 )
 
 logger = logging.getLogger(__name__)
@@ -99,16 +91,18 @@ def _build_wage_steps(profile: BenefitsProfile) -> list[WageStep]:
 
 
 def _total_benefits(hourly_wage: float, profile: BenefitsProfile) -> float:
-    """Sum enrolled-program benefits at a given hourly wage."""
-    return sum_program_benefits(hourly_wage * HOURS_PER_YEAR, profile)
+    """Sum enrolled-program benefits at a given hourly wage via router."""
+    sum_fn = get_sum_program_benefits()
+    return sum_fn(hourly_wage * HOURS_PER_YEAR, profile)
 
 
 def _estimate_taxes(annual_income: float) -> float:
-    fica = annual_income * FICA_RATE
+    thresholds = get_thresholds()
+    fica = annual_income * thresholds["FICA_RATE"]
     income_tax = 0.0
     remaining = annual_income
     prev_bracket = 0.0
-    for bracket_top, rate in TAX_BRACKETS:
+    for bracket_top, rate in thresholds["TAX_BRACKETS"]:
         taxable = min(remaining, bracket_top - prev_bracket)
         if taxable <= 0:
             break
@@ -140,10 +134,13 @@ def _detect_cliffs(
 def _identify_lost_program(
     before: WageStep, after: WageStep, profile: BenefitsProfile,
 ) -> str:
+    calculators = get_program_calculators()
     biggest_drop = 0.0
     lost = "Unknown"
     for prog in profile.enrolled_programs:
-        calc = PROGRAM_CALCULATORS[prog]
+        calc = calculators.get(prog)
+        if calc is None:
+            continue
         before_val = calc(before.wage * HOURS_PER_YEAR, profile)
         after_val = calc(after.wage * HOURS_PER_YEAR, profile)
         drop = before_val - after_val
@@ -154,10 +151,13 @@ def _identify_lost_program(
 
 
 def _build_program_list(profile: BenefitsProfile) -> list[ProgramBenefit]:
+    calculators = get_program_calculators()
     programs: list[ProgramBenefit] = []
     annual = profile.current_monthly_income * MONTHS_PER_YEAR
     for prog in profile.enrolled_programs:
-        calc = PROGRAM_CALCULATORS[prog]
+        calc = calculators.get(prog)
+        if calc is None:
+            continue
         value = calc(annual, profile)
         phase_out = _get_phase_out(prog, profile)
         programs.append(ProgramBenefit(
@@ -174,23 +174,26 @@ def _build_program_list(profile: BenefitsProfile) -> list[ProgramBenefit]:
 def _get_phase_out(
     program: str, profile: BenefitsProfile,
 ) -> tuple[float, float, CliffType]:
+    """Get phase-out thresholds for a program, city-aware."""
+    t = get_thresholds()
     hs = min(profile.household_size, 8)
-    fpl = FPL_2026[hs]
+    fpl = t["FPL_2026"][hs]
+
     if program == "SNAP":
         return (fpl * 0.80, fpl * 1.30, CliffType.GRADUAL)
     if program == "TANF":
-        limit = TANF_MAX_MONTHLY.get(hs, 215) * MONTHS_PER_YEAR * 0.75
+        limit = t["TANF_MAX_MONTHLY"].get(hs, 215) * MONTHS_PER_YEAR * 0.75
         return (limit * 0.5, limit, CliffType.HARD)
-    if program == "ALL_Kids":
-        return (fpl * 2.0, fpl * ALL_KIDS_FPL_PCT, CliffType.HARD)
+    if program in ("ALL_Kids", "CHIP"):
+        return (fpl * 2.0, fpl * t["CHILD_HEALTH_FPL_PCT"], CliffType.HARD)
     if program == "Childcare_Subsidy":
-        smi = SMI_2026[hs]
-        return (smi * 0.50, smi * CHILDCARE_SMI_LIMIT_PCT, CliffType.GRADUAL)
+        smi = t["SMI_2026"][hs]
+        return (smi * 0.50, smi * t["CHILDCARE_SMI_LIMIT_PCT"], CliffType.GRADUAL)
     if program == "Section_8":
-        ami = AMI_MONTGOMERY_2026[hs]
-        return (ami * 0.30, ami * SECTION_8_AMI_LIMIT_PCT, CliffType.GRADUAL)
-    if program == "LIHEAP":
-        return (fpl * 1.0, fpl * LIHEAP_FPL_LIMIT_PCT, CliffType.HARD)
+        ami = t["AMI"][hs]
+        return (ami * 0.30, ami * t["SECTION_8_AMI_LIMIT_PCT"], CliffType.GRADUAL)
+    if program in ("LIHEAP", "CEAP"):
+        return (fpl * 1.0, fpl * t["ENERGY_FPL_LIMIT_PCT"], CliffType.HARD)
     logger.warning("Unknown program in phase-out calculation: %s", program)
     return (0, 0, CliffType.HARD)
 

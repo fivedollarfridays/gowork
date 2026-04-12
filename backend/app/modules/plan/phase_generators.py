@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from app.modules.matching.resource_router import get_career_center
 from app.modules.plan.generators_barriers import (  # noqa: F401 — re-export
     generate_credit_actions,
     generate_criminal_actions,
@@ -14,21 +15,18 @@ if TYPE_CHECKING:
     from app.modules.benefits.types import BenefitsEligibility, CliffAnalysis
     from app.modules.matching.types_wioa import WIOAEligibility
 
-_CAREER_CENTER_NAME = "Alabama Career Center"
-_CAREER_CENTER_PHONE = "334-286-1746"
-_CAREER_CENTER_ADDRESS = "1060 East South Blvd, Montgomery, AL 36116"
-
 
 def generate_career_center_action() -> ActionItem:
-    """Always-present first action: visit the Career Center."""
+    """Always-present first action: visit the Career Center. City-aware."""
+    cc = get_career_center()
     return ActionItem(
         category=ActionCategory.CAREER_CENTER,
-        title=f"Visit {_CAREER_CENTER_NAME}",
+        title=f"Visit {cc.name}",
         priority=0,
         source_module="career_center",
-        resource_name=_CAREER_CENTER_NAME,
-        resource_phone=_CAREER_CENTER_PHONE,
-        resource_address=_CAREER_CENTER_ADDRESS,
+        resource_name=cc.name,
+        resource_phone=cc.phone,
+        resource_address=cc.address,
     )
 
 
@@ -78,14 +76,15 @@ def generate_wioa_actions(wioa: WIOAEligibility | None) -> list[ActionItem]:
     """WIOA enrollment action if eligible."""
     if not wioa or not wioa.adult_program:
         return []
+    cc = get_career_center()
     actions = [ActionItem(
         category=ActionCategory.TRAINING,
         title="Enroll in WIOA Adult Program",
         detail="Training vouchers and supportive services available",
         priority=0,
         source_module="wioa",
-        resource_name=_CAREER_CENTER_NAME,
-        resource_phone=_CAREER_CENTER_PHONE,
+        resource_name=cc.name,
+        resource_phone=cc.phone,
     )]
     if wioa.ita_training:
         actions.append(ActionItem(

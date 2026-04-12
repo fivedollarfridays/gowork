@@ -88,4 +88,38 @@ describe("ProgressTracker", () => {
     renderTracker();
     expect(screen.getByText(/tu progreso/i)).toBeInTheDocument();
   });
+
+  it("persists completion to localStorage when steps update", () => {
+    const steps: ProgressStep[] = [
+      { key: "s1", label: "Step 1", completed: true },
+      { key: "s2", label: "Step 2", completed: true },
+    ];
+    render(
+      <TranslationProvider>
+        <ProgressTracker steps={steps} onToggle={vi.fn()} planId="test-plan" />
+      </TranslationProvider>,
+    );
+
+    const stored = localStorage.getItem("plan-progress-test-plan");
+    expect(stored).toBeTruthy();
+    const parsed = JSON.parse(stored!);
+    expect(parsed).toContain("s1");
+    expect(parsed).toContain("s2");
+  });
+
+  it("loads saved progress from localStorage on mount", () => {
+    localStorage.setItem("plan-progress-load-test", JSON.stringify(["s1"]));
+    const steps: ProgressStep[] = [
+      { key: "s1", label: "Step 1", completed: false },
+      { key: "s2", label: "Step 2", completed: false },
+    ];
+    const onToggle = vi.fn();
+    render(
+      <TranslationProvider>
+        <ProgressTracker steps={steps} onToggle={onToggle} planId="load-test" />
+      </TranslationProvider>,
+    );
+    // onToggle should have been called to restore "s1" as completed
+    expect(onToggle).toHaveBeenCalledWith("s1", true);
+  });
 });

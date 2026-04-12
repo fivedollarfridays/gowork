@@ -9,11 +9,14 @@ logger = logging.getLogger(__name__)
 VALID_PROGRAMS = frozenset({
     "SNAP", "TANF", "Medicaid", "ALL_Kids",
     "Childcare_Subsidy", "Section_8", "LIHEAP",
+    # Texas equivalents
+    "CHIP", "CEAP",
 })
 
 ProgramName = Literal[
     "SNAP", "TANF", "Medicaid", "ALL_Kids",
     "Childcare_Subsidy", "Section_8", "LIHEAP",
+    "CHIP", "CEAP",
 ]
 
 

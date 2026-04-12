@@ -1,20 +1,16 @@
 """Commute time estimator using haversine distance + average speed formulas.
 
-Calculates approximate drive, transit, and walk times for Montgomery, AL
-without external API calls.
+City-aware: uses geo_router for coordinates and ZIP centroids.
 """
 
+from app.modules.matching.geo_router import get_downtown_coords, get_zip_centroids
 from app.modules.matching.proximity_scorer import extract_zip
-from app.modules.matching.scoring import (
-    DOWNTOWN_MONTGOMERY,
-    ZIP_CENTROIDS,
-    haversine_miles,
-)
+from app.modules.matching.scoring import haversine_miles
 from app.modules.matching.types_transit import CommuteEstimate, TransitInfo
 
-# Average speeds for Montgomery, AL
+# Average speeds (same for both cities as rough estimates)
 _DRIVE_MPH = 25       # city driving
-_BUS_MPH = 12         # M-Transit average
+_BUS_MPH = 12         # bus average
 _WALK_MPH = 3         # walking speed
 _AVG_WAIT_MIN = 10    # average bus wait
 _WALK_FROM_STOP_MIN = 5  # estimated walk from bus stop to job
@@ -24,12 +20,12 @@ _MAX_WALK_MILES = 2.0  # beyond this, walk time is None
 def _resolve_coords(
     user_zip: str, job_location: str,
 ) -> tuple[tuple[float, float], tuple[float, float]]:
-    """Resolve user and job coordinates from ZIP codes."""
-    user_coords = ZIP_CENTROIDS.get(user_zip, DOWNTOWN_MONTGOMERY)
+    """Resolve user and job coordinates from ZIP codes. City-aware."""
+    centroids = get_zip_centroids()
+    downtown = get_downtown_coords()
+    user_coords = centroids.get(user_zip, downtown)
     job_zip = extract_zip(job_location)
-    job_coords = (
-        ZIP_CENTROIDS.get(job_zip, DOWNTOWN_MONTGOMERY) if job_zip else DOWNTOWN_MONTGOMERY
-    )
+    job_coords = centroids.get(job_zip, downtown) if job_zip else downtown
     return user_coords, job_coords
 
 

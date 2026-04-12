@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -15,6 +16,33 @@ export interface ProgressStep {
 interface ProgressTrackerProps {
   steps: ProgressStep[];
   onToggle: (key: string, completed: boolean) => void;
+  planId?: string;
+}
+
+const STORAGE_PREFIX = "plan-progress-";
+
+function getStorageKey(planId?: string): string {
+  return `${STORAGE_PREFIX}${planId ?? "default"}`;
+}
+
+function loadProgress(planId?: string): Set<string> {
+  if (typeof window === "undefined") return new Set();
+  try {
+    const raw = localStorage.getItem(getStorageKey(planId));
+    if (raw) return new Set(JSON.parse(raw));
+  } catch {
+    /* ignore parse errors */
+  }
+  return new Set();
+}
+
+function saveProgress(completedKeys: string[], planId?: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(getStorageKey(planId), JSON.stringify(completedKeys));
+  } catch {
+    /* ignore storage errors */
+  }
 }
 
 function CompletionSummary({ done, total }: { done: number; total: number }) {
@@ -29,11 +57,30 @@ function CompletionSummary({ done, total }: { done: number; total: number }) {
   );
 }
 
-export function ProgressTracker({ steps, onToggle }: ProgressTrackerProps) {
+export function ProgressTracker({ steps, onToggle, planId }: ProgressTrackerProps) {
   const locale = getLocale();
   const heading = getTranslation("progressTracker.heading", locale);
   const description = getTranslation("progressTracker.description", locale);
   const allDoneMsg = getTranslation("progressTracker.allDone", locale);
+
+  // Restore saved progress on mount
+  useEffect(() => {
+    const saved = loadProgress(planId);
+    for (const key of saved) {
+      const step = steps.find((s) => s.key === key);
+      if (step && !step.completed) {
+        onToggle(key, true);
+      }
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Save progress when steps change
+  useEffect(() => {
+    const completedKeys = steps.filter((s) => s.completed).map((s) => s.key);
+    if (completedKeys.length > 0) {
+      saveProgress(completedKeys, planId);
+    }
+  }, [steps, planId]);
 
   const completedCount = steps.filter((s) => s.completed).length;
   const pct = steps.length > 0 ? Math.round((completedCount / steps.length) * 100) : 0;
@@ -57,7 +104,7 @@ export function ProgressTracker({ steps, onToggle }: ProgressTrackerProps) {
             </div>
           )}
 
-          <ul className="space-y-2">
+          <ul className="space-y-2" role="list" aria-label={heading}>
             {steps.map((step) => (
               <li key={step.key} className="flex items-center gap-3">
                 <Checkbox
@@ -66,6 +113,7 @@ export function ProgressTracker({ steps, onToggle }: ProgressTrackerProps) {
                   onCheckedChange={(checked) =>
                     onToggle(step.key, checked === true)
                   }
+                  aria-label={step.label}
                 />
                 <label
                   htmlFor={step.key}

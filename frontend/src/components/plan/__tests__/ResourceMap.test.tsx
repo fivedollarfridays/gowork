@@ -80,10 +80,12 @@ describe("ResourceMap", () => {
 
   it("groups resources by category", () => {
     renderMap();
-    // Category headers should appear (exact text from humanizeCategory)
-    expect(screen.getByText("Career Center")).toBeInTheDocument();
-    expect(screen.getByText("Housing")).toBeInTheDocument();
-    expect(screen.getByText("Food")).toBeInTheDocument();
+    // Category headers appear as h3 elements
+    const headings = screen.getAllByRole("heading", { level: 3 });
+    const headingTexts = headings.map((h) => h.textContent);
+    expect(headingTexts).toContain("Career Center");
+    expect(headingTexts).toContain("Housing");
+    expect(headingTexts).toContain("Food");
   });
 
   it("renders in Spanish when locale is ES", () => {
@@ -97,5 +99,37 @@ describe("ResourceMap", () => {
     const websiteLinks = screen.getAllByText(/website/i);
     // 2 resources have URLs
     expect(websiteLinks.length).toBe(2);
+  });
+
+  it("renders category filter buttons", () => {
+    renderMap();
+    expect(screen.getByText("All")).toBeInTheDocument();
+    // Filter buttons should exist for each category
+    expect(screen.getByRole("button", { name: /career center/i })).toBeInTheDocument();
+  });
+
+  it("filters resources by category when clicked", async () => {
+    const user = (await import("@testing-library/user-event")).default.setup();
+    renderMap();
+    const housingBtn = screen.getByRole("button", { name: /housing/i });
+    await user.click(housingBtn);
+
+    // Only housing resource should be visible
+    expect(screen.getByText("Catholic Charities Fort Worth")).toBeInTheDocument();
+    expect(screen.queryByText("Workforce Solutions for Tarrant County")).not.toBeInTheDocument();
+    expect(screen.queryByText("Tarrant County Food Bank")).not.toBeInTheDocument();
+  });
+
+  it("shows all resources when All filter is clicked", async () => {
+    const user = (await import("@testing-library/user-event")).default.setup();
+    renderMap();
+
+    // Click Housing first
+    await user.click(screen.getByRole("button", { name: /housing/i }));
+    // Then click All
+    await user.click(screen.getByRole("button", { name: "All" }));
+
+    expect(screen.getByText("Workforce Solutions for Tarrant County")).toBeInTheDocument();
+    expect(screen.getByText("Catholic Charities Fort Worth")).toBeInTheDocument();
   });
 });
