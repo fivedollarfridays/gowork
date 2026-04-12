@@ -1,0 +1,98 @@
+[
+  {
+    "id": 2001,
+    "name": "Lockheed Martin",
+    "industry": "aerospace",
+    "location": "Fort Worth, TX",
+    "fair_chance": false,
+    "notes": "Major defense contractor. F-35 production. Background check required."
+  },
+  {
+    "id": 2002,
+    "name": "Bell Textron",
+    "industry": "aerospace",
+    "location": "Fort Worth, TX",
+    "fair_chance": false,
+    "notes": "Helicopter manufacturing. Background check required."
+  },
+  {
+    "id": 2003,
+    "name": "BNSF Railway",
+    "industry": "transportation",
+    "location": "Fort Worth, TX",
+    "fair_chance": true,
+    "notes": "Railroad operations. Ban the Box employer. Considers individual circumstances."
+  },
+  {
+    "id": 2004,
+    "name": "Texas Health Resources",
+    "industry": "healthcare",
+    "location": "Fort Worth, TX",
+    "fair_chance": true,
+    "notes": "Large healthcare system. Reviews criminal history on case-by-case basis."
+  },
+  {
+    "id": 2005,
+    "name": "JPS Health Network",
+    "industry": "healthcare",
+    "location": "Fort Worth, TX",
+    "fair_chance": true,
+    "notes": "County hospital system. Fair chance employer for non-clinical roles."
+  },
+  {
+    "id": 2006,
+    "name": "Cook Children's Health Care System",
+    "industry": "healthcare",
+    "location": "Fort Worth, TX",
+    "fair_chance": false,
+    "notes": "Pediatric healthcare. Background check required."
+  },
+  {
+    "id": 2007,
+    "name": "Walmart",
+    "industry": "retail",
+    "location": "Fort Worth, TX",
+    "fair_chance": true,
+    "notes": "Ban the Box employer. Removed criminal history from initial application."
+  },
+  {
+    "id": 2008,
+    "name": "Amazon",
+    "industry": "logistics",
+    "location": "Fort Worth, TX",
+    "fair_chance": true,
+    "notes": "Fair chance employer. Multiple fulfillment centers in DFW area."
+  },
+  {
+    "id": 2009,
+    "name": "Dave's Hot Chicken",
+    "industry": "food_service",
+    "location": "Fort Worth, TX",
+    "fair_chance": true,
+    "notes": "Known second-chance employer. Multiple DFW locations."
+  },
+  {
+    "id": 2010,
+    "name": "Tarrant County Government",
+    "industry": "government",
+    "location": "Fort Worth, TX",
+    "fair_chance": true,
+    "notes": "County government. Ban the Box. Reviews on case-by-case basis."
+  },
+  {
+    "id": 2011,
+    "name": "City of Fort Worth",
+    "industry": "government",
+    "location": "Fort Worth, TX",
+    "fair_chance": true,
+    "notes": "City government. Fair chance hiring policy for most positions."
+  },
+  {
+    "id": 2012,
+    "name": "American Airlines",
+    "industry": "transportation",
+    "location": "Fort Worth, TX",
+    "fair_chance": false,
+    "notes": "Headquarters in Fort Worth. Background check required."
+  }
+]

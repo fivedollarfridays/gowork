@@ -11,7 +11,15 @@ import {
 import type { BarrierSeverity, BarrierType, EmploymentStatus } from "./types";
 
 export const MONTGOMERY_ZIP_REGEX = /^361\d{2}$/;
+export const FORT_WORTH_ZIP_REGEX = /^761\d{2}$/;
 
+/** City-aware ZIP validation. Defaults to Montgomery for backward compatibility. */
+export function isValidCityZip(zip: string, state?: string): boolean {
+  if (state === "TX") return FORT_WORTH_ZIP_REGEX.test(zip);
+  return MONTGOMERY_ZIP_REGEX.test(zip);
+}
+
+/** @deprecated Use isValidCityZip instead */
 export function isValidMontgomeryZip(zip: string): boolean {
   return MONTGOMERY_ZIP_REGEX.test(zip);
 }
@@ -81,12 +89,27 @@ export function daysToMonths(days: number): string {
   return `~${months} month${months === 1 ? "" : "s"}`;
 }
 
-export const CAREER_CENTER = {
+export const CAREER_CENTER_AL = {
   name: "Montgomery Career Center",
   address: "1060 East South Boulevard, Montgomery, AL 36116",
   phone: "334-286-1746",
   hours: "Monday \u2013 Friday, 8:00 AM \u2013 5:00 PM",
 } as const;
+
+export const CAREER_CENTER_TX = {
+  name: "Workforce Solutions for Tarrant County",
+  address: "1200 Circle Dr, Fort Worth, TX 76119",
+  phone: "817-413-4400",
+  hours: "Monday \u2013 Friday, 8:00 AM \u2013 5:00 PM",
+} as const;
+
+/** Get career center for active city. Defaults to Montgomery. */
+export function getCareerCenter(state?: string) {
+  return state === "TX" ? CAREER_CENTER_TX : CAREER_CENTER_AL;
+}
+
+/** @deprecated Use getCareerCenter instead */
+export const CAREER_CENTER = CAREER_CENTER_AL;
 
 export const INDUSTRY_OPTIONS = [
   { value: "healthcare", label: "Healthcare" },
@@ -111,7 +134,7 @@ export const READINESS_BAND_STYLES: Record<string, { bg: string; text: string; b
   strong: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20" },
 };
 
-export const PROGRAM_LABELS: Record<string, string> = {
+export const PROGRAM_LABELS_AL: Record<string, string> = {
   SNAP: "SNAP",
   TANF: "TANF",
   Medicaid: "Medicaid",
@@ -120,6 +143,24 @@ export const PROGRAM_LABELS: Record<string, string> = {
   Section_8: "Section 8",
   LIHEAP: "LIHEAP",
 };
+
+export const PROGRAM_LABELS_TX: Record<string, string> = {
+  SNAP: "SNAP",
+  TANF: "TANF",
+  Medicaid: "Medicaid",
+  CHIP: "CHIP",
+  Childcare_Subsidy: "Childcare",
+  Section_8: "Section 8",
+  CEAP: "CEAP",
+};
+
+/** Get program labels for active city. Defaults to Alabama. */
+export function getProgramLabels(state?: string): Record<string, string> {
+  return state === "TX" ? PROGRAM_LABELS_TX : PROGRAM_LABELS_AL;
+}
+
+/** @deprecated Use getProgramLabels instead */
+export const PROGRAM_LABELS = PROGRAM_LABELS_AL;
 
 export function formatDateRange(assessmentDate: string, startDay: number, endDay: number): string {
   const base = new Date(assessmentDate + "T00:00:00");

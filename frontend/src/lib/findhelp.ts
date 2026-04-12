@@ -34,5 +34,6 @@ export function generateFindhelpUrl(
   const path = FINDHELP_CATEGORIES[barrierType];
   if (!path) return null;
   if (!ZIP_RE.test(zipCode)) return null;
-  return `${BASE}/${path}--montgomery-al?postal=${zipCode}`;
+  const citySlug = zipCode.startsWith("761") ? "fort-worth-tx" : "montgomery-al";
+  return `${BASE}/${path}--${citySlug}?postal=${zipCode}`;
 }
