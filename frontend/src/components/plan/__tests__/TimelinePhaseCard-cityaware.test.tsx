@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { TimelinePhaseCard } from "../TimelinePhaseCard";
-import type { TimelinePhase } from "@/lib/types";
+import type { ActionItem, TimelinePhase } from "@/lib/types";
 
 // Mock useCityConfig to control state
 vi.mock("@/hooks/useCityConfig", () => ({
@@ -14,6 +14,20 @@ vi.mock("@/hooks/useCityConfig", () => ({
     loading: false,
   }),
 }));
+
+function makeAction(overrides: Partial<ActionItem>): ActionItem {
+  return {
+    title: "",
+    category: "job_application",
+    detail: null,
+    priority: 1,
+    source_module: "test",
+    resource_name: null,
+    resource_phone: null,
+    resource_address: null,
+    ...overrides,
+  };
+}
 
 function makePhase(overrides: Partial<TimelinePhase> = {}): TimelinePhase {
   return {
@@ -31,11 +45,11 @@ describe("TimelinePhaseCard city-aware links (TX)", () => {
     const user = userEvent.setup();
     const phase = makePhase({
       actions: [
-        {
+        makeAction({
           title: "Apply for Warehouse Associate at Amazon",
           category: "job_application",
-          priority: "high",
-        },
+          priority: 1,
+        }),
       ],
     });
 
@@ -49,11 +63,11 @@ describe("TimelinePhaseCard city-aware links (TX)", () => {
   it("renders career center link to Fort Worth address", async () => {
     const phase = makePhase({
       actions: [
-        {
+        makeAction({
           title: "Visit the Career Center",
           category: "career_center",
-          priority: "high",
-        },
+          priority: 1,
+        }),
       ],
     });
 
@@ -68,11 +82,11 @@ describe("TimelinePhaseCard city-aware links (TX)", () => {
   it("renders housing link to Fort Worth Housing Solutions", () => {
     const phase = makePhase({
       actions: [
-        {
+        makeAction({
           title: "Apply for housing assistance",
           category: "housing",
-          priority: "medium",
-        },
+          priority: 2,
+        }),
       ],
     });
 
@@ -85,11 +99,11 @@ describe("TimelinePhaseCard city-aware links (TX)", () => {
   it("renders childcare link to Texas TWC", () => {
     const phase = makePhase({
       actions: [
-        {
+        makeAction({
           title: "Apply for childcare assistance",
           category: "childcare",
-          priority: "medium",
-        },
+          priority: 2,
+        }),
       ],
     });
 
@@ -102,11 +116,11 @@ describe("TimelinePhaseCard city-aware links (TX)", () => {
   it("renders criminal record link to Legal Aid of NW Texas", () => {
     const phase = makePhase({
       actions: [
-        {
+        makeAction({
           title: "Contact legal services for expunction review",
           category: "criminal_record",
-          priority: "high",
-        },
+          priority: 1,
+        }),
       ],
     });
 
@@ -119,11 +133,11 @@ describe("TimelinePhaseCard city-aware links (TX)", () => {
   it("renders benefits link to YourTexasBenefits", () => {
     const phase = makePhase({
       actions: [
-        {
+        makeAction({
           title: "Apply for SNAP benefits",
           category: "benefits_enrollment",
-          priority: "high",
-        },
+          priority: 1,
+        }),
       ],
     });
 
