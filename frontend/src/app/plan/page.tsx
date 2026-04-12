@@ -23,6 +23,8 @@ import { ProgressSummary } from "@/components/plan/ProgressSummary";
 import { CareerCenterExport } from "@/components/plan/CareerCenterExport";
 import { EmailExport } from "@/components/plan/EmailExport";
 import { PlanExport } from "@/components/plan/PlanExport";
+import { SharePlanButton } from "@/components/plan/SharePlanButton";
+import { PlanInsights } from "@/components/plan/PlanInsights";
 import { EmptyState } from "@/components/EmptyState";
 import { BarrierIntelChat } from "@/components/barrier-intel/BarrierIntelChat";
 import { PlanTransition } from "@/components/plan/PlanTransition";
@@ -33,6 +35,12 @@ import { barrierCountToSeverity, getCareerCenter, mapsUrl, toTelHref } from "@/l
 import { useCityConfig } from "@/hooks/useCityConfig";
 
 const BARRIER_TYPE_VALUES = new Set<string>(Object.values(BarrierType));
+
+function fireConfetti(count: number, y: number) {
+  import("canvas-confetti").then((mod) => {
+    mod.default({ particleCount: count, spread: 70, origin: { y }, ticks: 300, gravity: 0.8, disableForReducedMotion: true, colors: ["#1e3a5f", "#2d9596", "#d4a843"] });
+  }).catch(() => {});
+}
 
 function buildProfileFromPlan(sessionId: string, barriers: string[]): UserProfile {
   const validBarriers = barriers.filter((b): b is BarrierType => BARRIER_TYPE_VALUES.has(b));
@@ -83,18 +91,7 @@ function PlanContent() {
   const handleTransitionComplete = useCallback(() => {
     setTransitionDone(true);
     window.scrollTo(0, 0);
-    // Fire confetti after transition reveals plan
-    if (!prefersReduced) {
-      setTimeout(() => {
-        import("canvas-confetti").then((mod) => {
-          mod.default({
-            particleCount: 80, spread: 70, origin: { y: 0.6 },
-            ticks: 300, gravity: 0.8, disableForReducedMotion: true,
-            colors: ["#1e3a5f", "#2d9596", "#d4a843"],
-          });
-        }).catch(() => {});
-      }, 300);
-    }
+    if (!prefersReduced) setTimeout(() => fireConfetti(80, 0.6), 300);
   }, [prefersReduced]);
 
   // --- Phase completion confetti ---
@@ -114,13 +111,7 @@ function PlanContent() {
           });
           if (allDone && phase.actions.length > 0) {
             completedPhasesRef.current.add(phase.phase_id);
-            import("canvas-confetti").then((mod) => {
-              mod.default({
-                particleCount: 50, spread: 60, origin: { y: 0.7 },
-                ticks: 200, gravity: 0.9, disableForReducedMotion: true,
-                colors: ["#1e3a5f", "#2d9596", "#d4a843"],
-              });
-            }).catch(() => {});
+            fireConfetti(50, 0.7);
           }
         }
       }
@@ -295,6 +286,11 @@ function PlanContent() {
         </>
       )}
 
+      {/* Barrier sequence + What Happens If simulator */}
+      {sessionId && token && data?.barriers?.length > 0 && (
+        <><Separator /><PlanInsights sessionId={sessionId} token={token} barriers={data.barriers} /></>
+      )}
+
       {/* Credit results */}
       {creditResult && (
         <>
@@ -362,6 +358,7 @@ function PlanContent() {
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <PlanExport plan={plan} creditResult={creditResult} feedbackToken={token} />
             <EmailExport sessionId={sessionId} token={token ?? undefined} />
+            {sessionId && token && <SharePlanButton sessionId={sessionId} token={token} />}
             <Button asChild variant="outline" size="sm">
               <a href="/assess">Start New Assessment</a>
             </Button>
