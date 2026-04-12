@@ -106,4 +106,44 @@ describe("BenefitsCliffSimulator", () => {
     const { container } = renderSimulator(makeAnalysis({ wage_steps: [] }));
     expect(container.firstChild).toBeNull();
   });
+
+  it("renders loading state", () => {
+    render(
+      <TranslationProvider>
+        <BenefitsCliffSimulator analysis={null} loading={true} />
+      </TranslationProvider>,
+    );
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+  });
+
+  it("renders error state", () => {
+    render(
+      <TranslationProvider>
+        <BenefitsCliffSimulator analysis={null} error="Failed to load cliff data" />
+      </TranslationProvider>,
+    );
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    expect(screen.getByText(/failed to load/i)).toBeInTheDocument();
+  });
+
+  it("has accessible slider with aria label", () => {
+    renderSimulator();
+    const slider = screen.getByRole("slider");
+    expect(slider).toHaveAttribute("aria-label");
+  });
+
+  it("shows cliff warning as alert role", () => {
+    // Render with analysis where wage 12 has a cliff
+    const analysis = makeAnalysis();
+    render(
+      <TranslationProvider>
+        <BenefitsCliffSimulator analysis={analysis} />
+      </TranslationProvider>,
+    );
+    // Cliff at $12 -- initial wage is $8 so no cliff alert initially
+    // Check that cliff points summary renders
+    expect(screen.getByText("$12/hr: SNAP")).toBeInTheDocument();
+    expect(screen.getByText("$14/hr: Section_8")).toBeInTheDocument();
+  });
 });

@@ -1,41 +1,48 @@
-"""Career pathway generation for Job Readiness Score."""
+"""Career pathway generation for Job Readiness Score.
+
+City-aware: uses resource_router for career center names.
+"""
 
 from app.modules.matching.job_readiness_types import (
     ReadinessFactor,
     ReadinessPathwayStep,
 )
+from app.modules.matching.resource_router import get_career_center
 from app.modules.matching.types import UserProfile
 
 _WEAK_THRESHOLD = 60
 
-# Map factor names to pathway step templates: (action, resource, days)
-_STEP_TEMPLATES: dict[str, tuple[str, str, int]] = {
-    "Skills Match": (
-        "Build job-relevant skills through training programs",
-        "Montgomery Career Center",
-        30,
-    ),
-    "Industry Alignment": (
-        "Explore target industries and identify transferable skills",
-        "AIDT (Alabama Industrial Development Training)",
-        14,
-    ),
-    "Barrier Resolution": (
-        "Address barriers with community resources in your plan",
-        "See barrier cards above",
-        60,
-    ),
-    "Work Experience": (
-        "Create or update your resume highlighting relevant experience",
-        "Montgomery Career Center resume workshop",
-        7,
-    ),
-    "Credit Readiness": (
-        "Follow your credit repair pathway to improve eligibility",
-        "See credit assessment results",
-        90,
-    ),
-}
+
+def _get_step_templates() -> dict[str, tuple[str, str, int]]:
+    """Return step templates using the active city's career center."""
+    cc = get_career_center()
+    return {
+        "Skills Match": (
+            "Build job-relevant skills through training programs",
+            cc.name,
+            30,
+        ),
+        "Industry Alignment": (
+            "Explore target industries and identify transferable skills",
+            cc.name,
+            14,
+        ),
+        "Barrier Resolution": (
+            "Address barriers with community resources in your plan",
+            "See barrier cards above",
+            60,
+        ),
+        "Work Experience": (
+            "Create or update your resume highlighting relevant experience",
+            f"{cc.name} resume workshop",
+            7,
+        ),
+        "Credit Readiness": (
+            "Follow your credit repair pathway to improve eligibility",
+            "See credit assessment results",
+            90,
+        ),
+    }
 
 
 def build_pathway(
@@ -50,9 +57,10 @@ def build_pathway(
     if not weak:
         return []
 
+    templates = _get_step_templates()
     steps: list[ReadinessPathwayStep] = []
     for i, factor in enumerate(weak, start=1):
-        template = _STEP_TEMPLATES.get(factor.name)
+        template = templates.get(factor.name)
         if template:
             action, resource, days = template
             steps.append(ReadinessPathwayStep(

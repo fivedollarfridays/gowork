@@ -7,11 +7,31 @@ type TranslationMap = Record<string, unknown>;
 
 const translations: Record<Locale, TranslationMap> = { en, es };
 
-let currentLocale: Locale = "en";
+const LOCALE_STORAGE_KEY = "montgowork-locale";
 
-/** Set the active locale. */
+function loadSavedLocale(): Locale {
+  if (typeof window === "undefined") return "en";
+  try {
+    const saved = localStorage.getItem(LOCALE_STORAGE_KEY);
+    if (saved === "en" || saved === "es") return saved;
+  } catch {
+    /* ignore storage errors */
+  }
+  return "en";
+}
+
+let currentLocale: Locale = loadSavedLocale();
+
+/** Set the active locale and persist to localStorage. */
 export function setLocale(locale: Locale): void {
   currentLocale = locale;
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+    } catch {
+      /* ignore storage errors */
+    }
+  }
 }
 
 /** Get the active locale. */

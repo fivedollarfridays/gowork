@@ -56,4 +56,17 @@ describe("i18n", () => {
       expect(en).not.toBe(es);
     });
   });
+
+  describe("locale persistence", () => {
+    it("persists locale to localStorage on setLocale", () => {
+      setLocale("es");
+      expect(localStorage.getItem("montgowork-locale")).toBe("es");
+    });
+
+    it("persists English locale to localStorage", () => {
+      setLocale("es");
+      setLocale("en");
+      expect(localStorage.getItem("montgowork-locale")).toBe("en");
+    });
+  });
 });
