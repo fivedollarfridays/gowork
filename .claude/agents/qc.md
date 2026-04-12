@@ -4,7 +4,6 @@ display_name: Divona
 description: QC testing specialist. Runs interactive browser-based regression tests via Chrome extension. Reads .qc.yaml suite specs, executes scenarios step-by-step, and produces structured pass/fail reports.
 tools: Read, Grep, Glob, Bash
 model: sonnet
-memory: project
 permissionMode: default
 skills:
   - running-qc
