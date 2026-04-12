@@ -10,11 +10,30 @@ import {
 } from "lucide-react";
 import type { BarrierSeverity, BarrierType, EmploymentStatus } from "./types";
 
-export const MONTGOMERY_ZIP_REGEX = /^361\d{2}$/;
+// Re-export city-specific constants so existing imports keep working.
+export {
+  MONTGOMERY_ZIP_REGEX,
+  FORT_WORTH_ZIP_REGEX,
+  isValidCityZip,
+  CAREER_CENTER_AL,
+  CAREER_CENTER_TX,
+  getCareerCenter,
+  PROGRAM_LABELS_AL,
+  PROGRAM_LABELS_TX,
+  getProgramLabels,
+  getCityLabel,
+  getCityAreaDescription,
+  getZipPlaceholder,
+  getZipErrorMessage,
+  getJobBoardUrl,
+  getLegalServicesUrl,
+  getHousingUrl,
+  getChildcareUrl,
+  getBenefitsFallbackUrl,
+} from "./city-constants";
 
-export function isValidMontgomeryZip(zip: string): boolean {
-  return MONTGOMERY_ZIP_REGEX.test(zip);
-}
+/** @deprecated Use isValidCityZip instead */
+export { isValidCityZip as isValidMontgomeryZip } from "./city-constants";
 
 export function barrierCountToSeverity(count: number): BarrierSeverity {
   if (count >= 3) return "high";
@@ -81,12 +100,8 @@ export function daysToMonths(days: number): string {
   return `~${months} month${months === 1 ? "" : "s"}`;
 }
 
-export const CAREER_CENTER = {
-  name: "Montgomery Career Center",
-  address: "1060 East South Boulevard, Montgomery, AL 36116",
-  phone: "334-286-1746",
-  hours: "Monday \u2013 Friday, 8:00 AM \u2013 5:00 PM",
-} as const;
+/** @deprecated Use getCareerCenter instead */
+export { CAREER_CENTER_AL as CAREER_CENTER } from "./city-constants";
 
 export const INDUSTRY_OPTIONS = [
   { value: "healthcare", label: "Healthcare" },
@@ -111,15 +126,8 @@ export const READINESS_BAND_STYLES: Record<string, { bg: string; text: string; b
   strong: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20" },
 };
 
-export const PROGRAM_LABELS: Record<string, string> = {
-  SNAP: "SNAP",
-  TANF: "TANF",
-  Medicaid: "Medicaid",
-  ALL_Kids: "ALL Kids",
-  Childcare_Subsidy: "Childcare",
-  Section_8: "Section 8",
-  LIHEAP: "LIHEAP",
-};
+/** @deprecated Use getProgramLabels instead */
+export { PROGRAM_LABELS_AL as PROGRAM_LABELS } from "./city-constants";
 
 export function formatDateRange(assessmentDate: string, startDay: number, endDay: number): string {
   const base = new Date(assessmentDate + "T00:00:00");

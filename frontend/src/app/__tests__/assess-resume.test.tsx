@@ -30,7 +30,7 @@ function renderWithClient(ui: React.ReactElement) {
 
 async function advanceToResumeStep(user: ReturnType<typeof userEvent.setup>) {
   renderWithClient(<AssessPage />);
-  const zipInput = screen.getByLabelText(/montgomery zip/i);
+  const zipInput = screen.getByLabelText(/zip code/i);
   await user.type(zipInput, "36104");
   // Step 1 -> 2 (Resume)
   await user.click(screen.getByRole("button", { name: /go to step 2/i }));

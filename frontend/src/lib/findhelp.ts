@@ -34,5 +34,5 @@ export function generateFindhelpUrl(
   const path = FINDHELP_CATEGORIES[barrierType];
   if (!path) return null;
   if (!ZIP_RE.test(zipCode)) return null;
-  return `${BASE}/${path}--montgomery-al?postal=${zipCode}`;
+  return `${BASE}/${path}?postal=${zipCode}`;
 }
