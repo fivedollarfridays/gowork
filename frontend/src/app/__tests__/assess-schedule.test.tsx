@@ -37,7 +37,7 @@ async function advanceToScheduleStep(user: ReturnType<typeof userEvent.setup>) {
   renderWithClient(<AssessPage />);
 
   // Step 1: Enter valid ZIP
-  const zipInput = screen.getByLabelText(/montgomery zip/i);
+  const zipInput = screen.getByLabelText(/zip code/i);
   await user.type(zipInput, "36104");
 
   // Step 1 -> 2 (Resume)
@@ -95,7 +95,7 @@ describe("AssessPage schedule step", () => {
     // Use a flow WITHOUT credit barrier to simplify navigation
     renderWithClient(<AssessPage />);
 
-    const zipInput = screen.getByLabelText(/montgomery zip/i);
+    const zipInput = screen.getByLabelText(/zip code/i);
     await user.type(zipInput, "36104");
 
     // Step 1 -> 2 (Resume)

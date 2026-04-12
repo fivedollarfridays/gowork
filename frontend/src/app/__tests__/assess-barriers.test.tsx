@@ -36,7 +36,7 @@ describe("AssessPage barrier guidance", () => {
     renderWithClient(<AssessPage />);
 
     // Enter valid ZIP to advance past Basic Info
-    const zipInput = screen.getByLabelText(/montgomery zip/i);
+    const zipInput = screen.getByLabelText(/zip code/i);
     await user.type(zipInput, "36104");
 
     // Step 1 -> 2 (Resume)
@@ -55,7 +55,7 @@ describe("AssessPage barrier guidance", () => {
     renderWithClient(<AssessPage />);
 
     // Enter valid ZIP
-    const zipInput = screen.getByLabelText(/montgomery zip/i);
+    const zipInput = screen.getByLabelText(/zip code/i);
     await user.type(zipInput, "36104");
 
     // Navigate to Barriers step (step 3)

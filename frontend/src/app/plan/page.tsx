@@ -29,7 +29,8 @@ import { PlanTransition } from "@/components/plan/PlanTransition";
 import { PlanSkeleton } from "@/components/plan/PlanSkeleton";
 import { BarrierType, EmploymentStatus, AvailableHours } from "@/lib/types";
 import type { CreditAssessmentResult, UserProfile } from "@/lib/types";
-import { barrierCountToSeverity, CAREER_CENTER, mapsUrl, toTelHref } from "@/lib/constants";
+import { barrierCountToSeverity, getCareerCenter, mapsUrl, toTelHref } from "@/lib/constants";
+import { useCityConfig } from "@/hooks/useCityConfig";
 
 const BARRIER_TYPE_VALUES = new Set<string>(Object.values(BarrierType));
 
@@ -55,6 +56,8 @@ function buildProfileFromPlan(sessionId: string, barriers: string[]): UserProfil
 function PlanContent() {
   const { id: sessionId, ready: sessionReady } = useSessionId();
   const { token, ready: tokenReady } = useToken(sessionId);
+  const city = useCityConfig();
+  const careerCenter = getCareerCenter(city.state);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["plan", sessionId, token],
@@ -328,30 +331,30 @@ function PlanContent() {
         <CardContent className="space-y-4">
           <ol className="list-decimal list-inside space-y-3 text-sm">
             <li><strong>Download your Career Center Ready Package</strong> <span className="text-muted-foreground">using the button in Step 1 above.</span></li>
-            <li><strong>Bring this plan to the Montgomery Career Center:</strong></li>
+            <li><strong>Bring this plan to the {careerCenter.name}:</strong></li>
           </ol>
           <div className="ml-6 space-y-1.5 text-sm text-muted-foreground">
             <p className="flex items-center gap-2">
               <MapPin className="h-4 w-4 shrink-0" />
               <a
-                href={mapsUrl(CAREER_CENTER.address)}
+                href={mapsUrl(careerCenter.address)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline hover:text-foreground transition-colors"
               >
-                {CAREER_CENTER.address}
+                {careerCenter.address}
               </a>
             </p>
             <p className="flex items-center gap-2">
               <Phone className="h-4 w-4 shrink-0" />
               <a
-                href={toTelHref(CAREER_CENTER.phone)}
+                href={toTelHref(careerCenter.phone)}
                 className="underline hover:text-foreground transition-colors"
               >
-                {CAREER_CENTER.phone}
+                {careerCenter.phone}
               </a>
             </p>
-            <p className="flex items-center gap-2"><Clock className="h-4 w-4 shrink-0" /> {CAREER_CENTER.hours}</p>
+            <p className="flex items-center gap-2"><Clock className="h-4 w-4 shrink-0" /> {careerCenter.hours}</p>
           </div>
           <ol start={3} className="list-decimal list-inside space-y-3 text-sm">
             <li><strong>Ask for a case manager</strong> and show them your Career Center Ready Package.</li>

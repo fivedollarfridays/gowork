@@ -17,7 +17,8 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import type { BarrierCard as BarrierCardType } from "@/lib/types";
-import { BARRIER_ICONS, SEVERITY_BADGE_STYLES, STATUS_BADGE_STYLES, humanizeLabel, mapsUrl, toTelHref } from "@/lib/constants";
+import { BARRIER_ICONS, SEVERITY_BADGE_STYLES, STATUS_BADGE_STYLES, humanizeLabel, mapsUrl, toTelHref, getLegalServicesUrl } from "@/lib/constants";
+import { useCityConfig } from "@/hooks/useCityConfig";
 import { submitResourceFeedback } from "@/lib/api";
 import { EligibilityBadge } from "./EligibilityBadge";
 import { FindhelpLink } from "./FindhelpLink";
@@ -44,6 +45,7 @@ interface BarrierCardViewProps {
 }
 
 export function BarrierCardView({ barrier, sessionId, token, zipCode }: BarrierCardViewProps) {
+  const city = useCityConfig();
   const [expanded, setExpanded] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackState>(() =>
     sessionId ? loadFeedbackState(sessionId, barrier.resources.map((r) => r.id)) : {},
@@ -155,7 +157,11 @@ export function BarrierCardView({ barrier, sessionId, token, zipCode }: BarrierC
                 </p>
               )}
               <p className="text-xs text-muted-foreground italic">
-                This is not legal advice. Consult Legal Services Alabama for a formal assessment.
+                This is not legal advice. Consult{" "}
+                <a href={getLegalServicesUrl(city.state)} target="_blank" rel="noopener noreferrer" className="underline">
+                  {city.state === "TX" ? "Legal Aid of NorthWest Texas" : "Legal Services Alabama"}
+                </a>{" "}
+                for a formal assessment.
               </p>
             </div>
           </>
