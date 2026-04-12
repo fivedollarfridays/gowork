@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { TimelinePhaseCard } from "../TimelinePhaseCard";
-import type { TimelinePhase } from "@/lib/types";
+import type { ActionItem, TimelinePhase } from "@/lib/types";
 
 // Mock useCityConfig for Alabama (default)
 vi.mock("@/hooks/useCityConfig", () => ({
@@ -13,6 +13,20 @@ vi.mock("@/hooks/useCityConfig", () => ({
     loading: false,
   }),
 }));
+
+function makeAction(overrides: Partial<ActionItem>): ActionItem {
+  return {
+    title: "",
+    category: "job_application",
+    detail: null,
+    priority: 1,
+    source_module: "test",
+    resource_name: null,
+    resource_phone: null,
+    resource_address: null,
+    ...overrides,
+  };
+}
 
 function makePhase(overrides: Partial<TimelinePhase> = {}): TimelinePhase {
   return {
@@ -29,11 +43,11 @@ describe("TimelinePhaseCard AL regression", () => {
   it("renders job application link to Alabama JobLink", () => {
     const phase = makePhase({
       actions: [
-        {
+        makeAction({
           title: "Apply for Healthcare Aide",
           category: "job_application",
-          priority: "high",
-        },
+          priority: 1,
+        }),
       ],
     });
 
@@ -46,11 +60,11 @@ describe("TimelinePhaseCard AL regression", () => {
   it("renders career center link to Montgomery address", () => {
     const phase = makePhase({
       actions: [
-        {
+        makeAction({
           title: "Visit the Career Center",
           category: "career_center",
-          priority: "high",
-        },
+          priority: 1,
+        }),
       ],
     });
 
@@ -63,11 +77,11 @@ describe("TimelinePhaseCard AL regression", () => {
   it("renders housing link to HAMD for AL", () => {
     const phase = makePhase({
       actions: [
-        {
+        makeAction({
           title: "Apply for housing",
           category: "housing",
-          priority: "medium",
-        },
+          priority: 2,
+        }),
       ],
     });
 
@@ -80,11 +94,11 @@ describe("TimelinePhaseCard AL regression", () => {
   it("renders childcare link to Alabama DHR for AL", () => {
     const phase = makePhase({
       actions: [
-        {
+        makeAction({
           title: "Apply for childcare",
           category: "childcare",
-          priority: "medium",
-        },
+          priority: 2,
+        }),
       ],
     });
 
@@ -97,11 +111,11 @@ describe("TimelinePhaseCard AL regression", () => {
   it("renders criminal record link to Legal Services Alabama for AL", () => {
     const phase = makePhase({
       actions: [
-        {
+        makeAction({
           title: "Contact legal services about expungement",
           category: "criminal_record",
-          priority: "high",
-        },
+          priority: 1,
+        }),
       ],
     });
 
