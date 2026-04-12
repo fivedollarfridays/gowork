@@ -3,27 +3,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { BarChart3, Users, Shield } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
-interface DashboardStats {
-  total_assessments: number;
-  common_barriers: Array<{ barrier: string; count: number }>;
-  total_barrier_instances: number;
-}
+import { getDashboardStats } from "@/lib/api";
 
 function humanize(id: string): string {
   return id.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 export default function CaseManagerPage() {
-  const { data, isLoading, error } = useQuery<DashboardStats>({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["dashboard-stats"],
-    queryFn: async () => {
-      const res = await fetch(`${API_BASE}/api/dashboard/stats`);
-      if (!res.ok) throw new Error("Failed to fetch stats");
-      return res.json();
-    },
+    queryFn: getDashboardStats,
   });
 
   return (
