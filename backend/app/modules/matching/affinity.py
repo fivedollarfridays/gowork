@@ -1,6 +1,11 @@
-"""Resource affinity routing — specialized resources claim their barrier card."""
+"""Resource affinity routing -- specialized resources claim their barrier card.
 
-from app.modules.matching.career_center_package import CAREER_CENTER
+City-aware: uses resource_router for affinity keywords at call time.
+Module-level constants are Montgomery defaults (used by resource_router
+for Montgomery routing).
+"""
+
+from app.modules.matching.resource_router import get_resource_affinity
 from app.modules.matching.scoring import BARRIER_CATEGORY_MAP
 from app.modules.matching.types import BarrierType, Resource
 
@@ -15,7 +20,7 @@ BARRIER_PROCESSING_ORDER: list[BarrierType] = [
     BarrierType.CRIMINAL_RECORD,
 ]
 
-# Resource name keywords → designated barrier type
+# Montgomery resource name keywords (legacy -- resource_router imports this)
 RESOURCE_AFFINITY: dict[str, BarrierType] = {
     "mats": BarrierType.TRANSPORTATION,
     "montgomery area transit": BarrierType.TRANSPORTATION,
@@ -32,8 +37,10 @@ RESOURCE_AFFINITY: dict[str, BarrierType] = {
     "expungement": BarrierType.CRIMINAL_RECORD,
 }
 
+# Montgomery career center step (legacy -- resource_router imports this)
 CAREER_CENTER_STEP = (
-    f"{CAREER_CENTER.name}, {CAREER_CENTER.phone}, {CAREER_CENTER.address}"
+    "Montgomery Career Center, 334-286-1746, "
+    "1060 East South Boulevard, Montgomery, AL 36116"
 )
 
 
@@ -43,9 +50,13 @@ def is_career_center(resource: Resource) -> bool:
 
 
 def get_affinity_barrier(resource: Resource) -> BarrierType | None:
-    """Return the designated barrier type for an affinity resource, or None."""
+    """Return the designated barrier type for an affinity resource, or None.
+
+    Uses city-aware affinity keywords from the resource router.
+    """
+    affinity = get_resource_affinity()
     name_lower = resource.name.lower()
-    for keyword, barrier in RESOURCE_AFFINITY.items():
+    for keyword, barrier in affinity.items():
         if keyword in name_lower:
             return barrier
     return None

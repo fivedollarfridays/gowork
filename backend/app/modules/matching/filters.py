@@ -162,11 +162,17 @@ def apply_childcare_filter(
 def get_certification_renewal(
     work_history: str, certifications: list[dict] | None = None,
 ) -> list[dict]:
-    """Identify certifications in work history and return renewal pathways."""
+    """Identify certifications in work history and return renewal pathways.
+
+    Uses city-aware cert database from resource_router.
+    """
+    from app.modules.matching.resource_router import get_cert_db
+
+    city_cert_db = get_cert_db()
     results = []
     text_upper = work_history.upper()
 
-    for cert_type, info in CERT_DB.items():
+    for cert_type, info in city_cert_db.items():
         if cert_type in text_upper:
             results.append({
                 "certification_type": cert_type,

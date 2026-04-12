@@ -4,7 +4,6 @@ display_name: Bellona
 description: Pre-execution security gatekeeper. Use before running commands, committing code, or creating PRs. Reviews for security issues and blocks dangerous operations. SOC2 compliance focused.
 tools: Read, Grep, Glob, Bash
 model: sonnet
-memory: project
 permissionMode: plan
 ---
 

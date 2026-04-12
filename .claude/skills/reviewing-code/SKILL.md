@@ -21,22 +21,6 @@ git diff main...HEAD --stat
 git diff main...HEAD
 ```
 
-## Multi-Agent Review
-
-**Always dispatch both agents in parallel on every PR:**
-
-1. **Reviewer agent** -- correctness, architecture, test coverage, style
-2. **Security-auditor agent** -- vulnerabilities, operational risks (timeouts, resource leaks, error handling at boundaries), secrets
-
-All P0-P2 findings from BOTH agents must be resolved before merge.
-
-**For large PRs (>500 lines changed or >10 files), dispatch additional scoped reviewers:**
-
-3. **Second reviewer** -- focused on cross-module interactions, invariant fragility, operational scenarios (batch mode behavior, error propagation at pipeline boundaries)
-4. **If domain-specific changes:** reviewer scoped to that domain (e.g., audio pipeline correctness, auth flows, distribution contracts)
-
-Each additional reviewer gets a focused prompt describing their specific lens. Findings from all agents are merged into a single review.
-
 ## Review Output Format
 
 ```markdown

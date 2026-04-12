@@ -11,8 +11,10 @@ from app.modules.matching.career_center_types import (
     ResidentActionPlan,
     StaffSummary,
 )
+from app.modules.matching.resource_router import get_career_center
 from app.modules.matching.types import BarrierType, EmploymentStatus, ReEntryPlan, UserProfile, WIOAEligibility
 
+# Legacy constant for backward compatibility (resource_router imports this)
 CAREER_CENTER = CareerCenterInfo(
     name="Montgomery Career Center",
     phone="334-286-1746",
@@ -143,7 +145,7 @@ def assemble_package(
             work_history=profile.work_history,
             what_to_say=_build_what_to_say(profile, wioa),
             what_to_expect=_WHAT_TO_EXPECT,
-            career_center=CAREER_CENTER,
+            career_center=get_career_center(),
             programs=_build_programs(wioa),
             action_timeline=timeline,
         ),
