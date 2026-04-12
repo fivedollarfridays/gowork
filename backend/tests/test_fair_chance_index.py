@@ -29,4 +29,4 @@ class TestFairChanceIndex:
         from app.modules.criminal.fair_chance_index import load_employers
 
         employers = load_employers("nonexistent-city")
-        assert employers == []
+        assert len(employers) == 0

@@ -87,8 +87,6 @@ class USAJobsJobAdapter:
         self, session: AsyncSession, query: str, location: str,
     ) -> list[dict]:
         """Fetch jobs from USAJobs. Returns empty list on failure."""
-        if not _get_api_key():
-            return []
         try:
             return await _fetch_usajobs(query, location)
         except Exception:
