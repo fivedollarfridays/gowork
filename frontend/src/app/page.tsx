@@ -8,6 +8,8 @@ import {
   ScrollReveal, StaggerContainer, StaggerItem,
   Typewriter, AnimatedCounter,
 } from "@/lib/motion";
+import { useCityConfig } from "@/hooks/useCityConfig";
+import { getCityStats } from "@/lib/city-stats";
 
 const FLOW_STEPS = [
   {
@@ -27,13 +29,16 @@ const FLOW_STEPS = [
   },
 ];
 
-const STATS = [
-  { value: 20.9, suffix: "%", decimals: 1, label: "Poverty Rate" },
-  { value: 57.4, suffix: "%", decimals: 1, label: "Labor Participation" },
-  { value: 36, suffix: "K+", decimals: 0, label: "Residents Served Area" },
-];
-
 export default function Home() {
+  const city = useCityConfig();
+  const stats = getCityStats(city.state);
+
+  const STATS = [
+    { value: stats.povertyRate, suffix: "%", decimals: 1, label: "Poverty Rate" },
+    { value: stats.laborParticipation, suffix: "%", decimals: 1, label: "Labor Participation" },
+    { value: stats.populationValue, suffix: stats.populationLabel.replace(String(stats.populationValue), ""), decimals: 0, label: stats.populationDesc },
+  ];
+
   return (
     <main className="flex flex-col">
       {/* Hero */}
@@ -89,14 +94,14 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Montgomery stats */}
+      {/* City stats — powered by city config */}
       <section className="px-4 py-10">
         <div className="mx-auto max-w-4xl text-center">
           <h2 className="text-2xl font-semibold text-primary mb-2">
             By the Numbers
           </h2>
           <p className="text-muted-foreground mb-6">
-            Understanding the workforce landscape we are built to serve
+            Understanding the workforce landscape in {stats.cityName}
           </p>
           <div className="grid gap-6 sm:grid-cols-3">
             {STATS.map((stat) => (
