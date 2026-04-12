@@ -93,3 +93,102 @@ class TestSequenceEndpoint:
             assert "unlocks" in step
             assert "barrier_name" in step
             assert "category" in step
+
+    @pytest.mark.anyio
+    async def test_single_barrier(self, client, test_engine):
+        """A single barrier produces exactly one step."""
+        sid = "00000000-0000-4000-8000-5e00e0000005"
+        tok = await _seed_session_with_barriers(
+            test_engine, sid, ["credit"],
+            auth_token="seq-tok-5",
+        )
+        resp = await client.get(f"/api/plan/{sid}/sequence?token={tok}")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["total_barriers"] == 1
+        assert len(data["steps"]) == 1
+        assert data["steps"][0]["barrier_id"] == "credit"
+
+    @pytest.mark.anyio
+    async def test_all_seven_barrier_types(self, client, test_engine):
+        """All 7 standard barrier types are accepted and sequenced."""
+        sid = "00000000-0000-4000-8000-5e00e0000006"
+        all_barriers = [
+            "criminal_record", "credit", "transportation",
+            "childcare", "housing", "health", "training",
+        ]
+        tok = await _seed_session_with_barriers(
+            test_engine, sid, all_barriers, auth_token="seq-tok-6",
+        )
+        resp = await client.get(f"/api/plan/{sid}/sequence?token={tok}")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["total_barriers"] == 7
+        assert len(data["steps"]) == 7
+        returned_ids = {s["barrier_id"] for s in data["steps"]}
+        assert returned_ids == set(all_barriers)
+
+    @pytest.mark.anyio
+    async def test_unknown_barrier_excluded(self, client, test_engine):
+        """Barriers not in the graph mapping are silently excluded."""
+        sid = "00000000-0000-4000-8000-5e00e0000007"
+        tok = await _seed_session_with_barriers(
+            test_engine, sid, ["credit", "unknown_type"],
+            auth_token="seq-tok-7",
+        )
+        resp = await client.get(f"/api/plan/{sid}/sequence?token={tok}")
+        assert resp.status_code == 200
+        data = resp.json()
+        # unknown_type is not mapped, so only credit appears
+        returned_ids = [s["barrier_id"] for s in data["steps"]]
+        assert "credit" in returned_ids
+        assert "unknown_type" not in returned_ids
+
+    @pytest.mark.anyio
+    async def test_no_cycles_for_standard_barriers(self, client, test_engine):
+        """Standard barrier sets should not produce cycles."""
+        sid = "00000000-0000-4000-8000-5e00e0000008"
+        tok = await _seed_session_with_barriers(
+            test_engine, sid, ["criminal_record", "credit", "transportation"],
+            auth_token="seq-tok-8",
+        )
+        resp = await client.get(f"/api/plan/{sid}/sequence?token={tok}")
+        data = resp.json()
+        assert data["has_cycles"] is False
+
+    @pytest.mark.anyio
+    async def test_session_not_found_returns_404(self, client, test_engine):
+        """Requesting sequence for non-existent session returns error."""
+        resp = await client.get(
+            "/api/plan/00000000-0000-4000-8000-5e00e0000099/sequence?token=bad"
+        )
+        assert resp.status_code in (401, 404)
+
+    @pytest.mark.anyio
+    async def test_response_includes_estimated_total_weeks(self, client, test_engine):
+        """Sequence response includes an estimated total timeline in weeks."""
+        sid = "00000000-0000-4000-8000-5e00e000000a"
+        tok = await _seed_session_with_barriers(
+            test_engine, sid, ["criminal_record", "credit"],
+            auth_token="seq-tok-a",
+        )
+        resp = await client.get(f"/api/plan/{sid}/sequence?token={tok}")
+        data = resp.json()
+        assert "estimated_total_weeks" in data
+        assert isinstance(data["estimated_total_weeks"], int)
+        assert data["estimated_total_weeks"] > 0
+
+    @pytest.mark.anyio
+    async def test_steps_include_estimated_weeks(self, client, test_engine):
+        """Each step includes an estimated_weeks field."""
+        sid = "00000000-0000-4000-8000-5e00e000000b"
+        tok = await _seed_session_with_barriers(
+            test_engine, sid, ["credit", "housing"],
+            auth_token="seq-tok-b",
+        )
+        resp = await client.get(f"/api/plan/{sid}/sequence?token={tok}")
+        data = resp.json()
+        for step in data["steps"]:
+            assert "estimated_weeks" in step
+            assert isinstance(step["estimated_weeks"], int)
+            assert step["estimated_weeks"] > 0

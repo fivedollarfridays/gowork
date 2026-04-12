@@ -129,6 +129,49 @@
     "expiredOrInvalid": "This shared plan link has expired or is invalid.",
     "generatedOn": "Generated on",
     "copyLink": "Copy Link",
-    "copied": "Copied!"
+    "copied": "Copied!",
+    "shareButton": "Share Plan",
+    "sharing": "Sharing...",
+    "shareFailed": "Failed"
+  },
+  "sequence": {
+    "heading": "Barrier Resolution Order",
+    "description": "Resolve barriers in this order to maximize cascading benefits",
+    "noBarriers": "No barriers identified -- you are ready to move forward!",
+    "estimatedTotal": "Estimated total",
+    "weeks": "weeks",
+    "unlocks": "Unlocks",
+    "cycleWarning": "Cycle detected"
+  },
+  "simulator": {
+    "heading": "What Happens If...?",
+    "description": "Toggle barriers to see the cascading effect on your job matches and benefits",
+    "noBarriers": "No barriers identified to simulate.",
+    "reset": "Reset",
+    "calculating": "Calculating impact...",
+    "jobsAccessible": "Additional jobs accessible",
+    "benefitsUnlocked": "Benefits unlocked",
+    "cascadingUnlocks": "Cascading unlocks",
+    "summarySentence": "Resolving these barriers unlocks more jobs and benefits."
+  },
+  "voice": {
+    "startVoice": "Voice",
+    "stopVoice": "Stop",
+    "listening": "Listening...",
+    "unsupported": "Voice input not supported in this browser. Try Chrome or Edge."
+  },
+  "dashboard": {
+    "heading": "Case Manager Dashboard",
+    "description": "Aggregate metrics from MontGoWork assessments",
+    "totalAssessments": "Total Assessments",
+    "barrierInstances": "Barrier Instances",
+    "avgBarriers": "Avg Barriers/Person",
+    "commonBarriers": "Most Common Barriers",
+    "loadingStats": "Loading stats...",
+    "loadFailed": "Failed to load dashboard data."
+  },
+  "outcomes": {
+    "assessmentsCompleted": "assessments completed",
+    "improvingRecommendations": "barrier intelligence improving recommendations"
   }
 }

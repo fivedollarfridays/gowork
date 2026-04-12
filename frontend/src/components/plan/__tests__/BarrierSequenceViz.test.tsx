@@ -70,4 +70,51 @@ describe("BarrierSequenceViz", () => {
     expect(screen.getByText(/File for nondisclosure/i)).toBeInTheDocument();
     expect(screen.getByText(/Apply for childcare subsidy/i)).toBeInTheDocument();
   });
+
+  it("renders aria-labels on each step", () => {
+    render(<BarrierSequenceViz sequence={SAMPLE_SEQUENCE} />);
+    expect(screen.getByLabelText(/Step 1: Criminal Record/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Step 2: Childcare/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Step 3: Training/i)).toBeInTheDocument();
+  });
+
+  it("shows estimated weeks per step when available", () => {
+    const withWeeks = {
+      ...SAMPLE_SEQUENCE,
+      steps: SAMPLE_SEQUENCE.steps.map((s, i) => ({
+        ...s,
+        estimated_weeks: [12, 6, 8][i],
+      })),
+      estimated_total_weeks: 26,
+    };
+    render(<BarrierSequenceViz sequence={withWeeks} />);
+    expect(screen.getByText(/~12 weeks/i)).toBeInTheDocument();
+    expect(screen.getByText(/~6 weeks/i)).toBeInTheDocument();
+    expect(screen.getByText(/~8 weeks/i)).toBeInTheDocument();
+  });
+
+  it("shows total timeline estimate", () => {
+    const withTotal = {
+      ...SAMPLE_SEQUENCE,
+      estimated_total_weeks: 24,
+    };
+    render(<BarrierSequenceViz sequence={withTotal} />);
+    expect(screen.getByText(/~24 weeks/i)).toBeInTheDocument();
+  });
+
+  it("applies urgency color coding for legal category", () => {
+    render(<BarrierSequenceViz sequence={SAMPLE_SEQUENCE} />);
+    // Legal category (criminal_record) should have destructive/red styling
+    const legalBadge = screen.getByText("legal");
+    expect(legalBadge.className).toMatch(/destructive/);
+  });
+
+  it("renders cycle warning with aria-label", () => {
+    const cycleData: BarrierSequenceData = {
+      ...SAMPLE_SEQUENCE,
+      has_cycles: true,
+    };
+    render(<BarrierSequenceViz sequence={cycleData} />);
+    expect(screen.getByLabelText(/Cycle detected/i)).toBeInTheDocument();
+  });
 });

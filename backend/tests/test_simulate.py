@@ -105,3 +105,95 @@ class TestSimulateEndpoint:
             },
         )
         assert resp.status_code == 401
+
+
+class TestSimulateEdgeCases:
+    """Edge cases and enhancements for the simulator."""
+
+    @pytest.mark.anyio
+    async def test_all_seven_barrier_types(self, client, test_engine):
+        """Resolving all 7 barriers returns impact for each."""
+        sid = "00000000-0000-4000-8000-51a000000005"
+        all_barriers = [
+            "criminal_record", "credit", "transportation",
+            "childcare", "housing", "health", "training",
+        ]
+        tok = await _seed_session(
+            test_engine, sid, all_barriers, auth_token="sim-tok-5",
+        )
+        resp = await client.post(
+            f"/api/simulate?token={tok}",
+            json={"session_id": sid, "resolved_barriers": all_barriers},
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert len(data["barriers_remaining"]) == 0
+        assert data["jobs_unlocked_estimate"] > 0
+        assert len(data["benefits_unlocked"]) > 0
+
+    @pytest.mark.anyio
+    async def test_unknown_barrier_type_gets_default_estimate(self, client, test_engine):
+        """Unknown barrier types get a default jobs estimate (3)."""
+        sid = "00000000-0000-4000-8000-51a000000006"
+        tok = await _seed_session(
+            test_engine, sid, ["credit", "unknown_thing"],
+            auth_token="sim-tok-6",
+        )
+        resp = await client.post(
+            f"/api/simulate?token={tok}",
+            json={"session_id": sid, "resolved_barriers": ["unknown_thing"]},
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        # Default is 3 jobs for unknown barriers
+        assert data["jobs_unlocked_estimate"] == 3
+
+    @pytest.mark.anyio
+    async def test_benefits_per_barrier_type(self, client, test_engine):
+        """Each resolved barrier type yields specific benefits."""
+        sid = "00000000-0000-4000-8000-51a000000007"
+        tok = await _seed_session(
+            test_engine, sid, ["childcare", "transportation"],
+            auth_token="sim-tok-7",
+        )
+        resp = await client.post(
+            f"/api/simulate?token={tok}",
+            json={"session_id": sid, "resolved_barriers": ["childcare"]},
+        )
+        data = resp.json()
+        assert "Childcare subsidy" in data["benefits_unlocked"]
+        assert "Head Start" in data["benefits_unlocked"]
+
+    @pytest.mark.anyio
+    async def test_sequence_after_has_only_remaining(self, client, test_engine):
+        """The sequence_after field reflects only remaining barriers."""
+        sid = "00000000-0000-4000-8000-51a000000008"
+        tok = await _seed_session(
+            test_engine, sid, ["criminal_record", "credit", "transportation"],
+            auth_token="sim-tok-8",
+        )
+        resp = await client.post(
+            f"/api/simulate?token={tok}",
+            json={"session_id": sid, "resolved_barriers": ["criminal_record"]},
+        )
+        data = resp.json()
+        after_ids = {s["barrier_id"] for s in data["sequence_after"]["steps"]}
+        assert "criminal_record" not in after_ids
+        assert "credit" in after_ids
+        assert "transportation" in after_ids
+
+    @pytest.mark.anyio
+    async def test_response_includes_confidence(self, client, test_engine):
+        """Response includes confidence level for impact estimates."""
+        sid = "00000000-0000-4000-8000-51a000000009"
+        tok = await _seed_session(
+            test_engine, sid, ["credit", "transportation"],
+            auth_token="sim-tok-9",
+        )
+        resp = await client.post(
+            f"/api/simulate?token={tok}",
+            json={"session_id": sid, "resolved_barriers": ["credit"]},
+        )
+        data = resp.json()
+        assert "confidence" in data
+        assert data["confidence"] in ("low", "medium", "high")

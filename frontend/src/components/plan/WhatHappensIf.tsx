@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Zap, TrendingUp, Briefcase, Gift } from "lucide-react";
+import { Zap, TrendingUp, Briefcase, Gift, Loader2, RotateCcw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 export interface SimulationResults {
   barriers_resolved: string[];
@@ -22,10 +23,27 @@ interface Props {
   barriers: string[];
   onSimulate: (resolved: string[]) => void;
   simulationResults?: SimulationResults;
+  isLoading?: boolean;
 }
 
 function humanizeBarrier(id: string): string {
   return id.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function SummarySentence({ results }: { results: SimulationResults }) {
+  const count = results.barriers_resolved.length;
+  if (count === 0) return null;
+
+  return (
+    <p className="text-sm font-medium text-foreground mt-3" role="status">
+      Resolving these {count} barrier{count > 1 ? "s" : ""} unlocks{" "}
+      <strong>+{results.jobs_unlocked_estimate}</strong> more jobs
+      {results.benefits_unlocked.length > 0 && (
+        <> and <strong>{results.benefits_unlocked.length}</strong> benefits</>
+      )}
+      .
+    </p>
+  );
 }
 
 function ImpactSummary({ results }: { results: SimulationResults }) {
@@ -70,11 +88,13 @@ function ImpactSummary({ results }: { results: SimulationResults }) {
           </div>
         </div>
       )}
+
+      <SummarySentence results={results} />
     </div>
   );
 }
 
-export function WhatHappensIf({ barriers, onSimulate, simulationResults }: Props) {
+export function WhatHappensIf({ barriers, onSimulate, simulationResults, isLoading }: Props) {
   const [resolved, setResolved] = useState<Set<string>>(new Set());
 
   const handleToggle = useCallback(
@@ -93,6 +113,11 @@ export function WhatHappensIf({ barriers, onSimulate, simulationResults }: Props
     [onSimulate],
   );
 
+  const handleReset = useCallback(() => {
+    setResolved(new Set());
+    onSimulate([]);
+  }, [onSimulate]);
+
   if (barriers.length === 0) {
     return (
       <Card>
@@ -108,10 +133,23 @@ export function WhatHappensIf({ barriers, onSimulate, simulationResults }: Props
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Zap className="h-5 w-5 text-secondary" />
-          What Happens If...?
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Zap className="h-5 w-5 text-secondary" />
+            What Happens If...?
+          </CardTitle>
+          {resolved.size > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleReset}
+              aria-label="Reset all toggles"
+            >
+              <RotateCcw className="h-3.5 w-3.5 mr-1" />
+              Reset
+            </Button>
+          )}
+        </div>
         <p className="text-sm text-muted-foreground">
           Toggle barriers to see the cascading effect on your job matches and benefits
         </p>
@@ -146,7 +184,14 @@ export function WhatHappensIf({ barriers, onSimulate, simulationResults }: Props
           ))}
         </div>
 
-        {simulationResults && <ImpactSummary results={simulationResults} />}
+        {isLoading && (
+          <div className="flex items-center gap-2 mt-4 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Calculating impact...
+          </div>
+        )}
+
+        {!isLoading && simulationResults && <ImpactSummary results={simulationResults} />}
       </CardContent>
     </Card>
   );
