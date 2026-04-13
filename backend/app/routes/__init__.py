@@ -8,6 +8,7 @@ from app.routes.city import router as city_router
 from app.routes.credit import router as credit_router
 from app.routes.dashboard import router as dashboard_router
 from app.routes.feedback import router as feedback_router
+from app.routes.intelligence import router as intelligence_router
 from app.routes.jobs import router as jobs_router
 from app.routes.pathway import router as pathway_router
 from app.routes.plan import router as plan_router
@@ -30,5 +31,6 @@ all_routers = [
     dashboard_router,
     barrier_intel_router,
     pathway_router,
+    intelligence_router,
     city_router,
 ]

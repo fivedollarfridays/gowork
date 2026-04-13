@@ -159,6 +159,7 @@ def _build_pathway(
     profile: BenefitsProfile,
     current_wage: float,
     wage_step: float,
+    calibrated_weeks: dict[str, int] | None = None,
 ) -> CareerPathway:
     """Build a single pathway with given wage step size."""
     targets = find_safe_wage_targets(profile, current_wage, step_size=wage_step)
@@ -166,7 +167,7 @@ def _build_pathway(
 
     wage_list = [t.wage for t in targets]
     jobs_map = {w: _estimate_jobs_at_wage(w, barrier_ids) for w in wage_list}
-    steps = build_stages(barrier_ids, wage_list, jobs_map)
+    steps = build_stages(barrier_ids, wage_list, jobs_map, calibrated_weeks=calibrated_weeks)
 
     enriched = _enrich_steps(steps, barrier_ids, profile)
     enriched = _attach_cliff_warnings(enriched, zones)
@@ -187,10 +188,37 @@ def _build_pathway(
     )
 
 
+_STRATEGIES = [
+    ("Conservative path", "conservative", 4.0),
+    ("Balanced path", "balanced", 3.0),
+    ("Aggressive path", "aggressive", 2.0),
+]
+
+
+def _build_all_pathways(
+    barrier_ids: list[str],
+    benefits_profile: BenefitsProfile,
+    current_wage: float,
+    calibrated_weeks: dict[str, int] | None,
+) -> list[CareerPathway]:
+    """Build and rank pathways for all strategies."""
+    pathways = [
+        _build_pathway(
+            name, pid, barrier_ids, benefits_profile,
+            current_wage, wage_step=step,
+            calibrated_weeks=calibrated_weeks,
+        )
+        for name, pid, step in _STRATEGIES
+    ]
+    pathways.sort(key=lambda p: p.viability_score, reverse=True)
+    return pathways
+
+
 def generate_pathways(
     barrier_ids: list[str],
     benefits_profile: BenefitsProfile,
     current_wage: float,
+    calibrated_weeks: dict[str, int] | None = None,
 ) -> PathwayResult:
     """Generate ranked career pathways for a user profile.
 
@@ -201,29 +229,16 @@ def generate_pathways(
         barrier_ids: Active barrier category IDs.
         benefits_profile: Household benefits profile for cliff analysis.
         current_wage: Current hourly wage (0.0 if unemployed).
+        calibrated_weeks: Optional community-calibrated weeks per barrier.
 
     Returns:
         PathwayResult with ranked pathways and current state info.
     """
     effective_wage = max(current_wage, WAGE_MIN)
     current_net = calculate_net_at_wage(effective_wage, benefits_profile)
-
-    strategies = [
-        ("Conservative path", "conservative", 4.0),
-        ("Balanced path", "balanced", 3.0),
-        ("Aggressive path", "aggressive", 2.0),
-    ]
-
-    pathways: list[CareerPathway] = []
-    for name, pid, step in strategies:
-        pathway = _build_pathway(
-            name, pid, barrier_ids, benefits_profile,
-            current_wage, wage_step=step,
-        )
-        pathways.append(pathway)
-
-    # Sort by viability descending
-    pathways.sort(key=lambda p: p.viability_score, reverse=True)
+    pathways = _build_all_pathways(
+        barrier_ids, benefits_profile, current_wage, calibrated_weeks,
+    )
 
     return PathwayResult(
         pathways=pathways,
