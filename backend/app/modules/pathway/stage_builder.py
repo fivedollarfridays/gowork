@@ -18,7 +18,6 @@ _TIER_THRESHOLDS = [
     (16.0, "Mid-range position"),
     (19.0, "Skilled position"),
     (22.0, "Career-track position"),
-    (float("inf"), "Advanced career position"),
 ]
 
 

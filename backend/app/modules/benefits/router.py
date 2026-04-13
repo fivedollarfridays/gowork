@@ -4,8 +4,10 @@ The CITY env var (via CityConfig.state) determines which state's benefit
 rules, thresholds, application data, and program names to use.
 """
 
+from collections.abc import Callable
+
 from app.cities.config import get_city_config
-from app.modules.benefits.types import ProgramApplicationInfo
+from app.modules.benefits.types import BenefitsProfile, ProgramApplicationInfo
 
 
 def get_program_checks() -> dict:
@@ -116,7 +118,7 @@ def get_thresholds() -> dict:
     }
 
 
-def get_sum_program_benefits():
+def get_sum_program_benefits() -> Callable[[float, BenefitsProfile], float]:
     """Return the sum_program_benefits function for the active city's state."""
     state = get_city_config().state
     if state == "TX":
