@@ -113,11 +113,17 @@ def _topo_sort(
     return result, has_cycles
 
 
-def sequence_barriers(barrier_ids: list[str]) -> BarrierSequence:
+def sequence_barriers(
+    barrier_ids: list[str],
+    calibrated_weeks: dict[str, int] | None = None,
+) -> BarrierSequence:
     """Produce a topologically sorted resolution sequence for barriers.
 
     Args:
         barrier_ids: List of barrier IDs to sequence.
+        calibrated_weeks: Optional dict mapping barrier_id to calibrated
+            resolution weeks from community outcome data. Falls back to
+            _WEEKS_PER_BARRIER defaults for missing barriers.
 
     Returns:
         BarrierSequence with ordered steps, each containing the
@@ -133,10 +139,14 @@ def sequence_barriers(barrier_ids: list[str]) -> BarrierSequence:
     adj, in_degree = _build_adjacency(graph, active_ids)
     sorted_ids, has_cycles = _topo_sort(active_ids, adj, in_degree)
 
+    weeks_lookup = dict(_WEEKS_PER_BARRIER)
+    if calibrated_weeks:
+        weeks_lookup.update(calibrated_weeks)
+
     steps = []
     for order, bid in enumerate(sorted_ids, start=1):
         info = lookup.get(bid, {})
-        weeks = _WEEKS_PER_BARRIER.get(bid, 4)
+        weeks = weeks_lookup.get(bid, 4)
         steps.append(SequenceStep(
             order=order,
             barrier_id=bid,
