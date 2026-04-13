@@ -70,7 +70,7 @@ montgowork/
 1. **TDD** — Write failing tests before implementation
 2. **Arch Constraints** — Run `bpsai-pair arch check` before completing code tasks
 3. **Graceful Degradation** — App works without optional services (Claude, BrightData, Credit API)
-4. **Montgomery-Specific** — Resources, transit, employers seeded from local data
+4. **Multi-City Framework** — City config via `CITY` env var (`montgomery`, `fort-worth`). All modules route through city-aware routers. Next city: **Dallas** (DFW unification) — Texas state modules already built, needs only data curation (`cities/dallas.yaml`, DART transit, Dallas resources/employers). See `ROADMAP.md` for full checklist.
 
 ## How to Work Here
 
