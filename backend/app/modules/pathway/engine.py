@@ -9,7 +9,6 @@ Zero LLM calls. Fully deterministic.
 """
 
 from app.modules.benefits.cliff_calculator import (
-    WAGE_MAX,
     WAGE_MIN,
     calculate_net_at_wage,
 )

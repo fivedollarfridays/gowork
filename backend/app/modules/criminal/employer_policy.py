@@ -6,7 +6,7 @@ a person with a given RecordProfile is eligible to apply to.
 
 from pydantic import BaseModel, Field
 
-from app.modules.criminal.record_profile import ChargeCategory, RecordProfile, RecordType
+from app.modules.criminal.record_profile import RecordProfile, RecordType
 
 
 class EmployerPolicy(BaseModel):
