@@ -13,6 +13,24 @@ from sqlalchemy import text
 from app.core.database import get_async_session_factory
 
 
+def _build_test_plan(session_id: str, barriers: list[str]) -> str:
+    """Build a JSON plan payload for integration tests."""
+    return json.dumps({
+        "plan_id": "int-test",
+        "session_id": session_id,
+        "barriers": [{"type": b} for b in barriers],
+        "immediate_next_steps": [
+            "Visit career center for intake",
+            "Schedule credit counseling",
+            "Apply for transit pass",
+        ],
+        "job_matches": [
+            {"title": "Warehouse Associate", "url": "https://example.com/job1"},
+            {"title": "Customer Service Rep", "url": "https://example.com/job2"},
+        ],
+    })
+
+
 async def _seed_full_session(
     test_engine,
     session_id: str,
@@ -26,20 +44,7 @@ async def _seed_full_session(
     async with factory() as db:
         now = datetime.now(timezone.utc)
         expires = (now + timedelta(days=30)).isoformat()
-        plan = json.dumps({
-            "plan_id": "int-test",
-            "session_id": session_id,
-            "barriers": [{"type": b} for b in barriers],
-            "immediate_next_steps": [
-                "Visit career center for intake",
-                "Schedule credit counseling",
-                "Apply for transit pass",
-            ],
-            "job_matches": [
-                {"title": "Warehouse Associate", "url": "https://example.com/job1"},
-                {"title": "Customer Service Rep", "url": "https://example.com/job2"},
-            ],
-        })
+        plan = _build_test_plan(session_id, barriers)
         bp_json = json.dumps(benefits_profile) if benefits_profile else None
         await db.execute(
             text(
