@@ -31,7 +31,8 @@ def _get_hallucination_disclaimer() -> str:
     )
 
 
-HALLUCINATION_DISCLAIMER = _get_hallucination_disclaimer()
+# DEPRECATED: Use _get_hallucination_disclaimer() instead.
+# Removed module-level caching that froze city config at import time.
 
 # Matches capitalized multi-word proper nouns (2+ words, each capitalized)
 _ORG_PATTERN = re.compile(r"\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\b")
@@ -95,4 +96,4 @@ def check_hallucinations(
         return None
 
     names_str = ", ".join(hallucinated[:3])
-    return f"Unverified: {names_str}{HALLUCINATION_DISCLAIMER}"
+    return f"Unverified: {names_str}{_get_hallucination_disclaimer()}"

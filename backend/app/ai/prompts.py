@@ -1,4 +1,16 @@
-"""Prompt templates for Claude API plan generation."""
+"""Prompt templates for Claude API plan generation.
+
+DEPRECATED: This module contains Montgomery-specific prompts.
+Use app.ai.prompt_router for city-aware prompts instead.
+"""
+
+import warnings
+
+warnings.warn(
+    "app.ai.prompts is deprecated. Use app.ai.prompt_router for city-aware prompts.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 SYSTEM_PROMPT = (
     "You are a caring, experienced workforce navigator at the Alabama Career Center "
