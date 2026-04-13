@@ -4,6 +4,7 @@ from app.barrier_intel.router import router as barrier_intel_router
 from app.health import router as health_router
 from app.routes.assessment import router as assessment_router
 from app.routes.brightdata import router as brightdata_router
+from app.routes.city import router as city_router
 from app.routes.credit import router as credit_router
 from app.routes.dashboard import router as dashboard_router
 from app.routes.feedback import router as feedback_router
@@ -29,4 +30,5 @@ all_routers = [
     dashboard_router,
     barrier_intel_router,
     pathway_router,
+    city_router,
 ]

@@ -32,7 +32,7 @@ def _require_config():
     """Raise 503 if BrightData is not configured."""
     settings = get_settings()
     if not settings.brightdata_api_key or not settings.brightdata_dataset_id:
-        raise HTTPException(503, "BrightData integration not configured")
+        raise HTTPException(status_code=503, detail="BrightData integration not configured")
     return settings
 
 
@@ -46,7 +46,7 @@ async def trigger_crawl(
         try:
             snapshot_id = await client.trigger_crawl(request.urls)
         except BrightDataAPIError as e:
-            raise HTTPException(502, e.detail)
+            raise HTTPException(status_code=502, detail=e.detail)
     return TriggerCrawlResponse(
         snapshot_id=snapshot_id,
         status=CrawlStatus.STARTING,
@@ -68,7 +68,7 @@ async def get_crawl_status(
         try:
             result = await client.get_snapshot_status(snapshot_id)
         except BrightDataAPIError as e:
-            raise HTTPException(502, e.detail)
+            raise HTTPException(status_code=502, detail=e.detail)
 
     if isinstance(result, CrawlResult):
         count = await store_crawl_results(db, snapshot_id, result.jobs)
@@ -90,6 +90,6 @@ async def get_crawl_status(
 async def run_precrawl(
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """Admin endpoint to pre-populate Montgomery job listings."""
+    """Admin endpoint to pre-populate local job listings."""
     _require_config()
     return await precrawl_montgomery_jobs(db)
