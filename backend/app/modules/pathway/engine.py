@@ -32,8 +32,7 @@ _STRATEGY_CONSERVATIVE = "conservative"  # Fewest barriers first, slow climb
 _STRATEGY_AGGRESSIVE = "aggressive"  # High wage target, resolve all barriers
 _STRATEGY_BALANCED = "balanced"  # Mix: safe progression with ambition
 
-# Jobs-per-wage estimates (simplified -- in production would query job DB)
-_BASE_JOBS_PER_WAGE: dict[float, int] = {}
+# Barrier impact on job accessibility (multiplier, 1.0 = no impact)
 _BARRIER_JOB_PENALTY = {
     "criminal_record": 0.6,
     "credit": 0.8,
@@ -130,6 +129,29 @@ def _compute_viability(
     return max(0.05, min(1.0, round(score, 3)))
 
 
+def _enrich_steps(
+    steps: list[PathwayStep],
+    barrier_ids: list[str],
+    profile: BenefitsProfile,
+) -> list[PathwayStep]:
+    """Add net income and refined job counts to raw steps."""
+    enriched: list[PathwayStep] = []
+    remaining_barriers = list(barrier_ids)
+    for step in steps:
+        for b in step.barriers_to_resolve:
+            if b in remaining_barriers:
+                remaining_barriers.remove(b)
+        net = calculate_net_at_wage(step.target_wage, profile)
+        updated = step.model_copy(update={
+            "net_monthly_income": round(net, 2),
+            "jobs_accessible": _estimate_jobs_at_wage(
+                step.target_wage, remaining_barriers,
+            ),
+        })
+        enriched.append(updated)
+    return enriched
+
+
 def _build_pathway(
     name: str,
     pathway_id: str,
@@ -142,37 +164,16 @@ def _build_pathway(
     targets = find_safe_wage_targets(profile, current_wage, step_size=wage_step)
     zones = find_cliff_zones(profile)
 
-    # Build jobs-per-wage map, accounting for barriers resolved per stage
     wage_list = [t.wage for t in targets]
     jobs_map = {w: _estimate_jobs_at_wage(w, barrier_ids) for w in wage_list}
-
     steps = build_stages(barrier_ids, wage_list, jobs_map)
 
-    # Enrich steps with net income and cliff warnings
-    enriched: list[PathwayStep] = []
-    remaining_barriers = list(barrier_ids)
-    for step in steps:
-        # Remove resolved barriers for job count
-        for b in step.barriers_to_resolve:
-            if b in remaining_barriers:
-                remaining_barriers.remove(b)
-        net = calculate_net_at_wage(step.target_wage, profile)
-        updated = step.model_copy(update={
-            "net_monthly_income": round(net, 2),
-            "jobs_accessible": _estimate_jobs_at_wage(
-                step.target_wage, remaining_barriers,
-            ),
-        })
-        enriched.append(updated)
-
+    enriched = _enrich_steps(steps, barrier_ids, profile)
     enriched = _attach_cliff_warnings(enriched, zones)
 
     total_weeks = enriched[-1].estimated_weeks if enriched else 0
     final_wage = enriched[-1].target_wage if enriched else current_wage
-    final_net = calculate_net_at_wage(
-        max(final_wage, WAGE_MIN), profile,
-    )
-
+    final_net = calculate_net_at_wage(max(final_wage, WAGE_MIN), profile)
     viability = _compute_viability(enriched, len(barrier_ids), total_weeks)
 
     return CareerPathway(
