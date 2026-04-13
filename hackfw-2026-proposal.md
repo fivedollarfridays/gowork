@@ -182,6 +182,26 @@ Developed with bpsai-pair (AI-augmented pair programming framework). Driver/Navi
 
 ---
 
+## Post-Hackathon: Dallas Expansion (DFW Unification)
+
+The city framework built for Fort Worth is designed to scale. The next target city is **Dallas**, unifying the platform into a DFW-wide workforce navigator.
+
+**What's already done (reusable from Fort Worth):**
+- Texas benefits modules (HHSC: SNAP, TANF, Medicaid, CHIP, childcare, WIC, CEAP) — same state programs
+- Texas expunction (Art. 55) + nondisclosure (Gov Code Ch. 411 E-1) — same state law
+- City-aware routing infrastructure (`CITY` env var, module routers, prompt routing)
+
+**What Dallas needs (new data, not new code):**
+- `cities/dallas.yaml` — ZIP ranges (751xx/752xx/750xx), coordinates, Workforce Solutions Greater Dallas info
+- `data/cities/dallas/` — community resources, career centers, legal aid, childcare, housing
+- DART (Dallas Area Rapid Transit) GTFS data replacing Trinity Metro
+- Dallas fair-chance employer index
+- Dallas-specific AI prompt context and resource routing
+
+**Stretch goal:** A DFW-level view that spans both cities — shared employer index, cross-city job matches, regional outcome intelligence. The N+1 feedback loop would aggregate across both cities, strengthening the calibrated barrier resolution data.
+
+---
+
 ## Links
 
 - **HackFW 2026:** https://fwtx.devpost.com/

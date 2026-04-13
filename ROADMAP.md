@@ -173,6 +173,18 @@ These are documented trade-offs, not missing features. See `docs/architecture.md
 - View visit feedback submissions
 - Manually trigger BrightData pre-crawl
 
+### Phase: Dallas Expansion (DFW Unification)
+- [ ] Create `cities/dallas.yaml` config (ZIP ranges, coordinates, Workforce Solutions Greater Dallas info)
+- [ ] Create `data/cities/dallas/` seed directory (community resources, employers, fair-chance index)
+- [ ] Add DART (Dallas Area Rapid Transit) transit data — GTFS feed, stop coordinates, route hours
+- [ ] Dallas-specific career center and resource seed data (legal aid, childcare, housing)
+- [ ] Dallas fair-chance employer index from open sources
+- [ ] No new state-level work needed — Texas benefits (HHSC), expunction (Art. 55), and nondisclosure (Gov Code Ch. 411 E-1) modules already built for Fort Worth
+- [ ] Frontend city selector or `CITY=dallas` env var support (same pattern as `fort-worth`)
+- [ ] Consider DFW-level view that spans both cities (shared employer index, cross-city job matches)
+- [ ] Validate all city-aware routers (benefits, criminal, geo, resources, AI prompts) work with Dallas config
+- [ ] Integration tests: end-to-end Dallas assessment flow
+
 ### Phase: Data Quality
 - Populate resource coordinates from address geocoding
 - Activate proximity scoring (currently neutral -- returns 0.5 for all resources)
