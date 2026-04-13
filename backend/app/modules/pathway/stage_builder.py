@@ -65,6 +65,29 @@ def _compute_stage_weeks(
     return sum(weeks_lookup.get(b, 4) for b in barriers)
 
 
+def _build_steps_from_assignments(
+    wage_targets: list[float],
+    barrier_assignments: list[list[str]],
+    jobs_per_wage: dict[float, int],
+    calibrated_weeks: dict[str, int] | None,
+) -> list[PathwayStep]:
+    """Create PathwayStep list from barrier assignments and wage targets."""
+    steps: list[PathwayStep] = []
+    cumulative_weeks = 0
+    for i, wage in enumerate(wage_targets):
+        stage_barriers = barrier_assignments[i] if i < len(barrier_assignments) else []
+        cumulative_weeks += _compute_stage_weeks(stage_barriers, calibrated_weeks)
+        steps.append(PathwayStep(
+            stage=i + 1,
+            title=wage_tier_label(wage),
+            target_wage=wage,
+            barriers_to_resolve=stage_barriers,
+            estimated_weeks=cumulative_weeks,
+            jobs_accessible=jobs_per_wage.get(wage, 0),
+        ))
+    return steps
+
+
 def build_stages(
     barrier_ids: list[str],
     wage_targets: list[float],
@@ -88,26 +111,9 @@ def build_stages(
     if not wage_targets:
         return []
 
-    num_stages = len(wage_targets)
     barrier_assignments = _assign_barriers_to_stages(
-        barrier_ids, num_stages, calibrated_weeks=calibrated_weeks,
+        barrier_ids, len(wage_targets), calibrated_weeks=calibrated_weeks,
     )
-
-    steps: list[PathwayStep] = []
-    cumulative_weeks = 0
-
-    for i, wage in enumerate(wage_targets):
-        stage_barriers = barrier_assignments[i] if i < len(barrier_assignments) else []
-        stage_weeks = _compute_stage_weeks(stage_barriers, calibrated_weeks)
-        cumulative_weeks += stage_weeks
-
-        steps.append(PathwayStep(
-            stage=i + 1,
-            title=wage_tier_label(wage),
-            target_wage=wage,
-            barriers_to_resolve=stage_barriers,
-            estimated_weeks=cumulative_weeks,
-            jobs_accessible=jobs_per_wage.get(wage, 0),
-        ))
-
-    return steps
+    return _build_steps_from_assignments(
+        wage_targets, barrier_assignments, jobs_per_wage, calibrated_weeks,
+    )

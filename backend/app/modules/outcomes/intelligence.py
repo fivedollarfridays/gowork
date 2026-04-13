@@ -70,24 +70,14 @@ def _classify_confidence(sample_size: int) -> ConfidenceLevel:
     return ConfidenceLevel.NONE
 
 
-def compute_calibrated_barriers(
+def _accumulate_rows(
     rows: list[dict],
-) -> CalibratedWeeks:
-    """Compute calibrated barrier stats from raw feedback rows.
-
-    Each row is a dict with keys: barrier_id, resolved (bool),
-    weeks_to_resolve (int | None), plan_accuracy (int | None).
-
-    Args:
-        rows: Flat list of per-barrier feedback observations.
+) -> tuple[dict[str, int], dict[str, int], dict[str, list[float]], list[int]]:
+    """Accumulate per-barrier stats from raw feedback rows.
 
     Returns:
-        CalibratedWeeks with per-barrier stats, plan accuracy, and confidence.
+        Tuple of (totals, resolved_counts, weeks_values, plan_accuracies).
     """
-    if not rows:
-        return CalibratedWeeks(confidence=ConfidenceLevel.NONE)
-
-    # Accumulate per-barrier stats
     totals: dict[str, int] = defaultdict(int)
     resolved_counts: dict[str, int] = defaultdict(int)
     weeks_values: dict[str, list[float]] = defaultdict(list)
@@ -107,7 +97,15 @@ def compute_calibrated_barriers(
             if weeks is not None:
                 weeks_values[bid].append(float(weeks))
 
-    # Build calibrated barriers
+    return totals, resolved_counts, weeks_values, plan_accuracies
+
+
+def _build_calibrated_barriers(
+    totals: dict[str, int],
+    resolved_counts: dict[str, int],
+    weeks_values: dict[str, list[float]],
+) -> list[CalibratedBarrier]:
+    """Build calibrated barrier models from accumulated stats."""
     barriers: list[CalibratedBarrier] = []
     for bid, total in sorted(totals.items()):
         resolved = resolved_counts[bid]
@@ -124,16 +122,35 @@ def compute_calibrated_barriers(
             sample_size=total,
             confidence=conf,
         ))
+    return barriers
 
+
+def compute_calibrated_barriers(
+    rows: list[dict],
+) -> CalibratedWeeks:
+    """Compute calibrated barrier stats from raw feedback rows.
+
+    Each row is a dict with keys: barrier_id, resolved (bool),
+    weeks_to_resolve (int | None), plan_accuracy (int | None).
+
+    Args:
+        rows: Flat list of per-barrier feedback observations.
+
+    Returns:
+        CalibratedWeeks with per-barrier stats, plan accuracy, and confidence.
+    """
+    if not rows:
+        return CalibratedWeeks(confidence=ConfidenceLevel.NONE)
+
+    totals, resolved_counts, weeks_values, plan_accuracies = _accumulate_rows(rows)
+    barriers = _build_calibrated_barriers(totals, resolved_counts, weeks_values)
     total_samples = sum(totals.values())
-    overall = _classify_confidence(total_samples)
-    avg_pa = _compute_avg_plan_accuracy(plan_accuracies)
 
     return CalibratedWeeks(
         barriers=barriers,
-        confidence=overall,
+        confidence=_classify_confidence(total_samples),
         total_feedback_count=total_samples,
-        avg_plan_accuracy=avg_pa,
+        avg_plan_accuracy=_compute_avg_plan_accuracy(plan_accuracies),
     )
 
 
