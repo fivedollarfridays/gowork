@@ -68,10 +68,14 @@ def _build_profile_from_session(
     row: dict,
 ) -> UserProfile:
     """Reconstruct a UserProfile from stored session data (fallback defaults)."""
+    from app.cities.config import get_city_config
+
     logger.warning("Using fallback profile for session %s (stored profile missing/corrupt)", session_id)
+    city = get_city_config()
+    default_zip = city.zip_ranges[0].split("-")[0] if city.zip_ranges else "00000"
     return UserProfile(
         session_id=session_id,
-        zip_code="36104",
+        zip_code=default_zip,
         employment_status=EmploymentStatus.UNEMPLOYED,
         barrier_count=len(barriers),
         primary_barriers=barriers,

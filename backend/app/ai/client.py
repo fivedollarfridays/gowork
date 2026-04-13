@@ -4,8 +4,9 @@ import json
 import logging
 
 from app.ai.llm_client import get_llm_stream
-from app.ai.prompts import SYSTEM_PROMPT, USER_PROMPT_TEMPLATE
+from app.ai.prompt_router import get_system_prompt, get_user_prompt_template
 from app.ai.types import PlanNarrative
+from app.cities.config import get_city_config
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +26,7 @@ async def generate_narrative(
     timeline_section = (
         f"Phased action timeline:\n{timeline_text}\n\n" if timeline_text else ""
     )
-    user_prompt = USER_PROMPT_TEMPLATE.format(
+    user_prompt = get_user_prompt_template().format(
         barriers=", ".join(barriers),
         qualifications=qualifications,
         plan_data=json.dumps(plan_data, default=str),
@@ -33,7 +34,7 @@ async def generate_narrative(
     )
 
     chunks: list[str] = []
-    async for chunk in get_llm_stream(SYSTEM_PROMPT, user_prompt):
+    async for chunk in get_llm_stream(get_system_prompt(), user_prompt):
         chunks.append(chunk)
 
     raw = "".join(chunks)
@@ -101,7 +102,7 @@ def build_fallback_narrative(
     plan_data: dict,
     action_plan: dict | None = None,
 ) -> PlanNarrative:
-    """Build a warm, Montgomery-specific narrative when the AI API is unavailable."""
+    """Build a warm, city-aware narrative when the AI API is unavailable."""
     actions, contacts, job_titles = _extract_actions_and_contacts(plan_data)
     summary = _build_fallback_summary(barriers, contacts, job_titles)
     key_actions = _build_fallback_actions(actions)
@@ -120,23 +121,30 @@ def _fallback_opening(barriers: list[str]) -> str:
             "You have already taken a big step by identifying what is standing "
             "in your way. That takes real courage."
         )
+    city = get_city_config()
     return (
-        "You are taking an important first step, and there are people in "
-        "Montgomery ready to help you move forward."
+        f"You are taking an important first step, and there are people in "
+        f"{city.name} ready to help you move forward."
     )
 
 
 def _fallback_next_step(contacts: list[str]) -> str:
     """Return a Monday-morning contact step for the fallback narrative."""
+    city = get_city_config()
     if contacts:
         return (
             f"Your first step Monday morning is to reach out to {contacts[0]} "
-            "-- they work with Montgomery residents every day and know exactly "
+            f"-- they work with {city.name} residents every day and know exactly "
             "how to help."
+        )
+    if city.state == "TX":
+        return (
+            "Monday morning, head to Workforce Solutions for Tarrant County. "
+            f"The staff there help {city.name} residents just like you every single day."
         )
     return (
         "Monday morning, head to the Alabama Career Center on Carter Hill Road. "
-        "The staff there help Montgomery residents just like you every single day."
+        f"The staff there help {city.name} residents just like you every single day."
     )
 
 
@@ -158,7 +166,7 @@ def _build_fallback_summary(
     contacts: list[str],
     job_titles: list[str],
 ) -> str:
-    """Compose a warm, Montgomery-specific fallback summary."""
+    """Compose a warm, city-aware fallback summary."""
     parts = [
         _fallback_opening(barriers),
         _fallback_next_step(contacts),
@@ -170,9 +178,15 @@ def _build_fallback_summary(
 
 
 def _build_fallback_actions(actions: list[str]) -> list[str]:
-    """Return up to 5 key actions, with a Montgomery-specific default."""
+    """Return up to 5 key actions, with a city-specific default."""
     if actions:
         return actions[:5]
+    city = get_city_config()
+    if city.state == "TX":
+        return [
+            "Visit Workforce Solutions for Tarrant County in Fort Worth "
+            "for personalized guidance"
+        ]
     return [
         "Visit the Alabama Career Center on Carter Hill Road in Montgomery "
         "for personalized guidance"

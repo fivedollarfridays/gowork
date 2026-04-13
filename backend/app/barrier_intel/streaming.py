@@ -9,7 +9,7 @@ from app.ai.audit_log import log_llm_interaction
 from app.ai.llm_client import get_llm_stream, resolve_provider
 from app.barrier_intel.guardrails import check_hallucinations
 from app.barrier_intel.observability import build_request_log
-from app.barrier_intel.prompts import SYSTEM_PROMPT, build_user_prompt
+from app.barrier_intel.prompts import build_user_prompt, get_barrier_intel_system_prompt
 from app.core.config import get_settings
 from app.rag.document_schema import RetrievalContext
 
@@ -39,7 +39,7 @@ async def stream_chat_response(
     user_prompt = build_user_prompt(question, mode, ctx)
     chunk_count = 0
     collected_text: list[str] = []
-    async for text in get_llm_stream(SYSTEM_PROMPT, user_prompt, provider=provider):
+    async for text in get_llm_stream(get_barrier_intel_system_prompt(), user_prompt, provider=provider):
         yield format_sse("token", {"text": text})
         collected_text.append(text)
         chunk_count += 1

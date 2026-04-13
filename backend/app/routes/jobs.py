@@ -30,7 +30,7 @@ def requires_credit_check(license_type: str | None) -> bool:
 def is_transit_accessible(route: dict, schedule_type: str) -> bool:
     """Check if a transit route supports the given schedule type.
 
-    M-Transit: no Sunday service; weekday hours ~5am-9pm.
+    General transit check: weekday end hour determines night shift access.
     """
     weekday_end = route.get("weekday_end", "")
     try:
