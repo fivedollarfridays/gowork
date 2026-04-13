@@ -150,14 +150,17 @@ class TestDataDirConfig:
         assert s.data_dir == ""
 
     def testresolve_data_dir_uses_configured_path(self, tmp_path):
-        """resolve_data_dir returns configured path when data_dir is set."""
+        """resolve_data_dir returns configured path when data_dir is set and city dir missing."""
         from unittest.mock import MagicMock
         from app.core.database import resolve_data_dir
 
         mock_settings = MagicMock()
         mock_settings.data_dir = str(tmp_path / "custom_data")
 
-        with patch("app.core.database.get_settings", return_value=mock_settings):
+        with (
+            patch("app.core.database.get_city_config", side_effect=Exception("no city")),
+            patch("app.core.database.get_settings", return_value=mock_settings),
+        ):
             result = resolve_data_dir()
 
         assert result == (tmp_path / "custom_data").resolve()
@@ -198,7 +201,7 @@ class TestDataDirConfig:
             with caplog.at_level(logging.WARNING):
                 await seed_database(engine)
         warning_msgs = [r.message for r in caplog.records if r.levelno == logging.WARNING]
-        assert any("career_centers.json" in m for m in warning_msgs)
+        assert any("employers.json" in m for m in warning_msgs)
         assert any("transit_routes.json" in m for m in warning_msgs)
         await engine.dispose()
 

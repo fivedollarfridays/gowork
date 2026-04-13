@@ -129,7 +129,7 @@ CREATE TABLE IF NOT EXISTS employer_policies (
     bg_check_timing TEXT DEFAULT 'pre_offer',
     industry TEXT,
     source TEXT,
-    montgomery_area INTEGER DEFAULT 1
+    montgomery_area INTEGER DEFAULT 1  -- TODO(s7): rename to service_area when migration tooling is ready
 );
 CREATE TABLE IF NOT EXISTS record_profiles (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

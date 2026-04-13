@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 logger = logging.getLogger(__name__)
 
 _GRACE_HOURS = 48
-_RELATED_TABLES = ("feedback_tokens", "visit_feedback", "resource_feedback", "record_profiles")
+_RELATED_TABLES = ("feedback_tokens", "visit_feedback", "resource_feedback", "record_profiles", "share_tokens")
 
 _EXPIRED_SUBQUERY = (
     "SELECT id FROM sessions WHERE expires_at IS NOT NULL AND expires_at < :cutoff"

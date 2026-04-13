@@ -14,7 +14,9 @@ from app.modules.matching.career_center_types import (
 from app.modules.matching.resource_router import get_career_center
 from app.modules.matching.types import BarrierType, EmploymentStatus, ReEntryPlan, UserProfile, WIOAEligibility
 
-# Legacy constant for backward compatibility (resource_router imports this)
+# DEPRECATED: Montgomery-specific career center info. Used only by resource_router
+# for the Alabama code path. Fort Worth equivalent is in fort_worth_resources.py.
+# Do NOT import this constant directly — use get_career_center() from resource_router.
 CAREER_CENTER = CareerCenterInfo(
     name="Montgomery Career Center",
     phone="334-286-1746",
@@ -30,6 +32,8 @@ _BASE_DOCS = [
     DocumentChecklistItem(label="Proof of address", required=True),
 ]
 
+# TODO(s7): Route through resource_router for city-aware credit resources.
+# Fort Worth equivalent: fort_worth_resources.FREE_CREDIT_RESOURCES
 _FREE_CREDIT_RESOURCES = [
     "AnnualCreditReport.com: free weekly reports",
     "Consumer Financial Protection Bureau (CFPB)",

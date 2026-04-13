@@ -2,7 +2,9 @@
 
 import re
 
+from app.cities.config import get_city_config
 from app.modules.matching.types import Resource, JobMatch
+from app.modules.matching.zip_validation import get_zip_regex_for_city
 
 # Keywords indicating finance/government jobs (for medium credit severity)
 FINANCE_GOV_KEYWORDS = {
@@ -132,7 +134,7 @@ def apply_transit_filter(
             updated.transit_accessible = False
         elif has_routes:
             updated.transit_accessible = True
-            updated.route = routes[0].get("route_name", "M-Transit")
+            updated.route = routes[0].get("route_name", "Local Transit")
 
         results.append(updated)
 
@@ -142,8 +144,13 @@ def apply_transit_filter(
 def apply_childcare_filter(
     resources: list[Resource], user_zip: str, employer_zips: list[str],
 ) -> list[Resource]:
-    """Filter childcare providers by proximity to home and work."""
+    """Filter childcare providers by proximity to home and work.
+
+    Uses city-aware ZIP pattern from zip_validation instead of
+    hardcoded Montgomery 361xx range.
+    """
     relevant_zips = {user_zip} | set(employer_zips)
+    city_zip_pattern = re.compile(get_zip_regex_for_city(get_city_config()))
     filtered = []
 
     for resource in resources:
@@ -152,8 +159,9 @@ def apply_childcare_filter(
         if any(z in address for z in relevant_zips):
             filtered.append(resource)
             continue
-        # Also include Montgomery-area resources (361xx)
-        if re.search(r"361\d{2}", address):
+        # Include resources in the active city's ZIP range
+        zip_match = re.search(r"\b(\d{5})\b", address)
+        if zip_match and city_zip_pattern.match(zip_match.group(1)):
             filtered.append(resource)
 
     return filtered
