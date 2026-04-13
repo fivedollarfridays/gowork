@@ -8,7 +8,7 @@ router = APIRouter(prefix="/api", tags=["city"])
 
 
 @router.get("/city")
-async def get_city():
+async def get_city() -> dict:
     """Return the active city configuration for frontend use."""
     config = get_city_config()
     return {
