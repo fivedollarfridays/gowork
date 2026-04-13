@@ -12,6 +12,7 @@ from app.routes.intelligence import router as intelligence_router
 from app.routes.jobs import router as jobs_router
 from app.routes.pathway import router as pathway_router
 from app.routes.plan import router as plan_router
+from app.routes.plan_intelligence import router as plan_intelligence_router
 from app.routes.sequence import router as sequence_router
 from app.routes.share import router as share_router
 from app.routes.simulate import router as simulate_router
@@ -32,5 +33,6 @@ all_routers = [
     barrier_intel_router,
     pathway_router,
     intelligence_router,
+    plan_intelligence_router,
     city_router,
 ]
