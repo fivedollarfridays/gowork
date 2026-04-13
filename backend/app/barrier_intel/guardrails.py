@@ -16,11 +16,22 @@ SAFE_FALLBACK = (
     "I can help you with employment barriers, resources, and next steps."
 )
 
-HALLUCINATION_DISCLAIMER = (
-    "\n\n---\n*Some resources mentioned above could not be verified against our "
-    "database. Please confirm details by contacting the Alabama Career Center "
-    "at (334) 286-1746 before visiting.*"
-)
+def _get_hallucination_disclaimer() -> str:
+    """Return city-aware hallucination disclaimer."""
+    from app.cities.config import get_city_config
+
+    city = get_city_config()
+    if city.state == "TX":
+        center = "Workforce Solutions for Tarrant County at (817) 413-4000"
+    else:
+        center = "the Alabama Career Center at (334) 286-1746"
+    return (
+        "\n\n---\n*Some resources mentioned above could not be verified against our "
+        f"database. Please confirm details by contacting {center} before visiting.*"
+    )
+
+
+HALLUCINATION_DISCLAIMER = _get_hallucination_disclaimer()
 
 # Matches capitalized multi-word proper nouns (2+ words, each capitalized)
 _ORG_PATTERN = re.compile(r"\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\b")

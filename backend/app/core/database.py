@@ -76,7 +76,7 @@ async def get_db() -> AsyncSession:
 
 
 async def init_db(engine):
-    """Create tables via raw DDL, then seed with Montgomery data."""
+    """Create tables via raw DDL, then seed with city data."""
     async with engine.begin() as conn:
         for statement in DDL_SQL.strip().split(";"):
             statement = statement.strip()
@@ -86,7 +86,7 @@ async def init_db(engine):
 
 
 async def seed_database(engine):
-    """Load Montgomery JSON data into SQLite on first run."""
+    """Load city seed data (JSON) into SQLite on first run."""
     async with engine.begin() as conn:
         result = await conn.execute(text("SELECT COUNT(*) FROM resources"))
         if result.scalar() > 0:
