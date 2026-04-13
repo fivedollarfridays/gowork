@@ -159,6 +159,7 @@ def _build_pathway(
     profile: BenefitsProfile,
     current_wage: float,
     wage_step: float,
+    calibrated_weeks: dict[str, int] | None = None,
 ) -> CareerPathway:
     """Build a single pathway with given wage step size."""
     targets = find_safe_wage_targets(profile, current_wage, step_size=wage_step)
@@ -166,7 +167,7 @@ def _build_pathway(
 
     wage_list = [t.wage for t in targets]
     jobs_map = {w: _estimate_jobs_at_wage(w, barrier_ids) for w in wage_list}
-    steps = build_stages(barrier_ids, wage_list, jobs_map)
+    steps = build_stages(barrier_ids, wage_list, jobs_map, calibrated_weeks=calibrated_weeks)
 
     enriched = _enrich_steps(steps, barrier_ids, profile)
     enriched = _attach_cliff_warnings(enriched, zones)
@@ -191,6 +192,7 @@ def generate_pathways(
     barrier_ids: list[str],
     benefits_profile: BenefitsProfile,
     current_wage: float,
+    calibrated_weeks: dict[str, int] | None = None,
 ) -> PathwayResult:
     """Generate ranked career pathways for a user profile.
 
@@ -201,6 +203,7 @@ def generate_pathways(
         barrier_ids: Active barrier category IDs.
         benefits_profile: Household benefits profile for cliff analysis.
         current_wage: Current hourly wage (0.0 if unemployed).
+        calibrated_weeks: Optional community-calibrated weeks per barrier.
 
     Returns:
         PathwayResult with ranked pathways and current state info.
@@ -219,6 +222,7 @@ def generate_pathways(
         pathway = _build_pathway(
             name, pid, barrier_ids, benefits_profile,
             current_wage, wage_step=step,
+            calibrated_weeks=calibrated_weeks,
         )
         pathways.append(pathway)
 
