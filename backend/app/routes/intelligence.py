@@ -36,4 +36,6 @@ async def get_barrier_intelligence(
         "confidence": result.confidence.value,
         "calibrated_weeks": result.to_weeks_dict(),
         "default_weeks": dict(_WEEKS_PER_BARRIER),
+        "total_feedback_count": result.total_feedback_count,
+        "avg_plan_accuracy": result.avg_plan_accuracy,
     }
