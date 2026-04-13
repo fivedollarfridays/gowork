@@ -13,7 +13,6 @@ from app.integrations.brightdata.cache import store_crawl_results
 from app.integrations.brightdata.precrawl import precrawl_jobs
 from app.integrations.brightdata.types import (
     BrightDataAPIError,
-    CrawlProgress,
     CrawlResult,
     CrawlStatus,
     CrawlStatusResponse,
