@@ -2,12 +2,8 @@
 
 import re
 
-from app.modules.matching.scoring import (
-    DOWNTOWN_MONTGOMERY,
-    ZIP_CENTROIDS,
-    distance_to_score,
-    haversine_miles,
-)
+from app.modules.matching.geo_router import get_downtown_coords, get_zip_centroids
+from app.modules.matching.scoring import distance_to_score, haversine_miles
 
 _ZIP_RE = re.compile(r"\b(\d{5})\b")
 
@@ -33,8 +29,10 @@ def score_proximity(
     """
     job_zip = extract_zip(job_location)
 
-    user_coords = ZIP_CENTROIDS.get(user_zip, DOWNTOWN_MONTGOMERY)
-    job_coords = ZIP_CENTROIDS.get(job_zip, DOWNTOWN_MONTGOMERY) if job_zip else DOWNTOWN_MONTGOMERY
+    centroids = get_zip_centroids()
+    downtown = get_downtown_coords()
+    user_coords = centroids.get(user_zip, downtown)
+    job_coords = centroids.get(job_zip, downtown) if job_zip else downtown
 
     miles = haversine_miles(
         user_coords[0], user_coords[1], job_coords[0], job_coords[1]

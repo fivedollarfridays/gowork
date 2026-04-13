@@ -37,8 +37,8 @@ def get_barrier_intel_system_prompt() -> str:
     )
 
 
-# Keep backward-compatible module-level constant for existing callers
-SYSTEM_PROMPT = get_barrier_intel_system_prompt()
+# DEPRECATED: Use get_barrier_intel_system_prompt() instead.
+# Removed module-level caching that froze city config at import time.
 
 
 def build_user_prompt(

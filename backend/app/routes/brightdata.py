@@ -10,7 +10,7 @@ from app.core.config import get_settings
 from app.core.database import get_db
 from app.integrations.brightdata.client import BrightDataClient
 from app.integrations.brightdata.cache import store_crawl_results
-from app.integrations.brightdata.precrawl import precrawl_montgomery_jobs
+from app.integrations.brightdata.precrawl import precrawl_jobs
 from app.integrations.brightdata.types import (
     BrightDataAPIError,
     CrawlProgress,
@@ -92,4 +92,4 @@ async def run_precrawl(
 ) -> dict:
     """Admin endpoint to pre-populate local job listings."""
     _require_config()
-    return await precrawl_montgomery_jobs(db)
+    return await precrawl_jobs(db)

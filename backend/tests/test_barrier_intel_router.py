@@ -9,7 +9,7 @@ from fastapi.responses import StreamingResponse
 
 from app.barrier_intel.cache import RETRIEVAL_CACHE
 from app.barrier_intel.guardrails import is_disallowed_topic
-from app.barrier_intel.prompts import SYSTEM_PROMPT, build_user_prompt
+from app.barrier_intel.prompts import build_user_prompt, get_barrier_intel_system_prompt
 from app.barrier_intel.router import _get_retrieval_ctx, _rate_limiter, chat, reindex
 from app.barrier_intel.schemas import ChatRequest
 from app.core.database import get_async_session_factory
@@ -65,8 +65,8 @@ class TestGuardrails:
 
 class TestPrompts:
     def test_system_prompt_has_rules(self):
-        assert "RULES" in SYSTEM_PROMPT
-        assert "6th" in SYSTEM_PROMPT or "eighth" in SYSTEM_PROMPT or "reading level" in SYSTEM_PROMPT
+        assert "RULES" in get_barrier_intel_system_prompt()
+        assert "6th" in get_barrier_intel_system_prompt() or "eighth" in get_barrier_intel_system_prompt() or "reading level" in get_barrier_intel_system_prompt()
 
     def test_build_user_prompt_includes_context(self):
         ctx = _mock_retrieval_context()

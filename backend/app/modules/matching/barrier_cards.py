@@ -1,7 +1,7 @@
 """Barrier card construction — builds BarrierCards with eligibility annotations."""
 
 from app.modules.benefits.types import BenefitsProfile
-from app.modules.criminal.expungement import check_expungement_eligibility
+from app.modules.criminal.router import check_record_clearing
 from app.modules.matching.affinity import assign_resources
 from app.modules.matching.barrier_priority import prioritize_barriers
 from app.modules.matching.filters import get_certification_renewal
@@ -25,7 +25,9 @@ BARRIER_TITLES: dict[BarrierType, str] = {
     BarrierType.CRIMINAL_RECORD: "Record & Legal Support",
 }
 
-# Legacy constant for backward compatibility (imports by other modules)
+# DEPRECATED: Montgomery-specific barrier actions. Used only by resource_router
+# for the Alabama code path. Fort Worth equivalent is in fort_worth_resources.py.
+# Do NOT import this constant directly — use get_barrier_actions() from resource_router.
 BARRIER_ACTIONS: dict[BarrierType, list[str]] = {
     BarrierType.CREDIT: [
         "Request free credit report from annualcreditreport.com",
@@ -115,7 +117,7 @@ def _build_cards(
                 )
 
         if barrier == BarrierType.CRIMINAL_RECORD:
-            expungement = check_expungement_eligibility(profile.record_profile)
+            expungement = check_record_clearing(profile.record_profile)
 
         cards.append(BarrierCard(
             type=barrier,

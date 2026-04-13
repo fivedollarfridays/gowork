@@ -58,6 +58,22 @@ ELIGIBILITY_RULES: dict[str, dict] = {
         "requires_any_children": True,
     },
     "Family Guidance Center": {"type": "open"},
+    # Fort Worth / Tarrant County resources
+    "Workforce Solutions for Tarrant County": {"type": "open"},
+    "Workforce Solutions": {"type": "open"},
+    "Tarrant County College": {"type": "open"},
+    "Trinity Metro": {"type": "open"},
+    "JPS Health Network": {"type": "open"},
+    "JPS": {"type": "open"},
+    "Legal Aid of NorthWest Texas": {"type": "open"},
+    "Fort Worth Housing Solutions": {"type": "open"},
+    "Texas Rising Star": {"type": "open"},
+    "TWC Child Care Services": {
+        "type": "compound",
+        "income_check": "smi",
+        "max_income_pct_smi": CHILDCARE_SMI_LIMIT_PCT,
+        "requires_any_children": True,
+    },
 }
 
 

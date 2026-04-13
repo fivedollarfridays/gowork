@@ -1,4 +1,4 @@
-"""Pre-crawl Montgomery job listings via BrightData."""
+"""Pre-crawl city job listings via BrightData."""
 
 import logging
 from datetime import datetime, timedelta, timezone
@@ -6,6 +6,7 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.cities.config import get_city_config
 from app.core.config import get_settings
 from app.integrations.brightdata.cache import store_crawl_results
 from app.integrations.brightdata.client import BrightDataClient
@@ -20,8 +21,12 @@ _KEYWORDS = [
     "administrative", "entry level",
 ]
 
-_LOCATION = "Montgomery, AL"
 _DEFAULT_DOMAINS = ["indeed.com"]
+
+
+def _get_location() -> str:
+    """Return the configured city location string."""
+    return get_city_config().location
 
 
 def get_crawl_domains() -> list[str]:
@@ -35,19 +40,21 @@ def get_crawl_domains() -> list[str]:
 
 
 def build_search_urls() -> list[str]:
-    """Return Indeed search URLs for Montgomery, AL jobs."""
+    """Return Indeed search URLs for the configured city."""
     from urllib.parse import quote_plus
+    location = _get_location()
     urls: list[str] = []
     for kw in _KEYWORDS:
         q = quote_plus(kw) if kw else ""
-        loc = quote_plus(_LOCATION)
+        loc = quote_plus(location)
         url = f"https://www.indeed.com/jobs?q={q}&l={loc}&fromage=7"
         urls.append(url)
     return urls
 
 
 def build_keyword_searches() -> list[dict]:
-    """Return structured keyword searches for Montgomery, AL jobs across configured domains."""
+    """Return structured keyword searches for configured city jobs across configured domains."""
+    location = _get_location()
     domains = get_crawl_domains()
     searches: list[dict] = []
     for domain in domains:
@@ -56,7 +63,7 @@ def build_keyword_searches() -> list[dict]:
                 "country": "US",
                 "domain": domain,
                 "keyword_search": kw,
-                "location": _LOCATION,
+                "location": location,
             })
     return searches
 
@@ -73,8 +80,9 @@ async def _has_recent_data(session: AsyncSession) -> bool:
 
 def _searches_for_domain(domain: str) -> list[dict]:
     """Build keyword searches for a single domain."""
+    location = _get_location()
     return [
-        {"country": "US", "domain": domain, "keyword_search": kw, "location": _LOCATION}
+        {"country": "US", "domain": domain, "keyword_search": kw, "location": location}
         for kw in _KEYWORDS
     ]
 
@@ -89,8 +97,8 @@ async def _crawl_domain(
     return await store_crawl_results(db_session, snapshot_id, result.jobs)
 
 
-async def precrawl_montgomery_jobs(db_session: AsyncSession) -> dict:
-    """Trigger crawl of Montgomery job sites, poll, and cache results.
+async def precrawl_jobs(db_session: AsyncSession) -> dict:
+    """Trigger crawl of city job sites, poll, and cache results.
 
     Crawls each configured domain independently with partial failure
     tolerance: if one domain fails, others still proceed.

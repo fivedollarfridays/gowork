@@ -16,7 +16,7 @@ _CLIENT_PATCH = "app.routes.brightdata.BrightDataClient"
 _SETTINGS_PATCH = "app.routes.brightdata.get_settings"
 _AUTH_SETTINGS_PATCH = "app.core.auth.get_settings"
 _STORE_PATCH = "app.routes.brightdata.store_crawl_results"
-_PRECRAWL_PATCH = "app.routes.brightdata.precrawl_montgomery_jobs"
+_PRECRAWL_PATCH = "app.routes.brightdata.precrawl_jobs"
 
 _ADMIN_KEY = "test-admin-key"
 _ADMIN_HEADERS = {"X-Admin-Key": _ADMIN_KEY}

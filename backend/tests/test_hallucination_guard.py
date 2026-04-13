@@ -2,7 +2,7 @@
 
 import pytest
 
-from app.barrier_intel.guardrails import check_hallucinations, HALLUCINATION_DISCLAIMER
+from app.barrier_intel.guardrails import check_hallucinations, _get_hallucination_disclaimer
 
 
 class TestCheckHallucinations:
@@ -22,7 +22,7 @@ class TestCheckHallucinations:
         result = check_hallucinations(response, known_names)
         assert result is not None
         assert "Springfield Job Center" in result
-        assert HALLUCINATION_DISCLAIMER in result
+        assert _get_hallucination_disclaimer() in result
 
     def test_empty_response_returns_none(self):
         response = ""
@@ -103,7 +103,7 @@ class TestHallucinationDisclaimer:
     """Verify disclaimer format."""
 
     def test_disclaimer_is_informative(self):
-        assert "verify" in HALLUCINATION_DISCLAIMER.lower() or "confirm" in HALLUCINATION_DISCLAIMER.lower()
+        assert "verify" in _get_hallucination_disclaimer().lower() or "confirm" in _get_hallucination_disclaimer().lower()
 
     def test_disclaimer_not_empty(self):
-        assert len(HALLUCINATION_DISCLAIMER) > 0
+        assert len(_get_hallucination_disclaimer()) > 0
