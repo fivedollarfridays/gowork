@@ -113,6 +113,29 @@ def _topo_sort(
     return result, has_cycles
 
 
+def _build_sequence_steps(
+    sorted_ids: list[str],
+    lookup: dict[str, dict],
+    graph: dict,
+    active_ids: set[str],
+    weeks_lookup: dict[str, int],
+) -> list[SequenceStep]:
+    """Build SequenceStep objects from topologically sorted barrier IDs."""
+    steps = []
+    for order, bid in enumerate(sorted_ids, start=1):
+        info = lookup.get(bid, {})
+        steps.append(SequenceStep(
+            order=order,
+            barrier_id=bid,
+            barrier_name=info.get("name", bid),
+            category=info.get("category", "unknown"),
+            playbook=info.get("playbook", ""),
+            unlocks=_compute_unlocks(bid, graph, active_ids),
+            estimated_weeks=weeks_lookup.get(bid, 4),
+        ))
+    return steps
+
+
 def sequence_barriers(
     barrier_ids: list[str],
     calibrated_weeks: dict[str, int] | None = None,
@@ -143,25 +166,13 @@ def sequence_barriers(
     if calibrated_weeks:
         weeks_lookup.update(calibrated_weeks)
 
-    steps = []
-    for order, bid in enumerate(sorted_ids, start=1):
-        info = lookup.get(bid, {})
-        weeks = weeks_lookup.get(bid, 4)
-        steps.append(SequenceStep(
-            order=order,
-            barrier_id=bid,
-            barrier_name=info.get("name", bid),
-            category=info.get("category", "unknown"),
-            playbook=info.get("playbook", ""),
-            unlocks=_compute_unlocks(bid, graph, active_ids),
-            estimated_weeks=weeks,
-        ))
-
-    total_weeks = sum(s.estimated_weeks for s in steps)
+    steps = _build_sequence_steps(
+        sorted_ids, lookup, graph, active_ids, weeks_lookup,
+    )
 
     return BarrierSequence(
         steps=steps,
         total_barriers=len(barrier_ids),
         has_cycles=has_cycles,
-        estimated_total_weeks=total_weeks,
+        estimated_total_weeks=sum(s.estimated_weeks for s in steps),
     )

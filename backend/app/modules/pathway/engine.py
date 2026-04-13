@@ -188,6 +188,32 @@ def _build_pathway(
     )
 
 
+_STRATEGIES = [
+    ("Conservative path", "conservative", 4.0),
+    ("Balanced path", "balanced", 3.0),
+    ("Aggressive path", "aggressive", 2.0),
+]
+
+
+def _build_all_pathways(
+    barrier_ids: list[str],
+    benefits_profile: BenefitsProfile,
+    current_wage: float,
+    calibrated_weeks: dict[str, int] | None,
+) -> list[CareerPathway]:
+    """Build and rank pathways for all strategies."""
+    pathways = [
+        _build_pathway(
+            name, pid, barrier_ids, benefits_profile,
+            current_wage, wage_step=step,
+            calibrated_weeks=calibrated_weeks,
+        )
+        for name, pid, step in _STRATEGIES
+    ]
+    pathways.sort(key=lambda p: p.viability_score, reverse=True)
+    return pathways
+
+
 def generate_pathways(
     barrier_ids: list[str],
     benefits_profile: BenefitsProfile,
@@ -210,24 +236,9 @@ def generate_pathways(
     """
     effective_wage = max(current_wage, WAGE_MIN)
     current_net = calculate_net_at_wage(effective_wage, benefits_profile)
-
-    strategies = [
-        ("Conservative path", "conservative", 4.0),
-        ("Balanced path", "balanced", 3.0),
-        ("Aggressive path", "aggressive", 2.0),
-    ]
-
-    pathways: list[CareerPathway] = []
-    for name, pid, step in strategies:
-        pathway = _build_pathway(
-            name, pid, barrier_ids, benefits_profile,
-            current_wage, wage_step=step,
-            calibrated_weeks=calibrated_weeks,
-        )
-        pathways.append(pathway)
-
-    # Sort by viability descending
-    pathways.sort(key=lambda p: p.viability_score, reverse=True)
+    pathways = _build_all_pathways(
+        barrier_ids, benefits_profile, current_wage, calibrated_weeks,
+    )
 
     return PathwayResult(
         pathways=pathways,

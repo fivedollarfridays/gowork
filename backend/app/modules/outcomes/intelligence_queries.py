@@ -15,6 +15,30 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
+def _parse_feedback_row(
+    barriers_str: str | None,
+    outcomes_str: str | None,
+    plan_accuracy: int | None,
+) -> list[dict]:
+    """Parse a single feedback row into per-barrier observations."""
+    barriers = _safe_parse_list(barriers_str)
+    if not barriers:
+        return []
+
+    resolved_set = set(_safe_parse_list(outcomes_str))
+    observations: list[dict] = []
+    for bid in barriers:
+        if not isinstance(bid, str):
+            continue
+        observations.append({
+            "barrier_id": bid,
+            "resolved": bid in resolved_set,
+            "weeks_to_resolve": None,
+            "plan_accuracy": plan_accuracy,
+        })
+    return observations
+
+
 async def get_barrier_feedback_rows(
     db: AsyncSession,
 ) -> list[dict]:
@@ -39,26 +63,9 @@ async def get_barrier_feedback_rows(
 
     observations: list[dict] = []
     for row in rows_raw:
-        barriers_str, outcomes_str, plan_accuracy = row[0], row[1], row[2]
-
-        # Parse barriers
-        barriers = _safe_parse_list(barriers_str)
-        if not barriers:
-            continue
-
-        # Parse outcomes (resolved barrier IDs)
-        resolved_set = set(_safe_parse_list(outcomes_str))
-
-        for bid in barriers:
-            if not isinstance(bid, str):
-                continue
-            observations.append({
-                "barrier_id": bid,
-                "resolved": bid in resolved_set,
-                "weeks_to_resolve": None,  # Not tracked per-barrier yet
-                "plan_accuracy": plan_accuracy,
-            })
-
+        observations.extend(
+            _parse_feedback_row(row[0], row[1], row[2])
+        )
     return observations
 
 
