@@ -265,9 +265,22 @@ cd frontend && npx vitest run
 
 ---
 
+## City Expansion Roadmap
+
+MontGoWork uses a pluggable city framework (`CITY` env var + `cities/*.yaml` + `data/cities/` seed directories). Currently deployed:
+
+| City | Status | State Modules |
+|------|--------|---------------|
+| Montgomery, AL | Production (original) | Alabama benefits (7 programs), Alabama expungement (Act 2021-507) |
+| Fort Worth, TX | Complete (HackFW 2026) | Texas HHSC benefits (7 programs), Texas expunction/nondisclosure |
+
+**Next: Dallas, TX (DFW Unification).** Texas state-level modules (benefits, criminal) are already built for Fort Worth — Dallas reuses them. New work is data only: `cities/dallas.yaml` config, DART transit data, Dallas career centers/resources/employers, fair-chance employer index. See `ROADMAP.md` for the full checklist.
+
+---
+
 ## Built For
 
-**Worldwide Vibes Hackathon** -- March 2026
+**Worldwide Vibes Hackathon** -- March 2026 | **HackFW 2026** -- May 2026
 
 ---
 

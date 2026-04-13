@@ -74,6 +74,8 @@ Older sprint task tables, session histories, and plan details have been archived
 
 Sprint S7 complete. 2,124 backend tests passing (54 new). The N+1 feedback loop is now closed at the backend level. Remaining work for HackFW 2026 demo (May 2): (1) Wire /api/intelligence/barriers into the frontend to display "based on X residents" alongside timeline estimates. (2) Connect pathway route to pass calibrated_weeks from intelligence engine at request time. (3) Coverage push for pathway module uncovered lines. (4) Performance audit (caching the intelligence query result). (5) Frontend polish for community intelligence display.
 
+**Post-Hackathon:** Dallas expansion (DFW unification). Texas state-level modules (benefits, criminal) are already built. Dallas needs: `cities/dallas.yaml`, `data/cities/dallas/` seed data, DART transit data, Dallas career centers/resources/employers, fair-chance index. No new code — just data curation and a new city config. See ROADMAP.md "Dallas Expansion" phase and hackfw-2026-proposal.md "Post-Hackathon" section for full details.
+
 ## Blockers
 
 - T28.3: Requires findhelp.org API partnership (external dependency).
