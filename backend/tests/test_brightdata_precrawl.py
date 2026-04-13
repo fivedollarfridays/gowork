@@ -11,7 +11,7 @@ from app.integrations.brightdata.precrawl import (
     build_keyword_searches,
     build_search_urls,
     get_crawl_domains,
-    precrawl_montgomery_jobs,
+    precrawl_jobs,
 )
 from app.integrations.brightdata.types import (
     BrightDataConfigError,
@@ -195,7 +195,7 @@ class TestPrecrawlMontgomeryJobs:
             patch(_STORE_PATCH, new_callable=AsyncMock, return_value=2),
             patch(_STALE_PATCH, new_callable=AsyncMock, return_value=False),
         ):
-            result = await precrawl_montgomery_jobs(AsyncMock())
+            result = await precrawl_jobs(AsyncMock())
 
         assert result["snapshot_id"] is not None
         assert result["jobs_cached"] == 2
@@ -209,7 +209,7 @@ class TestPrecrawlMontgomeryJobs:
             patch(_SETTINGS_PATCH, return_value=_mock_settings()),
             patch(_STALE_PATCH, new_callable=AsyncMock, return_value=True),
         ):
-            result = await precrawl_montgomery_jobs(AsyncMock())
+            result = await precrawl_jobs(AsyncMock())
 
         assert result["skipped"] is True
         assert result["jobs_cached"] == 0
@@ -222,7 +222,7 @@ class TestPrecrawlMontgomeryJobs:
             patch(_STALE_PATCH, new_callable=AsyncMock, return_value=False),
         ):
             with pytest.raises(BrightDataConfigError):
-                await precrawl_montgomery_jobs(AsyncMock())
+                await precrawl_jobs(AsyncMock())
 
     @pytest.mark.asyncio
     async def test_partial_domain_failure_continues(self):
@@ -246,7 +246,7 @@ class TestPrecrawlMontgomeryJobs:
             patch(_STORE_PATCH, new_callable=AsyncMock, return_value=1),
             patch(_STALE_PATCH, new_callable=AsyncMock, return_value=False),
         ):
-            result = await precrawl_montgomery_jobs(AsyncMock())
+            result = await precrawl_jobs(AsyncMock())
 
         assert result["skipped"] is False
         assert result["jobs_cached"] == 1
@@ -270,7 +270,7 @@ class TestPrecrawlMontgomeryJobs:
             patch(_CLIENT_PATCH, return_value=mock_client),
             patch(_STALE_PATCH, new_callable=AsyncMock, return_value=False),
         ):
-            result = await precrawl_montgomery_jobs(AsyncMock())
+            result = await precrawl_jobs(AsyncMock())
 
         assert result["skipped"] is False
         assert result["jobs_cached"] == 0
@@ -298,7 +298,7 @@ class TestPrecrawlMontgomeryJobs:
             patch(_STORE_PATCH, new_callable=AsyncMock, side_effect=[3, 5]),
             patch(_STALE_PATCH, new_callable=AsyncMock, return_value=False),
         ):
-            result = await precrawl_montgomery_jobs(AsyncMock())
+            result = await precrawl_jobs(AsyncMock())
 
         assert result["jobs_cached"] == 8
         assert result["skipped"] is False
@@ -321,7 +321,7 @@ class TestPrecrawlMontgomeryJobs:
             patch(_STORE_PATCH, new_callable=AsyncMock, return_value=0),
             patch(_STALE_PATCH, new_callable=AsyncMock, return_value=False),
         ):
-            result = await precrawl_montgomery_jobs(AsyncMock())
+            result = await precrawl_jobs(AsyncMock())
 
         assert result["jobs_cached"] == 0
         assert result["skipped"] is False

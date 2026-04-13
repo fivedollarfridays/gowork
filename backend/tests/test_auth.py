@@ -32,7 +32,7 @@ class TestRequireAdminKey:
             patch(_SETTINGS_PATCH, return_value=bd_settings),
             patch("app.routes.brightdata.get_settings", return_value=bd_settings),
             patch(
-                "app.routes.brightdata.precrawl_montgomery_jobs",
+                "app.routes.brightdata.precrawl_jobs",
                 return_value={"snapshot_id": "snap-1", "jobs_cached": 5, "skipped": False},
             ),
         ):
