@@ -26,10 +26,17 @@ class MockProvider:
 
     def build_response(self, user_prompt: str) -> str:
         """Build a canned response without calling any API."""
+        from app.cities.config import get_city_config
+
+        city = get_city_config()
+        if city.state == "TX":
+            center = "Workforce Solutions for Tarrant County"
+        else:
+            center = "the Alabama Career Center on Carter Hill Road"
         return (
-            "I understand you're asking about support resources in Montgomery. "
+            f"I understand you're asking about support resources in {city.name}. "
             "While I'm currently running in offline mode, here are some general steps: "
-            "1) Visit the Alabama Career Center on Carter Hill Road for personalized guidance. "
+            f"1) Visit {center} for personalized guidance. "
             "2) Check with local community organizations for additional support. "
             "3) Review your personalized plan for specific action items."
         )
