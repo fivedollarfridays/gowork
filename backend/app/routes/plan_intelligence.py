@@ -8,6 +8,8 @@ Closes the N+1 feedback loop by fetching calibrated_weeks from the
 intelligence engine at request time.
 """
 
+from __future__ import annotations
+
 import json
 import logging
 from typing import Annotated
@@ -47,7 +49,7 @@ async def get_plan_intelligence(
     """Return complete plan intelligence in a single call.
 
     Combines barrier sequence, career pathway, cliff analysis,
-    and community intelligence into one response.
+    community intelligence, and personalized insights.
     """
     await require_session_token(db, session_id, token)
 
@@ -57,14 +59,23 @@ async def get_plan_intelligence(
 
     barriers_raw = row.get("barriers", "[]")
     barriers = json.loads(barriers_raw) if isinstance(barriers_raw, str) else barriers_raw
-
     profile = parse_benefits_profile(row)
 
-    # Fetch intelligence data (N+1 loop)
     intelligence = await fetch_intelligence(db)
+    return _build_intelligence_response(
+        intelligence, barriers, profile, current_wage,
+    )
+
+
+def _build_intelligence_response(
+    intelligence: CalibratedWeeks,
+    barriers: list[str],
+    profile: dict,
+    current_wage: float,
+) -> dict:
+    """Assemble all intelligence sections into the unified response."""
     calibrated_weeks = intelligence.to_weeks_dict()
 
-    # Build all four sections
     sequence = sequence_barriers(barriers, calibrated_weeks=calibrated_weeks or None)
     pathway_result = generate_pathways(
         barrier_ids=barriers,
@@ -79,7 +90,6 @@ async def get_plan_intelligence(
         [b.model_dump() for b in intelligence.barriers],
     )
 
-    # Generate personalized community insights
     city_config = get_city_config()
     insights = generate_insights(intelligence, barriers, city_config.name)
 
