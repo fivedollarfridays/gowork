@@ -17,84 +17,61 @@ from app.modules.outcomes.community_insights import (
 )
 
 
+def _barrier(
+    bid: str = "criminal_record",
+    weeks: float = 8.0,
+    rate: float = 0.80,
+    size: int = 15,
+    conf: ConfidenceLevel = ConfidenceLevel.HIGH,
+    stddev: float = 2.5,
+) -> CalibratedBarrier:
+    """Build a CalibratedBarrier with sensible defaults."""
+    return CalibratedBarrier(
+        barrier_id=bid, avg_weeks=weeks, success_rate=rate,
+        sample_size=size, confidence=conf, stddev_weeks=stddev,
+    )
+
+
+def _calibrated(
+    barriers: list[CalibratedBarrier] | None = None,
+    total: int = 15,
+    accuracy: float = 4.2,
+) -> CalibratedWeeks:
+    """Build a CalibratedWeeks with sensible defaults."""
+    return CalibratedWeeks(
+        barriers=barriers or [_barrier()],
+        total_feedback_count=total,
+        avg_plan_accuracy=accuracy,
+    )
+
+
+def _empty_calibrated() -> CalibratedWeeks:
+    """Build an empty (cold-start) CalibratedWeeks."""
+    return CalibratedWeeks(barriers=[], total_feedback_count=0)
+
+
 class TestSingleBarrierHighConfidence:
     """HIGH confidence barrier produces confident, data-rich insight."""
 
     def test_insight_includes_city_name(self):
         """City name appears in the insight message."""
-        calibrated = CalibratedWeeks(
-            barriers=[
-                CalibratedBarrier(
-                    barrier_id="criminal_record",
-                    avg_weeks=8.0,
-                    success_rate=0.80,
-                    sample_size=15,
-                    confidence=ConfidenceLevel.HIGH,
-                    stddev_weeks=2.5,
-                ),
-            ],
-            total_feedback_count=15,
-            avg_plan_accuracy=4.2,
-        )
-        insights = generate_insights(calibrated, ["criminal_record"], "Fort Worth")
+        insights = generate_insights(_calibrated(), ["criminal_record"], "Fort Worth")
         assert len(insights) >= 1
         assert "Fort Worth" in insights[0].message
 
     def test_insight_includes_sample_size(self):
         """Sample size is visible in the message for HIGH confidence."""
-        calibrated = CalibratedWeeks(
-            barriers=[
-                CalibratedBarrier(
-                    barrier_id="criminal_record",
-                    avg_weeks=8.0,
-                    success_rate=0.80,
-                    sample_size=15,
-                    confidence=ConfidenceLevel.HIGH,
-                    stddev_weeks=2.5,
-                ),
-            ],
-            total_feedback_count=15,
-            avg_plan_accuracy=4.2,
-        )
-        insights = generate_insights(calibrated, ["criminal_record"], "Fort Worth")
+        insights = generate_insights(_calibrated(), ["criminal_record"], "Fort Worth")
         assert "15" in insights[0].message
 
     def test_insight_includes_avg_weeks(self):
         """Average weeks metric is visible in the message."""
-        calibrated = CalibratedWeeks(
-            barriers=[
-                CalibratedBarrier(
-                    barrier_id="criminal_record",
-                    avg_weeks=8.0,
-                    success_rate=0.80,
-                    sample_size=15,
-                    confidence=ConfidenceLevel.HIGH,
-                    stddev_weeks=2.5,
-                ),
-            ],
-            total_feedback_count=15,
-            avg_plan_accuracy=4.2,
-        )
-        insights = generate_insights(calibrated, ["criminal_record"], "Fort Worth")
+        insights = generate_insights(_calibrated(), ["criminal_record"], "Fort Worth")
         assert "8" in insights[0].message
 
     def test_insight_model_fields(self):
         """CommunityInsight has correct model fields."""
-        calibrated = CalibratedWeeks(
-            barriers=[
-                CalibratedBarrier(
-                    barrier_id="criminal_record",
-                    avg_weeks=8.0,
-                    success_rate=0.80,
-                    sample_size=15,
-                    confidence=ConfidenceLevel.HIGH,
-                    stddev_weeks=2.5,
-                ),
-            ],
-            total_feedback_count=15,
-            avg_plan_accuracy=4.2,
-        )
-        insights = generate_insights(calibrated, ["criminal_record"], "Fort Worth")
+        insights = generate_insights(_calibrated(), ["criminal_record"], "Fort Worth")
         first = insights[0]
         assert isinstance(first, CommunityInsight)
         assert first.barrier_type == "criminal_record"
@@ -104,21 +81,7 @@ class TestSingleBarrierHighConfidence:
 
     def test_success_rate_insight_generated(self):
         """A success rate insight is also generated for HIGH confidence."""
-        calibrated = CalibratedWeeks(
-            barriers=[
-                CalibratedBarrier(
-                    barrier_id="criminal_record",
-                    avg_weeks=8.0,
-                    success_rate=0.80,
-                    sample_size=15,
-                    confidence=ConfidenceLevel.HIGH,
-                    stddev_weeks=2.5,
-                ),
-            ],
-            total_feedback_count=15,
-            avg_plan_accuracy=4.2,
-        )
-        insights = generate_insights(calibrated, ["criminal_record"], "Fort Worth")
+        insights = generate_insights(_calibrated(), ["criminal_record"], "Fort Worth")
         success_insights = [i for i in insights if i.metric_type == "success_rate"]
         assert len(success_insights) >= 1
         assert "80%" in success_insights[0].message
@@ -129,29 +92,23 @@ class TestColdStart:
 
     def test_cold_start_empty_barriers_data(self):
         """No calibrated barriers = cold start insight."""
-        calibrated = CalibratedWeeks(
-            barriers=[], total_feedback_count=0, avg_plan_accuracy=0.0,
-        )
-        insights = generate_insights(calibrated, ["criminal_record"], "Fort Worth")
+        insights = generate_insights(_empty_calibrated(), ["criminal_record"], "Fort Worth")
         assert len(insights) == 1
         assert "first" in insights[0].message.lower()
 
     def test_cold_start_includes_city(self):
         """Cold start message includes the city name."""
-        calibrated = CalibratedWeeks(barriers=[], total_feedback_count=0)
-        insights = generate_insights(calibrated, ["credit"], "Montgomery")
+        insights = generate_insights(_empty_calibrated(), ["credit"], "Montgomery")
         assert "Montgomery" in insights[0].message
 
     def test_cold_start_encouraging_tone(self):
         """Cold start message frames the user's experience positively."""
-        calibrated = CalibratedWeeks(barriers=[], total_feedback_count=0)
-        insights = generate_insights(calibrated, ["housing"], "Fort Worth")
+        insights = generate_insights(_empty_calibrated(), ["housing"], "Fort Worth")
         assert "improve" in insights[0].message.lower() or "help" in insights[0].message.lower()
 
     def test_cold_start_metric_type(self):
         """Cold start insight has recommendation metric type."""
-        calibrated = CalibratedWeeks(barriers=[], total_feedback_count=0)
-        insights = generate_insights(calibrated, ["training"], "Fort Worth")
+        insights = generate_insights(_empty_calibrated(), ["training"], "Fort Worth")
         assert insights[0].metric_type == "recommendation"
         assert insights[0].confidence == "none"
         assert insights[0].sample_size == 0
@@ -162,21 +119,13 @@ class TestMixedConfidence:
 
     def test_multiple_barriers_produce_insights_for_each(self):
         """Each user barrier with data gets insights."""
-        calibrated = CalibratedWeeks(
+        calibrated = _calibrated(
             barriers=[
-                CalibratedBarrier(
-                    barrier_id="criminal_record", avg_weeks=8.0,
-                    success_rate=0.80, sample_size=15,
-                    confidence=ConfidenceLevel.HIGH, stddev_weeks=2.5,
-                ),
-                CalibratedBarrier(
-                    barrier_id="childcare", avg_weeks=4.0,
-                    success_rate=0.70, sample_size=7,
-                    confidence=ConfidenceLevel.MEDIUM, stddev_weeks=1.5,
-                ),
+                _barrier("criminal_record"),
+                _barrier("childcare", weeks=4.0, rate=0.70, size=7,
+                         conf=ConfidenceLevel.MEDIUM, stddev=1.5),
             ],
-            total_feedback_count=22,
-            avg_plan_accuracy=4.0,
+            total=22, accuracy=4.0,
         )
         insights = generate_insights(
             calibrated, ["criminal_record", "childcare"], "Fort Worth",
@@ -187,59 +136,35 @@ class TestMixedConfidence:
 
     def test_low_confidence_uses_cautious_language(self):
         """LOW confidence should use vague, cautious language."""
-        calibrated = CalibratedWeeks(
-            barriers=[
-                CalibratedBarrier(
-                    barrier_id="credit", avg_weeks=6.0,
-                    success_rate=0.50, sample_size=2,
-                    confidence=ConfidenceLevel.LOW, stddev_weeks=3.0,
-                ),
-            ],
-            total_feedback_count=2,
-            avg_plan_accuracy=3.0,
+        calibrated = _calibrated(
+            barriers=[_barrier("credit", weeks=6.0, rate=0.50, size=2,
+                               conf=ConfidenceLevel.LOW, stddev=3.0)],
+            total=2, accuracy=3.0,
         )
         insights = generate_insights(calibrated, ["credit"], "Fort Worth")
         resolution = [i for i in insights if i.metric_type == "resolution_time"][0]
-        # LOW confidence should NOT show exact count "2"
         assert "small number" in resolution.message.lower()
-        # Should still include city name
         assert "Fort Worth" in resolution.message
 
     def test_medium_confidence_uses_moderate_language(self):
         """MEDIUM confidence uses 'Several people' instead of exact count."""
-        calibrated = CalibratedWeeks(
-            barriers=[
-                CalibratedBarrier(
-                    barrier_id="transportation", avg_weeks=3.0,
-                    success_rate=0.85, sample_size=5,
-                    confidence=ConfidenceLevel.MEDIUM, stddev_weeks=1.0,
-                ),
-            ],
-            total_feedback_count=5,
-            avg_plan_accuracy=4.0,
+        calibrated = _calibrated(
+            barriers=[_barrier("transportation", weeks=3.0, rate=0.85, size=5,
+                               conf=ConfidenceLevel.MEDIUM, stddev=1.0)],
+            total=5, accuracy=4.0,
         )
-        insights = generate_insights(
-            calibrated, ["transportation"], "Fort Worth",
-        )
+        insights = generate_insights(calibrated, ["transportation"], "Fort Worth")
         resolution = [i for i in insights if i.metric_type == "resolution_time"][0]
-        # MEDIUM with 5 samples -- at the threshold for exact count
         assert "Fort Worth" in resolution.message
 
     def test_none_confidence_barriers_skipped(self):
         """Barriers with NONE confidence produce no insights."""
         calibrated = CalibratedWeeks(
-            barriers=[
-                CalibratedBarrier(
-                    barrier_id="health", avg_weeks=0.0,
-                    success_rate=0.0, sample_size=0,
-                    confidence=ConfidenceLevel.NONE, stddev_weeks=0.0,
-                ),
-            ],
-            total_feedback_count=0,
-            avg_plan_accuracy=0.0,
+            barriers=[_barrier("health", weeks=0.0, rate=0.0, size=0,
+                               conf=ConfidenceLevel.NONE, stddev=0.0)],
+            total_feedback_count=0, avg_plan_accuracy=0.0,
         )
         insights = generate_insights(calibrated, ["health"], "Fort Worth")
-        # Should fall back to cold start since no usable data
         assert len(insights) == 1
         assert "first" in insights[0].message.lower()
 
@@ -249,76 +174,41 @@ class TestBarrierCombinationInsights:
 
     def test_recommendation_when_multiple_barriers(self):
         """Multiple barriers with data get a recommendation insight."""
-        calibrated = CalibratedWeeks(
+        calibrated = _calibrated(
             barriers=[
-                CalibratedBarrier(
-                    barrier_id="criminal_record", avg_weeks=8.0,
-                    success_rate=0.80, sample_size=15,
-                    confidence=ConfidenceLevel.HIGH, stddev_weeks=2.5,
-                ),
-                CalibratedBarrier(
-                    barrier_id="transportation", avg_weeks=2.0,
-                    success_rate=0.90, sample_size=12,
-                    confidence=ConfidenceLevel.HIGH, stddev_weeks=1.0,
-                ),
+                _barrier("criminal_record"),
+                _barrier("transportation", weeks=2.0, rate=0.90, size=12, stddev=1.0),
             ],
-            total_feedback_count=27,
-            avg_plan_accuracy=4.2,
+            total=27,
         )
         insights = generate_insights(
-            calibrated,
-            ["criminal_record", "transportation"],
-            "Fort Worth",
+            calibrated, ["criminal_record", "transportation"], "Fort Worth",
         )
         recs = [i for i in insights if i.metric_type == "recommendation"]
         assert len(recs) >= 1
-        # Recommendation should reference which barrier to address first
         rec_msg = recs[0].message.lower()
         assert "first" in rec_msg or "start" in rec_msg
 
     def test_recommendation_suggests_fastest_barrier(self):
         """Recommendation suggests resolving fastest barrier first."""
-        calibrated = CalibratedWeeks(
+        calibrated = _calibrated(
             barriers=[
-                CalibratedBarrier(
-                    barrier_id="criminal_record", avg_weeks=12.0,
-                    success_rate=0.70, sample_size=10,
-                    confidence=ConfidenceLevel.HIGH, stddev_weeks=3.0,
-                ),
-                CalibratedBarrier(
-                    barrier_id="transportation", avg_weeks=2.0,
-                    success_rate=0.95, sample_size=10,
-                    confidence=ConfidenceLevel.HIGH, stddev_weeks=0.5,
-                ),
+                _barrier("criminal_record", weeks=12.0, rate=0.70, size=10, stddev=3.0),
+                _barrier("transportation", weeks=2.0, rate=0.95, size=10, stddev=0.5),
             ],
-            total_feedback_count=20,
-            avg_plan_accuracy=4.0,
+            total=20, accuracy=4.0,
         )
         insights = generate_insights(
-            calibrated,
-            ["criminal_record", "transportation"],
-            "Fort Worth",
+            calibrated, ["criminal_record", "transportation"], "Fort Worth",
         )
         recs = [i for i in insights if i.metric_type == "recommendation"]
         assert len(recs) >= 1
-        # Should mention transportation (fastest to resolve)
         assert "transportation" in recs[0].message.lower()
 
     def test_no_recommendation_for_single_barrier(self):
         """Single barrier should not generate a recommendation insight."""
-        calibrated = CalibratedWeeks(
-            barriers=[
-                CalibratedBarrier(
-                    barrier_id="criminal_record", avg_weeks=8.0,
-                    success_rate=0.80, sample_size=15,
-                    confidence=ConfidenceLevel.HIGH, stddev_weeks=2.5,
-                ),
-            ],
-            total_feedback_count=15,
-            avg_plan_accuracy=4.2,
-        )
         insights = generate_insights(
-            calibrated, ["criminal_record"], "Fort Worth",
+            _calibrated(), ["criminal_record"], "Fort Worth",
         )
         recs = [i for i in insights if i.metric_type == "recommendation"]
         assert len(recs) == 0
@@ -329,21 +219,13 @@ class TestDeterminismAndEdgeCases:
 
     def test_deterministic_output(self):
         """Calling generate_insights twice with same input = same output."""
-        calibrated = CalibratedWeeks(
+        calibrated = _calibrated(
             barriers=[
-                CalibratedBarrier(
-                    barrier_id="criminal_record", avg_weeks=8.0,
-                    success_rate=0.80, sample_size=15,
-                    confidence=ConfidenceLevel.HIGH, stddev_weeks=2.5,
-                ),
-                CalibratedBarrier(
-                    barrier_id="credit", avg_weeks=6.0,
-                    success_rate=0.65, sample_size=8,
-                    confidence=ConfidenceLevel.MEDIUM, stddev_weeks=2.0,
-                ),
+                _barrier("criminal_record"),
+                _barrier("credit", weeks=6.0, rate=0.65, size=8,
+                         conf=ConfidenceLevel.MEDIUM, stddev=2.0),
             ],
-            total_feedback_count=23,
-            avg_plan_accuracy=4.0,
+            total=23, accuracy=4.0,
         )
         barriers = ["criminal_record", "credit"]
         first = generate_insights(calibrated, barriers, "Fort Worth")
@@ -357,37 +239,14 @@ class TestDeterminismAndEdgeCases:
 
     def test_empty_barriers_returns_empty(self):
         """No user barriers should produce no insights."""
-        calibrated = CalibratedWeeks(
-            barriers=[
-                CalibratedBarrier(
-                    barrier_id="criminal_record", avg_weeks=8.0,
-                    success_rate=0.80, sample_size=15,
-                    confidence=ConfidenceLevel.HIGH, stddev_weeks=2.5,
-                ),
-            ],
-            total_feedback_count=15,
-            avg_plan_accuracy=4.2,
-        )
-        insights = generate_insights(calibrated, [], "Fort Worth")
+        insights = generate_insights(_calibrated(), [], "Fort Worth")
         assert insights == []
 
     def test_unknown_barrier_skipped(self):
         """User barrier not in calibrated data is skipped gracefully."""
-        calibrated = CalibratedWeeks(
-            barriers=[
-                CalibratedBarrier(
-                    barrier_id="criminal_record", avg_weeks=8.0,
-                    success_rate=0.80, sample_size=15,
-                    confidence=ConfidenceLevel.HIGH, stddev_weeks=2.5,
-                ),
-            ],
-            total_feedback_count=15,
-            avg_plan_accuracy=4.2,
-        )
         insights = generate_insights(
-            calibrated, ["unknown_barrier"], "Fort Worth",
+            _calibrated(), ["unknown_barrier"], "Fort Worth",
         )
-        # No data for unknown_barrier, falls to cold start
         assert len(insights) == 1
         assert "first" in insights[0].message.lower()
 
@@ -406,27 +265,20 @@ class TestDeterminismAndEdgeCases:
             for i, bid in enumerate(all_barriers)
         ]
         calibrated = CalibratedWeeks(
-            barriers=barrier_objs,
-            total_feedback_count=70,
-            avg_plan_accuracy=4.0,
+            barriers=barrier_objs, total_feedback_count=70, avg_plan_accuracy=4.0,
         )
         insights = generate_insights(calibrated, all_barriers, "Montgomery")
-        # Each barrier gets resolution + success_rate, plus 1 recommendation
         barrier_types = {i.barrier_type for i in insights}
         for bid in all_barriers:
             assert bid in barrier_types
-        # Verify city name in all messages
         for i in insights:
             assert "Montgomery" in i.message
 
     def test_model_serialization(self):
         """CommunityInsight serializes to dict correctly."""
         insight = CommunityInsight(
-            message="Test message",
-            barrier_type="criminal_record",
-            confidence="high",
-            sample_size=15,
-            metric_type="resolution_time",
+            message="Test message", barrier_type="criminal_record",
+            confidence="high", sample_size=15, metric_type="resolution_time",
         )
         data = insight.model_dump()
         assert data["message"] == "Test message"

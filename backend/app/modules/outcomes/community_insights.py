@@ -12,7 +12,7 @@ That's not a feature. That's someone feeling less alone.
 
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from app.modules.outcomes.intelligence import (
     CalibratedBarrier,
@@ -71,9 +71,22 @@ def generate_insights(
     if not calibrated.barriers or calibrated.total_feedback_count == 0:
         return [generate_cold_start_insight(city_name, user_barriers)]
 
-    # Build lookup for quick access
     barrier_lookup = {b.barrier_id: b for b in calibrated.barriers}
+    insights = _build_barrier_insights(barrier_lookup, user_barriers, city_name)
 
+    if not insights:
+        return [generate_cold_start_insight(city_name, user_barriers)]
+
+    _append_recommendation(insights, barrier_lookup, user_barriers, city_name)
+    return insights
+
+
+def _build_barrier_insights(
+    barrier_lookup: dict[str, CalibratedBarrier],
+    user_barriers: list[str],
+    city_name: str,
+) -> list[CommunityInsight]:
+    """Build resolution and success-rate insights for each user barrier."""
     insights: list[CommunityInsight] = []
     for bid in user_barriers:
         stats = barrier_lookup.get(bid)
@@ -82,11 +95,16 @@ def generate_insights(
         insights.append(_format_resolution_insight(bid, stats, city_name))
         if stats.success_rate > 0:
             insights.append(_format_success_rate_insight(bid, stats, city_name))
+    return insights
 
-    if not insights:
-        return [generate_cold_start_insight(city_name, user_barriers)]
 
-    # Add recommendation insight when multiple barriers have data
+def _append_recommendation(
+    insights: list[CommunityInsight],
+    barrier_lookup: dict[str, CalibratedBarrier],
+    user_barriers: list[str],
+    city_name: str,
+) -> None:
+    """Append a recommendation insight when multiple barriers have data."""
     matched = [
         (bid, barrier_lookup[bid])
         for bid in user_barriers
@@ -97,8 +115,6 @@ def generate_insights(
         rec = _format_recommendation_insight(matched, city_name)
         if rec is not None:
             insights.append(rec)
-
-    return insights
 
 
 def generate_cold_start_insight(
@@ -188,7 +204,10 @@ def _format_recommendation_insight(
         return None
 
     # Find the barrier with shortest avg_weeks (quickest win)
-    fastest = min(matched_barriers, key=lambda x: x[1].avg_weeks if x[1].avg_weeks > 0 else float("inf"))
+    def _sort_key(pair: tuple[str, CalibratedBarrier]) -> float:
+        return pair[1].avg_weeks if pair[1].avg_weeks > 0 else float("inf")
+
+    fastest = min(matched_barriers, key=_sort_key)
     fastest_id, fastest_stats = fastest
     fastest_label = _BARRIER_LABELS.get(fastest_id, fastest_id.replace("_", " "))
     weeks = round(fastest_stats.avg_weeks)
