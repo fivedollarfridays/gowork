@@ -3,6 +3,10 @@
 Accepts a session ID and current wage, returns ranked career pathways
 that fuse barrier sequencing, cliff navigation, and wage progression
 into actionable multi-step career plans.
+
+Closes the N+1 feedback loop: fetches calibrated_weeks from the
+intelligence engine at request time so community feedback flows
+into every pathway recommendation.
 """
 
 import json
@@ -15,8 +19,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.auth import require_session_token
 from app.core.database import get_db
 from app.core.queries import get_session_by_id
-from app.modules.benefits.types import BenefitsProfile
 from app.modules.pathway.engine import generate_pathways
+from app.routes._intelligence_helpers import (
+    build_community_intelligence,
+    fetch_intelligence,
+    parse_benefits_profile,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -50,20 +58,23 @@ async def generate_career_pathways(
     barriers = json.loads(barriers_raw) if isinstance(barriers_raw, str) else barriers_raw
 
     # Parse benefits profile if available
-    bp_raw = row.get("benefits_profile")
-    if bp_raw:
-        try:
-            bp_data = json.loads(bp_raw) if isinstance(bp_raw, str) else bp_raw
-            profile = BenefitsProfile(**bp_data)
-        except (json.JSONDecodeError, ValueError):
-            profile = BenefitsProfile()
-    else:
-        profile = BenefitsProfile()
+    profile = parse_benefits_profile(row)
+
+    # Fetch calibrated weeks from intelligence engine (N+1 loop)
+    intelligence = await fetch_intelligence(db)
+    calibrated_weeks = intelligence.to_weeks_dict()
 
     result = generate_pathways(
         barrier_ids=barriers,
         benefits_profile=profile,
         current_wage=body.current_wage,
+        calibrated_weeks=calibrated_weeks or None,
     )
 
-    return result.model_dump()
+    response = result.model_dump()
+    response["community_intelligence"] = build_community_intelligence(
+        calibrated_weeks,
+        intelligence.total_feedback_count,
+        [b.model_dump() for b in intelligence.barriers],
+    )
+    return response
