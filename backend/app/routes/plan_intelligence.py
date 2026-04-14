@@ -15,10 +15,12 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.cities.config import get_city_config
 from app.core.auth import require_session_token
 from app.core.database import get_db
 from app.core.queries import get_session_by_id
 from app.modules.benefits.cliff_calculator import calculate_cliff_analysis
+from app.modules.outcomes.community_insights import generate_insights
 from app.modules.pathway.engine import generate_pathways
 from app.modules.plan.barrier_sequencer import sequence_barriers
 from app.routes._intelligence_helpers import (
@@ -77,9 +79,14 @@ async def get_plan_intelligence(
         [b.model_dump() for b in intelligence.barriers],
     )
 
+    # Generate personalized community insights
+    city_config = get_city_config()
+    insights = generate_insights(intelligence, barriers, city_config.name)
+
     return {
         "barriers": sequence.model_dump(),
         "pathway": pathway_result.model_dump(),
         "cliff_analysis": cliff.model_dump(),
         "community_intelligence": community,
+        "insights": [i.model_dump() for i in insights],
     }
