@@ -1,4 +1,4 @@
-version: 2.19.0
+version: 2.21.5
 project:
   name: MontGoWork
   description: "MontGoWork helps Montgomery residents overcome the real barriers between\
@@ -17,6 +17,7 @@ workflow:
   plans_dir: .paircoder/plans
   tasks_dir: .paircoder/tasks
   repo_url: https://github.com/fivedollarfridays/montgowork
+  require_feature_branch: false
 pack:
   default_name: agent_pack.tgz
   excludes:
