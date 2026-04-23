@@ -54,6 +54,21 @@ Older sprint task tables, session histories, and plan details have been archived
 
 ## What Was Just Done
 
+## 2026-04-23 — S12b T12.14 worker voice + resume/cover letter templates
+
+**T12.14 (done)**: created `backend/app/modules/documents/voice.py` (196 lines / 9 fn — arch warning-only above 150 line threshold; under 400 error). Single entry point `apply_worker_voice(text)` runs the full rule chain; idempotent (running twice yields same output).
+
+- Ported from `ops:lib/cover_letter_generator.py`: `_strip_dashes` (em-/en-dash → comma), `_strip_hedges` (perhaps/maybe/might/possibly/somewhat removed, double spaces collapsed), `_strip_quotes` (smart → ASCII).
+- Ported from `ops:lib/resume_generator.py`: `_strip_hyphens` — preserves last-name hyphens and street-address hyphens (regex anchors), removes obscuring mid-word hyphens.
+- Dignified substitutions: replaces loaded labels (e.g. "felon" → "person with a record") drawn from a substitution map; leaves neutral text untouched.
+- Reading-level helper: `_count_syllables` + `flesch_kincaid_grade(text)`. Test asserts F-K grade <9.0 on the fixed 5-sample worker-voice corpus.
+
+Templates added under `backend/app/modules/documents/templates/`:
+- `resume_base.md.j2` — markdown skeleton (header, summary, experience, skills, education); optional sections gated by truthy checks; HTML in worker-supplied fields auto-escaped.
+- `cover_letter_base.md.j2` — greeting + body + closing; default greeting "Dear Hiring Manager,". Both templates render under Jinja2 `autoescape=True`.
+
+Tests: 36/36 pass in `tests/test_document_voice.py`. Templates verified for render + escape behavior. Default `default.html` template (T12.4) untouched.
+
 ## 2026-04-23 — S12b T12.7a appointment enrichment + stage advance
 
 **T12.7a (done)**: ported `ops:lib/appointment_merge.py` into `backend/app/modules/appointments/enrichment.py` (235 lines / 9 fn, arch warning-only at >150 line threshold). Public API: `auto_advance_stage(appointment, *, city=None) -> StageAdvance | None` (pure — never mutates), `merge_appointment(existing, new) -> Appointment` (field-level fill of None/empty), `enrichment_changed(existing, new) -> dict[str, tuple]`, `build_pipeline_summary(session_id, *, db_path) -> dict[(barrier, stage), int]`, `register_enrichment_listener(db_path)` (idempotent via module-level `_REGISTRATION_SENTINEL`).
