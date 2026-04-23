@@ -41,6 +41,10 @@ class OutcomeRecord(BaseModel):
     plan_accuracy: Optional[int] = Field(default=None, ge=1, le=5)
     resource_ratings: dict[str, bool] = Field(default_factory=dict)
     city: str = ""
+    # ISO-8601 UTC timestamp. Optional on input so callers can let the
+    # tracker auto-populate it; the DB-backed tracker always writes a
+    # non-null value.
+    created_at: Optional[str] = None
 
 
 class BarrierInsight(BaseModel):

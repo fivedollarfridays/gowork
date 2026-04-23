@@ -1,0 +1,15 @@
+# MontGoWork feature flags — default values.
+#
+# Resolution order: environment variable (FEATURE_<NAME>) > this file > default.
+# Runtime toggles via POST /api/admin/flags/{name} take effect in-memory and
+# are logged to the feature_flag_audit table.
+
+# Gate for S12b AI generation (resume/cover letter). Requires data
+# processing agreement to be active before enabling in production.
+ENABLE_AI_GENERATION: false
+
+# Master switch for the nightly scheduler job (APScheduler / reminders).
+FEATURE_NIGHTLY_ENABLED: true
+
+# Master switch for outbound email delivery (SendGrid).
+FEATURE_EMAIL_SEND_ENABLED: true
