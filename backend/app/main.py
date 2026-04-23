@@ -14,6 +14,13 @@ from app.cities.config import get_city_config
 from app.core.config import get_settings
 from app.core.database import close_db, get_async_session_factory, get_engine, init_db
 from app.core.exception_handlers import register_exception_handlers
+from app.core.scheduler import (
+    enforce_single_worker,
+    scheduler_state_summary,
+    shutdown_scheduler,
+    start_scheduler,
+)
+from app.modules.appointments.outcomes_listener import register_outcomes_listener
 from app.routes import all_routers
 
 logger = logging.getLogger(__name__)
@@ -56,12 +63,21 @@ async def lifespan(app: FastAPI):
     llm_status = _log_startup_warnings()
     engine = get_engine()
     await init_db(engine)
+    register_outcomes_listener(settings.database_url.split(":///", 1)[-1])
     factory = get_async_session_factory()
     app.state.rag_store = await run_seeds_and_rag(factory)
     app.state.llm_status = llm_status
-    yield
-    await close_db()
-    logger.info("MontGoWork API shutting down")
+    # APScheduler: single-worker hard constraint + lifecycle management.
+    # Multi-worker safety via scheduler_leases is deferred to S13 (T12.3).
+    enforce_single_worker()
+    start_scheduler()
+    logger.info(scheduler_state_summary())
+    try:
+        yield
+    finally:
+        shutdown_scheduler(wait=False)
+        await close_db()
+        logger.info("MontGoWork API shutting down")
 
 
 settings = get_settings()
