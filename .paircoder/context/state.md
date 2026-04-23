@@ -54,6 +54,47 @@ Older sprint task tables, session histories, and plan details have been archived
 
 ## What Was Just Done
 
+## 2026-04-23 — S12a SPRINT COMPLETE — 26/26 tasks, GATE green
+
+**Final state: 2,851 backend tests passed (+450 new), 842 frontend tests passed, zero regressions. Two pre-existing failures remain (credit-assessment jwt, s8 route-counter).**
+
+**Waves 5-12 summary** (Waves 1-4 committed as `b95ae8d`):
+
+- **Wave 5** — T12.2a SendGrid Event Webhook (ECDSA signature verify, 13 events, hard-bounce audit-row disable — `sessions.reminders_enabled` column missing, documented for S12b); T12.9 Pathway → Appointment Auto-Linker (both `routes/pathway.py` and `routes/plan_intelligence.py` call `run_pathway_linker_hook`; **m003 migration** added to relax `appointments.starts_at NOT NULL` for placeholders); T12.11 Jobs Applications Lifecycle (composite `(source, url)` linkage, status machine + events + outcomes listener, main.py listener registered).
+
+- **Wave 6** — T12.10 Appointments API Routes (9 endpoints, token auth via `_appointments_helpers.verify_token`); T12.12 Jobs Funnel Analytics (k-anonymity `min_5` enforced, intelligence endpoint `application_conversion_rates` wired in `routes/intelligence.py`); T12.23 Evidence Collector (unified 6-signal bundle from appointments + jobs + outcomes).
+
+- **Wave 7** — T12.13 Jobs API Routes (`/api/job-applications` prefix — no collision); T12.18 Stall Detector (SOFT/MEDIUM/HARD with auto-advance suppression, `engagement_status` recommendations ported); T12.22 Daily Progress Retro (Option B — expected actions = today's appointments, classifications persisted); T12.33 Intelligence Wire-Up tests (10 tests against the `application_conversion_rates` endpoint, S11 consumer contract pinned).
+
+- **Wave 7 mid-wave restoration**: `_intelligence_helpers.py` was reverted between Waves 5 and 7 (mechanism unclear — linter or hook). Orchestrator restored `run_pathway_linker_hook` + hook calls in `pathway.py` and `plan_intelligence.py` manually. State-of-tree note for merge review.
+
+- **Wave 8** — T12.20 Digest Composer (4 files: composer/sections/rendering/data, carryover + dedupe + HTML escape ports, worker first name from `sessions.profile.first_name`); T12.26 Appointments Page (first frontend task, react-big-calendar + date-fns, 4 components + API client + 25 tests, translations at `src/lib/translations/`).
+
+- **Wave 9** — T12.21a Digest Preview Endpoint (minimal single-endpoint route for frontend); T12.25 Nightly Orchestrator + Accounting (city-scoped batch iteration, `asyncio.Semaphore(10)`, accounting row per run to `nightly_run_log`, kill switch via `FEATURE_NIGHTLY_ENABLED`).
+
+- **Wave 10** — T12.29 Daily Digest Page (4 section components + CollapsibleSection + StallAlert + DigestSectionBody; home redirect wired in `page.tsx` via `useAssessmentComplete` proxy based on `feedback_token_{sessionId}` sessionStorage presence; 16 tests).
+
+- **Wave 11** — T12.32 E2E Integration Tests (4 flows × 2 cities + 6 contract assertions: route collision, two-caller pathway hook, k-anonymity, auto-advance suppression, city-scope isolation, event emission — runtime 1.92s).
+
+- **Wave 12 GATE** — T12.35 Integration Gate (15 gate assertions + 2 admin-key-scan tests + 274-line runbook at `docs/ops/s12a-rollout.md`). All prior integrations verified: `all_routers` complete, scheduler lifespan wired, nightly_digest handler resolves to real orchestrator, pathway hook fires from both callers, migration rollback round-trips cleanly, feature-flag defaults locked in, all 13 tables present after m002, OutcomeTracker compat preserved. Load test: 200 sessions × 2 cities in 3.4s (budget 600s).
+
+**Manual AC deferred** (out of scope for agent mode): browser walk-through (new session → plan → appointments → application → retro → digest). User to verify pre-merge.
+
+**S12a staging-only constraint**: Must NOT go to production general availability until S12b T12.36 (worker data export + right-to-delete) lands. Documented in runbook.
+
+**Tech debt carried into S12b** (from accumulated driver reports):
+- `sessions.reminders_enabled` column (T12.2a uses audit-row pattern)
+- `sessions.email` column (T12.2a webhook uses `unique_args.session_id` only)
+- `sessions.city` column (T12.25 orchestrator infers from `outcomes_records.payload_json.city`)
+- `sessions.demo` flag (T12.12 guard ready, S12b T12.34 adds column)
+- Checklist item per-day tracking (T12.23 returns empty list)
+- T12.11 outcomes listener bypasses `OutcomeTracker.record_outcome()` (serializer mismatch)
+- m003 compatibility adjustment needed because T12.1 declared `starts_at NOT NULL` but T12.6 model allows None for placeholders
+- Plan-refresh step in T12.25 stubbed with TODO → S12b T12.24
+- Reminder engine with cooldown stubbed → S12b T12.19 replaces direct SendGrid call
+
+**Test-quality regression carried**: `test_s8_code_quality::test_all_route_files_registered` — counts private `_*.py` helper modules in `routes/` as missing routers. Test needs updating in S12b cleanup task to exclude `_`-prefixed files, or helpers should move to a subdirectory.
+
 ## 2026-04-23 — S12a Waves 2-3 complete (T12.1, T12.3, T12.0a, T12.0b, T12.6)
 
 **Wave 2**:

@@ -173,5 +173,82 @@
   "outcomes": {
     "assessmentsCompleted": "assessments completed",
     "improvingRecommendations": "barrier intelligence improving recommendations"
+  },
+  "appointments": {
+    "title": "Appointments",
+    "subtitle": "Schedule and track your upcoming commitments",
+    "tabCalendar": "Calendar",
+    "tabList": "Upcoming",
+    "newAppointment": "+ New appointment",
+    "loading": "Loading appointments...",
+    "loadFailed": "Failed to load appointments.",
+    "missingSession": "No session available. Start an assessment first.",
+    "emptyList": "No upcoming appointments in the next 30 days.",
+    "placeholdersBanner": "appointment(s) waiting on a date",
+    "placeholderCta": "Schedule",
+    "placeholderHeading": "Pathway suggestions without dates",
+    "placeholderRegionLabel": "Placeholder appointments needing a date",
+    "cardAttended": "Mark attended",
+    "cardMissed": "Mark missed",
+    "cardCancel": "Cancel",
+    "cardReschedule": "Reschedule",
+    "cardNoDate": "No date set",
+    "statusScheduled": "Scheduled",
+    "statusAttended": "Attended",
+    "statusMissed": "Missed",
+    "statusCancelled": "Cancelled",
+    "statusRescheduled": "Rescheduled",
+    "sourcePathway": "Pathway",
+    "sourceUser": "Manual",
+    "typeInterview": "Interview",
+    "typeAppointment": "Appointment",
+    "typeTraining": "Training",
+    "typeOther": "Other",
+    "modalTitleCreate": "New appointment",
+    "modalTitleEdit": "Edit appointment",
+    "fieldType": "Type",
+    "fieldTitle": "Title",
+    "fieldStartsAt": "Starts at",
+    "fieldEndsAt": "Ends at",
+    "fieldLocationName": "Location",
+    "fieldLocationAddress": "Address",
+    "fieldBarrierLink": "Barrier",
+    "fieldNotes": "Notes",
+    "save": "Save",
+    "cancel": "Cancel",
+    "errorTitleRequired": "Title is required",
+    "errorEndsBeforeStart": "End time must be after start time",
+    "closeModal": "Close dialog"
+  },
+  "digest": {
+    "page": {
+      "title": "Your daily digest"
+    },
+    "sections": {
+      "yesterday": {
+        "title": "Yesterday"
+      },
+      "today": {
+        "title": "Today"
+      },
+      "week": {
+        "title": "This week",
+        "coming_soon": "More community updates coming soon."
+      },
+      "stall": {
+        "title": "Needs attention",
+        "cta": "Talk to a navigator"
+      },
+      "empty": {
+        "placeholder": "Nothing new here"
+      }
+    },
+    "expand": "Show",
+    "collapse": "Hide",
+    "loading": "Loading your digest...",
+    "error": {
+      "generic": "Couldn't load your digest. Please try again.",
+      "unauthorized": "Session expired. Please log in again."
+    }
   }
 }
