@@ -29,9 +29,12 @@ class TestRouteRegistration:
         route_files = {
             f[:-3]
             for f in os.listdir(routes_dir)
-            if f.endswith(".py") and f != "__init__.py" and f != "career_center.py"
+            if f.endswith(".py")
+            and not f.startswith("_")  # exclude __init__.py and private helper modules
+            and f != "career_center.py"
         }
         # career_center is registered via plan_router (side-effect import)
+        # _*-prefixed modules are package-private helpers (no router exported)
 
         # Verify we have at least as many routers as route files
         assert len(all_routers) >= len(route_files), (

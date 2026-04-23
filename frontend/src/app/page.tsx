@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ClipboardList, Target, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,6 +12,7 @@ import {
 } from "@/lib/motion";
 import { useCityConfig } from "@/hooks/useCityConfig";
 import { getCityStats } from "@/lib/city-stats";
+import { useAssessmentComplete } from "./home-redirect";
 
 const FLOW_STEPS = [
   {
@@ -32,6 +35,14 @@ const FLOW_STEPS = [
 export default function Home() {
   const city = useCityConfig();
   const stats = getCityStats(city.state);
+  const router = useRouter();
+  const assessmentComplete = useAssessmentComplete();
+
+  useEffect(() => {
+    if (assessmentComplete) {
+      router.replace("/daily");
+    }
+  }, [assessmentComplete, router]);
 
   const STATS = [
     { value: stats.povertyRate, suffix: "%", decimals: 1, label: "Poverty Rate" },
