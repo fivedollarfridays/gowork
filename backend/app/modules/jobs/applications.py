@@ -106,17 +106,17 @@ def _build_status_changes(
     new_status: JobApplicationStatus,
     outcome_date: date | None,
 ) -> dict:
-    """Assemble the UPDATE payload for a status transition."""
+    """Assemble the UPDATE payload for a status transition.
+
+    ``applied_date`` is set ONLY on the DRAFT→APPLIED transition. Other
+    transitions ignore ``outcome_date`` to keep the field's semantics
+    honest — a WITHDRAWN application must not look APPLIED.
+    """
     changes: dict = {"status": new_status.value}
-    # applied_date is the canonical 'date the user actually applied'. Only
-    # stamp it automatically on the DRAFT → APPLIED transition, and only
-    # if the caller didn't supply one explicitly.
     if new_status is JobApplicationStatus.APPLIED:
         changes["applied_date"] = (
             outcome_date.isoformat() if outcome_date else date.today().isoformat()
         )
-    elif outcome_date is not None:
-        changes["applied_date"] = outcome_date.isoformat()
     return changes
 
 

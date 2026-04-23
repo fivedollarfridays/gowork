@@ -135,8 +135,10 @@ def _sendgrid_rows(db_path: Path) -> list[dict]:
 
 
 def _post_signed(client, private_key, events: list[dict]) -> object:
+    import time as _time
     body = json.dumps(events).encode("utf-8")
-    timestamp = "1700000000"
+    # Use current timestamp — webhook now rejects stale (>10min) timestamps.
+    timestamp = str(int(_time.time()))
     signature = _sign(private_key, timestamp, body)
     return client.post(
         "/api/webhooks/sendgrid/events",

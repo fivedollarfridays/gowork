@@ -142,20 +142,21 @@ def compute_stall_for_session(
 
 
 def _active_session_ids(db_path: str | Path, now: datetime) -> list[str]:
-    """Return session IDs whose `expires_at` is still in the future."""
+    """Return session IDs whose `expires_at` is still in the future.
+
+    Uses SQLite's ``datetime()`` coercion to tolerate ISO format skew
+    (``Z`` vs ``+00:00``, ``T`` vs space separator).
+    """
     conn = sqlite3.connect(str(db_path))
     try:
         rows = conn.execute(
-            "SELECT id, expires_at FROM sessions",
+            "SELECT id FROM sessions "
+            "WHERE expires_at IS NULL OR datetime(expires_at) > datetime(?)",
+            (now.isoformat(),),
         ).fetchall()
     finally:
         conn.close()
-    active: list[str] = []
-    now_iso = now.isoformat()
-    for sid, expires_at in rows:
-        if not expires_at or expires_at >= now_iso:
-            active.append(sid)
-    return active
+    return [sid for (sid,) in rows]
 
 
 def scan_active_sessions(

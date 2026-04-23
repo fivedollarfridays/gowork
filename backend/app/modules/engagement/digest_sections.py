@@ -218,9 +218,16 @@ def render_this_week_section(
     )
 
 
-def _day_label(dt: datetime | None) -> str:
+def _day_label(dt: datetime | None, city: str | None = None) -> str:
     if dt is None:
         return "TBD"
+    if city:
+        from app.modules.common.temporal_types import TIMEZONE_BY_CITY
+        from zoneinfo import ZoneInfo
+        tz_name = TIMEZONE_BY_CITY.get(city)
+        if tz_name:
+            local = dt.astimezone(ZoneInfo(tz_name))
+            return f"{local.strftime('%a')} {local.month}/{local.day}"
     local = dt.astimezone(timezone.utc)
     return f"{local.strftime('%a')} {local.month}/{local.day}"
 

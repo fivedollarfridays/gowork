@@ -70,13 +70,14 @@ def _build_sections(
     for_date: date,
     db_path: str | Path,
     now: datetime,
+    city: str,
 ) -> list[Section]:
     """Assemble the 0-4 non-empty sections in fixed order."""
     y_bundle, cleared = collect_yesterday(session_id, for_date, db_path)
     today_items, yesterday_missed = collect_today(
-        session_id, for_date, db_path, now,
+        session_id, for_date, db_path, now, city,
     )
-    week_items = collect_this_week(session_id, for_date, db_path, now)
+    week_items = collect_this_week(session_id, for_date, db_path, now, city)
     stall = compute_stall_for_session(session_id, db_path=db_path, now=now)
 
     sections: list[Section] = []
@@ -153,6 +154,7 @@ def compose_digest(
         for_date=for_date,
         db_path=db_path,
         now=now,
+        city=city,
     )
     return DigestResult(
         subject=_subject_for(for_date),

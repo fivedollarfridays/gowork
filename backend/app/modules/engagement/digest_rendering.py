@@ -9,7 +9,7 @@ limits by pushing leaf-level string work here.
 from __future__ import annotations
 
 import html
-from datetime import timezone
+from datetime import datetime, timezone
 
 from app.modules.appointments.types import Appointment
 from app.modules.common.temporal_types import StallLevel
@@ -54,7 +54,7 @@ def dedupe_appointments_by_slot(
             continue
         group.sort(key=lambda x: (_type_rank(x), -len(x.title or "")))
         winners.append(group[0])
-    return sorted(winners, key=lambda x: x.starts_at or x.starts_at)
+    return sorted(winners, key=lambda x: x.starts_at or datetime.max.replace(tzinfo=timezone.utc))
 
 
 def schedule_title_stale(

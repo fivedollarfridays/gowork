@@ -8,6 +8,7 @@ through `app.cities.config.load_city_config` — no direct YAML parsing.
 
 from __future__ import annotations
 
+from datetime import date as _date
 from datetime import datetime, timezone
 from enum import Enum
 from zoneinfo import ZoneInfo
@@ -143,8 +144,22 @@ def format_city_local(value: str | datetime, city: str) -> str:
     return local_dt.strftime(f"%A %B %-d at {hour}{minute}{ampm} {label}")
 
 
+def local_date_in_city(dt: datetime, city: str) -> _date:
+    """Return the calendar date of a datetime as observed in the city's timezone.
+
+    Critical for retro/digest correctness: a UTC timestamp at 02:00 Mar 21
+    is Mar 20 in Central Time, so "yesterday's appointment" filters must
+    compare city-local dates, not UTC dates.
+    """
+    tz_name = TIMEZONE_BY_CITY.get(city)
+    if tz_name is None:
+        raise KeyError(f"No timezone configured for city {city!r}")
+    return dt.astimezone(ZoneInfo(tz_name)).date()
+
+
 __all__ = [
     "AppointmentStatus", "AppointmentType", "EngagementEventType",
     "GenerationMethod", "JobApplicationStatus", "StallLevel",
     "TIMEZONE_BY_CITY", "TimezoneAwareModel", "format_city_local",
+    "local_date_in_city",
 ]
