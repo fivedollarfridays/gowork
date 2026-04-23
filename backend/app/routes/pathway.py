@@ -17,13 +17,16 @@ from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import require_session_token
+from app.core.config import get_settings
 from app.core.database import get_db
 from app.core.queries import get_session_by_id
 from app.modules.pathway.engine import generate_pathways
+from app.routes._appointments_helpers import resolve_db_path
 from app.routes._intelligence_helpers import (
     build_community_intelligence,
     fetch_intelligence,
     parse_benefits_profile,
+    run_pathway_linker_hook,
 )
 
 logger = logging.getLogger(__name__)
@@ -69,6 +72,9 @@ async def generate_career_pathways(
         benefits_profile=profile,
         current_wage=body.current_wage,
         calibrated_weeks=calibrated_weeks or None,
+    )
+    run_pathway_linker_hook(
+        body.session_id, result, city=get_settings().city, db_path=resolve_db_path(),
     )
 
     response = result.model_dump()

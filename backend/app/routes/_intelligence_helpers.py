@@ -9,12 +9,30 @@ import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.modules.appointments.barrier_linker import auto_generate_placeholders
 from app.modules.benefits.types import BenefitsProfile
 from app.modules.outcomes.intelligence import CalibratedWeeks, compute_calibrated_barriers
 from app.modules.outcomes.intelligence_queries import get_barrier_feedback_rows
 from app.modules.plan.barrier_sequencer import _WEEKS_PER_BARRIER
 
 logger = logging.getLogger(__name__)
+
+
+def run_pathway_linker_hook(
+    session_id: str,
+    pathway_result,
+    *,
+    city: str,
+    db_path,
+) -> list:
+    """Wrap auto_generate_placeholders in try/except so linker failures never break the pathway response."""
+    try:
+        return auto_generate_placeholders(
+            session_id, pathway_result, city=city, db_path=db_path,
+        )
+    except Exception:
+        logger.exception("pathway barrier_linker hook failed")
+        return []
 
 
 def build_community_intelligence(

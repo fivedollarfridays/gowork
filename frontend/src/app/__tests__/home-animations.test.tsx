@@ -15,6 +15,12 @@ vi.mock("next/link", () => ({
   ),
 }));
 
+// Mock next/navigation — home page now uses useRouter for the /daily redirect
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(),
+}));
+
 // Dynamically import Home so mocks are applied
 const { default: Home } = await import("../page");
 
