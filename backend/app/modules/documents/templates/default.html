@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{{ title }}</title>
+<style>
+  /* Print page geometry — A4 with 1in margins. */
+  @page {
+    size: A4;
+    margin: 1in;
+  }
+
+  /* Typography — serif body for print legibility, sans-serif for headings. */
+  body {
+    font-family: "Liberation Serif", "Georgia", serif;
+    font-size: 11pt;
+    line-height: 1.5;
+    color: #1a1a2e;
+    margin: 0;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: "Liberation Sans", "Helvetica", sans-serif;
+    color: #16213e;
+    page-break-after: avoid;
+  }
+  h1 { font-size: 20pt; margin-top: 0; border-bottom: 2px solid #16213e; padding-bottom: 4pt; }
+  h2 { font-size: 14pt; margin-top: 18pt; }
+  h3 { font-size: 12pt; margin-top: 12pt; }
+
+  p { margin: 0 0 8pt 0; }
+  ul, ol { margin: 0 0 8pt 1.2em; padding: 0; }
+  li { margin-bottom: 2pt; }
+
+  /* Prevent orphaned headings and split table rows across pages. */
+  table { width: 100%; border-collapse: collapse; margin: 8pt 0; }
+  th, td { padding: 6pt 8pt; text-align: left; border-bottom: 1px solid #ccc; }
+  th { background: #eef0f5; font-family: "Liberation Sans", sans-serif; }
+  tr { page-break-inside: avoid; }
+
+  /* Worker-facing artefacts (cover letters, resumes) often include block quotes. */
+  blockquote {
+    border-left: 3px solid #16213e;
+    margin: 8pt 0 8pt 0;
+    padding: 2pt 8pt;
+    color: #444;
+  }
+
+  code, pre {
+    font-family: "Liberation Mono", "Courier New", monospace;
+    font-size: 10pt;
+  }
+  pre { background: #f5f5f5; padding: 6pt; page-break-inside: avoid; }
+</style>
+</head>
+<body>
+{{ body | safe }}
+</body>
+</html>

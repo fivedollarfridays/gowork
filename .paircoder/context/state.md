@@ -54,6 +54,15 @@ Older sprint task tables, session histories, and plan details have been archived
 
 ## What Was Just Done
 
+## 2026-04-23 — S12b T12.4 PDF Rendering — deps + template closed
+
+**T12.4 (done)**: closed the two remaining test failures in `backend/tests/test_pdf_renderer.py`.
+- `backend/requirements.txt`: pinned `weasyprint==60.2` and `markdown==3.7`.
+- `Dockerfile`: added `apt-get install` block for `libpango-1.0-0 libpangoft2-1.0-0 libcairo2 libffi-dev fonts-liberation` before the pip install step (native WeasyPrint dependencies required on `python:3.13-slim`, which ships without them).
+- `backend/app/modules/documents/templates/default.html`: upgraded the existing template to print-friendly CSS (A4 page size, 1in margins via `@page`, Liberation Serif body + Liberation Sans headings, `page-break-inside: avoid` on tables/pre, anchor styles for h1/h2/h3/blockquote/code/ul).
+
+Tests: 14/14 pass in `tests/test_pdf_renderer.py`. Arch check: warning-only (178 > 150 warn threshold, well under 400 error).
+
 ## 2026-04-23 — Planned Sprint S12b
 
 Created plan `plan-2026-04-s12b-value-extensions` with 25 tasks (actual Cx sum **510**, not the backlog header's 490 — header was self-flagged as having a discrepancy against the ground-truth `### T12.x | Cx: N` lines; recount of those lines gives 510 Cx). Priority breakdown: **P0=3** (T12.36, T12.32b, T12.35b), **P1=18**, **P2=4** (T12.8a, T12.25b, T12.31, T12.31a). Sprint extends the S12a foundation with PDF rendering, resume + cover letter builders (LLM-gated), reminder engine + cooldown, plan refresher, transactional appointment emails + signed manage-links with key rotation, jobs kanban + documents pages + advisor inbox (city-scoped), past-appointment auto-advance, module status contracts, weekly review composer, and the **compliance gate** (T12.36 worker data export + right-to-delete) that unblocks production GA.
