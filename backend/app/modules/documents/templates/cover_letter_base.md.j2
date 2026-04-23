@@ -1,0 +1,32 @@
+{#-
+  Cover-letter base template (T12.14).
+
+  Output: Markdown. The downstream pipeline (T12.15/T12.16) feeds this
+  through the ``markdown`` library and then WeasyPrint to produce PDF.
+
+  Safety contract
+  ---------------
+  * Render with Jinja2 ``autoescape=True``. All worker-supplied
+    fields (``opening``, ``body``, ``fair_chance_framing``, ``name``,
+    ``hiring_manager``) are escaped.
+  * No ``| safe`` escape hatches in this template. If a caller needs
+    rich markdown in the body they must run ``apply_worker_voice``
+    and accept that HTML-ish fragments will be rendered as literal
+    text.
+-#}
+{{ date_today }}
+
+Dear {{ hiring_manager or "Hiring Manager" }},
+
+{{ opening }}
+
+{{ body }}
+
+{% if fair_chance_framing -%}
+{{ fair_chance_framing }}
+{%- endif %}
+
+Thank you for your consideration.
+
+Sincerely,
+{{ name }}
