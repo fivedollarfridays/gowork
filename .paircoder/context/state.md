@@ -54,6 +54,14 @@ Older sprint task tables, session histories, and plan details have been archived
 
 ## What Was Just Done
 
+## 2026-04-23 — S12b T12.10b signed manage-appointment links — router registered
+
+**T12.10b (done)**: `backend/app/routes/appointments_manage.py` was implemented but never added to `all_routers`, so the `GET /api/appointments/manage` endpoint was unreachable at runtime.
+
+- `backend/app/routes/__init__.py`: added `from app.routes.appointments_manage import router as appointments_manage_router` and inserted it into `all_routers` **before** `appointments_router`. Order matters: `appointments.py` has a `/{appointment_id}` catch-all that would otherwise swallow the `/manage` path. Added a comment in the registry explaining the ordering constraint.
+
+Tests: 23/23 pass in `tests/test_appointment_tokens.py` + `tests/test_s8_code_quality.py`. Arch check surfaced one pre-existing violation on `backend/app/routes/__init__.py` — 25 imports > 15 threshold. Baseline (before S12b) was already 24 > 15; this is a route-registry aggregator whose job is to import every router. Not our regression, not in scope to refactor. `appointments_manage.py` itself is arch-clean.
+
 ## 2026-04-23 — S12b T12.4 PDF Rendering — deps + template closed
 
 **T12.4 (done)**: closed the two remaining test failures in `backend/tests/test_pdf_renderer.py`.
