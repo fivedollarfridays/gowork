@@ -54,6 +54,20 @@ Older sprint task tables, session histories, and plan details have been archived
 
 ## What Was Just Done
 
+## 2026-04-23 — S12b T12.7a appointment enrichment + stage advance
+
+**T12.7a (done)**: ported `ops:lib/appointment_merge.py` into `backend/app/modules/appointments/enrichment.py` (235 lines / 9 fn, arch warning-only at >150 line threshold). Public API: `auto_advance_stage(appointment, *, city=None) -> StageAdvance | None` (pure — never mutates), `merge_appointment(existing, new) -> Appointment` (field-level fill of None/empty), `enrichment_changed(existing, new) -> dict[str, tuple]`, `build_pipeline_summary(session_id, *, db_path) -> dict[(barrier, stage), int]`, `register_enrichment_listener(db_path)` (idempotent via module-level `_REGISTRATION_SENTINEL`).
+
+- City-aware stage flow keyed by `(city_slug, barrier_link)`: AL Montgomery uses expunction labels (`filed → heard → granted → cleared`); TX Fort Worth uses nondisclosure labels (`petitioned → heard → ordered → cleared`); benefits and employment flows shared across cities.
+- Listener subscribes to `appointment.attended` + `job_application.offer` via the S12a in-process `app.core.events` bus (no direct import of emitters). Handler emits `barrier.cleared(session_id, barrier_id)` only when an advance reaches a terminal stage (`cleared`/`recerted`/`completed`) — feeds the intelligence engine's calibration loop. Job offers always emit `barrier.cleared` for the `employment` barrier.
+- Current stage is encoded in `appointment.notes` as `stage:<name>` (lightweight S12a contract before a dedicated stage column lands). Absent/unparseable notes fall back to flow's first stage. Malformed event payloads logged and swallowed.
+
+Tests: 14/14 pass in `tests/test_appointment_enrichment.py`. Listener registration in `app/main.py` deferred to a follow-up wire-up task — tests exercise the listener function directly.
+
+## 2026-04-23 — S12b T12.8a worker_unavailability bookkeeping
+
+**T12.8a (done)**: code (`backend/app/modules/appointments/unavailability.py` + `backend/tests/test_worker_unavailability.py`) was bundled into the T12.8 commit (`cf8c6dd`) alongside the availability engine. Marked done here — no new commit. Module covers worker-side blackout windows respected by `availability.suggest_slots`; tests covered by the broader appointments-availability suite.
+
 ## 2026-04-23 — S12b T12.8 availability engine — service config in city YAMLs
 
 **T12.8 (done)**: three tests in `tests/test_appointment_availability.py` were failing because `appointment_services` was missing from both city YAMLs. The engine itself (`availability.py`, `service_config.py`, `_availability_time.py`, `unavailability.py`) already works — this was purely a data gap.
