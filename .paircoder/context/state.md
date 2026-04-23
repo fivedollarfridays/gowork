@@ -54,6 +54,17 @@ Older sprint task tables, session histories, and plan details have been archived
 
 ## What Was Just Done
 
+## 2026-04-23 — S12b T12.19 reminder engine wired into nightly orchestrator
+
+**T12.19 (done)**: closed the last failing reminder-engine test by routing the nightly digest through `reminder_engine.send_digest`. Engine code (modules + helpers + templates + tokens + cooldown) was already complete and ported from `ops:lib/`.
+
+- `backend/scripts/nightly_digest.py`: replaced direct `send_transactional(...)` call in `_process_session` with `send_digest(session_id, email, subject, html, text, db_path=db_path)`. The reminder engine now gates every nightly send behind: (a) the (`session_id`, `"digest"`) cooldown row in `reminder_cooldowns`, (b) the `reminders_auto_disabled` engagement_events row (set by worker opt-out OR T12.2a hard-bounce handler), (c) the `EMAIL_SEND_ENABLED` kill-switch. Engine also writes the engagement_events success row. Module docstring + the TODO comment cleared.
+- `backend/tests/test_nightly_digest.py` + `backend/tests/_s12a_e2e_helpers.py`: shared `_install_sendgrid_spy` / `install_sendgrid_spy` helpers swapped from monkeypatching `nd.send_transactional` → `nd.send_digest`. Spy returns a `ReminderDispatchResult(success=True)` matching the new contract; existing assertions on `to`, `subject`, `category`, `session_id` keep working without test-body changes. Removed the now-unused `EmailSendResult` import from the e2e helpers.
+
+`sessions.reminders_enabled` carry-over: column does NOT exist on the `sessions` table (S12a-leftover debt). The engine handles this gracefully — opt-out is checked via the `engagement_events.reminders_auto_disabled` row pattern, NOT a session column. Worker opt-out and the T12.2a hard-bounce path both insert the same row shape.
+
+Tests: 38/38 pass across `test_reminder_engine.py` + `test_cooldown.py` + `test_unsubscribe_tokens.py` + `test_nightly_digest.py`. 12/12 pass in `test_s12a_worker_companion_e2e.py`. Full suite: 3019 passed (+1 vs prior 3018), 19 failures — 16 are the known `test_weekly_review` `ModuleNotFoundError` (Stage C target), 1 is the pre-existing `test_contract_credit_api`, 0 net new regressions. Arch checks: warning-only on the 4 engagement modules + nightly_digest.py (all between 162–276 lines, well under 400 error).
+
 ## 2026-04-23 — S12b T12.14 worker voice + resume/cover letter templates
 
 **T12.14 (done)**: created `backend/app/modules/documents/voice.py` (196 lines / 9 fn — arch warning-only above 150 line threshold; under 400 error). Single entry point `apply_worker_voice(text)` runs the full rule chain; idempotent (running twice yields same output).
