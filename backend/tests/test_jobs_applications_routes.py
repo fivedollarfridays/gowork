@@ -461,8 +461,13 @@ def test_no_collision_with_existing_api_jobs_endpoint(
     db_path: str, monkeypatch,
 ) -> None:
     """/api/jobs/{job_id} and /api/job-applications/{id} must resolve to
-    distinct handlers with distinct response shapes. This is the critical
-    regression test for the v2 review blocker.
+    distinct handlers with distinct response shapes. Critical regression
+    test for the v2 review blocker.
+
+    Verified via the FastAPI routing table + a behavioural probe on the
+    `/api/job-applications` side; does not invoke `/api/jobs/{id}`
+    directly (that handler depends on a live async SQLAlchemy session
+    which CI runners don't provision).
     """
     from app.routes import jobs as jobs_route
     monkeypatch.setattr(
@@ -471,18 +476,26 @@ def test_no_collision_with_existing_api_jobs_endpoint(
     app = FastAPI()
     app.include_router(jobs_route.router)
     app.include_router(jobs_applications_route.router)
+
+    # Contract check 1: distinct prefixes — /api/jobs vs /api/job-applications.
+    jobs_paths = {
+        r.path for r in jobs_route.router.routes if hasattr(r, "path")
+    }
+    app_paths = {
+        r.path for r in jobs_applications_route.router.routes
+        if hasattr(r, "path")
+    }
+    assert all(p.startswith("/api/jobs") for p in jobs_paths), jobs_paths
+    assert all(p.startswith("/api/job-applications") for p in app_paths), app_paths
+    assert not (jobs_paths & app_paths), (
+        f"collision: same path in both routers: {jobs_paths & app_paths}"
+    )
+
+    # Contract check 2: the PATCH /api/job-applications/{id} route resolves
+    # to the jobs_applications handler (not jobs.get_job). Probing via PATCH
+    # /api/jobs/9999 → 405 proves /api/jobs doesn't accept PATCH; probing
+    # /api/job-applications/9999 with a bogus id → our handler returns 404.
     local_client = TestClient(app)
-
-    # /api/jobs/{job_id}: integer path param, 404 dict with `detail` key
-    resp_jobs = local_client.get("/api/jobs/99999")
-    assert resp_jobs.status_code == 404
-    assert "detail" in resp_jobs.json()
-
-    # /api/job-applications/{id}: PATCH-only; GET is not defined,
-    # or at minimum the route is distinct and doesn't reach jobs.get_job.
-    # Confirm that PATCH /{id} routes to jobs_applications (not jobs).
-    # The clearest signal: PATCH /api/jobs/9999 returns 405, PATCH
-    # /api/job-applications/9999 returns 404 (our handler ran).
     resp_patch_jobs = local_client.patch("/api/jobs/9999", json={})
     resp_patch_app = local_client.patch(
         f"/api/job-applications/9999?token={_TOKEN_A}",
