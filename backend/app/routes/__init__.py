@@ -4,6 +4,7 @@ from app.barrier_intel.router import router as barrier_intel_router
 from app.health import router as health_router
 from app.routes.admin_flags import router as admin_flags_router
 from app.routes.appointments import router as appointments_router
+from app.routes.appointments_manage import router as appointments_manage_router
 from app.routes.assessment import router as assessment_router
 from app.routes.brightdata import router as brightdata_router
 from app.routes.city import router as city_router
@@ -28,6 +29,11 @@ import app.routes.career_center as _career_center  # noqa: F401 — registers ca
 all_routers = [
     health_router,
     admin_flags_router,
+    # appointments_manage (GET /api/appointments/manage) MUST be
+    # registered before appointments_router; otherwise the
+    # ``/{appointment_id}`` wildcard in appointments.py swallows the
+    # /manage path.
+    appointments_manage_router,
     appointments_router,
     assessment_router,
     plan_router,
