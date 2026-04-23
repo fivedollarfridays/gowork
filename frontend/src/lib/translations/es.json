@@ -173,5 +173,82 @@
   "outcomes": {
     "assessmentsCompleted": "evaluaciones completadas",
     "improvingRecommendations": "inteligencia de barreras mejorando recomendaciones"
+  },
+  "appointments": {
+    "title": "Citas",
+    "subtitle": "Programa y registra tus próximos compromisos",
+    "tabCalendar": "Calendario",
+    "tabList": "Próximas",
+    "newAppointment": "+ Nueva cita",
+    "loading": "Cargando citas...",
+    "loadFailed": "No se pudieron cargar las citas.",
+    "missingSession": "No hay sesión disponible. Inicia una evaluación primero.",
+    "emptyList": "Sin citas próximas en los próximos 30 días.",
+    "placeholdersBanner": "cita(s) esperando una fecha",
+    "placeholderCta": "Programar",
+    "placeholderHeading": "Sugerencias de ruta sin fechas",
+    "placeholderRegionLabel": "Citas pendientes de fecha",
+    "cardAttended": "Marcar asistida",
+    "cardMissed": "Marcar perdida",
+    "cardCancel": "Cancelar",
+    "cardReschedule": "Reprogramar",
+    "cardNoDate": "Sin fecha",
+    "statusScheduled": "Programada",
+    "statusAttended": "Asistida",
+    "statusMissed": "Perdida",
+    "statusCancelled": "Cancelada",
+    "statusRescheduled": "Reprogramada",
+    "sourcePathway": "Ruta",
+    "sourceUser": "Manual",
+    "typeInterview": "Entrevista",
+    "typeAppointment": "Cita",
+    "typeTraining": "Capacitación",
+    "typeOther": "Otro",
+    "modalTitleCreate": "Nueva cita",
+    "modalTitleEdit": "Editar cita",
+    "fieldType": "Tipo",
+    "fieldTitle": "Título",
+    "fieldStartsAt": "Comienza",
+    "fieldEndsAt": "Termina",
+    "fieldLocationName": "Lugar",
+    "fieldLocationAddress": "Dirección",
+    "fieldBarrierLink": "Barrera",
+    "fieldNotes": "Notas",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "errorTitleRequired": "El título es obligatorio",
+    "errorEndsBeforeStart": "La hora de fin debe ser posterior al inicio",
+    "closeModal": "Cerrar diálogo"
+  },
+  "digest": {
+    "page": {
+      "title": "Tu resumen diario"
+    },
+    "sections": {
+      "yesterday": {
+        "title": "Ayer"
+      },
+      "today": {
+        "title": "Hoy"
+      },
+      "week": {
+        "title": "Esta semana",
+        "coming_soon": "Próximamente más actualizaciones comunitarias."
+      },
+      "stall": {
+        "title": "Requiere atención",
+        "cta": "Hablar con un navegador"
+      },
+      "empty": {
+        "placeholder": "Nada nuevo por aquí"
+      }
+    },
+    "expand": "Mostrar",
+    "collapse": "Ocultar",
+    "loading": "Cargando tu resumen...",
+    "error": {
+      "generic": "No se pudo cargar tu resumen. Inténtalo de nuevo.",
+      "unauthorized": "Sesión expirada. Por favor inicia sesión de nuevo."
+    }
   }
 }

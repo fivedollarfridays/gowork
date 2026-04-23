@@ -87,8 +87,13 @@ class TestLifespan:
             mock_close.assert_awaited_once()
 
     @pytest.mark.anyio
-    async def test_warns_when_web_concurrency_gt_1(self):
-        """Startup should log a warning when WEB_CONCURRENCY > 1."""
+    async def test_raises_when_web_concurrency_gt_1(self):
+        """Startup hard-fails with RuntimeError when WEB_CONCURRENCY > 1.
+
+        T12.3 change: APScheduler in-process requires single-worker; the
+        prior soft warning was promoted to a hard failure. A pre-scheduler
+        warning is still emitted before the raise (unchanged).
+        """
         from app.main import lifespan, app
 
         mock_engine = AsyncMock()
@@ -96,15 +101,10 @@ class TestLifespan:
              patch("app.main.init_db", new_callable=AsyncMock), \
              patch("app.main.close_db", new_callable=AsyncMock), \
              patch(_MOCK_SEEDS, new_callable=AsyncMock, return_value=MagicMock()), \
-             patch("app.main.logger") as mock_logger, \
              patch.dict("os.environ", {"WEB_CONCURRENCY": "4"}):
-            async with lifespan(app):
-                pass
-        warning_calls = [
-            str(c) for c in mock_logger.warning.call_args_list
-        ]
-        assert any("WEB_CONCURRENCY" in c for c in warning_calls)
-        assert any("rate limit" in c.lower() for c in warning_calls)
+            with pytest.raises(RuntimeError, match="WEB_CONCURRENCY=1"):
+                async with lifespan(app):
+                    pass
 
     @pytest.mark.anyio
     async def test_no_warning_when_web_concurrency_is_1(self):

@@ -4,9 +4,14 @@ Each test class addresses a specific coverage gap identified during
 the Domain Expansion sweep.
 """
 
+import sqlite3
+from datetime import datetime, timezone
+from pathlib import Path
+
 import pytest
 from pydantic import ValidationError
 
+from app.core.migrations import runner
 from app.modules.benefits.types import BenefitsProfile
 from app.modules.feedback.types import VisitFeedbackRequest
 from app.modules.matching.types import Resource
@@ -20,6 +25,28 @@ from app.modules.resources.eligibility import (
 )
 
 
+def _prepare_outcomes_db(tmp_path: Path) -> str:
+    """Run migrations on a fresh temp DB and return its path."""
+    db_path = str(tmp_path / "s8_outcomes.db")
+    runner.apply_pending(db_path)
+    return db_path
+
+
+def _ensure_session(db_path: str, session_id: str) -> None:
+    """Insert parent sessions row so outcomes FK constraints are satisfied."""
+    now = datetime.now(timezone.utc).isoformat()
+    conn = sqlite3.connect(db_path)
+    try:
+        conn.execute(
+            "INSERT OR IGNORE INTO sessions (id, created_at, barriers, expires_at) "
+            "VALUES (?, ?, ?, ?)",
+            (session_id, now, "[]", now),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
 # ---------------------------------------------------------------------------
 # Cycle 1: OutcomeTracker.get_all_outcomes (tracker.py line 38)
 # ---------------------------------------------------------------------------
@@ -28,12 +55,19 @@ from app.modules.resources.eligibility import (
 class TestOutcomeTrackerGetAll:
     """Cover OutcomeTracker.get_all_outcomes method."""
 
-    def test_get_all_outcomes_empty(self) -> None:
-        tracker = OutcomeTracker()
+    def test_get_all_outcomes_empty(self, tmp_path: Path) -> None:
+        db_path = _prepare_outcomes_db(tmp_path)
+        tracker = OutcomeTracker(db_path)
         assert tracker.get_all_outcomes() == []
 
-    def test_get_all_outcomes_returns_all_cities(self) -> None:
-        tracker = OutcomeTracker()
+    def test_get_all_outcomes_returns_all_cities(self, tmp_path: Path) -> None:
+        db_path = _prepare_outcomes_db(tmp_path)
+        tracker = OutcomeTracker(db_path)
+        for sid in (
+            "aaaa0001-bbbb-cccc-dddd-eeeeeeeeeeee",
+            "aaaa0002-bbbb-cccc-dddd-eeeeeeeeeeee",
+        ):
+            _ensure_session(db_path, sid)
         tracker.record_outcome(OutcomeRecord(
             session_id="aaaa0001-bbbb-cccc-dddd-eeeeeeeeeeee",
             signal_type="barrier_resolved",
@@ -49,10 +83,13 @@ class TestOutcomeTrackerGetAll:
         cities = {o.city for o in all_outcomes}
         assert cities == {"fort-worth", "montgomery"}
 
-    def test_get_all_outcomes_preserves_data(self) -> None:
-        tracker = OutcomeTracker()
+    def test_get_all_outcomes_preserves_data(self, tmp_path: Path) -> None:
+        db_path = _prepare_outcomes_db(tmp_path)
+        tracker = OutcomeTracker(db_path)
+        sid = "aaaa0001-bbbb-cccc-dddd-eeeeeeeeeeee"
+        _ensure_session(db_path, sid)
         tracker.record_outcome(OutcomeRecord(
-            session_id="aaaa0001-bbbb-cccc-dddd-eeeeeeeeeeee",
+            session_id=sid,
             signal_type="barrier_resolved",
             barrier_outcomes=[
                 BarrierOutcome(barrier_id="credit", resolved=True, weeks_to_resolve=4),
