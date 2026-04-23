@@ -54,6 +54,15 @@ Older sprint task tables, session histories, and plan details have been archived
 
 ## What Was Just Done
 
+## 2026-04-23 — S12b T12.10a transactional emails — async scheduler job handler
+
+**T12.10a (done)**: `tests/test_appointment_transactional_emails.py::test_scheduler_job_invokes_scan` was failing because the `appointment_reminders` scheduler job was still registered as `_make_stub(...)` (a sync no-op logger), but the test drives it via `asyncio.run(job.func())`. Two fixes:
+
+- `backend/app/core/scheduler.py`: replaced the stub registration with a real handler that delegates to the new `scheduler_jobs.appointment_reminders_handler()` factory.
+- `backend/app/core/scheduler_jobs.py` (new): factored out both handler factories (`nightly_digest_handler`, `appointment_reminders_handler`) to keep `scheduler.py` under the 12-functions-per-file project ceiling. `appointment_reminders_handler()` returns an `async def _run()` that lazy-imports `transactional_emails` + `resolve_db_path`, resolves the DB path at run-time (so tests can monkeypatch), and calls the sync `scan_and_send_reminders(db_path=...)`. Downstream `scan_and_send_reminders` stays sync — no refactor chain needed.
+
+Tests: 45/45 pass across `test_appointment_transactional_emails.py`, `test_scheduler.py`, `test_nightly_digest.py`, `test_s12a_gate.py` (1 pre-existing skip, unrelated 10-min scale test). Arch check: both files clean. Extraction pattern mirrors S12a's `tracker.py`/`tracker_sql.py` split.
+
 ## 2026-04-23 — S12b T12.10b signed manage-appointment links — router registered
 
 **T12.10b (done)**: `backend/app/routes/appointments_manage.py` was implemented but never added to `all_routers`, so the `GET /api/appointments/manage` endpoint was unreachable at runtime.
