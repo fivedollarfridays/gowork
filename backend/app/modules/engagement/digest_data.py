@@ -10,11 +10,12 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 from app.modules.appointments import scheduler
 from app.modules.appointments.types import Appointment
+from app.modules.common.temporal_types import local_date_in_city
 from app.modules.plan.evidence_collector import EvidenceBundle, collect_evidence
 
 
@@ -94,18 +95,20 @@ def collect_today(
     for_date: date,
     db_path: str | Path,
     now: datetime,
+    city: str,
 ) -> tuple[list[Appointment], list[Appointment]]:
     """Return (today_scheduled_future, yesterday_missed).
 
     Only ``SCHEDULED`` appointments surface in "today" — missed items
-    flow to the carryover subsection.
+    flow to the carryover subsection. Dates compared in the city's local
+    timezone so evening appointments don't land on the wrong day.
     """
     rows = scheduler.list_by_session(session_id, db_path=db_path)
     today_items = [
         a for a in rows
         if a.status.value == "scheduled"
         and a.starts_at is not None
-        and a.starts_at.astimezone(timezone.utc).date() == for_date
+        and local_date_in_city(a.starts_at, city) == for_date
         and a.starts_at >= now
     ]
     yesterday = for_date - timedelta(days=1)
@@ -113,22 +116,22 @@ def collect_today(
         a for a in rows
         if a.status.value == "missed"
         and a.starts_at is not None
-        and a.starts_at.astimezone(timezone.utc).date() == yesterday
+        and local_date_in_city(a.starts_at, city) == yesterday
     ]
     return today_items, yesterday_missed
 
 
 def collect_this_week(
-    session_id: str, for_date: date, db_path: str | Path, now: datetime,
+    session_id: str, for_date: date, db_path: str | Path, now: datetime, city: str,
 ) -> list[Appointment]:
-    """Return scheduled appointments in 7-day window minus today."""
+    """Return scheduled appointments in 7-day window minus today. City-local dates."""
     rows = scheduler.list_by_session(session_id, db_path=db_path)
     cutoff = now + timedelta(days=7)
     return [
         a for a in rows
         if a.status.value == "scheduled"
         and a.starts_at is not None
-        and a.starts_at.astimezone(timezone.utc).date() != for_date
+        and local_date_in_city(a.starts_at, city) != for_date
         and now <= a.starts_at <= cutoff
     ]
 

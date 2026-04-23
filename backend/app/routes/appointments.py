@@ -41,6 +41,9 @@ def _resolve_db_path() -> str:
 
 
 _PATCH_FORBIDDEN_FIELDS = ("status", "session_id", "id", "source")
+_PATCH_ALLOWED_FIELDS = frozenset({
+    "title", "starts_at", "ends_at", "location_name", "location_address", "notes",
+})
 
 
 class AppointmentPatch(BaseModel):
@@ -48,7 +51,8 @@ class AppointmentPatch(BaseModel):
 
     Extra fields are allowed at parse time so the handler can return a
     400 (business-rule violation) for ``status`` / identity mutations
-    rather than a generic 422 schema error.
+    rather than a generic 422 schema error. Any other extras are dropped
+    by the allow-list filter in ``_patch_to_changes``.
     """
 
     model_config = ConfigDict(extra="allow")
@@ -179,7 +183,12 @@ def _patch_to_changes(patch: AppointmentPatch) -> dict[str, Any]:
                 status_code=400,
                 detail=f"field '{field}' cannot be changed via PATCH",
             )
-    return {k: v for k, v in raw.items() if v is not None}
+    # Strict allow-list: drop any extras that slipped through `extra="allow"`.
+    # Prevents PATCH body from writing arbitrary columns via update_fields.
+    return {
+        k: v for k, v in raw.items()
+        if k in _PATCH_ALLOWED_FIELDS and v is not None
+    }
 
 
 @router.delete("/{appointment_id}", status_code=204)

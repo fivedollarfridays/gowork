@@ -59,17 +59,24 @@ def _make_handler(signal_type: str, db_path: str | Path):
     return _handle
 
 
+_REGISTRATION_SENTINEL: set[tuple[str, str]] = set()
+
+
 def register_outcomes_listener(db_path: str | Path) -> None:
     """Subscribe outcome handlers to every mapped appointment event.
 
-    Idempotent — the bus's `subscribe` is a no-op for duplicates, but
-    each call here creates a *new* handler closure, so repeated
-    registrations would stack. In practice this is called once at
-    startup; callers that need re-registration should first invoke
-    `events.clear_all_subscribers()` (e.g. in tests).
+    Idempotent across lifespan restarts: the sentinel set tracks
+    (event_name, db_path) pairs so repeat calls (dev reload, test reuse)
+    don't stack duplicate closures. Tests that need fresh registration
+    should call ``events.clear_all_subscribers()`` then
+    ``_REGISTRATION_SENTINEL.clear()`` before re-registering.
     """
+    key_path = str(db_path)
     for event_name, signal_type in _SIGNAL_BY_EVENT.items():
+        if (event_name, key_path) in _REGISTRATION_SENTINEL:
+            continue
         events.subscribe(event_name, _make_handler(signal_type, db_path))
+        _REGISTRATION_SENTINEL.add((event_name, key_path))
 
 
 __all__ = ["register_outcomes_listener"]

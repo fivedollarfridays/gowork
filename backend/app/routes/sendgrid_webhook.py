@@ -87,15 +87,26 @@ def _load_public_key() -> ec.EllipticCurvePublicKey | None:
     return key
 
 
+_MAX_TIMESTAMP_SKEW_SECONDS = 600  # 10 minutes — SendGrid spec for replay defense
+
+
 def _verify_signature(
     signature_b64: str, timestamp: str, body: bytes
 ) -> bool:
-    """Return True iff the ECDSA P-256 signature matches."""
+    """Return True iff the ECDSA P-256 signature matches AND timestamp is fresh."""
     public_key = _load_public_key()
     if public_key is None:
         return False
     try:
-        sig_der = base64.b64decode(signature_b64, validate=False)
+        ts_seconds = int(float(timestamp))
+    except (TypeError, ValueError):
+        return False
+    now = int(__import__("time").time())
+    if abs(now - ts_seconds) > _MAX_TIMESTAMP_SKEW_SECONDS:
+        logger.warning("SendGrid webhook rejected: timestamp skew exceeds %ds", _MAX_TIMESTAMP_SKEW_SECONDS)
+        return False
+    try:
+        sig_der = base64.b64decode(signature_b64, validate=True)
     except Exception:
         return False
     signed_blob = timestamp.encode("ascii") + body

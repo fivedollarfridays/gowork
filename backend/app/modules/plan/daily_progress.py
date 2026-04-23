@@ -83,12 +83,16 @@ def collect_for_date(
 
 
 def _build_expected_from_appointments(
-    session_id: str, for_date: date, *, db_path: str | Path,
+    session_id: str, for_date: date, *, db_path: str | Path, city: str | None = None,
 ) -> list[dict]:
-    """Expected-actions list: every appointment starting on ``for_date``."""
+    """Expected-actions list: every appointment starting on ``for_date`` (city-local)."""
+    from app.modules.common.temporal_types import local_date_in_city
+    if city is None:
+        from app.core.config import get_settings
+        city = get_settings().city
     out: list[dict] = []
     for appt in scheduler.list_by_session(session_id, db_path=db_path):
-        if appt.starts_at is None or appt.starts_at.date() != for_date:
+        if appt.starts_at is None or local_date_in_city(appt.starts_at, city) != for_date:
             continue
         out.append({
             "action_id": f"appointment_{appt.id}",
