@@ -54,6 +54,12 @@ Older sprint task tables, session histories, and plan details have been archived
 
 ## What Was Just Done
 
+## 2026-04-23 — Planned Sprint S12b
+
+Created plan `plan-2026-04-s12b-value-extensions` with 25 tasks (actual Cx sum **510**, not the backlog header's 490 — header was self-flagged as having a discrepancy against the ground-truth `### T12.x | Cx: N` lines; recount of those lines gives 510 Cx). Priority breakdown: **P0=3** (T12.36, T12.32b, T12.35b), **P1=18**, **P2=4** (T12.8a, T12.25b, T12.31, T12.31a). Sprint extends the S12a foundation with PDF rendering, resume + cover letter builders (LLM-gated), reminder engine + cooldown, plan refresher, transactional appointment emails + signed manage-links with key rotation, jobs kanban + documents pages + advisor inbox (city-scoped), past-appointment auto-advance, module status contracts, weekly review composer, and the **compliance gate** (T12.36 worker data export + right-to-delete) that unblocks production GA.
+
+S12a staging-only constraint lifts when T12.36 lands.
+
 ## 2026-04-23 — S12a SPRINT COMPLETE — 26/26 tasks, GATE green
 
 **Final state: 2,851 backend tests passed (+450 new), 842 frontend tests passed, zero regressions. Two pre-existing failures remain (credit-assessment jwt, s8 route-counter).**
@@ -164,24 +170,9 @@ Created plan `plan-2026-04-s12a-worker-companion-foundation` with 26 tasks (520 
 
 ## What's Next
 
-Wave 1 complete (T12.0 + T12.5). Next: **commit the wave**, then proceed to Wave 2 (`T12.1` schema migrations creating all 13 S12 tables + `T12.3` APScheduler + day-boundary helpers — both depend only on T12.0). User will invoke `/running-sprint-tasks` to take over parallel wave execution from Wave 2 onward.
+Execute S12b. Recommended starting points (Wave 1, no S12b intra-sprint deps): T12.4 (PDF rendering), T12.14 (worker voice rules), T12.31a (advisor auth doc). All others chain through S12b intra-sprint deps or await Wave N-1 output.
 
-**Wave plan reference** (remaining 24 tasks after Wave 1):
-- Wave 2: T12.1, T12.3 (50 Cx)
-- Wave 3: T12.0a, T12.0b, T12.6 (55 Cx)
-- Wave 4: T12.2, T12.7 (45 Cx)
-- Wave 5: T12.2a, T12.9, T12.11 (60 Cx)
-- Wave 6: T12.10, T12.12, T12.23 (50 Cx)
-- Wave 7: T12.13, T12.18, T12.22, T12.33 (75 Cx)
-- Wave 8: T12.20, T12.26 (60 Cx)
-- Wave 9: T12.21a, T12.25 (30 Cx)
-- Wave 10: T12.29 (20 Cx)
-- Wave 11: T12.32 (25 Cx)
-- Wave 12 (GATE): T12.35 (20 Cx)
-
-**Known follow-ups carried from Wave 1**:
-- `database.py:13,94` + `test_database.py` still use direct `DDL_SQL` import — works via re-export. Route through `migrations.runner.apply_pending` when touched by downstream waves.
-- Pre-existing test failure in `test_contract_credit_api` (credit-assessment `jwt` module) is NOT a S12a regression.
+S12b gates production general availability via T12.36 (worker data export + right-to-delete). Until T12.36 lands, S12a is staging-only.
 
 **Post-Hackathon:** Dallas expansion (DFW unification). Texas state-level modules (benefits, criminal) are already built. Dallas needs: `cities/dallas.yaml`, `data/cities/dallas/` seed data, DART transit data, Dallas career centers/resources/employers, fair-chance index. No new code — just data curation and a new city config. See ROADMAP.md "Dallas Expansion" phase and hackfw-2026-proposal.md "Post-Hackathon" section for full details.
 
