@@ -9,8 +9,12 @@ targeted city:
 3. Refresh the plan — **stubbed** for S12a; real implementation lands in
    S12b T12.24.
 4. Compose the daily digest (T12.20).
-5. Send via SendGrid (T12.2) directly. **TODO S12b T12.19**: route
-   through the reminder engine with cooldown/dedup instead.
+5. Dispatch the digest through the reminder engine (T12.19) —
+   :func:`reminder_engine.send_digest` gates the SendGrid call behind
+   the (session_id, "digest") cooldown, the ``reminders_auto_disabled``
+   engagement_events opt-out row (worker opt-out OR T12.2a hard-bounce),
+   and the ``EMAIL_SEND_ENABLED`` kill switch, then logs an
+   ``engagement_events`` row on success.
 
 Kill switch
 -----------
@@ -46,9 +50,9 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 from app.core import day_boundary, feature_flags
-from app.integrations.email.sendgrid_client import send_transactional
 from app.modules.common.temporal_types import TIMEZONE_BY_CITY
 from app.modules.engagement.digest_composer import compose_digest
+from app.modules.engagement.reminder_engine import send_digest
 from app.modules.plan.daily_progress import run_nightly_retro
 from scripts.nightly_accounting import RunAccounting, insert_run_row, url_to_path
 
@@ -142,11 +146,15 @@ async def _process_session(
         return SessionOutcome(
             session_id=session_id, city=city, email_sent=False, error=None,
         )
-    # TODO S12b T12.19: replace direct SendGrid call with reminder_engine
-    #                   (adds cooldown + dedup; respects quiet hours).
-    result = send_transactional(
-        email, digest.subject, digest.html, digest.text,
-        "digest", session_id=session_id, db_path=db_path,
+    # T12.19 — route through reminder_engine.send_digest so every nightly
+    # digest honors the (session_id, "digest") cooldown, engagement_events
+    # opt-out (reminders_auto_disabled — set by worker opt-out or T12.2a
+    # hard-bounce handler), EMAIL_SEND_ENABLED kill switch, and writes to
+    # engagement_events. `reminder_engine` logs the engagement_events row
+    # and cooldown for us — we only tally the accounting outcome here.
+    result = send_digest(
+        session_id, email, digest.subject, digest.html, digest.text,
+        db_path=db_path,
     )
     return SessionOutcome(
         session_id=session_id, city=city,

@@ -18,7 +18,6 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from app.integrations.email.core import EmailSendResult
 from app.routes import appointments as appointments_route
 from app.routes import engagement_preview as engagement_preview_route
 from app.routes import jobs as jobs_route
@@ -141,24 +140,36 @@ def insert_outcome(
 
 
 def install_sendgrid_spy(monkeypatch: pytest.MonkeyPatch) -> list[dict]:
-    """Replace scripts.nightly_digest.send_transactional with a recorder."""
+    """Replace ``scripts.nightly_digest.send_digest`` with a recorder.
+
+    As of T12.19 the orchestrator routes every digest through
+    ``reminder_engine.send_digest`` (cooldown + opt-out + kill-switch
+    gating). The spy records the call shape this helper has always exposed
+    (``to`` / ``subject`` / ``category`` / ``session_id``) so the existing
+    e2e assertions keep working.
+    """
     calls: list[dict] = []
 
-    def _fake_send(
-        to: str, subject: str, html: str, text_fallback: str,
-        category: str, *, session_id: str | None = None, db_path: Any = None,
-    ) -> EmailSendResult:
+    def _fake_send_digest(
+        session_id: str, to_email: str, subject: str, html: str, text: str,
+        *, db_path: Any = None, now: Any = None,
+    ):
         calls.append({
-            "to": to, "subject": subject, "category": category,
+            "to": to_email, "subject": subject, "category": "digest",
             "session_id": session_id,
         })
-        return EmailSendResult(
-            success=True, message_id="mid-spy",
-            attempt_count=1, skipped_reason=None,
+        from app.modules.engagement.reminder_engine import (
+            ReminderDispatchResult,
+        )
+        return ReminderDispatchResult(
+            success=True,
+            skipped_reason=None,
+            category="digest",
+            message_id="mid-spy",
         )
 
     import scripts.nightly_digest as nd
-    monkeypatch.setattr(nd, "send_transactional", _fake_send)
+    monkeypatch.setattr(nd, "send_digest", _fake_send_digest)
     return calls
 
 
