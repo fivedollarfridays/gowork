@@ -54,6 +54,15 @@ Older sprint task tables, session histories, and plan details have been archived
 
 ## What Was Just Done
 
+## 2026-04-23 — S12b T12.8 availability engine — service config in city YAMLs
+
+**T12.8 (done)**: three tests in `tests/test_appointment_availability.py` were failing because `appointment_services` was missing from both city YAMLs. The engine itself (`availability.py`, `service_config.py`, `_availability_time.py`, `unavailability.py`) already works — this was purely a data gap.
+
+- `cities/montgomery.yaml`: added `appointment_services` with the 4 service types the tests assert on — `court_hearing` (60 min), `benefits_recert` (45 min), `dmv` (30 min), `childcare_intake` (45 min). Each carries morning + afternoon local hours with lunch break and `closed_days_of_week: [5, 6]` (Sat/Sun closed).
+- `cities/fort-worth.yaml`: same schema. City-agnostic defaults for S12b launch; a later data-curation task can layer in per-city variance (e.g. Texas DPS Saturday hours) without schema changes. Comment added documenting that choice.
+
+Tests: 20/20 pass in `tests/test_appointment_availability.py`. 165 city-related tests pass across the suite — zero regressions. No arch check (YAML files).
+
 ## 2026-04-23 — S12b T12.10a transactional emails — async scheduler job handler
 
 **T12.10a (done)**: `tests/test_appointment_transactional_emails.py::test_scheduler_job_invokes_scan` was failing because the `appointment_reminders` scheduler job was still registered as `_make_stub(...)` (a sync no-op logger), but the test drives it via `asyncio.run(job.func())`. Two fixes:
