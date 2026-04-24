@@ -1,34 +1,24 @@
 """Cover letter builder (T12.16) — fair-chance aware.
 
 Produces a worker cover letter in markdown, branching on the target
-employer's fair-chance status. The fair-chance lookup reads from
-:mod:`app.modules.criminal.fair_chance_index` (existing module, NOT
-a separate JSON file) so we share the same employer corpus the rest
-of the criminal-record pipeline uses.
+employer's fair-chance status (via :mod:`app.modules.criminal.fair_chance_index`,
+the shared employer corpus used by the rest of the criminal-record pipeline).
 
-Two branches
-------------
-* **Fair-chance** — addresses the criminal record using
-  *employment-gap framing* drawn from the worker's barrier resolution
-  timeline (``profile.cleared_barriers``). The framing names the
-  cleared barrier(s) without using loaded labels — the
-  :mod:`app.modules.documents.voice` post-processor strips them
-  defensively if any slip through.
-* **Non-fair-chance** — omits record disclosure entirely. The
-  ``barriers_framed`` field on the persisted row is empty.
+Two branches:
 
-Two render paths (mirrors :mod:`resume_builder`)
-------------------------------------------------
-* **Template** — always available. Used when ``ENABLE_AI_GENERATION``
-  is off, when the injection filter flags worker text, or when the
-  LLM raises.
-* **LLM** — gated on ``ENABLE_AI_GENERATION`` AND a clean injection
-  scan. Any LLM exception falls back to the template path.
+* **Fair-chance** — addresses the criminal record using employment-gap
+  framing drawn from ``profile.cleared_barriers``. The voice
+  post-processor strips loaded labels defensively.
+* **Non-fair-chance** — omits record disclosure entirely.
+
+Render paths mirror :mod:`resume_builder`: **template** (always
+available, used when the flag is off or injection is detected or the
+LLM raises) and **LLM** (flag-on + clean scan + successful response).
 
 Every call persists one ``resume_versions`` row with
 ``doc_type='cover_letter'``, a per-(session, doc_type) monotonically
-increasing ``version_counter``, and ``barriers_framed_json`` set
-when (and only when) the fair-chance branch fired.
+increasing ``version_counter``, and ``barriers_framed_json`` set only
+when the fair-chance branch fired.
 """
 
 from __future__ import annotations
@@ -99,13 +89,12 @@ def generate_cover_letter(
 ) -> CoverLetterDraft:
     """Build + persist one cover-letter version for ``session_id``.
 
-    ``job_match_ref`` is an opaque dict — the keys we read are
-    ``employer`` (str), ``city_slug`` (str), and optionally
-    ``hiring_manager`` (str). ``resume_version_id`` is recorded by
-    the caller for cross-doc lineage; we don't dereference it here.
+    ``job_match_ref`` keys read: ``employer`` (str), ``city_slug``
+    (str), optional ``hiring_manager`` (str). ``resume_version_id``
+    is for cross-doc lineage; not dereferenced here.
     """
     profile = _load_profile(session_id, db_path=db_path)
-    free_text = _collect_worker_free_text(profile)
+    free_text = _collect_worker_free_text(profile, job_match_ref=job_match_ref)
     check = injection_filter.check_for_injection(free_text)
     injection_reason = _injection_reason(check)
     is_fc = _is_fair_chance(job_match_ref)
@@ -149,13 +138,27 @@ def _load_profile(session_id: str, *, db_path: str | Path) -> dict[str, Any]:
     return profile if isinstance(profile, dict) else {}
 
 
-def _collect_worker_free_text(profile: dict[str, Any]) -> dict[str, str]:
-    """Worker-supplied fields scanned for prompt injection."""
+def _collect_worker_free_text(
+    profile: dict[str, Any],
+    *,
+    job_match_ref: dict[str, Any] | None = None,
+) -> dict[str, str]:
+    """Worker-supplied fields scanned for prompt injection.
+
+    Includes ``job_match_ref.employer`` + ``hiring_manager`` because
+    both are interpolated into the LLM prompt by
+    :mod:`_cover_letter_branches.build_llm_prompt`.
+    """
     fields: dict[str, str] = {}
     for key in ("name", "summary", "notes"):
         value = profile.get(key)
         if isinstance(value, str) and value:
             fields[key] = value
+    if isinstance(job_match_ref, dict):
+        for key in ("employer", "hiring_manager"):
+            value = job_match_ref.get(key)
+            if isinstance(value, str) and value:
+                fields[f"job_match_ref.{key}"] = value
     return fields
 
 
@@ -176,11 +179,7 @@ def _injection_reason(check: injection_filter.InjectionCheck) -> str | None:
 
 
 def _is_fair_chance(job_match_ref: dict[str, Any]) -> bool:
-    """Resolve fair-chance status for the target employer.
-
-    Reads via :mod:`app.modules.criminal.fair_chance_index`. Unknown
-    employers default to ``False`` (safe non-disclosure).
-    """
+    """Resolve fair-chance status. Unknown employers → False (safe default)."""
     employer = (job_match_ref.get("employer") or "").strip()
     city_slug = (job_match_ref.get("city_slug") or "").strip()
     if not employer or not city_slug:

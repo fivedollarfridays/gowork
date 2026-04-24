@@ -95,7 +95,7 @@ def generate_resume(
     on clean input with the flag on and a successful LLM response.
     """
     profile = _load_profile(session_id, db_path=db_path)
-    free_text = _collect_worker_free_text(profile)
+    free_text = _collect_worker_free_text(profile, job_description=job_description)
     check = injection_filter.check_for_injection(free_text)
     injection_reason: str | None = None
     if not check.clean:
@@ -141,13 +141,17 @@ def _load_profile(session_id: str, *, db_path: str | Path) -> dict[str, Any]:
     return profile if isinstance(profile, dict) else {}
 
 
-def _collect_worker_free_text(profile: dict[str, Any]) -> dict[str, str]:
+def _collect_worker_free_text(
+    profile: dict[str, Any],
+    *,
+    job_description: str | None = None,
+) -> dict[str, str]:
     """Assemble ``{field: text}`` for the injection scan.
 
-    We scan the fields a worker can freely type into: name, summary,
-    notes, and the description/title of every work-history entry. The
-    scan stops at the first match so order matters — name + notes first
-    because those are the likeliest attack surface.
+    Scans every worker-controlled field that reaches the LLM prompt:
+    name, summary, notes, work-history title/description, and the
+    request-body ``job_description`` (POST body, interpolated at
+    ``_build_llm_prompt``). Order matters — first match short-circuits.
     """
     fields: dict[str, str] = {}
     for key in ("name", "summary", "notes"):
@@ -163,6 +167,8 @@ def _collect_worker_free_text(profile: dict[str, Any]) -> dict[str, str]:
                 value = entry.get(key)
                 if isinstance(value, str) and value:
                     fields[f"work_history[{idx}].{key}"] = value
+    if isinstance(job_description, str) and job_description:
+        fields["job_description"] = job_description
     return fields
 
 
