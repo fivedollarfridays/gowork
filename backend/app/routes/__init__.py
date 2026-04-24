@@ -3,6 +3,7 @@
 from app.barrier_intel.router import router as barrier_intel_router
 from app.health import router as health_router
 from app.routes.admin_flags import router as admin_flags_router
+from app.routes.advisor_inbox import router as advisor_inbox_router
 from app.routes.appointments import router as appointments_router
 from app.routes.appointments_manage import router as appointments_manage_router
 from app.routes.assessment import router as assessment_router
@@ -61,4 +62,5 @@ all_routers = [
     engagement_preview_router,
     sendgrid_webhook_router,
     compliance_router,
+    advisor_inbox_router,
 ]

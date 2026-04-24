@@ -35,9 +35,10 @@ from app.integrations.email.core import (
 )
 from app.integrations.email.sendgrid_client import send_transactional
 from app.modules.common.temporal_types import StallLevel
-from app.modules.engagement._reminder_status import (
-    nightly_status as nightly_status,
-)
+from app.modules.engagement import _advisor_note, _reminder_status
+
+send_advisor_note = _advisor_note.send_advisor_note
+nightly_status = _reminder_status.nightly_status
 from app.modules.engagement.cooldown import (
     check_cooldown,
     record_send,
@@ -51,7 +52,7 @@ from app.modules.engagement.reminder_templates import (
 
 __all__ = [
     "ReminderDispatchResult", "nightly_status",
-    "send_digest", "send_reminder",
+    "send_advisor_note", "send_digest", "send_reminder",
 ]
 
 logger = logging.getLogger("app.modules.engagement.reminder_engine")

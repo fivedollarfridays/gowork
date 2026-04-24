@@ -335,5 +335,28 @@
     "jobDescriptionLabel": "Descripción del empleo",
     "jobTitleRequired": "El título del empleo es obligatorio",
     "jobCompanyRequired": "La empresa es obligatoria"
+  },
+  "advisor": {
+    "inboxHeading": "Requiere Atención",
+    "inboxDescription": "Trabajadores que enviaron resultados pero no han respondido. Envía una nota personal o revisa el detalle de su sesión.",
+    "emptyState": "Ninguna sesión requiere atención en tu ciudad por ahora.",
+    "severityHard": "Alta",
+    "severityMedium": "Media",
+    "severitySoft": "Leve",
+    "daysStalled": "{{days}} días estancado",
+    "viewDetailLabel": "Ver detalle de la sesión",
+    "sendNote": "Enviar nota",
+    "detailHeading": "Detalle de la sesión",
+    "detailBackLabel": "Volver a la bandeja",
+    "noteDialogTitle": "Enviar una nota personal",
+    "noteDialogDescription": "Este mensaje se enviará al trabajador por correo electrónico a través del motor de recordatorios. Límite de 3 notas por hora.",
+    "noteLabel": "Mensaje",
+    "notePlaceholder": "Hola — ¿Cómo vas? Llámame cuando puedas.",
+    "noteSubmit": "Enviar",
+    "noteCancel": "Cancelar",
+    "noteSendSuccess": "Nota enviada correctamente.",
+    "noteRateLimited": "Límite alcanzado: demasiadas notas en la última hora. Inténtalo más tarde.",
+    "noteForbidden": "Acceso denegado: esta sesión no pertenece a tu ciudad.",
+    "noteGenericError": "No se pudo enviar la nota. Inténtalo de nuevo."
   }
 }
