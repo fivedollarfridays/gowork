@@ -8,6 +8,7 @@ from app.routes.appointments_manage import router as appointments_manage_router
 from app.routes.assessment import router as assessment_router
 from app.routes.brightdata import router as brightdata_router
 from app.routes.city import router as city_router
+from app.routes.compliance import router as compliance_router
 from app.routes.credit import router as credit_router
 from app.routes.dashboard import router as dashboard_router
 from app.routes.demo import router as demo_router
@@ -59,4 +60,5 @@ all_routers = [
     engagement_router,
     engagement_preview_router,
     sendgrid_webhook_router,
+    compliance_router,
 ]

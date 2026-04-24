@@ -50,8 +50,14 @@ from pathlib import Path
 from app.core import day_boundary, feature_flags
 from app.modules.appointments.reconcile import reconcile_session_appointments
 from app.modules.common.temporal_types import TIMEZONE_BY_CITY
-from app.modules.engagement.digest_composer import compose_digest
-from app.modules.engagement.reminder_engine import send_digest
+from app.modules.compliance import retention as _retention_mod
+from app.modules.engagement import (
+    digest_composer as _digest_composer_mod,
+    reminder_engine as _reminder_engine_mod,
+)
+
+compose_digest = _digest_composer_mod.compose_digest
+send_digest = _reminder_engine_mod.send_digest
 # ``weekly_review`` and ``plan_refresher`` stay as module attributes (not
 # just names) so tests can monkeypatch ``nd.weekly_review.build_weekly_review``
 # and ``nd.refresh_plan`` directly. T12.24 added plan_refresher here.
@@ -258,7 +264,20 @@ async def run_nightly_digest(
     results: list[RunAccounting] = []
     for city in target_cities:
         results.append(await _process_city(city, resolved_db, resolved_now))
+    # T12.36 — retention sweep runs once per nightly run (sessions.expires_at
+    # is city-agnostic). Placed last so a purge error never blocks the send.
+    _run_retention_sweep(resolved_db, resolved_now)
     return results
+
+
+def _run_retention_sweep(db_path: Path, now: datetime) -> None:
+    """T12.36 — purge sessions past ``expires_at + 90d``. Errors never abort."""
+    try:
+        purged = _retention_mod.retention_sweep(db_path=db_path, now=now)
+        if purged:
+            logger.info("retention sweep purged %d sessions", len(purged))
+    except Exception:  # noqa: BLE001 — retention errors must never abort the run
+        logger.exception("retention sweep failed; continuing")
 
 
 async def nightly_digest_job() -> None:
