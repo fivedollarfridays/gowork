@@ -54,6 +54,26 @@ Older sprint task tables, session histories, and plan details have been archived
 
 ## What Was Just Done
 
+## 2026-04-23 — S12b T12.16 cover letter builder (fair-chance aware)
+
+**T12.16 (done)**: built `backend/app/modules/documents/cover_letter_builder.py` (294 lines / 9 fn — arch warning-only above 150 line threshold) + spoke `_cover_letter_branches.py` (130 lines / 4 fn, no warnings). Test file `tests/test_cover_letter_builder.py` written from scratch as the spec (11 tests, TDD red → green).
+
+Public API: `generate_cover_letter(session_id, job_match_ref, resume_version_id, *, db_path) -> CoverLetterDraft`. `job_match_ref` is an opaque dict whose `employer` + `city_slug` keys drive the fair-chance lookup (also reads optional `title`, `hiring_manager`).
+
+**Fair-chance lookup**: reuses existing `app.modules.criminal.fair_chance_index.get_fair_chance_employers(city_slug)` — NO new public API, no separate JSON. Match is case-insensitive on employer name; unknown employer/city defaults to `False` (safe non-disclosure).
+
+**Two branches** (extracted to `_cover_letter_branches.py` per the wheel-and-spoke pattern, mirrors `outcomes/tracker.py` + `tracker_sql.py`):
+- **Fair-chance**: `barriers_to_frame` returns the intersection of `profile.cleared_barriers` with a gap-implying set (`criminal_record`, `incarceration`, `treatment`, `homelessness`). The Jinja context's `fair_chance_framing` slot gets a one-sentence employment-gap narrative naming the cleared barrier in neutral language. Persisted `barriers_framed_json` mirrors the framed list.
+- **Non-fair-chance**: `barriers_to_frame` returns `[]` unconditionally. `fair_chance_framing` is empty string so the `{% if %}` block in the template suppresses any record disclosure. Persisted `barriers_framed_json` is `NULL`.
+
+**Render path** (mirrors `resume_builder` exactly): three gates — injection scan → `ENABLE_AI_GENERATION` flag → LLM call wrapped in try/except. Template path is `cover_letter_base.md.j2` (T12.14). Output post-processed through `voice.apply_worker_voice` for both branches. `_call_llm` is the explicit test seam.
+
+**Persistence**: every call inserts into `resume_versions` with `doc_type='cover_letter'`, monotonic `version_counter` per `(session_id, doc_type)` (independent of resume rows on the same session), `barriers_framed_json` populated only on fair-chance branch with framed list, `generation_method ∈ {"llm","template"}`. `resume_version_id` recorded by caller for cross-doc lineage; this builder doesn't dereference it.
+
+Tests cover: fair-chance branch (Montgomery + Fort Worth) addresses record with employment-gap framing + populates `barriers_framed`; non-fair-chance branch (Montgomery + Fort Worth) suppresses "criminal record"/"conviction"/"incarcer*" entirely + leaves `barriers_framed` empty; persistence row asserts `doc_type='cover_letter'` + correct `barriers_framed_json` + `generation_method`; version_counter independent of seeded resume row; injection in `notes` short-circuits to template even with flag ON (LLM stub raises if called); worker-voice strips smart quotes from name field; flag ON + clean input + successful LLM stub → `generation_method="llm"`. All 11 pass; 60 sibling document-module tests still green (no regressions).
+
+The fair_chance_index `_DATA_ROOT` is monkeypatched per-test to a tmp path — tests seed their own minimal employers.json so they don't depend on real data files (montgomery has no employers.json yet).
+
 ## 2026-04-23 — S12b T12.15 resume builder (LLM-gated, injection-defended)
 
 **T12.15 (done)**: built `backend/app/modules/documents/resume_builder.py` (289 lines / 11 fn — arch warning-only above 150 line threshold). Test file `tests/test_resume_builder.py` written from scratch as the spec (11 tests, TDD red → green).
