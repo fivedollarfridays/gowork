@@ -54,6 +54,8 @@ Older sprint task tables, session histories, and plan details have been archived
 
 ## What Was Just Done
 
+- **T12.28 done**: Documents pages — `/documents/resume` + `/documents/cover-letters` over T12.17's 7-endpoint API; typed client (`lib/api/documents.ts`), shared `useDocumentsData` query hook, `DocumentPreview` (markdown in `<pre>`, no new heavy dep), `VersionHistoryList` (newest-first, `generation_method` badge, anchor `download` PDF link), `CoverLetterForm` (resume-version dropdown defaults to newest, validates job title + company, disabled when no resume exists). EN/ES translations under `documents.*`. 28 new tests pass (vitest). Lint clean. Build clean (both routes prerendered). (this session)
+
 - **T12.34 done**: demo seed data extension — m005 adds `sessions.demo` column, `seed_worker_companion_sessions()` creates 5 sessions × 2 cities spanning none/soft/medium/hard/breakthrough stall states with appointments + applications + resumes + snapshots + city-tagged outcomes (this session)
 
 - **T12.27 done**: Jobs Tracker page — dnd-kit kanban over `/api/job-applications`, funnel sidebar w/ conversion rates, resume-version links + `generation_method` badge, city-aware EN/ES strings (this session)
@@ -69,6 +71,34 @@ Older sprint task tables, session histories, and plan details have been archived
 - **T12.21 done** (auto-updated by hook)
 
 - **T12.16 done** (auto-updated by hook)
+
+## 2026-04-23 — S12b T12.28 documents pages (resume + cover letter)
+
+**T12.28 (done)**: shipped `/documents/resume` + `/documents/cover-letters` on top of T12.17's 7-endpoint API. Followed the T12.26 appointments page pattern — `Suspense` + `TranslationProvider` shell, `useSessionId` / `useToken` from `app/plan/hooks.ts`, `react-query` for fetch + mutate. No new deps; markdown rendered as raw text in a `<pre>` for v1 (no heavy markdown lib).
+
+Files (all arch-check clean, every prod file < 200 lines, ≤ 6 fn each):
+- `frontend/src/lib/api/documents.ts` (155): typed client wrapping all 7 endpoints. JSON helper for POST + versions list, text helper for markdown GETs, sync URL builders `resumePdfUrl` / `coverLetterPdfUrl` for direct `<a download>` links (jsdom can't render PDFs but real browsers stream the `application/pdf` bytes the backend already serves).
+- `frontend/src/app/documents/resume/page.tsx` (168 / 3 fn): generate form with optional `job_description` textarea, preview pane, version-history list filtered to `doc_type='resume'`. Generate flow chains POST → GET markdown → set preview → invalidate versions.
+- `frontend/src/app/documents/cover-letters/page.tsx` (168 / 4 fn): consumes `useDocumentsData`, derives `resumes = versions.filter(v => v.doc_type === 'resume')`, hands them to `CoverLetterForm`. The form's submit button stays disabled until both a resume version exists (default = newest) and the user fills job title + company. Submit posts `{ resume_version_id, job_match_ref: { title, company, description? } }`, then chains GET markdown for preview.
+- `frontend/src/app/documents/_lib/useDocumentsData.ts` (32): shared `react-query` hook so both pages share the `["documents", "versions", session, token]` cache. Returns `{ versions, isLoading, error, invalidate }`.
+- `frontend/src/components/documents/DocumentPreview.tsx` (44): `role="region"` + aria-label, empty placeholder when no markdown, `<pre>` with `whitespace-pre-wrap` otherwise.
+- `frontend/src/components/documents/VersionHistoryList.tsx` (109): filters by `docType` prop; renders `v{counter}` + `Badge` for `generation_method` (label map passed in, e.g. `{ template: "Template", llm: "AI" }`) + locale-formatted `created_at` + optional View button + PDF anchor with `download target="_blank"`.
+- `frontend/src/components/documents/CoverLetterForm.tsx` (165 / 1 fn + handler closure): controlled form, resume-version `<select>` defaults to newest via `useEffect`, error banner when `failed`, submit disabled until valid.
+
+Translations: `documents.*` keys added to both `en.json` and `es.json` (resume + cover letter titles/subtitles, generate/preview/history copy, badge labels, form field labels, error messages).
+
+Tests (28 new, all green):
+- `lib/api/__tests__/documents.test.ts` (9): each endpoint URL/method/body shape, sync PDF URL builders, throws-on-non-ok-with-detail.
+- `__tests__/documents/DocumentPreview.test.tsx` (3): empty placeholder, `<pre>` body w/ markdown, `role="region"` a11y.
+- `__tests__/documents/VersionHistoryList.test.tsx` (6): empty state, item-per-version, `docType` filter routes to correct PDF URL host path, badge label mapping, `onView` callback, date formatting.
+- `__tests__/documents/resume-page.test.tsx` (5): missing-session, empty-versions render, generate-with-job-description payload, version-list with newest-first PDF link, error state on POST failure.
+- `__tests__/documents/cover-letter-page.test.tsx` (5): missing-session, no-resume warning + disabled submit, POST payload shape (`resume_version_id` + `job_match_ref` from form), version-list filtered to `cover_letter` only, error state.
+
+Pre-flight gotcha: my first edit to `lib/translations/en.json` was reverted by an external linter mid-flight, so the cover-letter tests initially failed with literal `documents.historyHeading` text appearing in output (i18n fallback returns the key when path is missing). Re-added the block to both `en.json` and `es.json`; tests went green.
+
+`npm run lint` clean. `npm run build` clean — both `/documents/resume` (3.6 kB) and `/documents/cover-letters` (4.22 kB) prerender as static. Full suite: 920 pass / 9 pre-existing failures in `__tests__/jobs/page.test.tsx` (T12.27 parallel work — verified pre-existing via `git stash` round-trip; zero net new regressions).
+
+Out of scope per task brief — did not touch backend (T12.17 API is fixed), nav/layout (T12.30), `app/jobs/**` (T12.27 in parallel), or `app/appointments/**`.
 
 ## 2026-04-23 — S12b T12.34 demo seed data extension
 
