@@ -54,13 +54,29 @@ Older sprint task tables, session histories, and plan details have been archived
 
 ## What Was Just Done
 
+- **T12.17 done**: documents API routes + PDF export — 7 endpoints, `_versions_db` spoke, use-counter hook wired in `jobs_applications.create()` (this session)
+
+- **T12.24 done** (auto-updated by hook)
+
 - **T12.24 done**: plan refresher + progress carry-forward + 20-row history cap (this session)
 
 - **T12.21 done** (auto-updated by hook)
 
 - **T12.16 done** (auto-updated by hook)
 
-## 2026-04-23 — S12b T12.24 plan refresher + progress carry-forward (HARD stall / breakthrough)
+## 2026-04-23 — S12b T12.17 documents API routes + PDF export
+
+**T12.17 (done)**: built `backend/app/routes/documents.py` (232 lines / 11 fn — 7 endpoints + 4 helpers) and `backend/app/modules/documents/_versions_db.py` spoke (147 lines / 4 fn) so the routes layer and the application-create hook share one source of truth for `resume_versions` reads + `use_counter` increments.
+
+Seven endpoints under `/api/documents`: `POST /resume`, `GET /resume/{id}`, `GET /resume/{id}/pdf`, `POST /cover-letter`, `GET /cover-letter/{id}`, `GET /cover-letter/{id}/pdf`, `GET /versions?session_id=`. Auth contract mirrors T12.10 / T12.13 (`token` query-param against `feedback_tokens`; cross-session reads return 403, cross-doc-type id returns 404). Markdown endpoints set `Content-Type: text/markdown`; PDF endpoints stream `application/pdf` bytes from the T12.4 SSRF-guarded `render_markdown_to_pdf(markdown, "default")`. POSTs delegate to T12.15 `generate_resume(session_id, *, job_description, db_path)` and T12.16 `generate_cover_letter(session_id, job_match_ref, resume_version_id, *, db_path)` rather than re-implementing persistence; the route then re-reads via `versions_db.list_versions(..., doc_type=...)` to surface the just-persisted row's `id` (which the dataclass returned by the builder doesn't expose — the builder returns `version_counter`, not the autoincrement primary key).
+
+T12.17 hook in `jobs_applications.create_application()`: when the request body carries `resume_version_id`, the route calls `_versions_db.increment_use_counter(version_id, db_path=db_path)` after the application insert succeeds. Best-effort (no-op on stale id) so a worker-supplied stale id can't 500 the endpoint. Hook is annotated inline with `# T12.17 hook:` so future readers can grep.
+
+Router ordering: documents prefix `/api/documents` is unique — none of the existing `/{...}` catch-alls (`/api/insights/{session_id}`, `/api/plan/{session_id}`, `/api/jobs/{job_id}`, etc.) intersect with documents, so registration order doesn't matter for collision avoidance. Placed alphabetically between `demo_router` and `engagement_router` in `routes/__init__.py`.
+
+Tests (`test_documents_routes.py` — 17 tests, 426 lines under the 600-line ceiling): cover all 7 endpoints, content-type assertions on both `text/markdown` and `application/pdf`, `%PDF-` magic byte check on the actual response bytes (not just non-empty), newest-first version ordering with multi-session isolation, cross-session 403, missing-id 404, the use-counter hook fires (and is no-op without `resume_version_id`), and a registration sanity check that documents_router is in `all_routers`. Two TestClient fixtures share the same temp db: `client` mounts the documents router, `jobs_app_client` mounts the jobs-applications router so the hook can be exercised end-to-end on the same `resume_versions` row.
+
+Carry-overs: `routes/__init__.py` imports now at 27 (was 26 carry-over before T12.17, +1 for `documents_router` import) — task spec explicitly says don't fix this pre-existing arch warning. `routes/jobs_applications.py` is at 248 lines (was ~239, +9 for the hook block + comment) — still under the 400-line error threshold, only triggers the soft 150-line warning that was already present.
 
 **T12.24 (done)**: built `backend/app/modules/plan/plan_refresher.py` (228 lines / 5 fn) + `_plan_refresher_db.py` helper spoke (181 lines / 7 fn) + `plan_progress.py` ports (89 lines / 6 fn — adapted from `ops:lib/plan_progress.py` to the MontGoWork plan shape since the Reddit-specific `recommended_threads` / `spend_opportunities` shape doesn't apply here). All three under 400-line error threshold; arch warnings on the 150-line soft cap only. 25/25 tests pass (16 new in `test_plan_refresher.py` + the 9 pre-existing nightly_digest tests after updating `test_plan_refresh_stub_noop_marks_todo` → `test_plan_refresh_invokes_refresher`). Full suite: 3092 passed, the same 2 pre-existing failures only (test_contract_credit_api + test_evidence_collector::test_outcomes_logged_in_range); zero net new regressions.
 

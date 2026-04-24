@@ -11,6 +11,7 @@ from app.routes.city import router as city_router
 from app.routes.credit import router as credit_router
 from app.routes.dashboard import router as dashboard_router
 from app.routes.demo import router as demo_router
+from app.routes.documents import router as documents_router
 from app.routes.engagement import router as engagement_router
 from app.routes.engagement_preview import router as engagement_preview_router
 from app.routes.feedback import router as feedback_router
@@ -54,6 +55,7 @@ all_routers = [
     city_router,
     insights_router,
     demo_router,
+    documents_router,
     engagement_router,
     engagement_preview_router,
     sendgrid_webhook_router,
