@@ -394,23 +394,31 @@ async def test_accounting_fields_populated(
 
 
 @pytest.mark.anyio
-async def test_plan_refresh_stub_noop_marks_todo(
+async def test_plan_refresh_invokes_refresher(
     db_path: str,
     monkeypatch: pytest.MonkeyPatch,
-    caplog: pytest.LogCaptureFixture,
 ) -> None:
-    """Plan-refresh slot logs a TODO pointing to T12.24 and does not mutate state."""
+    """T12.24 — plan-refresh slot now calls plan_refresher.refresh_plan."""
     _seed_session(db_path, "sid-1")
     _install_compose_stub(monkeypatch)
     _install_retro_stub(monkeypatch)
     _install_sendgrid_spy(monkeypatch)
 
+    calls: list[str] = []
+
+    def _spy(session_id, *, db_path, now=None, trigger_reason=None):
+        calls.append(session_id)
+        from app.modules.plan.plan_refresher import RefreshResult
+        return RefreshResult(refreshed=False)
+
+    import scripts.nightly_digest as nd
+    monkeypatch.setattr(nd, "refresh_plan", _spy)
+
     from scripts.nightly_digest import run_nightly_digest
-    with caplog.at_level(logging.DEBUG, logger="scripts.nightly_digest"):
-        await run_nightly_digest(
-            cities=["montgomery"], db_path=db_path, now=_NOW,
-        )
-    assert any("T12.24" in r.message for r in caplog.records)
+    await run_nightly_digest(
+        cities=["montgomery"], db_path=db_path, now=_NOW,
+    )
+    assert calls == ["sid-1"]
 
 
 def test_scheduler_registration_still_fires(monkeypatch: pytest.MonkeyPatch) -> None:

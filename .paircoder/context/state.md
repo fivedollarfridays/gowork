@@ -54,7 +54,30 @@ Older sprint task tables, session histories, and plan details have been archived
 
 ## What Was Just Done
 
+- **T12.24 done**: plan refresher + progress carry-forward + 20-row history cap (this session)
+
+- **T12.21 done** (auto-updated by hook)
+
 - **T12.16 done** (auto-updated by hook)
+
+## 2026-04-23 — S12b T12.24 plan refresher + progress carry-forward (HARD stall / breakthrough)
+
+**T12.24 (done)**: built `backend/app/modules/plan/plan_refresher.py` (228 lines / 5 fn) + `_plan_refresher_db.py` helper spoke (181 lines / 7 fn) + `plan_progress.py` ports (89 lines / 6 fn — adapted from `ops:lib/plan_progress.py` to the MontGoWork plan shape since the Reddit-specific `recommended_threads` / `spend_opportunities` shape doesn't apply here). All three under 400-line error threshold; arch warnings on the 150-line soft cap only. 25/25 tests pass (16 new in `test_plan_refresher.py` + the 9 pre-existing nightly_digest tests after updating `test_plan_refresh_stub_noop_marks_todo` → `test_plan_refresh_invokes_refresher`). Full suite: 3092 passed, the same 2 pre-existing failures only (test_contract_credit_api + test_evidence_collector::test_outcomes_logged_in_range); zero net new regressions.
+
+Triggers (auto-detect order — stall wins if both fire):
+- `stall_level=HARD` from `compute_stall_for_session` (T12.18) → reason=`stall_hard`, event=`stall_level=hard;days=N`
+- `barrier_resolved` outcome within last 24h (`BREAKTHROUGH_WINDOW`) → reason=`breakthrough`, event=`barrier_resolved:<barrier_id>`
+- Explicit `trigger_reason` arg bypasses auto-detect (manual refreshes / tests)
+
+Carry-forward contract: action keys built from `(phase_id, category, title)` triple — most stable triple our generators produce today (no per-action UUIDs). Old checklist items present in the new plan keep their `completed`/`completed_at`/`notes` state; items absent from the new plan get dropped; new items seed `completed=False`.
+
+Archive + dual-write: every refresh inserts one row into `plan_history` with `refresh_reason` + `triggering_event`, then UPDATEs `sessions.plan` + `sessions.action_checklist` + `sessions.previous_plan` (the dual-write target). 20-row cap per session enforced via a single `DELETE … WHERE id NOT IN (… ORDER BY archived_at DESC LIMIT 20)` after each insert — fulfilling the m002 inline comment promise of "application-level enforcement (NOT at schema level)".
+
+Orchestrator wiring: `backend/scripts/nightly_digest.py` step 3 now calls `refresh_plan(session_id, db_path=db_path, now=now)` via a `_refresh_session_plan` wrapper that swallows exceptions so a single buggy session can't abort the digest pipeline. The S12a `_plan_refresh_stub` function and its `"TODO S12b T12.24"` log line are removed. Step 2.5 area (T12.25a parallel) is untouched. Imports kept under the per-file ceiling by binding `from app.modules.plan import plan_refresher as _plan_refresher_mod` and aliasing `refresh_plan = _plan_refresher_mod.refresh_plan` so test monkeypatches on `nd.refresh_plan` continue to work.
+
+`load_calibrated_weeks(db_path)` is a sync sqlite-native sibling of `routes/_intelligence_helpers.fetch_intelligence` (which is async via `AsyncSession`). The nightly orchestrator runs sync-friendly inside `_process_session`, so a sync accessor was needed; both paths feed `compute_calibrated_barriers(rows).to_weeks_dict()` so confidence-gating (MEDIUM+) stays consistent. The pathway result is dumped as the new plan body — no `build_action_plan` call (action_plan requires `BarrierCard` instances; `sessions.barriers` stores plain strings, mismatched contract).
+
+**Carry-over for S13**: `sessions.previous_plan` column is now duplicated by the canonical `plan_history` table. The dual-write is a deprecation bridge — a future S13 ticket should drop the column and migrate any in-flight readers (the `app.core.progress_queries.store_previous_plan` helper + the `routes/plan.py` POST `/refresh` consumer) to read from `plan_history` instead. Documented inline in the `plan_refresher.py` module docstring (`Deprecation note (S13)`). Module also keeps a module-level `compute_stall_for_session` re-export so test monkeypatches against `plan_refresher.compute_stall_for_session` work without reaching into the engagement module.
 
 ## 2026-04-23 — S12b T12.21 engagement API routes (events/preferences/send-now/unsubscribe)
 
