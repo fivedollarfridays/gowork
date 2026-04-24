@@ -54,6 +54,8 @@ Older sprint task tables, session histories, and plan details have been archived
 
 ## What Was Just Done
 
+- **T12.31a done**: Advisor auth model doc — wrote `docs/security/advisor-auth.md` (400+ lines) documenting advisor identity model, token format (`mw_adv_<base58>` prefix + server-side `advisor_tokens` row), issuance CLI + manual SQL fallback, 6-month rotation cadence (row-level `revoked_at` — no dual-secret window), revocation SLA under 5 minutes, incident response (detection signals + cleanup + leak-hunt greps), backend enforcement contract (C1–C6 covering dependency signature, repo-layer city filter, 403 on cross-city, audit hash, uniform 401, rate-limit reuse), option A vs B trade-off table, and implementation notes (file layout, function signatures, migration DDL, checklist) for the T12.31 driver. **Chosen option: A (extend `require_admin_key` with per-advisor tokens + `city` claim).** Rationale: reuses existing header/rate-limit/audit plumbing; scale-appropriate for 5 cities; instant revocation cheaper than HMAC rotation window for low-volume bearer tokens. Guidance included for when to reconsider (Option B). (this session)
+
 - **T12.30 done**: Navigation + stall alert banner — `NavBar` (5 links: Appointments/Jobs/Documents/Daily/Case Manager, single `<nav>` landmark, responsive hamburger + aria-expanded), `StallAlertBanner` (renders only on `stallLevel="hard"`, `role="alert"`, dismiss writes ISO timestamp to `stall_banner_dismissed_at` localStorage key, 24h TTL, corrupted values ignored), `StallAlertBannerMount` (wires the banner into `Header` via digest preview query; maps `section_counts.stall > 0` to "hard" with a TODO to swap when backend exposes raw `stall_level`). EN/ES translations added under `nav.*` + `banner.*`. 16 new tests pass, full suite 930/930 green, lint clean, build clean (all 13 routes prerender, /case-manager 3.42 kB). (this session)
 
 - **T12.28 done**: Documents pages — `/documents/resume` + `/documents/cover-letters` over T12.17's 7-endpoint API; typed client (`lib/api/documents.ts`), shared `useDocumentsData` query hook, `DocumentPreview` (markdown in `<pre>`, no new heavy dep), `VersionHistoryList` (newest-first, `generation_method` badge, anchor `download` PDF link), `CoverLetterForm` (resume-version dropdown defaults to newest, validates job title + company, disabled when no resume exists). EN/ES translations under `documents.*`. 28 new tests pass (vitest). Lint clean. Build clean (both routes prerendered). (this session)
@@ -73,6 +75,46 @@ Older sprint task tables, session histories, and plan details have been archived
 - **T12.21 done** (auto-updated by hook)
 
 - **T12.16 done** (auto-updated by hook)
+
+## 2026-04-23 — S12b T12.31a advisor auth model doc
+
+**T12.31a (done)**: docs-only prerequisite for T12.31 (advisor inbox). Wrote `docs/security/advisor-auth.md` (15 sections, ~470 lines). Mirrors the structure of `docs/ops/appointment-token-rotation.md` so operators see a consistent playbook across token classes.
+
+**Chosen option: A — extend `require_admin_key` with per-advisor tokens + `city` claim.**
+
+Rationale (full text in Section 4 of the doc):
+1. Reuses existing plumbing — FastAPI header extraction, `hmac.compare_digest`, and T12.0b/T12.21 rate-limiter (`_check_rate_limit`, `hash_actor_token`) drop straight in. Option A adds one table lookup.
+2. Scale-appropriate — 2 cities live, 5 projected; ~20 advisor tokens max. Option B's dedicated module buys clean separation we do not need yet.
+3. Audit parity — the existing `hash_actor_token` pattern becomes `advisor_id_hash` without a new hashing path.
+4. Privilege-escalation risk is low when wired correctly — `require_admin_key` and `require_advisor_token` never overlap on a route; mechanical review is tractable.
+
+Explicit "reconsider Option B" triggers documented: advisor count >50, SSO/IdP requirement, SOC 2 distinct-audit-stream mandate, or admin key itself switching to HMAC format.
+
+Design decisions captured:
+- **Identity model**: one advisor per token, one city per token, many advisors per city allowed. Multi-city advisors get multiple tokens (one per city). No list-of-cities column.
+- **Token format**: `mw_adv_<32-char base58>` — prefix enables secret-scanner rules (`mw_adv_[A-HJ-NP-Za-km-z1-9]{32}`) and leak-hunt greps. 192 bits of entropy; base58 avoids ambiguous glyphs.
+- **Server-side row, not HMAC-signed payload** — row-level `revoked_at` gives instant revocation; a blocklist on top of an HMAC token is just a worse `revoked_at`. Low volume (~1 request per second peak) makes the DB lookup free. Rationale contrasted explicitly against T12.10b's rationale for HMAC.
+- **Rotation**: 1-year default lifetime, 6-month cadence, **no dual-secret window** (row-level revocation is instant; the appointment-token overlap window is security debt here, not security value). Rotation is per-advisor, 1:1 token replacement.
+- **Revocation SLA**: under 5 minutes from decision to effective (dependency re-reads the row on every request, no caching).
+- **Backend enforcement contract (C1–C6)** — the T12.31 driver MUST honour these or review blocks:
+  - C1: `require_advisor_token` → `(advisor_id, city)`, uniform 401 on all failure modes.
+  - C2: `city = advisor.city` filter at **repository layer**, not just route handler.
+  - C3: HTTP 403 on cross-city, never 404, never empty list.
+  - C4: Audit to `engagement_events(category='advisor_action', ...)` with `sha256(advisor_id)`.
+  - C5: Byte-identical 401 body across all auth failures (no enumeration oracle).
+  - C6: Rate limit via `_check_rate_limit(actor_hash, scope='advisor', max_per_hour=60)`.
+- **Incident response**: detection signal table (lost device, off-hours burst, git/paste leak, offboarding); 15-minute revoke + audit-query response; 24-hour cleanup (fresh token, post-incident note, scanner rule update).
+- **Schema gap documented**: `sessions` has no `city` column; T12.31 uses a join to `outcomes_records.payload_json.city` (JSON-path extraction) and MUST exclude sessions without an outcomes record (no resolvable city → not shown, not errored).
+
+Implementation notes for T12.31 driver include:
+- Expected file layout: `backend/app/modules/advisor/{auth,tokens,repository}.py`, `backend/app/routes/case_manager.py`, migration `m00X_advisor_tokens.py`, three test files.
+- Function signatures for `require_advisor_token`, `hash_token`, `validate_token`, `revoke_token`, `list_stalled_sessions_for_city`, `get_session_detail_for_city`.
+- Migration DDL including a partial index on `(advisor_id, city) WHERE revoked_at IS NULL` for hot-path lookups.
+- 11-item implementation checklist.
+
+Preserved content from the pre-existing draft (identity model, audit trail, threat model, not-addressed deferrals, schema-gap guidance) and rewrote structure to hit all 8 required spec sections: identity model / issuance / token format / rotation / revocation / backend enforcement contract / incident response / option comparison + chosen option.
+
+No code changes. No other docs touched. Doc awaiting security-lead review per AC.
 
 ## 2026-04-23 — S12b T12.30 navigation + stall alert banner
 
