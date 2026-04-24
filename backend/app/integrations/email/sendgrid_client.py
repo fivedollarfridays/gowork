@@ -36,6 +36,7 @@ EmailCategory = Literal[
     "stall_alert",
     "appointment_confirmation",
     "appointment_reminder",
+    "advisor_note",
 ]
 
 

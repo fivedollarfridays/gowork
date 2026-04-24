@@ -335,5 +335,28 @@
     "jobDescriptionLabel": "Job description",
     "jobTitleRequired": "Job title is required",
     "jobCompanyRequired": "Company is required"
+  },
+  "advisor": {
+    "inboxHeading": "Needs Attention",
+    "inboxDescription": "Workers who submitted outcomes but have gone quiet. Reach out with a personal note or review their session detail.",
+    "emptyState": "No sessions need attention in your city right now.",
+    "severityHard": "Hard",
+    "severityMedium": "Medium",
+    "severitySoft": "Soft",
+    "daysStalled": "{{days}} days stalled",
+    "viewDetailLabel": "View session detail",
+    "sendNote": "Send note",
+    "detailHeading": "Session detail",
+    "detailBackLabel": "Back to inbox",
+    "noteDialogTitle": "Send a personal note",
+    "noteDialogDescription": "This message will be emailed to the worker through the reminder engine. Limited to 3 notes per hour.",
+    "noteLabel": "Message",
+    "notePlaceholder": "Hey — checking in. Give me a call when you can.",
+    "noteSubmit": "Send",
+    "noteCancel": "Cancel",
+    "noteSendSuccess": "Note sent successfully.",
+    "noteRateLimited": "Rate limit hit: too many notes in the past hour. Try again later.",
+    "noteForbidden": "Access denied for this session — it is not in your city.",
+    "noteGenericError": "We could not send that note. Please try again."
   }
 }
