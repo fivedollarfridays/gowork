@@ -43,8 +43,11 @@ from app.modules.documents import (
     resume_ranking,
     voice,
 )
+from app.modules.documents._document_status import (
+    resume_nightly_status as nightly_status,
+)
 
-__all__ = ["ResumeDraft", "generate_resume"]
+__all__ = ["ResumeDraft", "generate_resume", "nightly_status"]
 
 logger = logging.getLogger(__name__)
 

@@ -24,6 +24,9 @@ from pathlib import Path
 from app.core import events
 from app.modules.common.temporal_types import JobApplicationStatus
 from app.modules.jobs import persistence
+from app.modules.jobs._applications_status import (
+    nightly_status as nightly_status,
+)
 from app.modules.jobs.job_status_transitions import check_transition
 from app.modules.jobs.types import JobApplication
 
@@ -149,5 +152,6 @@ __all__ = [
     "get",
     "list_by_session",
     "list_by_status",
+    "nightly_status",
     "update_status",
 ]

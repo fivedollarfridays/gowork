@@ -11,6 +11,7 @@ from __future__ import annotations
 from datetime import date as _date
 from datetime import datetime, timezone
 from enum import Enum
+from typing import Any, Literal
 from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel, field_validator
@@ -94,6 +95,36 @@ class TimezoneAwareModel(BaseModel):
         return v
 
 
+class ModuleStatus(BaseModel):
+    """Self-reported health for one backend module (T12.25b).
+
+    Ported from ops ``nightly_status()`` contract
+    (``ops/lib/module_status_contract.py``) — the ops version returns a
+    free-form dict; this city-product version is a typed Pydantic
+    adaptation so the aggregator in
+    :mod:`app.modules.status_collector` can return a homogeneous list
+    consumable by both the digest composer (T12.20) and the advisor
+    inbox (T12.31).
+
+    ``health`` semantics:
+
+    * ``healthy`` — module has recent activity AND no red flags.
+    * ``degraded`` — stale activity, opt-out state, or a stuck pipeline.
+    * ``unknown`` — module has never run for this session OR the
+      collector swallowed an exception. A sentinel, not an alarm.
+
+    ``signals`` is a free-form dict mirroring the ops convention; by
+    convention the top-level fields match the module's own counters
+    (e.g. ``resume_count``, ``pending``, ``digest_sent_count``). No
+    schema validation on signals — callers inspect them as dicts.
+    """
+
+    module_name: str
+    health: Literal["healthy", "degraded", "unknown"]
+    signals: dict[str, Any]
+    last_activity_at: datetime | None = None
+
+
 def _coerce_to_aware_datetime(value: str | datetime) -> datetime:
     """Accept an ISO-8601 string or datetime; return an aware UTC-anchored dt."""
     if isinstance(value, str):
@@ -159,7 +190,7 @@ def local_date_in_city(dt: datetime, city: str) -> _date:
 
 __all__ = [
     "AppointmentStatus", "AppointmentType", "EngagementEventType",
-    "GenerationMethod", "JobApplicationStatus", "StallLevel",
-    "TIMEZONE_BY_CITY", "TimezoneAwareModel", "format_city_local",
-    "local_date_in_city",
+    "GenerationMethod", "JobApplicationStatus", "ModuleStatus",
+    "StallLevel", "TIMEZONE_BY_CITY", "TimezoneAwareModel",
+    "format_city_local", "local_date_in_city",
 ]

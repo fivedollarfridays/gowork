@@ -47,8 +47,13 @@ from app.core import feature_flags
 from app.modules.criminal import fair_chance_index
 from app.modules.documents import _cover_letter_branches as branches
 from app.modules.documents import injection_filter, voice
+from app.modules.documents._document_status import (
+    cover_letter_nightly_status as nightly_status,
+)
 
-__all__ = ["CoverLetterDraft", "generate_cover_letter"]
+__all__ = [
+    "CoverLetterDraft", "generate_cover_letter", "nightly_status",
+]
 
 logger = logging.getLogger(__name__)
 
