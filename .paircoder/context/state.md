@@ -1,6 +1,6 @@
 # Current State
 
-> Last updated: 2026-04-23
+> Last updated: 2026-04-24
 
 ## Active Plan
 
@@ -30,6 +30,16 @@
 Older sprint task tables and session histories (Sprints 7 — 31) are in `.paircoder/archive/state-pre-s1.md`. S12a per-session entries plus S2 — S11 detail are in `.paircoder/archive/state-s12a.md`.
 
 ## What Was Just Done
+
+### 2026-04-24 — /reviewing-and-fixing pipeline on S12b branch
+
+Ran full review-and-fix pipeline across the S12b branch. Landed:
+- Doc cleanup (c7767c6): archived S12a session detail, collapsed state.md 549→105 lines.
+- Stage-2 fix bundle (9f88bc0, 75c2895, 95f35d7, 4c8207a): unsubscribe signer + GET handler (CAN-SPAM), async offload of reminder scan, injection-filter scope expansion, logging/defaults/sanitization/audit-ordering fixes.
+- Simplify pass (18f7df2): stripped narrative comments from review output, reused `hash_session_id` helper, renamed misleading log key, collapsed SELECT+INSERT to `INSERT OR IGNORE`.
+- Test TTL fix (91dc9e0): `_NOW` in `test_compliance` now uses `datetime.now(timezone.utc)` to avoid hardcoded-date drift.
+
+Deferred to S13: APP_HOST helper extraction, shared builder free-text helpers, token-system unification, advisor-audit schema consolidation, rate-limiter consolidation, unsubscribe double-connection refactor.
 
 ### 2026-04-23 — Sprint S12b complete (25/25 tasks, 510 Cx, GATE green, production GA UNBLOCKED)
 
