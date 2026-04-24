@@ -91,11 +91,16 @@ def _reset_route_rate_limiters():
 
 @pytest.fixture(autouse=True)
 def _token_secrets(monkeypatch: pytest.MonkeyPatch):
-    """Set two appointment + one compliance secret for every test."""
+    """Set two appointment + one compliance + unsubscribe secret per test."""
     monkeypatch.setenv("APPOINTMENT_TOKEN_SECRET", APPT_TOKEN_SECRET)
     monkeypatch.delenv("APPOINTMENT_TOKEN_SECRET_OLD", raising=False)
     monkeypatch.setenv("COMPLIANCE_TOKEN_SECRET", COMPLIANCE_SECRET)
     monkeypatch.delenv("COMPLIANCE_TOKEN_SECRET_OLD", raising=False)
+    monkeypatch.setenv(
+        "UNSUBSCRIBE_TOKEN_SECRET",
+        "s12b-e2e-unsubscribe-secret-0123456789abcdef",
+    )
+    monkeypatch.delenv("UNSUBSCRIBE_TOKEN_SECRET_OLD", raising=False)
     monkeypatch.setenv("APP_HOST", "https://app.test")
 
 

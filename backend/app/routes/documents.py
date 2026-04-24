@@ -23,6 +23,7 @@ T12.15 / T12.16 builders without re-implementing the SQL here.
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query, Response
@@ -32,6 +33,8 @@ from app.core.pdf_renderer import PdfRenderError, render_markdown_to_pdf
 from app.modules.documents import _versions_db as versions_db
 from app.modules.documents import cover_letter_builder, resume_builder
 from app.routes import _appointments_helpers as _h
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/documents", tags=["documents"])
 
@@ -69,15 +72,24 @@ def _markdown_response(version: versions_db.ResumeVersion) -> Response:
 
 
 def _pdf_response(version: versions_db.ResumeVersion) -> Response:
-    """Render the markdown to PDF and return ``application/pdf`` bytes."""
+    """Render the markdown to PDF and return ``application/pdf`` bytes.
+
+    PDF render errors keep their detail server-side: the caller gets a
+    generic 500 (no filesystem paths or CSS internals leaked) and the
+    operator gets the full exception via ``logger.exception``.
+    """
     try:
         pdf_bytes = render_markdown_to_pdf(
             version.markdown, template_name=_PDF_TEMPLATE,
         )
-    except PdfRenderError as exc:
+    except PdfRenderError:
+        logger.exception(
+            "documents_pdf_render_failed",
+            extra={"version_id": version.id},
+        )
         raise HTTPException(
-            status_code=500, detail=f"PDF rendering failed: {exc}",
-        ) from exc
+            status_code=500, detail="PDF rendering failed",
+        ) from None
     return Response(content=pdf_bytes, media_type="application/pdf")
 
 

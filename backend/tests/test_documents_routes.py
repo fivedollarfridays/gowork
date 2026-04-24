@@ -213,6 +213,43 @@ def test_get_resume_pdf_403_cross_session(client: TestClient) -> None:
     assert resp.status_code == 403
 
 
+def test_pdf_render_failure_returns_generic_detail(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """S5: PdfRenderError must NOT leak its exception text to the caller.
+
+    The previous implementation interpolated the raw exception
+    (filesystem paths, CSS internals) into the 500 detail. The fix
+    returns a generic ``"PDF rendering failed"`` and routes the full
+    exception to ``logger.exception`` for operator-side diagnosis.
+    """
+    from app.core import pdf_renderer
+    from app.routes import documents as docs_route
+
+    create = client.post(
+        f"/api/documents/resume?token={_TOKEN_A}",
+        json={"session_id": _SESSION_A},
+    )
+    version_id = create.json()["version_id"]
+
+    sensitive = "/var/lib/secrets/key.pem missing — leaked path"
+
+    def _boom(*args, **kwargs):
+        raise pdf_renderer.PdfRenderError(sensitive)
+
+    monkeypatch.setattr(docs_route, "render_markdown_to_pdf", _boom)
+
+    resp = client.get(
+        f"/api/documents/resume/{version_id}/pdf?token={_TOKEN_A}",
+    )
+    assert resp.status_code == 500
+    body = resp.json()
+    assert body["detail"] == "PDF rendering failed", body
+    assert sensitive not in resp.text, (
+        f"sensitive exception text leaked to caller: {resp.text!r}"
+    )
+
+
 # -------------------- POST /api/documents/cover-letter --------------------
 
 
