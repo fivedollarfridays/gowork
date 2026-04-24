@@ -25,16 +25,7 @@ def nightly_digest_handler() -> Callable:
 
 
 def appointment_reminders_handler() -> Callable:
-    """Return the async handler for the 6h appointment-reminder scan.
-
-    APScheduler's ``AsyncIOScheduler`` awaits coroutines, so the inner
-    ``_run`` is ``async def``. The reminder scanner itself is sync
-    (sqlite + SendGrid HTTP), so we offload it to the default executor
-    via :func:`asyncio.to_thread` to avoid blocking the event loop for
-    the full scan duration. DB path resolution happens at run-time so
-    tests can monkeypatch
-    :func:`app.routes._appointments_helpers.resolve_db_path`.
-    """
+    """Return the async handler for the 6h appointment-reminder scan; offloads the sync scanner via ``asyncio.to_thread``."""
     async def _run() -> None:
         from app.modules.appointments import transactional_emails
         from app.routes._appointments_helpers import resolve_db_path

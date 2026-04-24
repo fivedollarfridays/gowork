@@ -483,7 +483,7 @@ def test_cancel_failure_logs_warning_with_error_class(
     assert resp.json() == _UNIFORM_BODY
     matching = [
         rec for rec in caplog.records
-        if rec.message == "appointment_manage_token_failure"
+        if rec.message == "appointment_cancel_scheduler_failure"
     ]
-    assert matching, "no appointment_manage_token_failure warning emitted"
+    assert matching, "no appointment_cancel_scheduler_failure warning emitted"
     assert getattr(matching[0], "error_class", None) == "_DBLockedError"

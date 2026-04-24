@@ -233,13 +233,7 @@ def send_now(
 
 
 def _process_unsubscribe(token: str) -> dict:
-    """Shared verify + opt-out write for both GET and POST unsubscribe.
-
-    Single oracle: any verify failure (malformed, expired, tampered,
-    replayed) collapses to the same 401 body. CAN-SPAM links emitted
-    in email arrive as GETs; programmatic clients use POST. Both paths
-    write the same ``reminders_auto_disabled`` row.
-    """
+    """Verify unsubscribe token and write opt-out row."""
     db_path = _resolve_db_path()
     try:
         session_id = unsubscribe_tokens.verify(token, db_path=db_path)

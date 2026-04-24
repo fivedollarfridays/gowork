@@ -81,25 +81,14 @@ _INTRO_BY_LEVEL = {
 
 
 def build_unsubscribe_url(session_id: str) -> str:
-    """Return the CAN-SPAM unsubscribe URL for this session.
-
-    Uses :func:`app.modules.engagement.unsubscribe_tokens.sign` so the
-    embedded token round-trips through the public unsubscribe routes
-    (``GET`` and ``POST /api/engagement/unsubscribe``). The
-    appointments-token signer is NOT reused — it signs appointment IDs
-    with a different secret/action scheme.
-    """
+    """Return the CAN-SPAM unsubscribe URL for this session."""
     host = os.environ.get("APP_HOST", "https://app.montgowork.local")
     token = _sign_unsubscribe_token(session_id)
     return f"{host}/api/engagement/unsubscribe?token={token}"
 
 
 def _sign_unsubscribe_token(session_id: str) -> str:
-    """Sign a single-use engagement-unsubscribe token for ``session_id``.
-
-    Thin wrapper around :func:`unsubscribe_tokens.sign` so tests can
-    monkeypatch this seam without reaching into the signer module.
-    """
+    """Test seam for unsubscribe_tokens.sign."""
     return _sign_unsub(session_id)
 
 

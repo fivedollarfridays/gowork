@@ -68,18 +68,12 @@ def manage_appointment(
 
 
 def _handle_cancel(appointment_id: int, db_path: str) -> dict:
-    """Transition to cancelled; fold any scheduler error into uniform 401.
-
-    Caller-facing response stays uniform to preserve the no-enumeration
-    oracle, but operators need a stable signal when real bugs (DB locked,
-    ProgrammingError, SendGrid timeout) start spiking. We log at WARNING
-    with a stable error key so SRE dashboards can alert on it.
-    """
+    """Transition to cancelled; uniform 401 on scheduler failure, WARNING log for operators."""
     try:
         scheduler.cancel(appointment_id, db_path=db_path)
     except Exception as exc:  # noqa: BLE001 — uniform oracle
         logger.warning(
-            "appointment_manage_token_failure",
+            "appointment_cancel_scheduler_failure",
             extra={
                 "error_class": type(exc).__name__,
                 "appointment_id": appointment_id,

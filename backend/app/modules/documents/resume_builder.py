@@ -146,13 +146,7 @@ def _collect_worker_free_text(
     *,
     job_description: str | None = None,
 ) -> dict[str, str]:
-    """Assemble ``{field: text}`` for the injection scan.
-
-    Scans every worker-controlled field that reaches the LLM prompt:
-    name, summary, notes, work-history title/description, and the
-    request-body ``job_description`` (POST body, interpolated at
-    ``_build_llm_prompt``). Order matters — first match short-circuits.
-    """
+    """Assemble ``{field: text}`` for the injection scan."""
     fields: dict[str, str] = {}
     for key in ("name", "summary", "notes"):
         value = profile.get(key)

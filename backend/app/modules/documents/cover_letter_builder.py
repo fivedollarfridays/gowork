@@ -143,12 +143,7 @@ def _collect_worker_free_text(
     *,
     job_match_ref: dict[str, Any] | None = None,
 ) -> dict[str, str]:
-    """Worker-supplied fields scanned for prompt injection.
-
-    Includes ``job_match_ref.employer`` + ``hiring_manager`` because
-    both are interpolated into the LLM prompt by
-    :mod:`_cover_letter_branches.build_llm_prompt`.
-    """
+    """Worker-supplied fields scanned for prompt injection."""
     fields: dict[str, str] = {}
     for key in ("name", "summary", "notes"):
         value = profile.get(key)
