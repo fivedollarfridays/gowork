@@ -54,6 +54,30 @@ Older sprint task tables, session histories, and plan details have been archived
 
 ## What Was Just Done
 
+## 2026-04-23 — S12b T12.15 resume builder (LLM-gated, injection-defended)
+
+**T12.15 (done)**: built `backend/app/modules/documents/resume_builder.py` (289 lines / 11 fn — arch warning-only above 150 line threshold). Test file `tests/test_resume_builder.py` written from scratch as the spec (11 tests, TDD red → green).
+
+Public API: `generate_resume(session_id, *, job_description=None, db_path) -> ResumeDraft`. Returns `ResumeDraft(session_id, markdown, generation_method, version_counter, injection_reason)`.
+
+Path selection — three gates in order:
+1. **Injection scan** (`injection_filter.check_for_injection`) over `name`, `summary`, `notes`, and every `work_history[i].title/.description`. On any match: force template path, record `injection_reason` with the offending field + regex.
+2. **Feature flag** `ENABLE_AI_GENERATION` — when OFF (default), template path.
+3. **LLM call** — wrapped in try/except; any exception falls back to template so the worker always gets a resume.
+
+Rendering: deterministic template path uses Jinja2 `PackageLoader("app.modules.documents", "templates")` + `select_autoescape()`, reads the T12.14 `resume_base.md.j2` template. When `job_description` is supplied, `resume_keywords.extract_keywords` + `resume_ranking.rank_projects` reorder `work_history` so the highest-keyword-overlap role lands first. Output post-processed through `voice.apply_worker_voice` (T12.14 rules: dash/hedge/quote/hyphen stripping + dignified substitution).
+
+Persistence: every call inserts into `resume_versions` with:
+- `doc_type = "resume"`, `generation_method ∈ {"llm", "template"}`, monotonic `version_counter` per `(session_id, doc_type)` computed via `SELECT COALESCE(MAX(counter), 0) + 1`, full `markdown` body, `created_at` UTC. `injection_reason` is returned on the draft but NOT persisted (callers handle audit).
+
+`_call_llm(*, prompt, session_id)` is the explicit test seam — default raises `RuntimeError` noting the LLM path isn't wired for S12b (production flag defaults off). S12b+ wire-up task can swap in the existing `app.ai.llm_client` surface without changing the public API.
+
+Tests cover: template path always contains Name/Summary/Skills/Work-history sections; flag off forces template + asserts LLM stub never called; keyword reranking flips forklift above line cook when JD mentions forklift; cleared-barrier framing rendered when session profile has `cleared_barriers`; injected text in `notes` or `name` short-circuits to template even with flag ON (LLM stub raises if called — guards against regressions); `resume_versions` row written with counter 1/2/3 across successive calls; flag ON + clean input + successful LLM stub → `generation_method="llm"`; LLM exception falls back to template gracefully.
+
+**Commit scope note**: the 3 helper modules (`resume_keywords.py`, `resume_ranking.py`, `injection_filter.py`) and their 2 test files (`test_resume_keywords.py`, `test_injection_filter.py`) were sitting uncommitted as T12.15 dependencies — they go in the same commit as the builder.
+
+Tests: 11/11 resume_builder + 13/13 keywords/injection helpers pass. Full suite: 3047 passed (+11 vs prior 3036), 2 pre-existing failures only (`test_contract_credit_api` + `test_evidence_collector::test_outcomes_logged_in_range`). 0 net new regressions.
+
 ## 2026-04-23 — S12b T12.22a weekly review composer + Sunday orchestration branch
 
 **T12.22a (done)**: built the per-session weekly review composer from scratch (test file was the spec — 15 failing tests went red → green end-to-end).
