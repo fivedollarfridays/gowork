@@ -42,9 +42,7 @@ caught + counted; they do NOT abort the batch.
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
-import sqlite3
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -53,7 +51,11 @@ from app.core import day_boundary, feature_flags
 from app.modules.common.temporal_types import TIMEZONE_BY_CITY
 from app.modules.engagement.digest_composer import compose_digest
 from app.modules.engagement.reminder_engine import send_digest
+# ``weekly_review`` stays a module attribute (not just a name) so tests can
+# monkeypatch ``nd.weekly_review.build_weekly_review`` directly.
+from app.modules.plan import weekly_review
 from app.modules.plan.daily_progress import run_nightly_retro
+from scripts import _nightly_db, _nightly_weekly
 from scripts.nightly_accounting import RunAccounting, insert_run_row, url_to_path
 
 logger = logging.getLogger(__name__)
@@ -72,51 +74,6 @@ class SessionOutcome:
     error: str | None
 
 
-def _collect_active_sessions_for_city(
-    city: str, db_path: Path, now: datetime,
-) -> list[str]:
-    """Return session IDs active at ``now`` and tagged to ``city``.
-
-    "Active" = ``expires_at`` > now OR NULL. "Tagged to city" = has at
-    least one outcomes_records row whose payload_json.city == city.
-    See module docstring for the scope-enforcement rationale.
-    """
-    now_iso = now.isoformat()
-    conn = sqlite3.connect(str(db_path))
-    try:
-        rows = conn.execute(
-            "SELECT DISTINCT s.id FROM sessions s "
-            "JOIN outcomes_records o ON o.session_id = s.id "
-            "WHERE (s.expires_at IS NULL OR s.expires_at > ?) "
-            "AND json_extract(o.payload_json, '$.city') = ?",
-            (now_iso, city),
-        ).fetchall()
-    finally:
-        conn.close()
-    return [r[0] for r in rows]
-
-
-def _resolve_session_email(session_id: str, db_path: Path) -> str | None:
-    """Pull ``profile.email`` from the sessions row; None if missing."""
-    conn = sqlite3.connect(str(db_path))
-    try:
-        row = conn.execute(
-            "SELECT profile FROM sessions WHERE id = ?", (session_id,),
-        ).fetchone()
-    finally:
-        conn.close()
-    if not row or not row[0]:
-        return None
-    try:
-        profile = json.loads(row[0])
-    except (json.JSONDecodeError, TypeError):
-        return None
-    email = profile.get("email") if isinstance(profile, dict) else None
-    if isinstance(email, str) and email.strip():
-        return email.strip()
-    return None
-
-
 def _plan_refresh_stub(session_id: str) -> None:
     """S12b T12.24 plan-refresh slot — no-op for S12a."""
     logger.debug(
@@ -125,7 +82,7 @@ def _plan_refresh_stub(session_id: str) -> None:
 
 
 async def _process_session(
-    session_id: str, city: str, for_date: date, db_path: Path,
+    session_id: str, city: str, for_date: date, db_path: Path, now: datetime,
 ) -> SessionOutcome:
     """Run the retro → refresh-stub → compose → send pipeline for one session.
 
@@ -137,7 +94,7 @@ async def _process_session(
     digest = compose_digest(
         session_id, for_date, db_path=db_path, city=city,
     )
-    email = _resolve_session_email(session_id, db_path)
+    email = _nightly_db.resolve_session_email(session_id, db_path)
     if email is None:
         logger.warning(
             "skipping send for %s: session has no email in profile",
@@ -146,20 +103,38 @@ async def _process_session(
         return SessionOutcome(
             session_id=session_id, city=city, email_sent=False, error=None,
         )
-    # T12.19 — route through reminder_engine.send_digest so every nightly
-    # digest honors the (session_id, "digest") cooldown, engagement_events
-    # opt-out (reminders_auto_disabled — set by worker opt-out or T12.2a
-    # hard-bounce handler), EMAIL_SEND_ENABLED kill switch, and writes to
-    # engagement_events. `reminder_engine` logs the engagement_events row
-    # and cooldown for us — we only tally the accounting outcome here.
+    sent_ok = _dispatch_daily(session_id, email, digest, db_path=db_path)
+    # T12.22a — Sunday-only weekly review piggybacks on the same send path
+    # so cooldown + opt-out gating apply uniformly. Weekday() == 6 is Sunday
+    # in Python's convention; the caller-supplied ``now`` lets tests pin the
+    # day deterministically.
+    if now.weekday() == 6:
+        _nightly_weekly.send_weekly_review(
+            session_id, email, for_date,
+            db_path=db_path, send_fn=send_digest,
+        )
+    return SessionOutcome(
+        session_id=session_id, city=city,
+        email_sent=sent_ok, error=None,
+    )
+
+
+def _dispatch_daily(
+    session_id: str, email: str, digest, *, db_path: Path,
+) -> bool:
+    """Send the daily digest through reminder_engine and return success.
+
+    T12.19 — every nightly send is gated on the (session_id, "digest")
+    cooldown, the engagement_events ``reminders_auto_disabled`` opt-out
+    row (worker opt-out OR T12.2a hard-bounce), and the
+    EMAIL_SEND_ENABLED kill switch. The engine logs engagement_events on
+    success; we only tally the accounting outcome here.
+    """
     result = send_digest(
         session_id, email, digest.subject, digest.html, digest.text,
         db_path=db_path,
     )
-    return SessionOutcome(
-        session_id=session_id, city=city,
-        email_sent=bool(result.success), error=None,
-    )
+    return bool(result.success)
 
 
 async def _run_one(
@@ -168,11 +143,14 @@ async def _run_one(
     city: str,
     for_date: date,
     db_path: Path,
+    now: datetime,
 ) -> SessionOutcome:
     """Semaphore-bounded wrapper that converts exceptions into SessionOutcomes."""
     async with sem:
         try:
-            return await _process_session(session_id, city, for_date, db_path)
+            return await _process_session(
+                session_id, city, for_date, db_path, now,
+            )
         except Exception as exc:  # noqa: BLE001 — broad by design (isolation)
             logger.exception(
                 "nightly session failed: session_id=%s city=%s", session_id, city,
@@ -188,11 +166,16 @@ async def _process_city(
 ) -> RunAccounting:
     """Process every active session for ``city`` and write an accounting row."""
     start = datetime.now(timezone.utc)
-    sessions = _collect_active_sessions_for_city(city, db_path, now)
+    sessions = _nightly_db.collect_active_sessions_for_city(
+        city, db_path, now,
+    )
     for_date = day_boundary.current_work_date(city, now=now)
     sem = asyncio.Semaphore(_SESSION_CONCURRENCY)
     outcomes = await asyncio.gather(
-        *(_run_one(sem, sid, city, for_date, db_path) for sid in sessions),
+        *(
+            _run_one(sem, sid, city, for_date, db_path, now)
+            for sid in sessions
+        ),
     )
     end = datetime.now(timezone.utc)
     acct = RunAccounting(

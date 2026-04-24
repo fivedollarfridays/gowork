@@ -54,6 +54,21 @@ Older sprint task tables, session histories, and plan details have been archived
 
 ## What Was Just Done
 
+## 2026-04-23 — S12b T12.22a weekly review composer + Sunday orchestration branch
+
+**T12.22a (done)**: built the per-session weekly review composer from scratch (test file was the spec — 15 failing tests went red → green end-to-end).
+
+- `backend/app/modules/plan/weekly_review.py` (281 lines / 10 fn): public API is `build_weekly_review(session_id, date_range, *, db_path) -> WeeklyReview` + `format_summary_report(review) -> str`. Three section dataclasses — `FunnelMovement(draft_to_applied, applied_to_interview, interview_to_offer)`, `EngagementTrend(digests_sent, digests_opened, open_rate, reminders_sent)`, `BarriersClearedSummary(total, by_barrier)` — composed into one `WeeklyReview` with a pre-rendered `summary_markdown` field. `build_weekly_review` decomposed into `_collect_window_signals` + `_assemble_review` to stay under the 40-line function ceiling.
+- `backend/app/modules/plan/_weekly_queries.py` (193 lines / 7 fn): SQL spoke. `fetch_funnel_movement` counts `job_application_applied` / `_interview` / `_offer` outcomes in window; `fetch_engagement_trend` counts `digest_sent` + three stall reminder categories from `engagement_events` and joins `sendgrid_events.open` via `sessions.profile.email`; `fetch_barriers_cleared` handles DUAL `barrier.cleared` + legacy `barrier_resolved` event types. All queries are per-session scope only — **deliberate k-anonymity sentinel documented in the hub module's docstring** so future contributors route cross-session aggregation through `outcomes.intelligence_queries` (which already enforces 5-session suppression). Window bounds are `start-of-day` UTC to `end-of-day` UTC so tests using Sunday 02:00 UTC boundaries fall within.
+- Markdown rendering: quiet-week fallback when all signals zero; otherwise 3 section headers (`## Funnel movement`, `## Engagement`, `## Barriers cleared`) with bullet counts and open-rate percentage.
+
+Orchestrator wire-up:
+- `backend/scripts/_nightly_weekly.py` (new, 60 lines): `send_weekly_review(session_id, email, for_date, *, db_path, send_fn)` spoke — 7-day window ending at `for_date`, subject format `"Your week — <start> to <end>"`, dispatches through an injected `send_fn` (always `reminder_engine.send_digest`) so cooldown + opt-out + kill-switch gating apply uniformly. Weekly failures are caught and logged — they must NOT poison the daily digest's accounting.
+- `backend/scripts/_nightly_db.py` (new, 59 lines): extracted `collect_active_sessions_for_city` + `resolve_session_email` out of `nightly_digest.py` so the orchestrator stays under the 15-imports ceiling (was 16, now 13).
+- `backend/scripts/nightly_digest.py`: Sunday branch (`now.weekday() == 6`) in `_process_session` invokes the weekly-review spoke AFTER the daily send. Day-of-week checked against the caller-supplied `now` (UTC) rather than `for_date` (city-local) because for Chicago-tz cities at 02:00 UTC Sunday, `for_date` is still Saturday local. Extracted `_dispatch_daily` to keep `_process_session` under 40 lines. `send_digest` passed as `send_fn` injection so `monkeypatch.setattr(nd, "send_digest", ...)` continues to intercept both daily + weekly sends.
+
+Tests: 15/15 pass in `tests/test_weekly_review.py` (including Sunday-branch invocation, non-Sunday skip, two-email Sunday dispatch). 47/47 pass across weekly_review + nightly_digest + reminder_engine + s12a_e2e. Full suite: 3036 passed, 2 failed — 1 pre-existing `test_contract_credit_api`, 1 pre-existing `test_evidence_collector::test_outcomes_logged_in_range` (time-of-day-sensitive, confirmed failing on clean tree at c413631). Arch: all new files warning-only above 150 line threshold, no errors.
+
 ## 2026-04-23 — S12b T12.19 reminder engine wired into nightly orchestrator
 
 **T12.19 (done)**: closed the last failing reminder-engine test by routing the nightly digest through `reminder_engine.send_digest`. Engine code (modules + helpers + templates + tokens + cooldown) was already complete and ported from `ops:lib/`.
