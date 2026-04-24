@@ -54,6 +54,8 @@ Older sprint task tables, session histories, and plan details have been archived
 
 ## What Was Just Done
 
+- **T12.30 done**: Navigation + stall alert banner — `NavBar` (5 links: Appointments/Jobs/Documents/Daily/Case Manager, single `<nav>` landmark, responsive hamburger + aria-expanded), `StallAlertBanner` (renders only on `stallLevel="hard"`, `role="alert"`, dismiss writes ISO timestamp to `stall_banner_dismissed_at` localStorage key, 24h TTL, corrupted values ignored), `StallAlertBannerMount` (wires the banner into `Header` via digest preview query; maps `section_counts.stall > 0` to "hard" with a TODO to swap when backend exposes raw `stall_level`). EN/ES translations added under `nav.*` + `banner.*`. 16 new tests pass, full suite 930/930 green, lint clean, build clean (all 13 routes prerender, /case-manager 3.42 kB). (this session)
+
 - **T12.28 done**: Documents pages — `/documents/resume` + `/documents/cover-letters` over T12.17's 7-endpoint API; typed client (`lib/api/documents.ts`), shared `useDocumentsData` query hook, `DocumentPreview` (markdown in `<pre>`, no new heavy dep), `VersionHistoryList` (newest-first, `generation_method` badge, anchor `download` PDF link), `CoverLetterForm` (resume-version dropdown defaults to newest, validates job title + company, disabled when no resume exists). EN/ES translations under `documents.*`. 28 new tests pass (vitest). Lint clean. Build clean (both routes prerendered). (this session)
 
 - **T12.34 done**: demo seed data extension — m005 adds `sessions.demo` column, `seed_worker_companion_sessions()` creates 5 sessions × 2 cities spanning none/soft/medium/hard/breakthrough stall states with appointments + applications + resumes + snapshots + city-tagged outcomes (this session)
@@ -71,6 +73,28 @@ Older sprint task tables, session histories, and plan details have been archived
 - **T12.21 done** (auto-updated by hook)
 
 - **T12.16 done** (auto-updated by hook)
+
+## 2026-04-23 — S12b T12.30 navigation + stall alert banner
+
+**T12.30 (done)**: surfaced the five Wave-1 pages (Appointments, Jobs, Documents, Daily, Case Manager) via a shared `NavBar`, and added a site-wide `StallAlertBanner` that fires only on HARD stall with a 24h localStorage dismiss. No backend changes; no new deps.
+
+Files (all arch-check clean):
+- `frontend/src/components/NavBar.tsx` (88 / 1 fn): single `<nav aria-label={t("nav.primary")}>` landmark, desktop `<ul>` hidden below `sm`, responsive hamburger with `aria-expanded` + `aria-controls` for the mobile drawer. Drawer items live outside the nav landmark to avoid a duplicate landmark warning. Link list driven by a single `NAV_LINKS` constant shared between desktop + drawer, so translations and routes stay in sync. Default URLs: `/appointments`, `/jobs`, `/documents/resume` (Documents lands on resume per T12.28 split), `/daily`, `/case-manager`.
+- `frontend/src/components/StallAlertBanner.tsx` (111 / 3 fn): pure presentational banner. Props: `stallLevel: "none" | "soft" | "medium" | "hard"` — renders only when `"hard"`. Dismiss writes `new Date().toISOString()` to `stall_banner_dismissed_at`; reader treats `Number.isNaN(Date.parse(raw))` as not-dismissed (defensive against corrupted values). Exports `STALL_BANNER_DISMISS_KEY` + `STALL_BANNER_TTL_MS` constants for test + integration reuse. `role="alert"` for screen readers; `AlertTriangle` + `X` icons are `aria-hidden`; dismiss button has an explicit `aria-label`.
+- `frontend/src/components/layout/StallAlertBannerMount.tsx` (44 / 1 fn): client wrapper that fetches `previewDigest(sessionId, token)` via react-query (key `["digest-banner", ...]`, `staleTime=5min`, `retry=0` so the banner doesn't thrash on transient 401s). Derives `stallLevel` — currently `section_counts.stall > 0 ? "hard" : "none"` because the backend's `DigestResult` type doesn't yet expose raw `stall_level`. TODO comment flags this: backend `digest_sections.render_stall_alerts_section` already short-circuits on `StallLevel.NONE`, so any non-zero stall section IS the "session needs attention" signal the T12.30 AC asks about. When a future backend task exposes `stall_level`, swap the derivation to read it directly.
+- `frontend/src/components/layout/Header.tsx` (34): now a thin shell — logo link + `<NavBar />`, with `<StallAlertBannerMount />` rendered above the sticky header, all wrapped in `Suspense` + `TranslationProvider` so the header survives on routes that don't mount their own provider (home, assess, credit).
+
+Translations: `nav.*` + `banner.*` blocks added to both `en.json` and `es.json` (primary/toggle aria labels, 5 link labels, banner title/body/CTA/dismiss labels).
+
+Tests (16 new, all green; full suite 930/930):
+- `__tests__/layout/NavBar.test.tsx` (5): renders 5 primary links with correct hrefs, keyboard-focusable (no `tabindex=-1`), hamburger has accessible label + `aria-expanded` toggles, Spanish locale swaps labels.
+- `__tests__/layout/StallAlertBanner.test.tsx` (11): renders only on `"hard"`, no-op on `"none"`/`"soft"`/`"medium"`, Talk-to-a-navigator CTA points at `/plan`, dismiss persists ISO timestamp, dismiss within 24h stays hidden, dismiss older than TTL re-appears, corrupted value treated as not dismissed, Spanish copy, TTL constant = 24 * 60 * 60 * 1000.
+
+Verification: `node_modules/.bin/vitest run` 930/930 pass, `npm run lint` clean, `npm run build` all 13 routes prerender (case-manager 3.42 kB, daily 3.89 kB, jobs 20.3 kB, appointments 73.7 kB, documents/resume + documents/cover-letters 3.6/4.22 kB).
+
+Carry-overs:
+- The digest-preview endpoint does not yet expose `stall_level` as a typed field. When it does, replace the `counts.stall > 0 ? "hard" : "none"` mapping in `StallAlertBannerMount` with a direct read. This is the only place where the "HARD-only" contract leaks through to a count-based proxy — the banner component itself is strictly level-gated.
+- `/case-manager` today lands on the existing advisor dashboard page; T12.31 will replace that landing with the advisor inbox. No nav change required at that point.
 
 ## 2026-04-23 — S12b T12.28 documents pages (resume + cover letter)
 
