@@ -1,4 +1,20 @@
 {
+  "nav": {
+    "primary": "Navegación principal",
+    "toggle": "Alternar navegación",
+    "appointments": "Citas",
+    "jobs": "Empleos",
+    "documents": "Documentos",
+    "daily": "Resumen diario",
+    "caseManager": "Gestor de casos"
+  },
+  "banner": {
+    "stallTitle": "Vamos a destrabar tu proceso",
+    "stallBody": "Notamos que llevas un tiempo sin avanzar. Un navegador puede ayudarte con el siguiente paso.",
+    "stallCta": "Hablar con un navegador",
+    "dismiss": "Descartar",
+    "dismissLabel": "Descartar alerta de estancamiento"
+  },
   "common": {
     "getStarted": "Comenzar",
     "learnMore": "Aprender Mas",

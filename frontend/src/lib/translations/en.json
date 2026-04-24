@@ -1,4 +1,20 @@
 {
+  "nav": {
+    "primary": "Primary navigation",
+    "toggle": "Toggle navigation",
+    "appointments": "Appointments",
+    "jobs": "Jobs",
+    "documents": "Documents",
+    "daily": "Daily",
+    "caseManager": "Case Manager"
+  },
+  "banner": {
+    "stallTitle": "Let's get you unstuck",
+    "stallBody": "We've noticed you've been stuck for a while. A navigator can help you find the next step.",
+    "stallCta": "Talk to a navigator",
+    "dismiss": "Dismiss",
+    "dismissLabel": "Dismiss stall alert"
+  },
   "common": {
     "getStarted": "Get Started",
     "learnMore": "Learn More",
