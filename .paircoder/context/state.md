@@ -54,6 +54,8 @@ Older sprint task tables, session histories, and plan details have been archived
 
 ## What Was Just Done
 
+- **T12.25a done**: past-appointment auto-advance (port of `ops:lib/nightly_reconcile.py`) — 6h grace, audit + worker notice + outcome record, wired into the nightly orchestrator as step 2.5 (this session)
+
 - **T12.17 done**: documents API routes + PDF export — 7 endpoints, `_versions_db` spoke, use-counter hook wired in `jobs_applications.create()` (this session)
 
 - **T12.24 done** (auto-updated by hook)
@@ -63,6 +65,20 @@ Older sprint task tables, session histories, and plan details have been archived
 - **T12.21 done** (auto-updated by hook)
 
 - **T12.16 done** (auto-updated by hook)
+
+## 2026-04-23 — S12b T12.25a past-appointment auto-advance
+
+**T12.25a (done)**: ported `ops:lib/nightly_reconcile.py` (`reconcile_bookings_sweep`, `advance_past_bookings`, `_should_advance`, `_write_audit_log`) to `backend/app/modules/appointments/reconcile.py` (196 lines / 6 fn). Adapted the legacy JSON-file-backed implementation to MontGoWork's m002 `appointments` table, the existing scheduler.mark_missed transition path, and the `engagement_events` audit table.
+
+Per-advance side effects (4): (1) `scheduler.mark_missed(appt.id, db_path=...)` flips status SCHEDULED → MISSED via the existing transition matrix (which also emits `appointment.missed` for the T12.7 outcomes_listener that records an `appointment_missed` outcome row); (2) audit row `engagement_events(category='appointment_auto_advance', payload={appointment_id, reason})`; (3) one-time worker notice row `engagement_events(category='appointment_auto_missed_notice', payload={appointment_id})` for the next daily digest's "I actually attended" correction CTA; (4) outcome record via `OutcomeTracker.record_outcome(signal_type='appointment_auto_advance')` — and this is the integration contract with T12.18: the existing `progress_signals._gather_outcome_events` unconditionally filters this signal type out of the stall clock so the system's own auto-advance never fakes "fresh activity" for the worker.
+
+Idempotency falls out of the transition matrix: `MISSED → MISSED` is rejected, so a second sweep finds the row terminal, the `_advance_one` try/except catches the `InvalidStatusTransition`, returns False, and no audit/notice rows are emitted. Test `test_idempotent_two_runs_no_double_notice` asserts this directly (one run advances, second is zero, audit + notice each have count == 1).
+
+Orchestrator wire-up: `_reconcile_session` helper in `scripts/nightly_digest.py` (15 lines) is invoked between `run_nightly_retro` (step 2) and `_refresh_session_plan` (step 3 — T12.24). Failures are logged + swallowed (matches the T12.24 robustness contract). Required one import-count rebalance — consolidated `from app.modules.plan import plan_refresher, weekly_review` and `from app.modules.plan.daily_progress import run_nightly_retro` into a single `from app.modules.plan import (...)` block plus module-attribute aliasing for `run_nightly_retro` and `refresh_plan` (so existing `nd.run_nightly_retro` and `nd.refresh_plan` monkeypatches in `test_nightly_digest.py` still work). Net import count on `nightly_digest.py`: 14 → 14 (added reconcile, removed daily_progress as a top-level import).
+
+Tests (`tests/test_appointment_reconcile.py` — 7 tests, 439 lines, 50-line per-function compliance after extracting `_seed_orchestrator_session` and `_install_ordering_stubs` helpers): within-grace no-advance, beyond-grace advance + audit + notice + outcome, manual-attended no-action, idempotent (no double notice on second run), stall-suppression (auto_advance outcome filtered by T12.18 → 10-day-old real signal still drives MEDIUM stall classification), multi-session sweep via `advance_past_bookings`, orchestrator step ordering (retro → reconcile → compose).
+
+Carry-overs: `nightly_digest.py` file-size warning 274/150 lines (was 250 pre-task; +24 for the helper + module docstring + import shuffle — still warning-only, not error). `reconcile.py` file-size warning 196/150 (warning-only). Test file warning 439/400 (warning-only, errors at 600). Pre-existing test failures unrelated to T12.25a: `test_outcomes_logged_in_range` (verified pre-existing via `git stash` round-trip) and `test_provider_simple_input_fields_unchanged` (contract test).
 
 ## 2026-04-23 — S12b T12.17 documents API routes + PDF export
 

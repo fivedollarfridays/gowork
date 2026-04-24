@@ -48,16 +48,21 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 from app.core import day_boundary, feature_flags
+from app.modules.appointments.reconcile import reconcile_session_appointments
 from app.modules.common.temporal_types import TIMEZONE_BY_CITY
 from app.modules.engagement.digest_composer import compose_digest
 from app.modules.engagement.reminder_engine import send_digest
 # ``weekly_review`` and ``plan_refresher`` stay as module attributes (not
 # just names) so tests can monkeypatch ``nd.weekly_review.build_weekly_review``
 # and ``nd.refresh_plan`` directly. T12.24 added plan_refresher here.
-from app.modules.plan import plan_refresher as _plan_refresher_mod, weekly_review
-from app.modules.plan.daily_progress import run_nightly_retro
+from app.modules.plan import (
+    daily_progress as _daily_progress_mod,
+    plan_refresher as _plan_refresher_mod,
+    weekly_review,
+)
 
 refresh_plan = _plan_refresher_mod.refresh_plan
+run_nightly_retro = _daily_progress_mod.run_nightly_retro
 from scripts import _nightly_db, _nightly_weekly
 from scripts.nightly_accounting import RunAccounting, insert_run_row, url_to_path
 
@@ -75,6 +80,24 @@ class SessionOutcome:
     city: str
     email_sent: bool
     error: str | None
+
+
+def _reconcile_session(session_id: str, db_path: Path, now: datetime) -> None:
+    """T12.25a step 2.5 — auto-advance overdue appointments past 6h grace.
+
+    Runs between retro (step 2) and plan refresh (step 3). Failures are
+    logged but never propagate so a single broken session can't abort
+    the digest pipeline (matches the T12.24 robustness contract).
+    """
+    try:
+        reconcile_session_appointments(
+            session_id, db_path=db_path, now=now,
+        )
+    except Exception:  # noqa: BLE001 — reconcile must never block the digest
+        logger.exception(
+            "appointment reconcile failed for session_id=%s; continuing",
+            session_id,
+        )
 
 
 def _refresh_session_plan(session_id: str, db_path: Path, now: datetime) -> None:
@@ -102,6 +125,7 @@ async def _process_session(
     for catching and tallying it as an error (keeps this function focused).
     """
     run_nightly_retro(session_id, for_date, db_path=db_path)
+    _reconcile_session(session_id, db_path, now)
     _refresh_session_plan(session_id, db_path, now)
     digest = compose_digest(
         session_id, for_date, db_path=db_path, city=city,
