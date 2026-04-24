@@ -54,6 +54,10 @@ Older sprint task tables, session histories, and plan details have been archived
 
 ## What Was Just Done
 
+- **T12.34 done**: demo seed data extension — m005 adds `sessions.demo` column, `seed_worker_companion_sessions()` creates 5 sessions × 2 cities spanning none/soft/medium/hard/breakthrough stall states with appointments + applications + resumes + snapshots + city-tagged outcomes (this session)
+
+- **T12.27 done**: Jobs Tracker page — dnd-kit kanban over `/api/job-applications`, funnel sidebar w/ conversion rates, resume-version links + `generation_method` badge, city-aware EN/ES strings (this session)
+
 - **T12.25a done**: past-appointment auto-advance (port of `ops:lib/nightly_reconcile.py`) — 6h grace, audit + worker notice + outcome record, wired into the nightly orchestrator as step 2.5 (this session)
 
 - **T12.17 done**: documents API routes + PDF export — 7 endpoints, `_versions_db` spoke, use-counter hook wired in `jobs_applications.create()` (this session)
@@ -65,6 +69,49 @@ Older sprint task tables, session histories, and plan details have been archived
 - **T12.21 done** (auto-updated by hook)
 
 - **T12.16 done** (auto-updated by hook)
+
+## 2026-04-23 — S12b T12.34 demo seed data extension
+
+**T12.34 (done)**: added `sessions.demo` column via new migration `m005_sessions_demo_column.py` (54 lines / 3 fn — `_has_demo_column`, `upgrade`, `downgrade`; `ALTER TABLE … ADD COLUMN demo BOOLEAN NOT NULL DEFAULT FALSE`; downgrade uses `ALTER … DROP COLUMN`, supported on Python 3.12+'s sqlite3 ≥ 3.40, so no rebuild-copy dance). Migration is idempotent (skips when column already present) and round-trip-clean (downgrade removes the column verifiably). m003 + m004 already exist on this branch (T12.9 nullable-starts_at + T12.10b used_tokens) so I bumped to `SCHEMA_VERSION = 5` per the runner's monotonic glob discovery.
+
+Worker-companion seed lives in `backend/app/demo_seed_s12b.py` (275 lines / 12 fn — file-size warning above 150 soft cap, well under 400 error and 15 fn cap; the existing `demo_seed.py` already triggers the same soft warning so the new spoke matches the pattern). Public entry `seed_worker_companion_sessions(*, db_path, now=None)` re-exported from `app.demo_seed` so callers continue to `from app.demo_seed import seed_worker_companion_sessions`. Plain sqlite3 (no SQLAlchemy) so the seeded rows round-trip through the same code paths as T12.18 stall_detector and T12.12 funnel_queries.
+
+Each city (montgomery, fort-worth) gets 5 sessions = 10 total. Per session: one appointment (`career_center` type, status `attended`, source `user`), one job_application (status `applied`), one resume_version (`doc_type='resume'`, `generation_method='template'`), one daily_progress_snapshot, and outcomes_records rows (always a city-tagged `application_filed` event; for breakthrough sessions also a fresh `barrier_resolved` event within `BREAKTHROUGH_WINDOW=24h` so `_plan_refresher_db.detect_breakthrough` returns non-None). Session ids are deterministic UUIDs derived from `sha256("s12b-demo:<city>:<state>")` truncated to 16 bytes — the OutcomeRecord Pydantic validator enforces UUID-shape session_id, so an ad-hoc `demo-...` literal id was rejected and switching to a content-hash UUID gave both idempotency (same input → same id → PK collision → `INSERT OR IGNORE` no-op) and validator compliance.
+
+Stall-state steering: progress events are planted at ages chosen to land in the right `engagement.classification` bucket — `none`=1d ago (< SOFT_DAYS=3), `soft`=4d, `medium`=10d, `hard`=18d, `breakthrough`=20d baseline (HARD) plus the in-window `barrier_resolved` outcome on top so `plan_refresher` resolves the trigger as `breakthrough`. Test `test_stall_detector_classifies_seeded_sessions` calls `compute_stall_for_session` for the four enum levels and `detect_breakthrough` for the fifth scenario, so the seed contract is verified end-to-end against the real classification code.
+
+T12.12 community-funnel query was **already** demo-aware before this task — `funnel_queries.has_demo_column` PRAGMAs for `sessions.demo` and emits `AND COALESCE(s.demo, 0) = 0` when present. T12.34 is what activates that guard. Pre-existing `test_community_funnel_excludes_demo_sessions` skipped until the column landed; it now exercises the production guard. New regression test `test_community_funnel_excludes_seeded_demo_sessions` calls `compute_community_funnel(city)` for both cities post-seed and asserts zero counts (the demo-only DB looks empty to the funnel).
+
+Tests (`backend/tests/test_demo_seed_s12b.py` — 12 tests, 341 lines under the 600-line ceiling): m005 adds + downgrades + idempotent + existing-rows-default; seed creates 10 sessions; all flagged demo=1; all city-tagged via outcomes_records; all 5 states present per city; stall_detector classifies as designed; every session has the 4 support rows; idempotent re-run; T12.12 exclusion regression. All 12 passing. Broader regression: 102 tests across `test_demo_seed_s12b.py` + `test_demo_seed.py` + `test_demo_seed_feedback.py` + `test_demo_route.py` + `test_funnel_analytics.py` + `test_m002_migration.py` + `test_stall_detector.py` + `test_plan_refresher.py` + `test_outcome_tracker.py` all pass. Full suite 3129 passed / 1 skipped / 2 failed (the 2 are pre-existing carry-overs documented in prior sessions: `test_contract_credit_api::test_provider_simple_input_fields_unchanged` and `test_evidence_collector::test_outcomes_logged_in_range` — verified pre-existing via `git stash` round-trip; zero net new regressions).
+
+Carry-overs:
+- **T12.31 advisor inbox `WHERE demo = FALSE` filter — DEFERRED**: T12.31 advisor inbox is not yet built on this branch. The DB-layer guard is in place (column exists; T12.12 already filters), so when T12.31 lands the same `WHERE COALESCE(demo, 0) = 0` predicate or the `funnel_queries.has_demo_column` helper can be reused without a schema change.
+- `demo_seed.py` pre-existing arch errors (`_insert_session` 42L / `_insert_feedback` 41L vs. 40L threshold) and the file-size soft warning (244L vs. 150L soft cap) — verified pre-existing via `git stash` round-trip; not introduced by this task. Out of scope per the task brief which restricts changes to the worker-companion seed extension.
+- `sessions.reminders_enabled` / `sessions.email` / `sessions.city` columns still missing — explicit out-of-scope for T12.34 per the task brief; deferred to a separate ticket.
+
+## 2026-04-23 — S12b T12.27 Jobs Tracker page
+
+**T12.27 (done)**: built the Jobs Tracker kanban page on `frontend/src/app/jobs/page.tsx` (295 lines / ~4 fn — `JobsContent`, `JobsPage`, `MoveMenu`, `handleDragEnd/handleMove/handleMenuSelect` closures). Backs onto T12.13's `/api/job-applications` (GET list, PATCH status, GET funnel) plus T12.17's `/api/documents/versions` for the `generation_method` badge. Installed `@dnd-kit/core@^6.3.1` (accessible + tree-shakeable; no previous kanban dep in the tree).
+
+Components (all under 200 lines, arch-check clean):
+- `JobCard.tsx` (169): draggable via `useDraggable`; shows company, role, match source pill, applied date, resume-version PDF link, `generation_method` badge (llm → "AI-generated", template → "Template"), and an explicit "Move" button fallback that opens `MoveMenu` for keyboard/screen-reader users. Link + move button stop pointer/keydown propagation so they don't trigger a drag.
+- `JobKanbanColumn.tsx` (87): droppable via `useDroppable`; renders a status pill with per-column count + empty-state hint.
+- `FunnelStatsSidebar.tsx` (168): right-rail `<aside>` with per-status counts (total + 6 stage rows) and three conversion rates (draft→applied, applied→interview, interview→offer). Rates format to `{n}%` via `Math.round(rate * 100)` and show "—" for `null` denominators; hides the rates dl entirely when all three are `null`, replacing with a `funnelNoData` hint.
+- `kanbanHelpers.ts` (76): pure helpers — `STATUS_COLUMNS` lifecycle order, `groupByStatus`, `indexVersionsById`, `parseDroppableStatus`, `parseDraggableApplicationId`. Extracted so the page stays under the 400-line error threshold.
+- `lib/api/jobApplications.ts` (124): typed client — `listApplications`, `updateApplicationStatus` (status + optional `outcome_date`), `getFunnel`, `listResumeVersions`. Mirrors `lib/api/appointments.ts` error-handling + `qs()` helper.
+
+Page wiring: `useQuery` triple (applications / funnel / versions), single `useMutation` for `updateApplicationStatus` with `onError` surfacing the server detail via a `transitionError` state. `DndContext` uses a `PointerSensor(activationConstraint: { distance: 4 })` + `KeyboardSensor` to meet the "keyboard-accessible" AC without needing a custom keyboard flow — the `KeyboardSensor` treats focusable draggables as navigable via Space + arrows per dnd-kit defaults. `handleDragEnd` extracts the target column via `parseDroppableStatus(event.over?.id)`; no-ops when dropped outside the board or on the same column.
+
+Translations added under `jobs.*` in both `en.json` + `es.json` (34 keys each): column labels (`columnDraft`…`columnWithdrawn`), card chrome (`cardAppliedOn`, `cardResumeVersion`, gen-method labels, move label), funnel (`funnelTitle`, `funnelTotal`, `funnelConversions` + 3 rate labels, `funnelNoData`), empty states, error messages, and `dragInstructions` (a `<p id="dnd-instructions">` wired via `aria-describedby` on the board so screen readers announce the keyboard flow).
+
+Tests (28 total across 3 files):
+- `frontend/src/__tests__/jobs/page.test.tsx` (341 lines / 13 tests): header + missing-session, all 6 columns render, empty-board state, cards grouped by status, move-menu opens + triggers PATCH with the right `(id, status, token)` tuple, transition error surfaces when the PATCH 409s, `generation_method` badge renders with "AI-generated" text for `llm`, resume PDF link points at `/api/documents/resume/{id}/pdf` with `v{version_counter}` label, badge omitted when `resume_version_id` is null, funnel sidebar renders counts + `{rate*100}%` strings, "no conversion data yet" copy when all rates are null, `role=alert` surfaces when `listApplications` rejects.
+- `frontend/src/components/jobs/__tests__/kanbanHelpers.test.ts` (120 / 9): pure-function coverage for grouping, id parsing, version indexing.
+- `frontend/src/lib/api/__tests__/jobApplications.test.ts` (132 / 6): URL shapes, PATCH body (status + outcome_date), funnel response pass-through, error-detail bubbling.
+
+Full frontend suite: 904 passed / 92 test files (was 891 / 89 pre-task; +13 new page tests + 9 helpers + 6 API client = +28, matches). ESLint on new files: clean. `tsc --noEmit` on new files: zero errors (the only remaining repo-wide TS error, `Cannot find module '@/app/documents/cover-letters/page'`, is pre-existing in `__tests__/documents/cover-letter-page.test.tsx` and predates this task).
+
+Carry-overs: `page.tsx` sits at 295 lines (under the 400-line arch error, over the 200-line warning — acceptable per architecting-modules since the page is already decomposed into 4 child components + a helpers module; further extraction would spread query/mutation wiring across two files without real benefit). The `MoveMenu` in `page.tsx` is intentionally an inline child component (24 lines) rather than a separate file — it depends on `STATUS_COLUMNS` + the parent's `onSelect` callback and has no independent callers. Nav/layout integration is T12.30's scope (Wave 2) — did not touch `components/layout/` or root layout. Backend (`/api/job-applications`, `/api/documents/versions`) untouched per task guardrails.
 
 ## 2026-04-23 — S12b T12.25a past-appointment auto-advance
 
