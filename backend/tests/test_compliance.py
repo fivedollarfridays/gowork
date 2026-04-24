@@ -37,7 +37,7 @@ from app.core.migrations import runner
 # --------------------------------------------------------------- fixtures
 
 _SECRET = "compliance-test-secret-0123456789abcdef"
-_NOW = datetime(2026, 4, 23, 12, 0, tzinfo=timezone.utc)
+_NOW = datetime.now(timezone.utc)
 
 
 @pytest.fixture
