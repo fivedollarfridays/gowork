@@ -301,3 +301,36 @@ def test_list_writes_audit_row(
     payload = payloads[0]
     assert payload["action"] == "list_stalled_sessions"
     assert payload["city"] == "montgomery"
+
+
+def test_audit_placeholder_session_has_demo_flag(
+    migrated_db: str, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """S4: ``_advisor_audit`` placeholder row must carry ``demo=1``.
+
+    The placeholder is shared across all advisors and is created with
+    ``expires_at == created_at`` so worker-facing queries that filter
+    on expiry skip it. ``demo=1`` (m005) gives a second filter so any
+    query that doesn't check expiry still excludes the row.
+    """
+    import sqlite3 as _sqlite3
+    insert_advisor_token(
+        migrated_db, _TOKEN, "adv-jane", "montgomery",
+    )
+    client = build_client(migrated_db, monkeypatch)
+    r = client.get(
+        "/api/advisor/stalled-sessions",
+        headers={"X-Admin-Key": _TOKEN},
+    )
+    assert r.status_code == 200
+    conn = _sqlite3.connect(migrated_db)
+    try:
+        row = conn.execute(
+            "SELECT demo FROM sessions WHERE id = ?", ("_advisor_audit",),
+        ).fetchone()
+    finally:
+        conn.close()
+    assert row is not None, "placeholder session row missing"
+    assert int(row[0]) == 1, (
+        f"_advisor_audit placeholder lacks demo=1 (got {row[0]!r})"
+    )

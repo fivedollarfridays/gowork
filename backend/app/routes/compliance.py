@@ -33,6 +33,7 @@ been deleted yet (export precedes delete in the worker journey).
 
 from __future__ import annotations
 
+import hashlib
 import logging
 import threading
 from datetime import datetime, timedelta, timezone
@@ -144,19 +145,33 @@ def download_export(token: str = Query(...)) -> Response:
         raise HTTPException(
             status_code=401, detail="Invalid or expired download token",
         ) from None
-    archive = export_mod.build_archive(session_id, db_path=db_path)
     from app.modules.compliance._audit import write_audit
+    # S7: audit BEFORE build so a failed archive still leaves a trail.
+    # On build failure we also write an export_failed row so the
+    # compliance trail survives a 500.
     write_audit(
         db_path=db_path, session_id=session_id,
         action="export_downloaded",
-        payload={"bytes": len(archive)},
     )
+    try:
+        archive = export_mod.build_archive(session_id, db_path=db_path)
+    except Exception as exc:
+        write_audit(
+            db_path=db_path, session_id=session_id,
+            action="export_failed",
+            payload={"error_class": type(exc).__name__},
+        )
+        raise
+    # S6: filename uses a stable SHA256 prefix of the session_id, not the
+    # raw worker-controlled value (which has no CR/LF/quote constraint
+    # at schema level and could plant header bytes).
+    safe_id = hashlib.sha256(session_id.encode("utf-8")).hexdigest()[:16]
     return Response(
         content=archive,
         media_type="application/zip",
         headers={
             "Content-Disposition": (
-                f"attachment; filename=worker-data-{session_id}.zip"
+                f"attachment; filename=worker-data-{safe_id}.zip"
             ),
         },
     )

@@ -446,3 +446,44 @@ def test_reschedule_flow_returns_redirect(
     body = resp.json()
     assert body["appointment_id"] == aid
     assert "redirect" in body
+
+
+def test_cancel_failure_logs_warning_with_error_class(
+    migrated_db: str,
+    manage_client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """S2: scheduler.cancel exceptions still produce a uniform 401 to the
+    caller, but operators must see a WARNING log with a stable error key
+    so SRE can dashboard the spike (instead of silent folding into 401).
+    """
+    import logging
+
+    from app.modules.appointments import scheduler, tokens
+    from app.routes import appointments_manage
+
+    aid = _seed_appointment(migrated_db)
+    token = tokens.sign(aid, tokens.TokenAction.CANCEL)
+
+    class _DBLockedError(Exception):
+        """Stand-in for sqlite3.OperationalError 'database is locked'."""
+
+    def _boom(*args, **kwargs):
+        raise _DBLockedError("database is locked")
+
+    monkeypatch.setattr(scheduler, "cancel", _boom)
+
+    with caplog.at_level(logging.WARNING, logger=appointments_manage.__name__):
+        resp = manage_client.get(
+            f"/api/appointments/manage?token={token}&action=cancel",
+        )
+
+    assert resp.status_code == 401, resp.text
+    assert resp.json() == _UNIFORM_BODY
+    matching = [
+        rec for rec in caplog.records
+        if rec.message == "appointment_manage_token_failure"
+    ]
+    assert matching, "no appointment_manage_token_failure warning emitted"
+    assert getattr(matching[0], "error_class", None) == "_DBLockedError"

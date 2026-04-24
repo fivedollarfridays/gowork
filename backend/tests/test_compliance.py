@@ -18,6 +18,7 @@ applied. Compliance token secret is monkeypatched via env.
 
 from __future__ import annotations
 
+import hashlib
 import io
 import json
 import sqlite3
@@ -545,6 +546,92 @@ def test_export_endpoint_happy_path_returns_signed_url(
     body = r.json()
     assert "download_url" in body
     assert body.get("expires_in_sec") == 24 * 3600
+
+
+# --------------------------------------------------------------- S6 / S7
+
+def _read_compliance_audit_actions(db_path: str) -> list[str]:
+    """Return ordered list of action strings from compliance_audit."""
+    conn = sqlite3.connect(db_path)
+    try:
+        rows = conn.execute(
+            "SELECT action FROM compliance_audit ORDER BY id",
+        ).fetchall()
+    finally:
+        conn.close()
+    return [r[0] for r in rows]
+
+
+def test_download_filename_uses_hashed_session_id(
+    migrated_db: str, compliance_client: TestClient, secret_env: None,
+) -> None:
+    """S6: Content-Disposition filename must NOT echo the raw session_id.
+
+    Worker controls session_id at creation time and there is no
+    schema-level CR/LF/quote constraint. Use a SHA256 prefix so the
+    header carries no caller-controlled bytes.
+    """
+    from app.modules.compliance import export as export_mod
+
+    sid = "sess-cd-leak"
+    _seed_session(migrated_db, sid)
+    _seed_full_worker_data(migrated_db, sid)
+    token = export_mod.sign_export_token(sid, archive_id="arc-cd")
+    r = compliance_client.get(
+        f"/api/compliance/export/download?token={token}",
+    )
+    assert r.status_code == 200, r.text
+    cd = r.headers["Content-Disposition"]
+    assert sid not in cd, (
+        f"raw session_id leaked into Content-Disposition: {cd!r}"
+    )
+    expected_prefix = hashlib.sha256(sid.encode("utf-8")).hexdigest()[:16]
+    assert expected_prefix in cd, cd
+
+
+def test_download_audit_written_before_archive_build(
+    migrated_db: str, secret_env: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """S7: archive build failure must still leave a compliance trail.
+
+    The audit row is written BEFORE build_archive runs (export_downloaded),
+    and a second export_failed row is written if build raises. Operators
+    must always see a 500 paired with a trail row — never a silent loss.
+    """
+    from app.modules.compliance import export as export_mod
+    from app.routes import compliance as compliance_routes
+
+    sid = "sess-build-fail"
+    _seed_session(migrated_db, sid)
+    token = export_mod.sign_export_token(sid, archive_id="arc-bf")
+
+    # Force build_archive to raise after the audit row is written.
+    def _boom(session_id: str, *, db_path: str) -> bytes:
+        raise RuntimeError("simulated weasyprint failure")
+
+    monkeypatch.setattr(
+        compliance_routes.export_mod, "build_archive", _boom, raising=False,
+    )
+    monkeypatch.setattr(
+        compliance_routes, "_resolve_db_path", lambda: migrated_db,
+    )
+
+    # Use raise_server_exceptions=False so we observe the 500 instead of
+    # the framework re-raising into pytest.
+    app = FastAPI()
+    app.include_router(compliance_routes.router)
+    isolated_client = TestClient(app, raise_server_exceptions=False)
+
+    r = isolated_client.get(
+        f"/api/compliance/export/download?token={token}",
+    )
+    assert r.status_code == 500, r.text
+    actions = _read_compliance_audit_actions(migrated_db)
+    # Both rows must be present and in order.
+    assert "export_downloaded" in actions, actions
+    assert "export_failed" in actions, actions
+    assert actions.index("export_downloaded") < actions.index("export_failed")
 
 
 # --------------------------------------------------------------- orchestrator wiring
