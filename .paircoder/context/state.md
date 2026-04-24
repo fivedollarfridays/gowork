@@ -54,6 +54,26 @@ Older sprint task tables, session histories, and plan details have been archived
 
 ## What Was Just Done
 
+- **T12.16 done** (auto-updated by hook)
+
+## 2026-04-23 — S12b T12.21 engagement API routes (events/preferences/send-now/unsubscribe)
+
+**T12.21 (done)**: built `backend/app/routes/engagement.py` (253 lines / 11 fn — arch warning-only above 150 line threshold; under 400 error, 11 < 15 function limit, 11 < 20 imports). Four endpoints under the `/api/engagement` prefix. Preview-digest already lived at `routes/engagement_preview.py` from S12a T12.21a and is NOT touched.
+
+Endpoints:
+- `GET /api/engagement/events?session_id=X&token=Y` — returns `{events: [{id, category, payload, created_at}]}` for the session. Token validated via `_appointments_helpers.verify_token` (401 bad, 403 cross-session).
+- `POST /api/engagement/preferences?session_id=X&token=Y {reminders_enabled: bool}` — session-scoped; `false` writes a `reminders_auto_disabled` engagement_events row (the T12.19 opt-out signal), `true` deletes any existing rows. Returns the echoed state.
+- `POST /api/engagement/send-now {session_id}` — admin-only via `Depends(require_admin_key)` from `app.core.auth` (deliberately NOT the `demo.py:20` local-constant anti-pattern). Rate-limited 3 calls per `hash_actor_token(x_admin_key)` per hour via an in-process `_RATE_LIMITER` dict + threading `Lock` (mirrors `admin_flags.py` pattern; separate from `feature_flags._check_rate_limit` because that's hard-coded to 10/hr). 4th call in the window → 429. Dispatches through `_dispatch_send_now` (test seam) → `reminder_engine.send_reminder(session_id, StallLevel.SOFT)` so cooldown + opt-out + kill-switch preflight all apply.
+- `POST /api/engagement/unsubscribe {token}` — public. Verifies via `unsubscribe_tokens.verify` (T12.19 module — session_id-scoped parallel of T12.10b's appointment-token pattern; shared `used_tokens` table with `action='unsubscribe'` discriminator for atomic replay protection). Any `TokenError` subclass folded into a uniform 401 body ("Invalid or expired unsubscribe token.") — no enumeration oracle. On success, writes the `reminders_auto_disabled` row.
+
+Router registration: `backend/app/routes/__init__.py` now imports `engagement_router` and appends it to `all_routers` right before `engagement_preview_router`. S8 route-registration test passes.
+
+**Carry-over (same as T12.19)**: `sessions.reminders_enabled` column still does NOT exist. Both `POST /preferences` and `POST /unsubscribe` use the `engagement_events.reminders_auto_disabled` row pattern — matching the reminder engine's preflight contract so the same opt-out signal gates worker self-service toggles + unsubscribe-link clicks + the T12.2a hard-bounce auto-disable path. Adding a real column was deliberately NOT in scope for T12.21.
+
+Tests: 18/18 pass in `tests/test_engagement_routes.py` (TDD red → green; all 18 red on initial import-error failure before impl). 25/25 pass across engagement + s8 code-quality. Full suite: 3071 passed, 2 pre-existing failures only (`test_contract_credit_api` + `test_evidence_collector::test_outcomes_logged_in_range`); 0 net new regressions.
+
+Pattern notes for future contributors: `_dispatch_send_now` is a module-level function kept as a single-line indirection purely so unit tests can `patch.object(eng, "_dispatch_send_now", return_value=fake_result)` without reaching SendGrid. `_RATE_LIMITER.clear()` is an autouse test fixture — do NOT rely on rate-limit state surviving across tests.
+
 ## 2026-04-23 — S12b T12.16 cover letter builder (fair-chance aware)
 
 **T12.16 (done)**: built `backend/app/modules/documents/cover_letter_builder.py` (294 lines / 9 fn — arch warning-only above 150 line threshold) + spoke `_cover_letter_branches.py` (130 lines / 4 fn, no warnings). Test file `tests/test_cover_letter_builder.py` written from scratch as the spec (11 tests, TDD red → green).
