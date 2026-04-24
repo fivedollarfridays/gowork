@@ -1,0 +1,41 @@
+{#-
+  Resume base template (T12.14).
+
+  Output: Markdown. The downstream pipeline (T12.15/T12.16) feeds this
+  through the ``markdown`` library and then WeasyPrint to produce PDF.
+
+  Safety contract
+  ---------------
+  * Render with Jinja2 ``autoescape=True``. Worker-supplied fields
+    such as ``name`` and ``summary`` ARE escaped.
+  * ``{{ contact | safe }}`` intentionally disables escape because
+    ``contact`` is pre-rendered multi-line markdown assembled by the
+    caller (e.g. ``"123 Main St\nworker@example.com"``). Callers MUST
+    sanitise ``contact`` before passing it in.
+-#}
+# {{ name }}
+
+{% if contact -%}
+{{ contact | safe }}
+{% endif %}
+
+## Summary
+{{ summary }}
+
+## Skills
+{% for skill in skills %}- {{ skill }}
+{% endfor %}
+
+## Work history
+{% for role in work_history %}
+### {{ role.title }} — {{ role.employer }}
+{{ role.dates }}
+
+{{ role.description }}
+{% endfor %}
+
+{% if barriers_cleared -%}
+## Cleared barriers
+{% for b in barriers_cleared %}- {{ b }}
+{% endfor %}
+{%- endif %}

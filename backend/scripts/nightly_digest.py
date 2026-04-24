@@ -9,8 +9,12 @@ targeted city:
 3. Refresh the plan — **stubbed** for S12a; real implementation lands in
    S12b T12.24.
 4. Compose the daily digest (T12.20).
-5. Send via SendGrid (T12.2) directly. **TODO S12b T12.19**: route
-   through the reminder engine with cooldown/dedup instead.
+5. Dispatch the digest through the reminder engine (T12.19) —
+   :func:`reminder_engine.send_digest` gates the SendGrid call behind
+   the (session_id, "digest") cooldown, the ``reminders_auto_disabled``
+   engagement_events opt-out row (worker opt-out OR T12.2a hard-bounce),
+   and the ``EMAIL_SEND_ENABLED`` kill switch, then logs an
+   ``engagement_events`` row on success.
 
 Kill switch
 -----------
@@ -38,18 +42,34 @@ caught + counted; they do NOT abort the batch.
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
-import sqlite3
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from pathlib import Path
 
 from app.core import day_boundary, feature_flags
-from app.integrations.email.sendgrid_client import send_transactional
+from app.modules.appointments.reconcile import reconcile_session_appointments
 from app.modules.common.temporal_types import TIMEZONE_BY_CITY
-from app.modules.engagement.digest_composer import compose_digest
-from app.modules.plan.daily_progress import run_nightly_retro
+from app.modules.compliance import retention as _retention_mod
+from app.modules.engagement import (
+    digest_composer as _digest_composer_mod,
+    reminder_engine as _reminder_engine_mod,
+)
+
+compose_digest = _digest_composer_mod.compose_digest
+send_digest = _reminder_engine_mod.send_digest
+# ``weekly_review`` and ``plan_refresher`` stay as module attributes (not
+# just names) so tests can monkeypatch ``nd.weekly_review.build_weekly_review``
+# and ``nd.refresh_plan`` directly. T12.24 added plan_refresher here.
+from app.modules.plan import (
+    daily_progress as _daily_progress_mod,
+    plan_refresher as _plan_refresher_mod,
+    weekly_review,
+)
+
+refresh_plan = _plan_refresher_mod.refresh_plan
+run_nightly_retro = _daily_progress_mod.run_nightly_retro
+from scripts import _nightly_db, _nightly_weekly
 from scripts.nightly_accounting import RunAccounting, insert_run_row, url_to_path
 
 logger = logging.getLogger(__name__)
@@ -68,72 +88,55 @@ class SessionOutcome:
     error: str | None
 
 
-def _collect_active_sessions_for_city(
-    city: str, db_path: Path, now: datetime,
-) -> list[str]:
-    """Return session IDs active at ``now`` and tagged to ``city``.
+def _reconcile_session(session_id: str, db_path: Path, now: datetime) -> None:
+    """T12.25a step 2.5 — auto-advance overdue appointments past 6h grace.
 
-    "Active" = ``expires_at`` > now OR NULL. "Tagged to city" = has at
-    least one outcomes_records row whose payload_json.city == city.
-    See module docstring for the scope-enforcement rationale.
+    Runs between retro (step 2) and plan refresh (step 3). Failures are
+    logged but never propagate so a single broken session can't abort
+    the digest pipeline (matches the T12.24 robustness contract).
     """
-    now_iso = now.isoformat()
-    conn = sqlite3.connect(str(db_path))
     try:
-        rows = conn.execute(
-            "SELECT DISTINCT s.id FROM sessions s "
-            "JOIN outcomes_records o ON o.session_id = s.id "
-            "WHERE (s.expires_at IS NULL OR s.expires_at > ?) "
-            "AND json_extract(o.payload_json, '$.city') = ?",
-            (now_iso, city),
-        ).fetchall()
-    finally:
-        conn.close()
-    return [r[0] for r in rows]
+        reconcile_session_appointments(
+            session_id, db_path=db_path, now=now,
+        )
+    except Exception:  # noqa: BLE001 — reconcile must never block the digest
+        logger.exception(
+            "appointment reconcile failed for session_id=%s; continuing",
+            session_id,
+        )
 
 
-def _resolve_session_email(session_id: str, db_path: Path) -> str | None:
-    """Pull ``profile.email`` from the sessions row; None if missing."""
-    conn = sqlite3.connect(str(db_path))
+def _refresh_session_plan(session_id: str, db_path: Path, now: datetime) -> None:
+    """T12.24 plan-refresh slot — invokes the refresher with auto-detect.
+
+    The refresher itself is a no-op when neither HARD stall nor a recent
+    breakthrough is present; we still call it on every session so the
+    detection runs in one place. Failures are logged but never propagate
+    so a single buggy session can't abort the digest pipeline.
+    """
     try:
-        row = conn.execute(
-            "SELECT profile FROM sessions WHERE id = ?", (session_id,),
-        ).fetchone()
-    finally:
-        conn.close()
-    if not row or not row[0]:
-        return None
-    try:
-        profile = json.loads(row[0])
-    except (json.JSONDecodeError, TypeError):
-        return None
-    email = profile.get("email") if isinstance(profile, dict) else None
-    if isinstance(email, str) and email.strip():
-        return email.strip()
-    return None
-
-
-def _plan_refresh_stub(session_id: str) -> None:
-    """S12b T12.24 plan-refresh slot — no-op for S12a."""
-    logger.debug(
-        "nightly plan-refresh skipped for %s — TODO S12b T12.24", session_id,
-    )
+        refresh_plan(session_id, db_path=db_path, now=now)
+    except Exception:  # noqa: BLE001 — refresh must never block the digest
+        logger.exception(
+            "plan refresh failed for session_id=%s; continuing", session_id,
+        )
 
 
 async def _process_session(
-    session_id: str, city: str, for_date: date, db_path: Path,
+    session_id: str, city: str, for_date: date, db_path: Path, now: datetime,
 ) -> SessionOutcome:
-    """Run the retro → refresh-stub → compose → send pipeline for one session.
+    """Run the retro → plan-refresh → compose → send pipeline for one session.
 
     Any per-session exception propagates up; the caller is responsible
     for catching and tallying it as an error (keeps this function focused).
     """
     run_nightly_retro(session_id, for_date, db_path=db_path)
-    _plan_refresh_stub(session_id)
+    _reconcile_session(session_id, db_path, now)
+    _refresh_session_plan(session_id, db_path, now)
     digest = compose_digest(
         session_id, for_date, db_path=db_path, city=city,
     )
-    email = _resolve_session_email(session_id, db_path)
+    email = _nightly_db.resolve_session_email(session_id, db_path)
     if email is None:
         logger.warning(
             "skipping send for %s: session has no email in profile",
@@ -142,16 +145,38 @@ async def _process_session(
         return SessionOutcome(
             session_id=session_id, city=city, email_sent=False, error=None,
         )
-    # TODO S12b T12.19: replace direct SendGrid call with reminder_engine
-    #                   (adds cooldown + dedup; respects quiet hours).
-    result = send_transactional(
-        email, digest.subject, digest.html, digest.text,
-        "digest", session_id=session_id, db_path=db_path,
-    )
+    sent_ok = _dispatch_daily(session_id, email, digest, db_path=db_path)
+    # T12.22a — Sunday-only weekly review piggybacks on the same send path
+    # so cooldown + opt-out gating apply uniformly. Weekday() == 6 is Sunday
+    # in Python's convention; the caller-supplied ``now`` lets tests pin the
+    # day deterministically.
+    if now.weekday() == 6:
+        _nightly_weekly.send_weekly_review(
+            session_id, email, for_date,
+            db_path=db_path, send_fn=send_digest,
+        )
     return SessionOutcome(
         session_id=session_id, city=city,
-        email_sent=bool(result.success), error=None,
+        email_sent=sent_ok, error=None,
     )
+
+
+def _dispatch_daily(
+    session_id: str, email: str, digest, *, db_path: Path,
+) -> bool:
+    """Send the daily digest through reminder_engine and return success.
+
+    T12.19 — every nightly send is gated on the (session_id, "digest")
+    cooldown, the engagement_events ``reminders_auto_disabled`` opt-out
+    row (worker opt-out OR T12.2a hard-bounce), and the
+    EMAIL_SEND_ENABLED kill switch. The engine logs engagement_events on
+    success; we only tally the accounting outcome here.
+    """
+    result = send_digest(
+        session_id, email, digest.subject, digest.html, digest.text,
+        db_path=db_path,
+    )
+    return bool(result.success)
 
 
 async def _run_one(
@@ -160,11 +185,14 @@ async def _run_one(
     city: str,
     for_date: date,
     db_path: Path,
+    now: datetime,
 ) -> SessionOutcome:
     """Semaphore-bounded wrapper that converts exceptions into SessionOutcomes."""
     async with sem:
         try:
-            return await _process_session(session_id, city, for_date, db_path)
+            return await _process_session(
+                session_id, city, for_date, db_path, now,
+            )
         except Exception as exc:  # noqa: BLE001 — broad by design (isolation)
             logger.exception(
                 "nightly session failed: session_id=%s city=%s", session_id, city,
@@ -180,11 +208,16 @@ async def _process_city(
 ) -> RunAccounting:
     """Process every active session for ``city`` and write an accounting row."""
     start = datetime.now(timezone.utc)
-    sessions = _collect_active_sessions_for_city(city, db_path, now)
+    sessions = _nightly_db.collect_active_sessions_for_city(
+        city, db_path, now,
+    )
     for_date = day_boundary.current_work_date(city, now=now)
     sem = asyncio.Semaphore(_SESSION_CONCURRENCY)
     outcomes = await asyncio.gather(
-        *(_run_one(sem, sid, city, for_date, db_path) for sid in sessions),
+        *(
+            _run_one(sem, sid, city, for_date, db_path, now)
+            for sid in sessions
+        ),
     )
     end = datetime.now(timezone.utc)
     acct = RunAccounting(
@@ -231,7 +264,20 @@ async def run_nightly_digest(
     results: list[RunAccounting] = []
     for city in target_cities:
         results.append(await _process_city(city, resolved_db, resolved_now))
+    # T12.36 — retention sweep runs once per nightly run (sessions.expires_at
+    # is city-agnostic). Placed last so a purge error never blocks the send.
+    _run_retention_sweep(resolved_db, resolved_now)
     return results
+
+
+def _run_retention_sweep(db_path: Path, now: datetime) -> None:
+    """T12.36 — purge sessions past ``expires_at + 90d``. Errors never abort."""
+    try:
+        purged = _retention_mod.retention_sweep(db_path=db_path, now=now)
+        if purged:
+            logger.info("retention sweep purged %d sessions", len(purged))
+    except Exception:  # noqa: BLE001 — retention errors must never abort the run
+        logger.exception("retention sweep failed; continuing")
 
 
 async def nightly_digest_job() -> None:

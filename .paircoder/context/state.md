@@ -1,189 +1,114 @@
 # Current State
 
-> Last updated: 2026-04-12
+> Last updated: 2026-04-24
 
 ## Active Plan
 
-**Plan:** plan-sprint-s2-fort-worth-data
+**Plan:** plan-2026-04-s12b-value-extensions
 **Type:** feature
-**Title:** Fort Worth Data + Texas Rules -- Multi-city port for HackFW 2026
-**Status:** Complete (18/18 tasks done)
-**Current Sprint:** S2
-
-## Task Status
-
-### Sprint S2 --- Fort Worth Data + Texas Rules
-
-| ID | Title | Priority | Complexity | Status | Depends On |
-|----|-------|----------|------------|--------|------------|
-| T2.1 | Texas Benefits Thresholds | P0 | 20 | done | -- |
-| T2.2 | Texas Benefits Eligibility Checks | P0 | 25 | done | T2.1 |
-| T2.3 | Texas Application Data | P0 | 15 | done | -- |
-| T2.4 | Texas Benefits Types + Program Calculators | P0 | 25 | done | T2.1 |
-| T2.5 | Benefits Module Router | P0 | 25 | done | T2.2, T2.4 |
-| T2.6 | Texas Expunction + Nondisclosure Rules | P0 | 25 | done | -- |
-| T2.7 | Criminal Module Router | P0 | 15 | done | T2.6 |
-| T2.8 | Fort Worth ZIP Centroids + Geo Data | P0 | 15 | done | -- |
-| T2.9 | City-Aware ZIP Validation | P0 | 15 | done | -- |
-| T2.10 | Fort Worth Barrier Cards + Career Center | P0 | 20 | done | -- |
-| T2.11 | Live TWC Job Adapter | P1 | 30 | done | -- |
-| T2.12 | Live USAJobs Adapter | P1 | 30 | done | -- |
-| T2.13 | City-Aware AI Prompts | P1 | 15 | done | -- |
-| T2.14 | Frontend City-Aware Constants | P1 | 20 | done | -- |
-| T2.15 | Frontend City-Aware UI Text | P1 | 15 | done | T2.14 |
-| T2.16 | Fort Worth Seed Data | P2 | 20 | done | -- |
-| T2.17 | Fair-Chance Employer Index | P2 | 15 | done | -- |
-| T2.18 | Integration Gate | P2 | 10 | done | T2.5, T2.7-T2.10 |
-
-**Total: 18 tasks, 355 complexity points (18/18 done) -- SPRINT COMPLETE**
+**Title:** Worker Companion Value Extensions — production GA unblocker
+**Status:** Complete (25/25 tasks done) — production GA UNBLOCKED
+**Branch:** `sprint/s12b-value-extensions`
+**Current Sprint:** S12b
 
 ## Previous Sprints (summary)
 
-- **Sprint S1** -- City Framework Scaffold: multi-city YAML config, adapter protocol, BrightData/HonestJobs/TWC/USAJobs adapters, CITY env var (8/8 done)
+- **Sprint S12b** — Worker Companion Value Extensions: PDF rendering, resume + cover-letter builders (LLM-gated, injection-defended), reminder engine + cooldown, plan refresher + 20-row history cap, transactional appointment emails + signed manage-link key rotation, jobs kanban, documents pages, advisor inbox (city-scoped), past-appointment auto-advance, module status contracts, weekly review, compliance gate (export + right-to-delete + retention sweep). 25/25 done, 510 Cx, GATE green, GA unblocked.
+- **Sprint S12a** — Worker Companion Foundation: 26/26 done, GATE green, staging-only until S12b T12.36 (now landed). Migration infra, DB-backed outcomes, feature flags + audit, APScheduler, day boundary, appointments + jobs + documents + plan modules, digest composer, stall detector, nightly orchestrator, daily-digest page, appointments page. Detail in `.paircoder/archive/state-s12a.md`.
+- **Sprint S11** — "People Like You" Community Insights (deterministic, city-aware, no-LLM). Detail archived.
+- **Sprint S10** — Demo seed + full pipeline verification. Detail archived.
+- **Sprint S9** — Wired the intelligence loop end-to-end (calibrated_weeks → pathway). Detail archived.
+- **Sprint S8** — Cross-module integration verify + deep polish. Detail archived.
+- **Sprint S7** — Outcome-Informed Barrier Intelligence (N+1 loop). Detail archived.
+- **Sprint S6** — Backend hardening + Montgomery leak remediation. Detail archived.
+- **Sprint S5** — Employment Pathway Engine (cliff-aware multi-step). Detail archived.
+- **Sprint S4** — Hackathon polish + killer features (share, sequence viz, what-if simulator, case-manager dashboard, voice input, i18n). Detail archived.
+- **Sprint S3** — Texas/Fort Worth audit + S3 evolution. Detail archived.
+- **Sprint S2** — Fort Worth Data + Texas Rules: 18/18 done. Detail archived.
+- **Sprint S1** — City Framework Scaffold: 8/8 done. Detail archived.
 
-Older sprint task tables, session histories, and plan details have been archived to `.paircoder/archive/state-pre-s1.md`. One-line summary:
-
-- **Sprint 31** -- BrightData Consolidation + Commute Time (4/4 done)
-- **Sprint 30** -- Transit Enhancement (2/2 done)
-- **Sprint 29** -- Benefits Program Eligibility (4/4 done, PR #40)
-- **Sprint 28** -- Resource Auto-Matching (2/3 done, T28.3 deferred)
-- **Sprint 25** -- Benefits Cliff Engine (4/4 done, PR #36 merged)
-- **Sprint 23** -- Barrier Graph + RAG (1/7 done, paused)
-- **Sprint 18** -- Security Hardening (7/7 done)
-- **Sprints 7-17** -- Launch prep, demo polish, live jobs, intelligent matching, a11y, docs (all complete)
+Older sprint task tables and session histories (Sprints 7 — 31) are in `.paircoder/archive/state-pre-s1.md`. S12a per-session entries plus S2 — S11 detail are in `.paircoder/archive/state-s12a.md`.
 
 ## What Was Just Done
 
-## 2026-04-23 — S12a SPRINT COMPLETE — 26/26 tasks, GATE green
+### 2026-04-24 — /reviewing-and-fixing pipeline on S12b branch
 
-**Final state: 2,851 backend tests passed (+450 new), 842 frontend tests passed, zero regressions. Two pre-existing failures remain (credit-assessment jwt, s8 route-counter).**
+Ran full review-and-fix pipeline across the S12b branch. Landed:
+- Doc cleanup (c7767c6): archived S12a session detail, collapsed state.md 549→105 lines.
+- Stage-2 fix bundle (9f88bc0, 75c2895, 95f35d7, 4c8207a): unsubscribe signer + GET handler (CAN-SPAM), async offload of reminder scan, injection-filter scope expansion, logging/defaults/sanitization/audit-ordering fixes.
+- Simplify pass (18f7df2): stripped narrative comments from review output, reused `hash_session_id` helper, renamed misleading log key, collapsed SELECT+INSERT to `INSERT OR IGNORE`.
+- Test TTL fix (91dc9e0): `_NOW` in `test_compliance` now uses `datetime.now(timezone.utc)` to avoid hardcoded-date drift.
 
-**Waves 5-12 summary** (Waves 1-4 committed as `b95ae8d`):
+Deferred to S13: APP_HOST helper extraction, shared builder free-text helpers, token-system unification, advisor-audit schema consolidation, rate-limiter consolidation, unsubscribe double-connection refactor.
 
-- **Wave 5** — T12.2a SendGrid Event Webhook (ECDSA signature verify, 13 events, hard-bounce audit-row disable — `sessions.reminders_enabled` column missing, documented for S12b); T12.9 Pathway → Appointment Auto-Linker (both `routes/pathway.py` and `routes/plan_intelligence.py` call `run_pathway_linker_hook`; **m003 migration** added to relax `appointments.starts_at NOT NULL` for placeholders); T12.11 Jobs Applications Lifecycle (composite `(source, url)` linkage, status machine + events + outcomes listener, main.py listener registered).
+### 2026-04-23 — Sprint S12b complete (25/25 tasks, 510 Cx, GATE green, production GA UNBLOCKED)
 
-- **Wave 6** — T12.10 Appointments API Routes (9 endpoints, token auth via `_appointments_helpers.verify_token`); T12.12 Jobs Funnel Analytics (k-anonymity `min_5` enforced, intelligence endpoint `application_conversion_rates` wired in `routes/intelligence.py`); T12.23 Evidence Collector (unified 6-signal bundle from appointments + jobs + outcomes).
+**Top-level deliverables:**
 
-- **Wave 7** — T12.13 Jobs API Routes (`/api/job-applications` prefix — no collision); T12.18 Stall Detector (SOFT/MEDIUM/HARD with auto-advance suppression, `engagement_status` recommendations ported); T12.22 Daily Progress Retro (Option B — expected actions = today's appointments, classifications persisted); T12.33 Intelligence Wire-Up tests (10 tests against the `application_conversion_rates` endpoint, S11 consumer contract pinned).
+- **PDF rendering** (T12.4): SSRF-guarded WeasyPrint pipeline + print-friendly default template; weasyprint + markdown pinned in `requirements.txt`; native deps wired in `Dockerfile`.
+- **Worker voice + document templates** (T12.14): `apply_worker_voice` rule chain (dash/hedge/quote/hyphen stripping + dignified substitutions, F-K grade <9), Jinja2 resume + cover-letter templates with autoescape.
+- **Resume builder** (T12.15) and **cover-letter builder** (T12.16): LLM-gated (default off) behind `ENABLE_AI_GENERATION`, injection-defended via `injection_filter`, fair-chance branch reads `criminal.fair_chance_index`, persisted to `resume_versions` with monotonic per-doc-type counters.
+- **Reminder engine** (T12.19): wired into nightly orchestrator with cooldown + opt-out (audit-row pattern) + kill-switch preflight; ports the legacy ops/lib templates.
+- **Plan refresher** (T12.24): trigger detection (`stall_hard` or `barrier_resolved` window), checklist carry-forward by `(phase, category, title)` triple, `plan_history` archive with 20-row per-session cap, dual-write to `sessions.previous_plan` (deprecation bridge for S13).
+- **Past-appointment auto-advance** (T12.25a): nightly step 2.5; `scheduler.mark_missed` + audit + worker notice + outcome record (filtered out of stall clock by T12.18).
+- **Module status contracts** (T12.25b): `nightly_status` on documents/jobs/engagement; `status_collector.collect_all` aggregator; `DigestResult.module_status`.
+- **Weekly review composer** (T12.22a): per-session 7-day window; funnel + engagement + barriers-cleared sections; Sunday branch in nightly orchestrator dispatches via `reminder_engine.send_digest`.
+- **Transactional appointment emails** (T12.10a): scheduler job handler factored to `scheduler_jobs.appointment_reminders_handler`; 24h + 1h reminders.
+- **Signed manage-appointment links** (T12.10b): `appointments_manage` router registered before `appointments` to dodge the `/{appointment_id}` catch-all; HMAC-SHA256 + kid + 7-day overlap window for key rotation.
+- **Engagement API** (T12.21): `/api/engagement/{events, preferences, send-now, unsubscribe}`; admin-rate-limited send-now; uniform 401 on token failures.
+- **Documents API** (T12.17): 7 endpoints under `/api/documents`; PDF streaming; use-counter hook from `jobs_applications.create()`.
+- **Jobs Tracker page** (T12.27): dnd-kit kanban with funnel sidebar + conversion rates; resume-version PDF link + `generation_method` badge.
+- **Documents pages** (T12.28): `/documents/resume` + `/documents/cover-letters` over T12.17 API; markdown preview + version history + download.
+- **Navigation + stall alert banner** (T12.30): shared `NavBar` (5 links), HARD-only `StallAlertBanner` with 24h localStorage dismiss.
+- **Advisor inbox** (T12.31 + T12.31a): city-scoped stalled-session list + drill-through + personal-note dispatch; advisor auth model (mw_adv_<base58>, row-backed `advisor_tokens` with instant revoke); cross-city → 403; per-advisor rate limit; SHA256 audit hash.
+- **Compliance gate** (T12.36): worker data export + full delete + selective tombstone + retention sweep wired into nightly; `compliance_audit` table with hashed `session_id_hash`; `confirm: "DELETE"` speed-bump; `COMPLIANCE_TOKEN_SECRET` rotation; `docs/ops/compliance-operations.md` runbook. **Unblocks production GA.**
+- **Worker-companion demo seed** (T12.34): 5 sessions × 2 cities spanning none/soft/medium/hard/breakthrough; activates the T12.12 community-funnel `demo` guard.
+- **S12b end-to-end gate** (T12.32b): 11 city-symmetric flows + 6 cross-cutting security assertions; 19 tests in 2.15s.
+- **S12b integration gate + rollout runbook** (T12.35b): 26 gate assertions across 4 test files; admin-key scan; `docs/ops/s12b-rollout.md` (13 sections including Production GA Confirmation).
 
-- **Wave 7 mid-wave restoration**: `_intelligence_helpers.py` was reverted between Waves 5 and 7 (mechanism unclear — linter or hook). Orchestrator restored `run_pathway_linker_hook` + hook calls in `pathway.py` and `plan_intelligence.py` manually. State-of-tree note for merge review.
+**Migrations added (4):**
+- `m004_used_tokens` — atomic single-use registry for HMAC tokens (appointment manage-links, compliance export links).
+- `m005_sessions_demo` — `sessions.demo BOOLEAN NOT NULL DEFAULT FALSE`; activates pre-existing T12.12 funnel guard.
+- `m006_compliance_tombstones` — `compliance_audit` table + `deleted_at` / `deleted_reason` tombstones on `record_profiles`, `resume_versions`, `engagement_events`.
+- `m007_advisor_tokens` — `advisor_tokens` table + partial active-token index `WHERE revoked_at IS NULL`.
 
-- **Wave 8** — T12.20 Digest Composer (4 files: composer/sections/rendering/data, carryover + dedupe + HTML escape ports, worker first name from `sessions.profile.first_name`); T12.26 Appointments Page (first frontend task, react-big-calendar + date-fns, 4 components + API client + 25 tests, translations at `src/lib/translations/`).
+All four round-trip cleanly (apply → rollback → re-apply); `schema_migrations` tops out at version 7.
 
-- **Wave 9** — T12.21a Digest Preview Endpoint (minimal single-endpoint route for frontend); T12.25 Nightly Orchestrator + Accounting (city-scoped batch iteration, `asyncio.Semaphore(10)`, accounting row per run to `nightly_run_log`, kill switch via `FEATURE_NIGHTLY_ENABLED`).
+**Test count delta:**
+- Backend: **3018 → 3226 pass** (1 skipped, 2 pre-existing carry-overs unchanged: `test_contract_credit_api` JWT import, `test_evidence_collector` outcomes UTC/local-date midnight flake — both fail on clean checkout).
+- Frontend: **911 → 946 pass**.
 
-- **Wave 10** — T12.29 Daily Digest Page (4 section components + CollapsibleSection + StallAlert + DigestSectionBody; home redirect wired in `page.tsx` via `useAssessmentComplete` proxy based on `feedback_token_{sessionId}` sessionStorage presence; 16 tests).
+**GATE outcome:** 25 pass / 1 skip / 0 fail. Admin-key scan clean across all 20 new S12b files. Production GA UNBLOCKED as of 2026-04-23.
 
-- **Wave 11** — T12.32 E2E Integration Tests (4 flows × 2 cities + 6 contract assertions: route collision, two-caller pathway hook, k-anonymity, auto-advance suppression, city-scope isolation, event emission — runtime 1.92s).
+**Carry-overs (10) — do not block GA, tracked for S13:**
 
-- **Wave 12 GATE** — T12.35 Integration Gate (15 gate assertions + 2 admin-key-scan tests + 274-line runbook at `docs/ops/s12a-rollout.md`). All prior integrations verified: `all_routers` complete, scheduler lifespan wired, nightly_digest handler resolves to real orchestrator, pathway hook fires from both callers, migration rollback round-trips cleanly, feature-flag defaults locked in, all 13 tables present after m002, OutcomeTracker compat preserved. Load test: 200 sessions × 2 cities in 3.4s (budget 600s).
+1. `app/routes/__init__.py` has 27+ imports (pre-existing arch warning; warning-only).
+2. `sessions.reminders_enabled` / `.email` / `.city` not first-class columns — handled via row patterns; promote to columns + indexes.
+3. `sessions.previous_plan` deprecated by `plan_history` dual-write; drop in S13.
+4. `_call_llm` placeholders (resume + cover-letter) gated by `ENABLE_AI_GENERATION=false`; flip requires DPA per runbook §3.
+5. `test_evidence_collector::test_outcomes_logged_in_range` — UTC/local-date midnight flake; own ticket.
+6. `test_contract_credit_api::test_provider_simple_input_fields_unchanged` — sibling repo missing `jwt` import; environmental.
+7. `DigestResult.module_status` exposed but not yet rendered into digest body — advisor-inbox seam consumes it.
+8. Advisor token operator CLI — currently SQL-only; CLI is a future ticket.
+9. Frontend has no `test` script in `package.json` — invoke vitest directly; script-add chore deferred.
+10. Stall banner uses `counts.stall > 0` proxy — awaits backend exposing `stall_level` on digest preview.
 
-**Manual AC deferred** (out of scope for agent mode): browser walk-through (new session → plan → appointments → application → retro → digest). User to verify pre-merge.
-
-**S12a staging-only constraint**: Must NOT go to production general availability until S12b T12.36 (worker data export + right-to-delete) lands. Documented in runbook.
-
-**Tech debt carried into S12b** (from accumulated driver reports):
-- `sessions.reminders_enabled` column (T12.2a uses audit-row pattern)
-- `sessions.email` column (T12.2a webhook uses `unique_args.session_id` only)
-- `sessions.city` column (T12.25 orchestrator infers from `outcomes_records.payload_json.city`)
-- `sessions.demo` flag (T12.12 guard ready, S12b T12.34 adds column)
-- Checklist item per-day tracking (T12.23 returns empty list)
-- T12.11 outcomes listener bypasses `OutcomeTracker.record_outcome()` (serializer mismatch)
-- m003 compatibility adjustment needed because T12.1 declared `starts_at NOT NULL` but T12.6 model allows None for placeholders
-- Plan-refresh step in T12.25 stubbed with TODO → S12b T12.24
-- Reminder engine with cooldown stubbed → S12b T12.19 replaces direct SendGrid call
-
-**Test-quality regression carried**: `test_s8_code_quality::test_all_route_files_registered` — counts private `_*.py` helper modules in `routes/` as missing routers. Test needs updating in S12b cleanup task to exclude `_`-prefixed files, or helpers should move to a subdirectory.
-
-## 2026-04-23 — S12a Waves 2-3 complete (T12.1, T12.3, T12.0a, T12.0b, T12.6)
-
-**Wave 2**:
-- **T12.3 — APScheduler + Day-Boundary (done)**: `backend/app/core/scheduler.py` (141 lines, AsyncIOScheduler singleton with `register_job`, `start_scheduler`, `shutdown_scheduler`, `enforce_single_worker`, three stub jobs: nightly_digest 02:00 CT cron, stall_scan 08:00 daily cron, appointment_reminders 6h interval — all no-op stubs with TODO markers). `backend/app/core/day_boundary.py` (110 lines, ports `ops:lib/nightly_day_boundary.py` — `current_work_date`, `resolve_work_date`, `_resolve_rollover_hour`; reuses `TIMEZONE_BY_CITY` from T12.5). Lifespan modified in `main.py`: `enforce_single_worker()` raises RuntimeError on `WEB_CONCURRENCY != "1"` at startup; soft warning in `test_main.py` promoted to hard failure assertion. `apscheduler==3.11.2` added to requirements. 21 new tests.
-
-**Wave 3**:
-- **T12.0a — DB-Backed Outcomes Store (done)**: Rewrote `backend/app/modules/outcomes/tracker.py` (147 lines) as SQLite-backed append-only store, factored helpers into new `tracker_sql.py` (129 lines) to stay under the project's 15-function-per-file limit. New API: `OutcomeTracker(db_path)`, `record_outcome` (INSERT never upsert), `list_by_session`, `list_recent(city, event_type, since)`, `get_latest`. Caller audit correction: **`intelligence.py` does NOT use `OutcomeTracker`** (consumes raw rows from `intelligence_queries.py`); real callers are only `aggregator.py` (type hint only) + 3 test files, all ported. Added optional `created_at` to `OutcomeRecord`. 10 new DB tests + 16 existing updated, all passing.
-- **T12.0b — Feature Flag Infrastructure + Audit (done)**: `backend/app/core/feature_flags.py` (209 lines, resolution env > override > yaml > default + rate limiter), `backend/app/routes/admin_flags.py` (95 lines, `POST /api/admin/flags/{name}` with `require_admin_key`, 10/hour rate limit, ENABLE_AI_GENERATION warning emission, SHA256 actor hash). Config defaults at `config/feature_flags.yaml` (ENABLE_AI_GENERATION=false, FEATURE_NIGHTLY_ENABLED=true, FEATURE_EMAIL_SEND_ENABLED=true). Router registered in `backend/app/routes/__init__.py` (the project's `all_routers` aggregator — NOT main.py). `.env.example` updated. 23 new tests. Note: project's `max_function_lines` arch rule is 40 (not 50 as the backlog stated); driver extracted helpers to comply.
-- **T12.6 — Appointments Types + Models (done)**: `backend/app/modules/appointments/types.py` (98 lines) with `Appointment` Pydantic v2 model. Imports `AppointmentType`, `AppointmentStatus` from T12.5. Validators: timezone-aware datetimes, `ends_at >= starts_at`, zero-duration rejected for user appointments, placeholder exception when `source="pathway_auto"` + `starts_at=None`. 12 new tests.
-
-**Full suite**: 2519 passed, 1 pre-existing failure (`test_contract_credit_api` — credit-assessment sibling `jwt` import). Zero regressions. Ruff clean across all new files. Arch check clean (one warning on `feature_flags.py` at 209 > 150 warn threshold; well under 300 error).
-
-**Carried follow-ups**:
-- `database.py:13,94` + `test_database.py` still import `DDL_SQL` directly (works via re-export)
-- `intelligence.py` does not use `OutcomeTracker` — affects T12.33 expectations (intelligence wire-up uses raw queries, not the tracker)
-- Project arch rule is `max_function_lines: 40`, not 50 — downstream drivers should honor
-
-## 2026-04-23 — T12.1 Database Schema Migrations (All 13 Tables)
-
-**T12.1 — m002_s12_worker_companion (done)**: Added `backend/app/core/migrations/m002_s12_worker_companion.py` (254 lines) creating all 13 S12a+S12b worker-companion tables in a single migration. Tables: `appointments`, `job_applications`, `resume_versions`, `daily_progress_snapshots`, `engagement_events`, `plan_history`, `outcomes_records`, `reminder_cooldowns`, `nightly_run_log`, `scheduler_leases`, `worker_unavailability`, `feature_flag_audit`, `sendgrid_events`. All 9 tables with a `session_id` FK declare `TEXT REFERENCES sessions(id) ON DELETE CASCADE`. 25 indexes created per spec (status, starts_at, applied_date, date, created_at, category, event_type, composite reminder_cooldowns(session_id, category), composite feature_flag_audit(flag_name, timestamp)). `plan_history` carries inline SQL comment `-- cap of 20 per session enforced in T12.24 (application code; NOT at schema level)`. SCHEMA_VERSION=2; upgrade uses `CREATE TABLE IF NOT EXISTS` (idempotent); downgrade drops all 13 tables in reverse order.
-
-**Tests**: 10 new passing in `backend/tests/test_m002_migration.py` (463 lines) — all 13 tables present, session_id columns TEXT, FK CASCADE verified via `PRAGMA foreign_key_list`, every required index name present, plan_history schema, cap comment grep, idempotent re-apply, downgrade round-trip inserts+drops with m001 sessions row intact, `schema_migrations` records version 2, module shape (SCHEMA_VERSION/upgrade/downgrade).
-
-**Regression fix**: T12.0's `tests/test_migrations_runner.py` used `applied == ["m001_initial"]` strict equality in 4 tests — broke by design when any new migration lands. Relaxed to `"m001_initial" in applied` membership checks (+ first-element check on fresh DB to preserve ordering assertion). No production code changed for this fix.
-
-**Full suite**: 2464 passed, 1 pre-existing failure (`test_contract_credit_api::test_provider_simple_input_fields_unchanged` — documented unrelated). Ruff clean. Arch check: m002 file size 254 (below 400 error threshold; warning-only at 150). Test file has function-size warnings reduced via helper extraction.
-
-## 2026-04-23 — S12a Wave 1 complete (T12.0, T12.5)
-
-**T12.0 — Migration Infrastructure (done)**: Built per-migration Python module system following `ops:lib/db.py` pattern. Created `backend/app/core/migrations/{__init__.py, runner.py, m001_initial.py}`. Extracted existing `DDL_SQL` into `m001_initial.py` byte-for-byte; `backend/app/core/schema.py` now re-exports for backward compat (noted `database.py:13,94` + `test_database.py:175,193,234,251` for follow-up migration off direct `DDL_SQL` imports). 13 new tests. No regressions.
-
-**T12.5 — Shared Schemas + Timezone (done)**: Created `backend/app/modules/common/temporal_types.py` with six string-valued enums (`AppointmentType`, `AppointmentStatus`, `JobApplicationStatus`, `EngagementEventType`, `StallLevel`, `GenerationMethod`) + Pydantic models + `format_city_local(dt, city)`. `TIMEZONE_BY_CITY` registry used since `CityConfig` doesn't carry a `timezone` field and widespread tests instantiate it directly. 29 new tests. Note: Montgomery AL + Fort Worth TX are both `America/Chicago`; "different strings per city" test uses monkeypatch to prove the formatter reads from config rather than hardcoding.
-
-**Full suite**: 2443 passed, 1 pre-existing failure (`test_contract_credit_api::test_provider_simple_input_fields_unchanged` — unrelated; sibling `credit-assessment` repo missing `jwt` module). Ruff clean. Arch check clean on new files.
-
-**CLI task status**: Both tasks still show `in_progress` in paircoder — `task update --status done` refused due to dirty tree (expected per /running-sprint-tasks protocol; commit between waves clears it). Tracking completion here per skill guidance.
-
-## 2026-04-23 — Planned Sprint S12a
-
-Created plan `plan-2026-04-s12a-worker-companion-foundation` with 26 tasks (520 Cx — corrected from initial header claim of 25/498) from `backlog-sprint-s12a-foundation-daily-loop.md`. Sprint establishes foundation (migration infra, DB outcomes store, feature flags, scheduler) + daily loop (appointments CRUD + routes + page, jobs lifecycle + funnel, digest composer, stall detector, nightly orchestrator, daily digest page) + gate. Staging-only until S12b T12.36 compliance work lands.
-
-- **Sprint S11 -- "People Like You" Community Insights (Capstone)** (2026-04-11): Built the "People Like You" engine that transforms calibrated barrier outcome data into personalized, deterministic, city-aware community insight messages. No LLM. No AI. Pure deterministic logic. CREATED: app/modules/outcomes/community_insights.py (221 lines) -- Core engine with CommunityInsight Pydantic model (message, barrier_type, confidence, sample_size, metric_type) and 6 functions: generate_insights() pure function takes CalibratedWeeks + user barriers + city name and produces personalized messages; generate_cold_start_insight() for first-user encouraging messaging; _format_resolution_insight() produces "15 people in Fort Worth with criminal records resolved them in about 8 weeks"; _format_success_rate_insight() produces "80% success rate" messages; _format_recommendation_insight() compares multiple barriers and suggests resolving the fastest first; _format_people_phrase() adapts language by confidence level (HIGH: exact count "15 people", MEDIUM: "Several people", LOW: "A small number of people"). CREATED: app/routes/insights.py (62 lines) -- Standalone GET /api/insights/{session_id} endpoint, auth-protected, returns personalized insights list with barrier_count and city metadata. MODIFIED: app/routes/plan_intelligence.py (92 lines) -- Added "insights" section to the unified plan intelligence response, using generate_insights from the community_insights engine. MODIFIED: app/routes/__init__.py -- Registered insights_router. NEW TESTS: 4 test files, 36 new tests (2,394 total, was 2,358). test_community_insights.py (21 tests -- TestSingleBarrierHighConfidence: city name in message, sample size visible, avg weeks visible, model fields correct, success rate insight generated; TestColdStart: empty barriers data, city included, encouraging tone, recommendation metric type; TestMixedConfidence: multiple barriers produce insights for each, LOW confidence uses cautious language, MEDIUM uses moderate language, NONE confidence skipped to cold start; TestBarrierCombinationInsights: recommendation with multiple barriers, suggests fastest barrier first, no recommendation for single barrier; TestDeterminismAndEdgeCases: deterministic output verified, empty barriers returns empty, unknown barrier graceful fallback, all 7 barrier types produce insights, model serialization). test_insights_route.py (6 tests -- returns insights list, cold start encouraging, invalid token 401, session not found, city name in insights, response includes metadata). test_plan_intelligence_insights.py (4 tests -- response includes insights key, insights section is list, insights with feedback data, cold start insights). test_insights_with_seed.py (5 tests -- seeded data produces non-cold-start insights, insights reference calibrated stats with numbers, plan intelligence has insights after seeding, insights are deterministic across requests, Carlos persona with criminal+childcare+credit gets barrier-specific insights). Zero LLM calls. Fully deterministic. City-aware. All files under 400 lines, all functions under 50 lines. Zero regressions.
-
-- **Sprint S10 -- Demo Seed Data + Final Verification** (2026-04-11): Built the demo seed command and full pipeline verification for HackFW 2026 demo readiness. CREATED: app/demo_seed.py (244 lines) -- Deterministic seed module (Random(42)) that populates 50 Fort Worth sessions with realistic barrier distributions (criminal_record ~40%, transportation ~60%, credit ~50%, childcare ~35%, housing ~25%, health ~15%, training ~20%), Fort Worth ZIP codes (76102-76119), varied employment statuses, Texas benefits profiles (SNAP/TANF/Medicaid/CHIP/CEAP/Childcare_Subsidy), plans with immediate_next_steps, and feedback tokens. Also creates 30 visit_feedback entries with resolution outcomes, plan accuracy ratings (2-5), and free text comments. Runnable as `py -3.12 -m app.demo_seed` or via admin endpoint. CREATED: app/routes/demo.py (48 lines) -- POST /api/demo/seed admin endpoint protected by X-Admin-Key header, idempotent (detects existing data). MODIFIED: app/modules/outcomes/intelligence_queries.py -- Enhanced get_barrier_feedback_rows to estimate weeks_to_resolve from time delta between sessions.created_at and visit_feedback.submitted_at. This closes the final gap in the N+1 loop: the intelligence engine now computes actual avg_weeks from real timestamp data, making calibrated_weeks non-empty when feedback exists. Added _estimate_weeks and _try_parse helpers. Backward compatible (returns None when timestamps unavailable). MODIFIED: app/routes/__init__.py -- registered demo_router. NEW TESTS: 4 test files, 31 new tests (2,366 total, was 2,335). test_demo_seed.py (8 tests -- 50 sessions created, Fort Worth ZIPs in profile, valid barriers, plans present, feedback tokens for all sessions, criminal_record ~40%, transportation ~60%, credit ~50%). test_demo_seed_feedback.py (9 tests -- 30 feedback entries, valid outcomes JSON, plan accuracy 1-5, feedback links to valid sessions, intelligence calibrated after seed, calibrated weeks differ from defaults, multiple barrier types calibrated, deterministic output, return value summary). test_demo_route.py (4 tests -- requires admin key, rejects wrong key, succeeds with correct key, idempotent second call). test_full_pipeline_with_data.py (10 tests -- intelligence barriers endpoint calibrated, plan intelligence returns all 4 sections, pathway with community intelligence, pathway strategies present, share seeded session and retrieve, dashboard shows 50 assessments, outcomes aggregate, N+1 loop visible with calibrated != defaults, full chain seed->intelligence->pathway->share->dashboard, admin endpoint triggers seed and intelligence shows data). Zero regressions. All files under 400 lines, all functions under 50 lines.
-
-- **Sprint S9 -- Wire the Intelligence Loop Complete** (2026-04-11): Closed the N+1 feedback loop for real. The pathway route now fetches calibrated_weeks from the intelligence engine at REQUEST TIME so community feedback flows into every pathway recommendation automatically. Previously, the intelligence engine computed calibrated values but the pathway endpoint ignored them -- using hardcoded defaults instead. Now: visit_feedback in DB -> intelligence_queries.get_barrier_feedback_rows() -> intelligence.compute_calibrated_barriers() -> to_weeks_dict() -> pathway route passes to generate_pathways(calibrated_weeks=data). MODIFIED: app/routes/pathway.py -- now imports fetch_intelligence and passes calibrated_weeks to generate_pathways, adds community_intelligence metadata to response. CREATED: app/routes/plan_intelligence.py (85 lines) -- Unified Plan Intelligence endpoint GET /api/plan/{session_id}/intelligence returns EVERYTHING a frontend needs in one call: barriers (sequenced with calibrated weeks), pathway (3 strategies calibrated with community data), cliff_analysis (wage steps + cliff points), and community_intelligence (total_feedback, calibrated_barriers with confidence levels, improvements_from_defaults showing calibrated vs default for each barrier). CREATED: app/routes/_intelligence_helpers.py (77 lines) -- Shared helpers (build_community_intelligence, parse_benefits_profile, fetch_intelligence) used by both pathway and plan_intelligence routes, eliminating duplication. MODIFIED: app/routes/__init__.py -- registered plan_intelligence_router. NEW TESTS: 2 test files, 12 new tests (2,334 total, was 2,322). test_pathway_intelligence_wiring.py (3 tests -- pathway uses calibrated weeks from feedback, falls back to defaults on cold start, response includes calibration source with calibrated_barriers and improvements_from_defaults). test_plan_intelligence.py (9 tests -- returns complete intelligence package, barriers section has sequence, pathway section has strategies, cliff analysis section, community intelligence with feedback, cold start community intelligence, invalid token 401, session not found 404, improvements from defaults shown). Zero LLM calls. Fully deterministic. All files under 200 lines. All functions under 50 lines. Zero regressions.
-
-- **Sprint S8 Phase 2 -- Cross-Module Integration Verify** (2026-04-11): Systematic cross-module integration verification for HackFW 2026 demo readiness. Verified ALL 14 integration chains from the cross-module checklist. NEW TESTS: 3 test files, 21 new tests (2,322 total, was 2,301). test_s8p2_cross_module.py (8 tests -- Assessment->Plan with FW profile through generate_plan, Plan->BarrierCards with FW resource_router actions, Plan->Cliff with TX AMI thresholds and TX programs, Plan->Pathway with calibrated_weeks, Sequencer->Intelligence calibrated weeks flow, PVS Scorer->Benefits Router TX net income, PVS Scorer->Geo Router FW proximity coords, City Config->ALL Routers single test proving benefits/criminal/geo/resource/prompt all return TX simultaneously). test_s8p2_e2e_demo.py (5 tests -- Full 8-step demo chain exercising plan->sequence->simulate->share->pathway->intelligence->dashboard in a single test, single-barrier edge case, all-barriers-resolved simulation, share data integrity verification, pathway with benefits profile for cliff navigation). test_s8p2_api_integration.py (8 tests -- Intelligence API with real DB feedback data and empty DB cold start, Dashboard with seeded sessions verifying aggregate accuracy, Outcomes aggregate endpoint, Simulate->Sequencer with remaining barrier verification, Simulate with unknown barrier type, Sequence API ordered steps with timeline, Sequence with all 7 barrier types). The full demo chain test (test_full_demo_chain) exercises 8+ modules in a single flow: plan route, barrier sequencer, sequence route, simulate route, share route, pathway engine, intelligence endpoint, and dashboard. Zero regressions. All files under 400 lines, all functions under 50 lines.
-
-- **Sprint S8 Phase 1 -- Deep Polish** (2026-04-13): Systematic backend polish pass targeting coverage gaps, unused imports, dead code, type hints, and response format consistency. UNUSED IMPORTS REMOVED: assessment.py (HTTPException), brightdata.py (CrawlProgress), jobs.py (Request), employer_policy.py (ChargeCategory), pathway/engine.py (WAGE_MAX) -- 5 files cleaned. DEAD CODE FIXED: stage_builder.py had unreachable fallback line due to float("inf") sentinel in _TIER_THRESHOLDS -- removed sentinel, exposed fallback as the proper default path. TYPE HINTS ADDED: city.py get_city() -> dict, benefits/router.py get_sum_program_benefits() -> Callable[[float, BenefitsProfile], float]. COVERAGE GAPS CLOSED: tracker.py get_all_outcomes 92%->100%, stage_builder.py 97%->100%, generators_barriers.py 98%->100%, pathway/engine.py now 100%. NEW TESTS: 4 test files, 56 new tests (2,301 total, was 2,245). test_s8_coverage_gaps.py (20 tests -- OutcomeTracker.get_all_outcomes, feedback outcome length validation, low-severity credit actions, eligibility edge cases, wage_tier_label fallback). test_s8_route_hardening.py (15 tests -- dashboard barrier parsing edge cases, simulate unknown/mixed confidence, share deleted session + missing plan, sequence unknown barriers, intelligence response format). test_s8_response_consistency.py (14 tests -- error response format consistency across all endpoints, success response format validation for dashboard/pathway/sequence/simulate/share/intelligence/city/health). test_s8_code_quality.py (7 tests -- route registration gate, file size limits, function count limits, public function type hint enforcement). Zero regressions. All files under 400 lines, all functions under 50 lines, under 15 functions/file.
-
-- **Sprint S7 -- Outcome-Informed Barrier Intelligence** (2026-04-13): Closed the N+1 feedback loop -- the hackathon proposal's core differentiator. Built the Outcome Intelligence Engine that reads visit_feedback from the database and computes calibrated per-barrier resolution statistics (avg weeks to resolve, success rates, confidence levels based on sample size). These calibrated values feed back into the barrier_sequencer and pathway engine, replacing hardcoded estimates with real community outcome data. NEW MODULE: app/modules/outcomes/ with 5 files (intelligence.py -- engine computing calibrated stats; intelligence_queries.py -- DB join of visit_feedback + sessions producing per-barrier observations; aggregator.py -- community insights from outcome records; tracker.py -- in-memory outcome storage; types.py -- Pydantic models). NEW ROUTE: GET /api/intelligence/barriers returns calibrated barrier stats, confidence levels, calibrated_weeks dict (MEDIUM+ confidence only), and default_weeks for comparison. No PII exposed. MODIFIED: barrier_sequencer.sequence_barriers() now accepts optional calibrated_weeks parameter -- falls back to hardcoded _WEEKS_PER_BARRIER defaults when no community data. Pathway engine (generate_pathways, _build_pathway) and stage_builder (build_stages, _assign_barriers_to_stages, _compute_stage_weeks) all propagate calibrated_weeks through the full pipeline. Confidence levels: NONE (0 samples), LOW (1-2), MEDIUM (3-9), HIGH (10+). Only MEDIUM+ confidence barriers with non-zero avg_weeks are included in the calibrated_weeks dict. Zero LLM calls. Fully deterministic. City-aware. All files under 400 lines, all functions under 50 lines. 54 new tests (2,124 total backend, zero regressions). Test files: test_outcome_intelligence.py (15 tests -- confidence levels, per-barrier stats, weeks dict), test_intelligence_queries.py (7 tests -- DB query, malformed JSON, NULL outcomes, resolution marking), test_intelligence_route.py (6 tests -- endpoint 200, empty DB defaults, feedback data, calibrated weeks), test_intelligence_edge_cases.py (15 tests -- input fuzzing, boundary conditions, weeks dict integration, DB state corruption), test_calibrated_sequencer.py (7 tests -- backward compat, calibrated weeks used, mixed, total weeks, empty, unknown), test_calibrated_pathway.py (4 tests -- backward compat, calibrated affects timeline, empty same as default).
-
-- **Sprint S6 -- Deep Quality + Integration (Phase 1)** (2026-04-13): Backend hardening and Montgomery leak remediation. FIXES: (1) City route (/api/city) was NOT registered in all_routers -- now registered and tested. (2) app/ai/client.py used hardcoded Montgomery prompts instead of prompt_router -- now routes through get_system_prompt()/get_user_prompt_template(). (3) Fallback narrative in client.py had hardcoded "Montgomery", "Alabama Career Center" -- now city-aware via get_city_config(). (4) MockProvider in providers.py had hardcoded Montgomery response -- now city-aware. (5) career_center.py fallback profile used hardcoded ZIP 36104 -- now uses city config zip_ranges[0]. (6) barrier_intel/prompts.py had hardcoded Montgomery system prompt -- now city-aware via get_barrier_intel_system_prompt(). (7) barrier_intel/guardrails.py HALLUCINATION_DISCLAIMER had hardcoded Alabama Career Center -- now city-aware. (8) barrier_intel/streaming.py updated to use dynamic prompt function. (9) brightdata.py error responses normalized to keyword args (status_code, detail). (10) jobs.py M-Transit docstring generalized. (11) database.py Montgomery docstrings updated. NEW TESTS: 5 new test files, 46 new tests (2011 total, was 1965). test_city_route.py (4 tests -- endpoint registration, response format, state code, ZIP ranges). test_pathway_route.py (11 tests -- happy path, auth, validation, benefits profile, empty barriers, malformed data). test_montgomery_leaks.py (11 tests -- no hardcoded ZIP in routes, no Alabama Career Center in routes, city-aware fallback narrative, city-aware mock provider, city-aware career center ZIP, prompt_router is used). test_route_hardening.py (14 tests -- simulate error paths, sequence edge cases, share deleted session, dashboard NULL barriers, response format validation). test_integration_flow.py (6 tests -- full plan->sequence->share flow, simulate->sequence, pathway after plan, city endpoint, health endpoint, all routes registered). Zero regressions. All files under 400 lines, all functions under 50 lines.
-
-- **Sprint S5 -- Backend Innovations: Employment Pathway Engine** (2026-04-11): Built the Employment Pathway Engine, a novel backend system that fuses the barrier sequencer (topological sort), benefits cliff calculator, and wage analysis into ranked multi-step career trajectories. New module: app/modules/pathway/ with 4 files (types, cliff_navigator, stage_builder, engine) + route (POST /api/pathway). The cliff navigator scans per-program benefit landscapes to identify CliffZones (wage ranges where net income drops), then finds safe wage targets that route career progression AROUND cliffs. The stage builder distributes barriers across stages using topological order so root-cause barriers resolve first. The engine generates 3 strategy variants (conservative/balanced/aggressive) with different wage step sizes, each producing PathwaySteps with target wage, barriers to resolve, estimated weeks, net monthly income, cliff warnings, and job accessibility counts. Viability scoring penalizes barrier count, long timelines, and cliff exposure. City-aware: tested for both CITY=montgomery (AL) and CITY=fort-worth (TX) with proper cache management. Zero LLM calls -- fully deterministic. 44 new tests (1965 total backend, zero regressions). All files under 400 lines, functions under 50 lines, under 15 functions/file.
-
-- **Sprint S4 Phase 2 -- Creative Polish + Evolution** (2026-04-11): Comprehensive test coverage push and UX polish for all S4 features. Backend: added estimated_weeks per barrier step + estimated_total_weeks to barrier sequence response, confidence level (high/medium/low) to simulate endpoint, rate limiter test fixture for share plan, 7 new share edge-case tests (URL-safety, duplicate shares, truncated next_steps, barriers in shared plan), 6 new sequence tests (single barrier, all 7 types, unknown barrier exclusion, no-cycles, session-not-found, timeline fields), 5 new simulate tests (all 7 barrier types, unknown defaults, benefits per type, sequence-after verification, confidence), 5 new dashboard tests (aggregate accuracy, barrier counts, empty DB, malformed barriers, top-5 limit). Frontend: BarrierSequenceViz enhanced with aria-labels on all steps (role=list/listitem, Step N: Name), timeline ~weeks display per step, total timeline estimate, Clock icon, cycle warning aria-label. WhatHappensIf enhanced with loading state (spinner + "Calculating impact..."), Reset button to clear all toggles, summary sentence ("Resolving these N barriers unlocks +X more jobs and Y benefits"). VoiceInput enhanced with pulsing "Listening..." indicator and improved browser compatibility message. Full i18n coverage: 34 new EN keys + 34 new ES keys across 6 namespaces (sequence, simulator, voice, dashboard, outcomes, share), verified by 70-test completeness suite. New PlanInsights wrapper tests. CaseManager page tests for loading/error/computed states. 1,914 backend tests (+17), 786 frontend tests (+98), 2,700 total (+115). Zero regressions. All files under architecture limits.
-
-- **Sprint S4 -- Hackathon Polish + Killer Features** (2026-04-11): Full P0/P1/P2 implementation for HackFW 2026. P0: Share plan backend (POST /api/plan/{session_id}/share + GET /api/plan/shared/{token} with 7-day expiry, share_tokens table, SharePlanButton with copy-to-clipboard). City-aware landing page (Fort Worth: 15.3% poverty, 64% labor participation, 950K+ metro; Montgomery stats preserved). City-aware FastAPI description. Demo script rewritten for Fort Worth persona (Carlos, 76119, Trinity Metro, HHSC, Texas nondisclosure). P1: Barrier sequence visualization (BarrierSequenceViz component -- topological sort domino chain with arrows, unlock indicators, category badges). "What Happens If" multi-barrier simulator (WhatHappensIf toggle component + POST /api/simulate endpoint returning cascading impact: jobs unlocked estimate, benefits unlocked, barrier unlocks). Assessment wizard fully i18n-wrapped (all heading/description strings use t() from i18n, 18 new en.json keys + full Spanish es.json translations). P2: Case manager dashboard page (/case-manager with aggregate metrics, barrier bar charts). N+1 aggregate outcomes display (OutcomesBadge component + GET /api/outcomes/aggregate). Privacy reassurance badge in assessment wizard. Voice input for work history (VoiceInput component using Web Speech API). 18 new backend tests (1897 total passing), 34 new frontend tests (688 total passing). Zero regressions. All files under 400-line limit.
-
-- **Sprint S3 Phase 3 -- Final Evolution + Polish** (2026-04-11): End-to-end verification of both cities (Fort Worth and Montgomery) across the full assessment -> cliff -> screener -> barriers -> prompts chain. Verified zero Alabama bypasses remain when CITY=fort-worth (HHSC not DHR, Trinity Metro not M-Transit, Texas Board of Nursing not Alabama, Workforce Solutions not AL Career Center). Pushed all S3 backend files to 100% coverage: cliff_calculator, barrier_sequencer, geo_router, resource_router, zip_validation, prompt_router, eligibility_screener, benefits router, TX program_calculators, sequence_types. Tested edge cases: unknown programs via model_construct bypass, non-ordering relationship filtering in barrier sequencer, ZIP boundary values (76100/76200 rejection, 76101/76199 acceptance), cliff calculator with 0/7 programs, household size 1/8, zero income, severity classification boundaries. Added i18n edge cases (missing keys, localStorage errors, Spanish translation completeness), SharedPlanView edge cases (null plan, empty barriers, phone link). 121 new backend + 23 new frontend tests. 1863 backend / 653 frontend tests passing. Zero regressions.
-
-- **Sprint S3 Phase 2 -- Evolution + Hardening** (2026-04-11): S2 routing audit and S3 feature evolution. Fixed all Alabama bypasses in cliff_calculator (uses TX AMI $78K for Fort Worth), eligibility_screener (HHSC disclaimer), types.py (dynamic ZIP validation), pvs_scorer, scoring.py, commute_estimator, barrier_cards, affinity, career_center_package, filters, phase_generators, job_readiness_pathway -- all now route through city-aware routers. Built barrier sequencing engine (topological sort of 33 barriers, 53 edges). Evolved ProgressTracker (localStorage persistence), BenefitsCliffSimulator (loading/error states, ARIA), ResourceMap (category filtering), i18n (locale persistence). 28 new tests. 1742 backend / 630 frontend tests passing. Zero regressions.
-
-- **Sprint S2 complete** (2026-04-12) -- Fort Worth Data + Texas Rules: Full multi-city port for HackFW 2026. Created Texas benefits screener with HHSC programs (CHIP replaces ALL_Kids at 200% FPL, CEAP replaces LIHEAP, TX TANF at ~$308/mo vs AL $215), Texas expunction (Art. 55) + nondisclosure (Gov Code Ch. 411 E-1) dual record clearing, Fort Worth geo data (36 ZIP centroids, Trinity Metro hours), city-aware module routing (benefits, criminal, geo, resources, AI prompts), live TWC and USAJobs API adapters replacing stubs, Fort Worth seed data (10 community resources, 12 employers with fair-chance index), and frontend city-aware constants. 112 new S2 tests + 1707 total backend tests passing (zero regressions). 512 frontend tests passing.
+Per-task one-liners are no longer in this file — see git history (`sprint/s12b-value-extensions`) and `.paircoder/tasks/plan-2026-04-s12b-value-extensions/`.
 
 ## What's Next
 
-Wave 1 complete (T12.0 + T12.5). Next: **commit the wave**, then proceed to Wave 2 (`T12.1` schema migrations creating all 13 S12 tables + `T12.3` APScheduler + day-boundary helpers — both depend only on T12.0). User will invoke `/running-sprint-tasks` to take over parallel wave execution from Wave 2 onward.
+S12b is complete and production GA is unblocked. Recommended next steps:
 
-**Wave plan reference** (remaining 24 tasks after Wave 1):
-- Wave 2: T12.1, T12.3 (50 Cx)
-- Wave 3: T12.0a, T12.0b, T12.6 (55 Cx)
-- Wave 4: T12.2, T12.7 (45 Cx)
-- Wave 5: T12.2a, T12.9, T12.11 (60 Cx)
-- Wave 6: T12.10, T12.12, T12.23 (50 Cx)
-- Wave 7: T12.13, T12.18, T12.22, T12.33 (75 Cx)
-- Wave 8: T12.20, T12.26 (60 Cx)
-- Wave 9: T12.21a, T12.25 (30 Cx)
-- Wave 10: T12.29 (20 Cx)
-- Wave 11: T12.32 (25 Cx)
-- Wave 12 (GATE): T12.35 (20 Cx)
-
-**Known follow-ups carried from Wave 1**:
-- `database.py:13,94` + `test_database.py` still use direct `DDL_SQL` import — works via re-export. Route through `migrations.runner.apply_pending` when touched by downstream waves.
-- Pre-existing test failure in `test_contract_credit_api` (credit-assessment `jwt` module) is NOT a S12a regression.
-
-**Post-Hackathon:** Dallas expansion (DFW unification). Texas state-level modules (benefits, criminal) are already built. Dallas needs: `cities/dallas.yaml`, `data/cities/dallas/` seed data, DART transit data, Dallas career centers/resources/employers, fair-chance index. No new code — just data curation and a new city config. See ROADMAP.md "Dallas Expansion" phase and hackfw-2026-proposal.md "Post-Hackathon" section for full details.
+- **Merge `sprint/s12b-value-extensions` to `main`** after PR review.
+- **Scope S13** to drain the 10 carry-overs above. Best candidates for first wave:
+  - Promote `sessions.reminders_enabled` / `.email` / `.city` to first-class columns + indexes (carry-over #2).
+  - Drop `sessions.previous_plan` after migrating readers off the dual-write (carry-over #3).
+  - Expose `stall_level` on the digest preview endpoint and swap the banner mapping (carry-over #10).
+  - Add `npm test` script in `frontend/package.json` (carry-over #9).
+  - Advisor token issuance/revocation operator CLI (carry-over #8).
+  - Render `DigestResult.module_status` into the digest body (carry-over #7).
+  - Fix `test_evidence_collector` UTC/local-date midnight flake (carry-over #5).
+- **Post-Hackathon:** Dallas expansion (DFW unification). Texas state-level modules (benefits, criminal) are already built. Dallas needs `cities/dallas.yaml`, `data/cities/dallas/` seed data, DART transit data, Dallas career centers/resources/employers, fair-chance index. No new code — just data curation and a new city config. See ROADMAP.md "Dallas Expansion" phase and `hackfw-2026-proposal.md` "Post-Hackathon" section.
 
 ## Blockers
 
