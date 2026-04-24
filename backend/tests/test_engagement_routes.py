@@ -366,6 +366,43 @@ def test_unsubscribe_blocks_reminder_engine(
     assert _is_reminders_auto_disabled(db_path, _SESSION_A) is True
 
 
+# -------------------- GET /unsubscribe (CAN-SPAM email link) --------------------
+
+
+def test_unsubscribe_get_round_trip_disables_reminders(
+    client: TestClient, db_path: str,
+) -> None:
+    """GET with valid signed token (CAN-SPAM email link) writes opt-out row."""
+    from app.modules.engagement import unsubscribe_tokens
+
+    token = unsubscribe_tokens.sign(_SESSION_A)
+    resp = client.get(f"/api/engagement/unsubscribe?token={token}")
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["reminders_enabled"] is False
+    assert _has_auto_disabled_row(db_path, _SESSION_A)
+
+
+def test_unsubscribe_get_invalid_token_uniform_401(
+    client: TestClient,
+) -> None:
+    """GET with garbage token returns the same 401 as POST (no oracle)."""
+    resp = client.get("/api/engagement/unsubscribe?token=garbage")
+    assert resp.status_code == 401
+
+
+def test_unsubscribe_get_replay_401(
+    client: TestClient, db_path: str,
+) -> None:
+    """Second GET on the same token is rejected (single-use enforcement)."""
+    from app.modules.engagement import unsubscribe_tokens
+
+    token = unsubscribe_tokens.sign(_SESSION_A)
+    first = client.get(f"/api/engagement/unsubscribe?token={token}")
+    assert first.status_code == 200
+    second = client.get(f"/api/engagement/unsubscribe?token={token}")
+    assert second.status_code == 401
+
+
 # -------------------- Router registration --------------------
 
 

@@ -232,12 +232,17 @@ def send_now(
     }
 
 
-@router.post("/unsubscribe")
-def unsubscribe(body: UnsubscribeRequest) -> dict:
-    """Verify a signed unsubscribe token and disable reminders."""
+def _process_unsubscribe(token: str) -> dict:
+    """Shared verify + opt-out write for both GET and POST unsubscribe.
+
+    Single oracle: any verify failure (malformed, expired, tampered,
+    replayed) collapses to the same 401 body. CAN-SPAM links emitted
+    in email arrive as GETs; programmatic clients use POST. Both paths
+    write the same ``reminders_auto_disabled`` row.
+    """
     db_path = _resolve_db_path()
     try:
-        session_id = unsubscribe_tokens.verify(body.token, db_path=db_path)
+        session_id = unsubscribe_tokens.verify(token, db_path=db_path)
     except unsubscribe_tokens.TokenError:
         logger.debug("unsubscribe-token rejected", exc_info=True)
         raise HTTPException(
@@ -248,6 +253,18 @@ def unsubscribe(body: UnsubscribeRequest) -> dict:
         "session_id": session_id,
         "reminders_enabled": False,
     }
+
+
+@router.post("/unsubscribe")
+def unsubscribe(body: UnsubscribeRequest) -> dict:
+    """Verify a signed unsubscribe token and disable reminders (POST)."""
+    return _process_unsubscribe(body.token)
+
+
+@router.get("/unsubscribe")
+def unsubscribe_get(token: str = Query(...)) -> dict:
+    """CAN-SPAM GET handler — browsers follow email unsubscribe links."""
+    return _process_unsubscribe(token)
 
 
 __all__ = ["router"]

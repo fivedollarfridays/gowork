@@ -15,6 +15,7 @@ import os
 from dataclasses import dataclass
 
 from app.modules.common.temporal_types import StallLevel
+from app.modules.engagement.unsubscribe_tokens import sign as _sign_unsub
 
 __all__ = [
     "RenderedEmail",
@@ -82,15 +83,11 @@ _INTRO_BY_LEVEL = {
 def build_unsubscribe_url(session_id: str) -> str:
     """Return the CAN-SPAM unsubscribe URL for this session.
 
-    T12.10b (Wave 1 parallel) owns the session-level signed-token signer
-    for engagement unsubscribe. Until that ships the token is a
-    deterministic stub so the URL is still well-formed and the
-    /api/engagement/unsubscribe endpoint can accept test traffic.
-    app.modules.appointments.tokens.sign is NOT reused — it signs
-    appointment IDs with a different secret/action scheme.
-
-    TODO(T12.10b): swap ``_sign_unsubscribe_token`` for the real signer
-    once the engagement-unsubscribe signer lands.
+    Uses :func:`app.modules.engagement.unsubscribe_tokens.sign` so the
+    embedded token round-trips through the public unsubscribe routes
+    (``GET`` and ``POST /api/engagement/unsubscribe``). The
+    appointments-token signer is NOT reused — it signs appointment IDs
+    with a different secret/action scheme.
     """
     host = os.environ.get("APP_HOST", "https://app.montgowork.local")
     token = _sign_unsubscribe_token(session_id)
@@ -98,12 +95,12 @@ def build_unsubscribe_url(session_id: str) -> str:
 
 
 def _sign_unsubscribe_token(session_id: str) -> str:
-    """Placeholder signer — returns a deterministic stub token per session.
+    """Sign a single-use engagement-unsubscribe token for ``session_id``.
 
-    Replaced by T12.10b's HMAC-signed engagement-unsubscribe token once
-    that module ships.
+    Thin wrapper around :func:`unsubscribe_tokens.sign` so tests can
+    monkeypatch this seam without reaching into the signer module.
     """
-    return f"stub-{session_id}"
+    return _sign_unsub(session_id)
 
 
 def render_reminder(
