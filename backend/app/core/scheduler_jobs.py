@@ -9,6 +9,7 @@ heavy handler dependencies.
 
 from __future__ import annotations
 
+import asyncio
 from typing import Callable
 
 
@@ -27,8 +28,11 @@ def appointment_reminders_handler() -> Callable:
     """Return the async handler for the 6h appointment-reminder scan.
 
     APScheduler's ``AsyncIOScheduler`` awaits coroutines, so the inner
-    ``_run`` is ``async def``. DB path resolution happens at run-time
-    so tests can monkeypatch
+    ``_run`` is ``async def``. The reminder scanner itself is sync
+    (sqlite + SendGrid HTTP), so we offload it to the default executor
+    via :func:`asyncio.to_thread` to avoid blocking the event loop for
+    the full scan duration. DB path resolution happens at run-time so
+    tests can monkeypatch
     :func:`app.routes._appointments_helpers.resolve_db_path`.
     """
     async def _run() -> None:
@@ -36,7 +40,9 @@ def appointment_reminders_handler() -> Callable:
         from app.routes._appointments_helpers import resolve_db_path
 
         db_path = resolve_db_path()
-        transactional_emails.scan_and_send_reminders(db_path=db_path)
+        await asyncio.to_thread(
+            transactional_emails.scan_and_send_reminders, db_path=db_path,
+        )
 
     _run.__name__ = "appointment_reminders_handler"
     return _run
