@@ -72,12 +72,7 @@ def _markdown_response(version: versions_db.ResumeVersion) -> Response:
 
 
 def _pdf_response(version: versions_db.ResumeVersion) -> Response:
-    """Render the markdown to PDF and return ``application/pdf`` bytes.
-
-    PDF render errors keep their detail server-side: the caller gets a
-    generic 500 (no filesystem paths or CSS internals leaked) and the
-    operator gets the full exception via ``logger.exception``.
-    """
+    """Render the markdown to PDF and return ``application/pdf`` bytes."""
     try:
         pdf_bytes = render_markdown_to_pdf(
             version.markdown, template_name=_PDF_TEMPLATE,

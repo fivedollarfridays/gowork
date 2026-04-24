@@ -149,24 +149,10 @@ def _audit_advisor_action(
 def _ensure_audit_placeholder_session(
     conn: sqlite3.Connection, sid: str,
 ) -> None:
-    """Ensure a no-data placeholder session row exists for list audits.
-
-    Convention: this row uses the literal id ``_advisor_audit`` (single
-    placeholder shared across all advisors), is created with
-    ``expires_at == created_at`` (already expired, so worker-facing
-    queries that filter on expiry skip it), and carries ``demo=1``
-    (m005 column) so analytics + advisor-inbox queries that filter
-    ``demo = 0`` also skip it. Without ``demo=1`` this row could leak
-    into any query that didn't filter on expiry.
-    """
-    row = conn.execute(
-        "SELECT 1 FROM sessions WHERE id = ?", (sid,),
-    ).fetchone()
-    if row is not None:
-        return
+    """Upsert the ``_advisor_audit`` placeholder row with ``demo=1`` so queries filtering ``demo=0`` skip it."""
     now = datetime.now(timezone.utc).isoformat()
     conn.execute(
-        "INSERT INTO sessions (id, created_at, barriers, profile, "
+        "INSERT OR IGNORE INTO sessions (id, created_at, barriers, profile, "
         "expires_at, demo) VALUES (?, ?, '[]', '{}', ?, 1)",
         (sid, now, now),
     )
