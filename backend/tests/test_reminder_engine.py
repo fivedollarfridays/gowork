@@ -48,6 +48,16 @@ def _reset_feature_flags() -> None:
     feature_flags._reset_state_for_tests()
 
 
+@pytest.fixture(autouse=True)
+def _unsubscribe_secret_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Reminder + digest paths now sign real unsubscribe tokens."""
+    monkeypatch.setenv(
+        "UNSUBSCRIBE_TOKEN_SECRET",
+        "reminder-engine-test-unsub-secret-0123456789ab",
+    )
+    monkeypatch.delenv("UNSUBSCRIBE_TOKEN_SECRET_OLD", raising=False)
+
+
 @pytest.fixture
 def db_path(tmp_path: Path) -> str:
     path = str(tmp_path / "reminders.db")
