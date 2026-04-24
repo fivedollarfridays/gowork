@@ -72,23 +72,13 @@ def _make_stub(job_name: str, note: str) -> Callable[[], None]:
     return _stub
 
 
-def _nightly_digest_handler() -> Callable:
-    """Resolve the real nightly orchestrator lazily.
-
-    Imports inside the factory to avoid pulling the heavy digest stack
-    (retro + compose + SendGrid) at app startup — the handler is only
-    referenced when the cron fires.
-    """
-    from scripts.nightly_digest import nightly_digest_job
-
-    return nightly_digest_job
-
-
 def _register_default_jobs() -> None:
     """Register the three S12a recurring jobs (T12.25 wires nightly_digest)."""
+    from app.core import scheduler_jobs
+
     register_job(
         "nightly_digest",
-        _nightly_digest_handler(),
+        scheduler_jobs.nightly_digest_handler(),
         CronTrigger(hour=2, minute=0, timezone=_SCHEDULER_TZ),
     )
     register_job(
@@ -98,7 +88,7 @@ def _register_default_jobs() -> None:
     )
     register_job(
         "appointment_reminders",
-        _make_stub("appointment_reminders", "S12b"),
+        scheduler_jobs.appointment_reminders_handler(),
         IntervalTrigger(hours=6),
     )
 

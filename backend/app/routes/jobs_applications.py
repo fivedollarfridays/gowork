@@ -31,6 +31,7 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, ConfigDict
 
 from app.modules.common.temporal_types import JobApplicationStatus
+from app.modules.documents import _versions_db as _resume_versions  # T12.17 hook
 from app.modules.jobs import applications, funnel_analytics
 from app.modules.jobs.job_status_transitions import InvalidJobStatusTransition
 from app.modules.jobs.types import JobApplication
@@ -168,7 +169,7 @@ def create_application(
     db_path = _resolve_db_path()
     _h.verify_token(db_path, body.session_id, token)
     try:
-        return applications.create(
+        created = applications.create(
             body.session_id,
             match_source=body.match_source,
             match_url=body.match_url,
@@ -179,6 +180,14 @@ def create_application(
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+    # T12.17 hook: when an application links to a specific resume
+    # version, bump that version's ``use_counter``. Best-effort —
+    # ``increment_use_counter`` no-ops on a stale id rather than 500.
+    if body.resume_version_id is not None:
+        _resume_versions.increment_use_counter(
+            body.resume_version_id, db_path=db_path,
+        )
+    return created
 
 
 # -------------------- PATCH /{id} --------------------

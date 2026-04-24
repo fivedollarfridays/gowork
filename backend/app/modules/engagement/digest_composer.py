@@ -32,6 +32,7 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
+from app.modules.common.temporal_types import ModuleStatus
 from app.modules.engagement.digest_data import (
     collect_this_week,
     collect_today,
@@ -46,17 +47,25 @@ from app.modules.engagement.digest_sections import (
     render_yesterday_section,
 )
 from app.modules.engagement.stall_detector import compute_stall_for_session
+from app.modules.status_collector import collect_all as _collect_module_status
 
 _EMPTY_PLACEHOLDER = "Nothing new today — keep going."
 
 
 class DigestResult(BaseModel):
-    """Composed digest payload: subject + HTML + plaintext + section counts."""
+    """Composed digest payload: subject + HTML + plaintext + section counts.
+
+    ``module_status`` carries the T12.25b aggregated per-module health
+    list. The digest body does NOT render it today — the advisor-inbox
+    route (T12.31, Wave 2) consumes it downstream. Exposing it on the
+    result keeps the seam explicit without restructuring the composer.
+    """
 
     subject: str
     html: str
     text: str
     section_counts: dict[str, int]
+    module_status: list[ModuleStatus] = []
 
 
 def _subject_for(for_date: date) -> str:
@@ -161,6 +170,9 @@ def compose_digest(
         html=_render_html(first_name, sections),
         text=_render_text(first_name, sections),
         section_counts=_section_counts(sections),
+        module_status=_collect_module_status(
+            session_id, db_path=db_path, now=now,
+        ),
     )
 
 

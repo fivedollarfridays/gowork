@@ -19,6 +19,13 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+# Re-export the S12b worker-companion seed so callers can `from
+# app.demo_seed import seed_worker_companion_sessions` without reaching
+# into the spoke module. See `app.demo_seed_s12b` for the full docstring.
+from app.demo_seed_s12b import (  # noqa: F401  (public re-export)
+    seed_worker_companion_sessions,
+)
+
 # Fort Worth ZIP codes
 _FW_ZIPS = [
     "76102", "76103", "76104", "76105", "76106",

@@ -99,36 +99,42 @@ def _seed_session(
 
 
 def _install_sendgrid_spy(monkeypatch: pytest.MonkeyPatch) -> list[dict]:
-    """Monkeypatch send_transactional so the orchestrator never touches SMTP."""
+    """Monkeypatch reminder_engine.send_digest so the orchestrator never touches SMTP.
+
+    As of T12.19 the orchestrator routes every digest through
+    ``reminder_engine.send_digest`` (adds cooldown + opt-out + kill-switch
+    gating). The spy fakes its success path and records the call shape
+    the existing tests already asserted against (keyed by ``to``, ``subject``,
+    ``category``, ``session_id``).
+    """
     calls: list[dict] = []
 
-    def _fake_send(
-        to: str,
+    def _fake_send_digest(
+        session_id: str,
+        to_email: str,
         subject: str,
         html: str,
-        text_fallback: str,
-        category: str,
+        text: str,
         *,
-        session_id: str | None = None,
         db_path: Any = None,
+        now: Any = None,
     ):
         calls.append({
-            "to": to,
+            "to": to_email,
             "subject": subject,
-            "category": category,
+            "category": "digest",
             "session_id": session_id,
         })
-        # EmailSendResult is a dataclass-like object; return a minimal stub
-        from app.integrations.email.core import EmailSendResult
-        return EmailSendResult(
+        from app.modules.engagement.reminder_engine import ReminderDispatchResult
+        return ReminderDispatchResult(
             success=True,
-            message_id="mid-stub",
-            attempt_count=1,
             skipped_reason=None,
+            category="digest",
+            message_id="mid-stub",
         )
 
     import scripts.nightly_digest as nd
-    monkeypatch.setattr(nd, "send_transactional", _fake_send)
+    monkeypatch.setattr(nd, "send_digest", _fake_send_digest)
     return calls
 
 
@@ -388,23 +394,31 @@ async def test_accounting_fields_populated(
 
 
 @pytest.mark.anyio
-async def test_plan_refresh_stub_noop_marks_todo(
+async def test_plan_refresh_invokes_refresher(
     db_path: str,
     monkeypatch: pytest.MonkeyPatch,
-    caplog: pytest.LogCaptureFixture,
 ) -> None:
-    """Plan-refresh slot logs a TODO pointing to T12.24 and does not mutate state."""
+    """T12.24 — plan-refresh slot now calls plan_refresher.refresh_plan."""
     _seed_session(db_path, "sid-1")
     _install_compose_stub(monkeypatch)
     _install_retro_stub(monkeypatch)
     _install_sendgrid_spy(monkeypatch)
 
+    calls: list[str] = []
+
+    def _spy(session_id, *, db_path, now=None, trigger_reason=None):
+        calls.append(session_id)
+        from app.modules.plan.plan_refresher import RefreshResult
+        return RefreshResult(refreshed=False)
+
+    import scripts.nightly_digest as nd
+    monkeypatch.setattr(nd, "refresh_plan", _spy)
+
     from scripts.nightly_digest import run_nightly_digest
-    with caplog.at_level(logging.DEBUG, logger="scripts.nightly_digest"):
-        await run_nightly_digest(
-            cities=["montgomery"], db_path=db_path, now=_NOW,
-        )
-    assert any("T12.24" in r.message for r in caplog.records)
+    await run_nightly_digest(
+        cities=["montgomery"], db_path=db_path, now=_NOW,
+    )
+    assert calls == ["sid-1"]
 
 
 def test_scheduler_registration_still_fires(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -7,3 +7,28 @@ job_adapters:
   - twc
   - usajobs
 data_dir: data/cities/fort-worth
+
+# T12.8 — appointment_services: per-service booking windows consumed by
+# app/modules/appointments/availability.py. Hours are local (America/Chicago
+# for both MontGoWork cities). closed_days_of_week uses 0=Mon..6=Sun.
+# City-agnostic defaults for the S12b launch — Tarrant County / HHSC
+# office hours match the AL counterparts closely enough that we share the
+# schema. Per-city variance (e.g. DPS Saturday hours in TX) can be layered
+# in a later data-curation task without schema changes.
+appointment_services:
+  court_hearing:
+    duration_minutes: 60
+    hours_local: [["09:00", "12:00"], ["13:00", "16:00"]]
+    closed_days_of_week: [5, 6]
+  benefits_recert:
+    duration_minutes: 45
+    hours_local: [["08:30", "12:00"], ["13:00", "16:30"]]
+    closed_days_of_week: [5, 6]
+  dmv:
+    duration_minutes: 30
+    hours_local: [["08:30", "12:00"], ["13:00", "16:00"]]
+    closed_days_of_week: [5, 6]
+  childcare_intake:
+    duration_minutes: 45
+    hours_local: [["09:00", "12:00"], ["13:00", "16:00"]]
+    closed_days_of_week: [5, 6]
