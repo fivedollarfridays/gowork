@@ -431,6 +431,101 @@
     "noteForbidden": "Access denied for this session — it is not in your city.",
     "noteGenericError": "We could not send that note. Please try again."
   },
+  "footer": {
+    "entity": "MontGoWork (hackathon project)",
+    "tagline": "Workforce Navigator",
+    "navLabel": "Legal",
+    "privacy": "Privacy",
+    "terms": "Terms"
+  },
+  "privacy": {
+    "heading": "Privacy Policy",
+    "lastUpdated": "Last updated",
+    "counselNotice": "Hackathon-grade placeholder — this policy was authored fresh for the MontGoWork submission and has not been reviewed by counsel. Production rollout requires legal review.",
+    "seeAlso": "See also our",
+    "termsLink": "Terms of Service",
+    "esPlaceholder": "(Spanish-only placeholder string; never rendered when locale is English.)",
+    "collect": {
+      "heading": "What we collect",
+      "intro": "We collect only what we need to run the service. Specifically:"
+    },
+    "purpose": {
+      "heading": "Why we collect it"
+    },
+    "audience": {
+      "heading": "Who can see it"
+    },
+    "processors": {
+      "heading": "Third-party processors",
+      "intro": "We use a small set of vendors to deliver the service. They process data on our behalf (they are processors, not controllers) and are contractually bound to use it only for the purpose described."
+    },
+    "rights": {
+      "heading": "Your rights",
+      "intro": "You have the right to see, correct, and delete the data we hold about you, plus the right to know what we have. Each right has a one-click action in the app:"
+    },
+    "children": {
+      "heading": "Children"
+    },
+    "california": {
+      "heading": "California residents (CCPA)"
+    },
+    "security": {
+      "heading": "Security"
+    },
+    "changes": {
+      "heading": "Changes to this policy"
+    },
+    "contact": {
+      "heading": "Contact"
+    }
+  },
+  "terms": {
+    "heading": "Terms of Service",
+    "lastUpdated": "Last updated",
+    "counselNotice": "Hackathon-grade placeholder — these terms were authored fresh for the MontGoWork submission and have not been reviewed by counsel. Production rollout requires legal review.",
+    "seeAlso": "See also our",
+    "privacyLink": "Privacy Policy",
+    "esPlaceholder": "(Spanish-only placeholder string; never rendered when locale is English.)",
+    "eligibility": {
+      "heading": "Eligibility"
+    },
+    "service": {
+      "heading": "The service"
+    },
+    "account": {
+      "heading": "Your session (no traditional account)"
+    },
+    "acceptable": {
+      "heading": "Acceptable use"
+    },
+    "content": {
+      "heading": "Content you submit"
+    },
+    "ai": {
+      "heading": "AI-generated output"
+    },
+    "termination": {
+      "heading": "Termination"
+    },
+    "disclaimers": {
+      "heading": "Disclaimers"
+    },
+    "liability": {
+      "heading": "Liability cap"
+    },
+    "disputes": {
+      "heading": "Disputes"
+    },
+    "law": {
+      "heading": "Governing law"
+    },
+    "changes": {
+      "heading": "Changes to these terms"
+    },
+    "contact": {
+      "heading": "Contact"
+    }
+  },
   "errors": {
     "404": {
       "title": "Page not found",

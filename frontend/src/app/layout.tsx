@@ -5,6 +5,8 @@ import { MotionProvider } from '@/lib/motion';
 import { SmoothScroll } from '@/components/SmoothScroll';
 import { ScrollProgress } from '@/components/ScrollProgress';
 import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
+import { TranslationProvider } from '@/hooks/useTranslation';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { ViewTransitionsProvider } from '@/components/ViewTransitionsProvider';
 import './globals.css';
@@ -84,7 +86,12 @@ export default function RootLayout({
               <ViewTransitionsProvider>
                 <Header />
                 <ErrorBoundary>
-                  {children}
+                  <div className="flex min-h-[calc(100vh-3.5rem)] flex-col">
+                    <div className="flex-1">{children}</div>
+                    <TranslationProvider>
+                      <Footer />
+                    </TranslationProvider>
+                  </div>
                 </ErrorBoundary>
               </ViewTransitionsProvider>
             </SmoothScroll>

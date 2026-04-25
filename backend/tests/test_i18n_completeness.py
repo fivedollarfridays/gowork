@@ -51,6 +51,9 @@ IDENTICAL_PAIR_ALLOWLIST: dict[str, str] = {
     # 'Error:' is a Latinism shared by both languages with the same form
     # and identical inline-prefix usage in error UI strings.
     "credit.errorPrefix": "'Error:' is identical in EN/ES.",
+    # 'Legal' is the aria-label for the footer's legal-links nav. The word
+    # is a Latinism with identical surface form and meaning in EN/ES.
+    "footer.navLabel": "'Legal' is identical in EN/ES.",
 }
 
 
