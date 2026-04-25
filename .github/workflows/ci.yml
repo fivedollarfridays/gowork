@@ -89,9 +89,12 @@ jobs:
         run: npx vitest run
 
       - name: Build
-        run: npm run build
+        run: npm run build | tee /tmp/next-build.log
         env:
           NEXT_PUBLIC_API_URL: http://localhost:8000
+
+      - name: Bundle size check (T13.87)
+        run: node scripts/bundle-size-check.mjs --stdin < /tmp/next-build.log
 
   lighthouse:
     name: Lighthouse CI

@@ -81,18 +81,37 @@ async function readError(res: Response): Promise<string> {
   }
 }
 
+/** Per-request hard timeout (T13.92). 60s — PDF generation can be slow. */
+const REQUEST_TIMEOUT_MS = 60_000;
+
+async function _fetchWithTimeout(
+  path: string,
+  init?: RequestInit,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  try {
+    return await fetch(`${API_BASE}${path}`, {
+      ...init,
+      signal: init?.signal ?? controller.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 async function apiFetchJson<T>(path: string, init?: RequestInit): Promise<T> {
   const headers: Record<string, string> = {
     ...((init?.headers as Record<string, string>) ?? {}),
   };
   if (init?.body) headers["Content-Type"] = "application/json";
-  const res = await fetch(`${API_BASE}${path}`, { ...init, headers });
+  const res = await _fetchWithTimeout(path, { ...init, headers });
   if (!res.ok) throw new Error(await readError(res));
   return (await res.json()) as T;
 }
 
 async function apiFetchText(path: string, init?: RequestInit): Promise<string> {
-  const res = await fetch(`${API_BASE}${path}`, init);
+  const res = await _fetchWithTimeout(path, init);
   if (!res.ok) throw new Error(await readError(res));
   return res.text();
 }

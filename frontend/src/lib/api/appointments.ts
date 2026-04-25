@@ -31,19 +31,36 @@ export interface Appointment {
   notes: string | null;
 }
 
+/**
+ * Per-request hard timeout (T13.92). Surfaces an AbortError to the
+ * caller if the backend stops responding instead of letting the fetch
+ * hang indefinitely.
+ */
+const REQUEST_TIMEOUT_MS = 30_000;
+
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const headers: HeadersInit = { ...(init?.headers ?? {}) };
   if (init?.body) {
     (headers as Record<string, string>)["Content-Type"] = "application/json";
   }
-  const res = await fetch(`${API_BASE}${path}`, { ...init, headers });
-  if (!res.ok) {
-    const body = await res
-      .json()
-      .catch(() => ({ detail: res.statusText }));
-    throw new Error(body.detail || `API error ${res.status}`);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  try {
+    const res = await fetch(`${API_BASE}${path}`, {
+      ...init,
+      headers,
+      signal: init?.signal ?? controller.signal,
+    });
+    if (!res.ok) {
+      const body = await res
+        .json()
+        .catch(() => ({ detail: res.statusText }));
+      throw new Error(body.detail || `API error ${res.status}`);
+    }
+    return (await res.json()) as T;
+  } finally {
+    clearTimeout(timeoutId);
   }
-  return (await res.json()) as T;
 }
 
 function qs(params: Record<string, string | number>): string {

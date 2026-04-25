@@ -19,14 +19,26 @@ export default function SharedPlanPage() {
       setError(true);
       return;
     }
-    fetch(`${API_BASE}/api/plan/shared/${encodeURIComponent(params.token)}`)
+    // T13.92 — 30s hard timeout via AbortController.
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30_000);
+    fetch(`${API_BASE}/api/plan/shared/${encodeURIComponent(params.token)}`, {
+      signal: controller.signal,
+    })
       .then((res) => {
         if (!res.ok) throw new Error("Not found");
         return res.json();
       })
       .then((data) => setPlan(data))
       .catch(() => setError(true))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        clearTimeout(timeoutId);
+        setLoading(false);
+      });
+    return () => {
+      clearTimeout(timeoutId);
+      controller.abort();
+    };
   }, [params.token]);
 
   if (loading) {

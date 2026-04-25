@@ -11,6 +11,8 @@ from typing import TYPE_CHECKING
 
 import httpx
 
+from app.integrations._http_retry import async_get_with_retry
+
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -31,7 +33,8 @@ async def _fetch_twc_jobs(query: str, location: str) -> list[dict]:
         "page": "1",
     }
     async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
-        resp = await client.get(_TWC_SEARCH_URL, params=params)
+        # Idempotent GET: retry on 5xx + connect errors (T13.92).
+        resp = await async_get_with_retry(client, _TWC_SEARCH_URL, params=params)
         resp.raise_for_status()
         data = resp.json()
 
