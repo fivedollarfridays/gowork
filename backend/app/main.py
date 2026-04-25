@@ -1,7 +1,6 @@
 """MontGoWork API — Workforce Navigator (city-aware)."""
 
 import logging
-import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, Response
@@ -9,73 +8,50 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
-from app.ai.llm_client import check_llm_providers
 from app.cities.config import get_city_config
 from app.core.config import get_settings
 from app.core.database import close_db, get_async_session_factory, get_engine, init_db
 from app.core.exception_handlers import register_exception_handlers
-from app.core.scheduler import (
-    enforce_single_worker,
-    scheduler_state_summary,
-    shutdown_scheduler,
-    start_scheduler,
+from app.core.lifespan_helpers import (
+    log_startup_warnings,
+    register_db_listeners,
+    start_scheduler_with_guard,
+    stop_scheduler,
 )
-from app.modules.appointments.outcomes_listener import register_outcomes_listener
 from app.routes import all_routers
 
 logger = logging.getLogger(__name__)
 
 
-def _log_startup_warnings() -> dict:
-    """Log startup warnings and return LLM provider status."""
-    if not os.environ.get("ENVIRONMENT"):
-        logger.warning(
-            "ENVIRONMENT not set — defaulting to 'development'. "
-            "Set ENVIRONMENT explicitly for production deployments."
-        )
-    llm_status = check_llm_providers()
-    logger.info(
-        "LLM providers: %s (active: %s)",
-        llm_status["providers"], llm_status["active"],
-    )
-    if llm_status["active"] == "mock":
-        logger.warning("No LLM provider configured — using mock fallback")
-    web_concurrency = os.environ.get("WEB_CONCURRENCY", "1")
-    if web_concurrency.isdigit() and int(web_concurrency) > 1:
-        logger.warning(
-            "WEB_CONCURRENCY=%s — rate limiting is per-process and will not "
-            "be shared across workers. Consider using Redis-backed rate limit "
-            "or running a single worker.",
-            web_concurrency,
-        )
-    return llm_status
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Manage application lifespan."""
+    # Lazy imports avoid circular import + keep import count low.
+    # T13.118: env validation runs BEFORE any downstream code can
+    # silently default to a placeholder.
     from app.core.logging import configure_logging
-    configure_logging()
-    logger.info("MontGoWork API starting up")
-    get_settings()
+    from app.core.env_validation import validate_required_env
     from app.core.startup import run_seeds_and_rag
 
-    llm_status = _log_startup_warnings()
+    configure_logging()
+    logger.info("MontGoWork API starting up")
+    validate_required_env()
+    get_settings()
+
+    llm_status = log_startup_warnings()
     engine = get_engine()
     await init_db(engine)
-    register_outcomes_listener(settings.database_url.split(":///", 1)[-1])
+    register_db_listeners(settings.database_url)
     factory = get_async_session_factory()
     app.state.rag_store = await run_seeds_and_rag(factory)
     app.state.llm_status = llm_status
-    # APScheduler: single-worker hard constraint + lifecycle management.
-    # Multi-worker safety via scheduler_leases is deferred to S13 (T12.3).
-    enforce_single_worker()
-    start_scheduler()
-    logger.info(scheduler_state_summary())
+    # APScheduler: single-worker hard constraint + lifecycle.
+    # Multi-worker safety via scheduler_leases is deferred (T12.3).
+    start_scheduler_with_guard()
     try:
         yield
     finally:
-        shutdown_scheduler(wait=False)
+        stop_scheduler()
         await close_db()
         logger.info("MontGoWork API shutting down")
 

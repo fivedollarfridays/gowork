@@ -174,14 +174,19 @@ class TestStartupEnvironmentWarning:
             "providers": {"mock": "available"},
             "active": "mock",
         }
-        # Build env dict without ENVIRONMENT key
+        # Build env dict without ENVIRONMENT key but with the
+        # T13.118 required-on-boot vars so the validator doesn't
+        # short-circuit before we can observe the warning.
         clean_env = {k: v for k, v in os.environ.items() if k != "ENVIRONMENT"}
+        clean_env.setdefault("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
+        clean_env.setdefault("ADMIN_API_KEY", "x" * 32)
+        clean_env.setdefault("AUDIT_HASH_SALT", "test-salt-not-default")
         with patch("app.main.get_engine", return_value=mock_engine), \
              patch("app.main.init_db", new_callable=AsyncMock), \
              patch("app.main.close_db", new_callable=AsyncMock), \
              patch(_MOCK_SEEDS, new_callable=AsyncMock, return_value=MagicMock()), \
-             patch("app.main.check_llm_providers", return_value=mock_status), \
-             patch("app.main.logger") as mock_logger, \
+             patch("app.core.lifespan_helpers.check_llm_providers", return_value=mock_status), \
+             patch("app.core.lifespan_helpers.logger") as mock_logger, \
              patch.dict("os.environ", clean_env, clear=True):
             async with lifespan(app):
                 pass
@@ -202,9 +207,14 @@ class TestStartupEnvironmentWarning:
              patch("app.main.init_db", new_callable=AsyncMock), \
              patch("app.main.close_db", new_callable=AsyncMock), \
              patch(_MOCK_SEEDS, new_callable=AsyncMock, return_value=MagicMock()), \
-             patch("app.main.check_llm_providers", return_value=mock_status), \
-             patch("app.main.logger") as mock_logger, \
-             patch.dict("os.environ", {"ENVIRONMENT": "staging"}, clear=False):
+             patch("app.core.lifespan_helpers.check_llm_providers", return_value=mock_status), \
+             patch("app.core.lifespan_helpers.logger") as mock_logger, \
+             patch.dict("os.environ", {
+                 "ENVIRONMENT": "staging",
+                 "DATABASE_URL": "sqlite+aiosqlite:///:memory:",
+                 "ADMIN_API_KEY": "x" * 32,
+                 "AUDIT_HASH_SALT": "test-salt-not-default",
+             }, clear=False):
             async with lifespan(app):
                 pass
         warning_calls = [str(c) for c in mock_logger.warning.call_args_list]
