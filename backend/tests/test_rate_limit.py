@@ -108,36 +108,39 @@ class TestPlanGenerateRateLimit:
 
 
 class TestCreditAssessRateLimit:
-    """POST /api/credit/assess is rate limited."""
+    """POST /api/credit/assess is rate limited.
+
+    T13.99 tightened the credit limit from 10/60s to 5/60s to match
+    the LLM-expensive ``routes/plan.py`` value (the credit endpoint
+    burns paid outbound API calls). The fuller per-session test lives
+    in ``tests/test_credit_rate_limit.py``; this one keeps the
+    end-to-end smoke check against the live ``app.main.app``.
+    """
 
     @pytest.mark.asyncio
     async def test_credit_rate_limited(self):
-        from app.routes.credit import _rate_limiter
+        from app.routes.credit import _credit_rate_limiter
 
-        _rate_limiter.clear()
+        _credit_rate_limiter.clear()
+
+        payload = {
+            "credit_score": 620,
+            "utilization_percent": 30.0,
+            "total_accounts": 5,
+            "open_accounts": 3,
+            "negative_items": [],
+            "payment_history_percent": 90.0,
+            "oldest_account_months": 24,
+        }
 
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
-            # Send 10 requests (the limit) — they'll fail with 503 but still count
-            for _ in range(10):
-                await client.post("/api/credit/assess", json={
-                    "credit_score": 620,
-                    "utilization_percent": 30.0,
-                    "total_accounts": 5,
-                    "open_accounts": 3,
-                    "negative_items": [],
-                    "payment_history_percent": 90.0,
-                    "oldest_account_months": 24,
-                })
-            # 11th should be rate limited
-            resp = await client.post("/api/credit/assess", json={
-                "credit_score": 620,
-                "utilization_percent": 30.0,
-                "total_accounts": 5,
-                "open_accounts": 3,
-                "negative_items": [],
-                "payment_history_percent": 90.0,
-                "oldest_account_months": 24,
-            })
+            # Send 5 requests (the new tightened limit). They'll fail
+            # with 503 (no real upstream) but the limiter still counts
+            # them because it runs as a Depends() before the handler.
+            for _ in range(5):
+                await client.post("/api/credit/assess", json=payload)
+            # 6th should be rate limited.
+            resp = await client.post("/api/credit/assess", json=payload)
         assert resp.status_code == 429
-        _rate_limiter.clear()
+        _credit_rate_limiter.clear()

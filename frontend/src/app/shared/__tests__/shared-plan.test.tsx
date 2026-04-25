@@ -5,9 +5,9 @@ import { setLocale } from "@/lib/i18n";
 import { SharedPlanView, type SharedPlanData } from "../SharedPlanView";
 
 const SAMPLE_PLAN: SharedPlanData = {
-  session_id: "test-123",
+  // T13.71 P1 contract: no session_id, no raw barriers slugs.
   created_at: "2026-04-11",
-  barriers: ["credit", "transportation"],
+  barriers_count: 2,
   next_steps: [
     "Visit career center",
     "Update resume",
@@ -48,10 +48,13 @@ describe("SharedPlanView", () => {
     expect(screen.getByText("817-413-4400")).toBeInTheDocument();
   });
 
-  it("renders barrier labels", () => {
+  it("renders a non-PII focus-areas count instead of raw barrier slugs", () => {
     renderShared();
-    expect(screen.getByText(/credit/i)).toBeInTheDocument();
-    expect(screen.getByText(/transportation/i)).toBeInTheDocument();
+    // T13.71 P1: the public payload exposes a count, not the slug list.
+    expect(screen.getByText(/2 barriers identified/i)).toBeInTheDocument();
+    // Ensure no raw slugs leak through the UI
+    expect(screen.queryByText(/^credit$/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/^transportation$/i)).not.toBeInTheDocument();
   });
 
   it("shows invalid message when plan is null", () => {
@@ -65,8 +68,11 @@ describe("SharedPlanView", () => {
     expect(screen.getByText(/plan de accion compartido/i)).toBeInTheDocument();
   });
 
-  it("shows generation date", () => {
+  it("shows generation date formatted (no raw ISO microseconds)", () => {
     renderShared();
-    expect(screen.getByText(/2026-04-11/)).toBeInTheDocument();
+    // The component now formats the timestamp via toLocaleDateString — we just
+    // assert a 2026 year appears and the raw ISO string does NOT.
+    expect(screen.getByText(/2026/)).toBeInTheDocument();
+    expect(screen.queryByText(/T\d{2}:\d{2}:\d{2}/)).not.toBeInTheDocument();
   });
 });

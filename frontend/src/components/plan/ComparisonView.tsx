@@ -32,16 +32,20 @@ interface ComparisonRow {
 function buildRows(plan: ReEntryPlan, profile: UserProfile, creditResult?: CreditAssessmentResult | null): ComparisonRow[] {
   const rows: ComparisonRow[] = [];
 
-  // Barriers
+  // Barriers — only render if the user has active barriers; a "0 active →
+  // No barriers identified" row reads as a broken before/after for empty
+  // profiles (S13-T72).
   const activeBarriers = plan.barriers.length;
-  const highSeverity = plan.barriers.filter((b) => b.severity === "high").length;
-  rows.push({
-    label: "Barriers",
-    now: `${activeBarriers} active${highSeverity > 0 ? ` (${highSeverity} high severity)` : ""}`,
-    future: activeBarriers > 0 ? `${activeBarriers} addressed with action plans` : "No barriers identified",
-    nowIcon: <AlertCircle className="h-4 w-4 text-destructive" />,
-    futureIcon: <Check className="h-4 w-4 text-success" />,
-  });
+  if (activeBarriers > 0) {
+    const highSeverity = plan.barriers.filter((b) => b.severity === "high").length;
+    rows.push({
+      label: "Barriers",
+      now: `${activeBarriers} active${highSeverity > 0 ? ` (${highSeverity} high severity)` : ""}`,
+      future: `${activeBarriers} addressed with action plans`,
+      nowIcon: <AlertCircle className="h-4 w-4 text-destructive" />,
+      futureIcon: <Check className="h-4 w-4 text-success" />,
+    });
+  }
 
   // Jobs — prefer bucket counts; fall back to plan summary arrays or job_matches
   const strongCount = plan.strong_matches?.length ?? 0;
@@ -54,13 +58,17 @@ function buildRows(plan: ReEntryPlan, profile: UserProfile, creditResult?: Credi
   const eligibleAfter = plan.eligible_after_repair.length > 0
     ? plan.eligible_after_repair.length + eligibleNow
     : plan.job_matches.filter((j) => !j.eligible_now).length + eligibleNow;
-  rows.push({
-    label: "Job Matches",
-    now: `${eligibleNow} eligible now`,
-    future: `${eligibleAfter} eligible after plan completion`,
-    nowIcon: <Briefcase className="h-4 w-4 text-muted-foreground" />,
-    futureIcon: <Briefcase className="h-4 w-4 text-success" />,
-  });
+  // Skip the row entirely when both sides are zero — "0 eligible now → 0
+  // eligible after plan completion" is degenerate (S13-T72).
+  if (eligibleNow > 0 || eligibleAfter > 0) {
+    rows.push({
+      label: "Job Matches",
+      now: `${eligibleNow} eligible now`,
+      future: `${eligibleAfter} eligible after plan completion`,
+      nowIcon: <Briefcase className="h-4 w-4 text-muted-foreground" />,
+      futureIcon: <Briefcase className="h-4 w-4 text-success" />,
+    });
+  }
 
   // Credit
   if (profile.needs_credit_assessment) {
@@ -109,6 +117,13 @@ function buildRows(plan: ReEntryPlan, profile: UserProfile, creditResult?: Credi
 
 export function ComparisonView({ plan, profile, creditResult }: ComparisonViewProps) {
   const rows = useMemo(() => buildRows(plan, profile, creditResult), [plan, profile, creditResult]);
+
+  // When the user has no barriers, no eligible jobs, no credit-assessment
+  // need, and isn't transit-dependent, there's no meaningful before/after
+  // to show. Hide the section instead of rendering empty cards (S13-T72).
+  if (rows.length === 0) {
+    return null;
+  }
 
   return (
     <section className="space-y-4">
