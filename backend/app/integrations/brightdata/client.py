@@ -1,7 +1,18 @@
-"""Async HTTP client for BrightData Datasets API v3."""
+"""Async HTTP client for BrightData Datasets API v3.
+
+Retry policy (T13.92):
+* GET ``snapshot/{id}`` is idempotent — retried with exponential
+  backoff via :func:`app.integrations._http_retry.async_get_with_retry`.
+* POST ``trigger`` is non-idempotent (creates a job) — surfaced on
+  first failure, no retry.
+"""
 
 import httpx
 
+from app.integrations._http_retry import (
+    NoRetry5xxError,
+    async_get_with_retry,
+)
 from app.integrations.brightdata.types import (
     BrightDataAPIError,
     BrightDataConfigError,
@@ -69,11 +80,23 @@ class BrightDataClient:
         return resp.json()["snapshot_id"]
 
     async def get_snapshot_status(self, snapshot_id: str) -> CrawlProgress | CrawlResult:
-        """Check snapshot status. Returns CrawlProgress (202) or CrawlResult (200)."""
-        resp = await self._http.get(
-            f"{BASE_URL}/snapshot/{snapshot_id}",
-            params={"format": "json"},
-        )
+        """Check snapshot status. Returns CrawlProgress (202) or CrawlResult (200).
+
+        Uses :func:`async_get_with_retry` because polling is idempotent
+        and BrightData occasionally returns transient 502/503 during
+        edge maintenance.
+        """
+        try:
+            resp = await async_get_with_retry(
+                self._http,
+                f"{BASE_URL}/snapshot/{snapshot_id}",
+                params={"format": "json"},
+            )
+        except NoRetry5xxError as exc:
+            # Surface the upstream body so log diagnostics survive.
+            if exc.last_response is not None:
+                self._raise_api_error(exc.last_response)
+            raise BrightDataAPIError(exc.status_code, str(exc))
         if resp.status_code == 202:
             body = resp.json()
             return CrawlProgress(

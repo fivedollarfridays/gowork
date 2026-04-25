@@ -1,0 +1,27 @@
+{
+  "_meta": {
+    "captured_at": "2026-04-25",
+    "next_version": "15.5.9",
+    "first_load_js_routes": "Per-route First Load JS in KB; +10% over baseline triggers CI failure (T13.87).",
+    "regen_command": "cd frontend && NEXT_PUBLIC_API_URL=http://localhost:8000 npm run build, then copy the printed table into this file.",
+    "threshold_pct": 10,
+    "unit": "kB"
+  },
+  "routes": {
+    "/": 161,
+    "/admin/qc": 103,
+    "/appointments": 210,
+    "/assess": 190,
+    "/case-manager": 139,
+    "/credit": 165,
+    "/daily": 139,
+    "/documents/cover-letters": 139,
+    "/documents/resume": 138,
+    "/feedback/[token]": 127,
+    "/jobs": 152,
+    "/plan": 328,
+    "/privacy": 121,
+    "/shared/[token]": 129,
+    "/terms": 121
+  }
+}

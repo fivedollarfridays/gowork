@@ -54,6 +54,9 @@ async function readDetail(res: Response): Promise<string> {
   }
 }
 
+/** Per-request hard timeout (T13.92). */
+const REQUEST_TIMEOUT_MS = 30_000;
+
 async function advisorFetch<T>(
   path: string,
   token: string,
@@ -64,11 +67,21 @@ async function advisorFetch<T>(
     ...((init?.headers as Record<string, string>) ?? {}),
   };
   if (init?.body) headers["Content-Type"] = "application/json";
-  const res = await fetch(`${API_BASE}${path}`, { ...init, headers });
-  if (!res.ok) {
-    throw new AdvisorApiError(res.status, await readDetail(res));
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  try {
+    const res = await fetch(`${API_BASE}${path}`, {
+      ...init,
+      headers,
+      signal: init?.signal ?? controller.signal,
+    });
+    if (!res.ok) {
+      throw new AdvisorApiError(res.status, await readDetail(res));
+    }
+    return (await res.json()) as T;
+  } finally {
+    clearTimeout(timeoutId);
   }
-  return (await res.json()) as T;
 }
 
 export function listStalledSessions(
