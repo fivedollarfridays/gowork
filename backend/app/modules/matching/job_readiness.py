@@ -136,13 +136,47 @@ def _score_credit_readiness(
 _build_pathway = build_pathway
 
 
+def _is_profile_empty(
+    profile: UserProfile, parsed_resume: ParsedResume | None,
+) -> bool:
+    """Detect a session with no real assessment data.
+
+    An empty profile has zero work history, no resume content, no target
+    industries, and no barriers selected. Scoring such a profile produces
+    a misleading "developing — 41/100" band driven entirely by formula
+    defaults (no barriers => 100/100 Barrier Resolution, no credit barrier
+    => 100/100 Credit Readiness). Suppress instead.
+    """
+    has_work_history = bool(profile.work_history.strip())
+    has_industries = bool(profile.target_industries)
+    has_barriers = profile.barrier_count > 0
+    has_resume_content = bool(
+        parsed_resume and (
+            parsed_resume.skills
+            or parsed_resume.certifications
+            or parsed_resume.experience_keywords
+            or parsed_resume.word_count > 0
+        )
+    )
+    return not (
+        has_work_history or has_industries or has_barriers or has_resume_content
+    )
+
+
 def assess_job_readiness(
     profile: UserProfile,
     parsed_resume: ParsedResume | None,
     job_matches: list[ScoredJobMatch],
     credit_result: dict | None,
-) -> JobReadinessResult:
-    """Assess job readiness and return structured result."""
+) -> JobReadinessResult | None:
+    """Assess job readiness and return structured result.
+
+    Returns None for a fully-empty profile (no work history, resume,
+    industries, or barriers). The frontend hides the section in that case.
+    """
+    if _is_profile_empty(profile, parsed_resume):
+        return None
+
     scores = [
         _score_skills_match(parsed_resume, job_matches),
         _score_industry_alignment(profile, job_matches),

@@ -159,11 +159,13 @@ class TestFullDemoFlowE2E:
         assert len(share_token) > 10
 
         # -------- Step 5: Retrieve shared plan (public, no auth) --------
+        # Public payload is redacted (T13.71 P1): no session_id, no raw barriers.
         r_shared = await client.get(f"/api/plan/shared/{share_token}")
         assert r_shared.status_code == 200
         shared = r_shared.json()
-        assert shared["session_id"] == sid
-        assert len(shared["barriers"]) == 4
+        assert "session_id" not in shared
+        assert sid not in r_shared.text
+        assert shared["barriers_count"] == 4
         assert len(shared["next_steps"]) > 0
         assert shared["career_center_name"] != ""
 
@@ -254,14 +256,19 @@ class TestFullDemoFlowE2E:
         r_share = await client.post(f"/api/plan/{sid}/share?token={tok}")
         share_token = r_share.json()["share_token"]
 
-        # Retrieve shared
+        # Retrieve shared — public payload is redacted (T13.71 P1).
         r_shared = await client.get(f"/api/plan/shared/{share_token}")
         shared = r_shared.json()
 
-        # Barriers should match
-        assert set(shared["barriers"]) == set(barriers)
-        # Session ID should match
-        assert shared["session_id"] == sid
+        # Count must match without exposing the raw slugs
+        assert shared["barriers_count"] == len(barriers)
+        for slug in barriers:
+            assert slug not in r_shared.text, (
+                f"raw barrier slug {slug!r} leaked in shared response"
+            )
+        # session_id must NOT round-trip to the public payload
+        assert "session_id" not in shared
+        assert sid not in r_shared.text
 
     @pytest.mark.anyio
     async def test_pathway_with_benefits_profile(self, client, test_engine):
