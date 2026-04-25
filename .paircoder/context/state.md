@@ -31,9 +31,59 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
-- **T13.2 implemented (driver session, awaiting wave verification)**
-- **T13.5 done** — fake-clock harness for time-dependent tests
+- **Wave 0 complete (T13.1-T13.5 + T13.128 partial).** QC foundation in place: config + suite template + README, demo seed extension, reset CLI, axe-core install, fake-clock harness, staging deploy artifacts. End-to-end smoke verified: fresh DB → migrate → qc_reset wipes & reseeds 10 demo sessions in 2.76 ms. T13.128 needs `fly deploy` from a user-authed shell to complete (runbook ready). 5/128 tasks done; Tier-1 browser suite authoring (T13.10-T13.52) is unblocked.
+- **T13.3 done** — QC Reset CLI (`scripts/qc_reset.py`) wipes every demo-flagged row across the worker-companion schema and reseeds via the T13.2 factory in <5s. 16 tests across cycles 1-7. Wave 0B complete.
+- **T13.5 done** (auto-updated by hook)
+
+- **T13.4 done** (auto-updated by hook)
+
+- **T13.2 done** (auto-updated by hook)
+
+- **Wave 0A complete**: T13.2 + T13.4 + T13.5 done; T13.128 partial (runbook + scaffold landed; user runs `fly deploy`)
 - **T13.1 done** (auto-updated by hook)
+
+### 2026-04-24 — T13.3 driver session — QC Reset CLI
+
+Built `scripts/qc_reset.py` so QC suites can land on a deterministic demo baseline between runs.
+
+**Files created:**
+- `scripts/qc_reset.py` (183L) — CLI hub. `main(db_path, *, reseed, now)` returns `{"deleted": {table: count, ...}, "reseeded": bool, "sessions_after_reseed": int}`. Argparse layer accepts `--db-path` (defaults to `app.core.config.Settings.database_url`) and `--no-reseed`. Pretty-prints a per-table delete summary. Bootstraps `sys.path` so the script runs from the repo root or any cwd.
+- `scripts/_qc_reset_wipe.py` (134L) — pure-SQL wipe spoke. Single transaction; per-table delete helpers; demo-id discovery + `_advisor_audit` placeholder preservation.
+- `backend/tests/test_qc_reset.py` (454L) — 16 tests across 7 cycles (smoke, cascade, idempotency, non-demo sentinel, determinism, speed, CLI argparse).
+
+**Demo-scoped tables wiped (18):**
+- Session-keyed (cascade): `appointments`, `job_applications`, `resume_versions`, `daily_progress_snapshots`, `engagement_events`, `plan_history`, `outcomes_records`, `reminder_cooldowns`, `worker_unavailability`, `feedback_tokens`, `visit_feedback`, `resource_feedback`, `record_profiles`, `share_tokens`.
+- Hash-keyed: `compliance_audit` (filtered by `sha256(session_id)` for demo sessions).
+- Demo-prefix in shared tables: `advisor_tokens` (`advisor_id LIKE 'adv-demo-%'`), `sendgrid_events` (`message_id LIKE 'demo-%'`).
+- Direct `demo=1` filter: `sessions` (preserving `_advisor_audit` placeholder; its child engagement events are still wiped).
+
+**Non-demo guard:** every DELETE is scoped by `demo = 1` (excluding the placeholder), the demo-session-id list, or a deterministic `demo-` prefix. `used_tokens` (m004) intentionally not wiped — no session linkage and not seeded by the demo factory.
+
+**Test results:** 16/16 pass in 0.59s. Full demo-seed suite (43 tests across 4 files) also green — no regression.
+
+**Speed measured:** 2.76 ms for full reset+reseed on a populated demo DB (well under the 5s budget).
+
+**Acceptance criteria (T13.3 spec):**
+- `python scripts/qc_reset.py` truncates every `demo=1` scoped row (verified via `test_wipe_clears_every_demo_scoped_table`, `_compliance_audit_for_demo_sessions`, `_demo_advisor_tokens`, `_demo_sendgrid_events`).
+- Reseeds via T13.2 factory (`test_main_wipes_demo_sessions_and_reseeds`).
+- Idempotent: `test_reset_is_idempotent_on_clean_db` + `test_reset_twice_produces_stable_state`.
+- Does NOT touch non-demo data: `test_non_demo_session_and_children_survive_reset` + `test_non_demo_advisor_token_survives_reset` + `test_advisor_audit_placeholder_session_is_preserved`.
+- Runs in <5s: `test_reset_runs_under_five_seconds` (2.76 ms measured).
+- `bpsai-pair arch check` passes (zero errors; warnings only on file size — `qc_reset.py` 183L vs 150L tool default warning, well under the 400L project error limit per `.claude/rules/architecture.md`).
+
+**Wave 0B complete.** All 6 Wave 0/0A/0B foundation tasks now landed (T13.1, T13.2, T13.3, T13.4, T13.5; T13.128 still pending user `fly deploy`). Tier-1 browser suite authoring (T13.10–T13.52) unblocked.
+
+### 2026-04-24 — Wave 0A complete (T13.2 + T13.4 + T13.5 + T13.128 partial)
+
+Four driver agents ran in parallel against the foundation tasks:
+- T13.2: demo seed extension (compliance + weekly + advisor + reminders); +14 tests; module-status coverage assertion live.
+- T13.4: axe-core declared in frontend/package.json (was transitive only); 946 frontend tests pass.
+- T13.5: fake-clock harness via freezegun; 10 new tests; one existing test migrated as proof.
+- T13.128: deploy artifacts (Fly.io fly.toml, smoke script, runbook) — staging stand-up still requires `fly deploy` from a user-authed shell. Runbook AC checked; "deployed at URL" + "smoke 200s" ACs pending user action.
+
+Backend suite: 3267 pass / 2 pre-existing fails (test_contract_credit_api JWT, test_evidence_collector UTC midnight) — neither touched by Wave 0A. Frontend: 946/946.
+
+Wave 0A progress: 5/6 (T13.1 + T13.2 + T13.4 + T13.5 done; T13.128 partial). Wave 0B: T13.3 reset CLI is the last foundation piece.
 
 ### 2026-04-24 — T13.2 driver session — Demo Seed Extension (compliance + weekly + advisor + reminders)
 
