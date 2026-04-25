@@ -374,11 +374,14 @@ def test_idempotent_unsubscribe_does_not_double_audit(
 ) -> None:
     """Replaying an unsubscribe token writes exactly one audit row total.
 
-    The atomic INSERT into ``used_tokens`` (the single-use guard)
-    rejects the second call with 401, so the second write to
-    ``engagement_events`` must NOT fire. A regression here would look
-    like: the audit write fires BEFORE the dedup guard, so two audit
-    rows land before the replay rejection.
+    Updated for T13.61 — CAN-SPAM Section 5(a)(4) requires replay to
+    return 200 (not 401), but the *audit invariant* this test guards
+    is unchanged: the second write to ``engagement_events`` must NOT
+    fire. The atomic INSERT into ``used_tokens`` (the single-use guard)
+    routes the second call through the idempotent-replay branch, which
+    skips the duplicate audit row. A regression here would look like:
+    the audit write fires BEFORE the dedup guard, so two audit rows
+    land before the replay branch is reached.
     """
     where = (
         "category = 'reminders_auto_disabled' "
@@ -386,7 +389,7 @@ def test_idempotent_unsubscribe_does_not_double_audit(
     )
     before = row_count(audit_db, "engagement_events", where)
     s1, s2 = _replay_unsubscribe(audit_client, method="POST")
-    assert s1 == 200 and s2 == 401, f"got ({s1}, {s2})"
+    assert s1 == 200 and s2 == 200, f"got ({s1}, {s2})"
     after = row_count(audit_db, "engagement_events", where)
     assert after - before == 1, (
         f"Idempotent retry double-audited: delta={after - before}"
@@ -396,14 +399,19 @@ def test_idempotent_unsubscribe_does_not_double_audit(
 def test_idempotent_unsubscribe_get_does_not_double_audit(
     audit_client: TestClient, audit_db: str,
 ) -> None:
-    """GET (CAN-SPAM) handler shares the dedup guard — replay -> 401, no row."""
+    """GET (CAN-SPAM) handler is idempotent — replay -> 200, one audit row.
+
+    Updated for T13.61. The MTA + MUA combo can issue a prefetch GET
+    followed by a real GET on the same URL; both must succeed and
+    only one ``reminders_auto_disabled`` row may land.
+    """
     where = (
         "category = 'reminders_auto_disabled' "
         f"AND session_id = '{DEFAULT_SESSION_ID}'"
     )
     before = row_count(audit_db, "engagement_events", where)
     s1, s2 = _replay_unsubscribe(audit_client, method="GET")
-    assert s1 == 200 and s2 == 401, f"got ({s1}, {s2})"
+    assert s1 == 200 and s2 == 200, f"got ({s1}, {s2})"
     after = row_count(audit_db, "engagement_events", where)
     assert after - before == 1
 

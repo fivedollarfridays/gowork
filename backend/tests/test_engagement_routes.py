@@ -334,10 +334,17 @@ def test_unsubscribe_invalid_token_401(client: TestClient) -> None:
     assert resp.status_code == 401
 
 
-def test_unsubscribe_replay_401(
+def test_unsubscribe_replay_idempotent_200(
     client: TestClient, db_path: str,
 ) -> None:
-    """Second use of the same unsubscribe token is rejected."""
+    """CAN-SPAM idempotency: replaying the same valid token returns 200.
+
+    Updated for T13.61 — the unsubscribe handler must NOT 401 a
+    duplicate click (or MUA prefetch + click race) on a token whose
+    signature and expiry are both still valid. The first call writes
+    the opt-out row; the replay returns the same 200 shape but does
+    not add a second ``reminders_auto_disabled`` row.
+    """
     from app.modules.engagement import unsubscribe_tokens
 
     token = unsubscribe_tokens.sign(_SESSION_A)
@@ -348,7 +355,22 @@ def test_unsubscribe_replay_401(
     second = client.post(
         "/api/engagement/unsubscribe", json={"token": token},
     )
-    assert second.status_code == 401
+    assert second.status_code == 200, second.text
+    assert second.json() == {
+        "session_id": _SESSION_A,
+        "reminders_enabled": False,
+    }
+    # Single opt-out row preserved across replay.
+    conn = sqlite3.connect(db_path)
+    try:
+        count = conn.execute(
+            "SELECT COUNT(*) FROM engagement_events "
+            "WHERE session_id = ? AND category = 'reminders_auto_disabled'",
+            (_SESSION_A,),
+        ).fetchone()[0]
+    finally:
+        conn.close()
+    assert count == 1
 
 
 def test_unsubscribe_blocks_reminder_engine(
@@ -390,17 +412,36 @@ def test_unsubscribe_get_invalid_token_uniform_401(
     assert resp.status_code == 401
 
 
-def test_unsubscribe_get_replay_401(
+def test_unsubscribe_get_replay_idempotent_200(
     client: TestClient, db_path: str,
 ) -> None:
-    """Second GET on the same token is rejected (single-use enforcement)."""
+    """CAN-SPAM idempotent GET: replay returns 200, no second opt-out row.
+
+    Updated for T13.61. CAN-SPAM Section 5(a)(4) requires unsubscribe
+    URLs to be idempotent — email clients (and link-checkers like
+    Outlook Safe Links) often prefetch and then re-fetch on click.
+    """
     from app.modules.engagement import unsubscribe_tokens
 
     token = unsubscribe_tokens.sign(_SESSION_A)
     first = client.get(f"/api/engagement/unsubscribe?token={token}")
     assert first.status_code == 200
     second = client.get(f"/api/engagement/unsubscribe?token={token}")
-    assert second.status_code == 401
+    assert second.status_code == 200, second.text
+    assert second.json() == {
+        "session_id": _SESSION_A,
+        "reminders_enabled": False,
+    }
+    conn = sqlite3.connect(db_path)
+    try:
+        count = conn.execute(
+            "SELECT COUNT(*) FROM engagement_events "
+            "WHERE session_id = ? AND category = 'reminders_auto_disabled'",
+            (_SESSION_A,),
+        ).fetchone()[0]
+    finally:
+        conn.close()
+    assert count == 1
 
 
 # -------------------- Router registration --------------------

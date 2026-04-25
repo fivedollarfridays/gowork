@@ -42,7 +42,13 @@ _ACTION = "unsubscribe"
 
 
 class TokenError(ValueError):
-    """Base class — the unsubscribe route converts every subclass to 401."""
+    """Base class for unsubscribe-token failures.
+
+    The route layer maps :class:`TokenInvalid` and :class:`TokenExpired`
+    to a uniform 401 (no enumeration oracle); :class:`TokenAlreadyUsed`
+    is treated as an idempotent success per CAN-SPAM Section 5(a)(4)
+    (see ``app.routes.engagement._process_unsubscribe``).
+    """
 
 
 class TokenInvalid(TokenError):
@@ -54,7 +60,18 @@ class TokenExpired(TokenError):
 
 
 class TokenAlreadyUsed(TokenError):
-    """Signature valid but the token has already been consumed (replay)."""
+    """Signature valid but the token has already been consumed (replay).
+
+    The :attr:`session_id` attribute carries the *authenticated* session
+    id (signature + ``exp`` were both verified before this exception was
+    raised) so that idempotent callers — notably the unsubscribe route,
+    which must satisfy CAN-SPAM by returning 200 on duplicate clicks —
+    can return a successful response without a second decode pass.
+    """
+
+    def __init__(self, message: str, *, session_id: str | None = None) -> None:
+        super().__init__(message)
+        self.session_id = session_id
 
 
 # ----------------------------------------------------------------- helpers
@@ -216,6 +233,8 @@ def _consume_or_raise(
         )
         conn.commit()
         if cursor.rowcount != 1:
-            raise TokenAlreadyUsed("token already consumed")
+            raise TokenAlreadyUsed(
+                "token already consumed", session_id=session_id,
+            )
     finally:
         conn.close()
