@@ -33,7 +33,8 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 - **T13.3 done** (auto-updated by hook)
 
-- **Wave 0 complete (T13.1-T13.5 + T13.128 partial).** QC foundation in place: config + suite template + README, demo seed extension, reset CLI, axe-core install, fake-clock harness, staging deploy artifacts. End-to-end smoke verified: fresh DB → migrate → qc_reset wipes & reseeds 10 demo sessions in 2.76 ms. T13.128 needs `fly deploy` from a user-authed shell to complete (runbook ready). 5/128 tasks done; Tier-1 browser suite authoring (T13.10-T13.52) is unblocked.
+- **T13.128 staging environment LIVE on Fly.io** — https://montgowork-staging-api.fly.dev (backend, 2GB) + https://montgowork-staging-web.fly.dev (frontend). 7 migrations applied to volume DB; 10 demo sessions seeded. Smoke 15/19 PASS — 4 sub-fix findings logged (RAG index, admin/flags route path, /documents + /feedback Next.js pages). Two real fixes shipped in deploy: Dockerfile `COPY cities /cities`, backend memory 512mb→2gb.
+- **Wave 0 complete (T13.1-T13.5 + T13.128).** QC foundation in place: config + suite template + README, demo seed extension, reset CLI, axe-core install, fake-clock harness, staging deploy artifacts. End-to-end smoke verified: fresh DB → migrate → qc_reset wipes & reseeds 10 demo sessions in 2.76 ms. 6/128 tasks done; Tier-1 browser suite authoring (T13.10-T13.52) is unblocked.
 - **T13.3 done** — QC Reset CLI (`scripts/qc_reset.py`) wipes every demo-flagged row across the worker-companion schema and reseeds via the T13.2 factory in <5s. 16 tests across cycles 1-7. Wave 0B complete.
 - **T13.5 done** (auto-updated by hook)
 
