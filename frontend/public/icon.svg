@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="MontGoWork">
+  <title>MontGoWork</title>
+  <rect width="512" height="512" rx="96" fill="#1c3461"/>
+  <g fill="none" stroke="#2a9d8f" stroke-width="40" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Stylized "M" + path mark: two upright strokes with a forward arrow,
+         evoking "go to work". -->
+    <polyline points="112,384 112,160 192,288 272,160 272,384"/>
+    <polyline points="320,256 400,256 360,216 M400,256 360,296" stroke="#f4c66d"/>
+  </g>
+</svg>

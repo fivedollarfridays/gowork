@@ -92,6 +92,41 @@ Use `restrictions.skip_tags` in `config.yaml` to exclude tags per environment.
 
 ---
 
+## Divona vs. Playwright — when to use which
+
+Two QC runners share this directory of suites. Pick the right one for the job:
+
+| Runner     | Use when                                                                                            |
+|------------|-----------------------------------------------------------------------------------------------------|
+| divona     | Authoring a new suite (interactive, visible Chrome); broad coverage; flows that need human visual judgment; ad-hoc triage |
+| Playwright | CI gate (every PR); top-five critical paths; headless, fast, parallel; deterministic regression detection |
+
+### Source-of-truth contract
+
+The `.qc.yaml` file is **canonical** — it documents the flow, the demo session
+ID, the assertions, and the expected outcomes. Divona reads it directly.
+
+Playwright equivalents live in `frontend/e2e/<suite-id>.spec.ts` and are
+maintained in **lockstep** with the `.qc.yaml`. When you change a `.qc.yaml`,
+you must update the matching Playwright spec in the same PR (and vice versa).
+Drift between the two is a CI failure once T13.125 lands.
+
+### Adding a new Playwright spec
+
+1. Create `frontend/e2e/<suite-id>.spec.ts` mirroring the `.qc.yaml`.
+2. Wrap the suite in `test.describe("@critical <suite-name>", ...)` so the
+   PR-gating CI run picks it up via `--grep "@critical"`.
+3. Use the same demo session IDs from `.paircoder/qc/config.yaml`
+   (`test_credentials.*`); never hardcode.
+4. Run locally to confirm: `cd frontend && npm run test:e2e -- --grep "@critical"`.
+5. Keep the spec under 200 lines; split into multiple specs if the flow
+   grows beyond that (one user journey per file).
+
+Only the **top-five** critical paths should carry `@critical`. Broader
+coverage stays in divona where author intent and visual judgment matter.
+
+---
+
 ## How to invoke
 
 ### Via divona (interactive, full coverage)
@@ -109,15 +144,34 @@ Or direct agent dispatch when authoring a new suite:
 Divona will load the suite, check preconditions, run scenarios step-by-step in
 Chrome, and write a JSON report to `.paircoder/qc/runs/`.
 
-### Via Playwright (headless, CI gate — once T13.129 lands)
+### Via Playwright (headless, CI gate)
+
+Set up once per checkout (T13.129 lands the harness):
 
 ```
-cd frontend && npx playwright test --grep "@critical"
+cd frontend && npm install && npx playwright install chromium
 ```
 
-Playwright suites mirror a subset of `.qc.yaml` suites tagged `@critical`.
-Authoring a `.qc.yaml` is the source of truth; the Playwright equivalent is
-generated/maintained in lockstep.
+Then run the PR-gating subset:
+
+```
+cd frontend && npm run test:e2e -- --grep "@critical"
+```
+
+Or run everything:
+
+```
+cd frontend && npm run test:e2e
+```
+
+Other modes:
+- `npm run test:e2e:headed` — watch tests in a visible browser
+- `npm run test:e2e:debug` — step through tests in Playwright Inspector
+
+Playwright auto-starts `next dev` on port 3000 (see
+`frontend/playwright.config.ts.webServer`); reuses an existing dev server when
+one is already running locally. CI starts a fresh server (`reuseExistingServer:
+false` when `CI` is set).
 
 ### Smoke-load (just verify a suite parses)
 

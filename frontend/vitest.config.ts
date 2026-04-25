@@ -8,6 +8,10 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./vitest.setup.ts"],
+    // Playwright owns the `e2e/` tree (T13.129). Vitest default-matches
+    // `**/*.spec.ts`, which would otherwise try to load Playwright's
+    // `test`/`expect` bindings inside jsdom and crash.
+    exclude: ["**/node_modules/**", "**/dist/**", "**/.next/**", "e2e/**"],
   },
   resolve: {
     alias: {
