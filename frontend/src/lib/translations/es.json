@@ -431,6 +431,101 @@
     "noteForbidden": "Acceso denegado: esta sesión no pertenece a tu ciudad.",
     "noteGenericError": "No se pudo enviar la nota. Inténtalo de nuevo."
   },
+  "footer": {
+    "entity": "MontGoWork (proyecto de hackatón)",
+    "tagline": "Navegador laboral",
+    "navLabel": "Legal",
+    "privacy": "Privacidad",
+    "terms": "Términos"
+  },
+  "privacy": {
+    "heading": "Política de Privacidad",
+    "lastUpdated": "Última actualización",
+    "counselNotice": "Marcador de posición a nivel de hackatón: esta política fue redactada para la entrega de MontGoWork y no ha sido revisada por un abogado. El lanzamiento a producción requiere revisión legal.",
+    "seeAlso": "Consulta también nuestros",
+    "termsLink": "Términos del Servicio",
+    "esPlaceholder": "Esta política de privacidad está disponible en inglés. La traducción al español está en desarrollo y se publicará antes del lanzamiento a producción. Mientras tanto, puedes contactarnos para obtener un resumen en español de tus derechos sobre tus datos.",
+    "collect": {
+      "heading": "Qué recopilamos",
+      "intro": "Solo recopilamos lo necesario para operar el servicio. En concreto:"
+    },
+    "purpose": {
+      "heading": "Por qué lo recopilamos"
+    },
+    "audience": {
+      "heading": "Quién puede verlo"
+    },
+    "processors": {
+      "heading": "Procesadores externos",
+      "intro": "Usamos un pequeño conjunto de proveedores para operar el servicio. Procesan los datos en nuestro nombre (son procesadores, no controladores) y están obligados contractualmente a usarlos solo para el fin descrito."
+    },
+    "rights": {
+      "heading": "Tus derechos",
+      "intro": "Tienes derecho a ver, corregir y eliminar los datos que conservamos sobre ti, además del derecho a saber qué tenemos. Cada derecho tiene una acción de un clic en la aplicación:"
+    },
+    "children": {
+      "heading": "Menores"
+    },
+    "california": {
+      "heading": "Residentes de California (CCPA)"
+    },
+    "security": {
+      "heading": "Seguridad"
+    },
+    "changes": {
+      "heading": "Cambios a esta política"
+    },
+    "contact": {
+      "heading": "Contacto"
+    }
+  },
+  "terms": {
+    "heading": "Términos del Servicio",
+    "lastUpdated": "Última actualización",
+    "counselNotice": "Marcador de posición a nivel de hackatón: estos términos fueron redactados para la entrega de MontGoWork y no han sido revisados por un abogado. El lanzamiento a producción requiere revisión legal.",
+    "seeAlso": "Consulta también nuestra",
+    "privacyLink": "Política de Privacidad",
+    "esPlaceholder": "Estos términos del servicio están disponibles en inglés. La traducción al español está en desarrollo y se publicará antes del lanzamiento a producción.",
+    "eligibility": {
+      "heading": "Elegibilidad"
+    },
+    "service": {
+      "heading": "El servicio"
+    },
+    "account": {
+      "heading": "Tu sesión (sin cuenta tradicional)"
+    },
+    "acceptable": {
+      "heading": "Uso aceptable"
+    },
+    "content": {
+      "heading": "Contenido que envías"
+    },
+    "ai": {
+      "heading": "Contenido generado por IA"
+    },
+    "termination": {
+      "heading": "Terminación"
+    },
+    "disclaimers": {
+      "heading": "Renuncias"
+    },
+    "liability": {
+      "heading": "Límite de responsabilidad"
+    },
+    "disputes": {
+      "heading": "Disputas"
+    },
+    "law": {
+      "heading": "Ley aplicable"
+    },
+    "changes": {
+      "heading": "Cambios a estos términos"
+    },
+    "contact": {
+      "heading": "Contacto"
+    }
+  },
   "errors": {
     "404": {
       "title": "Página no encontrada",
