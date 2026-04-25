@@ -358,5 +358,19 @@
     "noteRateLimited": "Límite alcanzado: demasiadas notas en la última hora. Inténtalo más tarde.",
     "noteForbidden": "Acceso denegado: esta sesión no pertenece a tu ciudad.",
     "noteGenericError": "No se pudo enviar la nota. Inténtalo de nuevo."
+  },
+  "errors": {
+    "404": {
+      "title": "Página no encontrada",
+      "body": "La página que buscas no existe o fue movida. Vamos a regresarte al camino.",
+      "cta_home": "Volver al inicio",
+      "cta_daily": "Abrir mi plan diario"
+    },
+    "500": {
+      "title": "Algo salió mal",
+      "body": "Tuvimos un problema inesperado. La solicitud fue registrada y nuestro equipo lo revisará. Puedes intentar de nuevo o volver al inicio.",
+      "cta_retry": "Intentar de nuevo",
+      "cta_home": "Volver al inicio"
+    }
   }
 }

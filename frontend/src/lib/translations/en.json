@@ -358,5 +358,19 @@
     "noteRateLimited": "Rate limit hit: too many notes in the past hour. Try again later.",
     "noteForbidden": "Access denied for this session — it is not in your city.",
     "noteGenericError": "We could not send that note. Please try again."
+  },
+  "errors": {
+    "404": {
+      "title": "Page not found",
+      "body": "The page you were looking for doesn't exist or has moved. Let's get you back on track.",
+      "cta_home": "Back to home",
+      "cta_daily": "Open my daily plan"
+    },
+    "500": {
+      "title": "Something went wrong",
+      "body": "We hit an unexpected snag. The request was logged and our team will take a look. You can try again or head back home.",
+      "cta_retry": "Try again",
+      "cta_home": "Back to home"
+    }
   }
 }
