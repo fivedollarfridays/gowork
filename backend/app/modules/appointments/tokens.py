@@ -43,6 +43,15 @@ _SECRET_ENV_VAR = "APPOINTMENT_TOKEN_SECRET"
 _SECRET_OLD_ENV_VAR = "APPOINTMENT_TOKEN_SECRET_OLD"
 _DEFAULT_TTL_SEC = 7 * 24 * 3600  # 7 days
 
+# Documented overlap window — see appointment-token-rotation.md §2.
+# Equal to the default TTL: any pre-rotation token expires during the
+# overlap, so retiring OLD on day 7 cannot strand a worker.
+KEY_ROTATION_OVERLAP_DAYS = 7
+
+# Kid values the verifier will route to a secret pool. Unknown kids are
+# rejected outright — no fall-through to "try every active secret".
+_KNOWN_KIDS = frozenset({"current", "old"})
+
 
 class TokenAction(str, Enum):
     """Actions a manage-link token authorises."""
@@ -191,12 +200,10 @@ def verify(
 def _decode_and_verify_signature(token: str) -> dict:
     """Return the decoded payload dict or raise TokenInvalid.
 
-    Tries every active secret and accepts the first HMAC match. The
-    payload's ``kid`` is a hint only — we do not short-circuit on it
-    during rotation, because tokens minted just before the cutover
-    carry ``kid="current"`` but were signed with what is now OLD. If
-    ``kid="old"`` the pool is narrowed to the OLD secret and fails
-    closed when OLD is unset.
+    Per-kid secret pool: ``kid="old"`` -> OLD only (missing OLD fails
+    closed); ``kid="current"`` -> every active secret so a token signed
+    seconds before the operator promotes a new secret still verifies
+    under what is now OLD; unknown kid -> reject up front.
     """
     if not token or not isinstance(token, str) or token.count(".") != 1:
         raise TokenInvalid("token must be <encoded>.<signature>")
@@ -209,14 +216,12 @@ def _decode_and_verify_signature(token: str) -> dict:
     if not isinstance(payload, dict):
         raise TokenInvalid("payload must be a JSON object")
     payload_kid = payload.get("kid", "current")
+    if payload_kid not in _KNOWN_KIDS:
+        raise TokenInvalid("unknown kid")
     active = _active_secrets()
-    # If the token declares kid="old", only the OLD secret should match;
-    # missing OLD -> fail closed. Any other kid ("current" or unknown)
-    # falls through to the try-all path so rotating secrets works.
     candidates = (
         [(k, s) for k, s in active if k == "old"]
-        if payload_kid == "old"
-        else active
+        if payload_kid == "old" else active
     )
     for _kid, secret in candidates:
         expected_sig = _compute_sig(secret, encoded)

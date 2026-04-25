@@ -233,10 +233,26 @@ def send_now(
 
 
 def _process_unsubscribe(token: str) -> dict:
-    """Verify unsubscribe token and write opt-out row."""
+    """Verify unsubscribe token and write opt-out row.
+
+    CAN-SPAM Section 5(a)(4) requires unsubscribe links to be idempotent
+    — duplicate clicks (or a prefetch + click race from the same MUA)
+    must NOT 401. ``TokenAlreadyUsed`` means the signature and expiry
+    were already validated, so the duplicate caller is authentic; we
+    return 200 without re-inserting the opt-out row. ``TokenInvalid``
+    and ``TokenExpired`` keep the uniform 401 contract (no oracle).
+    """
     db_path = _resolve_db_path()
     try:
         session_id = unsubscribe_tokens.verify(token, db_path=db_path)
+    except unsubscribe_tokens.TokenAlreadyUsed as exc:
+        # Authenticated replay: the verify-stage barrier already
+        # produced the opt-out row on the winning request. Return the
+        # same 200 shape the original caller saw.
+        return {
+            "session_id": exc.session_id or "",
+            "reminders_enabled": False,
+        }
     except unsubscribe_tokens.TokenError:
         logger.debug("unsubscribe-token rejected", exc_info=True)
         raise HTTPException(
