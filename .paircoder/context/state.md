@@ -31,6 +31,7 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+- **Wave 6 fix-wave (2026-04-25)** — 6 hackathon-critical findings closed: F1 share-endpoint PII redaction (T13.71 P1; barriers_count scalar replaces raw barriers, career_center fields resolved from profile); F2 documents+credit rate limits (T13.99 HIGH; 5/60s session-keyed); F3 centralized PII log scrubber (T13.94; structlog processor + career_center.py refactor); F4 /plan empty-state UX (T13.72; job_readiness returns None for empty profiles, ComparisonView skips degenerate rows); F5 ES translation pass (T13.77 HIGH/MED; 67 new keys + 4 accent fixes across home/credit/plan/assess); F6 Dependabot config (T13.104). Test deltas: backend 3975→4012 (+37); frontend 1049→1055 (+6).
 - **T13.104 done** (auto-updated by hook)
 
 - **T13.102 done** (auto-updated by hook)
