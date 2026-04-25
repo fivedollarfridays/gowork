@@ -17,3 +17,6 @@ apscheduler==3.11.2
 sendgrid==6.11.0
 weasyprint==68.0
 markdown==3.8.1
+
+# Test-only dependencies (deterministic time control — see tests/_fake_clock.py)
+freezegun==1.5.5
