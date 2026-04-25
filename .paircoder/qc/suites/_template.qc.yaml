@@ -1,0 +1,104 @@
+# MontGoWork QC suite template.
+#
+# Copy this file to `<flow-name>.qc.yaml` (kebab-case) and fill in the fields.
+# Lines beginning with `#` are documentation -- delete them in real suites.
+#
+# Reference:
+#   - Step type reference: .claude/agents/divona.md
+#   - Authoring conventions: .paircoder/qc/suites/README.md
+#   - Environment config: .paircoder/qc/config.yaml
+
+# ---- Required: top-level identification --------------------------------------
+
+suite_name: <Human-readable suite name>          # e.g. "Worker Onboarding"
+suite_id: <kebab-case-id>                        # e.g. "worker-onboarding"
+                                                  # Must match the filename.
+description: |
+  One paragraph describing what this suite verifies, what user role(s) it
+  exercises, and what part of the platform it covers. Read by triage agents
+  when failures appear.
+
+# ---- Required: environment + tags --------------------------------------------
+
+environment: dev                                  # dev | staging | prod
+                                                  # Resolved against
+                                                  # .paircoder/qc/config.yaml.
+
+tags:                                             # Used for filtering by the
+  - worker                                        # runner (e.g. skip "mutates"
+  - happy-path                                    # in prod). See README for
+                                                  # canonical tag list.
+
+# ---- Required: preconditions -------------------------------------------------
+# Each precondition is checked BEFORE any scenario runs. If any fails, the
+# suite is reported as SKIPPED with the unmet precondition as the reason.
+
+preconditions:
+  - description: Frontend reachable
+    check: "GET ${frontend_url}/ returns 200"
+  - description: Backend reachable
+    check: "GET ${backend_url}/api/health returns 200"
+  - description: Demo data seeded
+    check: "Session ${test_credentials.worker_montgomery} exists in DB"
+
+# ---- Required: scenarios -----------------------------------------------------
+# A scenario is a sequence of steps. Each step is one of: navigate, verify,
+# click, fill, check_console, wait. Scenarios run in declared order; a failed
+# step fails the scenario but the next scenario still runs.
+#
+# Steps that ASSERT (verify, check_console) produce pass/fail evidence.
+# Steps that ACT (navigate, click, fill, wait) drive the browser. Every
+# scenario must end with at least one assertion -- a scenario with only
+# actions and no assertions is meaningless.
+
+scenarios:
+
+  - name: <Scenario name>                         # e.g. "Worker completes intake"
+    description: |
+      What this scenario proves end-to-end. Future maintainers triage
+      failures faster when this is specific.
+
+    # Optional: per-scenario tags layered on top of suite-level tags.
+    tags:
+      - happy-path
+
+    # Setup: any state mutation needed before this scenario, beyond what
+    # the suite-level seed provides. Optional.
+    setup:
+      - navigate: "${frontend_url}/onboarding?session=${test_credentials.worker_montgomery}"
+      - verify: "Onboarding form visible with city selector"
+
+    # Steps: the actual scenario.
+    steps:
+      - fill:
+          field: "City"
+          value: "Montgomery"
+      - fill:
+          field: "Primary barrier"
+          value: "Transportation"
+      - click: "Continue"
+      - verify: "Plan generation in progress indicator visible"
+      - wait: "3"
+      - verify: "First-pass plan rendered with at least one action"
+      - check_console: "No errors or warnings"
+
+    # Cleanup: anything this scenario must undo. The suite-level cleanup
+    # runs AFTER all scenarios. Use scenario-cleanup only for state that
+    # would block the NEXT scenario.
+    cleanup: []
+
+# ---- Optional: suite-level cleanup -------------------------------------------
+# Runs after all scenarios complete (regardless of pass/fail).
+# Most suites should rely on `bpsai-pair qc reset` between full QC runs and
+# leave cleanup empty here.
+
+cleanup:
+  - description: "QC reset reseeds demo data; no per-suite cleanup needed."
+
+# ---- Optional: visual regression assertions ----------------------------------
+# When T13.6 visual-regression infra is in place, individual scenarios may add
+# `screenshot:` steps that diff against .paircoder/qc/baselines/<suite-id>/.
+
+# ---- Reporting ---------------------------------------------------------------
+# The runner writes JSON results to .paircoder/qc/runs/<suite-id>-<timestamp>.json
+# Format documented in .claude/agents/divona.md (Structured Output Format).

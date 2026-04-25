@@ -4,12 +4,12 @@
 
 ## Active Plan
 
-**Plan:** plan-2026-04-s12b-value-extensions
-**Type:** feature
-**Title:** Worker Companion Value Extensions — production GA unblocker
-**Status:** Complete (25/25 tasks done) — production GA UNBLOCKED
-**Branch:** `sprint/s12b-value-extensions`
-**Current Sprint:** S12b
+**Plan:** plan-2026-04-s13-platform-qc
+**Type:** chore
+**Title:** S13 — Platform-Wide QC + Submission Readiness
+**Status:** Planned + decisions locked (0/128 tasks, 1,545 Cx, ~692K token estimate)
+**Branch:** not yet cut
+**Current Sprint:** S13
 
 ## Previous Sprints (summary)
 
@@ -30,6 +30,16 @@
 Older sprint task tables and session histories (Sprints 7 — 31) are in `.paircoder/archive/state-pre-s1.md`. S12a per-session entries plus S2 — S11 detail are in `.paircoder/archive/state-s12a.md`.
 
 ## What Was Just Done
+
+### 2026-04-24 — S13 QC + Submission Readiness planned (/pc-plan)
+
+Authored `plans/backlogs/backlog-sprint-s13-platform-qc.md` (126 tasks across 12 phases, 1,497 Cx, dry-run clean). Created plan `plan-2026-04-s13-platform-qc` and registered all 126 tasks with full task files under `.paircoder/tasks/T13.*.task.md`.
+
+**Scope:** QC infra (8), Tier-1 browser suites (43 — worker 30 / advisor 5 / admin 4 / unauth 4), Tier-2 backend e2e (18), Tier-3 exploratory sweeps (7), Tier-4 cross-cutting quality (15), Tier-5 security+compliance (12), Tier-6 cross-module integrity (6), Tier-7 submission readiness (13), continuous QC wiring (4).
+
+**Budget:** 671K token estimate → bpsai-pair recommends splitting into ~21 batches of ≤50K tokens. Priority split: P0=27 / P1=65 / P2=34.
+
+**Decisions locked (2026-04-24):** staging in scope (T13.128 added), submission targets judges + prod, error tracking now (Sentry), visual regression in scope, BOTH divona + Playwright headless (T13.129 added), WCAG AAA target, legal pages authored fresh. Tasks T13.79–T13.82 escalated to AAA criteria; T13.115/T13.121/T13.123 scope expanded; T13.6/T13.83 priority raised.
 
 ### 2026-04-24 — /reviewing-and-fixing pipeline on S12b branch
 
