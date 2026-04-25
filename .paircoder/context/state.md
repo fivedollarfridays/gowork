@@ -31,6 +31,14 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+- **T13.1 done** (auto-updated by hook)
+
+### 2026-04-24 — T13.1 done — QC foundation files
+
+Created `.paircoder/qc/config.yaml` (dev/staging/prod environment profiles), `.paircoder/qc/suites/_template.qc.yaml` (full schema reference with all six step types documented inline), and `.paircoder/qc/suites/README.md` (authoring conventions, canonical tag list, invocation paths). Divona smoke-load passed all four schema checks. arch check clean. Wave 0 progress: 1/6.
+
+**What's next:** Wave 0 remaining tasks (T13.2 demo seed extension, T13.3 reset CLI, T13.4 axe-core install, T13.5 fake-clock harness, T13.128 stand up staging) can run in parallel as independent driver sessions. Once Wave 0 lands, Tier-1 browser suite authoring (T13.10–T13.52) unblocks.
+
 ### 2026-04-24 — S13 QC + Submission Readiness planned (/pc-plan)
 
 Authored `plans/backlogs/backlog-sprint-s13-platform-qc.md` (126 tasks across 12 phases, 1,497 Cx, dry-run clean). Created plan `plan-2026-04-s13-platform-qc` and registered all 126 tasks with full task files under `.paircoder/tasks/T13.*.task.md`.
