@@ -2,9 +2,9 @@
 
 **Plan type:** chore
 **Sprint:** S13
-**Total Cx:** 1,545
-**Tasks:** 128 (P0: 30, P1: 67, P2: 31)
-**Revision:** v1 (2026-04-24) — drafted from approved platform QC plan
+**Total Cx:** 1,452 (active) — 1,545 inc. cancelled
+**Tasks:** 121 active + 7 cancelled (P0: 27, P1: 64, P2: 30)
+**Revision:** v2 (2026-04-25) — hackathon-only scope; cancelled post-launch ops items
 
 ## Goal
 
@@ -1754,7 +1754,7 @@ Custom 404 and 500 pages with brand styling and useful copy.
 
 ---
 
-### T13.115 --- Privacy Policy + Terms + Legal Footer (Authored Fresh) | Cx: 20 | P0
+### T13.115 --- Privacy Policy + Terms + Legal Footer (Authored Fresh) | Cx: 20 | P1
 
 **Description:**
 Author privacy policy and terms of service from scratch (no template attribution). GDPR + CCPA + COPPA-aware. Cover: data collected (PII, session content, advisor notes), purposes (matching, compliance, audit), retention (90d post-expiry sweep), worker rights (access, export, delete), advisor data handling, third-party processors (SendGrid, LLM providers). Legal footer on every page linking both + company legal entity.
@@ -1813,7 +1813,7 @@ Every env var used by code documented in `.env.example`. Production values confi
 
 ---
 
-### T13.119 --- Staging → Prod Migration Dry-Run | Cx: 15 | P1
+### T13.119 --- [CANCELLED hackathon] Staging → Prod Migration Dry-Run | Cx: 15 | P2
 
 **Description:**
 Full migration chain run against a prod-like snapshot in staging. Any issues caught here, not in prod.
@@ -1842,7 +1842,7 @@ Full migration chain run against a prod-like snapshot in staging. Any issues cau
 
 ---
 
-### T13.121 --- Post-Launch Monitoring Wired (Sentry) | Cx: 20 | P0
+### T13.121 --- [CANCELLED hackathon] Post-Launch Monitoring Wired (Sentry) | Cx: 20 | P2
 
 **Description:**
 Sentry (recommended; alternatives acceptable) wired backend + frontend. Source map upload from frontend build. PII scrubbed before send. Uptime monitoring on critical endpoints. Alerts route to a human-reachable channel.
@@ -1857,7 +1857,7 @@ Sentry (recommended; alternatives acceptable) wired backend + frontend. Source m
 
 ---
 
-### T13.122 --- Backup + Restore Rehearsal | Cx: 10 | P1
+### T13.122 --- [CANCELLED hackathon] Backup + Restore Rehearsal | Cx: 10 | P2
 
 **Description:**
 Backup of prod data to a safe location. Restore rehearsed end-to-end into a fresh environment.
@@ -1871,7 +1871,7 @@ Backup of prod data to a safe location. Restore rehearsed end-to-end into a fres
 
 ---
 
-### T13.123 --- On-Call Rotation | Cx: 8 | P1
+### T13.123 --- [CANCELLED hackathon] On-Call Rotation | Cx: 8 | P2
 
 **Description:**
 Submission targets prod rollout, so on-call is required. Rotation, escalation matrix, paging tool, and runbook ownership documented.
@@ -1888,7 +1888,7 @@ Submission targets prod rollout, so on-call is required. Rotation, escalation ma
 
 ## Phase 12: Continuous QC
 
-### T13.124 --- Nightly QC Against Staging | Cx: 15 | P1
+### T13.124 --- [CANCELLED hackathon] Nightly QC Against Staging | Cx: 15 | P2
 
 **Description:**
 Scheduled GitHub Action: nightly run of critical QC suites against staging. Results posted to dashboard + alerting channel on regression.
@@ -1903,7 +1903,7 @@ Scheduled GitHub Action: nightly run of critical QC suites against staging. Resu
 
 ---
 
-### T13.125 --- Critical QC Suites in CI (Every PR) | Cx: 15 | P1
+### T13.125 --- Critical QC Suites in CI (Every PR) | Cx: 15 | P2
 
 **Description:**
 Add a CI job that runs the top 5 QC suites headlessly via Playwright on every PR. Depends on T13.129 Playwright harness.
@@ -1918,7 +1918,7 @@ Add a CI job that runs the top 5 QC suites headlessly via Playwright on every PR
 
 ---
 
-### T13.126 --- Flake Detection + Retry Classifier | Cx: 15 | P2
+### T13.126 --- [CANCELLED hackathon] Flake Detection + Retry Classifier | Cx: 15 | P2
 
 **Description:**
 Track suite pass/fail across runs. Flakes (pass+fail in last 5 runs) surfaced. Auto-retry once for transient failures, classify as flake vs real.
@@ -1932,7 +1932,7 @@ Track suite pass/fail across runs. Flakes (pass+fail in last 5 runs) surfaced. A
 
 ---
 
-### T13.127 --- Bug Tracker Integration | Cx: 10 | P2
+### T13.127 --- [CANCELLED hackathon] Bug Tracker Integration | Cx: 10 | P2
 
 **Description:**
 Failing QC suites open tickets automatically (Trello or configured PM provider).
