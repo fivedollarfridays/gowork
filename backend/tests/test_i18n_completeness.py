@@ -48,6 +48,9 @@ IDENTICAL_PAIR_ALLOWLIST: dict[str, str] = {
     "documents.historyDownloadPdf": "PDF is a file-format proper noun.",
     # 'Total' is a Latinism with identical surface form in EN/ES.
     "jobs.funnelTotal": "'Total' is identical in EN/ES.",
+    # 'Error:' is a Latinism shared by both languages with the same form
+    # and identical inline-prefix usage in error UI strings.
+    "credit.errorPrefix": "'Error:' is identical in EN/ES.",
 }
 
 

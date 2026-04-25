@@ -118,7 +118,7 @@ function DashboardStats() {
   }
   if (error) {
     return (
-      <p className="text-destructive">Failed to load dashboard data.</p>
+      <p className="text-destructive">{t("dashboard.loadFailed")}</p>
     );
   }
   if (!data) return null;
@@ -128,7 +128,7 @@ function DashboardStats() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Users className="h-4 w-4" /> Total Assessments
+              <Users className="h-4 w-4" /> {t("dashboard.totalAssessments")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -140,7 +140,7 @@ function DashboardStats() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Shield className="h-4 w-4" /> Barrier Instances
+              <Shield className="h-4 w-4" /> {t("dashboard.barrierInstances")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -152,7 +152,7 @@ function DashboardStats() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" /> Avg Barriers/Person
+              <BarChart3 className="h-4 w-4" /> {t("dashboard.avgBarriers")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -167,7 +167,7 @@ function DashboardStats() {
       {data.common_barriers.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Most Common Barriers</CardTitle>
+            <CardTitle className="text-lg">{t("dashboard.commonBarriers")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
@@ -201,16 +201,17 @@ function DashboardStats() {
 }
 
 function CaseManagerView() {
+  const { t } = useTranslation();
   const token = useAdvisorToken();
   return (
     <main className="min-h-screen px-4 py-8 sm:px-8">
       <div className="mx-auto max-w-4xl space-y-6">
         <div className="space-y-1">
           <h1 className="text-3xl font-bold text-primary">
-            Case Manager Dashboard
+            {t("dashboard.heading")}
           </h1>
           <p className="text-muted-foreground">
-            Aggregate metrics from MontGoWork assessments
+            {t("dashboard.description")}
           </p>
         </div>
         {token && <NeedsAttentionSection token={token} />}

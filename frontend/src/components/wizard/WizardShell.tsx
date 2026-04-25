@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { t } from "@/lib/i18n";
 
 export interface WizardStepConfig {
   title: string;
@@ -21,7 +22,8 @@ interface WizardShellProps {
   completeLabel?: string;
 }
 
-export function WizardShell({ steps, onComplete, completeLabel = "Submit" }: WizardShellProps) {
+export function WizardShell({ steps, onComplete, completeLabel }: WizardShellProps) {
+  const resolvedCompleteLabel = completeLabel ?? t("common.submit");
   const [currentStep, setCurrentStep] = useState(0);
   const totalSteps = steps.length;
   const stepContentRef = useRef<HTMLDivElement>(null);
@@ -137,7 +139,7 @@ export function WizardShell({ steps, onComplete, completeLabel = "Submit" }: Wiz
             : {})}
         >
           <ChevronLeft className="h-4 w-4" />
-          Back
+          {t("common.back")}
         </Button>
         <Button
           onClick={handleNext}
@@ -146,7 +148,7 @@ export function WizardShell({ steps, onComplete, completeLabel = "Submit" }: Wiz
             ? { "aria-label": `Go to step ${currentStep + 2}: ${steps[currentStep + 1].title}` }
             : {})}
         >
-          {isLast ? completeLabel : "Next"}
+          {isLast ? resolvedCompleteLabel : t("common.next")}
           {!isLast && <ChevronRight className="h-4 w-4" />}
         </Button>
       </div>
