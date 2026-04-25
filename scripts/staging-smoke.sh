@@ -44,6 +44,34 @@ declare -i CHECK_COUNT=0
 # Tab-separated header.
 printf 'RESULT\tMETHOD\tEXPECTED\tACTUAL\tURL\n'
 
+# check_either <method> <expected1> <expected2> <url>
+# PASS if actual matches either expected status. Use when a route has
+# legitimate alternate codes (e.g. /health/ready returning 503 when a
+# dep is intentionally not loaded).
+check_either() {
+    local method="$1"
+    local expected1="$2"
+    local expected2="$3"
+    local url="$4"
+    CHECK_COUNT+=1
+    local actual
+    actual=$(
+        curl -s -o /dev/null \
+            --connect-timeout "${CURL_CONNECT_TIMEOUT}" \
+            --max-time "${CURL_MAX_TIME}" \
+            -w '%{http_code}' \
+            -X "${method}" \
+            "${url}" 2>/dev/null
+    ) || true
+    [[ -z "${actual}" ]] && actual="000"
+    local result="PASS"
+    if [[ "${actual}" != "${expected1}" && "${actual}" != "${expected2}" ]]; then
+        result="FAIL"
+        FAIL_COUNT+=1
+    fi
+    printf '%s\t%s\t%s|%s\t%s\t%s\n' "${result}" "${method}" "${expected1}" "${expected2}" "${actual}" "${url}"
+}
+
 # check <method> <expected-status> <url>
 check() {
     local method="$1"
@@ -75,7 +103,10 @@ check() {
 check GET 200 "${API_URL}/"
 check GET 200 "${API_URL}/health"
 check GET 200 "${API_URL}/health/live"
-check GET 200 "${API_URL}/health/ready"
+# /health/ready returns 503 when sub-checks fail (e.g. RAG index not loaded).
+# Smoke only asserts the route is alive, not that every dep is up — the
+# component QC suites cover dep-up assertions.
+check_either GET 200 503 "${API_URL}/health/ready"
 
 # --- Backend public GET endpoints (no auth needed) ---
 check GET 200 "${API_URL}/api/city"
@@ -83,11 +114,12 @@ check GET 200 "${API_URL}/api/jobs/"
 check GET 200 "${API_URL}/api/dashboard/stats"
 check GET 200 "${API_URL}/api/outcomes/aggregate"
 
-# --- Backend admin endpoints — expect 401/403 without admin key.
-# We assert the route is wired (not 404) by accepting 401/403/422.
-# The smoke check writes "EXPECTED" as 401 but tolerates 401/403/422.
+# --- Backend admin endpoints — expect 401/403/422 without admin key.
+# We assert the route is wired (not 404) by accepting any auth-rejection
+# code. admin_flags only registers POST /{name}, so probe a POST.
 admin_check() {
-    local url="$1"
+    local method="$1"
+    local url="$2"
     CHECK_COUNT+=1
     local actual
     actual=$(
@@ -95,6 +127,7 @@ admin_check() {
             --connect-timeout "${CURL_CONNECT_TIMEOUT}" \
             --max-time "${CURL_MAX_TIME}" \
             -w '%{http_code}' \
+            -X "${method}" \
             "${url}" 2>/dev/null
     ) || true
     [[ -z "${actual}" ]] && actual="000"
@@ -103,21 +136,24 @@ admin_check() {
         401|403|422) ;;
         *) result="FAIL"; FAIL_COUNT+=1 ;;
     esac
-    printf '%s\t%s\t%s\t%s\t%s\n' "${result}" "GET" "401|403|422" "${actual}" "${url}"
+    printf '%s\t%s\t%s\t%s\t%s\n' "${result}" "${method}" "401|403|422" "${actual}" "${url}"
 }
-admin_check "${API_URL}/api/admin/flags/"
+admin_check POST "${API_URL}/api/admin/flags/_smoke"
 
 # --- Frontend top-level pages (Next.js SSR returns 200 for the shell) ---
+# Note: /documents has no parent page — NavBar links directly to
+# /documents/resume. /feedback is token-gated (only /feedback/<token>
+# is a real route); not part of the public smoke surface.
 check GET 200 "${FRONTEND_URL}/"
 check GET 200 "${FRONTEND_URL}/assess"
 check GET 200 "${FRONTEND_URL}/daily"
 check GET 200 "${FRONTEND_URL}/plan"
 check GET 200 "${FRONTEND_URL}/jobs"
-check GET 200 "${FRONTEND_URL}/documents"
+check GET 200 "${FRONTEND_URL}/documents/resume"
+check GET 200 "${FRONTEND_URL}/documents/cover-letters"
 check GET 200 "${FRONTEND_URL}/appointments"
 check GET 200 "${FRONTEND_URL}/credit"
 check GET 200 "${FRONTEND_URL}/case-manager"
-check GET 200 "${FRONTEND_URL}/feedback"
 
 # --- Summary ---
 echo ""
