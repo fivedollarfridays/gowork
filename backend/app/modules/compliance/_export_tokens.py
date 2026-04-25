@@ -32,6 +32,11 @@ EXPORT_TTL_SEC = 24 * 3600
 _SECRET_ENV = "COMPLIANCE_TOKEN_SECRET"
 _SECRET_OLD_ENV = "COMPLIANCE_TOKEN_SECRET_OLD"
 
+# Kid values the verifier will route to a secret pool. Unknown kids are
+# rejected outright — no fall-through to "try every active secret".
+# Mirrors the T13.62 hardening in app.modules.appointments.tokens.
+_KNOWN_KIDS = frozenset({"current", "old"})
+
 
 class ComplianceTokenError(ValueError):
     """Any verify-time failure — caller catches a single class."""
@@ -117,6 +122,8 @@ def _decode_and_verify(token: str) -> dict:
     if not isinstance(payload, dict):
         raise ComplianceTokenError("payload must be a JSON object")
     kid = payload.get("kid", "current")
+    if kid not in _KNOWN_KIDS:
+        raise ComplianceTokenError("unknown kid")
     active = _active_secrets()
     candidates = (
         [(k, s) for k, s in active if k == "old"]

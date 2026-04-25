@@ -40,6 +40,11 @@ _SECRET_OLD_ENV_VAR = "UNSUBSCRIBE_TOKEN_SECRET_OLD"
 _DEFAULT_TTL_SEC = 30 * 24 * 3600  # 30 days — unsubscribe links live in old emails
 _ACTION = "unsubscribe"
 
+# Kid values the verifier will route to a secret pool. Unknown kids are
+# rejected outright — no fall-through to "try every active secret".
+# Mirrors the T13.62 hardening in app.modules.appointments.tokens.
+_KNOWN_KIDS = frozenset({"current", "old"})
+
 
 class TokenError(ValueError):
     """Base class for unsubscribe-token failures.
@@ -184,6 +189,8 @@ def _decode_and_verify_signature(token: str) -> dict:
     if payload.get("act") != _ACTION:
         raise TokenInvalid("wrong action for unsubscribe scope")
     payload_kid = payload.get("kid", "current")
+    if payload_kid not in _KNOWN_KIDS:
+        raise TokenInvalid("unknown kid")
     active = _active_secrets()
     candidates = (
         [(k, s) for k, s in active if k == "old"]
