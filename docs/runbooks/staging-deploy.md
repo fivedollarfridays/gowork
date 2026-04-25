@@ -78,17 +78,33 @@ flyctl version
 
 You'll set these via `fly secrets set` in §3.4. Sources:
 
-| Env var | Where to get the value |
-|---------|------------------------|
-| `ADMIN_API_KEY` | Generate: `python -c "import secrets; print(secrets.token_urlsafe(32))"` (>= 32 chars) |
-| `AUDIT_HASH_SALT` | Generate: `python -c "import secrets; print(secrets.token_urlsafe(24))"` |
-| `ANTHROPIC_API_KEY` | Anthropic Console → API Keys (or skip — falls back to mock) |
-| `OPENAI_API_KEY` | OpenAI Platform → API Keys (optional) |
-| `BRIGHTDATA_API_KEY` | BrightData dashboard (optional — staging can run without live job crawl) |
-| `BRIGHTDATA_DATASET_ID` | BrightData dashboard (optional) |
-| `SENDGRID_API_KEY` | SendGrid Console (optional — appointment emails) |
-| `CREDIT_API_KEY` | Credit microservice owner (optional) |
-| `CORS_ORIGINS` | Set after frontend app is launched. Will be `https://montgowork-staging-web.fly.dev` (or your custom CNAME). |
+> **Boot-time validator (T13.118):** the FastAPI lifespan calls
+> `app.core.env_validation.validate_required_env()` on startup. The
+> three rows marked **required** below are hard fail-fast — the
+> backend refuses to boot with a clear `RuntimeError(...)` naming the
+> missing var. The remaining rows are optional; the validator emits a
+> single WARNING per unset key but does not block boot.
+> See `.env.example` for the canonical inventory of every env var the
+> code reads.
+
+| Env var | Required? | Where to get the value |
+|---------|-----------|------------------------|
+| `DATABASE_URL` | **required** | Set in `deploy/fly/fly.backend.toml` `[env]` to `sqlite+aiosqlite:////app/data/montgowork.db`. No `fly secrets set` needed. |
+| `ADMIN_API_KEY` | **required** | Generate: `python -c "import secrets; print(secrets.token_urlsafe(32))"` (>= 32 chars) |
+| `AUDIT_HASH_SALT` | **required** | Generate: `python -c "import secrets; print(secrets.token_urlsafe(24))"` |
+| `CORS_ORIGINS` | recommended | Set after frontend app is launched. Will be `https://montgowork-staging-web.fly.dev` (or your custom CNAME). Production validator rejects any `localhost` value. |
+| `ANTHROPIC_API_KEY` | optional | Anthropic Console → API Keys (or skip — falls back to mock) |
+| `OPENAI_API_KEY` | optional | OpenAI Platform → API Keys |
+| `GEMINI_API_KEY` | optional | Google AI Studio |
+| `SENDGRID_API_KEY` | optional | SendGrid Console — appointment + digest emails |
+| `SENDGRID_FROM_EMAIL` | optional | Verified sender address |
+| `SENDGRID_WEBHOOK_PUBLIC_KEY` | optional | SendGrid Console — only needed if you wire the event webhook |
+| `APPOINTMENT_TOKEN_SECRET` | optional* | Generate: `python -c "import secrets; print(secrets.token_urlsafe(32))"` — *required for appointment emails to send |
+| `COMPLIANCE_TOKEN_SECRET` | optional* | Generate same — *required for data-export feature |
+| `UNSUBSCRIBE_TOKEN_SECRET` | optional* | Generate same — *required for any reminder/digest email |
+| `BRIGHTDATA_API_KEY` | optional | BrightData dashboard — staging can run without live job crawl |
+| `BRIGHTDATA_DATASET_ID` | optional | BrightData dashboard |
+| `CREDIT_API_KEY` | optional | Credit microservice owner |
 
 Do **not** commit any of these. The `.gitignore` already excludes
 `backend/.env`.

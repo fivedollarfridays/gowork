@@ -57,9 +57,21 @@ class TestProxyHeadersMiddleware:
         assert "172.16.0.0/12" in s.trusted_proxy_hosts
 
 
+@pytest.fixture
+def _required_env(monkeypatch):
+    """Satisfy T13.118 boot-time validator inside lifespan tests.
+
+    Without this, ``validate_required_env()`` aborts the lifespan
+    before the rest of the test setup can patch ``init_db`` etc.
+    """
+    monkeypatch.setenv("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
+    monkeypatch.setenv("ADMIN_API_KEY", "x" * 32)
+    monkeypatch.setenv("AUDIT_HASH_SALT", "test-salt-not-default")
+
+
 class TestLifespan:
     @pytest.mark.anyio
-    async def test_startup_and_shutdown(self):
+    async def test_startup_and_shutdown(self, _required_env):
         from app.main import lifespan, app
 
         mock_engine = AsyncMock()
@@ -73,7 +85,7 @@ class TestLifespan:
             mock_close.assert_awaited_once()
 
     @pytest.mark.anyio
-    async def test_shutdown_disposes_engine(self):
+    async def test_shutdown_disposes_engine(self, _required_env):
         """close_db is called on shutdown to dispose the engine."""
         from app.main import lifespan, app
 
@@ -87,7 +99,7 @@ class TestLifespan:
             mock_close.assert_awaited_once()
 
     @pytest.mark.anyio
-    async def test_raises_when_web_concurrency_gt_1(self):
+    async def test_raises_when_web_concurrency_gt_1(self, _required_env):
         """Startup hard-fails with RuntimeError when WEB_CONCURRENCY > 1.
 
         T12.3 change: APScheduler in-process requires single-worker; the
@@ -107,7 +119,7 @@ class TestLifespan:
                     pass
 
     @pytest.mark.anyio
-    async def test_no_warning_when_web_concurrency_is_1(self):
+    async def test_no_warning_when_web_concurrency_is_1(self, _required_env):
         """No warning when WEB_CONCURRENCY is 1."""
         from app.main import lifespan, app
 
@@ -126,7 +138,7 @@ class TestLifespan:
         assert not any("WEB_CONCURRENCY" in c for c in warning_calls)
 
     @pytest.mark.anyio
-    async def test_logs_llm_provider_status_on_startup(self):
+    async def test_logs_llm_provider_status_on_startup(self, _required_env):
         """Lifespan logs LLM provider status during startup."""
         from app.main import lifespan, app
 
@@ -139,15 +151,15 @@ class TestLifespan:
              patch("app.main.init_db", new_callable=AsyncMock), \
              patch("app.main.close_db", new_callable=AsyncMock), \
              patch(_MOCK_SEEDS, new_callable=AsyncMock, return_value=MagicMock()), \
-             patch("app.main.check_llm_providers", return_value=mock_status), \
-             patch("app.main.logger") as mock_logger:
+             patch("app.core.lifespan_helpers.check_llm_providers", return_value=mock_status), \
+             patch("app.core.lifespan_helpers.logger") as mock_logger:
             async with lifespan(app):
                 pass
         info_calls = [str(c) for c in mock_logger.info.call_args_list]
         assert any("LLM" in c and "anthropic" in c for c in info_calls)
 
     @pytest.mark.anyio
-    async def test_warns_when_llm_falls_back_to_mock(self):
+    async def test_warns_when_llm_falls_back_to_mock(self, _required_env):
         """Lifespan warns when no LLM provider configured (mock fallback)."""
         from app.main import lifespan, app
 
@@ -160,15 +172,15 @@ class TestLifespan:
              patch("app.main.init_db", new_callable=AsyncMock), \
              patch("app.main.close_db", new_callable=AsyncMock), \
              patch(_MOCK_SEEDS, new_callable=AsyncMock, return_value=MagicMock()), \
-             patch("app.main.check_llm_providers", return_value=mock_status), \
-             patch("app.main.logger") as mock_logger:
+             patch("app.core.lifespan_helpers.check_llm_providers", return_value=mock_status), \
+             patch("app.core.lifespan_helpers.logger") as mock_logger:
             async with lifespan(app):
                 pass
         warning_calls = [str(c) for c in mock_logger.warning.call_args_list]
         assert any("mock" in c.lower() for c in warning_calls)
 
     @pytest.mark.anyio
-    async def test_app_starts_with_no_providers(self):
+    async def test_app_starts_with_no_providers(self, _required_env):
         """App starts gracefully even with no LLM providers available."""
         from app.main import lifespan, app
 
@@ -181,7 +193,7 @@ class TestLifespan:
              patch("app.main.init_db", new_callable=AsyncMock), \
              patch("app.main.close_db", new_callable=AsyncMock), \
              patch(_MOCK_SEEDS, new_callable=AsyncMock, return_value=MagicMock()), \
-             patch("app.main.check_llm_providers", return_value=mock_status):
+             patch("app.core.lifespan_helpers.check_llm_providers", return_value=mock_status):
             async with lifespan(app):
                 pass
 
