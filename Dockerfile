@@ -19,6 +19,10 @@ COPY backend/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY backend/ ./
+# City config files live at repo root /cities (loaded by app/cities/config.py
+# via 4-parents-up path resolution). Image must expose them at /cities so the
+# resolution lands on the same place inside the container.
+COPY cities /cities
 
 EXPOSE 8000
 
