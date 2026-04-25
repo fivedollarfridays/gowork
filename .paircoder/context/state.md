@@ -31,6 +31,8 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+- **T13.128 done** (auto-updated by hook)
+
 - **T13.3 done** (auto-updated by hook)
 
 - **T13.128 staging environment LIVE on Fly.io** — https://montgowork-staging-api.fly.dev (backend, 2GB) + https://montgowork-staging-web.fly.dev (frontend). 7 migrations applied to volume DB; 10 demo sessions seeded. Smoke 15/19 PASS — 4 sub-fix findings logged (RAG index, admin/flags route path, /documents + /feedback Next.js pages). Two real fixes shipped in deploy: Dockerfile `COPY cities /cities`, backend memory 512mb→2gb.
