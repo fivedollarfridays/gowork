@@ -44,10 +44,33 @@ CATEGORY_TO_TABLE: dict[str, str] = {
 
 # --------------------------------------------------------------- full delete
 
-# ``record_profiles`` predates the S12 CASCADE contract (m001 shipped
-# it with a plain ``session_id TEXT UNIQUE`` — no FK). Full delete must
-# clear it manually; every m002 child does fall off the CASCADE.
-_NON_CASCADING_TABLES: tuple[str, ...] = ("record_profiles",)
+# m001 session-keyed tables that predate the S12 CASCADE contract.
+# Each of these carries a plain ``session_id TEXT`` column (no FK to
+# ``sessions(id)``), so the SQLite cascade chain triggered by
+# ``DELETE FROM sessions`` will NOT touch them — full delete must clear
+# them explicitly.
+#
+# This list is locked in by ``backend/tests/test_compliance_cascade.py``
+# (T13.70): a schema-drift test introspects the FK graph and fails CI
+# if a new session-scoped table lands without being added here (or
+# declared with ON DELETE CASCADE in its migration).
+#
+# * ``record_profiles``    — criminal record / charges
+# * ``feedback_tokens``    — single-use worker feedback tokens
+# * ``visit_feedback``     — career-center visit responses
+# * ``resource_feedback``  — per-resource helpfulness signals
+# * ``share_tokens``       — plan-share links
+#
+# Every m002+ session-scoped table declares ``ON DELETE CASCADE`` and
+# therefore is NOT in this list — adding such a table would double-delete
+# (harmless but redundant).
+_NON_CASCADING_TABLES: tuple[str, ...] = (
+    "record_profiles",
+    "feedback_tokens",
+    "visit_feedback",
+    "resource_feedback",
+    "share_tokens",
+)
 
 
 def full_delete(

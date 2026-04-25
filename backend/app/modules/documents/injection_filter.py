@@ -35,18 +35,48 @@ __all__ = ["InjectionCheck", "check_for_injection"]
 # is always available) to letting an injection reach the model.
 
 _INJECTION_SOURCES: tuple[str, ...] = (
+    # ----- direct override family ("ignore previous instructions") -----
     r"\bignore\s+(?:all\s+|previous\s+|above\s+)?"
     r"(?:prior\s+|previous\s+|the\s+)?instructions?\b",
-    r"\bdisregard\b[^.\n]{0,60}\b(?:instructions?|rules?)\b",
+    r"\bignore\s+instruction\s+set\b",
+    r"\bdisregard\b[^.\n]{0,60}\b(?:instructions?|rules?|safety)\b",
+    # ----- role / mode framing -----
     r"(?m)^\s*system:\s",
     r"\brole\s*:\s*system\b",
     r"\byou\s+are\s+now\b",
+    r"\byou\s+are\s+no\s+longer\b",
+    r"\byou\s+are\s+not\s+an?\s+(?:ai|assistant)\b",
+    r"\bpretend\s+(?:that\s+)?you\s+are\b",
+    r"\bact\s+as\s+(?:a|an|the)\b",
+    r"\bfrom\s+now\s+on\b",
+    r"\bfrom\s+this\s+point\s+forward\b",
     r"\bforget\s+(?:everything|all|what)\b",
-    # Delimiter / chat-format injection.
+    # ----- well-known jailbreak / mode names -----
+    r"\b(?:developer|admin|jailbreak|dan)\s+mode\b",
+    # ----- output exfiltration -----
+    r"\b(?:reveal|print|repeat|show|output|quote)\b[^.\n]{0,80}"
+    r"\b(?:system\s+(?:prompt|message|instructions?)|"
+    r"initial\s+(?:prompt|instructions?|message)|"
+    r"prompt\s+(?:above|verbatim)|your\s+(?:prompt|instructions?))\b",
+    r"\bwhat\s+were\s+you\s+told\b",
+    # ----- tool / function injection -----
+    r"\b(?:call|invoke|execute|use)\s+(?:the\s+)?"
+    r"(?:function|tool|command)\b",
+    # ----- delimiter / chat-format injection -----
     r"\n```\s*system",
+    r"```\s*\n\s*system\s*:",
     r"</\s*(?:system|instructions?|prompt)\s*>",
     r"<\|im_end\|>",
     r"<\|im_start\|>",
+    # ----- markdown / bracket role headers -----
+    r"(?m)^\s*#{1,6}\s*system\s*:?",
+    r"\[\s*(?:system|assistant|user\s+complete)\s*\]",
+    # ----- boundary spoofing -----
+    r"-{2,}\s*end\s+(?:user|prompt|input)\s*-{2,}",
+    r"\bend\s+of\s+(?:prompt|user|input)\b",
+    r"\bbegin\s+system(?:\s+message)?\b",
+    # ----- structured-payload "role: system" inside JSON/YAML -----
+    r'"role"\s*:\s*"system"',
 )
 
 _INJECTION_PATTERNS: tuple[re.Pattern[str], ...] = tuple(
