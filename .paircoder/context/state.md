@@ -31,6 +31,14 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+- **T13.103 done** (auto-updated by hook)
+
+- **T13.95 done** (auto-updated by hook)
+
+- **T13.94 done** (auto-updated by hook)
+
+- **T13.93 done** (auto-updated by hook)
+
 - **T13.77 done** (auto-updated by hook)
 
 - **T13.74 done** (auto-updated by hook)
