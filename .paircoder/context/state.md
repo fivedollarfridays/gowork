@@ -31,6 +31,16 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+- **T13.77 done** (auto-updated by hook)
+
+- **T13.74 done** (auto-updated by hook)
+
+- **T13.72 done** (auto-updated by hook)
+
+- **T13.71 done** (auto-updated by hook)
+
+- **T13.62 follow-up** — Token-downgrade fix applied to sibling kid-rotation modules. Mirroring the T13.62 hardening of `app.modules.appointments.tokens`, the same `_KNOWN_KIDS = frozenset({"current", "old"})` whitelist + early `TokenInvalid("unknown kid")` reject (or `ComplianceTokenError("unknown kid")` for the compliance namespace) was added to (1) `backend/app/modules/compliance/_export_tokens.py::_decode_and_verify` and (2) `backend/app/modules/engagement/unsubscribe_tokens.py::_decode_and_verify_signature`. Both modules previously fell through to "try every active secret" for any kid that was not literally `"old"`, which let a forged `kid='future'` token signed under the live secret slip past. **Test coverage:** new `backend/tests/test_export_token_rotation.py` (215L, 4 tests using `_fake_clock.freeze_time` to keep tokens within TTL so kid-handling failures cannot be masked by expiry: `test_current_kid_accepted`, `test_old_kid_accepted_with_old_secret`, `test_old_kid_rejected_without_old_secret`, `test_unknown_kid_rejected`); extended `backend/tests/test_unsubscribe_tokens.py` (+123L for the parallel kid-whitelist test class — 4 new tests with the same names, hand-mint helper using HS256 over the canonical JSON payload). RED phase confirmed in both modules: `test_unknown_kid_rejected` failed pre-fix (DID NOT RAISE) and passed post-fix; the other 3 baseline tests were green either way (verifying the fix did not regress the happy paths). **Regression suite:** `pytest tests/test_compliance.py tests/test_engagement_routes.py tests/test_unsubscribe_tokens.py tests/test_appointment_tokens.py tests/test_key_rotation_overlap.py tests/test_export_token_rotation.py tests/test_unsubscribe_race.py` = 86/86 pass. arch check: 0 errors on all 4 modified files (2 informational file-too-large warnings on the source modules at 168L / 247L vs. project's 150L warn threshold — these are pre-existing module sizes not introduced by this fix; both are well under the 400L error ceiling). **Files modified:** `backend/app/modules/compliance/_export_tokens.py` (+5L net: `_KNOWN_KIDS` constant + 2-line early reject), `backend/app/modules/engagement/unsubscribe_tokens.py` (+5L net), `backend/tests/test_unsubscribe_tokens.py` (extended +123L). **Files created:** `backend/tests/test_export_token_rotation.py`. Three of three kid-rotating token modules (appointments, compliance export, engagement unsubscribe) now share the same downgrade-resistant kid whitelist pattern; orchestrator owns the commit per task brief.
+
 - **T13.68 done** (auto-updated by hook)
 
 - **T13.67 done** (auto-updated by hook)
