@@ -31,6 +31,16 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+- **T13.65 done** (auto-updated by hook)
+
+- **T13.59 done** (auto-updated by hook)
+
+- **T13.55 done** (auto-updated by hook)
+
+- **T13.53 done** (auto-updated by hook)
+
+- **T13.53 done** — Nightly Orchestrator Full Dry-Run. New `backend/tests/test_orchestrator_full_run.py` (479L, 7 tests) seeds the T13.2 worker-companion demo (10 sessions × 2 cities), freezes the wall clock via the T13.5 `freeze_time` harness, and asserts every documented step in `scripts.nightly_digest` fires once per session in the documented order. Spy/stub helpers extracted to `backend/tests/_orchestrator_spies.py` (202L) to keep the test file under the 600L ceiling. Documented step list extracted from source: retro → reconcile (T12.25a step 2.5) → refresh (T12.24) → compose (T12.20, internally invokes stall detector + T12.25b module-status collector) → send_digest (T12.19) → weekly_review (T12.22a, Sunday only) → retention_sweep (T12.36, once per run). Partial-failure policy verified: fail-soft per session — `_run_one` catches a per-session compose raise and counts it as `error=1` while other sessions continue; `_refresh_session_plan` swallows its own raises so the digest still ships. Two task-brief deviations documented in the test docstring: (1) `send_digest` fires every day including Sunday, weekly_review piggybacks on top — does not replace it; (2) stall detection is invoked inside `compose_digest`, not as a standalone orchestrator step. 7/7 tests pass in 0.21s; arch check 0 errors (test file 479L < 600 error, spies 202L clean). No orchestrator bugs found — code matches the contract documented in `nightly_digest.py`'s module docstring.
+
 - **T13.70 done** (auto-updated by hook)
 
 - **T13.63 done** (auto-updated by hook)
