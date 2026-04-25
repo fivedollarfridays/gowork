@@ -1,62 +1,43 @@
-# Fly.io app config — MontGoWork backend (staging)
+# fly.toml app configuration file generated for montgowork-staging-api on 2026-04-24T23:34:33-05:00
 #
-# T13.128 — staging deploy artifact. The user runs `fly launch` with this
-# file (`fly launch --copy-config --config deploy/fly/fly.backend.toml
-# --no-deploy`) and finishes setup as documented in
-# docs/runbooks/staging-deploy.md.
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
-# Why Fly.io for staging: SQLite-friendly via persistent Volumes, single
-# region, simple `fly deploy` flow, no managed-DB ceremony — matches the
-# current single-node app architecture. See runbook for migration notes
-# if we later move off SQLite.
 
-app = "montgowork-staging-api"
-primary_region = "iad"  # User can change; Fly will prompt on first launch.
+app = 'montgowork-staging-api'
+primary_region = 'iad'
 
 [build]
-  # Reuse the existing project-root Dockerfile — no Dockerfile.staging
-  # needed. Fly.io will run `docker build -f Dockerfile .` from the
-  # project root because dockerfile is relative to fly.toml's working
-  # directory; we set it explicitly to be safe.
-  dockerfile = "../../Dockerfile"
+  dockerfile = '../../Dockerfile'
+
+[deploy]
+  strategy = 'immediate'
 
 [env]
-  ENVIRONMENT = "staging"
-  # SQLite path lives on the mounted volume — the four-slash sqlite URL
-  # is intentional (sqlite+aiosqlite://// then absolute /app/data/...).
-  DATABASE_URL = "sqlite+aiosqlite:////app/data/montgowork.db"
-  LOG_LEVEL = "INFO"
-  # Backend trusts Fly's edge proxy headers.
-  TRUSTED_PROXY_HOSTS = "*"
-  # CORS_ORIGINS is set via `fly secrets set` so it can reference the
-  # frontend Fly app URL once it exists. See runbook §4.
+  DATABASE_URL = 'sqlite+aiosqlite:////app/data/montgowork.db'
+  ENVIRONMENT = 'staging'
+  LOG_LEVEL = 'INFO'
+  TRUSTED_PROXY_HOSTS = '*'
+
+[[mounts]]
+  source = 'montgowork_staging_db'
+  destination = '/app/data'
 
 [http_service]
   internal_port = 8000
   force_https = true
-  auto_stop_machines = "stop"
+  auto_stop_machines = 'stop'
   auto_start_machines = true
-  min_machines_running = 1  # Keep one machine warm so SQLite volume stays attached.
-  processes = ["app"]
+  min_machines_running = 1
+  processes = ['app']
 
   [[http_service.checks]]
-    interval = "30s"
-    timeout = "5s"
-    grace_period = "10s"
-    method = "GET"
-    path = "/health/live"
-    protocol = "http"
-
-[[mounts]]
-  source = "montgowork_staging_db"
-  destination = "/app/data"
-  # IMPORTANT: SQLite + Fly volumes are single-machine. Do NOT scale
-  # this app beyond 1 machine without first migrating to Postgres.
-  # See docs/architecture.md for the migration path.
+    interval = '30s'
+    timeout = '5s'
+    grace_period = '10s'
+    method = 'GET'
+    path = '/health/live'
+    protocol = 'http'
 
 [[vm]]
-  size = "shared-cpu-1x"
-  memory = "512mb"
-
-[deploy]
-  strategy = "immediate"  # Single machine; rolling not applicable.
+  size = 'shared-cpu-1x'
+  memory = '512mb'
