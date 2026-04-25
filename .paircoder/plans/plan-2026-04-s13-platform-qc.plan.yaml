@@ -1,0 +1,14 @@
+id: plan-2026-04-s13-platform-qc
+title: S13 — Platform-Wide QC + Submission Readiness
+type: chore
+status: in_progress
+created_at: '2026-04-24T11:43:14.029697'
+skills:
+- planning-with-pm
+goals:
+- 'Round out the platform before external submission: build QC infrastructure, author
+  browser-driven QC suites for every user journey, extend backend integration tests
+  to every module, run exploratory/security/cross-module audits, close submission-readiness
+  gaps (legal pages, monitoring, rollback plan).'
+metadata:
+  pm_scope: epic
