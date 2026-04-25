@@ -31,13 +31,48 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+- **T13.2 implemented (driver session, awaiting wave verification)**
+- **T13.5 done** — fake-clock harness for time-dependent tests
 - **T13.1 done** (auto-updated by hook)
+
+### 2026-04-24 — T13.2 driver session — Demo Seed Extension (compliance + weekly + advisor + reminders)
+
+Extended `app/demo_seed_s12b.py` so every demo session carries QC-coverage state for compliance, weekly review, advisor inbox, and reminder modules. Decomposed into hub-and-spoke to satisfy arch limits.
+
+**Files created:**
+- `backend/app/_demo_seed_qc.py` (80L) — QC hub: orchestrates compliance + engagement spokes per session.
+- `backend/app/_demo_seed_compliance.py` (90L) — `feedback_tokens` (active + expired) + `compliance_audit` baseline rows (`export_requested` + `export_downloaded` per session, hashed session id matches `app.modules.compliance._audit`).
+- `backend/app/_demo_seed_engagement.py` (249L) — engagement window (varied by stall state), sendgrid `open` events, reminder cooldowns + opt-out (`reminders_auto_disabled`), and one `advisor_tokens` row per city (deterministic plaintext exposed via `advisor_token_plaintext` for QC harness use).
+- `backend/app/_demo_seed_rows.py` (187L) — extracted per-row insert helpers (appointments, applications, resume + cover letter, snapshots, outcomes) so the seed hub stays under arch limits. Resume helper now plants BOTH a `resume` and a `cover_letter` row so `cover_letter_builder.nightly_status` reports non-`unknown` for QC coverage.
+- `backend/tests/test_demo_seed_qc.py` (313L) — 14 new tests for cycles 7-12 (compliance, weekly, advisor, reminders, module-status coverage, determinism + idempotency).
+- `backend/tests/_demo_seed_qc_helpers.py` (104L) — shared fixture + snapshot helpers (`fresh_db`, `apply_m005`, `apply_through_m007`, `qc_seed_snapshot`).
+
+**Files modified:**
+- `backend/app/demo_seed_s12b.py` — collapsed to hub (170L). Per-row helpers moved out; QC seed spoke called per session via `_seed_qc_state_if_schema_ready` (gated on m006 + m007 table presence so legacy callers without those migrations still work).
+- `backend/tests/test_demo_seed_s12b.py` — slimmed to base S12b cycles 1-6 (267L), now imports fixtures from `_demo_seed_qc_helpers`.
+
+**Test results:** 26 tests across the two files, all passing in 0.46s. Full backend suite: 3257 pass / 2 fail (both pre-existing carry-overs documented in state.md: `test_contract_credit_api` JWT import + `test_evidence_collector` UTC midnight flake) / 2 skipped. Net delta: +14 tests.
+
+**Acceptance criteria (T13.2 spec):**
+- Each of the 10 demo sessions carries state for every module required by any QC suite (verified via `test_module_status_keys_have_at_least_one_nonunknown_session`).
+- Seed is deterministic (`test_seed_is_deterministic_across_fresh_dbs` passes — two fresh DBs seeded with the same `now` produce byte-identical row tuples).
+- Seed is idempotent (`test_seed_is_idempotent_on_qc_state` passes — re-runs into the same DB do not mutate any payload).
+- Coverage assertion: every module the live `status_collector.collect_all` reports has at least one demo session whose health is non-`unknown` (`resume_builder`, `cover_letter_builder`, `applications`, `reminder_engine`).
+- `bpsai-pair arch check` passes (zero errors across all 8 files; three warnings on file size, all comfortably under the 300-line error threshold).
+
+**Schema gaps hit:** None. All required tables (feedback_tokens, compliance_audit, advisor_tokens, engagement_events, reminder_cooldowns, sendgrid_events) already exist in m001 + m002 + m006 + m007.
+
+**Module status keys covered:** `resume_builder`, `cover_letter_builder` (NEW — required cover_letter doc_type seeding), `applications`, `reminder_engine`. The aggregator iterates these from `status_collector._MODULES`; the test reads the live list so any future module addition automatically ratchets the assertion forward.
+
+### 2026-04-24 — T13.5 done — fake-clock harness
+
+Built `backend/tests/_fake_clock.py` (test-only) on top of `freezegun==1.5.5` (added to `requirements.txt` under a "test-only dependencies" comment). Public API: `freeze_time(iso_str_or_dt)` context manager yielding a `FrozenClock` controller with `.advance(seconds_or_timedelta, scheduler=None)`, `.move_to(instant, scheduler=None)`, and `.fire_pending(scheduler)`. APScheduler integration walks `scheduler.get_jobs()` and synchronously fires any trigger whose next-fire-time falls inside the (start, now] window of the advance — no scheduler thread needed, deterministic by construction. Verified with cron (`Sun 23:59`) + DateTrigger smoke tests. Tests: 10 in `tests/test_fake_clock.py` (all green, stable across 3 reps). Migrated `test_export_token_expires_after_24h` in `test_compliance.py` from `now=` injection to `freeze_time + clock.advance(timedelta(hours=25))` — exercises the production `datetime.now(timezone.utc)` code path directly. Authoring docs in `backend/tests/README_fake_clock.md`. arch check clean on harness + harness tests; pre-existing `test_compliance.py` size/function violations are unchanged (645→646 line delta from migration). Wave 0 progress: 2/6.
+
+**What's next:** Wave 0 remaining tasks (T13.2 demo seed extension, T13.3 reset CLI, T13.4 axe-core install, T13.128 stand up staging) can run in parallel as independent driver sessions. Once Wave 0 lands, Tier-1 browser suite authoring (T13.10–T13.52) unblocks.
 
 ### 2026-04-24 — T13.1 done — QC foundation files
 
 Created `.paircoder/qc/config.yaml` (dev/staging/prod environment profiles), `.paircoder/qc/suites/_template.qc.yaml` (full schema reference with all six step types documented inline), and `.paircoder/qc/suites/README.md` (authoring conventions, canonical tag list, invocation paths). Divona smoke-load passed all four schema checks. arch check clean. Wave 0 progress: 1/6.
-
-**What's next:** Wave 0 remaining tasks (T13.2 demo seed extension, T13.3 reset CLI, T13.4 axe-core install, T13.5 fake-clock harness, T13.128 stand up staging) can run in parallel as independent driver sessions. Once Wave 0 lands, Tier-1 browser suite authoring (T13.10–T13.52) unblocks.
 
 ### 2026-04-24 — S13 QC + Submission Readiness planned (/pc-plan)
 

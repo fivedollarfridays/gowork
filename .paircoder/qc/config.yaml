@@ -38,9 +38,13 @@ environments:
 
   staging:
     description: Hosted staging. Full read-write QC against deployed app.
-    # Populated by T13.128 once staging is provisioned.
-    frontend_url: https://staging.montgowork.example
-    backend_url: https://staging-api.montgowork.example
+    # T13.128: replace these placeholders after `fly deploy` completes
+    # (see docs/runbooks/staging-deploy.md §3.8). Default Fly URLs are
+    # https://montgowork-staging-web.fly.dev and
+    # https://montgowork-staging-api.fly.dev — overwrite with your
+    # custom CNAME if you set one up per runbook §5.
+    frontend_url: ${STAGING_FRONTEND_URL}  # e.g. https://montgowork-staging-web.fly.dev
+    backend_url: ${STAGING_BACKEND_URL}   # e.g. https://montgowork-staging-api.fly.dev
     db_path: null  # Remote; QC reset goes through the staging admin endpoint.
     test_credentials:
       worker_montgomery: ${STAGING_WORKER_MGM_SESSION}

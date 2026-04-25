@@ -1,0 +1,43 @@
+# Fly.io app config — MontGoWork frontend (staging)
+#
+# T13.128 — staging deploy artifact. Pairs with fly.backend.toml.
+#
+# Build-time NEXT_PUBLIC_API_URL is required (Next.js bakes
+# NEXT_PUBLIC_* values into the client bundle at build time).
+# We pass it via `fly deploy --build-arg NEXT_PUBLIC_API_URL=...` —
+# see runbook §3 for the exact command.
+
+app = "montgowork-staging-web"
+primary_region = "iad"
+
+[build]
+  dockerfile = "../../Dockerfile.frontend"
+  # NEXT_PUBLIC_API_URL must be supplied at deploy time as a
+  # --build-arg. See runbook §3.
+
+[env]
+  NODE_ENV = "production"
+  PORT = "3000"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "10s"
+    method = "GET"
+    path = "/"
+    protocol = "http"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
+
+[deploy]
+  strategy = "rolling"

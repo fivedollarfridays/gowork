@@ -257,15 +257,16 @@ def test_export_signed_link_round_trip(
 def test_export_token_expires_after_24h(
     migrated_db: str, secret_env: None,
 ) -> None:
+    """Token signed at T0 fails verify after 25h (fake-clock harness, T13.5)."""
+    from tests._fake_clock import freeze_time
     from app.modules.compliance import export
 
     _seed_session(migrated_db, "sess-exp-ttl")
-    past = _NOW - timedelta(hours=25)
-    token = export.sign_export_token(
-        "sess-exp-ttl", archive_id="arc-x", now=past,
-    )
-    with pytest.raises(export.ComplianceTokenError):
-        export.verify_export_token(token, db_path=migrated_db, now=_NOW)
+    with freeze_time("2026-04-19T12:00:00+00:00") as clock:
+        token = export.sign_export_token("sess-exp-ttl", archive_id="arc-x")
+        clock.advance(timedelta(hours=25))
+        with pytest.raises(export.ComplianceTokenError):
+            export.verify_export_token(token, db_path=migrated_db)
 
 
 def test_export_token_atomic_under_concurrency(
