@@ -31,6 +31,41 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+- **T13.70 done** (auto-updated by hook)
+
+- **T13.63 done** (auto-updated by hook)
+
+- **T13.57 done** (auto-updated by hook)
+
+- **T13.56 done** (auto-updated by hook)
+
+- **T13.70 done** — Compliance Cascade Verification. New `backend/tests/test_compliance_cascade.py` (520L, 6 tests) introspects `sqlite_master` + `PRAGMA foreign_key_list` to enumerate every session-scoped table, seeds one row in each, runs `full_delete`, and asserts zero rows survive (audit row exempt by allowlist). Schema-drift guard fails CI with the offending name if a future migration adds a session-scoped table without wiring it to the cascade. **Bug found & fixed:** introspection revealed 4 m001 tables (`feedback_tokens`, `visit_feedback`, `resource_feedback`, `share_tokens`) that carry a `session_id` column but no FK — `full_delete` was leaking these rows. Added them to `delete._NON_CASCADING_TABLES` (now 5 entries: `record_profiles` + the 4 newly covered). 6/6 cascade tests + 18/18 existing compliance + 16/16 qc_reset green; arch check shows warnings only (test 520L < 600 error; delete.py 163L < 300 error).
+
+### 2026-04-24 — T13.70 driver session — Compliance Cascade Verification
+
+Built schema-introspection-driven cascade test that locks in the `full_delete` invariant for current and future session-scoped tables.
+
+**Files created:**
+- `backend/tests/test_compliance_cascade.py` (520L) — 6 tests across 3 axes: introspection sanity, full-delete-clears-all, schema-drift guard. Module docstring documents the FK + session_id-column union strategy and the allowlist contract.
+
+**Files modified:**
+- `backend/app/modules/compliance/delete.py` — `_NON_CASCADING_TABLES` extended from `("record_profiles",)` to a 5-tuple covering all m001 session-keyed tables (`record_profiles`, `feedback_tokens`, `visit_feedback`, `resource_feedback`, `share_tokens`). Comment block above the tuple now points at this test as the lock-in mechanism for future drift.
+
+**Tables discovered via introspection (14):** 9 FK-cascading (m002/m003: `appointments`, `daily_progress_snapshots`, `engagement_events`, `job_applications`, `outcomes_records`, `plan_history`, `reminder_cooldowns`, `resume_versions`, `worker_unavailability`) + 5 m001 session-keyed without FK (`record_profiles`, `feedback_tokens`, `visit_feedback`, `resource_feedback`, `share_tokens`).
+
+**Allowlist (1 entry):** `compliance_audit` — written by `full_delete` itself, stores `session_id_hash` (sha256), retained as the immutable audit trail.
+
+**Cascade gap fixed:** prior to this task, `full_delete` only manually cleared `record_profiles`. SQLite's `ON DELETE CASCADE` chain triggered by the `DELETE FROM sessions` row took care of every m002 child but did NOT touch the 4 m001 legacy tables (no FK declared). Without this fix, a worker requesting full deletion would have left `feedback_tokens`, `visit_feedback`, `resource_feedback`, and `share_tokens` rows in the DB pointing at a now-orphan session id — a real PII-retention bug. Cross-references `scripts/_qc_reset_wipe.SESSION_KEYED_TABLES` (T13.3): the QC reset script already treated these 4 as session-keyed, so the demo wipe was correct but the production right-to-delete path was incomplete. Both lists are now consistent.
+
+**Acceptance criteria (T13.70 spec):**
+- Table inventory generated via schema introspection: `_user_tables`, `_tables_with_fk_to_sessions`, `_tables_with_session_id_column`, `_session_scoped_tables`. Verified by `test_introspection_returns_expected_session_scoped_tables`.
+- `full_delete` followed by `count(*)==0` on every listed table: `test_full_delete_clears_every_session_scoped_table` (introspect-driven loop, no hard-coded list).
+- Audit row retained (explicit exception): `_RETAIN_ALLOWLIST` documents `compliance_audit` with reason; `test_compliance_audit_row_retained_after_full_delete` asserts the `full_delete` action row survives.
+- New session-scoped table fails CI: `test_every_session_scoped_table_is_covered_or_allowlisted` walks introspection results and asserts each table is either (a) FK-cascading, (b) in `delete._NON_CASCADING_TABLES`, or (c) in the test's `_RETAIN_ALLOWLIST`. The error message names the offending table and lists the 3 fix options.
+- `bpsai-pair arch check` passes: 0 errors. Test file 520L (warning at 400, error at 600 — within bounds). delete.py 163L (warning at 150 due to project-tightened threshold; error at 300 — within bounds).
+
+**Test results:** 6/6 pass in 0.06s. Regression: 18/18 existing compliance tests + 16/16 qc_reset tests still green.
+
 - **T13.128 done** (auto-updated by hook)
 
 - **T13.3 done** (auto-updated by hook)
