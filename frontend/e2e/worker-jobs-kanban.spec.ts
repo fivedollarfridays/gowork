@@ -39,6 +39,9 @@ test.describe("@critical worker jobs kanban", () => {
     await expect(page.getByTestId("kanban-board")).toBeVisible();
 
     // Six canonical columns from `STATUS_COLUMNS` in kanbanHelpers.ts.
+    // The h2 heading text is "<Label> <count>" (count badge inside the
+    // heading), so the accessible name is e.g. "Draft 0". Match the
+    // region instead — its aria-label is the bare label.
     for (const label of [
       "Draft",
       "Applied",
@@ -48,7 +51,7 @@ test.describe("@critical worker jobs kanban", () => {
       "Withdrawn",
     ]) {
       await expect(
-        page.getByRole("heading", { name: new RegExp(`^${label}$`) }).first(),
+        page.getByRole("region", { name: label, exact: true }),
       ).toBeVisible();
     }
   });
