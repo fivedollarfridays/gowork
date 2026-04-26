@@ -3,7 +3,7 @@ uvicorn[standard]==0.46.0
 sqlalchemy[asyncio]==2.0.48
 aiosqlite==0.22.1
 pydantic==2.12.5
-pydantic-settings==2.13.1
+pydantic-settings==2.14.0
 httpx==0.28.1
 structlog==25.5.0
 alembic==1.18.4
