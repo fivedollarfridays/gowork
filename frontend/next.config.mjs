@@ -13,9 +13,11 @@ const nextConfig = {
     optimizePackageImports: ['lucide-react', 'framer-motion'],
   },
   async headers() {
-    // connect-src: include localhost only in dev (S-M5)
+    // connect-src: include localhost only in dev (S-M5).
+    // Dev allows any localhost port so test backends on alternate ports
+    // (e.g. Playwright using :8888 vs the canonical :8000) aren't blocked.
     const connectSrc = isDev
-      ? "connect-src 'self' http://localhost:8000 https://*.railway.app https://*.up.railway.app"
+      ? "connect-src 'self' http://localhost:* http://127.0.0.1:* https://*.railway.app https://*.up.railway.app"
       : "connect-src 'self' https://*.montgowork.com https://*.railway.app https://*.up.railway.app";
 
     const securityHeaders = [

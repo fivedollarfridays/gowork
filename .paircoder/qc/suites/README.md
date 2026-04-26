@@ -125,6 +125,26 @@ Drift between the two is a CI failure once T13.125 lands.
 Only the **top-five** critical paths should carry `@critical`. Broader
 coverage stays in divona where author intent and visual judgment matter.
 
+### `@critical` index — demo-gating Playwright specs
+
+These six specs gate the hackathon demo. Each mirrors one beat of the
+demo script; if any one fails on a PR, the demo path is broken. Run all
+of them with `cd frontend && npm run test:e2e -- --grep "@critical"`.
+
+| # | Spec file (under `frontend/e2e/`) | Demo beat | Notes |
+|---|-----------------------------------|-----------|-------|
+| 1 | `worker-onboarding.spec.ts` | Beat 1: home → assess | No auth required |
+| 2 | `worker-daily-loop.spec.ts` | Beat 2: tokenized digest | Worker session via URL params |
+| 3 | `worker-resume-llm-off.spec.ts` | Beat 3: template-mode resume | Asserts version-history wiring; no mutation |
+| 4 | `worker-jobs-kanban.spec.ts` | Beat 4: jobs board | Render + columns; drag covered by divona |
+| 5 | `worker-compliance-export.spec.ts` | Beat 5: data export | API-level (`request.post` / `request.get`) |
+| 6 | `advisor-login-inbox.spec.ts` | Beat 6: advisor inbox | `?advisor_token=...` URL param auth |
+
+Demo-session credentials live in `frontend/e2e/_demo_session.ts` —
+deterministic IDs + tokens derived from the seed in
+`backend/app/demo_seed_s12b.py` + `_demo_seed_qc.py`. Refresh those
+constants if either seed module's hash inputs change.
+
 ---
 
 ## How to invoke
