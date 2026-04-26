@@ -50,6 +50,11 @@ const mockedGet = vi.mocked(getCareerCenterPackage);
 describe("CareerCenterExport", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // vi.doMock("html2pdf.js") below only applies to FUTURE imports.
+    // Without resetModules, a prior test's import is cached and the
+    // mock silently no-ops — handler hits the real module, throws,
+    // setGenerating(false) lands before waitFor can see "Generating...".
+    vi.resetModules();
   });
 
   it("renders a Career Center PDF button", () => {
