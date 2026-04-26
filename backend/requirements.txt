@@ -1,5 +1,5 @@
 fastapi==0.135.1
-uvicorn[standard]==0.41.0
+uvicorn[standard]==0.46.0
 sqlalchemy[asyncio]==2.0.48
 aiosqlite==0.22.1
 pydantic==2.12.5
