@@ -259,11 +259,15 @@ class TestSuccessResponseFormat:
         r2 = await client.get(f"/api/plan/shared/{share_tok}")
         assert r2.status_code == 200
         data = r2.json()
+        # Public payload contract (T13.71 P1): redacted shape.
         expected_keys = {
-            "session_id", "created_at", "barriers",
+            "created_at", "barriers_count",
             "next_steps", "career_center_name", "career_center_phone",
         }
         assert expected_keys.issubset(data.keys())
+        # Explicitly assert PII fields are absent.
+        assert "session_id" not in data
+        assert "barriers" not in data
 
     @pytest.mark.anyio
     async def test_intelligence_response_format(self, client, test_engine):

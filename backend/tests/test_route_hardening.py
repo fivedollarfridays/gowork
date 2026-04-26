@@ -185,8 +185,10 @@ class TestSharePlanEdgeCases:
         r2 = await client.get(f"/api/plan/shared/{share_tok}")
         assert r2.status_code == 200
         data = r2.json()
-        assert "session_id" in data
-        assert "barriers" in data
+        # Public payload is redacted (T13.71 P1): no session_id, no raw barriers.
+        assert "session_id" not in data
+        assert "barriers" not in data
+        assert "barriers_count" in data
         assert "next_steps" in data
         assert "created_at" in data
         assert "career_center_name" in data

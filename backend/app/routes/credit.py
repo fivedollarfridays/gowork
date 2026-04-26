@@ -14,8 +14,20 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/credit", tags=["credit"])
 
-_rate_limiter = RateLimiter(max_requests=10, window_seconds=60)
-_check_rate = require_rate_limit(_rate_limiter)
+# T13.99 — Tightened from 10/60s to 5/60s to mirror ``routes/plan.py``;
+# the credit endpoint hits a paid outbound microservice every call.
+#
+# Note on keying: ``SimpleCreditRequest`` does not carry a
+# ``session_id`` field, so this limiter keys by client IP via
+# ``require_rate_limit``. If the request schema gains ``session_id``
+# in the future, switch to in-handler ``.check(session_id)`` for the
+# same per-session axis used by ``routes/documents.py``.
+_credit_rate_limiter = RateLimiter(max_requests=5, window_seconds=60)
+_check_rate = require_rate_limit(_credit_rate_limiter)
+
+# Backwards-compat alias so existing tests / callers that import
+# ``_rate_limiter`` continue to work after T13.99 renamed the symbol.
+_rate_limiter = _credit_rate_limiter
 
 
 def _check_credit_response(resp: httpx.Response) -> None:

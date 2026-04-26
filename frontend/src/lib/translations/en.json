@@ -37,6 +37,27 @@
     "cta": "Get Your Plan",
     "creditCta": "Check Credit"
   },
+  "home": {
+    "heroQuestion": "What's standing between you and a job?",
+    "heroBlurb": "MontGoWork is a workforce navigator that helps you overcome barriers and find your path to employment.",
+    "ctaPlan": "Get Your Plan",
+    "ctaCredit": "Check Credit",
+    "howHeading": "How It Works",
+    "stepLabel": "Step",
+    "stepAssessTitle": "Assess",
+    "stepAssessDesc": "Answer a few questions about your situation, barriers, and work history",
+    "stepMatchTitle": "Match",
+    "stepMatchDesc": "We match you with jobs, resources, and transit routes in your area",
+    "stepPlanTitle": "Plan",
+    "stepPlanDesc": "Get a personalized action plan: what to do Monday morning",
+    "numbersHeading": "By the Numbers",
+    "numbersSubtitlePrefix": "Understanding the workforce landscape in",
+    "statPoverty": "Poverty Rate",
+    "statLabor": "Labor Participation",
+    "bottomCtaTitle": "Ready to get started?",
+    "bottomCtaBody": "It takes about 2 minutes. No account needed.",
+    "bottomCtaButton": "Start Your Assessment"
+  },
   "howItWorks": {
     "heading": "How It Works",
     "step1Title": "Assess",
@@ -82,7 +103,18 @@
     "overnight": "Overnight (10pm - 6am)",
     "flexible": "Flexible / Any shift",
     "iHaveVehicle": "I have a vehicle",
-    "privacyBadge": "We don't store your identity. No login. No tracking. Your data stays on your device."
+    "privacyBadge": "We don't store your identity. No login. No tracking. Your data stays on your device.",
+    "stepBasicInfo": "Basic Info",
+    "stepResume": "Resume",
+    "stepBarriers": "Barriers",
+    "stepRecord": "Record Details",
+    "stepBenefits": "Benefits",
+    "stepSchedule": "Schedule",
+    "stepIndustries": "Industries",
+    "stepCredit": "Credit Check",
+    "stepReview": "Review & Submit",
+    "errorSubmit": "Something went wrong submitting your assessment. Please try again.",
+    "errorCredit": "Credit check could not be completed. Continuing without credit data."
   },
   "plan": {
     "heading": "Your Action Plan",
@@ -102,7 +134,47 @@
     "noRecovery": "Net income does not fully recover within the analyzed wage range.",
     "sharePlan": "Share Plan",
     "downloadPdf": "Download PDF",
-    "progress": "Progress"
+    "progress": "Progress",
+    "emptyNoSession": "No session ID provided.",
+    "emptyNoToken": "No access token found.",
+    "emptyStartCta": "Start an assessment",
+    "errorNotFound": "Session not found. It may have expired.",
+    "errorGeneric": "Something went wrong loading your plan. Please try again.",
+    "errorFallback": "Something went wrong loading your plan.",
+    "errorStartNew": "Start a new assessment",
+    "matchesEmptyTitle": "No job matches yet",
+    "matchesEmptyDesc": "We're still looking for the best matches for your profile. Check back soon or update your assessment.",
+    "matchesEmptyAction": "Update Assessment",
+    "yourBarriers": "Your Barriers",
+    "creditAssessmentHeading": "Credit Assessment",
+    "jobReadinessHeading": "Job Readiness",
+    "whatsNextHeading": "What's Next?",
+    "whatsNextDownloadStrong": "Download your Career Center Ready Package",
+    "whatsNextDownloadDesc": "using the button in Step 1 above.",
+    "whatsNextBringPlanPrefix": "Bring this plan to the",
+    "whatsNextAskCaseManager": "Ask for a case manager",
+    "whatsNextAskCaseManagerDesc": "and show them your Career Center Ready Package.",
+    "whatsNextStartNew": "Start New Assessment"
+  },
+  "credit": {
+    "heading": "Credit Assessment",
+    "scoreLabel": "Credit Score (300-850)",
+    "utilizationLabel": "Credit Utilization (%)",
+    "paymentHistoryLabel": "Payment History (%)",
+    "accountAgeLabel": "Average Account Age (months)",
+    "totalAccountsLabel": "Total Accounts",
+    "openAccountsLabel": "Open Accounts",
+    "assessButton": "Assess Credit",
+    "analyzing": "Analyzing...",
+    "errorPrefix": "Error:",
+    "tryAgain": "Try Again",
+    "barrierSeverityLabel": "Barrier Severity:",
+    "encouragement": "You're taking a great step by understanding your credit. Knowledge is the first step to improvement.",
+    "thresholdsHeading": "Credit Thresholds",
+    "thresholdMet": "Met",
+    "thresholdDays": "days",
+    "eligibilityHeading": "Product Eligibility",
+    "runAnother": "Run Another Assessment"
   },
   "barriers": {
     "credit": "Credit",
@@ -148,7 +220,12 @@
     "copied": "Copied!",
     "shareButton": "Share Plan",
     "sharing": "Sharing...",
-    "shareFailed": "Failed"
+    "shareFailed": "Failed",
+    "barriersZero": "No focus areas identified",
+    "barriersOne": "1 focus area identified",
+    "barriersMany": "{{count}} focus areas identified",
+    "focusAreasTitle": "Focus areas",
+    "careerCenterTitle": "Career Center"
   },
   "sequence": {
     "heading": "Barrier Resolution Order",
@@ -358,5 +435,114 @@
     "noteRateLimited": "Rate limit hit: too many notes in the past hour. Try again later.",
     "noteForbidden": "Access denied for this session — it is not in your city.",
     "noteGenericError": "We could not send that note. Please try again."
+  },
+  "footer": {
+    "entity": "MontGoWork (hackathon project)",
+    "tagline": "Workforce Navigator",
+    "navLabel": "Legal",
+    "privacy": "Privacy",
+    "terms": "Terms"
+  },
+  "privacy": {
+    "heading": "Privacy Policy",
+    "lastUpdated": "Last updated",
+    "counselNotice": "Hackathon-grade placeholder — this policy was authored fresh for the MontGoWork submission and has not been reviewed by counsel. Production rollout requires legal review.",
+    "seeAlso": "See also our",
+    "termsLink": "Terms of Service",
+    "esPlaceholder": "(Spanish-only placeholder string; never rendered when locale is English.)",
+    "collect": {
+      "heading": "What we collect",
+      "intro": "We collect only what we need to run the service. Specifically:"
+    },
+    "purpose": {
+      "heading": "Why we collect it"
+    },
+    "audience": {
+      "heading": "Who can see it"
+    },
+    "processors": {
+      "heading": "Third-party processors",
+      "intro": "We use a small set of vendors to deliver the service. They process data on our behalf (they are processors, not controllers) and are contractually bound to use it only for the purpose described."
+    },
+    "rights": {
+      "heading": "Your rights",
+      "intro": "You have the right to see, correct, and delete the data we hold about you, plus the right to know what we have. Each right has a one-click action in the app:"
+    },
+    "children": {
+      "heading": "Children"
+    },
+    "california": {
+      "heading": "California residents (CCPA)"
+    },
+    "security": {
+      "heading": "Security"
+    },
+    "changes": {
+      "heading": "Changes to this policy"
+    },
+    "contact": {
+      "heading": "Contact"
+    }
+  },
+  "terms": {
+    "heading": "Terms of Service",
+    "lastUpdated": "Last updated",
+    "counselNotice": "Hackathon-grade placeholder — these terms were authored fresh for the MontGoWork submission and have not been reviewed by counsel. Production rollout requires legal review.",
+    "seeAlso": "See also our",
+    "privacyLink": "Privacy Policy",
+    "esPlaceholder": "(Spanish-only placeholder string; never rendered when locale is English.)",
+    "eligibility": {
+      "heading": "Eligibility"
+    },
+    "service": {
+      "heading": "The service"
+    },
+    "account": {
+      "heading": "Your session (no traditional account)"
+    },
+    "acceptable": {
+      "heading": "Acceptable use"
+    },
+    "content": {
+      "heading": "Content you submit"
+    },
+    "ai": {
+      "heading": "AI-generated output"
+    },
+    "termination": {
+      "heading": "Termination"
+    },
+    "disclaimers": {
+      "heading": "Disclaimers"
+    },
+    "liability": {
+      "heading": "Liability cap"
+    },
+    "disputes": {
+      "heading": "Disputes"
+    },
+    "law": {
+      "heading": "Governing law"
+    },
+    "changes": {
+      "heading": "Changes to these terms"
+    },
+    "contact": {
+      "heading": "Contact"
+    }
+  },
+  "errors": {
+    "404": {
+      "title": "Page not found",
+      "body": "The page you were looking for doesn't exist or has moved. Let's get you back on track.",
+      "cta_home": "Back to home",
+      "cta_daily": "Open my daily plan"
+    },
+    "500": {
+      "title": "Something went wrong",
+      "body": "We hit an unexpected snag. The request was logged and our team will take a look. You can try again or head back home.",
+      "cta_retry": "Try again",
+      "cta_home": "Back to home"
+    }
   }
 }

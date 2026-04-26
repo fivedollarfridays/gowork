@@ -26,6 +26,8 @@ import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 
+from app.core.token_kids import KNOWN_KIDS
+
 __all__ = [
     "TokenError",
     "TokenInvalid",
@@ -40,9 +42,20 @@ _SECRET_OLD_ENV_VAR = "UNSUBSCRIBE_TOKEN_SECRET_OLD"
 _DEFAULT_TTL_SEC = 30 * 24 * 3600  # 30 days — unsubscribe links live in old emails
 _ACTION = "unsubscribe"
 
+# Kid values come from the shared `app.core.token_kids.KNOWN_KIDS`
+# whitelist. Unknown kids are rejected outright — no fall-through to
+# "try every active secret".
+# Mirrors the T13.62 hardening in app.modules.appointments.tokens.
+
 
 class TokenError(ValueError):
-    """Base class — the unsubscribe route converts every subclass to 401."""
+    """Base class for unsubscribe-token failures.
+
+    The route layer maps :class:`TokenInvalid` and :class:`TokenExpired`
+    to a uniform 401 (no enumeration oracle); :class:`TokenAlreadyUsed`
+    is treated as an idempotent success per CAN-SPAM Section 5(a)(4)
+    (see ``app.routes.engagement._process_unsubscribe``).
+    """
 
 
 class TokenInvalid(TokenError):
@@ -54,7 +67,18 @@ class TokenExpired(TokenError):
 
 
 class TokenAlreadyUsed(TokenError):
-    """Signature valid but the token has already been consumed (replay)."""
+    """Signature valid but the token has already been consumed (replay).
+
+    The :attr:`session_id` attribute carries the *authenticated* session
+    id (signature + ``exp`` were both verified before this exception was
+    raised) so that idempotent callers — notably the unsubscribe route,
+    which must satisfy CAN-SPAM by returning 200 on duplicate clicks —
+    can return a successful response without a second decode pass.
+    """
+
+    def __init__(self, message: str, *, session_id: str | None = None) -> None:
+        super().__init__(message)
+        self.session_id = session_id
 
 
 # ----------------------------------------------------------------- helpers
@@ -167,6 +191,8 @@ def _decode_and_verify_signature(token: str) -> dict:
     if payload.get("act") != _ACTION:
         raise TokenInvalid("wrong action for unsubscribe scope")
     payload_kid = payload.get("kid", "current")
+    if payload_kid not in KNOWN_KIDS:
+        raise TokenInvalid("unknown kid")
     active = _active_secrets()
     candidates = (
         [(k, s) for k, s in active if k == "old"]
@@ -216,6 +242,8 @@ def _consume_or_raise(
         )
         conn.commit()
         if cursor.rowcount != 1:
-            raise TokenAlreadyUsed("token already consumed")
+            raise TokenAlreadyUsed(
+                "token already consumed", session_id=session_id,
+            )
     finally:
         conn.close()

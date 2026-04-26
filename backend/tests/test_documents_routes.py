@@ -51,6 +51,22 @@ def _isolate_event_bus() -> Iterator[None]:
     events.clear_all_subscribers()
 
 
+@pytest.fixture(autouse=True)
+def _reset_doc_rate_limiter() -> Iterator[None]:
+    """T13.99 — clear the per-session rate limiter between tests.
+
+    The limiter is a module-level singleton, so without this fixture
+    the constant ``_SESSION_A`` would carry timestamps from one test
+    into the next and tests after the 5th POST in a process would
+    spuriously 429.
+    """
+    from app.routes.documents import _doc_gen_rate_limiter
+
+    _doc_gen_rate_limiter.clear()
+    yield
+    _doc_gen_rate_limiter.clear()
+
+
 @pytest.fixture
 def db_path(tmp_path: Path) -> str:
     path = str(tmp_path / "documents_api.db")

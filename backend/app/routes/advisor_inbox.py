@@ -97,12 +97,24 @@ def _build_audit_payload(
     *, advisor_id: str, city: str, action: str,
     session_id: str | None, extra: dict[str, Any] | None,
 ) -> dict[str, Any]:
-    """Compose the JSON payload for an advisor-action audit row."""
+    """Compose the JSON payload for an advisor-action audit row.
+
+    The session id is stored as a SHA256 hash (``session_id_hash``) so
+    a compromised audit dump does not reverse-resolve the worker id —
+    matches the ``compliance_audit`` discipline. The raw id stays in
+    the FK column on ``engagement_events.session_id`` for queryability;
+    duplicating the raw id here would weaken the audit-row contract
+    (T13.59).
+    """
+    from app.modules.compliance._audit import hash_session_id
+
     payload: dict[str, Any] = {
         "action": action,
         "advisor_id_hash": hash_advisor_id(advisor_id),
         "city": city,
-        "session_id": session_id,
+        "session_id_hash": (
+            hash_session_id(session_id) if session_id else None
+        ),
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
     if extra:

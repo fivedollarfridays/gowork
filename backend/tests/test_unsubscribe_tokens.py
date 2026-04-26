@@ -20,6 +20,10 @@ the two namespaces collision-free.
 
 from __future__ import annotations
 
+import base64
+import hashlib
+import hmac
+import json
 import sqlite3
 import threading
 from datetime import datetime, timedelta, timezone
@@ -28,6 +32,7 @@ from pathlib import Path
 import pytest
 
 from app.core.migrations import runner
+from tests._fake_clock import freeze_time
 
 _SECRET_CURRENT = "unsub-current-secret-for-tests-0123456789abcdef"
 _SECRET_OLD = "unsub-old-secret-for-tests-fedcba9876543210aaaa"
@@ -207,3 +212,121 @@ def test_key_rotation_missing_old_invalidates(
     monkeypatch.delenv("UNSUBSCRIBE_TOKEN_SECRET_OLD", raising=False)
     with pytest.raises(ut.TokenInvalid):
         ut.verify(token, db_path=migrated_db)
+
+
+# -------------------------------------------------------- kid whitelist
+#
+# These tests pin the T13.62 follow-up hardening: any kid that is neither
+# ``current`` nor ``old`` must reject up front, regardless of whether the
+# attacker signed the payload with a deployed secret. Pre-fix, the
+# verifier fell through to the active-secret pool for any kid that was
+# not literally ``"old"``, which let a forged ``kid='future'`` token slip
+# past. We hand-mint tokens with explicit kids because the production
+# ``sign`` function only ever stamps ``kid='current'``.
+
+
+def _b64url(raw: bytes) -> str:
+    return base64.urlsafe_b64encode(raw).rstrip(b"=").decode("ascii")
+
+
+def _hand_mint_unsub_token(
+    *, secret: str, sid: str, kid: str, iat: int, exp: int,
+) -> str:
+    """Build an unsubscribe token with an explicit kid + secret pair."""
+    payload = {
+        "sid": sid,
+        "act": "unsubscribe",
+        "exp": int(exp),
+        "iat": int(iat),
+        "kid": kid,
+    }
+    encoded = _b64url(
+        json.dumps(payload, separators=(",", ":"), sort_keys=True).encode()
+    )
+    sig = hmac.new(
+        secret.encode("utf-8"),
+        encoded.encode("ascii"),
+        hashlib.sha256,
+    ).digest()
+    return f"{encoded}.{_b64url(sig)}"
+
+
+def test_kid_current_accepted(
+    migrated_db: str, rotating_env: None,
+) -> None:
+    """Round-trip baseline: a freshly-signed kid='current' token verifies.
+
+    Guards against an over-eager fix that breaks the happy path.
+    """
+    from app.modules.engagement import unsubscribe_tokens as ut
+
+    token = ut.sign("sess-current")
+    assert ut.verify(token, db_path=migrated_db) == "sess-current"
+
+
+def test_kid_old_accepted_with_old_secret(
+    migrated_db: str, rotating_env: None,
+) -> None:
+    """A token signed under OLD with kid='old' verifies during overlap."""
+    from app.modules.engagement import unsubscribe_tokens as ut
+
+    iat = int(datetime(2026, 4, 1, tzinfo=timezone.utc).timestamp())
+    exp = iat + 7 * 24 * 3600  # well within the 30-day TTL.
+
+    old_kid_token = _hand_mint_unsub_token(
+        secret=_SECRET_OLD, sid="sess-old", kid="old", iat=iat, exp=exp,
+    )
+
+    with freeze_time("2026-04-01T06:00:00+00:00"):
+        assert ut.verify(old_kid_token, db_path=migrated_db) == "sess-old"
+
+
+def test_kid_old_rejected_without_old_secret(
+    migrated_db: str, secret_env: None,
+) -> None:
+    """Once the operator unsets OLD, an old-kid token rejects.
+
+    ``secret_env`` sets only UNSUBSCRIBE_TOKEN_SECRET (NEW), not OLD —
+    no remaining secret in the verifier pool can match the OLD-signed
+    signature.
+    """
+    from app.modules.engagement import unsubscribe_tokens as ut
+
+    iat = int(datetime(2026, 4, 1, tzinfo=timezone.utc).timestamp())
+    exp = iat + 7 * 24 * 3600  # well within TTL — failure is not expiry.
+
+    old_kid_token = _hand_mint_unsub_token(
+        secret=_SECRET_OLD, sid="sess-stranded", kid="old", iat=iat, exp=exp,
+    )
+
+    with freeze_time("2026-04-01T06:00:00+00:00"):
+        with pytest.raises(ut.TokenInvalid):
+            ut.verify(old_kid_token, db_path=migrated_db)
+
+
+def test_unknown_kid_rejected(
+    migrated_db: str, rotating_env: None,
+) -> None:
+    """A token whose kid is neither 'current' nor 'old' must reject.
+
+    Even if the attacker signs the payload with one of the deployed
+    secrets, the kid is part of the signed payload and is the authority
+    for which secret pool to consult. Pre-fix the verifier fell through
+    to the full active pool for any kid != 'old', so a NEW-signed
+    forgery tagged ``kid='future'`` would pass. Mirrors the
+    appointment-token T13.62 hardening.
+    """
+    from app.modules.engagement import unsubscribe_tokens as ut
+
+    iat = int(datetime(2026, 4, 1, tzinfo=timezone.utc).timestamp())
+    exp = iat + 7 * 24 * 3600
+
+    # Sign with the live NEW (current) secret but tag kid='future'.
+    forged = _hand_mint_unsub_token(
+        secret=_SECRET_CURRENT, sid="sess-forged", kid="future",
+        iat=iat, exp=exp,
+    )
+
+    with freeze_time("2026-04-01T06:00:00+00:00"):
+        with pytest.raises(ut.TokenInvalid):
+            ut.verify(forged, db_path=migrated_db)

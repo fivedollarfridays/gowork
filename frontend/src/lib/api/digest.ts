@@ -110,9 +110,19 @@ export async function previewDigest(
     token,
   };
   if (forDate) params.for_date = forDate;
-  const res = await fetch(
-    `${API_BASE}/api/engagement/preview-digest?${qs(params)}`,
-  );
+  // T13.92 — 30s hard timeout so a stalled backend doesn't hang the
+  // digest preview indefinitely.
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30_000);
+  let res: Response;
+  try {
+    res = await fetch(
+      `${API_BASE}/api/engagement/preview-digest?${qs(params)}`,
+      { signal: controller.signal },
+    );
+  } finally {
+    clearTimeout(timeoutId);
+  }
   if (!res.ok) {
     const body = await res
       .json()

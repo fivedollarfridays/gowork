@@ -138,4 +138,55 @@ describe("appointments API client", () => {
       /invalid session/,
     );
   });
+
+  it(
+    "still aborts via local timeout even when caller supplies their own signal (T13 stage-2 P1-4)",
+    async () => {
+      // Regression for the timeout-shadowing bug: previously the code
+      // used ``init?.signal ?? controller.signal`` which dropped the
+      // local timeout whenever the caller passed a signal. We now
+      // compose both via ``AbortSignal.any``, so the local timeout
+      // must still fire even with a caller signal in play.
+      vi.useFakeTimers();
+      try {
+        // fetch resolves only when the signal it received aborts.
+        let observedSignal: AbortSignal | undefined;
+        fetchMock.mockImplementationOnce(
+          (_url: string, init: RequestInit) => {
+            observedSignal = init.signal as AbortSignal | undefined;
+            return new Promise((_resolve, reject) => {
+              observedSignal?.addEventListener("abort", () => {
+                reject(
+                  Object.assign(new Error("aborted"), { name: "AbortError" }),
+                );
+              });
+            });
+          },
+        );
+
+        const callerController = new AbortController();
+        const { createAppointment } = await import("../appointments");
+        const promise = createAppointment(
+          { session_id: "s", type: "t", title: "x" },
+          "tkn",
+          // @ts-expect-error — caller-supplied signal not in the
+          // public type but accepted by the underlying ``apiFetch``.
+          { signal: callerController.signal },
+        );
+        // Tell vitest to ignore the unhandled rejection that surfaces
+        // when fake-timers fire the timeout abort.
+        promise.catch(() => undefined);
+
+        // Advance past the 30s hard timeout. If the caller signal had
+        // shadowed the local one, this would NOT trigger an abort and
+        // ``promise`` would hang.
+        await vi.advanceTimersByTimeAsync(31_000);
+
+        await expect(promise).rejects.toMatchObject({ name: "AbortError" });
+        expect(observedSignal).toBeDefined();
+      } finally {
+        vi.useRealTimers();
+      }
+    },
+  );
 });

@@ -137,6 +137,7 @@ class TestFetchUSAJobs:
             },
         }
         mock_response.raise_for_status = MagicMock()
+        mock_response.status_code = 200  # T13.92 retry helper inspects status_code
 
         mock_client = AsyncMock()
         mock_client.get.return_value = mock_response
@@ -160,6 +161,7 @@ class TestFetchUSAJobs:
             "SearchResult": {"SearchResultItems": []},
         }
         mock_response.raise_for_status = MagicMock()
+        mock_response.status_code = 200  # T13.92 retry helper inspects status_code
 
         mock_client = AsyncMock()
         mock_client.get.return_value = mock_response
@@ -178,6 +180,7 @@ class TestFetchUSAJobs:
         mock_response = MagicMock()
         mock_response.json.return_value = {"SearchResult": {"SearchResultItems": []}}
         mock_response.raise_for_status = MagicMock()
+        mock_response.status_code = 200  # T13.92 retry helper inspects status_code
 
         mock_client = AsyncMock()
         mock_client.get.return_value = mock_response

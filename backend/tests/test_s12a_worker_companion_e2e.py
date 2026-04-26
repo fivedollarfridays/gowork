@@ -53,6 +53,16 @@ from app.modules.common.temporal_types import (
     StallLevel,
 )
 from app.modules.engagement.stall_detector import compute_stall_for_session
+from tests._fake_clock import freeze_time as _freeze_time
+
+
+@pytest.fixture
+def _freeze_non_sunday():
+    """Freeze clock to Wednesday 2026-04-22 12:00 UTC so the orchestrator's
+    Sunday branch (weekly_review email on top of daily digest) doesn't fire
+    and inflate the assertion count."""
+    with _freeze_time("2026-04-22T12:00:00+00:00"):
+        yield
 from app.modules.jobs import applications as job_applications
 from app.modules.jobs.funnel_analytics import (
     SuppressedCell,
@@ -272,6 +282,7 @@ def test_flow2_stall_soft_surfaces_in_digest(
 
 
 @pytest.mark.parametrize("city", _CITIES)
+@pytest.mark.usefixtures("_freeze_non_sunday")
 def test_flow3_nightly_cycle_end_to_end(
     db_path: str, monkeypatch: pytest.MonkeyPatch, city: str,
 ) -> None:
@@ -457,6 +468,7 @@ def test_contract_auto_advance_filtered_from_stall_signals(
 # ====================================================================
 
 
+@pytest.mark.usefixtures("_freeze_non_sunday")
 def test_contract_orchestrator_respects_city_scope(
     db_path: str, monkeypatch: pytest.MonkeyPatch,
 ) -> None:

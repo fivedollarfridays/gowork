@@ -19,6 +19,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from app.modules.compliance._audit import write_audit
+from app.modules.compliance.delete import NON_CASCADING_TABLES
 
 __all__ = ["RETENTION_GRACE_DAYS", "retention_sweep"]
 
@@ -66,7 +67,16 @@ def _select_stale_sessions(
 def _purge_one(
     session_id: str, db_path: str | Path, now: datetime,
 ) -> bool:
-    """Delete one session + cascade; audit. Returns True on success."""
+    """Delete one session + cascade; audit. Returns True on success.
+
+    Mirrors the cascade contract of :func:`compliance.delete.full_delete`:
+    the m002+ session-scoped tables ride the SQLite FK cascade triggered
+    by the parent DELETE, but the m001 ``session_id``-but-no-FK tables
+    (``record_profiles``, ``feedback_tokens``, ``visit_feedback``,
+    ``resource_feedback``, ``share_tokens``) MUST be cleared explicitly
+    or the sweep leaks orphaned PII rows. Same ``NON_CASCADING_TABLES``
+    list, same explicit-DELETE-before-parent-DELETE order.
+    """
     try:
         write_audit(
             db_path=db_path, session_id=session_id,
@@ -77,6 +87,11 @@ def _purge_one(
         conn = sqlite3.connect(str(db_path))
         try:
             conn.execute("PRAGMA foreign_keys = ON")
+            for table in NON_CASCADING_TABLES:
+                conn.execute(
+                    f"DELETE FROM {table} WHERE session_id = ?",
+                    (session_id,),
+                )
             conn.execute(
                 "DELETE FROM sessions WHERE id = ?", (session_id,),
             )

@@ -125,7 +125,7 @@ class ModuleStatus(BaseModel):
     last_activity_at: datetime | None = None
 
 
-def _coerce_to_aware_datetime(value: str | datetime) -> datetime:
+def coerce_to_aware_datetime(value: str | datetime) -> datetime:
     """Accept an ISO-8601 string or datetime; return an aware UTC-anchored dt."""
     if isinstance(value, str):
         s = value.replace("Z", "+00:00")
@@ -165,7 +165,7 @@ def format_city_local(value: str | datetime, city: str) -> str:
     if tz_name is None:
         raise KeyError(f"No timezone configured for city {city!r}")
 
-    dt = _coerce_to_aware_datetime(value)
+    dt = coerce_to_aware_datetime(value)
     local_dt = dt.astimezone(ZoneInfo(tz_name))
 
     hour = local_dt.hour % 12 or 12
@@ -192,5 +192,5 @@ __all__ = [
     "AppointmentStatus", "AppointmentType", "EngagementEventType",
     "GenerationMethod", "JobApplicationStatus", "ModuleStatus",
     "StallLevel", "TIMEZONE_BY_CITY", "TimezoneAwareModel",
-    "format_city_local", "local_date_in_city",
+    "coerce_to_aware_datetime", "format_city_local", "local_date_in_city",
 ]
