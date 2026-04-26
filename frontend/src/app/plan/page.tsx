@@ -33,6 +33,7 @@ import { BarrierType, EmploymentStatus, AvailableHours } from "@/lib/types";
 import type { CreditAssessmentResult, UserProfile } from "@/lib/types";
 import { barrierCountToSeverity, getCareerCenter, mapsUrl, toTelHref } from "@/lib/constants";
 import { useCityConfig } from "@/hooks/useCityConfig";
+import { t } from "@/lib/i18n";
 
 const BARRIER_TYPE_VALUES = new Set<string>(Object.values(BarrierType));
 
@@ -159,9 +160,9 @@ function PlanContent() {
   if (!sessionId || !token) {
     return (
       <div className="text-center py-12 space-y-3">
-        <p className="text-muted-foreground">{!sessionId ? "No session ID provided." : "No access token found."}</p>
+        <p className="text-muted-foreground">{!sessionId ? t("plan.emptyNoSession") : t("plan.emptyNoToken")}</p>
         <Button asChild variant="outline">
-          <a href="/assess">Start an assessment</a>
+          <a href="/assess">{t("plan.emptyStartCta")}</a>
         </Button>
       </div>
     );
@@ -170,14 +171,14 @@ function PlanContent() {
   if (error) {
     const msg = error instanceof Error ? error.message : String(error);
     const friendlyMessage = msg.includes("404")
-      ? "Session not found. It may have expired."
-      : "Something went wrong loading your plan. Please try again.";
+      ? t("plan.errorNotFound")
+      : t("plan.errorGeneric");
 
     return (
       <div role="alert" className="text-center py-12 space-y-3">
         <p className="text-destructive">{friendlyMessage}</p>
         <Button asChild variant="outline">
-          <a href="/assess">Start a new assessment</a>
+          <a href="/assess">{t("plan.errorStartNew")}</a>
         </Button>
       </div>
     );
@@ -186,9 +187,9 @@ function PlanContent() {
   if (!data || !plan || !profile) {
     return (
       <div role="alert" className="text-center py-12 space-y-3">
-        <p className="text-destructive">Something went wrong loading your plan.</p>
+        <p className="text-destructive">{t("plan.errorFallback")}</p>
         <Button asChild variant="outline">
-          <a href="/assess">Start a new assessment</a>
+          <a href="/assess">{t("plan.errorStartNew")}</a>
         </Button>
       </div>
     );
@@ -237,9 +238,9 @@ function PlanContent() {
         ) : (
           <EmptyState
             icon={Search}
-            title="No job matches yet"
-            description="We're still looking for the best matches for your profile. Check back soon or update your assessment."
-            actionLabel="Update Assessment"
+            title={t("plan.matchesEmptyTitle")}
+            description={t("plan.matchesEmptyDesc")}
+            actionLabel={t("plan.matchesEmptyAction")}
             actionHref="/assess"
           />
         )}
@@ -275,7 +276,7 @@ function PlanContent() {
           <Separator />
           <ScrollReveal>
             <section className="space-y-4">
-              <h2 className="text-xl font-semibold text-primary">Your Barriers</h2>
+              <h2 className="text-xl font-semibold text-primary">{t("plan.yourBarriers")}</h2>
               <div className="grid gap-4 sm:grid-cols-2 auto-rows-fr">
                 {plan.barriers.map((barrier) => (
                   <BarrierCardView key={barrier.type} barrier={barrier} sessionId={sessionId ?? undefined} token={token ?? undefined} zipCode={zipCode} />
@@ -297,7 +298,7 @@ function PlanContent() {
           <Separator />
           <ScrollReveal>
             <section className="space-y-4">
-              <h2 className="text-xl font-semibold text-primary">Credit Assessment</h2>
+              <h2 className="text-xl font-semibold text-primary">{t("plan.creditAssessmentHeading")}</h2>
               <CreditResults result={creditResult} />
             </section>
           </ScrollReveal>
@@ -310,7 +311,7 @@ function PlanContent() {
           <Separator />
           <ScrollReveal>
             <section className="space-y-4">
-              <h2 className="text-xl font-semibold text-primary">Job Readiness</h2>
+              <h2 className="text-xl font-semibold text-primary">{t("plan.jobReadinessHeading")}</h2>
               <JobReadinessResults result={plan.job_readiness} />
             </section>
           </ScrollReveal>
@@ -322,12 +323,12 @@ function PlanContent() {
       <ScrollReveal>
       <Card className="border-secondary/30 bg-secondary/5">
         <CardHeader>
-          <CardTitle className="text-xl">What&apos;s Next?</CardTitle>
+          <CardTitle className="text-xl">{t("plan.whatsNextHeading")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <ol className="list-decimal list-inside space-y-3 text-sm">
-            <li><strong>Download your Career Center Ready Package</strong> <span className="text-muted-foreground">using the button in Step 1 above.</span></li>
-            <li><strong>Bring this plan to the {careerCenter.name}:</strong></li>
+            <li><strong>{t("plan.whatsNextDownloadStrong")}</strong> <span className="text-muted-foreground">{t("plan.whatsNextDownloadDesc")}</span></li>
+            <li><strong>{t("plan.whatsNextBringPlanPrefix")} {careerCenter.name}:</strong></li>
           </ol>
           <div className="ml-6 space-y-1.5 text-sm text-muted-foreground">
             <p className="flex items-center gap-2">
@@ -353,14 +354,14 @@ function PlanContent() {
             <p className="flex items-center gap-2"><Clock className="h-4 w-4 shrink-0" /> {careerCenter.hours}</p>
           </div>
           <ol start={3} className="list-decimal list-inside space-y-3 text-sm">
-            <li><strong>Ask for a case manager</strong> and show them your Career Center Ready Package.</li>
+            <li><strong>{t("plan.whatsNextAskCaseManager")}</strong> {t("plan.whatsNextAskCaseManagerDesc")}</li>
           </ol>
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <PlanExport plan={plan} creditResult={creditResult} feedbackToken={token} />
             <EmailExport sessionId={sessionId} token={token ?? undefined} />
             {sessionId && token && <SharePlanButton sessionId={sessionId} token={token} />}
             <Button asChild variant="outline" size="sm">
-              <a href="/assess">Start New Assessment</a>
+              <a href="/assess">{t("plan.whatsNextStartNew")}</a>
             </Button>
           </div>
         </CardContent>

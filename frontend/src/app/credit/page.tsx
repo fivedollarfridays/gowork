@@ -8,6 +8,7 @@ import { SEVERITY_BADGE_STYLES } from "@/lib/constants";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/lib/motion";
+import { t } from "@/lib/i18n";
 
 export default function CreditPage() {
   const [score, setScore] = useState("");
@@ -41,12 +42,12 @@ export default function CreditPage() {
 
   return (
     <main className="min-h-screen p-8 max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold text-primary mb-8">Credit Assessment</h1>
+      <h1 className="text-3xl font-bold text-primary mb-8">{t("credit.heading")}</h1>
 
       {!result ? (
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="credit-score" className="block text-sm font-medium">Credit Score (300-850)</label>
+            <label htmlFor="credit-score" className="block text-sm font-medium">{t("credit.scoreLabel")}</label>
             <Input
               id="credit-score"
               type="number" min={300} max={850} value={score}
@@ -54,7 +55,7 @@ export default function CreditPage() {
             />
           </div>
           <div>
-            <label htmlFor="credit-utilization" className="block text-sm font-medium">Credit Utilization (%)</label>
+            <label htmlFor="credit-utilization" className="block text-sm font-medium">{t("credit.utilizationLabel")}</label>
             <Input
               id="credit-utilization"
               type="number" min={0} max={100} step={0.1} value={utilization}
@@ -62,7 +63,7 @@ export default function CreditPage() {
             />
           </div>
           <div>
-            <label htmlFor="payment-history" className="block text-sm font-medium">Payment History (%)</label>
+            <label htmlFor="payment-history" className="block text-sm font-medium">{t("credit.paymentHistoryLabel")}</label>
             <Input
               id="payment-history"
               type="number" min={0} max={100} step={0.1} value={paymentHistory}
@@ -70,7 +71,7 @@ export default function CreditPage() {
             />
           </div>
           <div>
-            <label htmlFor="account-age" className="block text-sm font-medium">Average Account Age (months)</label>
+            <label htmlFor="account-age" className="block text-sm font-medium">{t("credit.accountAgeLabel")}</label>
             <Input
               id="account-age"
               type="number" min={0} value={accountAge}
@@ -79,7 +80,7 @@ export default function CreditPage() {
           </div>
           <div className="flex gap-4">
             <div className="flex-1">
-              <label htmlFor="total-accounts" className="block text-sm font-medium">Total Accounts</label>
+              <label htmlFor="total-accounts" className="block text-sm font-medium">{t("credit.totalAccountsLabel")}</label>
               <Input
                 id="total-accounts"
                 type="number" min={0} value={totalAccounts}
@@ -87,7 +88,7 @@ export default function CreditPage() {
               />
             </div>
             <div className="flex-1">
-              <label htmlFor="open-accounts" className="block text-sm font-medium">Open Accounts</label>
+              <label htmlFor="open-accounts" className="block text-sm font-medium">{t("credit.openAccountsLabel")}</label>
               <Input
                 id="open-accounts"
                 type="number" min={0} value={openAccounts}
@@ -96,17 +97,17 @@ export default function CreditPage() {
             </div>
           </div>
           <Button type="submit" disabled={!formValid || mutation.isPending}>
-            {mutation.isPending ? "Analyzing..." : "Assess Credit"}
+            {mutation.isPending ? t("credit.analyzing") : t("credit.assessButton")}
           </Button>
           {mutation.isError && (
             <div role="alert" className="flex items-center gap-3">
-              <p className="text-sm text-destructive">Error: {mutation.error.message}</p>
+              <p className="text-sm text-destructive">{t("credit.errorPrefix")} {mutation.error.message}</p>
               <button
                 type="button"
                 onClick={() => mutation.reset()}
                 className="text-sm text-primary underline hover:no-underline"
               >
-                Try Again
+                {t("credit.tryAgain")}
               </button>
             </div>
           )}
@@ -118,22 +119,22 @@ export default function CreditPage() {
               SEVERITY_BADGE_STYLES[result.barrier_severity as keyof typeof SEVERITY_BADGE_STYLES] ?? SEVERITY_BADGE_STYLES.low
             }`}>
               <h2 className="font-semibold text-lg">
-                Barrier Severity: <span className="capitalize">{result.barrier_severity}</span>
+                {t("credit.barrierSeverityLabel")} <span className="capitalize">{result.barrier_severity}</span>
               </h2>
             </div>
 
             <p className="text-sm text-muted-foreground mt-3">
-              You&apos;re taking a great step by understanding your credit. Knowledge is the first step to improvement.
+              {t("credit.encouragement")}
             </p>
 
             {result.thresholds.length > 0 && (
               <div className="rounded-lg border p-4">
-                <h3 className="font-medium mb-2">Credit Thresholds</h3>
-                {result.thresholds.map((t, i) => (
+                <h3 className="font-medium mb-2">{t("credit.thresholdsHeading")}</h3>
+                {result.thresholds.map((threshold, i) => (
                   <div key={i} className="flex justify-between py-1 border-b last:border-0">
-                    <span>{String(t.threshold_name || "")}</span>
+                    <span>{String(threshold.threshold_name || "")}</span>
                     <span className="text-sm text-muted-foreground">
-                      {t.already_met ? "Met" : `~${t.estimated_days} days`}
+                      {threshold.already_met ? t("credit.thresholdMet") : `~${threshold.estimated_days} ${t("credit.thresholdDays")}`}
                     </span>
                   </div>
                 ))}
@@ -142,7 +143,7 @@ export default function CreditPage() {
 
             {result.eligibility.length > 0 && (
               <div className="rounded-lg border p-4">
-                <h3 className="font-medium mb-2">Product Eligibility</h3>
+                <h3 className="font-medium mb-2">{t("credit.eligibilityHeading")}</h3>
                 {result.eligibility.map((e, i) => (
                   <div key={i} className="flex justify-between py-1 border-b last:border-0">
                     <span>{String(e.product_name || "")}</span>
@@ -157,7 +158,7 @@ export default function CreditPage() {
             <p className="text-xs text-muted-foreground">{result.disclaimer}</p>
 
             <Button variant="outline" onClick={() => setResult(null)}>
-              Run Another Assessment
+              {t("credit.runAnother")}
             </Button>
           </div>
         </ScrollReveal>

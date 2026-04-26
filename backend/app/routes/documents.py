@@ -30,6 +30,7 @@ from fastapi import APIRouter, HTTPException, Query, Response
 from pydantic import BaseModel
 
 from app.core.pdf_renderer import PdfRenderError, render_markdown_to_pdf
+from app.core.rate_limit import RateLimiter
 from app.modules.documents import _versions_db as versions_db
 from app.modules.documents import cover_letter_builder, resume_builder
 from app.routes import _appointments_helpers as _h
@@ -41,6 +42,30 @@ router = APIRouter(prefix="/api/documents", tags=["documents"])
 _DOC_RESUME = "resume"
 _DOC_COVER = "cover_letter"
 _PDF_TEMPLATE = "default"
+
+# T13.99 — per-session rate limit on LLM-invoking POSTs. Mirrors the
+# value used by ``routes/plan.py`` because resume + cover-letter
+# generation are similarly expensive (LLM calls when
+# ``ENABLE_AI_GENERATION=true``). Keyed by ``session_id`` rather than
+# IP because a single household / shelter can share an IP, and the
+# cost axis we care about is per-worker LLM spend.
+_doc_gen_rate_limiter = RateLimiter(max_requests=5, window_seconds=60)
+
+
+def _enforce_doc_rate_limit(session_id: str) -> None:
+    """Raise 429 once the session has exhausted its per-window quota.
+
+    Called inside the route body (not via ``Depends``) because
+    ``session_id`` is supplied in the request body, not the URL path
+    or a header that ``require_rate_limit`` could see. Token
+    verification runs *before* this so an attacker with a wrong
+    token cannot consume another session's quota.
+    """
+    if not _doc_gen_rate_limiter.check(session_id):
+        raise HTTPException(
+            status_code=429,
+            detail="Too many document generations. Please try again later.",
+        )
 
 
 # -------------------- Helpers --------------------
@@ -116,6 +141,7 @@ def post_resume(
     """Generate + persist one resume version, return its identifiers."""
     db_path = _resolve_db_path()
     _h.verify_token(db_path, body.session_id, token)
+    _enforce_doc_rate_limit(body.session_id)
     draft = resume_builder.generate_resume(
         body.session_id,
         job_description=body.job_description,
@@ -168,6 +194,7 @@ def post_cover_letter(
     """Generate + persist one cover-letter version, return its identifiers."""
     db_path = _resolve_db_path()
     _h.verify_token(db_path, body.session_id, token)
+    _enforce_doc_rate_limit(body.session_id)
     draft = cover_letter_builder.generate_cover_letter(
         body.session_id,
         body.job_match_ref,

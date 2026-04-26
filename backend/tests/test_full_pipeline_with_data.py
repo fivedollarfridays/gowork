@@ -141,12 +141,14 @@ class TestPipelineShareAndDashboard:
         share_data = r.json()
         share_token = share_data["share_token"]
 
-        # Retrieve shared plan
+        # Retrieve shared plan — public payload is redacted (T13.71 P1):
+        # no session_id, no raw barrier slugs; barriers_count is the scalar.
         r2 = await client.get(f"/api/plan/shared/{share_token}")
         assert r2.status_code == 200
         shared = r2.json()
-        assert shared["session_id"] == sid
-        assert len(shared["barriers"]) >= 1
+        assert "session_id" not in shared
+        assert sid not in r2.text
+        assert shared["barriers_count"] >= 1
 
     @pytest.mark.anyio
     async def test_dashboard_with_seeded_data(self, client, test_engine):

@@ -40,13 +40,31 @@ def get_scheduler() -> AsyncIOScheduler:
     return _scheduler
 
 
-def register_job(name: str, func: Callable, trigger) -> None:
+def register_job(
+    name: str,
+    func: Callable,
+    trigger,
+    *,
+    misfire_grace_time: int = 300,
+) -> None:
     """Register `func` under job id `name` with the given trigger.
 
     Replaces any existing job with the same id so startup is idempotent.
+
+    ``misfire_grace_time`` (seconds) overrides the APScheduler default
+    of 1 second, which is too tight to recover any job that misses its
+    fire window because of a worker restart or a busy event loop. The
+    default of 300s (5 minutes) is a sensible floor for daily cron
+    jobs; per-job overrides are accepted via the keyword argument.
     """
     sched = get_scheduler()
-    sched.add_job(func, trigger=trigger, id=name, replace_existing=True)
+    sched.add_job(
+        func,
+        trigger=trigger,
+        id=name,
+        replace_existing=True,
+        misfire_grace_time=misfire_grace_time,
+    )
 
 
 def enforce_single_worker() -> None:
@@ -73,23 +91,32 @@ def _make_stub(job_name: str, note: str) -> Callable[[], None]:
 
 
 def _register_default_jobs() -> None:
-    """Register the three S12a recurring jobs (T12.25 wires nightly_digest)."""
+    """Register the three S12a recurring jobs (T12.25 wires nightly_digest).
+
+    Per-job ``misfire_grace_time`` (seconds): wide enough to absorb a
+    worker restart but narrow enough that a stale fire is still useful
+    work. 5 minutes for daily crons, 30 minutes for the 6h appointment
+    reminder scan.
+    """
     from app.core import scheduler_jobs
 
     register_job(
         "nightly_digest",
         scheduler_jobs.nightly_digest_handler(),
         CronTrigger(hour=2, minute=0, timezone=_SCHEDULER_TZ),
+        misfire_grace_time=300,
     )
     register_job(
         "stall_scan",
         _make_stub("stall_scan", "later S12a task"),
         CronTrigger(hour=8, minute=0, timezone=_SCHEDULER_TZ),
+        misfire_grace_time=300,
     )
     register_job(
         "appointment_reminders",
         scheduler_jobs.appointment_reminders_handler(),
         IntervalTrigger(hours=6),
+        misfire_grace_time=1800,
     )
 
 

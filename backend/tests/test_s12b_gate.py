@@ -138,14 +138,26 @@ def test_nightly_digest_handler_is_real_orchestrator(
 
 
 def test_main_lifespan_wires_scheduler() -> None:
-    """app.main.lifespan imports enforce_single_worker + start_scheduler."""
+    """app.main.lifespan wires the scheduler via lifespan_helpers.
+
+    T13.118 refactor moved enforce_single_worker + start_scheduler
+    into ``app.core.lifespan_helpers.start_scheduler_with_guard`` so
+    main.py stays under the import-count arch limit. The contract is
+    still that the lifespan starts and stops the scheduler.
+    """
     import inspect
 
     from app import main as main_mod
+    from app.core import lifespan_helpers
 
-    source = inspect.getsource(main_mod.lifespan)
-    assert "enforce_single_worker" in source
-    assert "start_scheduler" in source
+    lifespan_source = inspect.getsource(main_mod.lifespan)
+    assert "start_scheduler_with_guard" in lifespan_source
+    assert "stop_scheduler" in lifespan_source
+
+    helpers_source = inspect.getsource(lifespan_helpers)
+    assert "enforce_single_worker" in helpers_source
+    assert "start_scheduler" in helpers_source
+    assert "shutdown_scheduler" in helpers_source
 
 
 # ====================================================================

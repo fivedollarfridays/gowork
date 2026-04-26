@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="MontGoWork — Workforce Navigator">
+  <title>MontGoWork — Workforce Navigator</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1c3461"/>
+      <stop offset="100%" stop-color="#0f1f3d"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <!-- Brand mark, top-left -->
+  <g transform="translate(80,80)">
+    <rect width="120" height="120" rx="24" fill="#2a9d8f"/>
+    <text x="60" y="84" text-anchor="middle" font-family="system-ui, -apple-system, Segoe UI, Inter, sans-serif" font-weight="800" font-size="56" fill="#ffffff">MGW</text>
+  </g>
+  <!-- Headline + tagline -->
+  <g font-family="system-ui, -apple-system, Segoe UI, Inter, sans-serif" fill="#f3f1ea">
+    <text x="80" y="340" font-size="84" font-weight="800">MontGoWork</text>
+    <text x="80" y="410" font-size="40" font-weight="600" fill="#f4c66d">Workforce Navigator</text>
+    <text x="80" y="490" font-size="32" font-weight="400" fill="#cbd5e1">Overcome barriers. Find your path to employment.</text>
+    <text x="80" y="552" font-size="24" font-weight="500" fill="#94a3b8">Assess · Match · Plan</text>
+  </g>
+</svg>

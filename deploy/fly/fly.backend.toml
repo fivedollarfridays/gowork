@@ -1,0 +1,43 @@
+# fly.toml app configuration file generated for montgowork-staging-api on 2026-04-24T23:34:33-05:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'montgowork-staging-api'
+primary_region = 'iad'
+
+[build]
+  dockerfile = '../../Dockerfile'
+
+[deploy]
+  strategy = 'immediate'
+
+[env]
+  DATABASE_URL = 'sqlite+aiosqlite:////app/data/montgowork.db'
+  ENVIRONMENT = 'staging'
+  LOG_LEVEL = 'INFO'
+  TRUSTED_PROXY_HOSTS = '*'
+
+[[mounts]]
+  source = 'montgowork_staging_db'
+  destination = '/app/data'
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ['app']
+
+  [[http_service.checks]]
+    interval = '30s'
+    timeout = '5s'
+    grace_period = '10s'
+    method = 'GET'
+    path = '/health/live'
+    protocol = 'http'
+
+[[vm]]
+  size = 'shared-cpu-1x'
+  memory = '2gb'  # T13.128: 512mb OOM-killed uvicorn (sentence-transformers + faiss + weasyprint)

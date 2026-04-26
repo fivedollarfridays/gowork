@@ -8,7 +8,12 @@ import json
 
 import pytest
 
-from app.routes.share import _build_share_url, _extract_career_center, _extract_next_steps
+from app.routes.share import (
+    _build_share_url,
+    _count_barriers,
+    _extract_next_steps,
+    _resolve_career_center,
+)
 from app.routes.sequence import _map_barrier_to_graph_id
 from app.routes.simulate import _compute_unlocked, _JOBS_PER_BARRIER, _BENEFITS_PER_BARRIER
 
@@ -60,15 +65,44 @@ class TestBuildShareUrl:
         assert token in url
 
 
-class TestExtractCareerCenter:
-    """share._extract_career_center -- city-aware career center info."""
+class TestResolveCareerCenter:
+    """share._resolve_career_center -- city-aware real career center info (T13.72)."""
 
-    def test_returns_name_and_state(self):
-        name, state = _extract_career_center({})
+    def test_returns_real_center_name_and_phone(self):
+        name, phone = _resolve_career_center()
         assert isinstance(name, str)
-        assert len(name) > 0
-        assert isinstance(state, str)
-        assert len(state) > 0
+        assert isinstance(phone, str)
+        # Either a real center is resolved or both fields are empty — what we
+        # must NOT do is return the bare city name + an empty phone.
+        if name:
+            assert "Career Center" in name or "Workforce" in name
+        if phone:
+            digit_count = sum(1 for ch in phone if ch.isdigit())
+            assert digit_count >= 7
+
+
+class TestCountBarriers:
+    """share._count_barriers -- non-PII scalar from raw barrier storage (T13.71)."""
+
+    def test_counts_list_of_slugs(self):
+        assert _count_barriers(json.dumps(["credit", "housing", "health"])) == 3
+
+    def test_counts_python_list(self):
+        assert _count_barriers(["credit", "housing"]) == 2
+
+    def test_empty_list_returns_zero(self):
+        assert _count_barriers("[]") == 0
+        assert _count_barriers([]) == 0
+
+    def test_invalid_json_returns_zero(self):
+        assert _count_barriers("not-json") == 0
+
+    def test_dict_uses_key_count(self):
+        assert _count_barriers({"credit": 1, "housing": 1}) == 2
+
+    def test_unknown_type_returns_zero(self):
+        assert _count_barriers(None) == 0
+        assert _count_barriers(42) == 0
 
 
 class TestMapBarrierToGraphId:

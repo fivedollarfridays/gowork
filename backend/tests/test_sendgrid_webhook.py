@@ -394,3 +394,184 @@ def test_one_bad_event_doesnt_abort_batch(
     sg_rows = _sendgrid_rows(webhook_db)
     assert len(sg_rows) == 2  # the good two
     assert [r["event_type"] for r in sg_rows] == ["delivered", "open"]
+
+
+# -------------------- T13.55 — explicit AC coverage --------------------
+
+
+def test_t13_55_delivered_writes_audit_no_disable(
+    app_client, keypair, webhook_db
+):
+    """T13.55 AC: delivered event writes audit; does NOT auto-disable."""
+    private_key, _ = keypair
+    events = [
+        {
+            "event": "delivered",
+            "email": "user@example.com",
+            "sg_message_id": "mid-d-ac",
+            "timestamp": 1700000000,
+            "unique_args": {"session_id": "sess-1"},
+        }
+    ]
+    response = _post_signed(app_client, private_key, events)
+    assert response.status_code == 204
+
+    eng_rows = _engagement_rows(webhook_db)
+    sg_rows = _sendgrid_rows(webhook_db)
+    # Audit row written to both tables
+    assert any(r["event_type"] == "delivered" for r in sg_rows)
+    assert any(r[1] == "delivered" for r in eng_rows)
+    # No auto-disable side effect for delivered
+    assert not any(r[1] == "reminders_auto_disabled" for r in eng_rows)
+
+
+def test_t13_55_bounced_auto_disables_for_email(
+    app_client, keypair, webhook_db
+):
+    """T13.55 AC: bounce event auto-disables reminders for that email."""
+    private_key, _ = keypair
+    events = [
+        {
+            "event": "bounce",
+            "type": "bounce",
+            "email": "bouncy@example.com",
+            "sg_message_id": "mid-b-ac",
+            "reason": "550 mailbox does not exist",
+            "timestamp": 1700000000,
+            "unique_args": {"session_id": "sess-1"},
+        }
+    ]
+    response = _post_signed(app_client, private_key, events)
+    assert response.status_code == 204
+
+    eng_rows = _engagement_rows(webhook_db)
+    sg_rows = _sendgrid_rows(webhook_db)
+    # Audit row written referencing the bouncing email
+    sg_bounce = [r for r in sg_rows if r["event_type"] == "bounce"]
+    assert len(sg_bounce) == 1
+    assert sg_bounce[0]["email"] == "bouncy@example.com"
+    # Auto-disable engagement row written for the session
+    auto = [r for r in eng_rows if r[1] == "reminders_auto_disabled"]
+    assert len(auto) == 1
+    assert auto[0][0] == "sess-1"
+    assert auto[0][2]["reason"] == "hard_bounce"
+
+
+def test_t13_55_spamreport_auto_disables_for_email(
+    app_client, keypair, webhook_db
+):
+    """T13.55 AC: spamreport event auto-disables reminders for that email."""
+    private_key, _ = keypair
+    events = [
+        {
+            "event": "spamreport",
+            "email": "complainant@example.com",
+            "sg_message_id": "mid-s-ac",
+            "timestamp": 1700000000,
+            "unique_args": {"session_id": "sess-1"},
+        }
+    ]
+    response = _post_signed(app_client, private_key, events)
+    assert response.status_code == 204
+
+    eng_rows = _engagement_rows(webhook_db)
+    sg_rows = _sendgrid_rows(webhook_db)
+    sg_spam = [r for r in sg_rows if r["event_type"] == "spamreport"]
+    assert len(sg_spam) == 1
+    assert sg_spam[0]["email"] == "complainant@example.com"
+    auto = [r for r in eng_rows if r[1] == "reminders_auto_disabled"]
+    assert len(auto) == 1
+    assert auto[0][0] == "sess-1"
+    assert auto[0][2]["reason"] == "spam_complaint"
+
+
+def test_t13_55_dropped_writes_audit(app_client, keypair, webhook_db):
+    """T13.55 AC: dropped event writes audit row.
+
+    Note: current handler also auto-disables on dropped (treated as a
+    permanent failure equivalent to a hard bounce — recipient on suppression
+    list, invalid SMTPAPI header, etc.). The formal AC only requires the
+    audit row, so we assert that here and document the auto-disable as
+    current behavior (see test_dropped_event_treated_as_hard_bounce).
+    """
+    private_key, _ = keypair
+    events = [
+        {
+            "event": "dropped",
+            "email": "dropped@example.com",
+            "sg_message_id": "mid-dr-ac",
+            "reason": "Bounced Address",
+            "timestamp": 1700000000,
+            "unique_args": {"session_id": "sess-1"},
+        }
+    ]
+    response = _post_signed(app_client, private_key, events)
+    assert response.status_code == 204
+
+    sg_rows = _sendgrid_rows(webhook_db)
+    sg_drop = [r for r in sg_rows if r["event_type"] == "dropped"]
+    assert len(sg_drop) == 1
+    assert sg_drop[0]["email"] == "dropped@example.com"
+    assert sg_drop[0]["reason"] == "Bounced Address"
+    # engagement table also captures the event
+    eng_rows = _engagement_rows(webhook_db)
+    assert any(r[1] == "dropped" for r in eng_rows)
+
+
+def test_t13_55_unknown_event_type_logged_as_audit(
+    app_client, keypair, webhook_db
+):
+    """Unknown event types pass through as audit-only (no auto-disable)."""
+    private_key, _ = keypair
+    events = [
+        {
+            "event": "click",  # valid SendGrid event but not in _EVENT_CATEGORY
+            "email": "user@example.com",
+            "sg_message_id": "mid-c-ac",
+            "timestamp": 1700000000,
+            "unique_args": {"session_id": "sess-1"},
+        }
+    ]
+    response = _post_signed(app_client, private_key, events)
+    assert response.status_code == 204
+
+    sg_rows = _sendgrid_rows(webhook_db)
+    assert any(r["event_type"] == "click" for r in sg_rows)
+    eng_rows = _engagement_rows(webhook_db)
+    # Event recorded with raw type as category fallback
+    assert any(r[1] == "click" for r in eng_rows)
+    # No auto-disable for unknown types
+    assert not any(r[1] == "reminders_auto_disabled" for r in eng_rows)
+
+
+def test_t13_55_replay_documents_no_dedup(app_client, keypair, webhook_db):
+    """Document current (non-idempotent) behavior on event replay.
+
+    The webhook does not currently dedup events. Replaying the same bounce
+    twice writes two sendgrid_events rows AND two reminders_auto_disabled
+    audit rows. Idempotency is out of scope for T13.55 (not in formal AC)
+    and is tracked separately. This test pins the current contract so any
+    future dedup change is intentional.
+    """
+    private_key, _ = keypair
+    event = {
+        "event": "bounce",
+        "type": "bounce",
+        "email": "user@example.com",
+        "sg_message_id": "mid-replay",
+        "reason": "550",
+        "timestamp": 1700000000,
+        "unique_args": {"session_id": "sess-1"},
+    }
+
+    r1 = _post_signed(app_client, private_key, [event])
+    r2 = _post_signed(app_client, private_key, [event])
+    assert r1.status_code == 204
+    assert r2.status_code == 204
+
+    sg_rows = _sendgrid_rows(webhook_db)
+    eng_rows = _engagement_rows(webhook_db)
+    assert sum(1 for r in sg_rows if r["event_type"] == "bounce") == 2
+    assert (
+        sum(1 for r in eng_rows if r[1] == "reminders_auto_disabled") == 2
+    )

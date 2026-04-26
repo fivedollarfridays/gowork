@@ -27,6 +27,7 @@ import sqlite3
 from dataclasses import dataclass
 from pathlib import Path
 
+from app.modules.engagement._batch_stalls import batch_compute_stalls
 from app.modules.engagement.stall_detector import (
     StalledSession,
     compute_stall_for_session,
@@ -131,19 +132,30 @@ def list_stalled_sessions_for_city(
 
     Sort order: ``stall_level`` (HARD > MEDIUM > SOFT) then
     ``days_stalled`` DESC so the worst case floats to the top.
+
+    Implementation note (T13.90): the per-session call to
+    :func:`compute_stall_for_session` here was an N+1 — each session in
+    the city scanned 5 queries. We now route through
+    :func:`batch_compute_stalls` which loads all signals in a constant
+    handful of queries regardless of cohort size. The semantics match
+    the per-session helper — see ``backend/tests/test_batch_stalls.py``
+    for the parity assertions.
     """
     ids = _city_scoped_session_ids(db_path, city)
+    if not ids:
+        return []
+    summaries = batch_compute_stalls(ids, db_path=db_path)
     stalled: list[AdvisorStalledSession] = []
     for sid in ids:
-        ss: StalledSession = compute_stall_for_session(sid, db_path=db_path)
-        if ss.stall_level.value == "none":
+        days, level, _stalls = summaries[sid]
+        if level.value == "none":
             continue
         stalled.append(
             AdvisorStalledSession(
                 session_id=sid,
                 city=city,
-                stall_level=ss.stall_level.value,
-                days_stalled=ss.days_stalled,
+                stall_level=level.value,
+                days_stalled=days,
             ),
         )
     stalled.sort(

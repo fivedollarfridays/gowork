@@ -13,24 +13,10 @@ import {
 import { useCityConfig } from "@/hooks/useCityConfig";
 import { getCityStats } from "@/lib/city-stats";
 import { useAssessmentComplete } from "./home-redirect";
+import { t } from "@/lib/i18n";
 
-const FLOW_STEPS = [
-  {
-    icon: ClipboardList,
-    title: "Assess",
-    description: "Answer a few questions about your situation, barriers, and work history",
-  },
-  {
-    icon: Target,
-    title: "Match",
-    description: "We match you with jobs, resources, and transit routes in your area",
-  },
-  {
-    icon: Map,
-    title: "Plan",
-    description: "Get a personalized action plan: what to do Monday morning",
-  },
-];
+const FLOW_STEP_ICONS = [ClipboardList, Target, Map] as const;
+const FLOW_STEP_KEYS = ["Assess", "Match", "Plan"] as const;
 
 export default function Home() {
   const city = useCityConfig();
@@ -44,9 +30,27 @@ export default function Home() {
     }
   }, [assessmentComplete, router]);
 
+  const flowSteps = [
+    {
+      icon: FLOW_STEP_ICONS[0],
+      title: t("home.stepAssessTitle"),
+      description: t("home.stepAssessDesc"),
+    },
+    {
+      icon: FLOW_STEP_ICONS[1],
+      title: t("home.stepMatchTitle"),
+      description: t("home.stepMatchDesc"),
+    },
+    {
+      icon: FLOW_STEP_ICONS[2],
+      title: t("home.stepPlanTitle"),
+      description: t("home.stepPlanDesc"),
+    },
+  ];
+
   const STATS = [
-    { value: stats.povertyRate, suffix: "%", decimals: 1, label: "Poverty Rate" },
-    { value: stats.laborParticipation, suffix: "%", decimals: 1, label: "Labor Participation" },
+    { value: stats.povertyRate, suffix: "%", decimals: 1, label: t("home.statPoverty") },
+    { value: stats.laborParticipation, suffix: "%", decimals: 1, label: t("home.statLabor") },
     { value: stats.populationValue, suffix: stats.populationLabel.replace(String(stats.populationValue), ""), decimals: 0, label: stats.populationDesc },
   ];
 
@@ -55,21 +59,20 @@ export default function Home() {
       {/* Hero */}
       <section className="flex flex-col items-center justify-center px-4 py-12 sm:py-16 text-center">
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-primary max-w-3xl">
-          <Typewriter text="What's standing between you and a job?" />
+          <Typewriter text={t("home.heroQuestion")} />
         </h1>
         <ScrollReveal delay={0.2}>
           <p className="mt-4 text-lg sm:text-xl text-muted-foreground max-w-xl">
-            MontGoWork is a workforce navigator that helps you overcome barriers
-            and find your path to employment.
+            {t("home.heroBlurb")}
           </p>
         </ScrollReveal>
         <ScrollReveal delay={0.4}>
           <div className="mt-8 flex gap-4">
             <Button size="lg" asChild className="transition-shadow duration-300 hover:shadow-[0_0_20px_rgba(45,149,150,0.4)]">
-              <Link href="/assess">Get Your Plan</Link>
+              <Link href="/assess">{t("home.ctaPlan")}</Link>
             </Button>
             <Button size="lg" variant="outline" asChild className="transition-shadow duration-300 hover:shadow-[0_0_16px_rgba(45,149,150,0.25)]">
-              <Link href="/credit">Check Credit</Link>
+              <Link href="/credit">{t("home.ctaCredit")}</Link>
             </Button>
           </div>
         </ScrollReveal>
@@ -79,20 +82,20 @@ export default function Home() {
       <section className="px-4 py-10 bg-muted/30">
         <div className="mx-auto max-w-4xl">
           <h2 className="text-2xl font-semibold text-center text-primary mb-6">
-            How It Works
+            {t("home.howHeading")}
           </h2>
           <StaggerContainer className="grid gap-6 sm:grid-cols-3">
-            {FLOW_STEPS.map((step, i) => {
+            {flowSteps.map((step, i) => {
               const Icon = step.icon;
               return (
-                <StaggerItem key={step.title}>
+                <StaggerItem key={FLOW_STEP_KEYS[i]}>
                   <Card className="group text-center hover:shadow-[0_0_24px_rgba(45,149,150,0.3)] hover:border-secondary/40 hover:-translate-y-1">
                     <CardContent className="pt-6 space-y-3">
                       <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-secondary/10 transition-colors duration-300 group-hover:bg-secondary/20">
                         <Icon className="h-6 w-6 text-secondary transition-transform duration-300 group-hover:scale-110" />
                       </div>
                       <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                        Step {i + 1}
+                        {t("home.stepLabel")} {i + 1}
                       </div>
                       <h3 className="text-lg font-semibold">{step.title}</h3>
                       <p className="text-sm text-muted-foreground">{step.description}</p>
@@ -109,10 +112,10 @@ export default function Home() {
       <section className="px-4 py-10">
         <div className="mx-auto max-w-4xl text-center">
           <h2 className="text-2xl font-semibold text-primary mb-2">
-            By the Numbers
+            {t("home.numbersHeading")}
           </h2>
           <p className="text-muted-foreground mb-6">
-            Understanding the workforce landscape in {stats.cityName}
+            {t("home.numbersSubtitlePrefix")} {stats.cityName}
           </p>
           <div className="grid gap-6 sm:grid-cols-3">
             {STATS.map((stat) => (
@@ -134,12 +137,12 @@ export default function Home() {
       <ScrollReveal>
         <section className="px-4 py-10 bg-primary text-primary-foreground text-center">
           <div className="mx-auto max-w-xl space-y-3">
-            <h2 className="text-2xl font-semibold">Ready to get started?</h2>
+            <h2 className="text-2xl font-semibold">{t("home.bottomCtaTitle")}</h2>
             <p className="text-primary-foreground/80">
-              It takes about 2 minutes. No account needed.
+              {t("home.bottomCtaBody")}
             </p>
             <Button size="lg" variant="secondary" asChild>
-              <Link href="/assess">Start Your Assessment</Link>
+              <Link href="/assess">{t("home.bottomCtaButton")}</Link>
             </Button>
           </div>
         </section>

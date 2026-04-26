@@ -133,8 +133,12 @@ class TestGetSharedPlan:
         r2 = await client.get(f"/api/plan/shared/{share_tok}")
         assert r2.status_code == 200
         data = r2.json()
-        assert data["session_id"] == sid
-        assert "barriers" in data
+        # Public payload must NOT include the raw session_id (T13.71 P1).
+        # See test_share_endpoint_redaction.py for the redaction contract.
+        assert "session_id" not in data
+        assert sid not in r2.text
+        # barriers slug list is also redacted; barriers_count is the public scalar
+        assert "barriers_count" in data
         assert "next_steps" in data
 
     @pytest.mark.anyio
@@ -270,7 +274,13 @@ class TestShareEdgeCases:
 
         r2 = await client.get(f"/api/plan/shared/{share_tok}")
         data = r2.json()
-        assert data["barriers"] == ["credit", "transportation"]
+        # Raw barrier slugs are PII (T13.71 P1) — public payload exposes a
+        # non-identifying count, NOT the slug list. See
+        # test_share_endpoint_redaction.py for the redaction contract.
+        assert "barriers" not in data
+        assert data["barriers_count"] == 2
+        assert "credit" not in r2.text
+        assert "transportation" not in r2.text
 
     @pytest.mark.anyio
     async def test_next_steps_truncated_at_10(self, client, test_engine):

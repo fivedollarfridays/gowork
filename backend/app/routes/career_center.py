@@ -1,12 +1,12 @@
 """GET /api/plan/{session_id}/career-center — Career Center Ready Package."""
 
 import json
-import logging
 
 from fastapi import Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+from app.core.logging import get_logger
 from app.modules.credit.types import CreditAssessmentResult
 from app.modules.matching.career_center_package import assemble_package
 from app.modules.matching.types import (
@@ -20,7 +20,10 @@ from app.modules.matching.types import (
 from app.modules.matching.wioa_screener import screen_wioa_eligibility
 from app.routes.plan import SessionId, _fetch_session, _safe_json, router
 
-logger = logging.getLogger(__name__)
+# Use structlog so the centralized PII scrubber (T13.94) catches
+# session_id / email / phone kwargs at the event level — no per-site
+# hash_session_id call needed.
+logger = get_logger(__name__)
 
 
 @router.get("/{session_id}/career-center")
@@ -56,7 +59,7 @@ async def get_career_center_package(
         try:
             credit_result = CreditAssessmentResult(**json.loads(row["credit_profile"]))
         except (json.JSONDecodeError, ValueError):
-            logger.warning("Invalid credit profile data for %s", session_id)
+            logger.warning("invalid_credit_profile_data", session_id=session_id)
 
     package = assemble_package(profile, plan, wioa, credit_result)
     return package.model_dump()
@@ -70,7 +73,11 @@ def _build_profile_from_session(
     """Reconstruct a UserProfile from stored session data (fallback defaults)."""
     from app.cities.config import get_city_config
 
-    logger.warning("Using fallback profile for session %s (stored profile missing/corrupt)", session_id)
+    logger.warning(
+        "career_center_fallback_profile",
+        session_id=session_id,
+        reason="stored profile missing/corrupt",
+    )
     city = get_city_config()
     default_zip = city.zip_ranges[0].split("-")[0] if city.zip_ranges else "00000"
     return UserProfile(

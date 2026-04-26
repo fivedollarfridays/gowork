@@ -1,0 +1,81 @@
+# MontGoWork QC environment profiles.
+#
+# Loaded by divona (and any QC runner) to resolve URLs, credentials, and
+# restrictions for a given environment. Reference: .claude/agents/divona.md.
+#
+# Profile selection: pass --env <name> to the QC runner, or set
+# MONTGOWORK_QC_ENV. Default profile is `dev` if unset.
+
+version: 1
+
+defaults:
+  # Suite-level defaults; per-suite values override these.
+  step_timeout_seconds: 10
+  page_load_timeout_seconds: 10
+  retry_on_transient_failures: false  # QC suites must be deterministic.
+
+environments:
+
+  dev:
+    description: Local development. Full read-write QC.
+    frontend_url: http://localhost:3000
+    backend_url: http://localhost:8000
+    db_path: backend/data/montgowork.db
+    test_credentials:
+      # Demo sessions are seeded by `bpsai-pair qc reset` (see T13.3).
+      # IDs match demo_seed_s12b.py.
+      worker_montgomery: demo-mgm-medium
+      worker_fortworth: demo-ftw-medium
+      advisor_montgomery: demo-advisor-mgm
+      advisor_fortworth: demo-advisor-ftw
+      admin_key: dev-admin-key-DO-NOT-USE-IN-PROD
+    restrictions:
+      read_only: false
+      skip_tags: []
+    seed:
+      reset_command: python scripts/qc_reset.py  # T13.3
+      reset_required: true
+
+  staging:
+    description: Hosted staging. Full read-write QC against deployed app.
+    # T13.128: replace these placeholders after `fly deploy` completes
+    # (see docs/runbooks/staging-deploy.md §3.8). Default Fly URLs are
+    # https://montgowork-staging-web.fly.dev and
+    # https://montgowork-staging-api.fly.dev — overwrite with your
+    # custom CNAME if you set one up per runbook §5.
+    frontend_url: ${STAGING_FRONTEND_URL}  # e.g. https://montgowork-staging-web.fly.dev
+    backend_url: ${STAGING_BACKEND_URL}   # e.g. https://montgowork-staging-api.fly.dev
+    db_path: null  # Remote; QC reset goes through the staging admin endpoint.
+    test_credentials:
+      worker_montgomery: ${STAGING_WORKER_MGM_SESSION}
+      worker_fortworth: ${STAGING_WORKER_FTW_SESSION}
+      advisor_montgomery: ${STAGING_ADVISOR_MGM_TOKEN}
+      advisor_fortworth: ${STAGING_ADVISOR_FTW_TOKEN}
+      admin_key: ${STAGING_ADMIN_KEY}
+    restrictions:
+      read_only: false
+      skip_tags:
+        - destroys-prod-data
+    seed:
+      reset_endpoint: /api/admin/qc-reset  # gated on admin_key
+      reset_required: true
+
+  prod:
+    description: Production. READ-ONLY smoke checks; never mutates data.
+    frontend_url: https://montgowork.example
+    backend_url: https://api.montgowork.example
+    db_path: null
+    test_credentials: {}  # No credentials -- prod QC is unauth-only.
+    restrictions:
+      read_only: true
+      skip_tags:
+        - mutates
+        - destroys-prod-data
+        - requires-auth
+    seed:
+      reset_required: false  # Never reset prod.
+
+# Suite output directory (per-run JSON results).
+output:
+  runs_dir: .paircoder/qc/runs
+  baselines_dir: .paircoder/qc/baselines  # Visual regression (T13.6, T13.83)

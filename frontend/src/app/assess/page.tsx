@@ -102,7 +102,7 @@ export default function AssessPage() {
       router.push(`/plan?session=${data.session_id}`);
     },
     onError: () => {
-      setError("Something went wrong submitting your assessment. Please try again.");
+      setError(t("assess.errorSubmit"));
     },
   });
 
@@ -127,7 +127,7 @@ export default function AssessPage() {
         setCreditResult(result);
         creditResultRef.current = result;
       } catch {
-        setError("Credit check could not be completed. Continuing without credit data.");
+        setError(t("assess.errorCredit"));
       }
     }
 
@@ -154,7 +154,7 @@ export default function AssessPage() {
 
   const steps: WizardStepConfig[] = useMemo(() => [
     {
-      title: "Basic Info",
+      title: t("assess.stepBasicInfo"),
       icon: <ClipboardList className="h-4 w-4" />,
       canAdvance: () => zipValid,
       content: () => (
@@ -168,7 +168,7 @@ export default function AssessPage() {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <label htmlFor="zip" className="text-sm font-medium">ZIP Code</label>
+              <label htmlFor="zip" className="text-sm font-medium">{t("assess.zipLabel")}</label>
               <Input
                 id="zip"
                 type="text"
@@ -183,7 +183,7 @@ export default function AssessPage() {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="employment" className="text-sm font-medium">Employment Status</label>
+              <label htmlFor="employment" className="text-sm font-medium">{t("assess.employmentLabel")}</label>
               <Select
                 value={formData.employment}
                 onValueChange={(v) => setFormData({ ...formData, employment: v as EmploymentStatus })}
@@ -209,14 +209,14 @@ export default function AssessPage() {
               onCheckedChange={(checked) => setFormData({ ...formData, hasVehicle: checked === true })}
             />
             <label htmlFor="vehicle" className="text-sm font-medium cursor-pointer">
-              I have a vehicle
+              {t("assess.iHaveVehicle")}
             </label>
           </div>
         </div>
       ),
     },
     {
-      title: "Resume",
+      title: t("assess.stepResume"),
       icon: <Upload className="h-4 w-4" />,
       canAdvance: () => true,
       content: () => (
@@ -232,7 +232,7 @@ export default function AssessPage() {
       ),
     },
     {
-      title: "Barriers",
+      title: t("assess.stepBarriers"),
       icon: <ListChecks className="h-4 w-4" />,
       canAdvance: () => barrierCount > 0,
       content: () => (
@@ -253,7 +253,7 @@ export default function AssessPage() {
       ),
     },
     ...(hasCriminalBarrier ? [{
-      title: "Record Details",
+      title: t("assess.stepRecord"),
       icon: <Shield className="h-4 w-4" />,
       canAdvance: () => true,
       content: () => (
@@ -269,7 +269,7 @@ export default function AssessPage() {
       ),
     }] as WizardStepConfig[] : []),
     {
-      title: "Benefits",
+      title: t("assess.stepBenefits"),
       icon: <Home className="h-4 w-4" />,
       canAdvance: () => true,
       content: () => (
@@ -285,7 +285,7 @@ export default function AssessPage() {
       ),
     },
     {
-      title: "Schedule",
+      title: t("assess.stepSchedule"),
       icon: <Clock className="h-4 w-4" />,
       canAdvance: () => true,
       content: () => (
@@ -297,7 +297,7 @@ export default function AssessPage() {
             </p>
           </div>
           <div className="space-y-2">
-            <label htmlFor="available-hours" className="text-sm font-medium">Available Hours</label>
+            <label htmlFor="available-hours" className="text-sm font-medium">{t("assess.scheduleLabel")}</label>
             <Select
               value={formData.availableHours}
               onValueChange={(v) => setFormData({ ...formData, availableHours: v as AvailableHours })}
@@ -306,10 +306,10 @@ export default function AssessPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={AvailableHours.DAYTIME}>Daytime (8am - 5pm)</SelectItem>
-                <SelectItem value={AvailableHours.EVENING}>Evening (5pm - 10pm)</SelectItem>
-                <SelectItem value={AvailableHours.NIGHT}>Overnight (10pm - 6am)</SelectItem>
-                <SelectItem value={AvailableHours.FLEXIBLE}>Flexible / Any shift</SelectItem>
+                <SelectItem value={AvailableHours.DAYTIME}>{t("assess.daytime")}</SelectItem>
+                <SelectItem value={AvailableHours.EVENING}>{t("assess.evening")}</SelectItem>
+                <SelectItem value={AvailableHours.NIGHT}>{t("assess.overnight")}</SelectItem>
+                <SelectItem value={AvailableHours.FLEXIBLE}>{t("assess.flexible")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -317,7 +317,7 @@ export default function AssessPage() {
       ),
     },
     {
-      title: "Industries",
+      title: t("assess.stepIndustries"),
       icon: <Briefcase className="h-4 w-4" />,
       canAdvance: () => true,
       content: () => (
@@ -340,7 +340,7 @@ export default function AssessPage() {
       ),
     },
     ...(hasCreditBarrier ? [{
-      title: "Credit Check",
+      title: t("assess.stepCredit"),
       icon: <CreditCard className="h-4 w-4" />,
       canAdvance: () => creditFormCanAdvance(creditData),
       content: () => (
@@ -356,7 +356,7 @@ export default function AssessPage() {
       ),
     }] as WizardStepConfig[] : []),
     {
-      title: "Review & Submit",
+      title: t("assess.stepReview"),
       icon: <FileText className="h-4 w-4" />,
       canAdvance: () => (formData.workHistory.trim().length > 0 || hasResume) && !mutation.isPending,
       content: () => (
@@ -391,7 +391,7 @@ export default function AssessPage() {
         <WizardShell
           steps={steps}
           onComplete={handleSubmit}
-          completeLabel={mutation.isPending ? "Analyzing..." : "Submit Assessment"}
+          completeLabel={mutation.isPending ? t("assess.analyzing") : t("assess.submitAssessment")}
         />
       </div>
     </main>

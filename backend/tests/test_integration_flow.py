@@ -105,12 +105,14 @@ class TestFullDemoFlow:
         assert r3.status_code == 200
         share_token = r3.json()["share_token"]
 
-        # Step 4: Retrieve shared plan (public, no auth)
+        # Step 4: Retrieve shared plan (public, no auth) — payload is
+        # redacted to strip session_id and raw barrier slugs (T13.71 P1).
         r4 = await client.get(f"/api/plan/shared/{share_token}")
         assert r4.status_code == 200
         shared = r4.json()
-        assert shared["session_id"] == sid
-        assert len(shared["barriers"]) == 3
+        assert "session_id" not in shared
+        assert sid not in r4.text
+        assert shared["barriers_count"] == 3
         assert len(shared["next_steps"]) > 0
         assert shared["career_center_name"] != ""
 
