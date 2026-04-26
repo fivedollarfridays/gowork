@@ -62,15 +62,20 @@ export function useCityConfig(): CityConfigResult {
   const [loading, setLoading] = useState(!cached);
 
   useEffect(() => {
+    let alive = true;
     if (cached) {
       setConfig(cached);
       setLoading(false);
       return;
     }
     fetchCityConfig().then((data) => {
+      if (!alive) return;
       setConfig(data);
       setLoading(false);
     });
+    return () => {
+      alive = false;
+    };
   }, []);
 
   return { ...config, loading };
