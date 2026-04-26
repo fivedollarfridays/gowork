@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import random
 from typing import Any
 
 import httpx
@@ -58,8 +59,22 @@ _RETRYABLE_NETWORK_ERRORS = (
 
 
 def _backoff_delay(base_delay: float, attempt: int) -> float:
-    """Exponential backoff: base, 2*base, 4*base, …"""
-    return base_delay * (2 ** (attempt - 1))
+    """Exponential backoff with full jitter (AWS-recommended).
+
+    For attempt ``N`` the delay is drawn uniformly from
+    ``[0, base_delay * 2 ** N]``. Full jitter (per the AWS Architecture
+    Blog "Exponential Backoff and Jitter") spreads concurrent retriers
+    out the most when many clients hit the same upstream failure at
+    the same instant — preventing the retry-stampede that pure
+    exponential backoff can produce.
+
+    ``base_delay=0.0`` short-circuits to ``0.0`` so unit tests can
+    disable real sleeping deterministically.
+    """
+    if base_delay <= 0.0:
+        return 0.0
+    cap = base_delay * (2 ** attempt)
+    return random.uniform(0.0, cap)
 
 
 async def _try_get_once(

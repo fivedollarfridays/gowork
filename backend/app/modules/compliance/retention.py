@@ -19,7 +19,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from app.modules.compliance._audit import write_audit
-from app.modules.compliance.delete import _NON_CASCADING_TABLES
+from app.modules.compliance.delete import NON_CASCADING_TABLES
 
 __all__ = ["RETENTION_GRACE_DAYS", "retention_sweep"]
 
@@ -74,7 +74,7 @@ def _purge_one(
     by the parent DELETE, but the m001 ``session_id``-but-no-FK tables
     (``record_profiles``, ``feedback_tokens``, ``visit_feedback``,
     ``resource_feedback``, ``share_tokens``) MUST be cleared explicitly
-    or the sweep leaks orphaned PII rows. Same ``_NON_CASCADING_TABLES``
+    or the sweep leaks orphaned PII rows. Same ``NON_CASCADING_TABLES``
     list, same explicit-DELETE-before-parent-DELETE order.
     """
     try:
@@ -87,7 +87,7 @@ def _purge_one(
         conn = sqlite3.connect(str(db_path))
         try:
             conn.execute("PRAGMA foreign_keys = ON")
-            for table in _NON_CASCADING_TABLES:
+            for table in NON_CASCADING_TABLES:
                 conn.execute(
                     f"DELETE FROM {table} WHERE session_id = ?",
                     (session_id,),

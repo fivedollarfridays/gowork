@@ -30,7 +30,7 @@ cascade clears every m002 child (FK + ``ON DELETE CASCADE``) but does
 NOT touch the m001 ``session_id``-but-no-FK tables that T13.70 already
 fixed in :func:`compliance.delete.full_delete`. The cascade test below
 fails until ``retention_sweep`` is taught to clear the same
-``_NON_CASCADING_TABLES`` list.
+``NON_CASCADING_TABLES`` list.
 """
 
 from __future__ import annotations
@@ -187,7 +187,7 @@ def _assert_every_table_cleared(
                 f"retention_sweep left {cnt} rows in {table!r} for purged "
                 f"session {sid!r}; cascade gap — extend the sweep to "
                 "cover the same surface area as full_delete "
-                "(see _NON_CASCADING_TABLES)."
+                "(see NON_CASCADING_TABLES)."
             )
         row = conn.execute(
             "SELECT 1 FROM sessions WHERE id = ?", (sid,),

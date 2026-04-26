@@ -220,7 +220,12 @@
     "copied": "Copied!",
     "shareButton": "Share Plan",
     "sharing": "Sharing...",
-    "shareFailed": "Failed"
+    "shareFailed": "Failed",
+    "barriersZero": "No focus areas identified",
+    "barriersOne": "1 focus area identified",
+    "barriersMany": "{{count}} focus areas identified",
+    "focusAreasTitle": "Focus areas",
+    "careerCenterTitle": "Career Center"
   },
   "sequence": {
     "heading": "Barrier Resolution Order",

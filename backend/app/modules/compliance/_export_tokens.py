@@ -20,6 +20,8 @@ import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 
+from app.core.token_kids import KNOWN_KIDS
+
 __all__ = [
     "EXPORT_TTL_SEC",
     "ComplianceTokenError",
@@ -32,10 +34,10 @@ EXPORT_TTL_SEC = 24 * 3600
 _SECRET_ENV = "COMPLIANCE_TOKEN_SECRET"
 _SECRET_OLD_ENV = "COMPLIANCE_TOKEN_SECRET_OLD"
 
-# Kid values the verifier will route to a secret pool. Unknown kids are
-# rejected outright — no fall-through to "try every active secret".
+# Kid values come from the shared `app.core.token_kids.KNOWN_KIDS`
+# whitelist. Unknown kids are rejected outright — no fall-through to
+# "try every active secret".
 # Mirrors the T13.62 hardening in app.modules.appointments.tokens.
-_KNOWN_KIDS = frozenset({"current", "old"})
 
 
 class ComplianceTokenError(ValueError):
@@ -122,7 +124,7 @@ def _decode_and_verify(token: str) -> dict:
     if not isinstance(payload, dict):
         raise ComplianceTokenError("payload must be a JSON object")
     kid = payload.get("kid", "current")
-    if kid not in _KNOWN_KIDS:
+    if kid not in KNOWN_KIDS:
         raise ComplianceTokenError("unknown kid")
     active = _active_secrets()
     candidates = (

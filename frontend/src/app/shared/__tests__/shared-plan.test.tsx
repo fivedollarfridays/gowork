@@ -51,7 +51,8 @@ describe("SharedPlanView", () => {
   it("renders a non-PII focus-areas count instead of raw barrier slugs", () => {
     renderShared();
     // T13.71 P1: the public payload exposes a count, not the slug list.
-    expect(screen.getByText(/2 barriers identified/i)).toBeInTheDocument();
+    // T13 stage-2 P1-1: copy is now i18n-driven (share.barriersMany).
+    expect(screen.getByText(/2 focus areas identified/i)).toBeInTheDocument();
     // Ensure no raw slugs leak through the UI
     expect(screen.queryByText(/^credit$/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/^transportation$/i)).not.toBeInTheDocument();

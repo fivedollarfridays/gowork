@@ -15,21 +15,24 @@ import sqlite3
 from datetime import date, datetime, timezone
 from pathlib import Path
 
+from app.modules.common.temporal_types import coerce_to_aware_datetime
+
 _AUTO_ADVANCE_EVENT_TYPE = "appointment_auto_advance"
 
 
 def parse_iso(raw: str | None) -> datetime | None:
-    """Parse an ISO-8601 string (possibly ending 'Z') into an aware datetime."""
+    """Parse an ISO-8601 string (possibly ending 'Z') into an aware datetime.
+
+    Wraps :func:`app.modules.common.temporal_types.coerce_to_aware_datetime`
+    to preserve the SQL-loader contract of returning ``None`` on absent or
+    malformed inputs (rather than raising).
+    """
     if not raw:
         return None
-    s = raw.replace("Z", "+00:00")
     try:
-        dt = datetime.fromisoformat(s)
+        return coerce_to_aware_datetime(raw)
     except ValueError:
         return None
-    if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
-    return dt
 
 
 def parse_date(raw: str | None) -> date | None:

@@ -28,6 +28,7 @@ from app.modules.compliance._audit import write_audit
 
 __all__ = [
     "CATEGORY_TO_TABLE",
+    "NON_CASCADING_TABLES",
     "full_delete",
     "selective_delete",
     "read_record_profile",
@@ -64,7 +65,7 @@ CATEGORY_TO_TABLE: dict[str, str] = {
 # Every m002+ session-scoped table declares ``ON DELETE CASCADE`` and
 # therefore is NOT in this list — adding such a table would double-delete
 # (harmless but redundant).
-_NON_CASCADING_TABLES: tuple[str, ...] = (
+NON_CASCADING_TABLES: tuple[str, ...] = (
     "record_profiles",
     "feedback_tokens",
     "visit_feedback",
@@ -99,7 +100,7 @@ def full_delete(
     conn = sqlite3.connect(str(db_path))
     try:
         conn.execute("PRAGMA foreign_keys = ON")
-        for table in _NON_CASCADING_TABLES:
+        for table in NON_CASCADING_TABLES:
             conn.execute(
                 f"DELETE FROM {table} WHERE session_id = ?", (session_id,),
             )

@@ -220,7 +220,12 @@
     "copied": "Copiado!",
     "shareButton": "Compartir Plan",
     "sharing": "Compartiendo...",
-    "shareFailed": "Error"
+    "shareFailed": "Error",
+    "barriersZero": "Sin areas de enfoque identificadas",
+    "barriersOne": "1 area de enfoque identificada",
+    "barriersMany": "{{count}} areas de enfoque identificadas",
+    "focusAreasTitle": "Areas de enfoque",
+    "careerCenterTitle": "Centro Profesional"
   },
   "sequence": {
     "heading": "Orden de Resolucion de Barreras",

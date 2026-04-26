@@ -2,7 +2,7 @@
 
 import { Phone, Calendar, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getTranslation, getLocale } from "@/lib/i18n";
+import { getTranslation, getLocale, type Locale } from "@/lib/i18n";
 import { toTelHref } from "@/lib/constants";
 
 /**
@@ -48,10 +48,13 @@ function formatGeneratedAt(value: string): string {
   return parsed.toLocaleDateString();
 }
 
-function barriersCountLabel(count: number): string {
-  if (count <= 0) return "No barriers identified";
-  if (count === 1) return "1 barrier identified";
-  return `${count} barriers identified`;
+function barriersCountLabel(count: number, locale: Locale): string {
+  if (count <= 0) return getTranslation("share.barriersZero", locale);
+  if (count === 1) return getTranslation("share.barriersOne", locale);
+  return getTranslation("share.barriersMany", locale).replace(
+    "{{count}}",
+    String(count),
+  );
 }
 
 export function SharedPlanView({ plan }: SharedPlanViewProps) {
@@ -59,6 +62,8 @@ export function SharedPlanView({ plan }: SharedPlanViewProps) {
   const heading = getTranslation("share.heading", locale);
   const expired = getTranslation("share.expiredOrInvalid", locale);
   const generatedLabel = getTranslation("share.generatedOn", locale);
+  const focusAreasTitle = getTranslation("share.focusAreasTitle", locale);
+  const careerCenterTitle = getTranslation("share.careerCenterTitle", locale);
 
   if (!plan) {
     return (
@@ -90,11 +95,11 @@ export function SharedPlanView({ plan }: SharedPlanViewProps) {
       {/* Barriers — public-safe count only (T13.71 P1) */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-base font-medium">Focus areas</CardTitle>
+          <CardTitle className="text-base font-medium">{focusAreasTitle}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            {barriersCountLabel(plan.barriers_count ?? 0)}
+            {barriersCountLabel(plan.barriers_count ?? 0, locale)}
           </p>
         </CardContent>
       </Card>
@@ -113,7 +118,7 @@ export function SharedPlanView({ plan }: SharedPlanViewProps) {
       {hasCenter && (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-medium">Career Center</CardTitle>
+            <CardTitle className="text-base font-medium">{careerCenterTitle}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {centerName && (

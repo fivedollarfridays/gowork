@@ -6,7 +6,12 @@
  * they reflect unmet preconditions, not a stability signal.
  */
 
-import { isFlaky, latestVerdict, suiteVerdict } from "./flakes";
+import { sortNewestFirst } from "./dashboard";
+import {
+  isFlakyFromSorted,
+  latestVerdictFromSorted,
+  suiteVerdict,
+} from "./flakes";
 import type { QcRun, SuiteSummary } from "./types";
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -38,25 +43,28 @@ export function passRateLast7Days(
   return passes / verdicts.length;
 }
 
-function newestRun(runs: QcRun[]): QcRun | null {
-  if (runs.length === 0) return null;
-  return [...runs].sort((a, b) => b.timestamp.localeCompare(a.timestamp))[0];
-}
-
-/** Roll up all runs for a single suite into one SuiteSummary row. */
+/**
+ * Roll up all runs for a single suite into one SuiteSummary row.
+ *
+ * Optimisation: callers previously triggered three independent sorts
+ * (one each in `latestVerdict`, `isFlaky`, and the local `newestRun`).
+ * We sort once and feed the sorted array into the `*FromSorted`
+ * variants — see their docstrings for the contract.
+ */
 export function summarizeSuite(
   suiteId: string,
   runs: QcRun[],
   now: Date = new Date(),
 ): SuiteSummary {
-  const newest = newestRun(runs);
+  const sorted = sortNewestFirst(runs);
+  const newest = sorted[0] ?? null;
   const window7d = runsInLastDays(runs, 7, now);
   return {
     suite_id: suiteId,
     suite_name: newest?.suite_name ?? suiteId,
-    latest_verdict: latestVerdict(runs),
+    latest_verdict: latestVerdictFromSorted(sorted),
     latest_run_at: newest?.timestamp ?? null,
-    is_flaky: isFlaky(runs),
+    is_flaky: isFlakyFromSorted(sorted),
     pass_rate_7d: passRateLast7Days(runs, now),
     run_count_7d: window7d.length,
     total_runs: runs.length,

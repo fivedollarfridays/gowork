@@ -29,7 +29,7 @@ can always grep it out of logs.
 from __future__ import annotations
 
 import sqlite3
-from datetime import datetime, timezone
+from datetime import datetime
 
 from app._demo_seed_compliance import (
     seed_compliance_audit,
@@ -64,17 +64,3 @@ def seed_qc_state(
     seed_engagement_window(conn, session_id, state_label, now)
     seed_reminder_state(conn, session_id, state_label, now)
     seed_advisor_token(conn, city, now)
-
-
-def seed_qc_state_default_now(
-    conn: sqlite3.Connection,
-    session_id: str,
-    *,
-    city: str,
-    state_label: str,
-) -> None:
-    """Convenience wrapper for callers that don't pin ``now``."""
-    seed_qc_state(
-        conn, session_id, city=city, state_label=state_label,
-        now=datetime.now(timezone.utc),
-    )

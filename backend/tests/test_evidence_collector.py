@@ -23,6 +23,21 @@ import pytest
 
 from app.core import events
 from app.core.migrations import runner
+from tests._fake_clock import freeze_time as _freeze_time
+
+
+@pytest.fixture
+def freeze_wednesday():
+    """Freeze clock to Wednesday 2026-04-22 12:00 UTC.
+
+    Avoids two flake classes:
+      1. local-time `date.today()` drifting from UTC `datetime.now()`
+         around midnight (this test compares both)
+      2. running on a Sunday triggering the weekly-review branch in
+         tested orchestrator code
+    """
+    with _freeze_time("2026-04-22T12:00:00+00:00"):
+        yield
 from app.modules.appointments import scheduler
 from app.modules.appointments.types import Appointment
 from app.modules.common.temporal_types import (
@@ -311,6 +326,7 @@ def test_applications_progressed_empty_when_only_filed(db_path: str) -> None:
     assert bundle.applications_progressed == []
 
 
+@pytest.mark.usefixtures("freeze_wednesday")
 def test_outcomes_logged_in_range(db_path: str) -> None:
     tracker = OutcomeTracker(db_path)
     tracker.record_outcome(OutcomeRecord(

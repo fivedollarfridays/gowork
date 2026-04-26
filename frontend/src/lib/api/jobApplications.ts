@@ -61,6 +61,20 @@ export interface ResumeVersionInfo {
 /** Per-request hard timeout (T13.92). */
 const REQUEST_TIMEOUT_MS = 30_000;
 
+/**
+ * Compose the caller's signal (if any) with our local timeout signal so
+ * that BOTH abort triggers are honoured (T13 stage-2 P1-4). The prior
+ * ``init?.signal ?? controller.signal`` silently dropped the timeout
+ * whenever the caller supplied their own signal.
+ */
+function _composeSignal(
+  callerSignal: AbortSignal | null | undefined,
+  timeoutSignal: AbortSignal,
+): AbortSignal {
+  if (!callerSignal) return timeoutSignal;
+  return AbortSignal.any([callerSignal, timeoutSignal]);
+}
+
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const headers: HeadersInit = { ...(init?.headers ?? {}) };
   if (init?.body) {
@@ -72,7 +86,7 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
     const res = await fetch(`${API_BASE}${path}`, {
       ...init,
       headers,
-      signal: init?.signal ?? controller.signal,
+      signal: _composeSignal(init?.signal, controller.signal),
     });
     if (!res.ok) {
       const body = await res

@@ -84,6 +84,22 @@ async function readError(res: Response): Promise<string> {
 /** Per-request hard timeout (T13.92). 60s — PDF generation can be slow. */
 const REQUEST_TIMEOUT_MS = 60_000;
 
+/**
+ * Compose the caller's signal (if any) with our local timeout signal so
+ * that BOTH abort triggers are honoured. The previous implementation
+ * used ``init?.signal ?? controller.signal`` which silently dropped the
+ * timeout whenever the caller passed their own signal — meaning a hung
+ * backend call could no longer be terminated by the per-request hard
+ * timeout (T13 stage-2 P1-4).
+ */
+function _composeSignal(
+  callerSignal: AbortSignal | null | undefined,
+  timeoutSignal: AbortSignal,
+): AbortSignal {
+  if (!callerSignal) return timeoutSignal;
+  return AbortSignal.any([callerSignal, timeoutSignal]);
+}
+
 async function _fetchWithTimeout(
   path: string,
   init?: RequestInit,
@@ -93,7 +109,7 @@ async function _fetchWithTimeout(
   try {
     return await fetch(`${API_BASE}${path}`, {
       ...init,
-      signal: init?.signal ?? controller.signal,
+      signal: _composeSignal(init?.signal, controller.signal),
     });
   } finally {
     clearTimeout(timeoutId);
