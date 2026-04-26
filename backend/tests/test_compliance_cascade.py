@@ -9,7 +9,7 @@ tables added in future migrations must either:
 1. declare an ``ON DELETE CASCADE`` FK to ``sessions(id)`` (so they
    ride the SQLite cascade for free), **or**
 2. be added to the explicit cascade list inside ``delete.py`` (the
-   ``_NON_CASCADING_TABLES`` tuple), **or**
+   ``NON_CASCADING_TABLES`` tuple), **or**
 3. be added to the allowlist below with a documented reason.
 
 Otherwise this test fails with the offending table name — the
@@ -45,7 +45,7 @@ Cascade gap fixed by this task
 Introspection plus a seed-every-table fixture revealed that the m001
 session-keyed tables without FKs were not being cleared by
 ``full_delete`` — only ``record_profiles`` had been added to the
-non-cascade list. Added to ``_NON_CASCADING_TABLES``:
+non-cascade list. Added to ``NON_CASCADING_TABLES``:
 
 * ``feedback_tokens``    — m001 worker feedback tokens
 * ``visit_feedback``     — m001 visit feedback responses
@@ -431,7 +431,7 @@ def test_full_delete_clears_every_session_scoped_table(
             assert cnt == 0, (
                 f"full_delete left {cnt} rows in {table!r} for session "
                 f"{_SESSION_ID!r} — add the table to delete.py's "
-                "_NON_CASCADING_TABLES or declare ON DELETE CASCADE on "
+                "NON_CASCADING_TABLES or declare ON DELETE CASCADE on "
                 "its session_id FK."
             )
         # Sessions row itself is gone too.
@@ -481,7 +481,7 @@ def test_every_session_scoped_table_is_covered_or_allowlisted(
 
     * declared with ``ON DELETE CASCADE`` -> sessions(id) (rides the
       implicit cascade), OR
-    * present in ``delete._NON_CASCADING_TABLES`` (explicitly DELETEd
+    * present in ``delete.NON_CASCADING_TABLES`` (explicitly DELETEd
       before the sessions row drops), OR
     * present in :data:`_RETAIN_ALLOWLIST` (intentionally retained).
 
@@ -499,7 +499,7 @@ def test_every_session_scoped_table_is_covered_or_allowlisted(
     finally:
         conn.close()
 
-    explicit = set(delete_mod._NON_CASCADING_TABLES)
+    explicit = set(delete_mod.NON_CASCADING_TABLES)
     allowlisted = set(_RETAIN_ALLOWLIST)
 
     uncovered = scoped - fk_tables - explicit - allowlisted
@@ -507,7 +507,7 @@ def test_every_session_scoped_table_is_covered_or_allowlisted(
         "Session-scoped tables not covered by full_delete cascade: "
         f"{sorted(uncovered)!r}. Either declare ON DELETE CASCADE on "
         "the FK, add the table name to "
-        "app.modules.compliance.delete._NON_CASCADING_TABLES, or add "
+        "app.modules.compliance.delete.NON_CASCADING_TABLES, or add "
         "it to _RETAIN_ALLOWLIST in this test with a documented reason."
     )
 

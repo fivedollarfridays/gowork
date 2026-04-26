@@ -5,6 +5,19 @@
 
 import type { SuiteSummary, SuiteVerdict } from "./types";
 
+/**
+ * Sort runs (or any timestamped record) newest-first by ISO timestamp.
+ * Returns a new array; the input is not mutated. Lexical compare is
+ * safe here because all stored timestamps share the same offset
+ * spelling (UTC `+00:00`); see notes in `share.py` for the rules
+ * around lexical ISO comparison.
+ */
+export function sortNewestFirst<T extends { timestamp: string }>(
+  runs: T[],
+): T[] {
+  return [...runs].sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+}
+
 export interface DashboardStats {
   total_suites: number;
   total_runs_7d: number;

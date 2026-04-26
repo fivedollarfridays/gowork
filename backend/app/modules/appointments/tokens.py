@@ -28,6 +28,8 @@ from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 
+from app.core.token_kids import KNOWN_KIDS
+
 __all__ = [
     "TokenAction",
     "TokenError",
@@ -48,9 +50,9 @@ _DEFAULT_TTL_SEC = 7 * 24 * 3600  # 7 days
 # overlap, so retiring OLD on day 7 cannot strand a worker.
 KEY_ROTATION_OVERLAP_DAYS = 7
 
-# Kid values the verifier will route to a secret pool. Unknown kids are
+# Kid values the verifier will route to a secret pool come from the
+# shared `app.core.token_kids.KNOWN_KIDS` whitelist. Unknown kids are
 # rejected outright — no fall-through to "try every active secret".
-_KNOWN_KIDS = frozenset({"current", "old"})
 
 
 class TokenAction(str, Enum):
@@ -216,7 +218,7 @@ def _decode_and_verify_signature(token: str) -> dict:
     if not isinstance(payload, dict):
         raise TokenInvalid("payload must be a JSON object")
     payload_kid = payload.get("kid", "current")
-    if payload_kid not in _KNOWN_KIDS:
+    if payload_kid not in KNOWN_KIDS:
         raise TokenInvalid("unknown kid")
     active = _active_secrets()
     candidates = (

@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { isAccessAllowed } from "../access";
+import {
+  constantTimeStringEqual,
+  isAccessAllowed,
+} from "../access";
 
 describe("isAccessAllowed (T13.8 prod gate)", () => {
   it("allows access in development regardless of header", () => {
@@ -60,5 +63,30 @@ describe("isAccessAllowed (T13.8 prod gate)", () => {
         adminKey: "real-key",
       }),
     ).toBe(false);
+  });
+});
+
+describe("constantTimeStringEqual (T13 stage-2 P1-3)", () => {
+  it("returns true for equal strings", () => {
+    expect(constantTimeStringEqual("abc123", "abc123")).toBe(true);
+  });
+
+  it("returns false for different-length strings without throwing", () => {
+    // The early length-check is required: ``timingSafeEqual`` itself
+    // throws RangeError on unequal-length inputs.
+    expect(constantTimeStringEqual("abc", "abc1")).toBe(false);
+    expect(constantTimeStringEqual("", "x")).toBe(false);
+  });
+
+  it("returns false for same-length but differing strings", () => {
+    expect(constantTimeStringEqual("abc", "abd")).toBe(false);
+    // First-byte mismatch — the prior `===` impl leaked timing here.
+    expect(constantTimeStringEqual("aaaa", "baaa")).toBe(false);
+  });
+
+  it("returns true for two empty strings", () => {
+    // Empty admin keys are rejected upstream, but the helper must be
+    // total: equal-length zero-byte buffers should compare equal.
+    expect(constantTimeStringEqual("", "")).toBe(true);
   });
 });

@@ -9,14 +9,10 @@
  * an all-failing streak is failing, not flaky.
  */
 
+import { sortNewestFirst } from "./dashboard";
 import type { QcRun, ScenarioVerdict, SuiteVerdict } from "./types";
 
 const FLAKE_WINDOW = 5;
-
-/** Sort runs newest-first by timestamp. */
-function sortNewestFirst(runs: QcRun[]): QcRun[] {
-  return [...runs].sort((a, b) => b.timestamp.localeCompare(a.timestamp));
-}
 
 /**
  * Roll up a single run's scenario verdicts into a suite verdict.
@@ -36,8 +32,17 @@ export function suiteVerdict(run: QcRun): SuiteVerdict {
 /** Latest verdict across the runs given (any suite). */
 export function latestVerdict(runs: QcRun[]): SuiteVerdict {
   if (runs.length === 0) return "unknown";
-  const newest = sortNewestFirst(runs)[0];
-  return suiteVerdict(newest);
+  return latestVerdictFromSorted(sortNewestFirst(runs));
+}
+
+/**
+ * Same as :func:`latestVerdict` but trusts the caller to have already
+ * sorted ``runs`` newest-first via :func:`sortNewestFirst`. Used by
+ * :func:`summarizeSuite` to avoid re-sorting the same array three times.
+ */
+export function latestVerdictFromSorted(sortedRuns: QcRun[]): SuiteVerdict {
+  if (sortedRuns.length === 0) return "unknown";
+  return suiteVerdict(sortedRuns[0]);
 }
 
 /**
@@ -48,7 +53,18 @@ export function scenarioVerdicts(
   runs: QcRun[],
   windowSize: number,
 ): SuiteVerdict[] {
-  const window = sortNewestFirst(runs).slice(0, windowSize);
+  return scenarioVerdictsFromSorted(sortNewestFirst(runs), windowSize);
+}
+
+/**
+ * Same as :func:`scenarioVerdicts` but trusts the caller-supplied
+ * ``sortedRuns`` to already be newest-first.
+ */
+export function scenarioVerdictsFromSorted(
+  sortedRuns: QcRun[],
+  windowSize: number,
+): SuiteVerdict[] {
+  const window = sortedRuns.slice(0, windowSize);
   return window.reverse().map(suiteVerdict);
 }
 
@@ -57,7 +73,15 @@ export function scenarioVerdicts(
  * suite show both passed AND failed verdicts?
  */
 export function isFlaky(runs: QcRun[]): boolean {
-  const verdicts = scenarioVerdicts(runs, FLAKE_WINDOW).filter(
+  return isFlakyFromSorted(sortNewestFirst(runs));
+}
+
+/**
+ * Same as :func:`isFlaky` but trusts the caller to have already sorted
+ * ``runs`` newest-first via :func:`sortNewestFirst`.
+ */
+export function isFlakyFromSorted(sortedRuns: QcRun[]): boolean {
+  const verdicts = scenarioVerdictsFromSorted(sortedRuns, FLAKE_WINDOW).filter(
     (v) => v !== "skipped" && v !== "unknown",
   );
   const sawPass = verdicts.some((v) => v === "passed");

@@ -32,7 +32,8 @@ describe("SharedPlanView edge cases", () => {
     });
     expect(screen.getByText("Test Center")).toBeInTheDocument();
     expect(screen.getByText("Contact career center")).toBeInTheDocument();
-    expect(screen.getByText(/no barriers identified/i)).toBeInTheDocument();
+    // T13 stage-2 P1-1: copy is now i18n-driven (share.barriersZero).
+    expect(screen.getByText(/no focus areas identified/i)).toBeInTheDocument();
   });
 
   it("renders plan with no next steps", () => {
@@ -44,7 +45,8 @@ describe("SharedPlanView edge cases", () => {
       career_center_phone: "555-0100",
     });
     expect(screen.getByText("Test Center")).toBeInTheDocument();
-    expect(screen.getByText(/1 barrier identified/i)).toBeInTheDocument();
+    // T13 stage-2 P1-1: copy is now i18n-driven (share.barriersOne).
+    expect(screen.getByText(/1 focus area identified/i)).toBeInTheDocument();
   });
 
   it("renders plan with many barriers (count only, no slug leak)", () => {
@@ -56,7 +58,8 @@ describe("SharedPlanView edge cases", () => {
       career_center_phone: "555-0200",
     });
     // Renders the count, not the underlying slugs (T13.71 P1)
-    expect(screen.getByText(/7 barriers identified/i)).toBeInTheDocument();
+    // T13 stage-2 P1-1: copy is now i18n-driven (share.barriersMany).
+    expect(screen.getByText(/7 focus areas identified/i)).toBeInTheDocument();
     expect(screen.queryByText(/^criminal record$/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/^credit$/i)).not.toBeInTheDocument();
   });
@@ -95,6 +98,13 @@ describe("SharedPlanView edge cases", () => {
       career_center_phone: "555-0300",
     });
     expect(screen.getByText(/plan de accion compartido/i)).toBeInTheDocument();
+    // T13 stage-2 P1-1: focus-areas + career-center titles + barrier
+    // count are now i18n. Verify the ES strings actually render.
+    expect(screen.getByText(/areas de enfoque/i)).toBeInTheDocument();
+    expect(screen.getByText(/centro profesional/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/1 area de enfoque identificada/i),
+    ).toBeInTheDocument();
   });
 
   it("renders Spanish expired message when plan is null", () => {

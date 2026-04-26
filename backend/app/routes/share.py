@@ -13,6 +13,7 @@ from app.core.auth import require_session_token
 from app.core.database import get_db
 from app.core.queries import get_session_by_id
 from app.core.rate_limit import RateLimiter, require_rate_limit
+from app.modules.common.temporal_types import coerce_to_aware_datetime
 from app.modules.feedback.tokens import generate_token
 from app.modules.matching.resource_router import get_career_center
 
@@ -136,8 +137,18 @@ async def _load_active_share(
         raise HTTPException(status_code=404, detail="Share link not found")
 
     session_id, created_at, expires_at = row
-    now = datetime.now(timezone.utc).isoformat()
-    if expires_at <= now:
+    # T13 stage-2 P1-2: parse the stored ISO timestamp into an aware
+    # datetime instead of comparing strings lexically. Lexical compare is
+    # only safe when both sides use the exact same offset spelling
+    # (currently '+00:00'); a future migration writing 'Z' would silently
+    # invert the comparison. ``coerce_to_aware_datetime`` accepts both
+    # forms and naive datetimes the same way every other caller does.
+    try:
+        expires_at_dt = coerce_to_aware_datetime(expires_at)
+    except (TypeError, ValueError):
+        # Treat an unparseable timestamp as expired — fail-closed.
+        raise HTTPException(status_code=410, detail="Share link has expired")
+    if expires_at_dt <= datetime.now(timezone.utc):
         raise HTTPException(status_code=410, detail="Share link has expired")
     return session_id, created_at
 

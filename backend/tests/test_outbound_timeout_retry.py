@@ -19,7 +19,11 @@ from unittest.mock import AsyncMock, patch
 import httpx
 import pytest
 
-from app.integrations._http_retry import async_get_with_retry, NoRetry5xxError
+from app.integrations._http_retry import (
+    _backoff_delay,
+    async_get_with_retry,
+    NoRetry5xxError,
+)
 from app.integrations.adapters import twc_adapter, usajobs_adapter
 from app.integrations.brightdata.client import BrightDataClient
 from app.integrations.brightdata.types import (
@@ -119,6 +123,37 @@ class TestHttpRetryHelper:
                 client, "https://x", base_delay=0.0, max_attempts=3,
             )
         assert client.get.await_count == 3
+
+
+class TestBackoffJitter:
+    """`_backoff_delay` uses full jitter to avoid retry stampedes (Stage 3 fix F).
+
+    AWS Architecture Blog "Exponential Backoff and Jitter":
+    full jitter = uniform(0, base * 2**attempt) — best at reducing
+    stampedes when many clients fail at the same upstream.
+    """
+
+    def test_delay_is_bounded_by_exponential_cap(self):
+        """For attempt N, delay must be in [0, base * 2**N]."""
+        base = 0.5
+        for attempt in range(1, 6):
+            cap = base * (2 ** attempt)
+            for _ in range(50):
+                delay = _backoff_delay(base, attempt)
+                assert 0.0 <= delay <= cap
+
+    def test_delay_is_not_deterministic(self):
+        """100 samples at the same attempt should not all match — jittered."""
+        base = 0.5
+        attempt = 3
+        samples = {_backoff_delay(base, attempt) for _ in range(100)}
+        # With full jitter and a 4.0s cap, expect many distinct values.
+        assert len(samples) > 1
+
+    def test_delay_zero_base_returns_zero(self):
+        """`base_delay=0.0` (used by tests) must always yield 0."""
+        for attempt in range(1, 6):
+            assert _backoff_delay(0.0, attempt) == 0.0
 
 
 # --------------------------------------------------------------------------- #
