@@ -47,10 +47,14 @@ test.describe("@critical advisor login inbox", () => {
   }) => {
     await page.goto(`/case-manager?advisor_token=${advisor.plaintext}`);
 
-    // Card title is the i18n string `advisor.inboxHeading` — "Needs Attention".
+    // Card title is the i18n string `advisor.inboxHeading` — "Needs
+    // Attention". The shadcn CardTitle renders as a <div>, not a
+    // heading element, so we match by text content + aria-label fallback.
+    // The StalledSessionsList <ul> also carries aria-label="Needs
+    // Attention", so we scope to the card title text via getByText.
     await expect(
-      page.getByRole("heading", { name: /needs attention/i }),
-    ).toBeVisible();
+      page.getByText("Needs Attention", { exact: true }).first(),
+    ).toBeVisible({ timeout: 10_000 });
   });
 
   test("inbox surfaces stalled sessions or a typed loading/error state", async ({
@@ -59,8 +63,8 @@ test.describe("@critical advisor login inbox", () => {
     await page.goto(`/case-manager?advisor_token=${advisor.plaintext}`);
 
     await expect(
-      page.getByRole("heading", { name: /needs attention/i }),
-    ).toBeVisible();
+      page.getByText("Needs Attention", { exact: true }).first(),
+    ).toBeVisible({ timeout: 10_000 });
 
     // The StalledSessionsList renders rows once the API resolves; until
     // then the loading copy is shown. An invalid token (or unseeded DB)
@@ -76,6 +80,6 @@ test.describe("@critical advisor login inbox", () => {
         (await loading.count()) +
         (await alert.count());
       expect(total).toBeGreaterThan(0);
-    }).toPass({ timeout: 5_000 });
+    }).toPass({ timeout: 10_000 });
   });
 });

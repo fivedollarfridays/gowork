@@ -4,28 +4,19 @@ import { DEMO, BACKEND_BASE, detectBackend } from "./_demo_session";
 /**
  * Beat 5 of the demo script — worker exports their data.
  *
- * The demo beat shows a curl-in-terminal pane (compliance is API-only;
- * no UI button at the moment). We mirror that with an API-level
- * Playwright test using `request.post` / `request.get` so the gate
- * still produces a CI signal even though the flow has no DOM surface.
+ * Compliance is API-only (no UI surface), so this gate exercises the
+ * two-step contract from `app.routes.compliance` directly:
+ *   1. POST /api/compliance/export → 200 + signed single-use download URL
+ *   2. GET <download_url>          → 200 application/zip
  *
- * Two-step contract from `app.routes.compliance`:
- *   1. POST /api/compliance/export with {session_id, session_token}
- *      → 200 {archive_id, download_url, expires_in_sec}
- *   2. GET <download_url>
- *      → 200, Content-Type: application/zip, non-empty body
- *
- * Single-use download token: the GET in step 2 consumes the token, so a
- * second invocation in the same spec run would fail. We assert the
- * happy path once, end of spec.
- *
- * Rate limit: 3 exports per hour per session (see `_enforce_rate_limit`
- * in compliance.py). If this test runs more than 3x in a 60-min window
- * (e.g. tight retries), expect 429s — that's a real backend signal,
- * not a test bug.
+ * Rate limit: 3 export POSTs per hour per session id (in-memory in
+ * compliance.py:_enforce_rate_limit). Each test below uses a distinct
+ * demo session so retries don't flake on 429.
  */
 test.describe("@critical worker compliance export", () => {
-  const creds = DEMO.workerMontgomeryMedium;
+  const credsIssue = DEMO.workerMontgomeryMedium;
+  const credsZip = DEMO.workerMontgomeryHard;
+  const credsAuth = DEMO.workerMontgomeryMedium;
 
   test.beforeAll(async ({ request }) => {
     const reason = await detectBackend(request);
@@ -39,8 +30,8 @@ test.describe("@critical worker compliance export", () => {
       `${BACKEND_BASE}/api/compliance/export`,
       {
         data: {
-          session_id: creds.sessionId,
-          session_token: creds.feedbackToken,
+          session_id: credsIssue.sessionId,
+          session_token: credsIssue.feedbackToken,
         },
       },
     );
@@ -58,12 +49,16 @@ test.describe("@critical worker compliance export", () => {
   });
 
   test("download URL streams a non-empty ZIP archive", async ({ request }) => {
+    // Mints a fresh token inside the test (single-use enforcement is
+    // working as designed; this test must not reuse the one minted by
+    // the test above). Uses the hard-stall demo session to avoid
+    // sharing the medium session's per-hour quota.
     const exportRes = await request.post(
       `${BACKEND_BASE}/api/compliance/export`,
       {
         data: {
-          session_id: creds.sessionId,
-          session_token: creds.feedbackToken,
+          session_id: credsZip.sessionId,
+          session_token: credsZip.feedbackToken,
         },
       },
     );
@@ -81,9 +76,11 @@ test.describe("@critical worker compliance export", () => {
   test("invalid session_token returns 401 without leaking a URL", async ({
     request,
   }) => {
+    // verify_token runs before _enforce_rate_limit, so this 401 path
+    // does not consume a rate-limit slot — safe to share a session id.
     const res = await request.post(`${BACKEND_BASE}/api/compliance/export`, {
       data: {
-        session_id: creds.sessionId,
+        session_id: credsAuth.sessionId,
         session_token: "wrong-token-xxxxxxxxxxxxxxxxxxxxxxxx",
       },
     });
