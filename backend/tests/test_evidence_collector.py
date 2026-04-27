@@ -288,9 +288,11 @@ def test_applications_filed_excludes_out_of_range(db_path: str) -> None:
     assert bundle.applications_filed == []
 
 
+@pytest.mark.usefixtures("freeze_wednesday")
 def test_applications_progressed_in_range(db_path: str) -> None:
-    # The outcomes listener has to be registered for progression events
-    # to land in outcomes_records.
+    # `update_status` stamps progressed_on with datetime.now(); without
+    # the freeze, real-clock days outside [2026-04-20, 2026-04-26] make
+    # the progression land outside the window and the bundle is empty.
     register_jobs_outcomes_listener(db_path)
     start = date(2026, 4, 20)
     end = date(2026, 4, 26)
