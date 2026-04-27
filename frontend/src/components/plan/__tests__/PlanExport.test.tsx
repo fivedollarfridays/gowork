@@ -245,9 +245,14 @@ describe("PlanExport", () => {
     const button = screen.getByRole("button", { name: /download pdf/i });
     await user.click(button);
 
-    // Wait for the error to appear
-    const errorEl = await screen.findByRole("alert");
+    // Wait for the error to appear. Default findBy timeout is 1000ms;
+    // CI Linux can be slow enough that the catch+setError React update
+    // doesn't land in time — bump to 3000ms.
+    const errorEl = await screen.findByRole("alert", undefined, { timeout: 3000 });
     expect(errorEl).toHaveTextContent(/failed to generate pdf/i);
+    // Let any remaining microtasks drain before afterEach cleanup so a
+    // late React update doesn't leak into the next test.
+    await new Promise((r) => setTimeout(r, 0));
   });
 
   it("button has aria-label during generation", async () => {
@@ -264,6 +269,10 @@ describe("PlanExport", () => {
     expect(button).toHaveAttribute("aria-label", "Generating PDF, please wait");
 
     resolveSave();
+    // Ensure the resolution propagates before cleanup so the next test
+    // doesn't inherit a half-settled state update.
+    await savePromise;
+    await new Promise((r) => setTimeout(r, 0));
   });
 
   it("handles empty barriers and jobs gracefully", () => {
