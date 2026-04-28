@@ -50,15 +50,27 @@ vi.mock("@/hooks/useTranslation", () => ({
     React.createElement(React.Fragment, null, children),
 }));
 
+// W3 Driver D — Wave 3: Chapter06 added a 2nd next/dynamic boundary
+// (BenefitsCliffChart). The shim now differentiates loaders by source so
+// only the MapboxScene loader emits the "mapbox-scene-stub" testid; the
+// cliff chart gets a separate placeholder testid that can't collide.
 vi.mock("next/dynamic", () => ({
   default: (loader: () => Promise<{ default: React.ComponentType }>) => {
     let Component: React.ComponentType | null = null;
     void loader().then((mod) => {
       Component = mod.default;
     });
+    const loaderSrc = String(loader);
+    const isMapbox = /MapboxScene/.test(loaderSrc);
+    const isCliffChart = /BenefitsCliffChart/.test(loaderSrc);
+    const fallbackTestId = isMapbox
+      ? "mapbox-scene-stub"
+      : isCliffChart
+        ? "cliff-chart-dynamic-stub"
+        : "dynamic-stub";
     const Wrapper: React.FC<Record<string, unknown>> = (props) => {
       if (Component) return React.createElement(Component, props);
-      return React.createElement("div", { "data-testid": "mapbox-scene-stub" });
+      return React.createElement("div", { "data-testid": fallbackTestId });
     };
     return Wrapper;
   },

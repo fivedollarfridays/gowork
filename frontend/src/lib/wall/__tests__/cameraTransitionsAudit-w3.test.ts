@@ -78,23 +78,23 @@ describe("T3.25a — Driver C lane: 9 -> 10 transition is sane", () => {
   });
 });
 
-// Pairs that depend on Drivers A+B chapters. Souji un-skips after W3 merge.
-describe.skip("T3.25a — pairs 5->6 .. 8->9 (un-skip after Drivers A+B merge)", () => {
-  it("Ch5 -> Ch6 transition is sane (Driver B Ch6)", () => {
+// Pairs that depend on Drivers A+B chapters. Driver D un-skipped after W3 merge.
+describe("T3.25a — pairs 5->6 .. 8->9 (un-skipped by Driver D)", () => {
+  it("Ch5 -> Ch6 transition is sane (Driver A Ch6)", () => {
     assertSaneTransition(5, 6);
   });
-  it("Ch6 -> Ch7 transition is sane (Drivers B Ch6 + A Ch7)", () => {
+  it("Ch6 -> Ch7 transition is sane (Driver A Ch6 + B Ch7)", () => {
     assertSaneTransition(6, 7);
   });
-  it("Ch7 -> Ch8 transition is sane (Drivers A Ch7 + B Ch8)", () => {
+  it("Ch7 -> Ch8 transition is sane (Driver B Ch7 + B Ch8)", () => {
     assertSaneTransition(7, 8);
   });
-  it("Ch8 -> Ch9 transition is sane (Drivers B Ch8 + A Ch9)", () => {
+  it("Ch8 -> Ch9 transition is sane (Driver B Ch8 + A Ch9)", () => {
     assertSaneTransition(8, 9);
   });
 });
 
-describe.skip("T3.25a — full-spine no-identical-camera guarantee (un-skip after merge)", () => {
+describe("T3.25a — full-spine no-identical-camera guarantee (un-skipped by Driver D)", () => {
   it("no two adjacent chapters share identical camera state", () => {
     const pairs: ReadonlyArray<[number, number]> = [
       [1, 2],

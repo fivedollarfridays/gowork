@@ -47,15 +47,22 @@ vi.mock("@/hooks/useDeviceCapability", () => ({
   }),
 }));
 
+// W3 Driver D — Wave 3 differentiates dynamic loaders by source so the
+// MapboxScene fallback testid can't collide with the cliff chart loader's.
 vi.mock("next/dynamic", () => ({
   default: (loader: () => Promise<{ default: React.ComponentType }>) => {
     let Component: React.ComponentType | null = null;
     void loader().then((mod) => {
       Component = mod.default;
     });
+    const loaderSrc = String(loader);
+    const isCliffChart = /BenefitsCliffChart/.test(loaderSrc);
+    const fallbackTestId = isCliffChart
+      ? "cliff-chart-dynamic-stub"
+      : "mapbox-scene-stub";
     const Wrapper: React.FC<Record<string, unknown>> = (props) => {
       if (Component) return React.createElement(Component, props);
-      return React.createElement("div", { "data-testid": "mapbox-scene-stub" });
+      return React.createElement("div", { "data-testid": fallbackTestId });
     };
     return Wrapper;
   },

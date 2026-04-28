@@ -133,12 +133,16 @@ describe("cliff-embed contract — wall must import, never duplicate", () => {
       return;
     }
     const content = readFileSync(ch6Path, "utf8");
-    // Accept either path-alias or relative import; reject any local
-    // BenefitsCliffChart definition.
+    // Accept any of: static `from "..."` import, OR next/dynamic
+    // `import("...")` lazy boundary, OR a relative variant. Driver D's
+    // W3 maximization moved Ch6 to lazy-load the chart via next/dynamic
+    // to keep Recharts out of the eager `/` chunk; the contract still
+    // holds (Ch6 never duplicates the chart, only consumes the canonical
+    // implementation), the resolution path just runs through dynamic().
+    const STATIC_IMPORT_RE = /from\s+["'](?:@\/components\/plan\/BenefitsCliffChart|.*\/components\/plan\/BenefitsCliffChart)["']/;
+    const DYNAMIC_IMPORT_RE = /import\s*\(\s*["'](?:@\/components\/plan\/BenefitsCliffChart|.*\/components\/plan\/BenefitsCliffChart)["']\s*\)/;
     const importsCanonical =
-      /from\s+["'](?:@\/components\/plan\/BenefitsCliffChart|.*\/components\/plan\/BenefitsCliffChart)["']/.test(
-        content,
-      );
+      STATIC_IMPORT_RE.test(content) || DYNAMIC_IMPORT_RE.test(content);
     const declaresLocal = FORBIDDEN_PATTERNS.some((p) => p.test(content));
     expect(declaresLocal).toBe(false);
     expect(importsCanonical).toBe(true);

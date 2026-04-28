@@ -154,8 +154,11 @@ describe("W3 Driver B — Ch8 Graph (3D constellation) camera state", () => {
   it("Chapter 8 tilts UP to reveal constellation above the city", () => {
     expect(CHAPTER_CAMERAS[8]).toBeDefined();
     const ch8 = CHAPTER_CAMERAS[8]!;
-    // Pitch 70 is what gives the constellation the floating-above-city look
-    expect(ch8.pitch).toBe(70);
+    // Pitch 60 is the dramatic tilt that keeps the Ch8->Ch9 audit
+    // constraint intact (60° max delta from Ch9's pitch 0). Driver D
+    // retuned from 70 → 60 during W3 maximization; the constellation
+    // still reads as floating above downtown at this pitch.
+    expect(ch8.pitch).toBe(60);
     expect(ch8.bearing).toBe(0);
     expect(ch8.zoom).toBe(12);
   });

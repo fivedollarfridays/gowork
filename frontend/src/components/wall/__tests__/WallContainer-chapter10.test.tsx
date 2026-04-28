@@ -39,15 +39,22 @@ vi.mock("@/hooks/useDeviceCapability", () => ({
   }),
 }));
 
+// W3 Driver D — differentiate dynamic loaders so MapboxScene + cliff
+// chart fallbacks don't collide on the same testid.
 vi.mock("next/dynamic", () => ({
   default: (loader: () => Promise<{ default: React.ComponentType }>) => {
     let Component: React.ComponentType | null = null;
     void loader().then((mod) => {
       Component = mod.default;
     });
+    const loaderSrc = String(loader);
+    const isCliffChart = /BenefitsCliffChart/.test(loaderSrc);
+    const fallbackTestId = isCliffChart
+      ? "cliff-chart-dynamic-stub"
+      : "mapbox-scene-stub";
     const Wrapper: React.FC<Record<string, unknown>> = (props) => {
       if (Component) return React.createElement(Component, props);
-      return React.createElement("div", { "data-testid": "mapbox-scene-stub" });
+      return React.createElement("div", { "data-testid": fallbackTestId });
     };
     return Wrapper;
   },
