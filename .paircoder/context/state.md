@@ -1,6 +1,6 @@
 # Current State
 
-> Last updated: 2026-04-28 (W2 Driver D maximization — 2319 tests passing, all 5 chapters wired, namespace consolidated, layers composed)
+> Last updated: 2026-04-28 (W2 souji-sweep — PR #82 opened to sprint/visual-rebirth, typecheck zero errors, PlanExport + CareerCenterExport flake CLOSED, 2319/2319 across 3 consecutive runs)
 
 ## Active Plan
 
@@ -31,6 +31,75 @@
 Older sprint task tables and session histories (Sprints 7 — 31) are in `.paircoder/archive/state-pre-s1.md`. S12a per-session entries plus S2 — S11 detail are in `.paircoder/archive/state-s12a.md`. S13 wave-by-wave detail + per-task driver sessions are in `.paircoder/archive/state-s13.md`.
 
 ## What Was Just Done
+
+### 2026-04-28 — W2 souji-sweep → PR #82 (sprint/w2-mapbox-chapters-1-5 → sprint/visual-rebirth)
+
+Branch: `sprint/w2-mapbox-chapters-1-5` (main tree). Pipeline: 9-phase Death Note souji.
+
+**RECON:** 116 files / 8 commits / +11,484 / -153 LOC ahead of `sprint/visual-rebirth`. Largest source file `lib/wall/layers/jobsByZipData.ts` at 327 lines (data file, well under 400 limit). All other source files under 220 lines. No SIMPLIFY violations.
+
+**REVIEW:** No debug artifacts (console.log / debugger / TODO / FIXME). No hardcoded secrets — Mapbox token loaded from env, validator REJECTS `sk.` secret tokens (test-asserted). All 19 token references in diff are either test stubs (fake JWT signatures), defensive validation, or false positives in ES translations ("Secretario de Distrito" = District Secretary).
+
+**FIX (driver D escalations + flake remediation):**
+1. **Typecheck (4 files, 11 errors → 0):**
+   - `cameraChoreography.test.ts`: narrow `W2_CHAPTERS` array type from `ChapterId` (1..10) to `W2ChapterId` (1..5) so `CHAPTER_CAMERAS` indexing typechecks. Forward-compatible with W3 since `ChapterId` itself stays at 1..10 in `types.ts`.
+   - `flyToOrchestrator.test.ts`: migrate `vi.fn<[Args], Return>` (vitest 3 generic) to `vi.fn<(args) => Return>` (vitest 4 callable signature).
+   - `zipBoundaries.test.ts`: same vitest 4 migration on 6 mock fields.
+   - `Ch4Transitions.integration.test.tsx`: explicit `string` annotation on `playSpy.mockImplementation` parameter (was implicit any).
+2. **PlanExport.test.tsx flake CLOSED:** root cause was a fire-and-forget `resolveSave()` at line 238 ("shows loading state") + fire-and-forget `resolveSave()` at line 271 (in pre-fix state). Added `await savePromise; await new Promise(r => setTimeout(r, 0))` after every `resolveSave()`.
+3. **vitest.setup.ts global cleanup hardening:** added `afterEach(async () => { await microtask; cleanup(); })` + `beforeEach(() => { document.body.innerHTML = ""; })` belt-and-suspenders so no test inherits a stale DOM regardless of file-local hooks. Closes the entire class of parallel-test-pressure flakes.
+4. **CareerCenterExport.test.tsx Linux CI flake CLOSED:** the existing tests had no file-local cleanup (relied on auto-cleanup that vitest 4 doesn't install). Same `await savePromise; await microtask` patch on the 2 `resolveSave()` sites + scoped `within(container)` query in the print-layout test as defense-in-depth.
+
+**SECURE:** No secrets, no `dangerouslySetInnerHTML`, no `eval`. Mapbox token strict-validated. ZIP GeoJSON committed offline (no runtime fetch). Carlos home pin programmatically `piiSafe: true` (block representative, not exact address; `piiReviewedAt: 2026-04-27`).
+
+**VERIFY (full gauntlet):**
+- `npx tsc --noEmit`              → exit 0
+- `npm run lint`                  → exit 0 (1 pre-existing W1 warning at `usePerformanceBudget.ts:122`)
+- `npx vitest run` (×3)           → 2319/2319 each run (was 1-2 flaky failures before the cleanup hardening)
+- `npm run build`                 → exit 0; 21/21 pages; `/` 8.33 kB / 136 kB First Load
+- `bpsai-pair arch check frontend/` → clean
+- `npm run audit:brand`           → clean
+- `npm run audit:tokens`          → clean (97 declared, 22 consumed)
+
+**FINISH:** Two souji commits — `d279d53` (typecheck + flake elimination) and `a33dea4` (CI remediation: i18n allowlist + CareerCenterExport hardening).
+
+**SUBMIT:** PR #82 — `feat(w2): Mapbox + Chapters 1-5 + Data Layers + Driver D Maximization` → `sprint/visual-rebirth`.
+
+**WATCH/REMEDIATE — three CI cycles to GREEN MERGEABLE:**
+
+Cycle 1 (push of `d279d53`):
+- Backend (Python) FAIL on `test_no_untranslated_passthrough`. 4 ES strings byte-identical to EN: `wall.chapter04a/04b/04d.statValue` ("71 min", "87 min", "33%") + `wall.chapter05.formsCounter` ("47"). Numeric stat-pill values genuinely don't translate ("min" abbreviation + bare percentages + integer counts are identical surface forms). Remediation: extended `IDENTICAL_PAIR_ALLOWLIST` in `backend/tests/test_i18n_completeness.py` with rationale.
+- Frontend (Next.js) FAIL on `CareerCenterExport > renders CareerCenterPrintLayout offscreen after fetch`. Linux CI parallel pressure surfaced a flake local Windows runs didn't. Remediation: vitest.setup.ts `beforeEach` document.body.innerHTML nuke + `within(container)` scoping in the failing test.
+
+Cycle 2 (push of `a33dea4`):
+- Lighthouse CI FAIL on `categories.performance` for `/`: 0.72 vs 0.80 minScore. Same code; the parallel run on the same commit scored ≥0.80 (pass). Single-run Lighthouse on CI has ±5-10 point variance from CPU contention; W2's Mapbox-heavy `/` pushed median close enough to floor that single-shot can dip below. Remediation: per the project's own `lighthouserc.README.md` runbook ("If you see flaky failures on the perf category, bump to 3 in lighthouserc.json rather than lowering the floor"), bumped `numberOfRuns: 1 → 3` (LHCI median behavior). Floor (0.80) unchanged.
+
+Cycle 3 (push of `c571bfb`):
+- All 4 checks × 2 parallel runs = **8 / 8 PASS**. PR #82 `mergeStateStatus=CLEAN`, `mergeable=MERGEABLE`.
+
+**Cross-driver concerns surfaced (queued as enrichment, not in-flight):**
+- T2.76 — full TIGER ZIP 76119 polygon (W4); current 4-vertex envelope is acceptable for W2.
+- W4 native-Spanish reviewer picks `chapter01.heroQuestion` vs `chapter01.hero` canonical key; both ship with same EN content for migration safety.
+- W4 reviewer resolves 4 ES strings flagged `[ES-pending-review]` documented in `docs/spanish-translation-review.md`.
+- W3 wires the `/dev/wall` `?scroll=` querystring consumer on the homepage.
+- Press kit (W5) — actual JPG static fallback for T2.1 (CSS fallback ships now).
+- react-map-gl v8 migration — W3+ enrichment.
+
+**Files touched in souji cleanup commits (3 commits):**
+- `frontend/vitest.setup.ts` (global afterEach + beforeEach cleanup hardening)
+- `frontend/src/components/plan/__tests__/PlanExport.test.tsx` (resolveSave await)
+- `frontend/src/components/plan/__tests__/CareerCenterExport.test.tsx` (resolveSave await + within scoping)
+- `frontend/src/components/wall/chapters/__tests__/Ch4Transitions.integration.test.tsx` (typecheck)
+- `frontend/src/lib/wall/__tests__/cameraChoreography.test.ts` (typecheck)
+- `frontend/src/lib/wall/__tests__/flyToOrchestrator.test.ts` (typecheck)
+- `frontend/src/lib/wall/layers/__tests__/zipBoundaries.test.ts` (typecheck)
+- `backend/tests/test_i18n_completeness.py` (i18n allowlist)
+- `frontend/lighthouserc.json` (numberOfRuns 1 → 3)
+- `frontend/lighthouserc.README.md` (rationale doc)
+
+Total: 10 files, 3 commits (`d279d53`, `a33dea4`, `c571bfb`).
+
+Next: **PR #82 GREEN MERGEABLE — ready for Shawn to merge** → `sprint/visual-rebirth`. Then cut `sprint/w3-interactive-chapters-6-10` from updated visual-rebirth and dispatch 3 W3 drivers (Mapbox cliff math @ Ch6, Carlos avatar @ Ch7, 3D barrier graph @ Ch8, fly-to-Montgomery @ Ch9, view transitions @ Ch10).
 
 ### 2026-04-28 — W2 Driver D maximization — chapters wired end-to-end, namespace consolidated, layers composed (main tree)
 
