@@ -1,6 +1,6 @@
 # Current State
 
-> Last updated: 2026-04-27 (W1 backlog drafted — foundation sprint authored)
+> Last updated: 2026-04-28 (W1 souji-sweep complete; PR #81 GREEN, MERGEABLE)
 
 ## Active Plan
 
@@ -31,6 +31,41 @@
 Older sprint task tables and session histories (Sprints 7 — 31) are in `.paircoder/archive/state-pre-s1.md`. S12a per-session entries plus S2 — S11 detail are in `.paircoder/archive/state-s12a.md`. S13 wave-by-wave detail + per-task driver sessions are in `.paircoder/archive/state-s13.md`.
 
 ## What Was Just Done
+
+### 2026-04-28 — W1 Foundation souji-sweep complete. PR #81 GREEN, MERGEABLE, ready for Ren's merge approval.
+
+**Pipeline:** All 9 phases of the souji-sweeping skill executed sequentially against `sprint/w1-foundation`.
+
+**PR:** [#81](https://github.com/fivedollarfridays/montgowork/pull/81) — base `sprint/visual-rebirth`, head `sprint/w1-foundation`. Status: `MERGEABLE / CLEAN`. All checks pass: Backend (Python), Frontend (Next.js), Lighthouse CI, Security Checks.
+
+**Phase summary:**
+- **RECON:** 17 commits ahead, 191 files changed, +14345/-297. Largest source file: 208 lines (`lib/wall/sound.ts`), well under 350-line gate.
+- **REVIEW:** Clean — no debug artifacts, no hardcoded secrets, all `localhost` references are env-gated fallbacks (pre-existing in `lib/api/*`).
+- **FIX:** Phase 1 found nothing; skipped.
+- **SIMPLIFY:** `bpsai-pair arch check frontend/` clean (no violations).
+- **VERIFY:** 1772/1772 vitest green locally; backend untouched (W1 was frontend-only).
+- **SECURE:** Diff secret-scan clean (one match was a test fixture asserting `sk.`-prefixed Mapbox tokens are rejected). `npm audit --production` flagged 2 pre-existing moderate postcss vulnerabilities (transitive via Next.js, build-time only, fix requires breaking Next major upgrade — logged as warning).
+- **FINISH:** No merge conflicts; pushed both `sprint/visual-rebirth` and `sprint/w1-foundation` (neither existed on remote yet — the workflow had been keyed to `main` only).
+- **SUBMIT:** PR created with full body documenting the 4 driver lanes, Driver D Spotlight inventions, brand integrity, architecture compliance, and souji-tracked-item dispositions.
+- **WATCH + REMEDIATE:** 3 cycles consumed (out of 5 budget):
+  1. **Cycle 1 — lint + typecheck:** display-name error in `useLiveNow.test.ts` (extracted inline arrow into named `QueryWrapper`); ES2017 → ES2020 target bump (Driver B's BigInt literals + regex `s` flag); `svg.className.baseVal` → `svg.getAttribute("class")` in `brand-loading-cinematic.test.tsx`.
+  2. **Cycle 2 — test isolation:** mocked `useCityConfig` in 6 wizard/plan tests (`assess-schedule`, `assess-industry`, `assess-barriers`, `assess-resume`, `assess-city-aware`, `plan-whats-next`). The hook's 10s `/api/city` AbortController fallback + module-level cache made suite outcomes order-dependent across CI parallel workers; W1's new test files shifted the order and exposed the latent flake. Static `vi.mock` with Montgomery AL defaults; `assess-city-aware` converted from `vi.doMock` + `vi.resetModules` to top-level `vi.mock` (both tests use the same AL config).
+  3. **Cycle 3 — build:** wired `postcss-import` BEFORE `tailwindcss` in `postcss.config.mjs`. Driver A's CSS architecture split (T1.7/T1.8) factored partials with `@layer base/utilities`, but Tailwind's PostCSS plugin processed each imported file independently and rejected `@layer` without matching `@tailwind` directive. `postcss-import` 15.1.0 was already installed transitively; just needed wiring.
+- **READY:** Final verification — 1772/1772 vitest green, `tsc --noEmit` clean, `lint` clean (1 unrelated warning), `bpsai-pair arch check frontend/` clean, `npm run build` succeeds in 9.6s locally and in CI.
+
+**Souji closer commits on this branch:**
+- `28642ea ci(w1): extend triggers to sprint branches + add brand/contrast/svgo gates` — `.github/workflows/ci.yml` now triggers on `sprint/**` and runs `npm run audit:brand`, `npm run contrast`, and SVGO config validation.
+- `5979e7c fix(ci): lint display-name + typecheck target ES2020 + SVG class API`
+- `337e2d1 fix(ci): mock useCityConfig in 6 wizard/plan tests to fix CI flake`
+- `a0673f7 fix(build): wire postcss-import for W1 token-partial @layer support`
+
+**Souji-tracked items (from dispatch):**
+1. ✓ **Item 2 (CI workflow gates) — CLOSED** in `28642ea`. Note: SVGO 3.x dropped `--dry-run`; we use `--show-plugins` to validate config loads.
+2. ⏸ **Item 1 (`baseline-bundle-sizes.json` refresh) — DEFERRED.** Requires full `npm run build` in canonical CI environment; stale baseline will produce informational alerts, not blockers. Recommend follow-up commit on `sprint/visual-rebirth` after merge or in W2.
+3. ⏸ **Item 3 (`.dropcap` vs `.editorial-dropcap`) — DEFERRED.** No JSX consumer references either class; both are CSS-only with documented intent. `tokens-editorial.test.ts` explicitly asserts both exist for back-compat. Defer consolidation to W2 or a typography polish ticket.
+4. ✓ **Item 4 (PlanExport flake) — NO ACTION NEEDED.** Not introduced by W1 (file untouched in this branch's diff); already hardened upstream in `b4e28b7` and `553bcf9` on `sprint/visual-rebirth`. Full vitest + 4 CI runs all showed green.
+
+**Honest uncertainty surfaced during sweep:** Latent test-isolation flake in `useCityConfig` was real and exposed by W1; existed before this sprint but was masked by deterministic test ordering. The build-time `@layer` failure was a true W1 regression — Driver A's split was tested via vitest reading the partials directly but never via `npm run build` end-to-end. Both root causes documented in the remediation commits for future-team learning.
 
 ### 2026-04-28 — W1 Foundation closed via Driver D maximization. Tests: 1772/1772 passing (+138). Next: souji-sweep + merge.
 
@@ -177,8 +212,8 @@ Outstanding pre-PR: /reviewing-and-fixing pipeline running. Browser-driven remai
 
 ## What's Next
 
-1. Souji-sweep on `sprint/w1-foundation` — pre-merge cleanup (file list checks, comment polish, lint fixes if any)
-2. Merge `sprint/w1-foundation` → `sprint/visual-rebirth`
+1. **Ren reviews PR #81** and merges `sprint/w1-foundation` → `sprint/visual-rebirth` when satisfied (souji-sweep complete; CI green; mergeable/clean)
+2. Optional follow-up on `sprint/visual-rebirth`: refresh `frontend/baseline-bundle-sizes.json` via `npm run analyze` (souji item #1, deferred — needs canonical CI build environment)
 3. Engage `sprint/w2-mapbox-chapters` per `docs/sprints/w2-readiness-gate.md` — verify ALL gates green before starting
 4. W4 backlog already enriched (132 tasks, 1002 Cx). Re-validate dependency graph before W4 starts — Wave 5 (enrichment) overlays on Waves 2 + 3.
 5. Engage W2 → W3 → W4 → W5 in order; merge `sprint/visual-rebirth` to main only at W5 completion
