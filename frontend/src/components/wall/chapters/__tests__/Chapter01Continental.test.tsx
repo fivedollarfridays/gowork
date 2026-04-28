@@ -21,11 +21,11 @@ vi.mock("@/hooks/useTranslation", () => ({
   useTranslation: vi.fn(() => ({
     locale: "en",
     t: (key: string) => {
-      if (key === "wall.ch1.hero") return "What's standing between you and a job?";
-      if (key === "wall.ch1.subhero")
+      if (key === "wall.chapter01.hero") return "What's standing between you and a job?";
+      if (key === "wall.chapter01.subhero")
         return "You shouldn't have to figure out the wall. We do the math, sequence the path, and hand you the plan.";
-      if (key === "wall.ch1.ariaLive") return "Chapter 1: Continental — top-down view of America";
-      if (key === "wall.ch1.title") return "Chapter 1 — Continental";
+      if (key === "wall.chapter01.aria") return "Chapter 1: Continental — top-down view of America";
+      if (key === "wall.chapter01.title") return "Chapter 1 — Continental";
       return key;
     },
     switchLocale: vi.fn(),

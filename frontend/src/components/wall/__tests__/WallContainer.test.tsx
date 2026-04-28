@@ -23,6 +23,19 @@ vi.mock("../MapboxScene", () => ({
   default: () => React.createElement("div", { "data-testid": "mapbox-scene-stub" }),
 }));
 
+// Wave 2 (Driver D) — chapters now render inside WallContainer. Mock the
+// translation surface so this composition test stays focused on
+// container orchestration.
+vi.mock("@/hooks/useTranslation", () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+    locale: "en",
+    setLocale: () => undefined,
+  }),
+  TranslationProvider: ({ children }: { children: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children),
+}));
+
 // Default to a high-tier device with WebGL — the Spotlight tier gate
 // (Wave 5) routes low-tier or WebGL-less devices to the fallback. Tests
 // here focus on token + composition; tier behavior has its own file.

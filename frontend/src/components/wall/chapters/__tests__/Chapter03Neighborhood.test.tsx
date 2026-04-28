@@ -19,11 +19,11 @@ vi.mock("@/hooks/useTranslation", () => ({
   useTranslation: vi.fn(() => ({
     locale: "en",
     t: (key: string) => {
-      if (key === "wall.ch3.body")
+      if (key === "wall.chapter03.body")
         return "Carlos is 29. ZIP 76119. Single father of one daughter, four years old. Recently released — sentence complete, three years past. He has $300 in cash, no vehicle, and four years of warehouse and forklift experience. He is ready to work. Four barriers stand between him and a paycheck.";
-      if (key === "wall.ch3.ariaLive")
-        return "Chapter 3: The Neighborhood — ZIP 76119";
-      if (key === "wall.ch3.title") return "Chapter 3 — The Neighborhood";
+      if (key === "wall.chapter03.aria")
+        return "Chapter 3: a neighborhood block in 76119. Carlos is introduced.";
+      if (key === "wall.chapter03.title") return "Chapter 3 — The Neighborhood";
       return key;
     },
     switchLocale: vi.fn(),

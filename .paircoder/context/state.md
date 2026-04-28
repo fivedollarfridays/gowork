@@ -1,6 +1,6 @@
 # Current State
 
-> Last updated: 2026-04-28 (W1 souji-sweep complete; PR #81 GREEN, MERGEABLE)
+> Last updated: 2026-04-28 (W2 Driver D maximization — 2319 tests passing, all 5 chapters wired, namespace consolidated, layers composed)
 
 ## Active Plan
 
@@ -31,6 +31,77 @@
 Older sprint task tables and session histories (Sprints 7 — 31) are in `.paircoder/archive/state-pre-s1.md`. S12a per-session entries plus S2 — S11 detail are in `.paircoder/archive/state-s12a.md`. S13 wave-by-wave detail + per-task driver sessions are in `.paircoder/archive/state-s13.md`.
 
 ## What Was Just Done
+
+### 2026-04-28 — W2 Driver D maximization — chapters wired end-to-end, namespace consolidated, layers composed (main tree)
+
+Branch: `sprint/w2-mapbox-chapters-1-5` (main tree at `C:\Dev\montgowork`; no worktree). Lane: maximization + integration + creative authority. Per dispatch: pre-flight verified — 2188 baseline → final 2319 passing (+131 net new).
+
+**Wave 1 — Pre-existing W1 failures (P0, must close): ALREADY CLOSED.** Verified `tokens-reduced-motion.test.ts` (11/11) + `tokens-typography-utils.test.ts` (5/5) green in isolation and full suite. The 2 failures Drivers A+B reported were closed by commits `6385a5f` and `18f8723` (token snapshot tests updated for @layer removal). No additional fix required.
+
+**Wave 2 — End-to-end chapter wiring (P0): SHIPPED.** `WallContainer.tsx` now composes `<Chapter01Continental /> <Chapter02CityArrival /> <Chapter03Neighborhood /> <Chapter04TheWall /> <Chapter05Labyrinth />` in DOM order under a `<main data-testid="wall-chapters">` element. Each chapter receives LOCAL progress sliced via `wallProgress.globalToLocal(totalProgress, id)` and Ch3 gets `active` derived from currentChapter === 3. New test file: `WallContainer-chapters.test.tsx` (9 tests, all green) verifies all 5 chapter sections render, in correct DOM order, with single h1 + multiple h2s, and that Ch5 maze SVG renders at the right global progress slice.
+
+**Wave 3 — Translation namespace consolidation (P0): SHIPPED.** Driver C had `wall.chapter01..05.*` (canonical), Driver B had `wall.ch1..3.*` (legacy). Consolidated to canonical `wall.chapter01..05.*` namespace in BOTH `en.json` and `es.json`:
+- Added Driver B's keys (`title`, `hero`, `subhero`, `body`, `aria`) under canonical `chapter01`/`chapter02`/`chapter03` blocks. `chapter01.heroQuestion` (existing) and `chapter01.hero` (added — same EN string) coexist for migration safety.
+- Removed duplicate `wall.ch1`, `wall.ch2`, `wall.ch3` blocks from both translation files.
+- Migrated Driver B's three chapter components (`Chapter01Continental.tsx`, `Chapter02CityArrival.tsx`, `Chapter03Neighborhood.tsx`) to use canonical keys (`wall.chapter0N.{hero,subhero,title,body,aria}`).
+- Updated 3 test files to assert the new keys.
+- New parity test `wall-namespace-parity.test.ts` (45 tests): every canonical key exists in both EN+ES; EN/ES key shapes are identical; `wall.ch1..3` namespaces are absent.
+
+**Wave 4 — Layer composer wiring (P0): SHIPPED.** `MapboxScene.tsx` now wires Driver B's `registerAllLayers / removeAllLayers` composer:
+- Added `onLoad` handler that runs `registerMarkerSymbols(map)` FIRST (sprite must register before offices symbol layer's `icon-image` lookups), then `registerAllLayers(map)`.
+- Added cleanup that runs `removeAllLayers(map)` BEFORE the `map.remove()` so Mapbox never holds a layer referencing a removed source.
+- Wrapped registration in try/catch so a layer-init failure doesn't crash the page (judges never see a crashed map).
+- New test file: `MapboxScene-layers.test.tsx` (5 tests, all green) verifies onLoad ordering, idempotent re-registration, cleanup ordering.
+
+**Wave 5 — Carry-overs + cross-driver concerns: ADDRESSED.**
+- **Office IDs alignment:** Driver C's `lib/wall/chapters/deps.ts` declared 5 office IDs that mostly didn't match Driver B's `officeRegistry.ts`. Pre-Wave-5: only `tarrant-district-clerk` matched (1 of 5). Realigned both `deps.ts.W2_OFFICES` and `ch4SubChapter.ts.CH4_SUBCHAPTERS[].highlightOfficeId` to use Driver B's canonical IDs (`hhsc-fort-worth-east-lancaster`, `tx-dps-mega-center-fort-worth`, `legal-aid-northwest-texas-fw`, `workforce-solutions-tarrant`). Updated 2 stale tests (deps.test.ts + ch4Transitions.test.ts) to assert the new canonical IDs. New `officeIds-alignment.test.ts` (10 tests) enforces alignment forever — every deps W2_OFFICES id must exist in the registry, every Ch4 sub-chapter highlightOfficeId must resolve.
+- **react-map-gl v7 vs v8 (Driver A flagged):** v7 still ships; no peer-dep issue surfaced; left as-is. One-line bump documented as enrichment.
+- **Static fallback JPG (T2.1 AC):** CSS-only fallback documented as the W2 acceptable path; T2.1 enrichment for actual JPG is a press-kit task (W5).
+- **ZIP 76119 envelope GeoJSON (Driver B flagged):** Documented as W4 follow-up per existing T2.76 enrichment task; not in W2 scope.
+- **4 ES strings flagged `[ES-pending-review]`:** Documented in W4 review checklist gate (`docs/spanish-translation-review.md`).
+
+**Wave 6 — Spotlight inventions (≥5): SHIPPED 6.**
+1. **`lib/wall/wallProgress.ts`** — central global-to-local progress slicer (CHAPTER_BOUNDS, chapterBoundsFor, globalToLocal, localToGlobal, isChapterActive). 17 tests. Compound Lens: same module ships in W3 (Ch6-10) and W4 life-layers; one source of truth replaces inline arithmetic in 5 chapter files.
+2. **`lib/wall/chapterContract.ts`** — unified `ChapterProps` interface. 9 tests. Structural Lens: 3 drivers shipped 5 slightly-different chapter prop signatures; this module pins the canonical shape so W3 chapters 6-10 inherit instead of inventing a 6th variant. Includes `isChapterProps` runtime guard for the chapter inspector + `isValidChapterId` for the contract.
+3. **`lib/wall/__tests__/cameraTransitionsAudit.test.ts`** — sanity gate for adjacent chapter pairs. 21 tests. Wisdom Lens: every adjacent pair (1→2, 2→3, 3→4, 4→5) must have pitch delta ≤60°, bearing delta ≤180°, zoom delta ≤11, and a TRANSITION_SPEEDS table entry; no two adjacent chapters share identical camera state. If a future driver writes a chapter that flies the camera to Antarctica, this test fails before the demo recording does.
+4. **`lib/wall/__tests__/officeIds-alignment.test.ts`** — Wave 5 alignment enforcer. 10 tests. Honesty Lens: pre-Wave-5 only 1 of 5 IDs matched; the highlight feature was a silent no-op. This test makes the alignment programmatic, not promised.
+5. **`components/wall/chapters/AppointmentsCounter.tsx`** — counts DOWN with progress (47 → 5). 7 tests. Compound Lens: complement to FormsCounter (the WALL: 47 forms) showing the OUTCOME (after GoWork: ~5 appointments). Today (W2) deterministic; W3 wires real outcome data; W5 ships in press-kit.
+6. **`/dev/wall` chapter inspector** (`app/dev/wall/page.tsx`). 4 tests. Production guard: renders "Not available in production" stub when NODE_ENV=production. Lists all 10 chapter bounds with jump links so editorial reviewers do a 30-second pass instead of scrolling 10×100vh.
+
+**Tests:** Frontend baseline 2188 → final 2319 (+131 net new). All 253 test files green. Target was +50; delivered +131. PlanExport flake observed once during one full-suite run, deterministic in isolation; pre-existing per W1 souji-sweep notes; not introduced by this lane.
+
+**Architecture:** `bpsai-pair arch check frontend/` clean. Largest new source file: WallContainer.tsx (211 lines). All new modules under 220 lines. All new functions under 50 lines.
+
+**Build:** `npx next build` exits 0. Bundle: `/` 8.33 kB / 136 kB First Load JS (was 3.66 kB / 115 kB pre-Wave-2; Mapbox stays lazy via `next/dynamic`); `/dev/wall` 148 B / 103 kB (production stub). All routes still SSR-safe.
+
+**Brand integrity:** `npm run audit:brand` exits 0 (no MontGoWork strings, no legacy hex, no legacy M-shape).
+
+**Cross-driver concerns surfaced (for souji-sweep):**
+- TypeScript `tsc --noEmit` reports pre-existing errors in 4 test files (`cameraChoreography.test.ts` indexes by ChapterId 1..10 but type only allows 1..5; `flyToOrchestrator.test.ts` + `zipBoundaries.test.ts` use vitest mock signature unsupported by current vitest types; `Ch4Transitions.integration.test.tsx` has implicit any). NOT introduced by Driver D; vitest run + next build still green. Should be addressed in souji-sweep.
+- PlanExport flake under full-suite parallel pressure. Pre-existing per W1 souji notes.
+
+**Honest uncertainty (C4/C5):**
+- C4: Translation consolidation kept `chapter01.heroQuestion` AND added `chapter01.hero` (same EN content). Editorial reviewers can pick the canonical key in W4; the duplicate is harmless and keeps both Driver A's plan-file copy and Driver B's component-consumed key resolved.
+- C4: ES translation for `chapter01.hero` uses Driver B's pre-existing string ("¿Qué te separa de un trabajo?") which differs slightly from Driver C's `chapter01.heroQuestion` ES ("¿Qué se interpone entre tú y un empleo?"). Both are acceptable native phrasings; W4 native-Spanish reviewer picks one canonical version.
+- C4: `/dev/wall` jump links use a `?scroll=` querystring contract that the homepage doesn't yet read. W3 wires the consumer; the route is informational today.
+- C4: Office IDs aligned but the ch4b sub-chapter no longer points at a transit office (B's registry has no transit category). Repointed to DPS — defensible because DPS is the long-bus-ride destination Carlos can't easily reach in 4b. Documented in `ch4SubChapter.ts` comments.
+- C5: WallContainer test had to mock `useTranslation` because chapters now render inside; updated 2 existing test files to add the same mock so they don't regress. Pure test infrastructure; no runtime change.
+
+**Files committed (this lane):**
+- New: `frontend/src/lib/wall/{wallProgress,chapterContract}.ts` + tests.
+- New: `frontend/src/lib/wall/__tests__/{cameraTransitionsAudit,officeIds-alignment}.test.ts`.
+- New: `frontend/src/lib/translations/__tests__/wall-namespace-parity.test.ts`.
+- New: `frontend/src/components/wall/chapters/AppointmentsCounter.tsx` + test.
+- New: `frontend/src/components/wall/__tests__/{WallContainer-chapters,MapboxScene-layers}.test.tsx`.
+- New: `frontend/src/app/dev/wall/page.tsx` + test.
+- Modified: `frontend/src/components/wall/WallContainer.tsx` (Wave 2 — chapters composed end-to-end).
+- Modified: `frontend/src/components/wall/MapboxScene.tsx` (Wave 4 — layer composer wired).
+- Modified: `frontend/src/components/wall/chapters/{Chapter01Continental,Chapter02CityArrival,Chapter03Neighborhood}.tsx` (Wave 3 — keys migrated to canonical namespace).
+- Modified: `frontend/src/components/wall/chapters/__tests__/{Chapter01Continental,Chapter02CityArrival,Chapter03Neighborhood}.test.tsx` (Wave 3 — test mocks updated).
+- Modified: `frontend/src/components/wall/__tests__/{WallContainer,WallContainer-tier}.test.tsx` (added useTranslation mock to support chapters now rendering inside).
+- Modified: `frontend/src/lib/wall/chapters/{deps,ch4SubChapter}.ts` (Wave 5 — IDs aligned).
+- Modified: `frontend/src/lib/wall/chapters/__tests__/{deps,ch4Transitions}.test.ts` (Wave 5 — aligned ID assertions).
+- Modified: `frontend/src/lib/translations/{en,es}.json` (Wave 3 — namespace consolidation).
 
 ### 2026-04-28 — W2 Driver B (Data Layers + Chapters 1–3) — wave 1–6 shipped on worktree
 
@@ -294,13 +365,12 @@ Outstanding pre-PR: /reviewing-and-fixing pipeline running. Browser-driven remai
 
 ## What's Next
 
-1. **Ren reviews PR #81** and merges `sprint/w1-foundation` → `sprint/visual-rebirth` when satisfied (souji-sweep complete; CI green; mergeable/clean)
-2. Optional follow-up on `sprint/visual-rebirth`: refresh `frontend/baseline-bundle-sizes.json` via `npm run analyze` (souji item #1, deferred — needs canonical CI build environment)
-3. Engage `sprint/w2-mapbox-chapters` per `docs/sprints/w2-readiness-gate.md` — verify ALL gates green before starting
+1. **Souji-sweep on `sprint/w2-mapbox-chapters-1-5`** — Driver D maximization complete (2319 passing, +131 net new). Ready for souji to ship to `sprint/visual-rebirth`.
+2. Pre-existing TS errors in 4 test files surfaced by tsc but green under vitest + next build — souji-sweep candidate to fix.
+3. Engage W3 chapter 6-10 development (cliff + Carlos's path + calibration + plan + outcomes).
 4. W4 backlog already enriched (132 tasks, 1002 Cx). Re-validate dependency graph before W4 starts — Wave 5 (enrichment) overlays on Waves 2 + 3.
-5. Engage W2 → W3 → W4 → W5 in order; merge `sprint/visual-rebirth` to main only at W5 completion
+5. Native-Spanish-fluent reviewer pass on `wall.chapter01..05.*` keys (4 strings still flagged `[ES-pending-review]`).
 6. May 2 D-day: execute W5.44 runbook, hit Devpost submit by 9:00 AM CDT
-7. Background: /reviewing-and-fixing pipeline still gating S13 PR
 
 ## Blockers
 
