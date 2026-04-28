@@ -12,6 +12,13 @@ vi.mock("../MapboxScene", () => ({
   default: () => React.createElement("div", { "data-testid": "mapbox-scene-stub" }),
 }));
 
+// Driver C's Chapter10 calls useRouter; once all W3 chapters merge, this
+// test renders the full spine and must mock next/navigation too.
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(),
+}));
+
 vi.mock("@/hooks/useTranslation", () => ({
   useTranslation: () => ({
     t: (key: string) => key,
