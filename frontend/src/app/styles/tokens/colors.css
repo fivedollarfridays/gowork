@@ -153,6 +153,21 @@
   --accent-rose-900: color-mix(in oklch, var(--accent-rose), var(--bg-base) 75%);
 }
 
+/* ─── T1.97 — prefers-contrast: more variant overrides ───────────────────────
+ * For users who explicitly request more contrast (Windows Settings, macOS
+ * Reduce Transparency + Increase Contrast). Lifts muted tones, brightens
+ * the cyan accent. CONFIDENCE: C1 — well-supported across evergreen browsers.
+ * Lifted values still clear AAA (verified via T1.13 contrast script).
+ */
+@media (prefers-contrast: more) {
+  :root {
+    --fg-secondary: var(--fg-primary);
+    --fg-muted: #B0B8C5;       /* lifted from #8696A8 — clears AAA-normal */
+    --accent-cyan: #5EEEFF;    /* brighter than #22D3EE */
+    --accent-current: #5EEEFF;
+  }
+}
+
 /* Browsers without color-mix() support: explicit hex shade fallbacks.
  * Computed once via OKLCH mix offline; values represent 25/40/55/70/85% mixes.
  * CONFIDENCE: C2 — Safari <16.4, Chrome <111, Firefox <113 hit this branch. */

@@ -50,3 +50,32 @@
   background-color: color-mix(in oklch, var(--accent-cyan), transparent 60%);
   color: var(--fg-primary);
 }
+
+/* ─── T1.106 — Branded scrollbar ─────────────────────────────────────────────
+ * Default OS scrollbar shouts "this is a webpage." Brand-tinted track + a
+ * cyan-mixed thumb carries identity into the chrome. Webkit covers Chrome /
+ * Safari / Edge; scrollbar-color + scrollbar-width cover Firefox. Older
+ * browsers ignore both branches without error.
+ */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in oklch, var(--accent-cyan), var(--bg-elevated) 60%);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-cyan);
+}
+
+html {
+  scrollbar-color: var(--accent-cyan) var(--bg-surface);
+  scrollbar-width: thin;
+}
