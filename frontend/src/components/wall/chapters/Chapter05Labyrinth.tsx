@@ -56,6 +56,7 @@ export function Chapter05Labyrinth({
     <section
       data-testid="chapter05-labyrinth"
       data-chapter="05"
+      data-chapter-id="labyrinth"
       data-reduced-motion={reducedMotion ? "true" : "false"}
       aria-labelledby="chapter05-title"
       className="chapter05-labyrinth relative flex min-h-screen flex-col items-center justify-center gap-8 px-6 py-12"

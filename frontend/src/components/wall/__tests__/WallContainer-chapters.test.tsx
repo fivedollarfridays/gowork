@@ -148,12 +148,21 @@ describe("Wave 2 — WallContainer renders all 5 W2 chapters in scroll order", (
         el.getAttribute("data-chapter-id") ?? el.getAttribute("data-chapter");
       if (id) chapterMarkers.push(id);
     });
-    // Must contain at least these in order
+    // Must contain at least these in order. Some chapters carry BOTH a
+    // semantic `data-chapter-id` (Driver A/D contract) and a numeric
+    // `data-chapter` (W2 legacy). The loop above prefers the semantic
+    // id when present, so we accept either-or for ch4/ch5 lookup.
     const continentalIdx = chapterMarkers.indexOf("continental");
     const cityIdx = chapterMarkers.indexOf("city-arrival");
     const hoodIdx = chapterMarkers.indexOf("neighborhood");
-    const ch4Idx = chapterMarkers.indexOf("04");
-    const ch5Idx = chapterMarkers.indexOf("05");
+    const ch4Idx = Math.max(
+      chapterMarkers.indexOf("04"),
+      chapterMarkers.indexOf("the-wall"),
+    );
+    const ch5Idx = Math.max(
+      chapterMarkers.indexOf("05"),
+      chapterMarkers.indexOf("labyrinth"),
+    );
     expect(continentalIdx).toBeGreaterThanOrEqual(0);
     expect(cityIdx).toBeGreaterThan(continentalIdx);
     expect(hoodIdx).toBeGreaterThan(cityIdx);

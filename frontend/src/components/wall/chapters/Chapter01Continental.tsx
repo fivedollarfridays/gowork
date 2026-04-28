@@ -30,22 +30,40 @@
  */
 
 import { useVariableFontWeight } from "@/hooks/useVariableFontWeight";
+import { useHeroFontWeight } from "@/hooks/useHeroFontWeight";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { useTranslation } from "@/hooks/useTranslation";
 
 export interface Chapter01ContinentalProps {
   /** 0..1 progress within Chapter 1's scroll range (Driver A wires). */
   progress: number;
+  /**
+   * 0..1 GLOBAL scroll progress across the whole Wall (W4 Driver D).
+   *
+   * When defined, the hero headline weight follows the spec
+   * `useHeroFontWeight(globalProgress)` (700→900 across 0→0.05 of global
+   * scroll). When undefined, the legacy `useVariableFontWeight(progress)`
+   * path holds — used by isolated chapter tests + any consumer that
+   * mounts Ch1 outside the WallContainer.
+   */
+  globalProgress?: number;
   /** Optional override for the chapter id used in data attributes. */
   chapterId?: string;
 }
 
 export function Chapter01Continental({
   progress,
+  globalProgress,
   chapterId = "continental",
 }: Chapter01ContinentalProps) {
   const reduced = usePrefersReducedMotion();
-  const fontVariation = useVariableFontWeight(progress);
+  // W4 T4.D.1 — When globalProgress is provided, use the W4 hero contract
+  // (700→900 across 0→0.05 of GLOBAL scroll). Otherwise hold to the legacy
+  // local-progress variable-font path so isolated tests stay green.
+  const heroVariation = useHeroFontWeight(globalProgress ?? 0);
+  const legacyVariation = useVariableFontWeight(progress);
+  const fontVariation =
+    globalProgress !== undefined ? heroVariation : legacyVariation;
   const { t } = useTranslation();
 
   // Static-fallback flag: when reduced-motion is on, the overlay is at
