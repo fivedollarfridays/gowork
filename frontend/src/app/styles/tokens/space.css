@@ -1,0 +1,9 @@
+/* W1 space tokens — placeholder partial for post-W1 population.
+ *
+ * Reserved for an editorial rhythm scale (--space-rhythm-*) that aligns
+ * vertical spacing to the type-leading-loose token, plus the standard
+ * --space-1..--space-12 scale Tailwind already covers via theme.spacing.
+ *
+ * Intentionally empty in W1 — W2 will introduce values when chapter sections
+ * need vertical rhythm beyond Tailwind defaults.
+ */
