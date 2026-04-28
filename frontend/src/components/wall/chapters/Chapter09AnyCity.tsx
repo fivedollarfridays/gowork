@@ -138,6 +138,7 @@ export function Chapter09AnyCity({
     <section
       data-testid="chapter09-any-city"
       data-chapter="09"
+      data-chapter-id="any-city"
       data-reduced-motion={reducedMotion ? "true" : "false"}
       aria-labelledby="chapter09-title"
       className="chapter09-any-city relative flex min-h-screen flex-col items-center justify-center gap-6 px-6 py-12"

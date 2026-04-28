@@ -33,14 +33,25 @@
   }
 
   /* ─── Chapter rhythm = page rhythm ─────────────────────────────────────── */
-  .wall-chapter {
+  /*
+   * Two selectors print-equivalent:
+   *   - `.wall-chapter` — opt-in className for chapter wrappers.
+   *   - `section[data-chapter-id]` — Driver-A-shipped data-attribute, used
+   *     by every Wall chapter today (W4 Driver D extends print coverage to
+   *     match the actual chapter markup without forcing a rename).
+   * The contract module `lib/wall/printStylesheet.ts` enforces both
+   * appear here.
+   */
+  .wall-chapter,
+  section[data-chapter-id] {
     page-break-before: always;
     page-break-inside: avoid;
     orphans: 3;
     widows: 3;
   }
 
-  .wall-chapter:first-of-type {
+  .wall-chapter:first-of-type,
+  section[data-chapter-id]:first-of-type {
     /* The opening chapter shares the title page. */
     page-break-before: auto;
   }
