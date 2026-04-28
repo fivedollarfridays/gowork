@@ -223,3 +223,60 @@ Outstanding pre-PR: /reviewing-and-fixing pipeline running. Browser-driven remai
 ## Blockers
 
 None. W5 backlog is ready to engage; W1–W4 backlogs are upstream and must be drafted/engaged first per the visual-rebirth sequencing in `docs/visual-rebirth-briefs.md`.
+
+## 2026-04-28 — W2 Driver A (Mapbox Foundation lane) complete on worktree-agent-adb30d00402a7efc4.
+
+**Branch:** `sprint/w2-mapbox-chapters-1-5` (rebased from `8b04ae8` via worktree-agent-adb30d00402a7efc4 — local commits not yet pushed; Ren coordinates push after souji-sweep per dispatch protocol).
+
+**Tasks completed (T2.X):**
+- Wave 1 — Foundation: T2.1 (token validation + async network probe with 2s timeout), T2.2 (WallContainer with WallContext + tier gate + dynamic Mapbox import), T2.3 (MapboxScene with react-map-gl v7), T2.4 (INITIAL_CAMERA = Fort Worth centroid), T2.5 (explicit map.remove() cleanup), T2.18 (Mapbox style URL resolver + runbook + JSON archive).
+- Wave 2 — Scroll engine + camera: T2.6 (ChapterScaffold with sticky atmosphere + opacity curve + reduced-motion + aria-live), T2.7 (cameraChoreography per-chapter states + TRANSITION_SPEEDS table), T2.8 (useChapterProgress 1-indexed boundary band hook), T2.9 (flyToOrchestrator pure transition with reduced-motion jumpTo branch), T2.10 (useScrollPin feature-detect sticky support).
+- Wave 4 — page.tsx: T2.46 (legacy /archive route preserved), T2.47 (page.tsx rewritten to render WallContainer; preserves /daily redirect).
+- Wave 6 — Lazy load: T2.58 (Mapbox dynamic-imported via next/dynamic with ssr:false; bundle budget contract test pins the constraint).
+- Wave 7 — Build + bundle: T2.66 (production build smoke green; bundle: `/` 3.66 kB / 115 kB First Load JS, `/archive` 4.47 kB / 163 kB; mapbox-gl ~600KB stays out of the initial chunk; shared 102 kB).
+
+**Tasks deferred / out-of-lane (sibling drivers):**
+- T2.11–T2.15 data layers (Trinity Metro / offices / ZIP / Carlos pin / jobs) — Driver B
+- T2.16 marker SVG sprite, T2.17 layer composer — Driver B
+- T2.19–T2.45 chapter components Ch1–Ch5 — Drivers B + C
+- T2.30 cursor-flashlight conditional activation — chapter-aware activation deferred to chapter components
+- T2.48 chapter-progression contract test — depends on chapters
+- T2.49–T2.53 EN/ES copy population — Driver C
+- T2.54–T2.56 axe-core + heading hierarchy + skip-to-content — depend on chapters
+- T2.57 chapter code-splitting — depends on chapter components
+- T2.59–T2.65 sprint coverage tests — depend on full chapter render path
+
+**Spotlight inventions (Legacy beyond brief):**
+1. URL-spoofing defense in resolveMapboxStyleUrl (Honesty Lens) — env vars are runtime-attacker-controllable; rejecting non-mapbox-style URIs prevents redirecting the map to a malicious style.json.
+2. TRANSITION_SPEEDS per-pair table (Permission Lens) — Mapbox flyTo speed default is 1.2; tuning per-pair (1.4 for continental dolly, 0.6 for sub-chapter pivots) is the cinematic upgrade the brief implied but didn't catalog.
+3. CSS-only branded static fallback shipped before the JPG pipeline (Multiple Selves Lens — judge on a token-less Vercel preview) — pure CSS gradient + Inter Variable hero + accessibility label. Ship the gate now, swap to image when asset lands.
+4. Tier-based mobile fallback wired in W2 (Resilience Lens — Carlos on Pixel 4a) — low-tier OR no-WebGL routes to the same branded fallback path. W4 will graduate to scaled-down map.
+5. Bundle budget contract test (Wisdom Lens) — static contract test reads source files and asserts the lazy-load pattern; a future driver promoting mapbox-gl to a static import fails the test before bundling bloats.
+6. ChapterScaffold opacity curve exported as a pure function (Compound Lens) — `computeOverlayOpacity(progress, reducedMotion)` is exported separately from the JSX so flyTo overlap (T2.114 enrichment) can reuse the same shape — no drift.
+
+**Honest uncertainty (C4/C5):**
+- C4 — Worktree branch lineage: dispatch base `sprint/w2-mapbox-chapters-1-5` did not exist on remote at handoff; rebased from `origin/sprint/visual-rebirth` (tip `8b04ae8`) per dispatch authorization. Local-only commits; Ren coordinates push.
+- C4 — react-map-gl v7 vs v8 API: dispatch said "v8+" but package.json ships v7.1.7. Used v7 default export. One-line bump if v8 is required.
+- C4 — Static fallback JPG asset: T2.1 AC asks for 1920×1080 JPG; shipped CSS-only branding so gate compiles before asset pipeline. One-line src swap when asset lands.
+- C4 — Map cleanup ref pattern: addressed ESLint exhaustive-deps warning via capture-at-effect-mount.
+- C5 — Pre-existing 2 W1 failing tests: `tokens-reduced-motion.test.ts` + `tokens-typography-utils.test.ts` check for `@layer utilities` directives the W1 hotfix removed. Outside W2-A scope.
+
+**Test coverage delta:**
+- Baseline (W1 tip `8b04ae8`): 1772 total / 1769 passing / 3 failing
+- W2-A close: 1882 total / 1880 passing / 2 failing
+- Net new tests: +110, all green. Floor preserved.
+
+**Architecture compliance:** All new modules pass `bpsai-pair arch check`. Production build green (Next.js 15.5.9). Bundle: `/` 115 kB First Load JS (Mapbox lazy); `/archive` 163 kB (legacy preserved); shared 102 kB.
+
+**Cross-driver concerns / merge notes:**
+- Driver B consumes: `WallContainer`, `cameraChoreography.CHAPTER_CAMERAS` (read-only), `useChapterProgress`, `ChapterScaffold`.
+- Driver C consumes: same scaffold + hook; extends EN/ES translations under `wall.chN.*`.
+- W3 consumes: `cameraChoreography` extends with Ch6–Ch10; `flyToOrchestrator` already permissive (graceful no-op for unknown destinations); `WallContainer` already 1-indexed.
+- Wall lib barrel: explicit re-export of W1 env.ts `isMapboxAvailable` as `isMapboxTokenShapeValid` to avoid collision with W2's async `isMapboxAvailable`. W1 tests preserved.
+- Hooks barrel: new exports (`useScrollPin`, `useChapterProgress`); barrel test 3/3 green.
+
+**Commit log:**
+- `4417a8a feat(w2-A): T2.1 + T2.2 + T2.3 + T2.4 + T2.5 + T2.6 + T2.7 + T2.8 + T2.9 + T2.10 + T2.18 + T2.46 + T2.47`
+- Pending: lazy-load contract + tier gate + state.md update commit (this commit).
+
+慣性の契約.
