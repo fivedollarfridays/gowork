@@ -15,15 +15,16 @@ Build the design system, motion system, brand identity, hooks, and edge states t
 
 | Metric | Value |
 |---|---|
-| Total tasks | 68 |
-| P0 / P1 / P2 | 51 / 14 / 3 |
-| Total Cx | 582 |
-| Wave count | 5 |
-| Critical path | Infra install → CSS arch split → tokens (color/type/motion) → hooks/brand/edges/header parallel → wiring/types/tests |
-| Spotlight inventions | 5 (added beyond the brief) |
+| Total tasks | 123 |
+| P0 / P1 / P2 | 65 / 44 / 14 |
+| Total Cx | 1010 |
+| Wave count | 6 (new Wave 6 = system audits + Spotlight enrichment polish) |
+| Critical path | Infra install → CSS arch split → tokens (color/type/motion) → hooks/brand/edges/header parallel → wiring/types/tests → telemetry/SEO/PWA/security/a11y-beyond-AAA/editorial-polish/perf/data-verify/dev-tooling/print-extras |
+| Spotlight inventions | 5 (original) + 12 (enrichment pass) = 17 total |
 | Architecture compliance | every code task includes `bpsai-pair arch check passes` AC |
 | TDD compliance | every code task lists failing-test-first AC |
-| Engage dry-run | passes (68 tasks parsed) |
+| Engage dry-run | passes (123 tasks parsed) |
+| Enrichment pass | T1.78–T1.132 — analytics, SEO/Schema.org, PWA/SW, CSP, a11y beyond AAA, editorial polish (drop caps, pull quotes, chapter dividers as ART), font subsetting, real-data verification, brand sound logo, reading-speed adapter, dev FPS overlay, Web Vitals reporter, error reporter scaffold |
 
 ## Priority Order (top 25, abbreviated)
 
@@ -1458,6 +1459,1067 @@ These tasks are NOT in the brief's 16 categories. They emerged from the Spotligh
 - [ ] Reviewer agent approves
 
 **Depends on:** T1.34
+
+---
+
+## Phase 18: Analytics & Telemetry (Enrichment Pass)
+
+The brief sets a Lighthouse 90+ gate but does not specify how we will know — during the live demo on May 2 — whether the home page is being read, where readers drop off, or which chapter is the bottleneck. Phase 18 builds a privacy-friendly analytics + RUM scaffold that costs <2KB shipped JS and reports nothing personally identifiable. **This is the difference between "we built it" and "we know how it performed."**
+
+### T1.78 — Plausible-style privacy-first analytics scaffold | Cx: 10 | P1
+
+**Description:**
+Create `frontend/src/lib/analytics/client.ts`. Self-hosted, cookie-less analytics dispatcher. Exposes `track(event: AnalyticsEvent, props?: Record<string, string | number>)` and `pageview(path: string)`. Posts to `/api/analytics/ingest` (W4 endpoint — for W1, hook MUST gracefully no-op when endpoint 404s). **No cookies, no fingerprinting, no PII** — the whole point. Event types union: `'pageview' | 'chapter_enter' | 'chapter_exit' | 'cta_click' | 'language_toggle' | 'mute_toggle'`. Sampling rate default 100%; reads `NEXT_PUBLIC_ANALYTICS_SAMPLE_RATE` for production tuning. Respects `navigator.doNotTrack === '1'` (no-op when DNT). **Why beyond brief:** brief never names how we measure reader engagement; without this we are flying blind on demo day. **Confidence:** C2.
+
+**AC:**
+- [ ] Failing test written FIRST: track('cta_click', {chapter: '06'}) posts to /api/analytics/ingest with body matching schema; DNT=1 → no fetch; endpoint 404 → swallowed gracefully (no console error on caller's path)
+- [ ] All cases pass after implementation
+- [ ] Module <200 lines, <15 fns, <15 imports
+- [ ] No cookies set (verified by document.cookie spy after track call)
+- [ ] No PII in payload schema (TypeScript narrows props to string|number primitives only)
+- [ ] SSR-safe (typeof window guard)
+- [ ] Bundle size <2KB minified+gzipped (verified via `npm run analyze` — module is its own chunk if dynamically imported)
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.6
+
+---
+
+### T1.79 — Web Vitals reporter (CWV → analytics) | Cx: 10 | P1
+
+**Description:**
+Create `frontend/src/lib/analytics/web-vitals.ts`. Subscribes to Core Web Vitals via the `web-vitals` npm package (add to deps; ~1KB). Reports LCP, CLS, INP, FCP, TTFB to the analytics dispatcher (T1.78) under event name `web_vital` with props `{ metric: string; value: number; rating: 'good' | 'needs-improvement' | 'poor' }`. Hook `useWebVitalsReporter()` mounted once in `layout.tsx`. **Why beyond brief:** the brief's Lighthouse gate is a single CI snapshot; this reports live RUM values from real users, which is what judges and W4 perf descope decisions actually need. **Confidence:** C1.
+
+**AC:**
+- [ ] Failing test written FIRST: mock onLCP fires with value 2400 → dispatcher.track('web_vital', {metric:'LCP', value:2400, rating:'good'}) called once
+- [ ] All 5 vitals (LCP, CLS, INP, FCP, TTFB) wired
+- [ ] Hook mounted once (idempotent — second mount in test does NOT double-subscribe)
+- [ ] `web-vitals` package pinned in package.json (~v4.x)
+- [ ] SSR-safe
+- [ ] Bundle delta <2KB
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.78
+
+---
+
+### T1.80 — Chapter scroll-depth event ladder | Cx: 8 | P1
+
+**Description:**
+Create `frontend/src/hooks/useChapterScrollTelemetry.ts`. Wraps `useScrollProgress` (T1.27). Emits `chapter_enter` and `chapter_exit` events via T1.78 dispatcher when chapter index changes. Also emits `chapter_quartile` events at 25/50/75/100% within-chapter progress (deduped per chapter per session). Used by W2 chapters to feed the bounce-rate-per-chapter telemetry the brief never specified. **Confidence:** C2.
+
+**AC:**
+- [ ] Failing test written FIRST: simulate scroll: chapter 0→1 fires `chapter_exit` for 0 + `chapter_enter` for 1; within-chapter 0.5 fires `chapter_quartile` once; within-chapter 0.5 again does NOT re-fire (deduped)
+- [ ] Cases pass
+- [ ] Hook returns no value (side-effect only)
+- [ ] SSR-safe
+- [ ] Hook <100 lines
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.27, T1.78
+
+---
+
+### T1.81 — RUM session ID hash utility (PII-safe) | Cx: 6 | P1
+
+**Description:**
+Create `frontend/src/lib/analytics/session-id.ts`. Generates a per-tab session ID by hashing `navigator.userAgent + screen.width + Date.now()` with SHA-256 (Web Crypto API), stored in `sessionStorage` (NOT localStorage — dies on tab close). Exposes `getSessionId(): Promise<string>`. Attached to every analytics event. **Hash, never raw** — the user agent is a fingerprint vector, the hash is not. **Why beyond brief:** brief mentions Live Now widget needs session count but never says how we count without breaching PII. **Confidence:** C2.
+
+**AC:**
+- [ ] Failing test written FIRST: getSessionId() returns 64-char hex string; second call within same tab returns same id; sessionStorage cleared → next call returns new id
+- [ ] Cases pass
+- [ ] No raw user-agent or any non-hashed PII appears in sessionStorage value
+- [ ] SSR-safe (returns 'ssr' literal on server)
+- [ ] Module <80 lines
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.6
+
+---
+
+### T1.82 — Animation framerate dev overlay | Cx: 10 | P2
+
+**Description:**
+Create `frontend/src/components/dev/FpsOverlay.tsx`. Dev-only (env-guarded) bottom-left fixed overlay showing live FPS (rAF delta moving average over 1s window). Color-coded: ≥58 green, 30–57 amber, <30 rose. Toggle via `?fps=1` query string OR Ctrl+Shift+F. **Production bundle excludes the component** (verified via `npm run analyze` — chunk only present in dev). **Why beyond brief:** brief promises 60fps but provides no per-build feedback loop; this overlay tells Driver agents in real-time when an animation is dropping frames. **Confidence:** C2.
+
+**AC:**
+- [ ] Failing test written FIRST: rendered when env=dev AND ?fps=1 set; rendered when Ctrl+Shift+F dispatched; not rendered when env=production
+- [ ] FPS computation correct (mock rAF delta of 16.67ms → reports ~60fps)
+- [ ] Color-coding switches at 58 and 30 thresholds
+- [ ] Production bundle does NOT include component (verified by build inspection)
+- [ ] Component <150 lines
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.10, T1.11
+
+---
+
+## Phase 19: SEO & Discoverability (Enrichment Pass)
+
+The brief notes SEO 0.9 in `lighthouserc.json` but the Wall page has no editorial meta strategy. Schema.org markup, hreflang, per-route descriptions, sitemap chapter expansion, OG variants — all missing. Phase 19 closes the gap. **Why this matters for HackFW:** judges who Google "GoWork" or share the URL on Twitter/LinkedIn must see correctly-rendered cards with the locked slogan, not Next.js defaults.
+
+### T1.83 — Schema.org JSON-LD: Article, Person, Organization, Place | Cx: 12 | P1
+
+**Description:**
+Create `frontend/src/lib/seo/jsonld.ts`. Exports four typed builders:
+(a) `articleJsonLd({ headline, datePublished, author, image })` → Article schema for the Wall home page;
+(b) `personJsonLd()` → Person schema for Carlos (alias name "Carlos" + structuredData persona — flagged as "fictional case study" via `description` field, NOT as real person — IMPORTANT for honesty);
+(c) `organizationJsonLd()` → Organization for GoWork with logo, slogan, openSource Project, MIT license URL;
+(d) `placeJsonLd()` → Place for Fort Worth, TX with geo coords, country US, addressRegion TX. Outputs `<script type="application/ld+json">` strings for layout/page injection. **Why beyond brief:** Schema.org puts the slogan in Google's knowledge panel and powers rich snippets. **Confidence:** C3 (schema correctness without SEO consultant — worst case rich-snippet won't render but no harm).
+
+**AC:**
+- [ ] Failing test written FIRST: each builder returns valid JSON-LD with required @context and @type fields; Person includes `description: "Fictional case study persona for civic-tech demonstration"` (no real-PII assertion); Article schema lifts copy thesis EXACTLY
+- [ ] All 4 builders pass JSON-schema validation against Schema.org context
+- [ ] No real Carlos PII (e.g., specific address) in Person schema — Place schema uses ZIP-area centroid only
+- [ ] Validates clean against Google's Rich Results Test (manual run, document result in PR)
+- [ ] Module <200 lines
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.6
+
+---
+
+### T1.84 — Per-route meta description map | Cx: 6 | P1
+
+**Description:**
+Create `frontend/src/lib/seo/meta-map.ts`. Const map `Record<string, { title: string; description: string }>` — one entry per route (`/`, `/assess`, `/plan`, `/jobs`, `/daily`, `/appointments`, `/case-manager`, `/privacy`, `/terms`). Descriptions lifted from copy thesis where appropriate, ~155 chars each. Default fallback uses locked slogan. Function `getRouteMeta(pathname: string)` returns the entry or fallback. Used by `layout.tsx` (T1.38) and any per-route metadata. **Confidence:** C1.
+
+**AC:**
+- [ ] Failing test written FIRST: getRouteMeta('/') returns description containing "Workforce infrastructure for any American city."; getRouteMeta('/unknown') returns the fallback default
+- [ ] All 9 routes populated
+- [ ] Each description ≤160 chars (Google preferred)
+- [ ] Each title ≤60 chars (Google preferred)
+- [ ] Module <120 lines
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.6
+
+---
+
+### T1.85 — Hreflang alternates for EN/ES | Cx: 6 | P1
+
+**Description:**
+Update `frontend/src/app/layout.tsx` (T1.38 owns the file; this task adds the alternates section in metadata.alternates.languages — coordinate via Depends on: T1.38). Adds `'en-US'` and `'es-MX'` hreflang alternates pointing to `/?lang=en` and `/?lang=es` (or however the language toggle wires URLs in W4 — for W1, alternate paths are placeholders documented in PR). **Why beyond brief:** Spanish parity is in the brief, but search engines need hreflang to know two languages exist; without this, the ES variant is invisible to Spanish-speaking searchers. **Confidence:** C2.
+
+**AC:**
+- [ ] Failing test written FIRST: layout-metadata test asserts `metadata.alternates.languages['en-US']` and `['es-MX']` set to `/?lang=en` and `/?lang=es`
+- [ ] Both alternates present
+- [ ] No regression on other metadata
+- [ ] `bpsai-pair arch check frontend/src/app/layout.tsx` passes (file <130 lines budget upheld)
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.38
+
+---
+
+### T1.86 — Sitemap chapter expansion + canonical URLs | Cx: 8 | P1
+
+**Description:**
+Update `frontend/src/app/sitemap.ts` (existing, untouched in W1 so far). Add per-chapter URLs as fragments — `/#chapter-01` through `/#chapter-10` — with `lastmod` set to the build timestamp. Also add `/?lang=en` and `/?lang=es` variants per chapter (link with hreflang from T1.85). Add canonical URL pattern: `<link rel="canonical">` injected via metadata.alternates.canonical = `/`. Each chapter URL gets priority 0.7; root gets 1.0. **Why beyond brief:** the chapter scroll structure is invisible to crawlers without per-chapter URLs. **Confidence:** C2.
+
+**AC:**
+- [ ] Failing test written FIRST: sitemap test asserts 10 chapter URLs present (each with `#chapter-NN` fragment) + 2 lang variants per chapter = 30+ entries; canonical metadata.alternates.canonical = '/'
+- [ ] All assertions pass
+- [ ] sitemap.ts file <100 lines
+- [ ] No regression on existing sitemap entries (privacy/terms/etc still present)
+- [ ] `bpsai-pair arch check frontend/src/app/sitemap.ts` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.85
+
+---
+
+### T1.87 — robots.txt extension (sitemap, allow rules, AI bot policy) | Cx: 4 | P1
+
+**Description:**
+Update `frontend/src/app/robots.ts` (existing). Verify `Sitemap` directive points to `/sitemap.xml`. Add explicit `Allow: /` for crawlers. Add policy directives for AI training bots: `User-agent: GPTBot`, `User-agent: Google-Extended`, `User-agent: anthropic-ai` — set to `Allow: /` (we ARE open-source, we DO want to be in training data — civic tech reach maximizer). Document this decision in inline comments. **Why beyond brief:** AI bots are now a meaningful traffic source; explicit policy is more honest than silence. **Confidence:** C2.
+
+**AC:**
+- [ ] Failing test written FIRST: robots.ts output asserts `Sitemap: ...` line, explicit GPTBot/Google-Extended/anthropic-ai entries, all set to Allow
+- [ ] Inline comment explains the open-source policy decision
+- [ ] No new restrictions added (we are public)
+- [ ] robots.ts file <60 lines
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.6
+
+---
+
+### T1.88 — OG variants for Twitter, LinkedIn, Facebook + DNS prefetch | Cx: 8 | P1
+
+**Description:**
+Update layout.tsx metadata (coordinate with T1.38, T1.85): Twitter card type `summary_large_image` with locked slogan; LinkedIn uses `og:image:width=1200, og:image:height=627` (their preferred); Facebook respects standard og:image. Different platforms cache OG differently — verified via Twitter Card Validator + LinkedIn Post Inspector + Facebook Debugger (manual, document in PR). ALSO add `<link rel="dns-prefetch" href="//api.mapbox.com" />` and `<link rel="preconnect" href="https://fonts.googleapis.com">` to layout.tsx head. **Confidence:** C2.
+
+**AC:**
+- [ ] Failing test written FIRST: layout-metadata test asserts twitter.card === 'summary_large_image', og:image:width === 1200; head contains dns-prefetch for api.mapbox.com
+- [ ] All assertions pass
+- [ ] Manual validators (Twitter, LinkedIn, Facebook) all show correct preview — document screenshots in PR
+- [ ] No regression on existing metadata
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.85
+
+---
+
+## Phase 20: PWA & Offline (Enrichment Pass)
+
+The brief mentions PWA in passing (manifest theme color was T1.37) but never adds offline support, install prompt UX, or branded offline page. For a "real infrastructure" signal, the home page should install on a phone, work offline (read-only), and look branded when down. Phase 20 builds the minimum viable PWA layer.
+
+### T1.89 — Service Worker scaffold (offline 404 + asset cache) | Cx: 14 | P1
+
+**Description:**
+Create `frontend/public/sw.js` (vanilla, no Workbox — keep bundle out of main). Cache strategy: cache-first for `/icon-*.png`, `/sounds/*.mp3`, `/og-image.svg`, `/_next/static/css/*`; network-first for HTML; offline-fallback for `/`. Registers via `frontend/src/lib/pwa/register-sw.ts` (env-guarded — only registers in production, NOT in dev to avoid hot-reload poisoning). **Honesty/C4:** if SW breaks Next 15 dev hot-reload, fallback is registration only behind `?sw=1` query for testing. **Confidence:** C3.
+
+**AC:**
+- [ ] Failing test written FIRST: register-sw.ts mocked navigator.serviceWorker.register called once in production env, not called in dev env; sw.js exists with cache strategy comments
+- [ ] All cases pass
+- [ ] Service Worker registers on / in production build; verified via Chrome DevTools Application panel (manual)
+- [ ] sw.js <250 lines
+- [ ] register-sw.ts <80 lines
+- [ ] Dev hot-reload still works after registration logic added (verified by `npm run dev`)
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.6
+
+---
+
+### T1.90 — Offline page (branded fallback) | Cx: 8 | P1
+
+**Description:**
+Create `frontend/src/app/offline/page.tsx`. Static, server-rendered branded fallback for when SW catches a network failure. Headline EN: "You're off the grid." ES: "Estás fuera de línea." Sub: "The Wall is back when you reconnect. Carlos's path is still drawn." CTA: "Try again" (window.location.reload). Branded with new tokens. Translation keys `edge.offline.*`. **Why beyond brief:** brief assumes online; demo-day venues frequently have flaky WiFi. **Confidence:** C1.
+
+**AC:**
+- [ ] Failing test written FIRST: page renders headline + retry CTA; reload CTA invokes window.location.reload
+- [ ] EN + ES copy
+- [ ] WCAG AAA contrast
+- [ ] reduced-motion safe
+- [ ] Page <80 lines
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.10, T1.22, T1.33
+
+---
+
+### T1.91 — InstallPrompt component (BeforeInstallPromptEvent) | Cx: 10 | P2
+
+**Description:**
+Create `frontend/src/components/wall/InstallPrompt.tsx`. Listens for `beforeinstallprompt` event, dismisses native banner, shows branded inline prompt instead. Trigger location: footer or dismissible toast — NOT modal (intrusive). Persist dismissal in localStorage `gowork.install.dismissed`. Translation keys `pwa.install.*`. **Why beyond brief:** native browser install banner is ugly; branded prompt continues editorial gravity. **Confidence:** C3 (BeforeInstallPromptEvent only Chrome/Edge — Safari iOS uses Add-to-Home-Screen which is OS-level).
+
+**AC:**
+- [ ] Failing test written FIRST: dispatch beforeinstallprompt event → component renders; click install CTA → calls saved event.prompt(); dismissal persists to localStorage
+- [ ] Cases pass
+- [ ] Safari iOS path: component is null (different UX path; brief comment in code)
+- [ ] EN + ES copy
+- [ ] Component <120 lines
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.10, T1.33
+
+---
+
+### T1.92 — Apple touch icons + splash screen variants | Cx: 6 | P2
+
+**Description:**
+Generate `apple-touch-icon-180x180.png` (already from T1.35) PLUS Apple-specific splash screens: `apple-splash-2048x2732.png` (iPad Pro 12.9), `apple-splash-1668x2388.png` (iPad Pro 11), `apple-splash-1290x2796.png` (iPhone Pro Max). Extend `frontend/scripts/generate-icons.mjs` (T1.35) to output these. Add `<link rel="apple-touch-startup-image">` tags in layout.tsx (coordinate with T1.38 budget). **Why beyond brief:** when judges install via Safari iOS, default white screen flash kills the editorial gravity. **Confidence:** C2.
+
+**AC:**
+- [ ] Failing test written FIRST: generate-icons script outputs all 3 splash screen PNGs at correct dimensions
+- [ ] All splash screen files present in `frontend/public/`
+- [ ] layout.tsx contains 3 apple-touch-startup-image link tags (within 130-line budget — coordinate with T1.38)
+- [ ] Splash screen background = `--bg-base` (#0A0E1A); branded mark centered
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.35, T1.38
+
+---
+
+## Phase 21: Security & Headers (Enrichment Pass)
+
+Mapbox + Three.js + Satori + analytics each broaden the security surface. Without explicit CSP, an XSS vector via translations or user input could exfiltrate Mapbox tokens or session IDs. Phase 21 hardens the perimeter.
+
+### T1.93 — Content Security Policy headers (Mapbox + Three.js + Satori safe) | Cx: 14 | P1
+
+**Description:**
+Add CSP via `frontend/next.config.ts` headers() function. Policy:
+- `default-src 'self'`
+- `script-src 'self' 'wasm-unsafe-eval'` (Three.js needs wasm; Satori needs eval-equivalent — `'wasm-unsafe-eval'` is the modern alternative to `unsafe-eval` for WASM-only)
+- `style-src 'self' 'unsafe-inline'` (Tailwind/Lightning CSS injects inline styles)
+- `img-src 'self' data: blob: https://*.tiles.mapbox.com https://api.mapbox.com`
+- `connect-src 'self' https://api.mapbox.com https://events.mapbox.com`
+- `font-src 'self' data:`
+- `worker-src 'self' blob:` (Mapbox uses workers)
+- `frame-ancestors 'none'`
+- `form-action 'self'`
+- `base-uri 'self'`
+- `report-uri /api/csp-report`. **Honesty/C4:** if CSP breaks Mapbox tile loading, must broaden img-src — verified via `npm run dev` + page load. **Confidence:** C3.
+
+**AC:**
+- [ ] Failing test written FIRST: response from `/` includes Content-Security-Policy header with all 11 directives above
+- [ ] Mapbox tiles still load with CSP active (manual + Playwright assert no `Refused to load` console error on `/`)
+- [ ] Three.js loads (W3 will verify; W1 smoke: import three in a hidden component, verify no CSP block)
+- [ ] No `unsafe-eval` outside `wasm-unsafe-eval`
+- [ ] CSP report endpoint stub (W4 wires real ingestion)
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.6
+
+---
+
+### T1.94 — Permissions-Policy + HSTS + X-Frame-Options + Referrer-Policy | Cx: 6 | P1
+
+**Description:**
+In `next.config.ts` headers(), add:
+- `Permissions-Policy: camera=(), microphone=(), geolocation=(self), interest-cohort=()` (deny camera/mic; allow geolocation only first-party for future map "find my location"; deny FLoC/Topics)
+- `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload`
+- `X-Frame-Options: DENY` (paired with frame-ancestors 'none')
+- `X-Content-Type-Options: nosniff`
+- `Referrer-Policy: strict-origin-when-cross-origin`. **Confidence:** C2.
+
+**AC:**
+- [ ] Failing test written FIRST: response headers include all 5 directives with exact values above
+- [ ] All assertions pass
+- [ ] Mapbox geolocation API NOT broken when used (W2 will verify; W1 manually checks `navigator.permissions.query({name:'geolocation'})` returns 'granted' or 'prompt' in dev)
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.93
+
+---
+
+### T1.95 — Subresource Integrity audit (no external scripts in main bundle) | Cx: 6 | P2
+
+**Description:**
+Create `frontend/scripts/audit-sri.mjs`. Greps the built `.next/server` output and `.next/static` for any `<script src="https://...">` referencing third-party origins. Reports findings; exits 1 if any external script lacks `integrity=`. **Goal:** keep main bundle 100% first-party JS — Mapbox is the ONLY exception (loaded via npm, not CDN). **Why beyond brief:** any unaudited third-party script is a supply-chain vector. **Confidence:** C1.
+
+**AC:**
+- [ ] Failing test written FIRST: script test fixture with external <script src="cdn.example.com"> (no integrity) → exits 1; clean fixture → exits 0
+- [ ] Run against current build: exit 0 (we have no external scripts today)
+- [ ] Script <120 lines
+- [ ] Added to `npm run` scripts as `"audit:sri"` for periodic runs
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.6
+
+---
+
+## Phase 22: Accessibility Beyond AAA (Enrichment Pass)
+
+The brief hits WCAG AAA contrast and reduced-motion, but accessibility has many more axes. Forced-Colors mode (Windows high-contrast users), prefers-contrast: more (low-vision users), Battery API (battery-conscious users), Vibration API (touch feedback for motor-impaired), explicit accessibility statement page. **The Spanish-only screen-reader user from Spotlight Multiple Selves drove this phase.**
+
+### T1.96 — Forced Colors Mode CSS adaptations | Cx: 8 | P0
+
+**Description:**
+Add `frontend/src/app/styles/tokens/forced-colors.css` (new partial; @import-wired by T1.8 — coordinate). Block: `@media (forced-colors: active) { :root { --accent-cyan: LinkText; --bg-base: Canvas; --fg-primary: CanvasText; --accent-amber: Mark; --status-negative: Mark; ... } *:focus-visible { outline: 2px solid Highlight; } svg [stroke="currentColor"] { stroke: CanvasText; } }`. Maps brand tokens to system colors so Windows High Contrast Mode renders the Wall as functional, not just legible. **Why beyond brief:** ~3% of users have HCM enabled; they currently see broken token-derived colors. **Confidence:** C2.
+
+**AC:**
+- [ ] Failing test written FIRST: vitest+jsdom asserts forced-colors.css contains `@media (forced-colors: active)` block AND maps --accent-cyan to LinkText, --bg-base to Canvas
+- [ ] @import added in globals.css (T1.8 list)
+- [ ] Manual: Windows + Edge with HCM toggled — every text legible, brand mark visible (not invisible)
+- [ ] Partial <80 lines
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.7, T1.8, T1.10, T1.11
+
+---
+
+### T1.97 — prefers-contrast: more variant tokens | Cx: 6 | P1
+
+**Description:**
+Add to `frontend/src/app/styles/tokens/colors.css`: `@media (prefers-contrast: more) { :root { --fg-secondary: var(--fg-primary); --fg-muted: #B0B8C5; /* lifted from #64748B */ --accent-cyan: #5EEEFF; /* brighter */ } }`. Boosts contrast for users who explicitly request it (overlapping but not identical to forced-colors). **Confidence:** C1.
+
+**AC:**
+- [ ] Failing test written FIRST: asserts `@media (prefers-contrast: more)` block exists in colors.css with the 3 token overrides
+- [ ] WCAG verified: lifted muted tones still pass AAA contrast (delegate to T1.13 contrast script)
+- [ ] No regression on default contrast (default --fg-muted unchanged)
+- [ ] colors.css line count <250
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.10, T1.11, T1.13
+
+---
+
+### T1.98 — Battery API integration (animations off <20%) | Cx: 10 | P2
+
+**Description:**
+Create `frontend/src/hooks/useBatteryAware.ts`. Returns `{ level: number | null, charging: boolean | null, isLow: boolean }` via `navigator.getBattery()` (Chrome/Edge; gracefully nulls on Safari/Firefox). `isLow` true when level <0.2 AND not charging. W2/W3 use this to disable expensive animations (3D barrier graph, cursor flashlight) when user is on low battery. **Why beyond brief:** mobile demo viewer at 18% battery should not have their phone die mid-Wall. **Confidence:** C3 (Battery API is dropping in Firefox; gracefully degrade).
+
+**AC:**
+- [ ] Failing test written FIRST: mock getBattery returning {level:0.5, charging:false} → isLow=false; mock {level:0.15, charging:false} → isLow=true; mock {level:0.15, charging:true} → isLow=false; getBattery undefined (Firefox) → level=null, isLow=false
+- [ ] All cases pass
+- [ ] SSR-safe
+- [ ] Cleanup removes battery event listeners on unmount
+- [ ] Hook <100 lines
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.6
+
+---
+
+### T1.99 — Save-Data + Network-Information aware utility | Cx: 8 | P1
+
+**Description:**
+Create `frontend/src/lib/wall/network.ts`. Exports `getNetworkProfile(): { saveData: boolean, effectiveType: '2g' | '3g' | '4g' | 'unknown', downlinkMbps: number | null }`. Reads `navigator.connection` (mostly Chromium; gracefully degrades). Used by W2 to decide between Mapbox vector tiles (4g) vs. raster preview-only (2g/3g/saveData). **Why beyond brief:** brief's mobile fallback used innerWidth only — users on slow rural networks need data-aware fallback regardless of screen size. **Confidence:** C2.
+
+**AC:**
+- [ ] Failing test written FIRST: mock navigator.connection {saveData:true, effectiveType:'3g', downlink:1.5} → returns matching object; navigator.connection undefined → returns saveData:false, effectiveType:'unknown', downlinkMbps:null
+- [ ] All cases pass
+- [ ] SSR-safe
+- [ ] Module <100 lines
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.6
+
+---
+
+### T1.100 — `/accessibility` statement page | Cx: 10 | P1
+
+**Description:**
+Create `frontend/src/app/accessibility/page.tsx`. Editorial accessibility statement: WCAG AAA conformance claim, list of supported assistive tech (NVDA, VoiceOver, JAWS), Forced Colors Mode support, prefers-reduced-motion respect, keyboard navigation summary, contact email `accessibility@gowork.example`, last-audited date (build timestamp). Footer link added in T1.55 list. Translation keys `a11y.statement.*`. **Why beyond brief:** Section 508 + EU EAA expect a published accessibility statement for civic-tech products. **Confidence:** C1.
+
+**AC:**
+- [ ] Failing test written FIRST: page renders all 7 sections (WCAG claim, AT list, forced-colors, reduced-motion, keyboard, contact, audit date)
+- [ ] EN + ES copy
+- [ ] WCAG AAA contrast verified
+- [ ] Page <250 lines
+- [ ] Link added to Footer (coordinate with T1.55)
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.10, T1.33, T1.55
+
+---
+
+### T1.101 — Vibration API touch-feedback utility | Cx: 6 | P2
+
+**Description:**
+Create `frontend/src/lib/wall/haptics.ts`. Exposes `pulse(durationMs: number = 10)`, `tap()`, `confirm()`. Wraps `navigator.vibrate()` (mostly Android; iOS does NOT support web Vibration API as of 2026). Respects user opt-in via localStorage `gowork.haptics` (default `false` — battery-friendly + iOS-honest). Used by W3 chapter transitions for users who opt in. **Why beyond brief:** for users with sensory needs, haptic confirmation of a CTA tap is meaningful; native apps do this — we should match. **Confidence:** C2.
+
+**AC:**
+- [ ] Failing test written FIRST: with opt-in true, pulse(20) calls navigator.vibrate(20) once; with opt-in false, no call; navigator.vibrate undefined → no-op without crash
+- [ ] All cases pass
+- [ ] SSR-safe
+- [ ] Module <80 lines
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.6
+
+---
+
+## Phase 23: Typography & Editorial Polish (Enrichment Pass)
+
+Inter Variable's wght axis is in T1.15 — but the optical-size axis goes further (italic, slant, opsz combinations create real editorial typography). Drop caps, pull quotes, chapter dividers as ART (not blank lines), branded scrollbar, hover-on-brand path animation — all the small polish that compounds into "Fortune 500" feel.
+
+### T1.102 — Variable font axis tokens (slant, italic, optical) | Cx: 8 | P1
+
+**Description:**
+Append to `frontend/src/app/styles/tokens/typography.css` and `frontend/src/lib/wall/tokens.ts`:
+CSS:
+```
+--font-axis-wght-display: 900;
+--font-axis-wght-body: 400;
+--font-axis-opsz-display: 32;
+--font-axis-opsz-body: 14;
+--font-axis-slnt-italic: -10;  /* Inter slant axis */
+```
+TS export `FONT_AXES = { wghtDisplay: 900, wghtBody: 400, opszDisplay: 32, opszBody: 14, slntItalic: -10 } as const`. Also create utility `.italic-axis` class using `font-style: oblique -10deg;` for Inter Variable's slant axis (NOT the static italic font). **Why beyond brief:** brief mentions opsz only; slant axis enables the "drop cap" + "pull quote" typography in T1.103/T1.104 to render with editorial polish. **Confidence:** C2.
+
+**AC:**
+- [ ] Failing test written FIRST: typography.css contains all 5 new tokens; tokens.ts exports FONT_AXES with matching values; .italic-axis class compiles to `font-style: oblique -10deg`
+- [ ] All assertions pass
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.15, T1.16
+
+---
+
+### T1.103 — Drop cap CSS utility | Cx: 6 | P1
+
+**Description:**
+Add to `typography.css`: `.dropcap::first-letter { float: left; font-size: 5em; line-height: 0.85; padding: 0.05em 0.1em 0 0; font-variation-settings: "wght" 800, "opsz" 60; color: var(--accent-cyan); }`. Used by W2 chapter intros' first paragraph. Also adds `@media print { .dropcap::first-letter { color: black; } }` for print stylesheet (T1.45). **Why beyond brief:** drop caps are a 500-year-old editorial convention; signals "this is a magazine essay, not a webpage." **Confidence:** C1.
+
+**AC:**
+- [ ] Failing test written FIRST: typography.css contains `.dropcap::first-letter` rule with float:left + cyan color + variable font weight
+- [ ] Print override present
+- [ ] Manual visual check: render a test paragraph with `.dropcap` → first letter is large, cyan, properly aligned (no overlap with second line)
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.102
+
+---
+
+### T1.104 — Pull quote component + typography | Cx: 8 | P1
+
+**Description:**
+Create `frontend/src/components/wall/PullQuote.tsx`. Renders a `<blockquote>` with editorial typography: italic axis (T1.102), large display weight, cyan rule on left, attribution (`<cite>`) below. Used by W2 chapters for editorial emphasis. Translation keys `wall.pullQuotes.*` (W2 populates content). **Confidence:** C1.
+
+**AC:**
+- [ ] Failing test written FIRST: renders blockquote element with italic-axis class + cyan border-left + cite element when attribution provided
+- [ ] WCAG AAA contrast (italic cyan rule on bg-base ≥3:1)
+- [ ] reduced-motion safe (no entrance animation by default)
+- [ ] Component <80 lines
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.102, T1.10, T1.11
+
+---
+
+### T1.105 — Chapter divider as ART (SVG ornament, not blank line) | Cx: 10 | P1
+
+**Description:**
+Create `frontend/public/dividers/chapter-divider.svg`. Hand-tuned ornament: a small horizontal cyan path-line with a center bullet that echoes the brand mark's path. Used between chapters as a visual rhythm marker — NOT a `<hr>`. ALSO create `frontend/src/components/wall/ChapterDivider.tsx` that renders the SVG with `aria-hidden` (decorative). Animates path-draw on intersection-observer (when scrolled into view). reduced-motion: static. **Why beyond brief:** brief says "one chapter ends, next begins" but never specifies the seam. Magazine essays use ornaments. **Confidence:** C1.
+
+**AC:**
+- [ ] Failing test written FIRST: SVG file exists with viewBox and path; component renders it with aria-hidden=true; with prefers-reduced-motion, NO animation prop applied
+- [ ] All assertions pass
+- [ ] svgo idempotent run preserves the file
+- [ ] Component <100 lines
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.5, T1.10, T1.30
+
+---
+
+### T1.106 — Branded custom scrollbar CSS | Cx: 6 | P1
+
+**Description:**
+Add to `frontend/src/app/styles/tokens/layout.css` (coordinate with T1.65):
+```
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg-surface); }
+::-webkit-scrollbar-thumb { background: color-mix(in oklch, var(--accent-cyan), var(--bg-elevated) 60%); border-radius: 5px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-cyan); }
+html { scrollbar-color: var(--accent-cyan) var(--bg-surface); scrollbar-width: thin; }  /* Firefox */
+```
+**Why beyond brief:** default OS scrollbar is the loudest "this is a webpage" signal. Custom scrollbar carries brand into the chrome. **Confidence:** C2 (Webkit + Firefox covered; older browsers fall back gracefully).
+
+**AC:**
+- [ ] Failing test written FIRST: layout.css contains all 4 webkit-scrollbar selectors AND `scrollbar-color` for Firefox
+- [ ] reduced-motion: no transition on hover (instant color)
+- [ ] WCAG: thumb-on-track contrast ≥3:1 (verified via T1.13)
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.10, T1.11, T1.65
+
+---
+
+### T1.107 — Brand mark hover: animated path-draw | Cx: 8 | P1
+
+**Description:**
+Update `frontend/public/icon.svg` (created in T1.34) — wrap the cyan path-line in a `<g class="path-draw">` with `stroke-dasharray` + `stroke-dashoffset` set up for SMIL OR CSS animation on hover. ALSO create CSS in `frontend/src/app/styles/tokens/layout.css`: `.brand-mark:hover svg .path-draw { animation: draw-path 600ms cubic-bezier(0.32, 0.72, 0, 1) both; } @keyframes draw-path { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }`. Reduced-motion: animation disabled. **Why beyond brief:** brief says "animated path-draw on hover" but provides no implementation; this is the spec. **Confidence:** C1.
+
+**AC:**
+- [ ] Failing test written FIRST: icon.svg contains class="path-draw" group with stroke-dasharray attr; layout.css contains .brand-mark:hover rule + @keyframes draw-path
+- [ ] reduced-motion override present
+- [ ] Manual hover test: hover triggers path-draw 600ms; reduced-motion → no animation
+- [ ] svgo idempotent preserves the class attribute
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.34, T1.65
+
+---
+
+## Phase 24: Iconography (Enrichment Pass)
+
+Lucide is the existing icon library; sufficient for utility icons. But the four barrier types (criminal record, transit, childcare, credit) deserve custom icons that signal "we built this for THIS problem" — not "we picked an icon library." Phase 24 builds the four barrier icons + branded button variant tokens.
+
+### T1.108 — Custom barrier-type icons (criminal record, transit, childcare, credit) | Cx: 12 | P1
+
+**Description:**
+Create 4 SVGs in `frontend/public/icons/barriers/`:
+(a) `criminal-record.svg` — line-art document with a strikethrough redaction line (cyan)
+(b) `transit.svg` — abstract bus stop pole + 71-min arc
+(c) `childcare.svg` — abstract small + adult silhouette pair
+(d) `credit.svg` — abstract three-tier bar with gap (representing score gap)
+All hand-tuned 24x24 viewBox, single cyan stroke on transparent, designed at 16px first per brief. ALSO create `frontend/src/components/wall/BarrierIcon.tsx` mapping `BarrierType` enum → icon path. **Why beyond brief:** brief says "Lucide defaults" — defaults are interchangeable; custom barrier icons signal authorship. **Confidence:** C2.
+
+**AC:**
+- [ ] Failing test written FIRST: BarrierIcon component renders correct SVG for each of 4 BarrierType values; each SVG file contains <title> matching the barrier name
+- [ ] All 4 SVGs exist and pass svgo idempotent run
+- [ ] Component <100 lines
+- [ ] aria-label set for screen readers (e.g., "Criminal record barrier icon")
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.5, T1.10, T1.11
+
+---
+
+### T1.109 — Branded button variants (CTA primary, ghost, danger, link) | Cx: 10 | P1
+
+**Description:**
+Update `frontend/src/components/ui/button.tsx` (existing shadcn — verify path) OR create `frontend/src/components/wall/Button.tsx` if existing component is shadcn-locked. Variants:
+- `cta-primary`: bg accent-cyan + fg bg-base, large radius, animated outline-offset on focus
+- `ghost`: transparent bg, fg-primary, subtle hover bg-elevated
+- `danger`: accent-rose bg, white fg
+- `link`: underline only, accent-cyan
+All variants respect reduced-motion (transition durations swap to 0). All keyboard reachable, focus visible. Sized via Tailwind classes. **Confidence:** C2.
+
+**AC:**
+- [ ] Failing test written FIRST: render each variant; assert distinct className per variant; focus-visible outline matches accent-cyan; reduced-motion disables transitions
+- [ ] All 4 variants pass
+- [ ] WCAG AAA contrast verified per variant (cta-primary fg on bg, danger fg on bg, etc.)
+- [ ] Component <150 lines
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.10, T1.11, T1.22
+
+---
+
+## Phase 25: Performance Beyond Lighthouse (Enrichment Pass)
+
+Lighthouse 90+ is the gate, but real performance is about font subsetting, DPR-aware assets, resource hints, brotli, cache headers. Phase 25 puts the infrastructure in place to PASS the gate by margin, not by squeak.
+
+### T1.110 — Font subsetting (Latin EN; Spanish charset overlay) | Cx: 10 | P1
+
+**Description:**
+Configure `next/font/google` for Inter Variable in `layout.tsx` (T1.38 owns; coordinate) with `subsets: ['latin']` baseline. For ES locale, lazy-load `latin-ext` subset via dynamic font definition gated by `useLanguage()` (T1.33). Verifies that the EN-only first-paint downloads only the Latin subset (~14KB), and ES toggle adds latin-ext (~6KB) on demand. **Honesty/C4:** Next.js next/font does NOT support runtime subset switching; fallback path is to ship both subsets but use `unicode-range` CSS to load lazily — document the path tried in PR. **Confidence:** C4.
+
+**AC:**
+- [ ] Failing test written FIRST: layout-metadata test asserts subsets includes 'latin'; on ES toggle, additional font CSS link element present (or unicode-range rule fires)
+- [ ] All assertions pass
+- [ ] Network panel: EN-only page loads exactly 1 woff2 (Latin); after ES toggle, additional woff2 loaded
+- [ ] No FOIT (flash of invisible text) — `adjustFontFallback: true` from T1.15 covers this
+- [ ] Bundle delta: total font weight <25KB across both subsets
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.15, T1.33, T1.38
+
+---
+
+### T1.111 — DPR-aware asset utility (1x/2x/3x) | Cx: 8 | P1
+
+**Description:**
+Create `frontend/src/lib/wall/dpr.ts`. Exports `pickDprVariant(srcset: { 1: string; 2: string; 3: string })` and React component `<DprImage src={...} alt={...} />` that picks the right variant based on `window.devicePixelRatio`. Used by W2 for the per-chapter atmosphere images (sky textures, building extrusions). **Why beyond brief:** retina iPhone judges shouldn't see blurry 1x assets; 3GB Android shouldn't download 3x. **Confidence:** C1.
+
+**AC:**
+- [ ] Failing test written FIRST: pickDprVariant({1:'a.png',2:'b.png',3:'c.png'}) at devicePixelRatio=1 returns 'a.png'; at 2 returns 'b.png'; at 3 returns 'c.png'; SSR returns '1' fallback
+- [ ] DprImage component renders <img src=...> matching variant
+- [ ] All cases pass
+- [ ] SSR-safe
+- [ ] Module <120 lines
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.6
+
+---
+
+### T1.112 — Resource hints (preconnect, prefetch, dns-prefetch) | Cx: 6 | P1
+
+**Description:**
+Update `layout.tsx` head (coordinate budget with T1.38, T1.85, T1.88, T1.92 — file budget 130 lines): add `<link rel="preconnect" href="https://api.mapbox.com" crossorigin>`, `<link rel="preconnect" href="https://events.mapbox.com" crossorigin>`, `<link rel="dns-prefetch" href="//*.tiles.mapbox.com">`. Saves ~100-300ms on first Mapbox tile request by warming the connection during HTML parse. **Confidence:** C1.
+
+**AC:**
+- [ ] Failing test written FIRST: layout-metadata test asserts head contains preconnect for api.mapbox.com and events.mapbox.com, dns-prefetch for *.tiles.mapbox.com
+- [ ] All assertions pass
+- [ ] layout.tsx still <130 lines (coordinate)
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.38
+
+---
+
+### T1.113 — HTTP cache headers per asset type (Vercel headers config) | Cx: 8 | P1
+
+**Description:**
+Update `frontend/next.config.ts` headers() to set per-asset-type Cache-Control:
+- `/_next/static/*` → `public, max-age=31536000, immutable`
+- `/icons/*`, `/sounds/*`, `/dividers/*` → `public, max-age=2592000, stale-while-revalidate=86400` (30d cache, 1d SWR)
+- `/og-image.svg`, `/icon.svg` → `public, max-age=3600, stale-while-revalidate=86400` (1h cache, brand updates fast)
+- HTML routes → `public, max-age=0, must-revalidate` (always fresh — chapter content may change)
+**Confidence:** C2.
+
+**AC:**
+- [ ] Failing test written FIRST: response headers for `/_next/static/sample.js` include `max-age=31536000, immutable`; `/og-image.svg` includes `max-age=3600`; `/` includes `must-revalidate`
+- [ ] All assertions pass via Playwright fetch + header inspection
+- [ ] No regression on existing build output
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.6
+
+---
+
+### T1.114 — Bundle analyzer baseline + thresholds extension | Cx: 8 | P1
+
+**Description:**
+Update `frontend/baseline-bundle-sizes.json` _meta to include W1's expected First Load JS deltas: install of mapbox-gl + react-map-gl + three is heavyweight but lazy-loaded so should NOT increase `/` route's bundle. Add a CI-runnable check `frontend/scripts/check-bundle-budget.mjs` that reads route sizes from `.next/build-manifest.json` AND compares against thresholds (10% over baseline → fail). Document W1 baseline pre-Mapbox: `/` route = 161KB. After T1.1+T1.2+T1.3+T1.4 installs, baseline must be re-captured; if deltas >5KB on routes, investigate (likely missing lazy-load). **Confidence:** C2.
+
+**AC:**
+- [ ] Failing test written FIRST: script test fixture with route at 200KB vs baseline 161KB → exits 1 (24% over); fixture at 165KB → exits 0 (within 10%)
+- [ ] All cases pass
+- [ ] `npm run check:bundle` script added to package.json
+- [ ] Re-baseline post-W1: documented in PR; new baseline shows mapbox/three NOT in `/` route's First Load JS
+- [ ] Script <150 lines
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.1, T1.2, T1.3, T1.4
+
+---
+
+## Phase 26: Error Handling & Monitoring (Enrichment Pass)
+
+Per-component error boundaries (richer than the global error.tsx of T1.41), Sentry-style scaffold (own-rolled, no SDK), 404 → relevant suggestions. Phase 26 makes failure dignified.
+
+### T1.115 — Per-section ErrorBoundary component | Cx: 10 | P1
+
+**Description:**
+Create `frontend/src/components/wall/SectionErrorBoundary.tsx`. React class-based ErrorBoundary that catches errors in child subtree and renders T1.44's ErrorState component instead of crashing whole page. Logs error to T1.117's reporter. Props: `{ sectionName: string; children: React.ReactNode; fallback?: React.ReactNode }`. Used by W2 to wrap each chapter — one chapter crash should NOT take down the others. **Confidence:** C1.
+
+**AC:**
+- [ ] Failing test written FIRST: child throws → ErrorBoundary renders ErrorState with sectionName; reporter mock called once with error and section name; reset path works (clicking retry renders children again)
+- [ ] All cases pass
+- [ ] Component <120 lines
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.44
+
+---
+
+### T1.116 — 404 → chapter suggestions | Cx: 8 | P2
+
+**Description:**
+Update `frontend/src/app/not-found.tsx` (T1.40 owns; coordinate). Add a "Maybe you meant…" section listing the 10 chapters as links to `/#chapter-NN`. Suggested in EN+ES via translations. Visual: small grid of chapter titles in tabular-nums + cyan hover. **Why beyond brief:** stock 404s dead-end; ours converts a misroute into a chapter discovery moment. **Confidence:** C1.
+
+**AC:**
+- [ ] Failing test written FIRST: not-found page contains 10 chapter suggestion links; each href matches `/#chapter-NN`; EN + ES copy verified
+- [ ] All assertions pass
+- [ ] WCAG AAA contrast on links
+- [ ] Page <120 lines (T1.40 was <100 — extension within budget)
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.40, T1.86
+
+---
+
+### T1.117 — Error reporter scaffold (PII-safe, console-only in W1) | Cx: 10 | P1
+
+**Description:**
+Create `frontend/src/lib/error-reporter.ts`. Module-level singleton with `report(error: Error, context?: Record<string, string | number>)`. In dev: console.error with full context. In production: posts to `/api/errors/ingest` (W4 endpoint — graceful 404 swallowing). PII filter: scrubs any context value matching email regex, replaces stack-trace path components matching `/Users/[username]` or `C:\\Users\\[username]` with `<USER>`. **Why beyond brief:** brief mentions error pages but never logs errors — without logs, post-demo debugging is blind. **Confidence:** C2.
+
+**AC:**
+- [ ] Failing test written FIRST: report(new Error('boom')) in dev calls console.error once; in production posts to /api/errors/ingest; email in context scrubbed to `<EMAIL>`; user-path stack trace scrubbed to `<USER>`; endpoint 404 swallowed
+- [ ] All cases pass
+- [ ] Module <200 lines
+- [ ] SSR-safe
+- [ ] Bundle delta <2KB
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.6, T1.81
+
+---
+
+## Phase 27: Live / Time-of-Day Precursors (Enrichment Pass)
+
+useTimeOfDay (T1.24) supports 4 phases. The brief's life-layer #1 says "golden 6am, deep navy 11pm" — that implies more granularity. Phase 27 extends to 8 phases + adds weather-awareness scaffold + reading-speed adapter.
+
+### T1.118 — useTimeOfDay 8-phase extension | Cx: 8 | P1
+
+**Description:**
+Update `frontend/src/hooks/useTimeOfDay.ts` (T1.24 owns; coordinate as ENHANCE-IN-PLACE, not new file). Phase enum extended from 4 to 8: `'dawn' | 'morning' | 'midday' | 'afternoon' | 'golden' | 'dusk' | 'evening' | 'night'`. Boundaries: dawn 5–7, morning 7–10, midday 10–14, afternoon 14–17, golden 17–18.5, dusk 18.5–20, evening 20–22, night 22–5. Each phase maps to a distinct accentShift + Mapbox sky preset (W2 wires sky). **Backward-compat:** old TimePhase type union now wider; types.ts (T1.67) updated to match. **Confidence:** C1.
+
+**AC:**
+- [ ] Failing test written FIRST: at fake-time 6:30 → phase=dawn; 17:30 → phase=golden; 22:30 → phase=night; 11:00 → phase=midday
+- [ ] All 8 cases pass
+- [ ] Existing useTimeOfDay tests still green (4-phase test cases adapted to 8-phase outputs)
+- [ ] Type export TimePhase has all 8 literals
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.24, T1.67
+
+---
+
+### T1.119 — Weather-awareness scaffold hook | Cx: 10 | P2
+
+**Description:**
+Create `frontend/src/hooks/useWeather.ts`. Returns `{ cloudCover: number /* 0..1 */, isPrecip: boolean, condition: 'clear' | 'cloudy' | 'rainy' | 'foggy' | 'unknown' }`. Polls `/api/weather` (W4 endpoint with NWS API proxy — for W1, hook returns `{ cloudCover: 0.3, isPrecip: false, condition: 'unknown' }` placeholder + 404 graceful). Used by W2 to dim Mapbox sky on cloudy + raise atmosphere fog. **Why beyond brief:** life-layer #1 is time-aware; weather-aware is the natural fusion (Spotlight). Real Fort Worth weather on the demo screen = "the city is real" signal. **Confidence:** C3 (NWS API integration is W4; W1 stub is safe).
+
+**AC:**
+- [ ] Failing test written FIRST: endpoint mock returns {cloudCover:0.8, isPrecip:true, condition:'rainy'} → hook returns matching object; 404 → returns placeholder values
+- [ ] All cases pass
+- [ ] SSR-safe
+- [ ] Polling interval 5 minutes (configurable)
+- [ ] Hook <120 lines
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.6
+
+---
+
+### T1.120 — Reading-speed adapter (auto-scroll passive viewing mode) | Cx: 12 | P2
+
+**Description:**
+Create `frontend/src/components/wall/AutoScrollMode.tsx`. Toggleable mode (button in header or footer) that auto-scrolls the page at a measured pace (default 60 words/min × per-chapter word count → chapter dwell time). Allows judges to watch the Wall passively without scrolling — useful for "TV-mounted-in-airplane-mode-judge" scenario from Spotlight Multiple Selves. Pause on hover; resume after 3s idle. Accessible: keyboard space-bar pauses/resumes; aria-live announces "Auto-scroll paused / resumed". reduced-motion: disabled (returns null). **Why beyond brief:** brief assumes scrolling; passive mode is the demo-day affordance for non-interactive judging contexts. **Confidence:** C3.
+
+**AC:**
+- [ ] Failing test written FIRST: enable auto-scroll → fake timer advance 1s → window.scrollBy called with positive y delta; hover → scrollBy NOT called; spacebar press → toggles paused state; reduced-motion → component renders null
+- [ ] All cases pass
+- [ ] Component <150 lines
+- [ ] aria-live announces toggle state
+- [ ] EN + ES copy
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.30, T1.33, T1.27
+
+---
+
+## Phase 28: Real-Data Verification (Enrichment Pass)
+
+Carlos's path uses 5 real Fort Worth offices. Article 55 cites Texas Government Code. HHSC childcare program is named CCS. Trinity Metro GTFS is a real feed. Phase 28 verifies these with primary sources — because if a journalist or judge fact-checks and finds an error, the editorial credibility collapses.
+
+### T1.121 — Carlos's 5-office address verification matrix | Cx: 10 | P1
+
+**Description:**
+Create `frontend/src/lib/wall/carlos-path.ts` AND `frontend/src/lib/wall/__tests__/carlos-path.test.ts`. Module exports the 5 office records (T1.67 ChapterId 7 references): Tarrant County District Clerk (100 N Calhoun St, Fort Worth, TX 76196), HHSC office (closest to 76119 — verify), Legal Aid of Northwest Texas (300 S Center St, Arlington TX OR Fort Worth office — verify), Workforce Solutions for Tarrant County on E. Belknap (verify exact address), Amazon FC DFW5 (verify coords). Each record: `{ id, name, address, lat, lng, sourceUrl }`. Test asserts each `sourceUrl` returns 200 (manual one-time verification documented in PR; tests assert structure). **Why beyond brief:** brief lists offices but never sources them. Sourcing makes the work auditable. **Confidence:** C3 (real addresses; geocoding accuracy depends on OSM/Mapbox lookup).
+
+**AC:**
+- [ ] Failing test written FIRST: module exports 5 records with id/name/address/lat/lng/sourceUrl; latitudes within Tarrant County bounding box (32.5–33.0 lat, -97.6 to -97.2 lng); each sourceUrl is a real .gov or .org URL
+- [ ] All assertions pass
+- [ ] PR includes screenshots of each sourceUrl proving address
+- [ ] HHSC office geocoded ≤8 mi from 76119 centroid
+- [ ] Module <150 lines
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.67
+
+---
+
+### T1.122 — Article 55 Texas Government Code citation verification | Cx: 6 | P1
+
+**Description:**
+Create `frontend/src/lib/wall/legal-citations.ts`. Exports the citation: `{ id: 'tx-art-55', code: 'Texas Government Code, Chapter 55', topic: 'Expunction of Criminal Records', sourceUrl: 'https://statutes.capitol.texas.gov/Docs/GV/htm/GV.55.htm' (verify), summary: '...' }`. **Honesty:** the brief's "Article 55 expunction" is shorthand; verify the actual chapter and section. If the citation is wrong, FIX IT — don't ship a fictional code. **Confidence:** C3.
+
+**AC:**
+- [ ] Failing test written FIRST: module exports legal citation with id, code, topic, sourceUrl, summary
+- [ ] sourceUrl matches Texas statutes.capitol.texas.gov path (manually verified, screenshot in PR)
+- [ ] If brief's "Article 55" is incorrect, document the correction in PR with the actual code reference
+- [ ] Module <100 lines
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.67
+
+---
+
+### T1.123 — Trinity Metro GTFS feed freshness check + HHSC CCS naming | Cx: 8 | P1
+
+**Description:**
+Create `frontend/scripts/verify-gtfs-freshness.mjs`. Fetches Trinity Metro GTFS feed URL (https://ridetrinitymetro.org/developer-resources or transitland.org), checks `feed_info.txt` `feed_end_date` is within 60 days of today. ALSO update `frontend/src/lib/wall/carlos-path.ts` (T1.121) to include the HHSC childcare program with the CORRECT program name: **"Child Care Services" (CCS)** — verified via hhsc.texas.gov. The brief's "HHSC childcare subsidy" should be normalized to CCS. **Why beyond brief:** stale GTFS = stale routes = wrong commute estimates. Wrong program name = workers Google for help and find the wrong page. **Confidence:** C2.
+
+**AC:**
+- [ ] Failing test written FIRST: script test fixture with feed_end_date 90 days old → exits 1; 30 days old → exits 0
+- [ ] Run against real GTFS URL: documented in PR (PASS or descope to manual check)
+- [ ] carlos-path.ts records HHSC office with `program: 'Child Care Services (CCS)'`
+- [ ] hhsc.texas.gov URL verified live and present in record
+- [ ] Script <120 lines
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.121
+
+---
+
+## Phase 29: Brand Sound + Chapter Navigation + Dev Tooling (Enrichment Pass)
+
+Last polish layer: a single-note brand sound logo (opt-in only), full keyboard-accessible chapter quick-jump, reading-mode toggle, and a unified dev tools surface that compounds T1.76, T1.82, and a memory profiler hook into one developer experience.
+
+### T1.124 — Brand sound logo (subtle audio signature on first interaction) | Cx: 8 | P2
+
+**Description:**
+Create `frontend/public/sounds/brand-sound-logo.mp3` (placeholder silent for W1 — replaced post-W1 with real audio asset by composer). Add SoundId `'brand-logo'` to T1.56 sound module. Plays ONCE per session on first user gesture if sound is unmuted. Single soft chime (~400ms, two tones), respectful, NOT a jingle. Persisted via sessionStorage `gowork.brandSoundPlayed`. **Why beyond brief:** brief lists sound as descope candidate (Phase N priority 1), but a single 400ms brand sound on opt-in first interaction = mnemonic without disruption. **Confidence:** C2.
+
+**AC:**
+- [ ] Failing test written FIRST: play('brand-logo') called on first user gesture when unmuted; sessionStorage flag set; subsequent gesture does NOT replay
+- [ ] All cases pass
+- [ ] Placeholder silent file <50KB (within budget)
+- [ ] PR includes "REPLACE BEFORE LAUNCH" note for asset swap
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.56, T1.59
+
+---
+
+### T1.125 — Chapter quick-jump menu (1-0 keyboard shortcuts) | Cx: 10 | P1
+
+**Description:**
+Create `frontend/src/components/wall/ChapterQuickJump.tsx`. Listens for keyboard `1`–`9` and `0` (chapter 10) keys. On press, `window.scrollTo()` to `#chapter-NN` with `behavior: 'smooth'` (or instant if reduced-motion). Visible affordance: small `?` keyboard-help button in header that opens a modal listing shortcuts. Aria: live region announces "Jumping to Chapter N". **Why beyond brief:** keyboard-only users + power-judges should not need to scroll through 5 minutes of chapters to revisit chapter 8. **Confidence:** C1.
+
+**AC:**
+- [ ] Failing test written FIRST: keydown event with key='3' → window.scrollTo called targeting #chapter-03; reduced-motion → behavior: 'auto' instead of 'smooth'; ariaLive announces "Jumping to Chapter 3" (or ES equivalent)
+- [ ] All cases pass
+- [ ] Modal opens on `?` press; closes on Esc; focus-trapped
+- [ ] EN + ES copy
+- [ ] Component <150 lines
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.27, T1.30, T1.33, T1.64
+
+---
+
+### T1.126 — Reading mode toggle (text-only, no map) | Cx: 10 | P2
+
+**Description:**
+Create `frontend/src/components/wall/ReadingModeToggle.tsx`. Toggle button (header or footer) that swaps the page from full Wall (Mapbox + chapters + 3D) to TEXT-ONLY editorial mode (chapters render as long-form essay, no map, no animations). Persisted in localStorage `gowork.readingMode`. Uses CSS class `.reading-mode` on `<body>` that suppresses Mapbox container, 3D layer, cursor flashlight, sound, etc. **Why beyond brief:** Spotlight Multiple Selves — the slow-3G mobile user in West Texas can't load 5MB of Mapbox tiles; reading mode is the rescue. Also useful for jurors who want to read without scrolling-to-control. **Confidence:** C2.
+
+**AC:**
+- [ ] Failing test written FIRST: toggle on → body has `.reading-mode` class; localStorage updated; toggle off → class removed
+- [ ] CSS rules in layout.css `.reading-mode .mapbox-container { display: none; }` + similar suppressions
+- [ ] aria-live announces "Reading mode: on/off"
+- [ ] EN + ES copy
+- [ ] Component <120 lines
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.33, T1.64, T1.65
+
+---
+
+### T1.127 — aria-current="step" on chapter "you are here" | Cx: 6 | P1
+
+**Description:**
+Update `frontend/src/components/wall/ChapterCounter.tsx` (T1.52 owns; ENHANCE-IN-PLACE) to use `aria-current="step"` on the active chapter indicator. Adds visible "you are here" affordance for screen readers and visual users. ALSO update Header (T1.51) to make `ChapterCounter` itself a live region (`aria-live="polite"`) so chapter changes are announced. **Why beyond brief:** scrolling through 10 chapters with no announcement = screen-reader silence; aria-current is the convention. **Confidence:** C1.
+
+**AC:**
+- [ ] Failing test written FIRST: ChapterCounter renders with aria-current="step" on active span; aria-live="polite" wrapper present
+- [ ] All assertions pass
+- [ ] T1.52's existing tests still green (additive change)
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.52, T1.64
+
+---
+
+### T1.128 — Memory profiler hook (dev-only) | Cx: 8 | P2
+
+**Description:**
+Create `frontend/src/hooks/useMemoryProfiler.ts` (dev-only — env-guarded; bundle excluded in production). Wraps `performance.memory` (Chrome only) into a hook returning `{ jsHeapUsedMb, jsHeapLimitMb, percentUsed }`. Updates every 2 seconds. Used by FpsOverlay (T1.82) to display memory alongside FPS. **Why beyond brief:** brief's W4 Lighthouse gate doesn't measure memory; W3's 3D barrier graph could leak across re-renders. **Confidence:** C2.
+
+**AC:**
+- [ ] Failing test written FIRST: in dev env, hook returns numeric jsHeapUsedMb when performance.memory available; in production env, hook returns null/0 and is never registered
+- [ ] All cases pass
+- [ ] Cleanup clears interval on unmount
+- [ ] Hook <100 lines
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.6, T1.73
+
+---
+
+### T1.129 — Unified dev tools surface (`/dev` route hub) | Cx: 8 | P2
+
+**Description:**
+Create `frontend/src/app/(dev)/dev/page.tsx`. Dev-only route hub linking to `/tokens` (T1.76), inline FPS overlay (T1.82) toggle, memory profiler stat (T1.128), CSP report viewer (T1.93), bundle size report. Single panel with route links — judges/users never see this in production. **Why beyond brief:** dev tools are scattered (T1.76, T1.82, T1.128, etc.); a single hub is easier to remember. **Confidence:** C2.
+
+**AC:**
+- [ ] Failing test written FIRST: in dev env, /dev route renders with links to /tokens + FPS toggle + memory stat; in production, /dev returns 404 (or redirects)
+- [ ] All cases pass
+- [ ] Route group `(dev)` confirmed working OR env-check fallback documented
+- [ ] Page <150 lines
+- [ ] No production bundle bloat
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.76, T1.82, T1.128
+
+---
+
+### T1.130 — Cookie/privacy disclosure banner (cookieless analytics — minimal) | Cx: 8 | P1
+
+**Description:**
+Create `frontend/src/components/wall/PrivacyDisclosureBanner.tsx`. Tiny inline disclosure (NOT a GDPR-style modal — we use cookieless analytics so consent is not required). Text EN: "GoWork uses cookie-less analytics to understand which chapters readers reach. No personal data leaves your device. Read our privacy notice." with link to /privacy. Dismissible; persists dismissal in sessionStorage. Translation keys `privacy.disclosure.*`. **Why beyond brief:** even cookieless analytics deserves transparency; one-time inline banner respects users without intruding. **Confidence:** C1.
+
+**AC:**
+- [ ] Failing test written FIRST: renders banner once; dismissal persists to sessionStorage; second mount → banner null
+- [ ] EN + ES copy
+- [ ] WCAG AAA contrast
+- [ ] Keyboard reachable dismiss
+- [ ] reduced-motion safe
+- [ ] Component <100 lines
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.10, T1.33
+
+---
+
+## Phase 30: Print Polish + OS-Language Detect (Enrichment Pass)
+
+Last enrichment phase. Print stylesheet from T1.45 covers magazine layout — but drop-cap rendering in print + per-chapter page breaks + Playwright print-preview test were never spec'd. Plus OS-language auto-detect on first visit (delegated from T1.33's "browser default" but never tested as primary intent).
+
+### T1.131 — Print drop-cap + chapter page breaks + Playwright print snapshot | Cx: 12 | P2
+
+**Description:**
+Update `frontend/src/app/styles/print.css` (T1.45 owns; ENHANCE-IN-PLACE):
+- `.dropcap::first-letter { color: #000 !important; font-size: 4em; }` for print
+- `.wall-chapter { page-break-before: always; page-break-inside: avoid; orphans: 3; widows: 3; }`
+- `.wall-pull-quote { page-break-inside: avoid; }`
+ALSO add `frontend/tests/e2e/visual/print-magazine.spec.ts` Playwright spec that emulates print media on `/`, takes a screenshot, verifies it does not contain the Mapbox container, the header is hidden, the body uses serif. Snapshot diff against a baseline saved in repo. **Why beyond brief:** brief mentions "9-page magazine essay" but never tests it. **Confidence:** C2.
+
+**AC:**
+- [ ] Failing test written FIRST: print.css contains all 3 new rules; Playwright spec asserts header hidden + body serif + no .mapbox-container element
+- [ ] Both tests pass
+- [ ] T1.45's existing tests still green
+- [ ] PR includes a print-preview screenshot from real Chrome print dialog as evidence
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.45, T1.103, T1.104
+
+---
+
+### T1.132 — OS-language auto-detect on first visit + lang attribute sync | Cx: 6 | P1
+
+**Description:**
+Update `frontend/src/hooks/useLanguage.ts` (T1.33 owns; ENHANCE-IN-PLACE — no new file). Strengthen the navigator.language detection: if `navigator.languages` array is available, prefer first es-* match if any (more accurate than just primary). ALSO ensure on locale change, `<html lang="...">` attribute updates dynamically (currently set once in layout.tsx). Use a useEffect that calls `document.documentElement.lang = locale === 'es' ? 'es-MX' : 'en-US'`. Critical for screen readers — wrong html lang attribute = wrong pronunciation. **Confidence:** C2.
+
+**AC:**
+- [ ] Failing test written FIRST: navigator.languages = ['es-MX', 'en-US'] → useLanguage returns 'es' on first mount; setLocale('en') → document.documentElement.lang === 'en-US'; setLocale('es') → 'es-MX'
+- [ ] All cases pass
+- [ ] T1.33's existing tests still green
+- [ ] SSR-safe
+- [ ] No regression on localStorage persistence
+- [ ] `bpsai-pair arch check` passes
+- [ ] Reviewer agent approves
+
+**Depends on:** T1.33
 
 ---
 

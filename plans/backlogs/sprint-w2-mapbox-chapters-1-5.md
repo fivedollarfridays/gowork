@@ -1295,6 +1295,1230 @@ End-of-sprint smoke: scroll the page from top to chapter 5, verify camera flight
 
 ---
 
+## Phase 14: Enrichment Pass — Real-Data Verification
+
+> Tasks T2.68–T2.122 added in the Apex Spotlight enrichment pass (2026-04-27). They sharpen real-world fidelity, Mapbox polish, interactive map elements, editorial details, FW landmark references, camera polish, labyrinth deep polish, time-of-day prefiguration, Bus 4 detail accuracy, cross-chapter integration, and visual-regression tests. Existing T2.1–T2.67 are unchanged; enrichment tasks weave into the existing waves via explicit `Depends on` edges.
+
+### T2.68 --- Verify Tarrant County District Clerk address + hours + phone | Cx: 6 | P0
+
+**Description:**
+Phase 3 / Phase 7 (4a) commit a District Clerk pin and the editorial "4.8 miles. 71 minutes" stat band. The committed coordinates and stat band are only credible if the address is verified. Forensic-truth task: verify Tarrant County District Clerk's actual public address (200 E Weatherford St, Fort Worth, TX 76196), hours (Mon–Fri 8 AM – 5 PM), and main phone (817-884-1574) against the official Tarrant County Government website. Document source URL + access date. Update `tarrant-offices.geojson` properties.
+
+**AC:**
+- [ ] `tarrant-offices.geojson` District Clerk feature has verified address (200 E Weatherford St, FW 76196), hours, phone, sourceUrl, sourceDate
+- [ ] Source URL committed in feature properties (e.g., `https://www.tarrantcountytx.gov/`)
+- [ ] Coordinates verified within ±50m of building address (geocoded via Mapbox geocoding API or OSM Nominatim — document tool used)
+- [ ] Vitest: District Clerk feature properties pass schema check
+- [ ] Reviewer agent confirms data is from a primary government source (not a third-party aggregator)
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.12
+
+---
+
+### T2.69 --- Verify HHSC Fort Worth office (pick best location) | Cx: 6 | P0
+
+**Description:**
+HHSC has multiple Fort Worth-area offices. Pick the one closest to ZIP 76119 + accessible by Bus 4 to keep editorial truth: that's the office Carlos would actually go to. Likely candidate: HHSC office at 1200 E Lancaster Ave or the office on E Berry St (verify both, choose). Verify address, hours, phone, services offered (Medicaid, SNAP, CHIP, childcare). Source: https://www.hhs.texas.gov/. Update `tarrant-offices.geojson`.
+
+**AC:**
+- [ ] HHSC feature in `tarrant-offices.geojson` has verified address (single office picked), hours, phone, services list, sourceUrl, sourceDate
+- [ ] Selection rationale documented in commit message: "closest HHSC to 76119 reachable by Bus 4"
+- [ ] Coordinates geocoded ±50m of building
+- [ ] Vitest: HHSC feature passes schema
+- [ ] Reviewer confirms primary source
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.12
+
+---
+
+### T2.70 --- Verify Legal Aid of NorthWest Texas FW office | Cx: 6 | P0
+
+**Description:**
+Legal Aid of NorthWest Texas operates multiple Fort Worth locations. Pick the primary intake office (likely 600 E Weatherford St or West Lancaster). Verify address, intake hours, intake phone (LANWT main: 817-336-3943), services. Source: https://www.lanwt.org/. Update `tarrant-offices.geojson`.
+
+**AC:**
+- [ ] Legal Aid feature in `tarrant-offices.geojson` has verified address, intake hours, phone, services, sourceUrl, sourceDate
+- [ ] Coordinates geocoded ±50m
+- [ ] Vitest: feature passes schema
+- [ ] Reviewer confirms primary source
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.12
+
+---
+
+### T2.71 --- Verify Workforce Solutions on E. Belknap (Carlos's office) | Cx: 5 | P0
+
+**Description:**
+Demo script line: "Workforce Solutions office on E. Belknap." `CAREER_CENTER_TX` constant points to 1200 Circle Dr. Reconcile: are these two different offices, or is the demo-script address outdated? Verify against official Workforce Solutions for Tarrant County office locator (https://www.workforcesolutions.net/locations/). Pick canonical address; update `CAREER_CENTER_TX` if needed AND `tarrant-offices.geojson`.
+
+**AC:**
+- [ ] Demo script vs. constant reconciled (one canonical address committed)
+- [ ] If `CAREER_CENTER_TX` updated, all dependent tests pass
+- [ ] Workforce Solutions feature in `tarrant-offices.geojson` matches `CAREER_CENTER_TX` (DRY)
+- [ ] Source URL + access date in feature properties
+- [ ] Vitest: existing `city-constants.test.ts` still passes
+- [ ] Reviewer confirms reconciliation
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.12
+
+---
+
+### T2.72 --- Verify Texas DPS Fort Worth office (for Article 55 expunction filings) | Cx: 5 | P0
+
+**Description:**
+Article 55 of the Texas Code of Criminal Procedure governs expunction; DPS receives orders. Pick the FW DPS office most likely to serve a 76119 resident (likely DPS Driver License Mega Center on Camp Bowie or McCart Ave — verify). Source: https://www.dps.texas.gov/. Add as the 5th office (court / benefits / dps / workforce / legal taxonomy is now complete).
+
+**AC:**
+- [ ] DPS feature in `tarrant-offices.geojson` has verified address, hours, phone, services, sourceUrl, sourceDate
+- [ ] Coordinates geocoded ±50m
+- [ ] Category="dps" matches T2.16 sprite category
+- [ ] Vitest: 5 distinct categories present in offices GeoJSON (court, benefits, dps, workforce, legal)
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.12
+
+---
+
+### T2.73 --- Trinity Metro GTFS data freshness gate | Cx: 8 | P0
+
+**Description:**
+The committed `trinity-metro.geojson` could be stale by submission day (Honest Uncertainty #2). Build a freshness gate: the build script writes `lastUpdated` (ISO 8601) and `sourceUrl` into a sibling JSON file `trinity-metro.metadata.json`. WallContainer reads the metadata at build-time and a vitest asserts `lastUpdated` is within 90 days of `process.env.BUILD_TIMESTAMP` or fails CI with a clear "GTFS data stale — re-run build script" message. Spotlight: forensic honesty made explicit.
+
+**AC:**
+- [ ] `frontend/public/data/wall/trinity-metro.metadata.json` committed with `{lastUpdated, sourceUrl, gtfsVersion, refreshScriptPath}`
+- [ ] `frontend/scripts/build-trinity-metro-geojson.mjs` (T2.11) updated to write metadata
+- [ ] `frontend/src/lib/wall/__tests__/gtfs-freshness.test.ts` asserts `lastUpdated` within 90 days of CI run
+- [ ] Test failure message is human-readable: "Run `node scripts/build-trinity-metro-geojson.mjs` to refresh"
+- [ ] Vitest: metadata schema valid
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.11
+
+---
+
+### T2.74 --- Article 55 statute text verification + commit | Cx: 5 | P1
+
+**Description:**
+The demo script and Ch4a editorial reference "Article 55 expunction." Commit a verbatim verified excerpt of the relevant Texas Code of Criminal Procedure Art. 55 statute text (or the official URL + section number) at `frontend/src/lib/wall/legalReferences.ts` so the editorial layer has a single source of truth. NOT legal advice — citation only. Used for future Ch4a tooltip + W3 Ch7 narrative authenticity.
+
+**AC:**
+- [ ] `frontend/src/lib/wall/legalReferences.ts` exports `ARTICLE_55_TX = {citation, sourceUrl, sourceDate, summary}` const
+- [ ] Source URL points to Texas Legislature Online (https://statutes.capitol.texas.gov/) or equivalent primary source
+- [ ] Summary is ≤ 200 chars, factual (no advice)
+- [ ] Vitest: shape verified; sourceUrl is HTTPS and resolves at audit time (mocked check)
+- [ ] Reviewer confirms primary source
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** none
+
+---
+
+### T2.75 --- Texas HHSC childcare program canonical name (CCS) verification | Cx: 4 | P1
+
+**Description:**
+Ch4c stat band says "$1,200/mo without subsidy." The "subsidy" is Texas Workforce Commission's Child Care Services (CCS) program — NOT HHSC. Reconcile the brief: Ch4c uses HHSC pin but the actual subsidy program is TWC/CCS. Decision: keep HHSC pin (childcare *eligibility* assistance routes through HHSC for Medicaid/SNAP household income verification), but ensure copy in T2.52 doesn't claim HHSC administers the subsidy directly. Add a docs comment in `legalReferences.ts`.
+
+**AC:**
+- [ ] `legalReferences.ts` exports `TX_CHILDCARE_PROGRAM = {agency: "Texas Workforce Commission", program: "Child Care Services (CCS)", sourceUrl}`
+- [ ] T2.52 ES/EN copy reviewed: "subsidy" generic, no false claim that HHSC administers
+- [ ] Reviewer confirms accuracy
+- [ ] Vitest: const shape verified
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** none
+
+---
+
+### T2.76 --- ZIP 76119 boundary from US Census TIGER/Line — committed offline | Cx: 6 | P0
+
+**Description:**
+Augments T2.13. The TIGER/Line ZCTA download is a manual one-time step. Commit the TIGER/Line source ZIP (or filtered Shapefile) at `frontend/data/tiger-zcta-76119-source.zip` for offline reproducibility. The T2.13 extract script reads from this archived source, NOT from a live US Census URL at build-time. Forensic: locks data provenance. License: TIGER/Line is public domain.
+
+**AC:**
+- [ ] `frontend/data/tiger-zcta-76119-source.zip` committed (or filtered Shapefile if smaller)
+- [ ] `frontend/scripts/extract-zip-76119.mjs` (T2.13) reads from local archive
+- [ ] LICENSES.md notes TIGER/Line is U.S. Census Bureau public domain
+- [ ] Source URL + download date documented
+- [ ] Vitest: extracted GeoJSON matches expected feature count = 1
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.13
+
+---
+
+## Phase 15: Mapbox Polish
+
+### T2.77 --- Custom Mapbox controls (zoom in/out + reset) styled per design tokens | Cx: 12 | P0
+
+**Description:**
+T2.3 suppresses default Mapbox interactive controls. Replace with custom controls: zoom-in, zoom-out, reset-to-current-chapter. Styled with W1 design tokens (no Mapbox default chrome). Positioned bottom-right with W1 spacing tokens. Reset button respects current `currentChapter` from `WallContext` — pings the camera back to that chapter's state.
+
+**AC:**
+- [ ] `frontend/src/components/wall/MapControls.tsx` created (≤120 lines)
+- [ ] 3 buttons: zoom-in (+), zoom-out (−), reset (↻)
+- [ ] All visual chrome uses W1 design tokens
+- [ ] Reset uses `flyTo` to current chapter's camera state (jumpTo if reduced-motion)
+- [ ] Keyboard reachable + ARIA labels (zoom in, zoom out, reset to current chapter)
+- [ ] WCAG AAA contrast on icons
+- [ ] Vitest: zoom-in calls `map.zoomIn`
+- [ ] Vitest: reset calls flyTo with `CHAPTER_CAMERAS[currentChapter]`
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.3, T2.7
+
+---
+
+### T2.78 --- Mapbox attribution placement (legal requirement) — branded | Cx: 6 | P0
+
+**Description:**
+**LEGAL:** Mapbox terms of service require attribution ("© Mapbox" + "© OpenStreetMap" links) visible and clickable on every map page. Wire the `AttributionControl` from `react-map-gl` with `customAttribution` if needed (e.g., adding "© Trinity Metro" for GTFS). Style the attribution bar with low-opacity W1 token, bottom-left, but never hidden. Spotlight (Honesty + Legacy): legal compliance is non-negotiable — failure to attribute is a Mapbox ToS violation.
+
+**AC:**
+- [ ] `react-map-gl` `<AttributionControl>` rendered in `MapboxScene` with default attribution + Trinity Metro custom attribution
+- [ ] Attribution bar visible at all zoom levels (per Mapbox ToS)
+- [ ] Bar styled with W1 tokens (subtle but always readable)
+- [ ] Links open in new tab with `rel="noopener"`
+- [ ] WCAG AAA contrast on attribution text
+- [ ] Vitest: attribution element present in DOM
+- [ ] Vitest: link to mapbox.com present
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.3
+
+---
+
+### T2.79 --- Mapbox logo positioning (legal) | Cx: 4 | P0
+
+**Description:**
+**LEGAL:** Mapbox terms also require the Mapbox logo (or text) visible on the map, bottom-left typically. `react-map-gl` shows it by default; verify it isn't hidden by overlays or the chapter scaffolding. Sibling concern to T2.78. Together they constitute legal compliance.
+
+**AC:**
+- [ ] Mapbox logo visible at all chapter states (verified manually + test)
+- [ ] No overlay covers the logo (z-index audit on chapter overlays)
+- [ ] Vitest: `.mapboxgl-ctrl-logo` or equivalent element rendered
+- [ ] Reviewer agent confirms compliance
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.3
+
+---
+
+### T2.80 --- Mapbox label collision avoidance config | Cx: 8 | P1
+
+**Description:**
+At zoom 14 (Ch3), Mapbox label collisions can cause flicker/jump as labels are dropped. Configure the custom style's `text-allow-overlap` and `text-ignore-placement` for street labels and POIs. Documented in T2.18 runbook with screenshots of bad-state and fixed-state. Not a code task — Mapbox Studio config — but a stub task to track verification.
+
+**AC:**
+- [ ] T2.18 runbook updated with collision-avoidance section + screenshots placeholders
+- [ ] Verified manually: Ch3 (zoom 14) labels stable across small camera tilts
+- [ ] No console warnings about label collisions in dev mode
+- [ ] Reviewer confirms runbook update
+- [ ] No code changes (style-only)
+
+**Depends on:** T2.18
+
+---
+
+### T2.81 --- Mapbox water styled per W1 design tokens | Cx: 6 | P1
+
+**Description:**
+The custom Mapbox style colors water. T2.18 documented "water in --bg-surface." Spotlight: water is a presence that matters in FW (Trinity River runs through downtown). Style water with subtle `--bg-surface` blue with optional grain texture (Mapbox `raster` source overlay if texture, or plain solid). Documented in T2.18 runbook.
+
+**AC:**
+- [ ] T2.18 runbook updated with water-styling step + Trinity River call-out
+- [ ] Verified manually: water visible at zoom 11–14 with W1-aligned color
+- [ ] Reviewer confirms
+- [ ] No code changes (style-only)
+
+**Depends on:** T2.18
+
+---
+
+### T2.82 --- Mapbox parks / green spaces styled | Cx: 4 | P1
+
+**Description:**
+Parks (Mapbox `landuse` `class=park`) styled with subtle muted green per W1 token. Important for FW: Trinity Park, Forest Park, Gateway Park visible at zoom 13–14. Documented in T2.18 runbook.
+
+**AC:**
+- [ ] T2.18 runbook updated with parks step
+- [ ] Verified manually at zoom 13–14
+- [ ] No console errors
+- [ ] Reviewer confirms
+- [ ] No code changes (style-only)
+
+**Depends on:** T2.18
+
+---
+
+### T2.83 --- Mapbox boundary lines (county, ZIP) styled | Cx: 6 | P1
+
+**Description:**
+County and ZIP boundaries on the base style: thin dashed line in `--fg-muted`. Combined with T2.13's bright 76119 outline (high-emphasis), default boundaries provide spatial context without competing for attention. Documented in T2.18 runbook.
+
+**AC:**
+- [ ] T2.18 runbook updated with boundary-line step
+- [ ] Verified manually at zoom 9–11 (state/county) and 13 (ZIP)
+- [ ] Reviewer confirms
+- [ ] No code changes (style-only)
+
+**Depends on:** T2.18
+
+---
+
+### T2.84 --- Texas state outline at zoom-out + Tarrant County boundary visible | Cx: 8 | P1
+
+**Description:**
+Augments T2.83. At zoom 5–7 (Ch1 → Ch2 transition), the Texas state outline should be visible as a subtle stroke. At zoom 9–11 (Ch2 in), Tarrant County boundary appears. Both pulled from US Census TIGER/Line state + county shapefiles. Committed at `frontend/public/data/wall/texas-state.geojson` and `frontend/public/data/wall/tarrant-county.geojson`. Layered above water/parks but below offices/pins.
+
+**AC:**
+- [ ] `frontend/public/data/wall/texas-state.geojson` committed (single MultiPolygon for TX)
+- [ ] `frontend/public/data/wall/tarrant-county.geojson` committed
+- [ ] `frontend/src/lib/wall/layers/boundaries.ts` exports state + county layer configs (zoom-aware visibility)
+- [ ] Layer composer (T2.17) registers boundaries layer
+- [ ] Vitest: GeoJSON valid; Texas centroid within TX bounds
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.17
+
+---
+
+### T2.85 --- Mapbox terrain elevation (subtle, only at zoom-out) | Cx: 8 | P2
+
+**Description:**
+At Ch1 continental zoom (zoom 3), enable Mapbox `terrain-rgb` source for subtle elevation hillshading — gives America's topography texture without overwhelming the editorial moment. Disabled at zoom > 8 (perf). Documented in T2.18 runbook + a small code stub in `MapboxScene` for the source registration. Mapbox terrain costs additional API calls; only one source registered.
+
+**AC:**
+- [ ] `MapboxScene` registers `mapbox-dem` raster-dem source on `map.on('load')`
+- [ ] Terrain enabled only when zoom < 8
+- [ ] T2.18 runbook updated
+- [ ] Vitest: terrain source registered exactly once
+- [ ] Performance: no jank when terrain disabled (verified in build smoke)
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.3, T2.18
+
+---
+
+### T2.86 --- Mapbox 3D buildings only render in viewport (perf gate) | Cx: 8 | P1
+
+**Description:**
+T2.24 wires the 3D buildings extrusion. Without a viewport gate, Mapbox renders extrusions for buildings outside the visible area, costing GPU. Wire `filter` expression on the extrusion layer that excludes buildings outside current bounds (Mapbox does this internally to some degree, but verify). Add a perf assertion test.
+
+**AC:**
+- [ ] `frontend/src/lib/wall/layers/buildings3d.ts` updated with viewport-aware `filter` expression
+- [ ] Vitest: at zoom 14, only viewport-bounded buildings in the layer's effective render set (mocked map.queryRenderedFeatures)
+- [ ] Manual smoke: scrolling Ch2→Ch3 has no GPU jank
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.24
+
+---
+
+### T2.87 --- Mapbox console error handling | Cx: 8 | P0
+
+**Description:**
+Mapbox emits console warnings (deprecated symbols, missing sprite paths, network failures). Subscribe to `map.on('error')` and route to a single error-handling utility that logs in dev, swallows in prod (don't crash), and reports a single "Mapbox degraded — fallback in use" UI banner if errors persist. Keeps the demo from showing red console errors during a screen-share.
+
+**AC:**
+- [ ] `frontend/src/lib/wall/mapboxErrorHandler.ts` exports `attachErrorHandler(map)` + `detachErrorHandler(map)`
+- [ ] Errors logged with severity in dev, swallowed in prod
+- [ ] If 3+ errors in 5 seconds, render a small "Map degraded" banner (W1 toast/banner pattern)
+- [ ] Vitest: triple-error within window triggers banner state
+- [ ] Vitest: production build does NOT log to console (mocked NODE_ENV)
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.3
+
+---
+
+### T2.88 --- Mapbox tile load progress indicator | Cx: 6 | P1
+
+**Description:**
+While Mapbox tiles load (especially on Ch1→Ch2 zoom-in), the map can flash blank tiles. Render a subtle progress indicator (W1 LoadingState dot or overlay shimmer) tied to `map.on('dataloading')` / `map.on('idle')`. Disappears once tiles are settled.
+
+**AC:**
+- [ ] `frontend/src/components/wall/MapTileProgress.tsx` created
+- [ ] Subscribes to `dataloading` / `idle` events
+- [ ] Hidden when idle, visible during data load
+- [ ] Reduced-motion: shows static "Loading map" text instead of animation
+- [ ] WCAG AAA contrast
+- [ ] Vitest: shows on dataloading, hides on idle
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.3
+
+---
+
+### T2.89 --- Mapbox layer toggle (dev-only debug panel) | Cx: 10 | P2
+
+**Description:**
+Dev-only floating panel toggleable with `?debug=1` query param. Shows checkboxes for each registered layer (zip, metro, offices, carlos, jobs, city-lights, boundaries, buildings3d). Toggle visibility live. Spotlight (Wisdom): a debug panel speeds dev iteration without bloating prod bundle (gated on `process.env.NODE_ENV !== "production"` AND query param).
+
+**AC:**
+- [ ] `frontend/src/components/wall/dev/LayerDebugPanel.tsx` created
+- [ ] Renders only when `NODE_ENV !== "production"` AND `?debug=1`
+- [ ] One checkbox per registered layer; toggle via `map.setLayoutProperty(id, 'visibility', 'visible'|'none')`
+- [ ] Vitest: panel does NOT render in production build
+- [ ] Vitest: panel renders in dev with `?debug=1`
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.17
+
+---
+
+### T2.90 --- Camera state preview (dev-only debugger) | Cx: 8 | P2
+
+**Description:**
+Sibling to T2.89. Dev-only panel that displays current camera state (zoom, pitch, bearing, lng, lat) live. Plus a button row to "jump to" each chapter's camera state. Speeds iteration on `cameraChoreography.ts`. Gated on dev + `?debug=1`.
+
+**AC:**
+- [ ] `frontend/src/components/wall/dev/CameraDebugPanel.tsx` created
+- [ ] Reads camera state from `map.on('move')` events
+- [ ] Renders 5 buttons (Ch1–Ch5) that call `flyTo` to each chapter's state
+- [ ] Dev-only + query param gated
+- [ ] Vitest: not rendered in production
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.7, T2.89
+
+---
+
+### T2.91 --- Pinch zoom on touch devices (Mapbox native, verified) | Cx: 5 | P1
+
+**Description:**
+T2.3 suppresses pan/zoom controls but Mapbox native touch gestures (pinch-to-zoom, two-finger rotate) should remain enabled — touch users expect them. Verify `touchZoomRotate` is enabled by default in `react-map-gl/mapbox` and add a smoke test. Reduced-motion: rotate disabled (just zoom).
+
+**AC:**
+- [ ] `MapboxScene` ensures `touchZoomRotate` enabled (default)
+- [ ] Reduced-motion: `map.touchZoomRotate.disableRotation()` called
+- [ ] Vitest: pinch-zoom enabled when reduced-motion=false; rotation disabled when reduced-motion=true
+- [ ] Manual smoke on iPad / Android Chrome (documented in PR)
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.3
+
+---
+
+## Phase 16: Interactive Map Elements
+
+### T2.92 --- Hover on office marker reveals address card | Cx: 14 | P0
+
+**Description:**
+On hover over any office marker (T2.12), reveal a card with `{name, address, hours, phone}` — pulls from feature properties. Card positioned via Mapbox `popup` API (anchored to marker) but styled with W1 tokens (NOT default Mapbox popup chrome). Closes on mouse-leave with 100ms delay. Touch devices: tap-to-show, tap-elsewhere-to-dismiss.
+
+**AC:**
+- [ ] `frontend/src/components/wall/OfficeCard.tsx` created (≤200 lines)
+- [ ] Hover/tap on office marker shows card
+- [ ] Card content: name, address, hours, phone (from feature properties)
+- [ ] Card styled with W1 design tokens
+- [ ] WCAG AAA contrast on card text
+- [ ] Vitest: hover triggers card render
+- [ ] Vitest: mouse-leave dismisses card after 100ms
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.12, T2.92 — note: this is the parent task; click variant in T2.93
+
+---
+
+### T2.93 --- Click office marker opens card with phone tel: + directions links | Cx: 12 | P0
+
+**Description:**
+Augments T2.92. Click (vs hover) opens a "pinned" version of the card that doesn't dismiss until escape/outside-click. Adds two link buttons: "Call" (tel:phone) and "Directions" (deep links to Apple Maps + Google Maps with the office coordinates). Spotlight (Multiple Selves — Carlos's voice): if Carlos hits an office, he wants to call or get directions immediately.
+
+**AC:**
+- [ ] Click on office marker pins the card (doesn't dismiss on mouse-leave)
+- [ ] Card includes "Call" button: `<a href="tel:817-...">`
+- [ ] Card includes "Directions" button: opens picker — Apple Maps (`maps://?daddr=...`) on iOS, Google Maps (`https://maps.google.com/?daddr=...`) elsewhere
+- [ ] Escape key closes pinned card
+- [ ] Click outside closes pinned card
+- [ ] Tab order logical (Call → Directions → Close)
+- [ ] Vitest: click pins, escape closes
+- [ ] Vitest: tel: link present with formatted phone
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.92
+
+---
+
+### T2.94 --- Office hours rendering ("Mon–Fri 8–5" format) | Cx: 6 | P1
+
+**Description:**
+Office feature properties carry `hours: "Monday – Friday, 8:00 AM – 5:00 PM"` (verbose). Card UI condenses to "Mon–Fri 8–5" for editorial brevity. A pure render helper. Locale-aware: Spanish renders "Lun–Vie 8–5".
+
+**AC:**
+- [ ] `frontend/src/lib/wall/formatHours.ts` exports `formatHours(hours: string, locale: 'en'|'es'): string`
+- [ ] Returns "Mon–Fri 8–5" for verbose EN input
+- [ ] Returns "Lun–Vie 8–5" for ES locale
+- [ ] Vitest: 4+ hour strings tested for both locales
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** none
+
+---
+
+### T2.95 --- Phone link tel: with formatting | Cx: 4 | P1
+
+**Description:**
+The `tel:` link uses raw digits; the displayed phone uses formatted digits ("(817) 884-1574"). Helper: `formatPhone(raw)` returns formatted string for display, `phoneToTel(raw)` returns digits-only for href. Sibling helper to T2.94.
+
+**AC:**
+- [ ] `frontend/src/lib/wall/formatPhone.ts` exports `formatPhone(raw)` + `phoneToTel(raw)`
+- [ ] formatPhone("8178841574") returns "(817) 884-1574"
+- [ ] phoneToTel("(817) 884-1574") returns "+18178841574"
+- [ ] Vitest: 5+ phone strings tested
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** none
+
+---
+
+### T2.96 --- ZIP boundary highlight on hover | Cx: 8 | P1
+
+**Description:**
+When user hovers near the 76119 boundary (T2.13), the boundary stroke brightens (opacity 0.6 → 1.0) for ambient interactivity. Implemented via Mapbox feature-state. Works only in Ch3+ (where ZIP is visible). Reduced-motion: no transition (instant snap).
+
+**AC:**
+- [ ] Mouse hover near 76119 polygon sets feature-state `hover=true`
+- [ ] Mapbox paint expression reads feature-state for stroke opacity
+- [ ] Reduced-motion: instant on/off
+- [ ] Vitest: feature-state set on hover, cleared on leave
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.13
+
+---
+
+### T2.97 --- Tarrant County boundary subtle dashed line | Cx: 5 | P1
+
+**Description:**
+T2.84 commits Tarrant County boundary GeoJSON. Style it as a subtle dashed line (`line-dasharray: [2, 4]`) in `--fg-muted` so the county outline is visible at Ch2/Ch4 mid-altitude without competing with the ZIP highlight.
+
+**AC:**
+- [ ] `boundaries.ts` (T2.84) layer config uses dashed stroke for Tarrant County
+- [ ] Color: `--fg-muted`; width: 1px
+- [ ] Visible only at zoom 9–13 (zoom-aware paint expression)
+- [ ] Vitest: layer config has `line-dasharray` paint property
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.84
+
+---
+
+## Phase 17: Editorial Details
+
+### T2.98 --- Drop cap on Chapter 1 hero | Cx: 8 | P1
+
+**Description:**
+W1 ships variable font infrastructure. Spotlight (Editorial): the Ch1 hero question gains a drop cap on the first letter ("W" of "What's") — Inter Variable at weight 900, font-size 5.5em, float-left, line-height 0.9. Pure CSS, no JS. Reduced-motion: drop cap renders normally (it's not animated; it's typography).
+
+**AC:**
+- [ ] `Chapter01Continental.tsx` overlay heading uses `:first-letter` CSS for drop cap
+- [ ] Drop cap size, weight, line-height tied to W1 typography tokens
+- [ ] Visual smoke: drop cap renders without overflow on common viewports (1280, 1440, 1920)
+- [ ] WCAG AAA contrast preserved
+- [ ] Vitest: drop cap class applied to heading
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.19
+
+---
+
+### T2.99 --- Pull quote for Carlos voice in Chapter 2 | Cx: 10 | P1
+
+**Description:**
+Editorial detail: Ch2 (city arrival) renders a Carlos pull-quote: "I came home with $300." (real quote; verifiably attributable to a recently-released-individual narrative — sourced from publicly published reentry research, NOT fabricated. Source attribution committed.) Quote rendered in serif italic at 1.5em, framed with W1 quote-mark glyph. Visible at progress 0.15–0.18.
+
+**AC:**
+- [ ] `wall.ch2.pullQuote` + `wall.ch2.pullQuoteSource` keys in en.json + es.json (T2.50 follow-up; reviewer initials)
+- [ ] Source attribution: verified public source URL committed in `legalReferences.ts` (T2.74) or feature-prop
+- [ ] If no verifiable real source, mark quote as "composite — illustrative" and document in PR
+- [ ] Pull-quote rendered in `Chapter02CityArrival.tsx` with W1 typography
+- [ ] WCAG AAA contrast verified
+- [ ] Vitest: pull quote text appears at progress 0.15–0.18
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.23, T2.50
+
+---
+
+### T2.100 --- Chapter divider as visual art (small SVG ornament) | Cx: 8 | P1
+
+**Description:**
+Between chapters (e.g., Ch1→Ch2 transition zone), render a small SVG ornament — branded glyph (W1 G+path mark, smaller). Acts as a visual "page turn" marker. Only visible 1–2% of scroll progress at chapter boundaries. Reduced-motion: ornament renders statically (no animation).
+
+**AC:**
+- [ ] `frontend/public/wall-paths/chapter-divider.svg` committed (small ornament, ≤4KB)
+- [ ] `frontend/src/components/wall/ChapterDivider.tsx` renders ornament at chapter-boundary scroll positions
+- [ ] Reduced-motion: static
+- [ ] WCAG AAA: decorative role, aria-hidden=true
+- [ ] Vitest: ornament rendered at boundary scroll
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.6
+
+---
+
+### T2.101 --- Branded scrollbar overlay during chapter scroll | Cx: 8 | P2
+
+**Description:**
+Spotlight (Editorial): a small branded vertical scroll progress overlay (right edge of viewport) shows current chapter position visually. Renders 6-tick scale (5 chapters + start). Active tick uses `--accent-amber`. Inspired by NYT "scrollytelling" patterns. Reduced-motion: still renders (informational, not animated).
+
+**AC:**
+- [ ] `frontend/src/components/wall/ChapterScrollIndicator.tsx` created
+- [ ] 6 ticks, current chapter active (amber)
+- [ ] Position: fixed right edge, vertically centered, low z-index
+- [ ] WCAG AAA contrast on ticks
+- [ ] Hidden on viewport width < 1024px (mobile uses other indicators)
+- [ ] Vitest: active tick matches currentChapter
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.8
+
+---
+
+### T2.102 --- Sticky chapter title fade in/out | Cx: 6 | P1
+
+**Description:**
+Editorial: at top of each chapter, a small chapter title ("Chapter 2 — City Arrival") fades in for the first 5% of chapter progress, holds, then fades out at 95%+. Lives within `ChapterScaffold` as an opt-in slot. Reduced-motion: instant on/off.
+
+**AC:**
+- [ ] `ChapterScaffold` gains `chapterTitle` prop
+- [ ] Title fades in/out per scroll progress within chapter
+- [ ] Reduced-motion: instant
+- [ ] WCAG AAA contrast
+- [ ] Vitest: title visible at chapterProgress 0.5; opacity 0 at 0 and 1
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.6
+
+---
+
+### T2.103 --- Editorial blockquote treatment for Carlos quotes | Cx: 6 | P1
+
+**Description:**
+Sibling to T2.99. Reusable `<EditorialQuote>` component wraps Carlos voice quotes (Ch2 pull-quote, future Ch3 + W3 chapters). Quote-mark glyph, attribution line, source URL link. Used in W2 once + reused in W3 multiple times.
+
+**AC:**
+- [ ] `frontend/src/components/wall/EditorialQuote.tsx` created (≤120 lines)
+- [ ] Props: `text, attribution, sourceUrl?, lang`
+- [ ] Renders quote-mark glyph + italic body + attribution
+- [ ] WCAG AAA contrast
+- [ ] Vitest: quote text + attribution rendered
+- [ ] Vitest: optional sourceUrl renders as link
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** none
+
+---
+
+### T2.104 --- Chapter atmosphere preset library | Cx: 10 | P1
+
+**Description:**
+Each chapter has a distinct atmosphere: tone (color tint), accent (which W1 token is dominant), sound preset (rustle, bus engine, etc.). Currently scattered across chapter files. Spotlight (Compound Lens): consolidate into `frontend/src/lib/wall/chapterAtmosphere.ts` so W3 chapters 6–10 follow the same pattern. Each chapter declares: `{tint, accentToken, soundPresetId, dropCap}`.
+
+**AC:**
+- [ ] `frontend/src/lib/wall/chapterAtmosphere.ts` exports `CHAPTER_ATMOSPHERES` const for chapters 1–5
+- [ ] Each entry: `{tint, accentToken, soundPresetId, dropCap}`
+- [ ] Chapter components consume preset (no scattered tone/accent literals)
+- [ ] Vitest: every chapter has a complete preset shape
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.7
+
+---
+
+## Phase 18: Fort Worth Landmarks
+
+### T2.105 --- Trinity River visualization on map | Cx: 8 | P1
+
+**Description:**
+Trinity River runs through downtown FW. T2.81 styled water generically; this task ensures the Trinity River specifically is visible at zoom 11–14 with a slightly stronger blue. Pulled from Mapbox `waterway` source via the custom style (T2.18 update). Documented in T2.18 runbook.
+
+**AC:**
+- [ ] T2.18 runbook updated: Trinity River styled with `--accent-cyan` at low opacity
+- [ ] Verified manually: river visible at zoom 11–14
+- [ ] Reviewer confirms
+- [ ] No code changes (style-only)
+
+**Depends on:** T2.18, T2.81
+
+---
+
+### T2.106 --- Sundance Square reference in Chapter 2 city arrival overlay | Cx: 4 | P1
+
+**Description:**
+Editorial detail: Ch2's city-arrival copy can reference a real downtown FW landmark. "Carlos lives here. ZIP 76119. East of downtown — past Sundance Square, past the courthouse." (only as editorial; Sundance Square is a real public-private revitalized district at 5th & Main, FW). Verify with FW Convention & Visitors Bureau. Adds geographic grounding without naming individuals.
+
+**AC:**
+- [ ] Ch2 EN copy (T2.50) includes "past Sundance Square" reference
+- [ ] Source URL for Sundance Square documented in `legalReferences.ts`
+- [ ] ES translation parity (Sundance Square as proper noun, not translated)
+- [ ] Vitest: copy contains "Sundance Square" string
+- [ ] Reviewer confirms accuracy
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.50
+
+---
+
+### T2.107 --- Stockyards reference (chapter background mention) | Cx: 4 | P2
+
+**Description:**
+The Fort Worth Stockyards is FW's iconic historic district. Subtle background reference in Ch2 or Ch3 supporting copy: "north of the stockyards" or similar. Geographic grounding for FW residents. Source attribution.
+
+**AC:**
+- [ ] Ch2 or Ch3 supporting copy includes Stockyards reference (TBD which fits better)
+- [ ] Source URL documented in `legalReferences.ts`
+- [ ] ES translation parity
+- [ ] Vitest: copy contains reference
+- [ ] Reviewer confirms
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.50, T2.51
+
+---
+
+### T2.108 --- FW DAO seal subtle on chapter 9 (deferred to W3) | Cx: 4 | P2
+
+**Description:**
+**Deferred to W3.** The FW DAO is a sponsor of HackFW; their seal/insignia would appear subtly on Chapter 9 (fly to Montgomery / civic pride moment). Stub task here in W2 so W3 doesn't have to invent the asset path. W2 commits the SVG asset; W3 wires it. Source: official FW DAO branding kit (request from sponsor or public site).
+
+**AC:**
+- [ ] `frontend/public/wall-paths/fw-dao-seal.svg` committed (placeholder if asset unavailable)
+- [ ] Source attribution + license documented in PR
+- [ ] If no official asset, document in `LICENSES.md` as placeholder pending sponsor asset
+- [ ] No code wiring (W3 task)
+
+**Depends on:** none
+
+---
+
+### T2.109 --- Texas state silhouette + America silhouette assets | Cx: 6 | P1
+
+**Description:**
+Spotlight (Editorial): Ch1 transition could feature a brief America silhouette → Texas silhouette → Tarrant County silhouette zoom-in metaphor. Commit SVG assets for all three at `frontend/public/wall-paths/silhouettes/`. Used in transitions between chapters 1→2 (subtle, decorative). Reduced-motion: silhouettes static.
+
+**AC:**
+- [ ] `frontend/public/wall-paths/silhouettes/america.svg` committed
+- [ ] `frontend/public/wall-paths/silhouettes/texas.svg` committed
+- [ ] `frontend/public/wall-paths/silhouettes/tarrant-county.svg` committed
+- [ ] All SVGs under 8KB each (SVGO pass)
+- [ ] Decorative role (aria-hidden) when used
+- [ ] No code wiring yet (used in T2.110 ambient particles or later W3)
+- [ ] `bpsai-pair arch check` passes (assets only)
+
+**Depends on:** none
+
+---
+
+### T2.110 --- Continental ambient particles (subtle stars at zoom-out) | Cx: 8 | P2
+
+**Description:**
+At Ch1 continental zoom (zoom 3), render subtle ambient particles ("stars" — small white dots at low opacity) drifting across the screen. CSS-only animation (no JS) — `@keyframes drift`. Reduced-motion: particles static. Disappear at zoom > 6.
+
+**AC:**
+- [ ] `frontend/src/components/wall/AmbientParticles.tsx` created (≤80 lines)
+- [ ] CSS-only drift animation
+- [ ] Reduced-motion: static (no `@keyframes`)
+- [ ] Visible only at currentChapter=1
+- [ ] WCAG AAA: decorative role, aria-hidden
+- [ ] Vitest: rendered at chapter 1, hidden at chapter 2
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.21
+
+---
+
+## Phase 19: Camera Polish
+
+### T2.111 --- flyTo cancellable on user manual drag | Cx: 8 | P0
+
+**Description:**
+T2.9 noted user drag MAY override scroll-driven camera. Implement: subscribe to Mapbox `dragstart` and `pitchstart` events; if firing during a flyTo, abort the flyTo (Mapbox auto-aborts on user gesture, but we need to suppress the next chapter-change-triggered flyTo for 2 seconds so user has control). Counter resets on next chapter boundary.
+
+**AC:**
+- [ ] `flyToOrchestrator.ts` (T2.9) updated with user-gesture suppression window
+- [ ] Drag/pitch event sets `userOverrideUntil = now + 2000` timestamp
+- [ ] Subsequent flyTo calls skip if `now < userOverrideUntil`
+- [ ] Suppression auto-clears after window
+- [ ] Vitest: drag → next flyTo skipped
+- [ ] Vitest: 2.1s after drag → flyTo resumes
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.9
+
+---
+
+### T2.112 --- flyTo cancellable on tab-blur (pause) | Cx: 6 | P1
+
+**Description:**
+When user tab-blurs (e.g., switches to another tab during demo), pause flyTo orchestrator. On tab-focus resume, jump to current chapter's state (no in-flight catch-up animation). Spotlight (Multiple Selves — judge on TV): if a judge tabs away mid-demo, returning shouldn't show a half-finished animation.
+
+**AC:**
+- [ ] `flyToOrchestrator.ts` subscribes to `visibilitychange`
+- [ ] On hidden: cancel in-flight flyTo
+- [ ] On visible: jumpTo current chapter's camera state
+- [ ] Vitest: visibility change cancels and jumpTos
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.9
+
+---
+
+### T2.113 --- flyTo speed adapts to chapter complexity | Cx: 8 | P1
+
+**Description:**
+Some chapter transitions are short distances (Ch4a → Ch4b: same camera, bearing tilt only) while others are long (Ch1 → Ch2: continental → city, zoom 3 → 11). Vary `flyTo speed` per transition: short = 0.6, long = 1.4. Defaults to 1.0. Per-transition table lives in `cameraChoreography.ts` extension.
+
+**AC:**
+- [ ] `cameraChoreography.ts` exports `TRANSITION_SPEEDS` map (e.g., `"1->2": 1.4, "4a->4b": 0.6`)
+- [ ] `flyToOrchestrator.ts` reads speed from table for current transition
+- [ ] Falls back to 1.0 if pair not in table
+- [ ] Vitest: speed for known transition matches table
+- [ ] Vitest: unknown transition uses default 1.0
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.7, T2.9
+
+---
+
+### T2.114 --- Smooth chapter transition seams (ease across boundaries) | Cx: 10 | P1
+
+**Description:**
+When a chapter transition fires at scroll progress 0.20 (Ch1→Ch2 boundary), the overlay opacity and camera flyTo can feel "stepped" (overlay fades at 0.18–0.22, camera jumps at 0.20). Smooth the seam: overlay opacity + camera curve overlap by 5%. Spotlight (Wisdom): brief said "transitions" but didn't specify seam smoothing.
+
+**AC:**
+- [ ] `WallContainer` orchestrates 5% overlap on overlay fades around chapter boundaries
+- [ ] Camera flyTo curve aligned to overlay fade (no perceptible "jump")
+- [ ] Reduced-motion: instant cuts (no overlap)
+- [ ] Vitest: at scroll 0.20 (boundary), Ch1 opacity ~0.5 AND Ch2 opacity ~0.5 (overlap)
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.6, T2.9
+
+---
+
+### T2.115 --- Reduced-motion fallback keeps all data layers visible | Cx: 6 | P0
+
+**Description:**
+Spotlight (Resilience): brief said reduced-motion uses jumpTo. But the data layers (Trinity Metro, offices, ZIP boundary, jobs) can still fade — making reduced-motion users miss the data REVEAL. Fix: reduced-motion path renders ALL data layers visible from start (no fade), so users see the data immediately even if they don't see the camera flight. The "still-image fallback that's still beautiful" applies to data, not just motion.
+
+**AC:**
+- [ ] All chapter components: reduced-motion path sets all data-layer opacities to final visible value at mount
+- [ ] Vitest: reduced-motion + Ch1 → all relevant layers (city-lights) visible at progress=0
+- [ ] Vitest: reduced-motion + Ch3 → ZIP boundary + Carlos pin visible at progress=0
+- [ ] axe-core scan still green per chapter
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.22, T2.26, T2.40
+
+---
+
+## Phase 20: Chapter 5 Labyrinth Deep Polish
+
+### T2.116 --- Animated arrow glyphs between offices (not just lines) | Cx: 12 | P1
+
+**Description:**
+T2.42 commits the chaotic SVG path. Augment: along the path, render small directional arrow glyphs at intervals (every ~15% of path length) that "walk" in the path direction. The arrows convey FORCED motion through the bureaucracy (not the user's choice). Reduced-motion: arrows static at fixed positions.
+
+**AC:**
+- [ ] `frontend/public/wall-paths/labyrinth-arrows.svg` committed (arrow glyph element)
+- [ ] `Chapter05Labyrinth.tsx` overlays arrow glyphs along the path at intervals
+- [ ] Arrows animate along path (CSS or JS — pick one)
+- [ ] Reduced-motion: arrows static
+- [ ] WCAG AAA contrast on arrows against dark base
+- [ ] Vitest: 5+ arrows rendered along the labyrinth path
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.42
+
+---
+
+### T2.117 --- Real form names on labyrinth path tooltips | Cx: 8 | P1
+
+**Description:**
+The labyrinth path connects 5 offices. At each office node, a small label shows the actual form name Carlos would file: "DPS Form CR-09" (Article 55 expunction petition), "HHSC Application H1010" (childcare/Medicaid), "Tarrant County Civil Cover Sheet", "TWC Form C-3" (workforce intake), "LANWT Intake Form". Verify each form name from official agency sites; commit source URLs in `legalReferences.ts`.
+
+**AC:**
+- [ ] `legalReferences.ts` exports `LABYRINTH_FORMS` array of 5 entries: `{office, formName, formNumber, sourceUrl}`
+- [ ] Each form verified from primary source (DPS, HHSC, Tarrant County, TWC, LANWT)
+- [ ] `Chapter05Labyrinth.tsx` renders form-name labels at office nodes
+- [ ] Vitest: 5 form labels rendered with correct text
+- [ ] Reviewer confirms primary sources
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.41, T2.74
+
+---
+
+### T2.118 --- Forms counter scrolling tally with branded numerals | Cx: 8 | P1
+
+**Description:**
+T2.41 ticks 0→47 forms counter. Spotlight (Editorial): use Inter Variable's tabular-nums + "scrolling tally" pattern — each digit visually rolls (CSS `transform: translateY` per digit). 47 → 50 looks like a slot machine but tasteful. Reduced-motion: snaps without scroll. Pause animation when scroll pauses (don't tick during a hold). 
+
+**AC:**
+- [ ] `frontend/src/components/wall/ScrollingTally.tsx` created (≤150 lines, tabular-nums, transform-Y per digit)
+- [ ] Used in Ch5 forms counter
+- [ ] Pauses animation when scroll velocity = 0
+- [ ] Reduced-motion: snaps to final
+- [ ] Vitest: at progress=0.5, tally renders intermediate value (e.g., 24)
+- [ ] Vitest: scroll-paused state freezes counter
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.41
+
+---
+
+### T2.119 --- Labyrinth dead-end indicator at certain offices | Cx: 6 | P2
+
+**Description:**
+T2.42's path includes intentional dead-ends. Augment: at each dead-end node, render a small "✕" or "stop" glyph in W1 muted-red. Communicates "this office told Carlos to go elsewhere — dead end." Subtle, not loud.
+
+**AC:**
+- [ ] Dead-end glyph SVG rendered at 3 dead-end positions in the labyrinth
+- [ ] Color: W1 muted-red token
+- [ ] Decorative role (aria-hidden) — narration via T2.44 ARIA-live
+- [ ] Reduced-motion: glyphs static
+- [ ] Vitest: 3 dead-end glyphs rendered
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.42
+
+---
+
+## Phase 21: Time-of-Day Prefiguration
+
+### T2.120 --- Chapter 1 lighting hint based on user's local time | Cx: 8 | P1
+
+**Description:**
+W1 ships `useTimeOfDay` hook. Spotlight (Fusion): consume the hook in Ch1's continental view to apply a subtle CSS tint — sunrise gold at 6–8am, day neutral at 8am–6pm, sunset orange at 6–8pm, night deep-blue at 8pm–6am. NOT the Mapbox sky (that's deferred to W4); just an editorial overlay tint above Ch1. Reduced-motion: tint applied (it's static, not animated).
+
+**AC:**
+- [ ] `Chapter01Continental.tsx` consumes `useTimeOfDay` and applies tint via CSS variable
+- [ ] 4 time bands: dawn, day, dusk, night
+- [ ] Tint applied to a ::before overlay, not blocking interaction
+- [ ] WCAG AAA contrast on hero text preserved across all 4 tints
+- [ ] Vitest: each time band sets correct tint variable
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.19
+
+---
+
+### T2.121 --- Chapter 2 city arrival sky tinted per time | Cx: 8 | P1
+
+**Description:**
+Sibling to T2.120. Ch2 (city arrival) overlay tint shifts per time-of-day same way. Day = neutral, dusk = orange, night = deep blue. NOT the Mapbox sky layer (W4); editorial overlay only.
+
+**AC:**
+- [ ] `Chapter02CityArrival.tsx` consumes `useTimeOfDay` for overlay tint
+- [ ] 4 time bands match T2.120 logic
+- [ ] WCAG AAA contrast preserved
+- [ ] Vitest: each band sets correct tint
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.23, T2.120
+
+---
+
+### T2.122 --- Chapter 3 neighborhood lighting subtle shift | Cx: 6 | P1
+
+**Description:**
+Sibling to T2.120/T2.121. Ch3 (neighborhood) tint shifts per time-of-day, but more subtle (the chapter is closer-in; tint should be less prominent). Same time-band table, lower opacity.
+
+**AC:**
+- [ ] `Chapter03Neighborhood.tsx` consumes `useTimeOfDay` for subtle tint (max opacity 0.15)
+- [ ] WCAG AAA contrast preserved
+- [ ] Vitest: tint applied per band
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.27, T2.120
+
+---
+
+## Phase 22: Bus 4 + Transit Detail Accuracy
+
+### T2.123 --- Trinity Metro Bus 4 livery accurate (real photo reference) | Cx: 6 | P1
+
+**Description:**
+Ch4b highlights Bus 4 polyline in amber. Spotlight (Multiple Selves — FW resident who knows): real Trinity Metro brand colors are blue + green, NOT amber. Tension: editorial amber matches W1 accent system, but it's not Trinity Metro accurate. Decision: Bus 4 highlight uses Trinity Metro REAL brand colors (blue) for editorial accuracy; W1 amber accent stays in editorial overlays. Verify brand colors from Trinity Metro brand guide / public site. Document in `legalReferences.ts`.
+
+**AC:**
+- [ ] `legalReferences.ts` exports `TRINITY_METRO_BRAND = {primaryColor, secondaryColor, sourceUrl}`
+- [ ] T2.11 layer config updated: highlighted Bus 4 uses Trinity Metro primary blue (verified hex)
+- [ ] Editorial overlay still uses W1 amber for stat band (visual hierarchy preserved)
+- [ ] Vitest: Bus 4 paint expression uses Trinity Metro brand color
+- [ ] Reviewer confirms primary source
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.11
+
+---
+
+### T2.124 --- Bus 4 route GTFS polyline accuracy verification | Cx: 6 | P0
+
+**Description:**
+T2.11 commits Trinity Metro routes. Spot-check that Bus 4's polyline matches the published route map (Trinity Metro publishes route maps as PDFs at https://ride.trinitymetro.org/). Reviewer agent compares 5+ stops along the route with the committed polyline coordinates. If mismatched, file blocking sub-task to refresh GTFS.
+
+**AC:**
+- [ ] Reviewer compares Bus 4 polyline with published route map (5+ stop checkpoints)
+- [ ] Mismatches documented; file refresh sub-task if needed
+- [ ] Vitest: Bus 4 LineString has ≥ 20 coordinates (sanity: real route, not simplified)
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.11
+
+---
+
+### T2.125 --- Bus stop markers along Bus 4 + Bus 6 routes | Cx: 8 | P1
+
+**Description:**
+T2.11 commits route polylines. Augment: extract bus stop points from GTFS `stops.txt` for Bus 4 and Bus 6 specifically, commit at `frontend/public/data/wall/trinity-metro-stops-bus4-bus6.geojson`. Render as small dots in Ch4b when Bus 4 highlighted. Communicates: "Carlos's stop is HERE. Court is THERE."
+
+**AC:**
+- [ ] `frontend/public/data/wall/trinity-metro-stops-bus4-bus6.geojson` committed (stops for Bus 4 + Bus 6 only)
+- [ ] `frontend/src/lib/wall/layers/busStops.ts` exports layer config (small circles)
+- [ ] Layer composer registers it (visible only Ch4b)
+- [ ] Vitest: GeoJSON has ≥ 10 stops total
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.11, T2.17
+
+---
+
+### T2.126 --- Bus 6 transfer point highlighted in Ch4a | Cx: 5 | P1
+
+**Description:**
+Ch4a editorial: "Bus 4 + Bus 6 = 71 minutes." The TRANSFER point (where Carlos changes from Bus 4 to Bus 6) is the actual time-cost. Highlight that single transfer-stop with a different glyph (a small "↻" indicator) in Ch4a.
+
+**AC:**
+- [ ] Bus 4 + Bus 6 transfer stop identified (real GTFS check, likely downtown FW transit center)
+- [ ] Transfer stop glyph rendered in Ch4a only (custom icon at that coord)
+- [ ] WCAG AAA: glyph + tooltip "Transfer point — 71 minutes total"
+- [ ] Vitest: transfer glyph rendered in Ch4a state
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.32, T2.125
+
+---
+
+## Phase 23: Cross-Chapter Integration + Tests
+
+### T2.127 --- Carlos's home pin: PII-safe representative block confirmation | Cx: 4 | P0
+
+**Description:**
+T2.28 already covers PII review. This is a follow-up: add a runtime assertion in `paths.ts` that the committed pin's reverse-geocoding result (cached at build time, NOT a runtime API call) does not match a residential parcel. Build-time check: a build script reverse-geocodes the pin via Mapbox geocoding API once and asserts result type ≠ "address" (≠ "place" ≠ "poi.residential"). Spotlight (Honesty Lens): make the verification programmatic, not just human review.
+
+**AC:**
+- [ ] `frontend/scripts/verify-carlos-pin-pii.mjs` created — build-time reverse-geocode + assertion
+- [ ] Script run as part of CI (or as a pre-commit hook for `paths.ts` changes)
+- [ ] Output committed at `frontend/data/carlos-pin-verification.json` for archival
+- [ ] Vitest: archived verification result confirms type ≠ "address"
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.14, T2.28
+
+---
+
+### T2.128 --- Office state machine future-proofed for W3 Chapter 7 | Cx: 6 | P1
+
+**Description:**
+W3 Ch7 introduces a Carlos avatar walking; the offices will also enter "visited / pending / current" states. W2 ships the data layer (T2.12); add an extensible state-machine schema NOW so W3 doesn't refactor it. Each office gets a `state: "default" | "highlighted" | "visited" | "current"` property in feature properties; W2 renders only "default" + "highlighted"; W3 will use "visited" + "current".
+
+**AC:**
+- [ ] `tarrant-offices.geojson` features have `state` property (default = "default")
+- [ ] `frontend/src/lib/wall/layers/offices.ts` paint expression supports all 4 states (W2 uses 2; W3 enables others)
+- [ ] TypeScript type `OfficeState` exported
+- [ ] Vitest: paint expression returns correct opacity for all 4 states
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.12
+
+---
+
+### T2.129 --- Pre-load Chapter 6 data when Chapter 5 enters viewport | Cx: 8 | P1
+
+**Description:**
+W3 Ch6 (cliff calculator) requires data + assets that aren't loaded by W2's bundle. Spotlight (Compound): pre-fetch Ch6 data (W3 will define the file paths; W2 stubs them) when scroll enters Ch5 (~10s before user sees Ch6). Ch6 then renders instantly. Stub task: defines the pre-load hook + stub file paths.
+
+**AC:**
+- [ ] `frontend/src/hooks/usePreloadNextChapter.ts` created
+- [ ] Hook triggers `link rel="prefetch"` for Ch6 dynamic chunk + data files
+- [ ] WallContainer mounts hook when currentChapter=5
+- [ ] Vitest: prefetch link element added to head when chapter=5
+- [ ] No regression to current Ch5 render
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.43, T2.57
+
+---
+
+### T2.130 --- Chapter scroll-back state preservation | Cx: 6 | P0
+
+**Description:**
+Spotlight (Resilience): if user scrolls to Ch4 then back to Ch1, then forward to Ch4 again, the chapter state (e.g., Ch4 sub-chapter, audio play history) should NOT reset. Audit each chapter's local state (especially Ch4 sub-chapter machine, Ch5 forms counter, Ch4 sound-played flags) for proper memoization. Tests verify scroll-back-forward doesn't replay sounds or reset counter.
+
+**AC:**
+- [ ] `Chapter04TheWall.tsx` sub-chapter state preserved on scroll-out (memoized to currentChapter)
+- [ ] `Chapter05Labyrinth.tsx` counter state preserved (no reset on scroll-back)
+- [ ] Audio "already-played" flags tracked across full scroll session (not chapter-local)
+- [ ] Vitest: simulated scroll Ch4→Ch1→Ch4 — sub-chapter state matches expected (e.g., last-known sub-chapter restored)
+- [ ] Vitest: simulated scroll Ch5→Ch1→Ch5 — sound NOT replayed
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.31, T2.41
+
+---
+
+### T2.131 --- Visual regression test per chapter (Playwright screenshot) | Cx: 14 | P1
+
+**Description:**
+Spotlight (Wisdom): a per-chapter Playwright screenshot test catches visual regressions (e.g., a CSS change accidentally breaks Ch3 overlay layout). Lightweight — 5 screenshots, baseline committed at `frontend/tests/__snapshots__/wall-chapters/`. Compared per CI run with pixel diff threshold 1%.
+
+**AC:**
+- [ ] `frontend/tests/wall-visual.spec.ts` (Playwright) renders each chapter at fixed viewport (1280×720)
+- [ ] 5 baseline PNGs committed under `frontend/tests/__snapshots__/wall-chapters/`
+- [ ] Pixel diff threshold: 1%
+- [ ] CI runs Playwright on every PR
+- [ ] If Playwright not in repo, this task brings it in (single setup task in `package.json` + minimal config)
+- [ ] `bpsai-pair arch check` passes (test config files only)
+
+**Depends on:** T2.66
+
+---
+
+### T2.132 --- Mapbox layer visibility integration test | Cx: 8 | P0
+
+**Description:**
+Single integration test: per chapter, query the map for which layer IDs are visible. Asserts: Ch1 → only city-lights + boundaries; Ch2 → + trinity-metro + buildings3d; Ch3 → + zip + carlos-path; Ch4a → + offices (district clerk highlighted); Ch5 → + labyrinth + offices (all). Catches "I forgot to fade in the offices layer for Ch4" bug.
+
+**AC:**
+- [ ] `frontend/src/__tests__/wall/layer-visibility-integration.test.tsx` exists
+- [ ] Per-chapter assertion of visible layer set
+- [ ] Mock Mapbox map with layer-tracking
+- [ ] Vitest passes
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.63
+
+---
+
+### T2.133 --- Camera transition timing test | Cx: 6 | P1
+
+**Description:**
+Asserts that flyTo `duration` is sane (e.g., Ch1→Ch2 transition between 1500ms and 4000ms). Catches accidental coord-edit that triples the transition time, ruining the demo cadence.
+
+**AC:**
+- [ ] `frontend/src/lib/wall/__tests__/transition-timing.test.ts` exists
+- [ ] Per-transition: assert duration within sane bounds (per pair)
+- [ ] Reduced-motion: duration = 0 verified
+- [ ] Vitest passes
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.7, T2.113
+
+---
+
+### T2.134 --- Office click-to-card interaction test | Cx: 6 | P0
+
+**Description:**
+Vitest: simulate click on an office marker, assert OfficeCard renders with correct properties (name, address, phone, hours), assert escape key closes, assert outside click closes, assert tab order. Locks the interactive contract from T2.92/T2.93.
+
+**AC:**
+- [ ] `frontend/src/components/wall/__tests__/OfficeCard.test.tsx` exists
+- [ ] Tests: click opens, escape closes, outside click closes, tab order Call→Directions→Close
+- [ ] All 5 office categories tested (court, benefits, dps, workforce, legal)
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.92, T2.93
+
+---
+
+### T2.135 --- Accessibility: every interactive marker keyboard-reachable | Cx: 8 | P0
+
+**Description:**
+Audit + test: every office marker, every Carlos pin, every interactive layer is keyboard-focusable (Tab) and activatable (Enter/Space). Mapbox markers default to non-focusable; we wire `role="button"` + `tabindex="0"` via a custom marker-button overlay if needed. axe-core verifies.
+
+**AC:**
+- [ ] All office markers keyboard-focusable
+- [ ] Enter/Space on focused marker opens OfficeCard (T2.92/T2.93 contract)
+- [ ] axe-core scan returns zero violations on full WallContainer with markers visible
+- [ ] Vitest: simulated Tab through page reaches all 5 office markers
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.92
+
+---
+
+### T2.136 --- Sound clip license attribution | Cx: 4 | P0
+
+**Description:**
+Honest Uncertainty #7. T2.37 + T2.43 commit MP3 clips. Add a `frontend/public/sounds/wall/LICENSES.md` listing each clip with: source URL (Freesound.org link), license (CC0 / CC-BY / royalty-free), original creator, license confirmation date. Submission compliance.
+
+**AC:**
+- [ ] `frontend/public/sounds/wall/LICENSES.md` lists all 5 clips (4 Ch4 + 1 Ch5)
+- [ ] Each entry: source URL, license type, creator, date
+- [ ] Reviewer agent confirms each license URL resolves (mocked check)
+- [ ] `bpsai-pair arch check` passes (docs only)
+
+**Depends on:** T2.37, T2.43
+
+---
+
+### T2.137 --- Spanish reviewer asynchronous batch pass | Cx: 6 | P1
+
+**Description:**
+Honest Uncertainty #5. Bottleneck risk: per-chapter ES copy each requires a reviewer. Convert to a single batch: T2.49–T2.53 ES strings collected into one document `docs/spanish-review-w2.md`, reviewer initials once at the top. Reduces blocker risk on Spanish reviewer availability.
+
+**AC:**
+- [ ] `docs/spanish-review-w2.md` aggregates all W2 ES copy with EN side-by-side
+- [ ] Reviewer initials + date at document top
+- [ ] Each chapter's task references this doc instead of demanding individual reviewer pass
+- [ ] If reviewer unavailable by sprint end, doc marked `[ES-pending-review]` and W4 follow-up issue created
+- [ ] No code changes (docs only)
+
+**Depends on:** T2.49, T2.50, T2.51, T2.52, T2.53
+
+---
+
+### T2.138 --- Real Carlos quotes embedded as editorial moments | Cx: 6 | P1
+
+**Description:**
+Spotlight (Editorial). T2.99 covers Ch2 pull-quote. Add 2 more in Ch3 (neighborhood) and Ch5 (labyrinth) — each from publicly-published reentry research or, if no source available, marked "composite — illustrative" per T2.99 contract. Each rendered with `EditorialQuote` (T2.103).
+
+**AC:**
+- [ ] Ch3 pull-quote committed with EN + ES + source attribution
+- [ ] Ch5 pull-quote committed with EN + ES + source attribution
+- [ ] Both rendered via `EditorialQuote` component
+- [ ] Both source URLs documented in `legalReferences.ts`
+- [ ] If composite, marked clearly in PR + on rendered output
+- [ ] Vitest: quotes rendered at correct chapter scroll positions
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T2.99, T2.103, T2.51, T2.53
+
+---
+
+### T2.139 --- W2 enrichment dry-run validation gate | Cx: 4 | P0
+
+**Description:**
+Final gate. After all enrichment tasks (T2.68–T2.138) ship, run `bpsai-pair plan validate` and `bpsai-pair task list --plan w2 --verify-edges`. Verify the DAG has no cycles (each enrichment task's `Depends on` resolves), the enrichment Cx total stays within the original W2 1000-Cx ceiling (current ~860 + enrichment ~440 = ~1300 — flagged as a known overage; document the descope plan if needed).
+
+**AC:**
+- [ ] `bpsai-pair plan validate` returns 0
+- [ ] `bpsai-pair task list --plan w2 --verify-edges` returns 0 (no broken dependencies)
+- [ ] Total Cx documented (original 816 + enrichment ≈ 460–500 ≈ 1280)
+- [ ] If over 1000, descope plan documented in PR (which P2 tasks can move to W4)
+- [ ] No code changes (validation-only)
+
+**Depends on:** all prior W2 tasks (T2.1–T2.138)
+
+---
+
 ## Spotlight Inventions — Beyond the Brief
 
 These are tasks NOT in the original W2 brief that the Spotlight engine surfaced. Each is justified by a Spotlight Lens or one of the 5 Awakening Conditions.
