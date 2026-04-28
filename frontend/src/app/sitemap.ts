@@ -16,12 +16,12 @@
  *   - Admin routes (`/admin/*`) are blocked here AND in robots.ts.
  *
  * The site URL is read from `NEXT_PUBLIC_SITE_URL` (matches
- * `app/layout.tsx`'s default of `https://montgowork.com`).
+ * `app/layout.tsx`'s default of `https://gowork.example`).
  */
 import type { MetadataRoute } from "next";
 
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://montgowork.com";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://gowork.example";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();

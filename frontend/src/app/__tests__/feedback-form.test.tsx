@@ -53,7 +53,7 @@ describe("FeedbackPage", () => {
     await waitFor(() => {
       expect(screen.getByText(/did you make it/i)).toBeInTheDocument();
     });
-    expect(screen.getByText(/did montgowork/i)).toBeInTheDocument();
+    expect(screen.getByText(/did gowork/i)).toBeInTheDocument();
   });
 
   it("shows conditional Q2 when user selects Yes for Q1", async () => {

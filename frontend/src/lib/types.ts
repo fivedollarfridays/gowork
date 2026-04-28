@@ -1,4 +1,4 @@
-/* MontGoWork shared TypeScript types — mirrors backend Pydantic models */
+/* GoWork shared TypeScript types — mirrors backend Pydantic models */
 
 // --- Enums ---
 

@@ -28,7 +28,7 @@ function buildTemplateParams(
   return {
     to_email: toEmail,
     plan_url: buildPlanUrl(sessionId, token),
-    summary: "Your MontGoWork employment plan is ready. Use the link below to view your full plan.",
+    summary: "Your GoWork employment plan is ready. Use the link below to view your full plan.",
   };
 }
 

@@ -1,6 +1,6 @@
 {
-  "name": "MontGoWork",
-  "short_name": "MontGoWork",
+  "name": "GoWork",
+  "short_name": "GoWork",
   "description": "Workforce Navigator — overcome barriers and find your path to employment.",
   "start_url": "/",
   "display": "standalone",

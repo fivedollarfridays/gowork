@@ -32,18 +32,18 @@ describe("Home page animations", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders subtitle about MontGoWork", () => {
+  it("renders subtitle about GoWork", () => {
     render(<Home />);
     expect(
-      screen.getByText(/MontGoWork is a workforce navigator/),
+      screen.getByText(/GoWork is a workforce navigator/),
     ).toBeInTheDocument();
   });
 
-  it("renders stat values 20.9, 57.4, and 36K+", () => {
+  it("renders Fort Worth stat values (default reference deployment)", () => {
     const { container } = render(<Home />);
-    expect(container.textContent).toContain("20.9");
-    expect(container.textContent).toContain("57.4");
-    expect(container.textContent).toContain("36");
+    expect(container.textContent).toContain("15.3");
+    expect(container.textContent).toContain("64");
+    expect(container.textContent).toContain("950");
   });
 
   it("renders How It Works step titles", () => {

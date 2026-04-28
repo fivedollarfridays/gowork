@@ -20,16 +20,16 @@ const SITE_DESCRIPTION =
   'Workforce Navigator — overcome barriers and find your path to employment';
 
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://montgowork.com';
+  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://gowork.example';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'MontGoWork',
-    template: '%s | MontGoWork',
+    default: 'GoWork',
+    template: '%s | GoWork',
   },
   description: SITE_DESCRIPTION,
-  applicationName: 'MontGoWork',
+  applicationName: 'GoWork',
   manifest: '/manifest.json',
   icons: {
     icon: [
@@ -46,22 +46,22 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
-    siteName: 'MontGoWork',
-    title: 'MontGoWork — Workforce Navigator',
+    siteName: 'GoWork',
+    title: 'GoWork — Workforce Navigator',
     description: SITE_DESCRIPTION,
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'MontGoWork — Workforce Navigator',
+        alt: 'GoWork — Workforce Navigator',
       },
     ],
     locale: 'en_US',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'MontGoWork — Workforce Navigator',
+    title: 'GoWork — Workforce Navigator',
     description: SITE_DESCRIPTION,
     images: ['/og-image.png'],
   },

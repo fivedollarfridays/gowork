@@ -1,5 +1,5 @@
 /**
- * Typed API client for the MontGoWork Job-Applications feature (T12.13).
+ * Typed API client for the GoWork Job-Applications feature (T12.13).
  *
  * Every endpoint takes a `token` query parameter. The backend verifies it
  * against the session referenced by `session_id`; mismatches return 403.

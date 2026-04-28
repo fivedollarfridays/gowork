@@ -146,9 +146,9 @@ describe("PlanExport", () => {
     expect(button).toBeInTheDocument();
   });
 
-  it("renders hidden PDF content with MontGoWork header", () => {
+  it("renders hidden PDF content with GoWork header", () => {
     render(<PlanExport plan={basePlan} />);
-    const header = screen.getByText("MontGoWork Re-Entry Plan");
+    const header = screen.getByText("GoWork Re-Entry Plan");
     expect(header).toBeInTheDocument();
   });
 

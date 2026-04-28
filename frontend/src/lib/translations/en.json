@@ -33,13 +33,13 @@
   },
   "hero": {
     "title": "What's standing between you and a job?",
-    "subtitle": "MontGoWork is a workforce navigator that helps you overcome barriers and find your path to employment.",
+    "subtitle": "GoWork is a workforce navigator that helps you overcome barriers and find your path to employment.",
     "cta": "Get Your Plan",
     "creditCta": "Check Credit"
   },
   "home": {
     "heroQuestion": "What's standing between you and a job?",
-    "heroBlurb": "MontGoWork is a workforce navigator that helps you overcome barriers and find your path to employment.",
+    "heroBlurb": "GoWork is a workforce navigator that helps you overcome barriers and find your path to employment.",
     "ctaPlan": "Get Your Plan",
     "ctaCredit": "Check Credit",
     "howHeading": "How It Works",
@@ -255,7 +255,7 @@
   },
   "dashboard": {
     "heading": "Case Manager Dashboard",
-    "description": "Aggregate metrics from MontGoWork assessments",
+    "description": "Aggregate metrics from GoWork assessments",
     "totalAssessments": "Total Assessments",
     "barrierInstances": "Barrier Instances",
     "avgBarriers": "Avg Barriers/Person",
@@ -437,7 +437,7 @@
     "noteGenericError": "We could not send that note. Please try again."
   },
   "footer": {
-    "entity": "MontGoWork (hackathon project)",
+    "entity": "GoWork (hackathon project)",
     "tagline": "Workforce Navigator",
     "navLabel": "Legal",
     "privacy": "Privacy",
@@ -446,7 +446,7 @@
   "privacy": {
     "heading": "Privacy Policy",
     "lastUpdated": "Last updated",
-    "counselNotice": "Hackathon-grade placeholder — this policy was authored fresh for the MontGoWork submission and has not been reviewed by counsel. Production rollout requires legal review.",
+    "counselNotice": "Hackathon-grade placeholder — this policy was authored fresh for the GoWork submission and has not been reviewed by counsel. Production rollout requires legal review.",
     "seeAlso": "See also our",
     "termsLink": "Terms of Service",
     "esPlaceholder": "(Spanish-only placeholder string; never rendered when locale is English.)",
@@ -487,7 +487,7 @@
   "terms": {
     "heading": "Terms of Service",
     "lastUpdated": "Last updated",
-    "counselNotice": "Hackathon-grade placeholder — these terms were authored fresh for the MontGoWork submission and have not been reviewed by counsel. Production rollout requires legal review.",
+    "counselNotice": "Hackathon-grade placeholder — these terms were authored fresh for the GoWork submission and have not been reviewed by counsel. Production rollout requires legal review.",
     "seeAlso": "See also our",
     "privacyLink": "Privacy Policy",
     "esPlaceholder": "(Spanish-only placeholder string; never rendered when locale is English.)",
