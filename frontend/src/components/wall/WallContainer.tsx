@@ -32,6 +32,7 @@ import {
 import dynamic from "next/dynamic";
 import { validateToken } from "@/lib/wall/mapboxToken";
 import { useChapterProgress } from "@/hooks/useChapterProgress";
+import { useDeviceCapability } from "@/hooks/useDeviceCapability";
 
 /** Context shape consumed by chapter components (Drivers B/C). */
 export interface WallContextValue {
@@ -67,15 +68,22 @@ interface WallContainerProps {
 /** Top-level wrapper for The Wall page (`/`). */
 export default function WallContainer({ children }: WallContainerProps) {
   const tokenOk = validateToken();
+  const { tier, supportsWebGL } = useDeviceCapability();
   const { currentChapter, chapterProgress } = useChapterProgress();
-  const [isMapboxMounted] = useState<boolean>(tokenOk);
+
+  // Spotlight Wave 5 — tier-based fallback. Carlos on a 2GB Pixel 4a
+  // sees the still-image, not stalled JS. Low-tier devices and WebGL-
+  // disabled browsers route through the same branded fallback.
+  const tierBlocksMapbox = tier === "low" || !supportsWebGL;
+  const mountMapbox = tokenOk && !tierBlocksMapbox;
+  const [isMapboxMounted] = useState<boolean>(mountMapbox);
 
   const contextValue = useMemo<WallContextValue>(
     () => ({ currentChapter, chapterProgress, isMapboxMounted }),
     [currentChapter, chapterProgress, isMapboxMounted],
   );
 
-  if (!tokenOk) {
+  if (!mountMapbox) {
     return (
       <WallContext.Provider value={contextValue}>
         <StaticFallback />

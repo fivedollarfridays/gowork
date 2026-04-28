@@ -21,6 +21,7 @@
 import {
   CHAPTER_CAMERAS,
   TRANSITION_SPEEDS,
+  type ChapterCameraState,
   type ChapterId,
 } from "./cameraChoreography";
 
@@ -68,7 +69,9 @@ const DEFAULT_TRANSITION_SPEED = 1.0;
 export function triggerCameraTransition(params: CameraTransitionParams): void {
   const { map, from, to, reducedMotion } = params;
   if (!map) return;
-  const dest = CHAPTER_CAMERAS[to];
+  // Lookup is permissive: W3 chapter ids (6–10) are not in the W2 map yet,
+  // so undefined is the graceful "no transition known" path.
+  const dest = (CHAPTER_CAMERAS as Record<number, ChapterCameraState | undefined>)[to];
   if (!dest) return;
 
   const center: [number, number] = [dest.longitude, dest.latitude];

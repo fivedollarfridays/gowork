@@ -23,6 +23,20 @@ vi.mock("../MapboxScene", () => ({
   default: () => React.createElement("div", { "data-testid": "mapbox-scene-stub" }),
 }));
 
+// Default to a high-tier device with WebGL — the Spotlight tier gate
+// (Wave 5) routes low-tier or WebGL-less devices to the fallback. Tests
+// here focus on token + composition; tier behavior has its own file.
+vi.mock("@/hooks/useDeviceCapability", () => ({
+  useDeviceCapability: () => ({
+    tier: "high",
+    supportsWebGL: true,
+    isMobile: false,
+    deviceMemoryGb: 16,
+    hardwareConcurrency: 12,
+    prefersReducedData: false,
+  }),
+}));
+
 // `next/dynamic` returns a placeholder until the import resolves — in tests
 // we want the resolved component immediately so assertions don't have to
 // await the microtask queue. Swap dynamic for a synchronous shim.
