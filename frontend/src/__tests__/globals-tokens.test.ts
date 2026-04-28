@@ -47,13 +47,13 @@ describe("T1.7 — globals.css token partials exist", () => {
     expect(colors).toContain("--background: 195 9% 12%;");
   });
 
-  it("layout.css preserves @layer utilities .text-balance", () => {
+  it("layout.css preserves .text-balance utility (root scope post-8b04ae8)", () => {
     const layout = read(path.resolve(TOKENS_DIR, "layout.css"));
     expect(layout).toContain(".text-balance");
     expect(layout).toContain("text-wrap: balance");
   });
 
-  it("layout.css preserves @layer base border + body rules", () => {
+  it("layout.css preserves border + body base rules (root scope post-8b04ae8)", () => {
     const layout = read(path.resolve(TOKENS_DIR, "layout.css"));
     expect(layout).toContain("border-border");
     expect(layout).toContain("overscroll-behavior: none");
