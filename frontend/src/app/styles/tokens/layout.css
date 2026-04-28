@@ -79,3 +79,61 @@ html {
   scrollbar-color: var(--accent-cyan) var(--bg-surface);
   scrollbar-width: thin;
 }
+
+/* ─── Wave-2 — Z-stack hierarchy tokens ──────────────────────────────────────
+ * One source of truth for stacking-order across overlays. Discovered during
+ * W1 maximization that two overlays (CookieBanner + PWAInstallPrompt) shipped
+ * at literal `z-[55]` and would collide whenever both surfaced (a reduced-
+ * motion + first-visit + Chromium user). This token system sets the canonical
+ * order; consumers use `var(--z-*)` (or Tailwind's `z-[var(...)]` arbitrary
+ * value) instead of literal numbers.
+ *
+ *   --z-skip-link:        100 — keyboard users land here first; never occluded
+ *   --z-modal:             80 — modal dialogs (W2/W3 reserved)
+ *   --z-toast:             70 — transient announcements
+ *   --z-header:            50 — sticky header chrome
+ *   --z-banner:            40 — stall-alert banner UNDER header chrome
+ *   --z-pwa-prompt:        30 — install prompt
+ *   --z-cookie:            30 — cookie disclosure (sibling layer to PWA)
+ *   --z-cursor-flashlight:  5 — overlay above content, below chrome
+ *   --z-content:            1 — default page content
+ *
+ * Hierarchy intent: keyboard a11y > modal > toast > chrome > banner > prompts
+ *                   > cursor effects > content. Never invert without arch
+ *                   review.
+ */
+:root {
+  --z-skip-link: 100;
+  --z-modal: 80;
+  --z-toast: 70;
+  --z-header: 50;
+  --z-banner: 40;
+  --z-pwa-prompt: 30;
+  --z-cookie: 30;
+  --z-cursor-flashlight: 5;
+  --z-content: 1;
+}
+
+/* ─── Wave-2 — Skip-to-content link (z-skip-link consumer) ───────────────────
+ * Visible-on-focus, NEVER visually-hidden. Per visual-rebirth-plan.md "Skip
+ * link is proudly visible on focus, not a screen-reader-only hack." Lifts to
+ * `--z-skip-link` (100) so it cannot be occluded by any chrome/banner.
+ */
+.skip-to-content {
+  position: fixed;
+  top: -100px;
+  left: 1rem;
+  z-index: var(--z-skip-link, 100);
+  padding: 0.5rem 1rem;
+  background: var(--accent-cyan);
+  color: var(--bg-base);
+  border-radius: 6px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: top 150ms var(--ease-linear-sig, ease-in-out);
+}
+
+.skip-to-content:focus {
+  top: 1rem;
+  outline: none;
+}

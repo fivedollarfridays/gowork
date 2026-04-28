@@ -34,7 +34,10 @@ function HeaderInner({ wallChapter }: HeaderProps) {
   return (
     <>
       <StallAlertBannerMount />
-      <header className="sticky top-0 z-50 border-b border-foreground/10 bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/65">
+      <header
+        style={{ zIndex: "var(--z-header, 50)" }}
+        className="sticky top-0 border-b border-foreground/10 bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/65"
+      >
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:px-8">
           <Link
             href="/"

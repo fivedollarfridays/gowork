@@ -26,4 +26,14 @@ describe("lib/wall barrel (T1.68)", () => {
     // Types are erased at runtime — this just asserts import resolves.
     expect(mod).toBeDefined();
   });
+
+  it("re-exports STORAGE_KEYS, log, detectFeatures, BRAND_ASSETS, CINEMATIC_STEPS, LANDMARKS", async () => {
+    const mod = await import("../index");
+    expect(mod.STORAGE_KEYS).toBeDefined();
+    expect(mod.log).toBeDefined();
+    expect(typeof mod.detectFeatures).toBe("function");
+    expect(mod.BRAND_ASSETS).toBeDefined();
+    expect(mod.CINEMATIC_STEPS).toBeDefined();
+    expect(mod.LANDMARKS).toBeDefined();
+  });
 });

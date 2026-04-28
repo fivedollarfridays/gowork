@@ -10,7 +10,9 @@
  * fingerprint material. The 64-char hex hash IS the only identifier.
  */
 
-export const SESSION_STORAGE_KEY = "gowork.rum.sid";
+import { STORAGE_KEYS } from "@/lib/wall/storage";
+
+export const SESSION_STORAGE_KEY = STORAGE_KEYS.RUM_SID;
 
 let inMemoryId: string | null = null;
 let inFlight: Promise<string> | null = null;

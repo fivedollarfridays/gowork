@@ -37,7 +37,9 @@ interface HowlerStatic {
   ctx?: { state?: string; resume?: () => Promise<void> };
 }
 
-const STORAGE_KEY = "gowork.muted";
+import { STORAGE_KEYS } from "./storage";
+
+const STORAGE_KEY = STORAGE_KEYS.MUTED;
 const SOUND_BASE = "/sounds";
 const SOUND_FILES: Record<SoundId, string> = {
   footstep: `${SOUND_BASE}/footstep.mp3`,

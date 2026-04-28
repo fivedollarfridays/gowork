@@ -49,7 +49,8 @@ export function CookieBanner(): JSX.Element | null {
       role="region"
       aria-label="Privacy disclosure"
       data-edge-state="disclosure"
-      className="fixed bottom-4 left-1/2 z-[55] -translate-x-1/2 rounded-lg border border-foreground/15 bg-background/95 px-4 py-3 text-sm shadow-lg backdrop-blur sm:max-w-2xl"
+      style={{ zIndex: "var(--z-cookie, 30)" }}
+      className="fixed bottom-4 left-1/2 -translate-x-1/2 rounded-lg border border-foreground/15 bg-background/95 px-4 py-3 text-sm shadow-lg backdrop-blur sm:max-w-2xl"
     >
       <p className="mb-2 text-foreground/80">
         We do not track. We store your locale and mute preference in
