@@ -1,6 +1,6 @@
 # Current State
 
-> Last updated: 2026-04-28 (W4 Driver D — Maximization + Per-Chapter OG + 7 Spotlight inventions on `sprint/w4-life-layers` (main tree, no worktree). 3211 → 3428 vitest passing (+217 net new tests, exceeds +200 floor). All 7 gates green: tsc 0 errors, lint 0 errors (1 pre-existing W1 warning), arch clean, audit:brand clean, audit:tokens clean, build green at `/` First Load JS = 150 kB (+1 kB from baseline 149 kB; well under 200 kB), per-chapter `/api/og/[chapter]` + `/api/og/default` Edge routes shipped. Closed: Driver A's deferred hero-font-wiring (Ch1 now consumes `useHeroFontWeight(globalProgress)` 700→900) + tablet zoom (10 vs desktop 11). Print stylesheet extended to cover `section[data-chapter-id]` (every chapter now print-paginated). View Transitions polished. Scroll-velocity motion-blur + idle ambient drift wired non-destructively.
+> Last updated: 2026-04-28 (W5 Driver C — Final Polish + Cross-Browser + Deployment + Submission Checklist + 3 Spotlight inventions on `w5-driver-c/submission-readiness` worktree branch off `sprint/w5-submission` HEAD f18e8e8. 3428 → 3529 vitest passing (+101 net new tests across 11 files). All gates green: tsc 0 errors, lint 0 errors (1 pre-existing W1 warning), arch clean, audit:brand clean, audit:tokens clean, build green at `/` First Load JS = 150 kB. 5 new docs: vercel-deploy-runbook, submission-checklist (T-1h Death Note), cross-browser-test-plan (Chrome/Safari/Firefox/Edge), mobile-slow-3g-test-plan, lighthouse-final-scores. 2 new scripts wired into package.json: `npm run pre-deploy` (full local gauntlet) + `npm run post-deploy-smoke` (production HTTP asserts). T5.C.1 honest-uncertainty: lhci could not run from this worktree (port 3000 in use by sibling agent); doc captures the run path for Shawn / CI. Submission-readiness guard test asserts all 11 surface docs (Driver A's optional docs soft-skip; Driver C's 5 hard-required).
 
 ## Active Plan
 
@@ -31,6 +31,75 @@
 Older sprint task tables and session histories (Sprints 7 — 31) are in `.paircoder/archive/state-pre-s1.md`. S12a per-session entries plus S2 — S11 detail are in `.paircoder/archive/state-s12a.md`. S13 wave-by-wave detail + per-task driver sessions are in `.paircoder/archive/state-s13.md`.
 
 ## What Was Just Done
+
+### 2026-04-28 — W5 Driver C: Final Polish + Cross-Browser + Deployment + Submission Checklist + 3 Spotlight inventions (T5.C.1–T5.C.7)
+
+Branch: `w5-driver-c/submission-readiness` (worktree off `sprint/w5-submission` HEAD f18e8e8). Baseline at start: 3428 vitest passing.
+Final: 3529 passing (+101 net new tests across 11 new files). All 7 gates green.
+
+**Critical tasks closed (P0):**
+
+- **T5.C.1 — Final Lighthouse pass on production build (deferred + documented)** — `lhci autorun` could not be run from this worktree because port 3000 was occupied by a sibling driver agent (the C4 honest-uncertainty case the brief flagged). Created `docs/lighthouse-final-scores.md` with the canonical run path (`cd frontend && npm ci && npm run build && npm run lhci`), the four 0.90 floors documented, the W4 descope priority order (audio → temperature multiplier → 3D barrier graph → View Transitions), and a measurement-log template. Pinned by `lighthouse-config.test.ts` (7 tests) so the floors cannot silently drift below 0.90 in `lighthouserc.json`. Pinned again by `lighthouse-final-scores-doc.test.ts` (8 tests) so the doc must always carry the four scores, the descope order, the run path, and an honest-uncertainty section. The `npm run pre-deploy` Spotlight (#1) automates the run end-to-end so the next operator runs one command.
+- **T5.C.2 — Cross-browser test plan** — `docs/cross-browser-test-plan.md` covers Chrome 135+, Safari 17+, Firefox 130+, Edge 135+. Per-browser checklist of pages to walk (`/`, `/assess`, `/plan`, `/api/og/1`, `/api/og/10`, `/api/og/default`, `/bogus-url`), functional tests (Ch1→Ch10 scroll, Ch6 wage slider, Ch9 fly-to-Montgomery, Ch10 CTA + View Transition), a11y (Tab traversal, screen reader), visual regressions (screenshot-vs-baseline). Manual QA plan — Shawn runs it. Pinned by `cross-browser-plan-doc.test.ts` (10 tests, ≥30 checkboxes asserted).
+- **T5.C.3 — Mobile + slow-3G test plan** — `docs/mobile-slow-3g-test-plan.md` covers iPhone Safari (MobileWallFallback, 10 chapter cards), Android Chrome (mobile + tablet zoom = 10 per W4 D), slow-3G throttle (hero text < 3s, Mapbox lazy-load after first scroll, video assets non-blocking), and offline degradation. Pinned by `mobile-slow3g-plan-doc.test.ts` (10 tests, ≥12 checkboxes asserted).
+- **T5.C.4 — Vercel deployment runbook** — `docs/vercel-deploy-runbook.md` covers pre-deploy gates, Vercel project setup (Root Directory = `frontend/`, project name `gowork`), all 5 required `NEXT_PUBLIC_*` env vars, Mapbox token sourcing (account.mapbox.com/access-tokens), custom Mapbox style URL setup, staging→production promotion, post-deploy smoke (10 concrete URLs to hit), 3-tier rollback path (Vercel instant-redeploy → git revert → staging swap), per-deploy `LAST_CALIBRATED` update, custom domain procedure, git tag step. C5 honest uncertainty: assumes `gowork.vercel.app`; one-line edit to flip to a custom domain. Pinned by `deployment-runbook.test.ts` (11 tests).
+- **T5.C.5 — Submission checklist** — `docs/submission-checklist.md` is the T-1 hour Death Note checklist Shawn ticks at the deadline. Phases: Pre-flight (T-24h), T-2h (production smoke + Lighthouse + Mapbox + OG + mobile + Spanish + reduced-motion + skip-link), T-1h (Devpost form fill: name, tagline, description, built-with, categories, team, production URL, GitHub tag, video upload < 50 MB / ≤ 4:30), T-30min (final review pass), T-15min (SUBMIT — target 8:45 AM CDT per 5h buffer), T-0 (deadline 2:00 PM CDT — never let it get here), T+15min (git tag `v0.1.0-hackfw-submission`). Emergency procedures for production-breaks-at-T-1, Devpost-upload-fails, Mapbox-quota-exceeded, Lighthouse-drops-below-0.90. Pinned by `submission-checklist-doc.test.ts` (15 tests, ≥25 checkboxes asserted, all 5 phase headings + 9 content gates).
+- **T5.C.6 — README link validator + 4 contract tests (≥10 tests requirement EXCEEDED)** — Shipped 8 vitest test files, 75 tests total, against the 10-test minimum:
+  - `readme-links.test.ts` (5 tests) — every relative path link in README.md resolves; every absolute URL parses; no localhost / file:// leaks.
+  - `lighthouse-config.test.ts` (7 tests) — pin lhci floors at 0.90.
+  - `env-example-completeness.test.ts` (8 tests) — pin all 5 NEXT_PUBLIC_* in `.env.local.example` (added missing `NEXT_PUBLIC_LAST_CALIBRATED` + `NEXT_PUBLIC_SITE_URL` to the example).
+  - `deployment-runbook.test.ts` (11 tests) — pin runbook structure.
+  - `submission-checklist-doc.test.ts` (15 tests) — pin checklist structure.
+  - `cross-browser-plan-doc.test.ts` (10 tests) — pin browser plan.
+  - `mobile-slow3g-plan-doc.test.ts` (10 tests) — pin mobile plan.
+  - `lighthouse-final-scores-doc.test.ts` (8 tests) — pin scores-doc structure.
+- **T5.C.7 — 3 Spotlight inventions:**
+  1. **`scripts/pre-deploy-gate.mjs`** + `pre-deploy-gate-script.test.ts` (6 tests). Runs the FULL submission gauntlet in sequence (tsc → lint → vitest → build → arch → brand → tokens → contrast → lhci) and exits non-zero on the first red gate. One command: `npm run pre-deploy`.
+  2. **`scripts/post-deploy-smoke.mjs`** + `post-deploy-smoke-script.test.ts` (9 tests). Hits production URL endpoints and asserts (HTTP 200 + image/png on `/api/og/1` + `/api/og/default`, HTTP 200 + GoWork text on `/`, HTTP 404 + wall-metaphor on `/bogus-url`). One command: `SITE_URL=https://gowork.vercel.app npm run post-deploy-smoke`.
+  3. **`submission-readiness-allDocs.test.ts`** (12 tests) — single guard test asserting every load-bearing submission artifact exists (README + press-kit + demo + submission-demo + checklist + cross-browser plan + mobile plan + deploy runbook + lighthouse scores + copy-thesis + devpost — 11 surfaces). Required (Driver C's 5) hard-fail; optional (Driver A's deferred docs) soft-skip with tracked count.
+
+**Files touched (W5-C):**
+
+Frontend additions:
+- `frontend/src/__tests__/lighthouse-config.test.ts` (NEW, 7 tests)
+- `frontend/src/__tests__/env-example-completeness.test.ts` (NEW, 8 tests)
+- `frontend/src/__tests__/deployment-runbook.test.ts` (NEW, 11 tests)
+- `frontend/src/__tests__/submission-checklist-doc.test.ts` (NEW, 15 tests)
+- `frontend/src/__tests__/cross-browser-plan-doc.test.ts` (NEW, 10 tests)
+- `frontend/src/__tests__/mobile-slow3g-plan-doc.test.ts` (NEW, 10 tests)
+- `frontend/src/__tests__/lighthouse-final-scores-doc.test.ts` (NEW, 8 tests)
+- `frontend/src/__tests__/readme-links.test.ts` (NEW, 5 tests)
+- `frontend/src/__tests__/pre-deploy-gate-script.test.ts` (NEW, 6 tests)
+- `frontend/src/__tests__/post-deploy-smoke-script.test.ts` (NEW, 9 tests)
+- `frontend/src/__tests__/submission-readiness-allDocs.test.ts` (NEW, 12 tests)
+- `frontend/scripts/pre-deploy-gate.mjs` (NEW, Spotlight #1)
+- `frontend/scripts/post-deploy-smoke.mjs` (NEW, Spotlight #2)
+- `frontend/.env.local.example` (UPDATED — added `NEXT_PUBLIC_LAST_CALIBRATED` + `NEXT_PUBLIC_SITE_URL`)
+- `frontend/package.json` (UPDATED — added `pre-deploy` + `post-deploy-smoke` scripts)
+
+Doc additions:
+- `docs/vercel-deploy-runbook.md` (NEW)
+- `docs/submission-checklist.md` (NEW)
+- `docs/cross-browser-test-plan.md` (NEW)
+- `docs/mobile-slow-3g-test-plan.md` (NEW)
+- `docs/lighthouse-final-scores.md` (NEW)
+
+**Gates summary (all green):**
+
+| Gate | Result |
+|------|--------|
+| `npx tsc --noEmit` | exit 0 |
+| `npx vitest run --no-file-parallelism` | 3529 passed (+101) |
+| `npm run build` | exit 0, `/` First Load JS = 150 kB |
+| `bpsai-pair arch check frontend/` | clean |
+| `npm run audit:brand` | clean |
+| `npm run audit:tokens` | clean (97 declared, 25 consumed) |
+| `npx next lint` | 0 errors, 1 pre-existing W1 warning |
+
+**C4 + C5 honest uncertainty:**
+
+- **C4 (Lighthouse measurement):** lhci could not run from this worktree env because port 3000 was occupied by a sibling driver agent at every attempt. The four scores in `docs/lighthouse-final-scores.md` are intentionally `_pending_` so a follow-up Shawn or CI run fills them in. The `npm run pre-deploy` Spotlight automates the build + lhci sequence so this is one command. The submission-checklist gate (`docs/submission-checklist.md` step "All Lighthouse scores ≥ 0.90 on production") is the human stop-loss until the doc is filled.
+- **C5 (custom domain):** Vercel runbook assumes `gowork.vercel.app` as the production domain. If Shawn wants `gowork.app` instead, it is a one-line edit to `NEXT_PUBLIC_SITE_URL` plus the DNS dance documented in §10 of the runbook. The submission video / Devpost / press kit all cite `NEXT_PUBLIC_SITE_URL` indirectly so the swap is loose-coupled.
 
 ### 2026-04-28 — W4 Driver D: Maximization + Per-Chapter OG + 7 Spotlight inventions (T4.D.1–T4.D.7)
 
