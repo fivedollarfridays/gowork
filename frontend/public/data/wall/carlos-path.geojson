@@ -1,0 +1,78 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "name": "Carlos's representative-block pin + 5-week path waypoints",
+    "source": "Generated from frontend/src/lib/wall/paths.ts (single source of truth)",
+    "buildScript": "buildCarlosPathGeoJSON() — see frontend/src/lib/wall/layers/carlosPath.ts",
+    "piiContract": "Home pin is a representative residential block within ZIP 76119, NOT Carlos's actual address. See paths.ts header.",
+    "lastVerified": "2026-04-27"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "home",
+        "label": "Carlos's neighborhood (representative block)",
+        "piiSafe": true
+      },
+      "geometry": { "type": "Point", "coordinates": [-97.293, 32.713] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "waypoint",
+        "label": "DPS — Article 55 expunction filing",
+        "week": 1,
+        "office": "tx-dps-mega-center-fort-worth"
+      },
+      "geometry": { "type": "Point", "coordinates": [-97.4216, 32.7396] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "waypoint",
+        "label": "HHSC — childcare subsidy intake",
+        "week": 4,
+        "office": "hhsc-fort-worth-east-lancaster"
+      },
+      "geometry": { "type": "Point", "coordinates": [-97.3134, 32.7506] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "waypoint",
+        "label": "Legal Aid — record cleared",
+        "week": 8,
+        "office": "legal-aid-northwest-texas-fw"
+      },
+      "geometry": { "type": "Point", "coordinates": [-97.3289, 32.7549] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "waypoint",
+        "label": "Workforce Solutions — interview prep",
+        "week": 10,
+        "office": "workforce-solutions-tarrant"
+      },
+      "geometry": { "type": "Point", "coordinates": [-97.3046, 32.7164] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "trace",
+        "label": "Carlos 5-week plan"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-97.293, 32.713],
+          [-97.4216, 32.7396],
+          [-97.3134, 32.7506],
+          [-97.3289, 32.7549],
+          [-97.3046, 32.7164]
+        ]
+      }
+    }
+  ]
+}

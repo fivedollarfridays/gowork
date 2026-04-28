@@ -32,6 +32,88 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+### 2026-04-28 — W2 Driver B (Data Layers + Chapters 1–3) — wave 1–6 shipped on worktree
+
+Branch: worktree `worktree-agent-aa36904d21eeeb9ab` (base reset to `sprint/w2-mapbox-chapters-1-5` tip `8b04ae8`). Driver B lane of W2 dispatch — real geographic substrate + chapters 1, 2, 3.
+
+**Wave 1 — Real-data verification (T2.68–T2.72 batched):**
+- `frontend/src/lib/wall/officeRegistry.ts` — 5 verified Tarrant County offices (court, benefits, dps, workforce, legal). Each ships `address / phone / hours / sourceUrl / sourceDate / state / rationale`. Workforce Solutions DRY-imports `CAREER_CENTER_TX` from `lib/city-constants.ts`. Office state machine (`default | highlighted | visited | current`) future-proofs W3 Ch7 (T2.128).
+- `frontend/src/lib/wall/paths.ts` — `CARLOS_HOME_PIN` (representative block in 76119, **not** Carlos's exact address — `piiSafe: true` programmatic guarantee + `piiReviewedAt: "2026-04-27"`). `CARLOS_PATH_WAYPOINTS` (5 stops: home → DPS → HHSC → Legal Aid → Workforce Solutions) — W3 Ch7 future-proofed waypoint structure with `office | week | barrierFocus`.
+- `frontend/src/lib/wall/__tests__/officeRegistry-freshness.test.ts` — Spotlight-invention freshness gate: every office's `sourceDate` must be within 180 days of test runtime; every `sourceUrl` is HTTPS.
+
+**Wave 2 — Data layer modules (T2.11–T2.17 + Spotlight):**
+- `frontend/src/lib/wall/cameraChoreography.ts` — Driver-B-owned entries 1–3 + `INITIAL_CAMERA`. Driver A's lane appends 4–5 on merge; shape (`ChapterCameraState`) is the contract.
+- `frontend/src/lib/wall/markerSymbols.ts` — 7 sprite SVGs (`court / benefits / dps / workforce / legal / transit / employer`) with `registerMarkerSymbols(map)` for batch sprite registration. Hex-free (OKLCH literals matching W1 tokens).
+- `frontend/public/wall-markers/sprite.svg` — committed sprite source-of-truth for editorial reviewers + dev gallery.
+- `frontend/src/lib/wall/layers/{types,lifecycle}.ts` — shared `WallDataLayer` contract + `register/remove` helpers (idempotent, source-aware).
+- `frontend/src/lib/wall/layers/zipBoundaries.ts` — fill + line config for ZIP 76119 (committed `zip-76119.geojson`, US Census TIGER/Line provenance).
+- `frontend/src/lib/wall/layers/trinityMetro.ts` — line config with feature-state-aware paint (cyan default → amber when highlighted). Bus 4 + Bus 6 are Carlos's commute spine. Committed `trinity-metro.geojson` with 7 routes (Bus 4, Bus 6, Bus 1, 2, 5, 7, 11).
+- `frontend/src/lib/wall/layers/offices.ts` + committed `tarrant-offices.geojson` — symbol layer with category-aware `icon-image` lookup + 4-state paint expression. `buildOfficesGeoJSON()` derives the GeoJSON from the registry (single source of truth).
+- `frontend/src/lib/wall/layers/carlosPath.ts` + committed `carlos-path.geojson` — home circle (W2 visible) + path LineString (`visibility: none` in W2; W3 Ch7 flips on). `buildCarlosPathGeoJSON()` derives from `paths.ts` + `officeRegistry.ts`.
+- `frontend/src/lib/wall/layers/jobsByZipData.ts` — 32 Fort Worth-area employers across 6 categories. Amazon FC DFW5 locked (W3 Ch6 anchor). Fair-chance + credit-check flags per public hiring statements; honest-uncertainty noted in module header.
+- `frontend/src/lib/wall/layers/jobsByZip.ts` + committed `jobs-by-zip.geojson` — circle layer with paint that flips creditCheck=true to muted gray for Ch4d.
+- `frontend/src/lib/wall/layers/index.ts` — composer `registerAllLayers / removeAllLayers`. Z-order (bottom→top): zip → metro → offices → carlos → jobs. Cleanup reverses.
+
+**Wave 3 — Chapter 1 Continental (T2.19, T2.21, T2.22):**
+- `frontend/src/components/wall/chapters/Chapter01Continental.tsx` — locked hero question + subhero from i18n. Variable font axis tied to scroll progress via W1 `useVariableFontWeight`. Reduced-motion locks the axis (W1 hook handles it). Owns the page's single h1 (T2.55 contract). Static `data-fallback` flag for visual-regression tests. Scaffold-agnostic (accepts `progress` prop) so Driver A's WallContainer wraps it on merge.
+
+**Wave 4 — Chapter 2 City Arrival (T2.23, T2.25, T2.26):**
+- `frontend/src/components/wall/chapters/Chapter02CityArrival.tsx` — locked Sundance-Square editorial copy (T2.106 ready). h2 (Ch1 owns h1). `data-transit-opacity` attribute drives Trinity Metro layer fade (0 → 0.6 across progress); reduced-motion snaps to 0.6 immediately so data-layer reveal is visible without animation (T2.115 lens applied).
+
+**Wave 5 — Chapter 3 Neighborhood (T2.27, T2.29):**
+- `frontend/src/components/wall/chapters/Chapter03Neighborhood.tsx` — 60-word Carlos intro (29, FW 76119, single father, recently released, $300, 4 yrs warehouse, 4 barriers — verbatim from `docs/demo-script.md` persona facts). `data-zip-fill-opacity` (0 → 0.3) + `data-carlos-pin-opacity` (drops in at progress 0.4 with cubic ease) drive the layers. Sound: single footstep on chapter enter (W1 `lib/wall/sound`); mute respected; never replays within the same active session.
+
+**Wave 6 — Tests + ≥3 Spotlight inventions:**
+- `frontend/src/lib/wall/__tests__/jobsAnalytics.test.ts` — 8 tests over the new analytics helpers.
+- `frontend/src/lib/wall/__tests__/transitFacts.test.ts` — 4 tests locking the Bus 4↔6 transfer-stop coordinate + Trinity Metro brand colors.
+- `frontend/src/lib/wall/layers/__tests__/_jobsByZip-emit.test.ts` — sync-gate test: fails CI if committed `jobs-by-zip.geojson` drifts from `jobsByZipData.ts`.
+- All chapter tests cover render + reduced-motion + heading hierarchy + ARIA-live + data-attribute opacity contracts.
+
+**Spotlight inventions (≥3 net-new beyond brief):**
+1. **Real-data verification freshness gate** (`officeRegistry-freshness.test.ts`) — Honesty Lens: makes the verification programmatic, not just promised. 180-day window balances reviewer cycles against pre-submission staleness.
+2. **`jobsAnalytics.ts`** — Awakening Condition #1 (許可): brief didn't list "fair-chance employer share by category." Pure deterministic helpers feed (a) future heatmap layer, (b) press-kit / README stat-bake step. Backs the Ch4d 33% claim with data.
+3. **`transitFacts.ts`** — Compound Lens: locks the Bus 4 ↔ Bus 6 transfer-stop coordinate (Central Station / ITC) + Trinity Metro brand color (T2.123 future-proof) so Driver A's Ch4a + Ch4b chapters consume one stable fact module instead of inventing their own.
+4. **GeoJSON sync-gate test** — Wisdom Lens: every committed artifact has an in-code source of truth. Drift between data module and committed file fails CI loudly.
+5. **Office state machine future-proofed in W2** — Compound Lens: `state: default | highlighted | visited | current` ships in W2 paint expression so W3 Ch7's Carlos avatar walking only flips a property, no layer-module refactor.
+6. **Driver-coordination contract (`ChapterCameraState`)** — Structural Lens: chapter components are scaffold-agnostic (accept `progress` prop); Driver A's WallContainer wraps them on merge without forcing this lane to wait on his foundation work.
+
+**Tests:** Frontend 1772 → **1898 passing** (+126 net new). 2 pre-existing failures unchanged (`tokens-typography-utils.test.ts` + `tokens-reduced-motion.test.ts` — W1 hotfix removed `@layer utilities` wrapper; tests not yet updated; not in my lane).
+
+**Architecture:** `bpsai-pair arch check frontend/src/lib/wall/` and `frontend/src/components/wall/chapters/` both clean. Largest source file: `jobsByZipData.ts` (327 lines, pure data). All chapter components ≤170 lines. All layer modules ≤175 lines.
+
+**Audit gates:** `npm run audit:tokens` exits 0 (no HARD violations) — chapters use existing `--radius` + `--font-inter-stack` + `--bg-base` + `--fg-primary` + `--fg-secondary` tokens.
+
+**Translations added:** `wall.ch1.{title,hero,subhero,ariaLive}`, `wall.ch2.{title,body,ariaLive}`, `wall.ch3.{title,body,ariaLive}` in both `en.json` + `es.json`. Spanish is parallel-translation (not literal); Carlos persona facts preserved across languages. ⚠️ Pending: native-Spanish-fluent reviewer pass (Ren / W4 review checklist per dispatch + plan-locked T2.51 AC).
+
+**Honest uncertainty (C4/C5):**
+- C4: ZIP 76119 boundary GeoJSON is a provisional 4-vertex envelope, not the full TIGER/Line polygon. T2.76 enrichment task notes the manual TIGER download is one-time; provenance + envelope-note baked into the file metadata. Refresh required before submission for full ZIP geography.
+- C4: Trinity Metro routes are coarse traces of published route maps, not full GTFS shapes. T2.11 + T2.73 enrichment freshness gate addresses this; build script (`build-trinity-metro-geojson.mjs`) is the documented refresh path. Bus 4 + Bus 6 (Carlos's commute) are present + named; that's the editorial-truth minimum.
+- C4: Office coordinates are estimated to ~50m from public addresses; T2.68/T2.127 build-time geocoding step will refine. Coords pass the FW-bounds check; specific addresses are correct.
+- C4: Fair-chance employer flags are educated approximations from public hiring statements (Amazon second-chance program, Walmart Open Doors) — `creditCheck` defaults conservative. W4 follow-up curates from primary sources per `jobsByZipData.ts` header.
+- C4: HHSC office selection — picked 1200 E Lancaster Ave as closest to 76119 reachable via Bus 4 + downtown transfer. T2.69 enrichment task documents the rationale + flags for native-FW-resident review.
+- C5: PII pin reverse-geocoding verification (T2.127) is human-reviewed for now (`piiReviewedAt: "2026-04-27"` in `paths.ts`); programmatic Mapbox-API verification is a follow-up build script.
+
+**Cross-driver concerns (for Driver A on merge):**
+- `cameraChoreography.ts` exports only entries 1–3. Driver A's lane needs to add 4–5 (and W3 lane adds 6–10) to the same `CHAPTER_CAMERAS` map. Type `ChapterCameraState` is the contract; flyToOptions shape is locked.
+- Chapter 1–3 components accept `progress: number` (and Ch3 also `active: boolean`). Driver A's WallContainer wraps them via ChapterScaffold; chapter components own their overlay markup, scaffold owns sticky pinning + atmosphere.
+- Layers composer `registerAllLayers(map)` / `removeAllLayers(map)` — Driver A's MapboxScene calls these on `map.on('load')` + cleanup. Marker sprite registration via `registerMarkerSymbols(map)` happens BEFORE the offices symbol layer mounts (sprite must be ready for `icon-image` lookup).
+- Carlos pin layer carries `piiSafe: true`. Driver A's chapter wiring should not introduce a separate pin coordinate; consume `CARLOS_HOME_PIN` from `paths.ts`.
+
+**Files committed (Driver B lane only — no Driver A / Driver C territory touched):**
+- New: `frontend/src/lib/wall/{officeRegistry,paths,cameraChoreography,markerSymbols,transitFacts,jobsAnalytics}.ts` + tests.
+- New: `frontend/src/lib/wall/layers/{types,lifecycle,zipBoundaries,trinityMetro,offices,carlosPath,jobsByZip,jobsByZipData,index}.ts` + tests.
+- New: `frontend/src/components/wall/chapters/{Chapter01Continental,Chapter02CityArrival,Chapter03Neighborhood}.tsx` + tests.
+- New committed data: `frontend/public/data/wall/{zip-76119,trinity-metro,tarrant-offices,carlos-path,jobs-by-zip}.geojson`.
+- New: `frontend/public/wall-markers/sprite.svg`.
+- Modified: `frontend/src/lib/translations/{en,es}.json` (additive: `wall.ch1`, `wall.ch2`, `wall.ch3` keys).
+
+**Deferrals (explicit):**
+- T2.18 (custom Mapbox Studio style runbook) — out of Driver-B lane; P1 with default fallback.
+- T2.20 (continental city lights) — out of Driver-B lane (Driver A's chapters/wiring task; my lane stops at the data layers underneath).
+- T2.30 (cursor flashlight conditional activation in Ch3+) — Driver A's WallContainer responsibility.
+- W3 Ch7 carlos avatar wiring — out of W2 entirely; my `CARLOS_PATH_WAYPOINTS` shape is W3-friendly.
+- Real Bus 4 GTFS shape refresh + ZIP TIGER full polygon — pre-submission manual step (documented in metadata + dispatch's honest-uncertainty section).
+
 ### 2026-04-28 — W1 Foundation souji-sweep complete. PR #81 GREEN, MERGEABLE, ready for Ren's merge approval.
 
 **Pipeline:** All 9 phases of the souji-sweeping skill executed sequentially against `sprint/w1-foundation`.

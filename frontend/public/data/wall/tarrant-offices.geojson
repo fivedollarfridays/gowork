@@ -1,0 +1,86 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "name": "Tarrant County offices — verified",
+    "source": "Generated from frontend/src/lib/wall/officeRegistry.ts (single source of truth)",
+    "buildScript": "buildOfficesGeoJSON() — see frontend/src/lib/wall/layers/offices.ts",
+    "lastVerified": "2026-04-27"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "tarrant-district-clerk",
+        "category": "court",
+        "name": "Tarrant County District Clerk",
+        "address": "200 E Weatherford St, Fort Worth, TX 76196",
+        "phone": "(817) 884-1574",
+        "hours": "Monday – Friday, 8:00 AM – 5:00 PM",
+        "sourceUrl": "https://www.tarrantcountytx.gov/en/district-clerk.html",
+        "sourceDate": "2026-04-27",
+        "state": "default"
+      },
+      "geometry": { "type": "Point", "coordinates": [-97.3326, 32.7553] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "hhsc-fort-worth-east-lancaster",
+        "category": "benefits",
+        "name": "Texas HHSC — Fort Worth Benefits Office",
+        "address": "1200 E Lancaster Ave, Fort Worth, TX 76102",
+        "phone": "(211)",
+        "hours": "Monday – Friday, 8:00 AM – 5:00 PM",
+        "sourceUrl": "https://www.hhs.texas.gov/services/benefits-offices",
+        "sourceDate": "2026-04-27",
+        "state": "default"
+      },
+      "geometry": { "type": "Point", "coordinates": [-97.3134, 32.7506] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "tx-dps-mega-center-fort-worth",
+        "category": "dps",
+        "name": "Texas DPS — Fort Worth Driver License Office",
+        "address": "1849 Cherry Ln, Fort Worth, TX 76116",
+        "phone": "(817) 244-5430",
+        "hours": "Monday – Friday, 8:00 AM – 5:00 PM",
+        "sourceUrl": "https://www.dps.texas.gov/section/driver-license/locations",
+        "sourceDate": "2026-04-27",
+        "state": "default"
+      },
+      "geometry": { "type": "Point", "coordinates": [-97.4216, 32.7396] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "workforce-solutions-tarrant",
+        "category": "workforce",
+        "name": "Workforce Solutions for Tarrant County",
+        "address": "1200 Circle Dr, Fort Worth, TX 76119",
+        "phone": "817-413-4400",
+        "hours": "Monday – Friday, 8:00 AM – 5:00 PM",
+        "sourceUrl": "https://www.workforcesolutions.net/locations/",
+        "sourceDate": "2026-04-27",
+        "state": "default"
+      },
+      "geometry": { "type": "Point", "coordinates": [-97.3046, 32.7164] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "legal-aid-northwest-texas-fw",
+        "category": "legal",
+        "name": "Legal Aid of NorthWest Texas — Fort Worth",
+        "address": "600 E Weatherford St, Fort Worth, TX 76102",
+        "phone": "(817) 336-3943",
+        "hours": "Monday – Friday, 9:00 AM – 4:00 PM",
+        "sourceUrl": "https://www.lanwt.org/en-US/locations.aspx",
+        "sourceDate": "2026-04-27",
+        "state": "default"
+      },
+      "geometry": { "type": "Point", "coordinates": [-97.3289, 32.7549] }
+    }
+  ]
+}
