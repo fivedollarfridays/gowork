@@ -104,3 +104,93 @@ If any answer is "no" → flag for revision in W4 Spanish-parity pass.
 > Authored 2026-04-28 by W1 Driver-D maximization pass.  
 > Source-of-truth EN strings live at `frontend/src/lib/translations/en.json`.  
 > Source-of-truth ES strings live at `frontend/src/lib/translations/es.json`.
+
+---
+
+## W2 Driver C — Chapter 4–5 review queue (added 2026-04-28)
+
+The chapters are where editorial gravity lands. Strings flagged below carry an explicit `[ES-pending-review]` suffix in `es.json` and require a native reviewer pass before W4.
+
+### String 5 — Chapter 4 lede (the math thesis)
+
+**Source key:** `wall.chapter04.lede`
+
+**English:**
+> Most workforce sites pretend barriers don't matter. We do the math to prove they do.
+
+**Spanish (pending review):**
+> La mayoría de los sitios laborales hace como si las barreras no importaran. Nosotros hacemos las cuentas para demostrar que sí.
+
+**Reviewer prompts:**
+- [ ] Does "hace como si" capture the contemptuous "pretend"? Alternative: "actúa como si".
+- [ ] "Hacemos las cuentas" — financial idiom or can it land for non-monetary barriers?
+- [ ] Should "barreras" (barriers) be "obstáculos" for warmer connotation in MX Spanish?
+
+### String 6 — Carlos quote (Ch4a "$300 and a daughter")
+
+**Source key:** `wall.chapter04a.pullquote`
+
+**English:**
+> I came home with $300 and a daughter, and the system told me to go to five offices.
+
+**Spanish (pending review):**
+> Volví a casa con 300 dólares y una hija, y el sistema me mandó a cinco oficinas.
+
+**Reviewer prompts:**
+- [ ] Does "Volví a casa" preserve the "came home from incarceration" subtext?
+- [ ] Is "el sistema me mandó" register-correct (formal-warm), or should it be "el sistema me dijo que fuera"?
+- [ ] Does the line feel like Carlos's voice (not narrator's)?
+
+### String 7 — Carlos quote (Ch4b "45 minutes is the schedule, 87 is the day")
+
+**Source key:** `wall.chapter04b.pullquote`
+
+**English:**
+> Forty-five minutes is the schedule. Eighty-seven is the day.
+
+**Spanish (pending review):**
+> Cuarenta y cinco minutos es el horario. Ochenta y siete es el día.
+
+**Reviewer prompts:**
+- [ ] Does the Spanish preserve the rhythmic two-clause structure? It should land like a sigh.
+- [ ] "El día" — confirm this lands as "the actual day," not "today."
+
+### String 8 — Carlos quote (Ch4d credit door metaphor)
+
+**Source key:** `wall.chapter04d.pullquote`
+
+**English:**
+> A score I can't see is closing doors I never knocked on.
+
+**Spanish (pending review):**
+> Un puntaje que no veo me está cerrando puertas a las que nunca toqué.
+
+**Reviewer prompts:**
+- [ ] Does "puntaje" land for credit score, or should it be "calificación"?
+- [ ] The "knock on doors" metaphor: does it work in MX Spanish or read awkwardly?
+- [ ] Should the tense be present-perfect ("he tocado") instead of preterite ("toqué")?
+
+### String 9 — Chapter 5 Labyrinth editorial (locked phrase)
+
+**Source key:** `wall.chapter05.editorial`
+
+**English:**
+> 5 offices. 47 forms. Each one says go to the next one.
+
+**Spanish (current — NOT flagged, but verify):**
+> 5 oficinas. 47 formularios. Cada una te manda a la siguiente.
+
+**Reviewer prompts:**
+- [ ] Does "te manda" preserve the bureaucratic command tone? Alternative: "te envía".
+- [ ] "La siguiente" agrees with "oficina" (feminine). Confirm intent — is the next OFFICE the antecedent, not the next FORM?
+- [ ] Word count: ES is shorter here (good); does the rhythm still feel staccato?
+
+### Locked DO-NOT-translate items (W2 Driver C)
+
+These render as literal numbers / units and stay identical across locales:
+- "47" (forms count)
+- "5" (offices count)
+- "$1,200/mes" — uses `mes` instead of `mo` for ES (already done)
+- Bus route names ("Autobús 4", "Autobús 6")
+
+> Authored 2026-04-28 by W2 Driver C — Chapter 4–5 lane.

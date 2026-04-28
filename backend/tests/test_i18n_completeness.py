@@ -54,6 +54,17 @@ IDENTICAL_PAIR_ALLOWLIST: dict[str, str] = {
     # 'Legal' is the aria-label for the footer's legal-links nav. The word
     # is a Latinism with identical surface form and meaning in EN/ES.
     "footer.navLabel": "'Legal' is identical in EN/ES.",
+    # The Wall stat-pills carry compact numeric / abbreviated-unit values
+    # that don't translate. Spanish uses 'min' for minute (Sp. 'minuto'
+    # abbreviated) and bare percentages identically. The descriptive labels
+    # next to them (statLabel) carry the actual translation.
+    "wall.chapter04a.statValue": "'71 min' — numeric duration with 'min' abbreviation identical in EN/ES.",
+    "wall.chapter04b.statValue": "'87 min' — numeric duration with 'min' abbreviation identical in EN/ES.",
+    "wall.chapter04d.statValue": "'33%' — bare percentage; identical surface form in EN/ES.",
+    # Chapter 5's forms-counter is a pure integer that anchors the WALL
+    # tally. The descriptive label ('formsCounterLabel') carries the
+    # translation; the count itself is identical in any language.
+    "wall.chapter05.formsCounter": "'47' — pure integer count; identical in EN/ES.",
 }
 
 

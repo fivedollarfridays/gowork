@@ -233,8 +233,13 @@ describe("PlanExport", () => {
     expect(screen.getByText(/generating/i)).toBeInTheDocument();
     expect(button).toBeDisabled();
 
-    // Resolve the save promise and let it complete
+    // Resolve the save promise and AWAIT it so the React state update from
+    // the .then() handler commits before the test function returns. Without
+    // the await, the state update could leak into the next test (PlanExport
+    // flake — W1 souji notes).
     resolveSave();
+    await savePromise;
+    await new Promise((r) => setTimeout(r, 0));
   });
 
   it("error message has role=alert", async () => {

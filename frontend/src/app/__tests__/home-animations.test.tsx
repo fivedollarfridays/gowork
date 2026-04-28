@@ -21,10 +21,13 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
-// Dynamically import Home so mocks are applied
-const { default: Home } = await import("../page");
+// W2 (T2.46): the legacy hero/flow/stats landing now lives at /archive.
+// `../page` renders WallContainer; the legacy content (which this test
+// guards) is preserved verbatim at `../archive/page`. Test the archive
+// route so the legacy contract still holds and rollback insurance works.
+const { default: Home } = await import("../archive/page");
 
-describe("Home page animations", () => {
+describe("Archived home page animations (preserved at /archive after W2 T2.46)", () => {
   it("renders hero heading text", () => {
     render(<Home />);
     expect(
