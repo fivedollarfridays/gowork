@@ -441,7 +441,59 @@
     "tagline": "Workforce Navigator",
     "navLabel": "Legal",
     "privacy": "Privacy",
-    "terms": "Terms"
+    "terms": "Terms",
+    "brand": {
+      "label": "GoWork — workforce infrastructure for any American city"
+    },
+    "github": "Open source on GitHub",
+    "license": "MIT licensed",
+    "lastCalibration": "Last calibrated"
+  },
+  "header": {
+    "brand": {
+      "label": "GoWork — back to the wall"
+    },
+    "muteToggle": {
+      "aria": "Toggle ambient sound"
+    },
+    "languageToggle": {
+      "aria": "Switch between English and Spanish"
+    },
+    "github": {
+      "aria": "View the source code on GitHub"
+    },
+    "chapterCounter": {
+      "aria": "Current chapter, of ten"
+    }
+  },
+  "wall": {
+    "titleSequence": {
+      "presenter": "GoWork presents",
+      "title": "The Wall",
+      "subtitle": "An interactive map of Fort Worth, Texas · April 2026"
+    }
+  },
+  "edge": {
+    "404": {
+      "title": "There is no path to this URL",
+      "body": "But there is one through the wall. Every barrier connects — let's get you back on the route.",
+      "cta": "Back to the wall"
+    },
+    "500": {
+      "title": "Something stalled",
+      "body": "We're calibrating. The page hit a snag, our team has been notified, and the request was logged. Try again, or step back to the home view.",
+      "cta": "Try again"
+    },
+    "empty": {
+      "title": "Nothing to chart yet",
+      "body": "Once data lands here, the path will draw itself."
+    },
+    "loading": {
+      "label": "Calibrating the path"
+    }
+  },
+  "a11y": {
+    "skipToContent": "Skip to main content"
   },
   "privacy": {
     "heading": "Privacy Policy",

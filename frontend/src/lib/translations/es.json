@@ -441,7 +441,59 @@
     "tagline": "Navegador laboral",
     "navLabel": "Legal",
     "privacy": "Privacidad",
-    "terms": "Términos"
+    "terms": "Términos",
+    "brand": {
+      "label": "GoWork — infraestructura laboral para cualquier ciudad estadounidense"
+    },
+    "github": "Código abierto en GitHub",
+    "license": "Licencia MIT",
+    "lastCalibration": "Última calibración"
+  },
+  "header": {
+    "brand": {
+      "label": "GoWork — volver al muro"
+    },
+    "muteToggle": {
+      "aria": "Activar o silenciar el sonido ambiente"
+    },
+    "languageToggle": {
+      "aria": "Cambiar entre inglés y español"
+    },
+    "github": {
+      "aria": "Ver el código fuente en GitHub"
+    },
+    "chapterCounter": {
+      "aria": "Capítulo actual, de diez"
+    }
+  },
+  "wall": {
+    "titleSequence": {
+      "presenter": "GoWork presenta",
+      "title": "El Muro",
+      "subtitle": "Un mapa interactivo de Fort Worth, Texas · abril de 2026"
+    }
+  },
+  "edge": {
+    "404": {
+      "title": "No hay un camino hacia esta dirección",
+      "body": "Pero sí hay uno a través del muro. Cada barrera se conecta con la siguiente — vamos a regresarte a la ruta.",
+      "cta": "Volver al muro"
+    },
+    "500": {
+      "title": "Algo se detuvo",
+      "body": "Estamos recalibrando. La página tropezó con un error, nuestro equipo fue notificado y la solicitud quedó registrada. Inténtalo de nuevo, o regresa al inicio.",
+      "cta": "Intentar de nuevo"
+    },
+    "empty": {
+      "title": "Aún no hay nada que trazar",
+      "body": "En cuanto lleguen los datos, el camino se dibujará solo."
+    },
+    "loading": {
+      "label": "Calibrando el camino"
+    }
+  },
+  "a11y": {
+    "skipToContent": "Saltar al contenido principal"
   },
   "privacy": {
     "heading": "Política de Privacidad",
