@@ -1,11 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="GoWork">
+<!--
+  GoWork brand mark : G + horizontal cyan path-line slicing the opening.
+
+  Geometric reasoning :
+    Source viewBox 0 0 16 16. The mark is DESIGNED AT 16px FIRST. Every
+    stroke and coordinate was tuned for unambiguous reading at favicon
+    density on Windows ClearType and macOS Retina, then scales upward
+    via SVG viewport for any larger raster (32, 192, 512). Legibility
+    checked top-down, not bottom-up.
+
+    Stroke width 2.4 (15 percent of viewport) for the G; chosen so the
+    arc holds together at 16px without merging into a blob, and stays
+    confident at 192px+. Arc spans 270 degrees from top (8,2) sweeping
+    counter-clockwise through left, bottom, and back to (14,8). The
+    counter (interior gap) sits on the right edge between y=8 and y=14.
+
+    The horizontal cyan path-line (#22D3EE) replaces the inner serif
+    of the G. It runs from x=8 (centre) past the right edge to x=15.
+    The path metaphor literally embodied in the letterform : the route
+    through the opening, continuing onward.
+
+    On hover, the path-line stroke-dashoffset can animate L-to-R to draw
+    the path. Consumers control via CSS class .gowork-mark--hover.
+
+    The legacy M-shape polyline (predecessor brand) is INTENTIONALLY
+    RETIRED. Do NOT reintroduce M-geometry. The G is the brand.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" role="img" aria-label="GoWork — workforce infrastructure for any American city" class="gowork-mark">
   <title>GoWork</title>
-  <rect width="512" height="512" rx="96" fill="#1c3461"/>
-  <g fill="none" stroke="#2a9d8f" stroke-width="40" stroke-linecap="round" stroke-linejoin="round">
-    <!-- Stylized "M" + path mark: two upright strokes with a forward arrow,
-         evoking "go to work". -->
-    <polyline points="112,384 112,160 192,288 272,160 272,384"/>
-    <polyline points="320,256 400,256 360,216 M400,256 360,296" stroke="#f4c66d"/>
+  <g fill="none" stroke="#F5F3EE" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 14 8 A 6 6 0 1 0 8 14" />
   </g>
+  <line x1="8" y1="8" x2="15" y2="8" stroke="#22D3EE" stroke-width="2.4" stroke-linecap="round" class="gowork-mark__path" />
 </svg>
