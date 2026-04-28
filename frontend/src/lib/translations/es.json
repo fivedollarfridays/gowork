@@ -471,6 +471,69 @@
       "presenter": "GoWork presenta",
       "title": "El Muro",
       "subtitle": "Un mapa interactivo de Fort Worth, Texas · abril de 2026"
+    },
+    "chapter01": {
+      "heroQuestion": "¿Qué se interpone entre tú y un empleo?",
+      "editorial": "Estados Unidos visto desde arriba. Un punto en la oscuridad — Fort Worth, Texas.",
+      "carlosLead": "Vamos a conocer a un trabajador llamado Carlos.",
+      "pullquote": "No deberías tener que descubrir solo cómo cruzar el muro."
+    },
+    "chapter02": {
+      "editorial": "Aquí vive Carlos. Código postal 76119. Al este del centro.",
+      "detail": "Las rutas de Trinity Metro atraviesan la ciudad en cian. La mitad no llegan a las bodegas.",
+      "aria": "Capítulo 2: Fort Worth desde altura. Rutas de Trinity Metro trazadas en cian."
+    },
+    "chapter03": {
+      "carlosIntro": "Carlos tiene 29 años. Es padre de una niña de cuatro. Hace tres años, un cargo menor por robo. Sentencia cumplida. Cuatro años de experiencia en bodegas y un certificado de montacargas en mano. Ahora está en casa, intentando volver a trabajar.",
+      "neighborhoodLabel": "Código postal 76119 — Este de Fort Worth",
+      "aria": "Capítulo 3: una cuadra del barrio 76119. Conocemos a Carlos."
+    },
+    "chapter04": {
+      "title": "El Muro",
+      "lede": "La mayoría de los sitios laborales hace como si las barreras no importaran. Nosotros hacemos las cuentas para demostrar que sí. [ES-pending-review]",
+      "aria": "Capítulo 4: El Muro. Cuatro barreras, nombradas una por una."
+    },
+    "chapter04a": {
+      "title": "Antecedentes penales",
+      "detail": "4.8 millas. Autobús 4 + Autobús 6 = 71 minutos.",
+      "statValue": "71 min",
+      "statLabel": "hasta la Oficina del Secretario de Distrito",
+      "pullquote": "Volví a casa con 300 dólares y una hija, y el sistema me mandó a cinco oficinas. [ES-pending-review]",
+      "aria": "Barrera uno: antecedentes penales. La Oficina del Secretario de Distrito del Condado de Tarrant queda a 4.8 millas. Autobús 4 más Autobús 6 suman 71 minutos."
+    },
+    "chapter04b": {
+      "title": "Sin transporte",
+      "detail": "Vive en el 76119. El Autobús 4 al centro toma 45 minutos. Más un transbordo. Más la espera.",
+      "statValue": "87 min",
+      "statLabel": "trayecto al centro",
+      "pullquote": "Cuarenta y cinco minutos es el horario. Ochenta y siete es el día. [ES-pending-review]",
+      "aria": "Barrera dos: sin transporte. El trayecto al centro en el Autobús 4, con transbordo, suma 87 minutos."
+    },
+    "chapter04c": {
+      "title": "Sin cuidado infantil",
+      "detail": "Su hija tiene 4 años. La guardería cuesta 1,200 dólares al mes que él no tiene.",
+      "statValue": "$1,200/mes",
+      "statLabel": "sin subsidio",
+      "pullquote": "No puedo aceptar un turno que empiece antes de que abra la guardería.",
+      "aria": "Barrera tres: sin cuidado infantil. El precio de mercado es de 1,200 dólares al mes sin subsidio."
+    },
+    "chapter04d": {
+      "title": "Mal crédito",
+      "detail": "540. Pagos atrasados. Una cuenta en cobranza. La mitad de los apartamentos no lo aceptan — y uno de cada tres empleos hace revisión de crédito.",
+      "statValue": "33%",
+      "statLabel": "de los empleos quedan fuera",
+      "pullquote": "Un puntaje que no veo me está cerrando puertas a las que nunca toqué. [ES-pending-review]",
+      "aria": "Barrera cuatro: mal crédito. Aproximadamente uno de cada tres empleos hace una revisión de crédito que Carlos no aprobaría."
+    },
+    "chapter05": {
+      "title": "El Laberinto",
+      "editorial": "5 oficinas. 47 formularios. Cada una te manda a la siguiente.",
+      "lede": "Sin GoWork, este es el camino. Le pusimos nombre para poder reemplazarlo.",
+      "formsCounter": "47",
+      "formsCounterLabel": "formularios por llenar",
+      "officesLabel": "oficinas por visitar",
+      "pullquote": "Cada oficina me dio un formulario y otra dirección.",
+      "aria": "Capítulo 5: el Laberinto. Cinco oficinas y cuarenta y siete formularios — el caos antes de que GoWork ordene el camino."
     }
   },
   "edge": {
