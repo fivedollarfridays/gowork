@@ -4,7 +4,7 @@ import {
   INITIAL_CAMERA,
   TRANSITION_SPEEDS,
   type ChapterCameraState,
-  type ChapterId,
+  type W2ChapterId,
 } from "../cameraChoreography";
 
 /**
@@ -26,7 +26,7 @@ import {
  * structural answer is "one config, indexed by chapter."
  */
 
-const W2_CHAPTERS: ChapterId[] = [1, 2, 3, 4, 5];
+const W2_CHAPTERS: W2ChapterId[] = [1, 2, 3, 4, 5];
 
 describe("T2.4 — INITIAL_CAMERA boots into Fort Worth overview", () => {
   it("centers Fort Worth (lng -97.3308, lat 32.7555)", () => {

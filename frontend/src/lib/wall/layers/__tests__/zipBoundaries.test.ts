@@ -19,12 +19,12 @@ import {
 } from "../zipBoundaries";
 
 interface MockMap {
-  addSource: ReturnType<typeof vi.fn>;
-  addLayer: ReturnType<typeof vi.fn>;
-  removeLayer: ReturnType<typeof vi.fn>;
-  removeSource: ReturnType<typeof vi.fn>;
-  getLayer: ReturnType<typeof vi.fn>;
-  getSource: ReturnType<typeof vi.fn>;
+  addSource: ReturnType<typeof vi.fn<(id: string, source: { type: string }) => void>>;
+  addLayer: ReturnType<typeof vi.fn<(layer: { id: string }) => void>>;
+  removeLayer: ReturnType<typeof vi.fn<(id: string) => void>>;
+  removeSource: ReturnType<typeof vi.fn<(id: string) => void>>;
+  getLayer: ReturnType<typeof vi.fn<(id: string) => { id: string } | undefined>>;
+  getSource: ReturnType<typeof vi.fn<(id: string) => { id: string } | undefined>>;
 }
 
 function createMockMap(): MockMap {

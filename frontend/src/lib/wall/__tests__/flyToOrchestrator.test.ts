@@ -34,8 +34,8 @@ interface FlyToOpts {
 }
 
 interface FakeMap {
-  flyTo: ReturnType<typeof vi.fn<[FlyToOpts], void>>;
-  jumpTo: ReturnType<typeof vi.fn<[FlyToOpts], void>>;
+  flyTo: ReturnType<typeof vi.fn<(opts: FlyToOpts) => void>>;
+  jumpTo: ReturnType<typeof vi.fn<(opts: FlyToOpts) => void>>;
 }
 
 function makeFakeMap(): FakeMap {
