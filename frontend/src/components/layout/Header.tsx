@@ -9,6 +9,7 @@ import { ChapterCounter } from "@/components/wall/ChapterCounter";
 import { MuteToggle } from "@/components/wall/MuteToggle";
 import { LanguageToggle } from "@/components/wall/LanguageToggle";
 import { BrandMark } from "@/components/wall/BrandMark";
+import { LiveNow } from "@/components/wall/LiveNow";
 
 /**
  * T1.51 — Header rewrite.
@@ -53,6 +54,11 @@ function HeaderInner({ wallChapter }: HeaderProps) {
             <NavBar />
           </div>
           <div className="ml-auto flex items-center gap-2">
+            {wallChapter && wallChapter.current > 1 ? (
+              // T4.A.5 — Live Now widget (hidden on Ch1 hero so the
+              // headline can breathe).
+              <LiveNow />
+            ) : null}
             {wallChapter ? (
               <ChapterCounter
                 current={wallChapter.current}
