@@ -18,8 +18,8 @@ function read(): string {
 describe("T1.17 — utility classes (typography)", () => {
   const css = read();
 
-  it("defines .tabular-nums under @layer utilities", () => {
-    expect(css).toMatch(/@layer utilities[^}]*\.tabular-nums/s);
+  it("defines .tabular-nums at root scope (post-8b04ae8 @layer removal)", () => {
+    expect(css).toMatch(/\.tabular-nums\s*\{/);
   });
 
   it(".tabular-nums sets font-feature-settings 'tnum' 1", () => {
@@ -30,7 +30,7 @@ describe("T1.17 — utility classes (typography)", () => {
     expect(body).toMatch(/font-variant-numeric:\s*tabular-nums/);
   });
 
-  it("defines .font-mono-data under @layer utilities", () => {
+  it("defines .font-mono-data at root scope (post-8b04ae8 @layer removal)", () => {
     expect(css).toMatch(/\.font-mono-data\s*\{/);
   });
 

@@ -65,8 +65,11 @@ describe("T1.23 — idle-pulse keyframes + utility", () => {
     expect(css).toMatch(/@keyframes\s+idle-pulse\s*\{/);
   });
 
-  it(".animate-idle-pulse utility defined under @layer utilities", () => {
-    expect(css).toMatch(/@layer utilities[\s\S]*\.animate-idle-pulse/);
+  it(".animate-idle-pulse utility defined at root scope", () => {
+    // @layer wrappers were removed in 8b04ae8 (Tailwind PostCSS rejected
+    // @layer in @import partials). Rules now land at root scope; cascade
+    // is preserved by globals.css's @tailwind directives.
+    expect(css).toMatch(/\.animate-idle-pulse\s*\{/);
   });
 
   it(".animate-idle-pulse references the idle-pulse keyframes name", () => {
