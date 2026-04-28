@@ -498,7 +498,7 @@
     },
     "chapter04": {
       "title": "El Muro",
-      "lede": "La mayoría de los sitios laborales hace como si las barreras no importaran. Nosotros hacemos las cuentas para demostrar que sí. [ES-pending-review]",
+      "lede": "La mayoría de los sitios laborales hace como si las barreras no importaran. Nosotros hacemos las cuentas para demostrar que sí importan.",
       "aria": "Capítulo 4: El Muro. Cuatro barreras, nombradas una por una."
     },
     "chapter04a": {
@@ -506,7 +506,7 @@
       "detail": "4.8 millas. Autobús 4 + Autobús 6 = 71 minutos.",
       "statValue": "71 min",
       "statLabel": "hasta la Oficina del Secretario de Distrito",
-      "pullquote": "Volví a casa con 300 dólares y una hija, y el sistema me mandó a cinco oficinas. [ES-pending-review]",
+      "pullquote": "Volví a casa con 300 dólares y una hija, y el sistema me mandó a cinco oficinas.",
       "aria": "Barrera uno: antecedentes penales. La Oficina del Secretario de Distrito del Condado de Tarrant queda a 4.8 millas. Autobús 4 más Autobús 6 suman 71 minutos."
     },
     "chapter04b": {
@@ -514,7 +514,7 @@
       "detail": "Vive en el 76119. El Autobús 4 al centro toma 45 minutos. Más un transbordo. Más la espera.",
       "statValue": "87 min",
       "statLabel": "trayecto al centro",
-      "pullquote": "Cuarenta y cinco minutos es el horario. Ochenta y siete es el día. [ES-pending-review]",
+      "pullquote": "Cuarenta y cinco minutos es el horario. Ochenta y siete es el día.",
       "aria": "Barrera dos: sin transporte. El trayecto al centro en el Autobús 4, con transbordo, suma 87 minutos."
     },
     "chapter04c": {
@@ -530,7 +530,7 @@
       "detail": "540. Pagos atrasados. Una cuenta en cobranza. La mitad de los apartamentos no lo aceptan — y uno de cada tres empleos hace revisión de crédito.",
       "statValue": "33%",
       "statLabel": "de los empleos quedan fuera",
-      "pullquote": "Un puntaje que no veo me está cerrando puertas a las que nunca toqué. [ES-pending-review]",
+      "pullquote": "Un puntaje que no veo me está cerrando puertas a las que nunca toqué.",
       "aria": "Barrera cuatro: mal crédito. Aproximadamente uno de cada tres empleos hace una revisión de crédito que Carlos no aprobaría."
     },
     "chapter05": {
@@ -562,8 +562,8 @@
     "chapter07": {
       "title": "Capítulo 7 — El Camino",
       "hero": "Cinco paradas. Doce semanas. Un solo plan.",
-      "subhero": "GoWork ordena las mismas oficinas entre las que Carlos saltaba — pero en el orden correcto, con el formulario correcto, en la semana correcta. [ES-pending-review]",
-      "body": "Casa → DPS → HHSC → Asistencia Legal → Workforce Solutions. Los autobuses 4 y 6 de Trinity Metro lo llevan entre ellas. Le pusimos nombre al camino para poder caminarlo con él. [ES-pending-review]",
+      "subhero": "GoWork ordena las mismas oficinas por las que Carlos andaba dando vueltas — pero en el orden correcto, con el formulario correcto, en la semana correcta.",
+      "body": "Casa → DPS → HHSC → Asistencia Legal → Workforce Solutions. Los autobuses 4 y 6 de Trinity Metro lo llevan entre una y otra. Le pusimos nombre al camino para poder caminarlo con él.",
       "aria": "Capítulo 7: El Camino. El plan de doce semanas de Carlos recorre cinco oficinas en orden.",
       "weekLabel1": "Semana 1 — DPS",
       "weekLabel2": "Semana 4 — HHSC",
@@ -575,8 +575,8 @@
     "chapter08": {
       "title": "Capítulo 8 — El Grafo",
       "hero": "El muro no es una lista. Es un grafo.",
-      "subhero": "Cada barrera se conecta con otras dos. Resolver una acerca otras tres. Las mapeamos para poder rodearlas. [ES-pending-review]",
-      "body": "Treinta y tres nodos. Siete categorías. La constelación respira sobre la ciudad — cada arista es una dependencia, cada nodo una barrera con nombre. [ES-pending-review]",
+      "subhero": "Cada barrera se conecta con otras dos. Resuelves una y otras tres se acercan. Las mapeamos para poder rodearlas.",
+      "body": "Treinta y tres nodos. Siete categorías. La constelación respira sobre la ciudad — cada arista es una dependencia, cada nodo es una barrera con nombre.",
       "aria": "Capítulo 8: El Grafo. Una constelación tridimensional de barreras flota sobre el centro de Fort Worth.",
       "fallbackAlt": "Imagen estática de la constelación de 33 nodos de barreras",
       "barrierLabels": {
