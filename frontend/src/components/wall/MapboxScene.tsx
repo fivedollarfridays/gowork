@@ -22,7 +22,7 @@
  * fallback — never a half-rendered stall.
  */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import Map, { AttributionControl, type MapRef } from "react-map-gl";
 import { getMapboxToken } from "@/lib/wall/env";
 import { resolveMapboxStyleUrl } from "@/lib/wall/mapboxStyle";
@@ -31,20 +31,26 @@ import { INITIAL_CAMERA } from "@/lib/wall/cameraChoreography";
 /** Public props — kept narrow because chapters consume the map via context
  *  (T2.2 WallContainer), not via prop drilling. */
 export interface MapboxSceneProps {
-  /** Optional className passthrough so WallContainer can size the map. */
-  className?: string;
+  /** Optional inline style passthrough — react-map-gl v7 accepts `style`
+   *  but not `className` on the Map element directly. */
+  style?: CSSProperties;
 }
 
-export default function MapboxScene({ className }: MapboxSceneProps) {
+const DEFAULT_STYLE: CSSProperties = { width: "100%", height: "100%" };
+
+export default function MapboxScene({ style }: MapboxSceneProps) {
   const mapRef = useRef<MapRef | null>(null);
   const token = getMapboxToken() ?? "";
   const styleUrl = resolveMapboxStyleUrl();
 
   // T2.5 — explicit cleanup. Mapbox does NOT free its WebGL context when
   // the React wrapper unmounts; without this, a second mount stalls.
+  // Capture the ref's current at effect-mount time so the cleanup function
+  // doesn't read a possibly-shifted ref.current later (lint guidance).
   useEffect(() => {
+    const refSnapshot = mapRef;
     return () => {
-      const map = mapRef.current?.getMap?.();
+      const map = refSnapshot.current?.getMap?.();
       if (map && typeof (map as { remove?: () => void }).remove === "function") {
         (map as { remove: () => void }).remove();
       }
@@ -56,7 +62,13 @@ export default function MapboxScene({ className }: MapboxSceneProps) {
       ref={mapRef}
       mapboxAccessToken={token}
       mapStyle={styleUrl}
-      initialViewState={INITIAL_CAMERA}
+      initialViewState={{
+        longitude: INITIAL_CAMERA.longitude,
+        latitude: INITIAL_CAMERA.latitude,
+        zoom: INITIAL_CAMERA.zoom,
+        pitch: INITIAL_CAMERA.pitch,
+        bearing: INITIAL_CAMERA.bearing,
+      }}
       // Chapter scroll drives the camera — these controls are off.
       dragRotate={false}
       scrollZoom={false}
@@ -66,8 +78,7 @@ export default function MapboxScene({ className }: MapboxSceneProps) {
       // T2.78 — attribution is rendered explicitly so styling can wrap it
       // without losing the legal-required link.
       attributionControl={false}
-      className={className}
-      style={{ width: "100%", height: "100%" }}
+      style={{ ...DEFAULT_STYLE, ...style }}
     >
       <AttributionControl
         position="bottom-left"

@@ -17,10 +17,12 @@
  */
 
 import { EASE_LINEAR_SIG } from "./tokens";
+import type { ChapterId } from "./types";
 
 /** W2 ships chapters 1–5; W3 extends with 6–10. Sub-chapters 4a/4b/4c/4d
  *  share Chapter 4's camera state (bearing tilts handled at runtime). */
-export type ChapterId = 1 | 2 | 3 | 4 | 5;
+export type W2ChapterId = Extract<ChapterId, 1 | 2 | 3 | 4 | 5>;
+export type { ChapterId };
 
 /** Mapbox camera + flyTo options. Mirrors mapbox-gl `CameraOptions`. */
 export interface ChapterCameraState {
@@ -66,7 +68,7 @@ export const INITIAL_CAMERA: ChapterCameraState = {
  * -97.0, lat 32.5 to 33.0) for chapters 2–5; chapter 1 is continental
  * (centered ~ -98, 39 — north-central US).
  */
-export const CHAPTER_CAMERAS: Readonly<Record<ChapterId, ChapterCameraState>> = {
+export const CHAPTER_CAMERAS: Readonly<Record<W2ChapterId, ChapterCameraState>> = {
   // Ch1 — Continental top-down America. Centered roughly Kansas; W1 city
   // lights layer (T2.20) makes FW + Montgomery glow brighter than other
   // metros so the eye is led down to Fort Worth in Ch2.
