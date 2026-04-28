@@ -129,6 +129,42 @@ describe("T2.7 — TRANSITION_SPEEDS table varies per chapter pair", () => {
   });
 });
 
+describe("W3 Driver B — Ch7 Path camera state", () => {
+  it("Chapter 7 is registered with neighborhood-altitude framing", () => {
+    expect(CHAPTER_CAMERAS[7]).toBeDefined();
+    const ch7 = CHAPTER_CAMERAS[7]!;
+    // Pulls to neighborhood altitude per brief: zoom 13, pitch 60, bearing 25
+    expect(ch7.zoom).toBe(13);
+    expect(ch7.pitch).toBe(60);
+    expect(ch7.bearing).toBe(25);
+  });
+
+  it("Chapter 7 lng/lat lands within Tarrant County bounds", () => {
+    const ch7 = CHAPTER_CAMERAS[7]!;
+    expect(ch7.longitude).toBeGreaterThan(-97.6);
+    expect(ch7.longitude).toBeLessThan(-97.0);
+    expect(ch7.latitude).toBeGreaterThan(32.5);
+    expect(ch7.latitude).toBeLessThan(33.0);
+  });
+});
+
+describe("W3 Driver B — Ch8 Graph (3D constellation) camera state", () => {
+  it("Chapter 8 tilts UP to reveal constellation above the city", () => {
+    expect(CHAPTER_CAMERAS[8]).toBeDefined();
+    const ch8 = CHAPTER_CAMERAS[8]!;
+    // Pitch 70 is what gives the constellation the floating-above-city look
+    expect(ch8.pitch).toBe(70);
+    expect(ch8.bearing).toBe(0);
+    expect(ch8.zoom).toBe(12);
+  });
+
+  it("Chapter 8 lng/lat centers Fort Worth (constellation hovers above downtown)", () => {
+    const ch8 = CHAPTER_CAMERAS[8]!;
+    expect(ch8.longitude).toBeCloseTo(-97.3308, 2);
+    expect(ch8.latitude).toBeCloseTo(32.7555, 2);
+  });
+});
+
 describe("T2.4 + T2.7 — regression-guard snapshot of camera coords", () => {
   it("coordinates are stable (snapshot guard against accidental edits)", () => {
     expect({

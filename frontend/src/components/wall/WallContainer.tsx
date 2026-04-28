@@ -50,6 +50,9 @@ import { Chapter02CityArrival } from "./chapters/Chapter02CityArrival";
 import { Chapter03Neighborhood } from "./chapters/Chapter03Neighborhood";
 import { Chapter04TheWall } from "./chapters/Chapter04TheWall";
 import { Chapter05Labyrinth } from "./chapters/Chapter05Labyrinth";
+// W3 Driver B — slots 7 + 8 only. Slots 6, 9, 10 belong to Drivers A + C.
+import { Chapter07ThePath } from "./chapters/Chapter07ThePath";
+import { Chapter08TheGraph } from "./chapters/Chapter08TheGraph";
 
 /** Context shape consumed by chapter components (Drivers B/C). */
 export interface WallContextValue {
@@ -162,6 +165,10 @@ function ChaptersSequence({
       <Chapter03Neighborhood progress={local(3)} active={active(3)} />
       <Chapter04TheWall progress={local(4)} />
       <Chapter05Labyrinth progress={local(5)} />
+      {/* W3 Driver B slots — Ch7 + Ch8. Drivers A + C own 6, 9, 10 and
+          will append their slots without touching this block. */}
+      <Chapter07ThePath progress={local(7)} active={active(7)} chapterNumber={7} />
+      <Chapter08TheGraph progress={local(8)} active={active(8)} chapterNumber={8} />
     </>
   );
 }
