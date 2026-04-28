@@ -6,23 +6,25 @@
  * universal selector resets that previously lived in globals.css.
  */
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+/* NOTE: @layer wrappers removed — Tailwind's PostCSS plugin processes each
+ * imported partial independently and rejects @layer directives without a
+ * same-file @tailwind directive. postcss-import resolution proved brittle
+ * in dev hot-reload; rules at root scope compose into Tailwind's cascade
+ * via the @tailwind directives in globals.css. @apply still works because
+ * the file is processed by the same PostCSS pipeline. */
+.text-balance {
+  text-wrap: balance;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-    transition: background-color 150ms ease-in-out, border-color 150ms ease-in-out, color 150ms ease-in-out;
-  }
-  html, body {
-    overscroll-behavior: none;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+* {
+  @apply border-border;
+  transition: background-color 150ms ease-in-out, border-color 150ms ease-in-out, color 150ms ease-in-out;
+}
+html, body {
+  overscroll-behavior: none;
+}
+body {
+  @apply bg-background text-foreground;
 }
 
 /* ─── T1.65 — Focus rings + text selection ───────────────────────────────────
