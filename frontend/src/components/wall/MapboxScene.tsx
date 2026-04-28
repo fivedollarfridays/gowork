@@ -34,7 +34,15 @@ import { INITIAL_CAMERA } from "@/lib/wall/cameraChoreography";
 import { registerAllLayers, removeAllLayers } from "@/lib/wall/layers";
 import { registerMarkerSymbols } from "@/lib/wall/markerSymbols";
 import { useMapboxSkyForTimeOfDay, type MapLike } from "@/hooks/useMapboxSkyForTimeOfDay";
+import { useResponsiveTier } from "@/hooks/useResponsiveTier";
 import { MapCursorFlashlight } from "./MapCursorFlashlight";
+
+/**
+ * W4 T4.D.2 — Tablet zoom delta. Tablet (768-1023) drops one zoom step
+ * below desktop's INITIAL_CAMERA.zoom for more visible context per frame
+ * on iPad-class devices held in landscape.
+ */
+const TABLET_ZOOM_DELTA = -1;
 
 /** Public props — kept narrow because chapters consume the map via context
  *  (T2.2 WallContainer), not via prop drilling. */
@@ -70,6 +78,11 @@ export default function MapboxScene({ style }: MapboxSceneProps) {
   const [mapInstance, setMapInstance] = useState<MapLike | null>(null);
   const token = getMapboxToken() ?? "";
   const styleUrl = resolveMapboxStyleUrl();
+
+  // W4 T4.D.2 — Tablet drops zoom by 1 step. Driver A's deferred constraint:
+  // "threading a tablet-specific zoom into MapboxScene is one prop away."
+  const { isTablet } = useResponsiveTier();
+  const initialZoom = INITIAL_CAMERA.zoom + (isTablet ? TABLET_ZOOM_DELTA : 0);
 
   // W4 T4.A.1 — sync time-of-day to the map's sky + light.
   useMapboxSkyForTimeOfDay(mapInstance);
@@ -136,7 +149,7 @@ export default function MapboxScene({ style }: MapboxSceneProps) {
         initialViewState={{
           longitude: INITIAL_CAMERA.longitude,
           latitude: INITIAL_CAMERA.latitude,
-          zoom: INITIAL_CAMERA.zoom,
+          zoom: initialZoom,
           pitch: INITIAL_CAMERA.pitch,
           bearing: INITIAL_CAMERA.bearing,
         }}

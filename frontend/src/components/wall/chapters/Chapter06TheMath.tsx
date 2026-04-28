@@ -113,6 +113,7 @@ export function Chapter06TheMath({
       ref={rootRef}
       data-testid="chapter06-the-math"
       data-chapter="06"
+      data-chapter-id="the-math"
       data-reduced-motion={reducedMotion ? "true" : "false"}
       aria-labelledby="chapter06-title"
       className="chapter06-the-math relative flex min-h-screen flex-col items-center justify-center gap-6 px-6 py-12"

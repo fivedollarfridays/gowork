@@ -48,6 +48,8 @@ import {
   type ChapterIndex,
 } from "@/lib/wall/wallProgress";
 import { AccentTokenProvider } from "./AccentTokenProvider";
+import { IdleStateProvider } from "./IdleStateProvider";
+import { MapMotionBlur } from "./MapMotionBlur";
 import { Chapter01Continental } from "./chapters/Chapter01Continental";
 import { Chapter02CityArrival } from "./chapters/Chapter02CityArrival";
 import { Chapter03Neighborhood } from "./chapters/Chapter03Neighborhood";
@@ -142,6 +144,8 @@ export default function WallContainer({ children }: WallContainerProps) {
   return (
     <WallContext.Provider value={contextValue}>
       <AccentTokenProvider />
+      {/* W4 T4.D.7 — idle ambient drift; sets data-life-idle on :root. */}
+      <IdleStateProvider />
       <div
         style={{
           position: "fixed",
@@ -151,7 +155,10 @@ export default function WallContainer({ children }: WallContainerProps) {
           height: "100%",
         }}
       >
-        <MapboxScene />
+        {/* W4 T4.D.6 — motion-blur on fast scroll, reduced-motion safe. */}
+        <MapMotionBlur>
+          <MapboxScene />
+        </MapMotionBlur>
       </div>
       <main
         data-testid="wall-chapters"
@@ -187,7 +194,7 @@ function ChaptersSequence({
   const active = (id: ChapterIndex) => currentChapter === id;
   return (
     <>
-      <Chapter01Continental progress={local(1)} />
+      <Chapter01Continental progress={local(1)} globalProgress={totalProgress} />
       <Chapter02CityArrival progress={local(2)} />
       <Chapter03Neighborhood progress={local(3)} active={active(3)} />
       <Chapter04TheWall progress={local(4)} />

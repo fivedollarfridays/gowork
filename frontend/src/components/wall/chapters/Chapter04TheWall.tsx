@@ -73,6 +73,7 @@ export function Chapter04TheWall({
     <section
       data-testid="chapter04-wall"
       data-chapter="04"
+      data-chapter-id="the-wall"
       data-subactive={activeSub}
       data-reduced-motion={reducedMotion ? "true" : "false"}
       aria-labelledby="chapter04-title"

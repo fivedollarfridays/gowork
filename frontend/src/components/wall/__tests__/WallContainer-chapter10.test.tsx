@@ -109,7 +109,11 @@ describe("W3 Driver C — WallContainer renders Chapter 10 (T3.23)", () => {
       if (id) markers.push(id);
     });
     expect(markers.length).toBeGreaterThan(0);
-    expect(markers[markers.length - 1]).toBe("10");
+    // Ch10 may carry EITHER `data-chapter="10"` (W3 legacy) or
+    // `data-chapter-id="find-your-path"` (W4 Driver D print contract).
+    // Either is the LAST chapter marker in DOM order.
+    const last = markers[markers.length - 1];
+    expect(["10", "find-your-path"]).toContain(last);
   });
 
   it("Chapter 10 renders the primary CTA button", async () => {
