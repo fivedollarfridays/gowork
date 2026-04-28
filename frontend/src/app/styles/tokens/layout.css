@@ -1,0 +1,26 @@
+/* W1 layout tokens + base utilities — preserved from globals.css (T1.7),
+ * extended by T1.65 (focus rings + selection), T1.106 (branded scrollbar),
+ * T1.107 (brand mark hover path-draw).
+ *
+ * @layer utilities holds composable utility classes; @layer base holds the
+ * universal selector resets that previously lived in globals.css.
+ */
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    transition: background-color 150ms ease-in-out, border-color 150ms ease-in-out, color 150ms ease-in-out;
+  }
+  html, body {
+    overscroll-behavior: none;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
