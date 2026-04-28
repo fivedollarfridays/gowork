@@ -1,0 +1,113 @@
+/* T1.45 + T1.131 — Print stylesheet (magazine layout for The Wall).
+ *
+ * Wired by layout.tsx via <link rel="stylesheet" href="/styles/print.css"
+ * media="print" /> (Driver C). When users print or save-as-PDF, the Wall
+ * collapses to a 9-page magazine essay: serif type, single column, chapter
+ * breaks aligned with page breaks, no chrome.
+ *
+ * Why a separate file (not in globals.css): print rules are loaded only when
+ * media="print" matches — saves bytes on the screen path and lets the print
+ * cascade live in isolation without leaking !important rules into screen
+ * styles.
+ */
+
+@page {
+  size: letter;
+  margin: 0.75in;
+}
+
+@media print {
+  /* ─── Type system (serif for editorial print authority) ──────────────── */
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-family: Georgia, "Times New Roman", "Liberation Serif", serif;
+    font-size: 11pt;
+    line-height: 1.5;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: Georgia, "Times New Roman", serif;
+    color: #000000;
+    page-break-after: avoid;
+  }
+
+  /* ─── Chapter rhythm = page rhythm ─────────────────────────────────────── */
+  .wall-chapter {
+    page-break-before: always;
+    page-break-inside: avoid;
+    orphans: 3;
+    widows: 3;
+  }
+
+  .wall-chapter:first-of-type {
+    /* The opening chapter shares the title page. */
+    page-break-before: auto;
+  }
+
+  .wall-pull-quote {
+    page-break-inside: avoid;
+    font-style: italic;
+    border-left: 3px solid #555;
+    padding-left: 1em;
+    margin: 1em 0;
+  }
+
+  .dropcap::first-letter {
+    color: #000000 !important;
+    font-size: 4em;
+    line-height: 0.9;
+    float: left;
+    padding: 0.05em 0.1em 0 0;
+    font-weight: 800;
+  }
+
+  /* ─── Suppress chrome that doesn't belong on a printed page ──────────── */
+  header,
+  footer,
+  nav,
+  .no-print,
+  .skip-link,
+  .mute-toggle,
+  .language-toggle,
+  .chapter-counter,
+  [data-print="hidden"] {
+    display: none !important;
+  }
+
+  /* ─── Replace Mapbox with a printed caption hint ───────────────────────── */
+  .mapbox-container,
+  .mapboxgl-map {
+    display: none !important;
+  }
+
+  .print-map-fallback {
+    display: block !important;
+    border: 1px solid #999;
+    padding: 0.5em;
+    font-style: italic;
+    color: #444;
+    margin: 1em 0;
+  }
+
+  /* ─── Honor link semantics (URL after link text) ──────────────────────── */
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    color: #555;
+  }
+
+  a[href^="#"]::after {
+    content: "";
+  }
+
+  /* ─── Last-calibration footnote (printed once at the end) ──────────────── */
+  .print-footnote {
+    display: block !important;
+    margin-top: 2em;
+    font-size: 9pt;
+    color: #666;
+    border-top: 1px solid #999;
+    padding-top: 0.5em;
+  }
+}

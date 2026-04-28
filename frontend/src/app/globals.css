@@ -2,86 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-}
-
-@layer base {
-  :root {
-    /* GoWork palette: Navy, Teal, Amber, Coral, Green, Off-white, Dark gray */
-    --background: 60 20% 95%;
-    --foreground: 195 9% 19%;
-    --card: 0 0% 100%;
-    --card-foreground: 195 9% 19%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 195 9% 19%;
-    --primary: 218 46% 20%;
-    --primary-foreground: 60 20% 95%;
-    --secondary: 173 58% 39%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 60 10% 91%;
-    --muted-foreground: 195 5% 45%;
-    --accent: 43 74% 66%;
-    --accent-foreground: 195 9% 19%;
-    --destructive: 12 76% 61%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 60 5% 88%;
-    --input: 60 5% 88%;
-    --ring: 218 46% 20%;
-    --chart-1: 218 46% 20%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 43 74% 66%;
-    --chart-4: 12 76% 61%;
-    --chart-5: 152 39% 52%;
-    --success: 152 39% 52%;
-    --success-foreground: 0 0% 100%;
-    --warning: 43 74% 66%;
-    --warning-foreground: 195 9% 19%;
-    --radius: 0.5rem;
-  }
-  .dark {
-    --background: 195 9% 12%;
-    --foreground: 60 20% 95%;
-    --card: 195 9% 15%;
-    --card-foreground: 60 20% 95%;
-    --popover: 195 9% 15%;
-    --popover-foreground: 60 20% 95%;
-    --primary: 173 58% 39%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 218 46% 30%;
-    --secondary-foreground: 60 20% 95%;
-    --muted: 195 9% 20%;
-    --muted-foreground: 60 10% 60%;
-    --accent: 43 74% 66%;
-    --accent-foreground: 195 9% 12%;
-    --destructive: 12 76% 50%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 195 9% 22%;
-    --input: 195 9% 22%;
-    --ring: 173 58% 39%;
-    --chart-1: 173 58% 39%;
-    --chart-2: 218 46% 40%;
-    --chart-3: 43 74% 66%;
-    --chart-4: 12 76% 61%;
-    --chart-5: 152 39% 52%;
-    --success: 152 39% 60%;
-    --success-foreground: 0 0% 100%;
-    --warning: 43 74% 66%;
-    --warning-foreground: 195 9% 12%;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-    transition: background-color 150ms ease-in-out, border-color 150ms ease-in-out, color 150ms ease-in-out;
-  }
-  html, body {
-    overscroll-behavior: none;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
+/* Token partials (T1.7 split → T1.8 wired). Order matters:
+ * colors first (everything depends on bg/fg), then typography (text on bg),
+ * then motion (animations of typed elements), then space (rhythm), then
+ * layout (utilities + universal resets that consume all above).
+ */
+@import "./styles/tokens/colors.css";
+@import "./styles/tokens/typography.css";
+@import "./styles/tokens/motion.css";
+@import "./styles/tokens/space.css";
+@import "./styles/tokens/layout.css";
+@import "./styles/tokens/forced-colors.css";
