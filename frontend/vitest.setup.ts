@@ -1,5 +1,17 @@
 import "@testing-library/jest-dom/vitest";
-import { vi } from "vitest";
+import { afterEach, vi } from "vitest";
+import { cleanup } from "@testing-library/react";
+
+// Global cleanup — runs after every test in every file, regardless of
+// file-local afterEach hooks. Closes the parallel-test flake observed in
+// PlanExport.test.tsx + CareerCenterExport.test.tsx (W1 souji notes) where
+// async resolveSave() chains could leak React state into the next test.
+// Two-phase cleanup: drain microtasks first (so any pending React state
+// updates from `resolveSave()` commit), then unmount.
+afterEach(async () => {
+  await new Promise((r) => setTimeout(r, 0));
+  cleanup();
+});
 
 // canvas-confetti uses requestAnimationFrame + canvas context which are unavailable
 // in jsdom. Mock globally to prevent uncaught exceptions during parallel test runs.

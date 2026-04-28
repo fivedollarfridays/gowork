@@ -105,6 +105,8 @@ describe("CareerCenterExport", () => {
     expect(button).toBeDisabled();
 
     resolveSave();
+    await savePromise;
+    await new Promise((r) => setTimeout(r, 0));
     vi.doUnmock("html2pdf.js");
   });
 
@@ -161,6 +163,8 @@ describe("CareerCenterExport", () => {
     });
 
     resolveSave();
+    await savePromise;
+    await new Promise((r) => setTimeout(r, 0));
     vi.doUnmock("html2pdf.js");
   });
 

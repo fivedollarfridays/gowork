@@ -46,7 +46,7 @@ describe("Ch4 transitions — full 4a → 4d traversal", () => {
 
   it("plays a sound on each unique sub-chapter entry (no replay within a sub)", () => {
     const heard: string[] = [];
-    playSpy.mockImplementation((id) => {
+    playSpy.mockImplementation((id: string) => {
       heard.push(id);
     });
     const { rerender } = render(<Chapter04TheWall progress={0.05} />);
