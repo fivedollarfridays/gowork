@@ -55,15 +55,13 @@
  *   any place where rhythm > readability.
  */
 
-@layer utilities {
-  .tabular-nums {
-    font-feature-settings: "tnum" 1;
-    font-variant-numeric: tabular-nums;
-  }
-  .font-mono-data {
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    font-weight: 500;
-  }
+.tabular-nums {
+  font-feature-settings: "tnum" 1;
+  font-variant-numeric: tabular-nums;
+}
+.font-mono-data {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-weight: 500;
 }
 
 /* ─── T1.102 — Variable font axis tokens ─────────────────────────────────────
@@ -80,10 +78,8 @@
   --font-axis-slnt-italic: -10;
 }
 
-@layer utilities {
-  .italic-axis {
-    font-style: oblique -10deg;
-  }
+.italic-axis {
+  font-style: oblique -10deg;
 }
 
 /* ─── T1.103 — Drop cap utility ──────────────────────────────────────────────

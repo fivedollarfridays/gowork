@@ -77,10 +77,8 @@
   50%      { opacity: 1.0; transform: translateY(-2px); }
 }
 
-@layer utilities {
-  .animate-idle-pulse {
-    animation: idle-pulse 4s var(--ease-linear-sig) infinite;
-  }
+.animate-idle-pulse {
+  animation: idle-pulse 4s var(--ease-linear-sig) infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
