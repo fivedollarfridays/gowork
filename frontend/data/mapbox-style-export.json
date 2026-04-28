@@ -1,0 +1,14 @@
+{
+  "_comment_runbook": "See docs/runbooks/mapbox-style-setup.md for build steps.",
+  "_comment_status": "PLACEHOLDER. Run the runbook in Mapbox Studio, export the resulting style JSON, and replace this file. Until then, MapboxScene falls back to mapbox://styles/mapbox/dark-v11 (T2.18).",
+  "_comment_recovery": "When populated, this file is the recovery artifact: import into a new Studio account to rebuild the style without re-doing the manual layer work.",
+  "version": 8,
+  "name": "GoWork Wall — Dark Editorial v1 (placeholder)",
+  "metadata": {
+    "owner": "GoWork Visual Rebirth W2",
+    "runbook": "docs/runbooks/mapbox-style-setup.md",
+    "designTokensSource": "frontend/src/app/styles/tokens/colors.css"
+  },
+  "sources": {},
+  "layers": []
+}
