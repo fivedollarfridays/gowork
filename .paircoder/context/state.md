@@ -1,6 +1,6 @@
 # Current State
 
-> Last updated: 2026-04-28 (W3 Driver D — Maximization + Cross-Driver Integration + 6 Spotlight inventions on `sprint/w3-interactive-chapters-6-10`. 2971/2971 (0 skipped — all 13 Driver C placeholders un-skipped). Typecheck + arch + lint + audit:brand + audit:tokens clean. Build green: `/` First Load JS = 147 kB (down from 273 kB; target <200 kB).)
+> Last updated: 2026-04-28 (W4 Driver B — Spanish parity + edge ES + mobile fallback + 3 Spotlight inventions on `w4-driver-b/spanish-edge-mobile` worktree branch off `sprint/w4-life-layers` HEAD `b50362f`. 3062/3062 frontend tests pass; 88 new tests across 9 new files; backend i18n completeness 8/8. Architecture clean.)
 
 ## Active Plan
 
@@ -31,6 +31,80 @@
 Older sprint task tables and session histories (Sprints 7 — 31) are in `.paircoder/archive/state-pre-s1.md`. S12a per-session entries plus S2 — S11 detail are in `.paircoder/archive/state-s12a.md`. S13 wave-by-wave detail + per-task driver sessions are in `.paircoder/archive/state-s13.md`.
 
 ## What Was Just Done
+
+### 2026-04-28 — W4 Driver B: Spanish parity + edge ES + mobile fallback + 3 Spotlight inventions
+
+Branch: `w4-driver-b/spanish-edge-mobile` worktree branch off `sprint/w4-life-layers` HEAD `b50362f`.
+Goal: native-fluent ES on every editorial chapter string, locale-toggle persistence verified, edge states (404/500/empty/loading) covered in ES, mobile/tablet viewport gating wired, Spanish voice convention guide shipped.
+
+**Audit (T4.B.1):**
+- 0 keys missing in EN; 0 missing in ES.
+- 8 keys flagged `[ES-pending-review]` (W3 Driver B's Ch4/Ch7/Ch8 strings) — closed.
+- 21 byte-identical EN/ES pairs; all on `IDENTICAL_PAIR_ALLOWLIST` in `backend/tests/test_i18n_completeness.py`.
+
+**Native-fluent ES (T4.B.2) — 8 flags closed:**
+- `wall.chapter04.lede` — added missing 'importan' clause
+- `wall.chapter04a.pullquote` — flag removed (already native-fluent)
+- `wall.chapter04b.pullquote` — flag removed
+- `wall.chapter04d.pullquote` — flag removed
+- `wall.chapter07.subhero` — idiom polish: 'andaba dando vueltas'
+- `wall.chapter07.body` — idiom polish: 'lleva entre una y otra'
+- `wall.chapter08.subhero` — idiom polish: 'Resuelves una y otras tres se acercan'
+- `wall.chapter08.body` — idiom polish: 'cada nodo es una barrera'
+
+**Locale toggle persistence (T4.B.3) + chapter re-render (T4.B.4):**
+- `LanguageToggle.persistence.test.tsx` (6 tests): persistence across mount cycles, keyboard reachability, aria-pressed.
+- `LocaleToggle.chapters.test.tsx` (7 tests): clicks the toggle and asserts Ch6/7/8/9/10 strings swap to ES via the canonical `useTranslation` hook.
+- `lib/i18n/__tests__/chapterLocaleSwap.test.ts` (27 tests): pins per-chapter EN/ES distinctness and proper-noun preservation (GoWork, Carlos, Fort Worth, Trinity Metro, Amazon, DFW5, Montgomery).
+
+**Edge state ES coverage (T4.B.5/6/7/8):**
+- `EdgeStates.es.test.tsx` (13 tests): 404 + 500 + EmptyState + LoadingState all rendered in `setLocale("es")`. 500 page non-leak of error.message preserved in Spanish too. Skeleton-not-spinner contract preserved.
+
+**Mobile + tablet viewport gating (T4.B.9):**
+- `WallContainer.tsx` extended: layered mobile-viewport gate ON TOP of the W2 tier gate. Mobile (innerWidth < 768) → `MobileWallFallback` regardless of tier. Tablet keeps cinematic Mapbox. Desktop unchanged.
+- `MobileWallFallback.tsx` (NEW): branded GoWork hero + 10 chapter cards reading EN/ES from i18n. Single-column scroll, no Mapbox, no Three.js, no View Transitions.
+- `WallContainer-mobile.test.tsx` (5 tests): mobile gate verified across tier matrix.
+- `TabletScaled.test.tsx` (4 tests): tablet keeps Mapbox path; future driver can retune INITIAL_CAMERA without breaking the contract.
+- `MobileWallFallback.test.tsx` (10 tests): EN+ES coverage, 10 chapter cards in order, no Mapbox container, branded layout.
+
+**3 Spotlight inventions:**
+
+1. **`lib/i18n/spanishVoiceConventions.md`** — Style guide pinning the GoWork ES voice contract: `tú` informal address, brand/proper-noun preservation rules (GoWork/Carlos/Fort Worth/Trinity Metro/Amazon FC DFW5/MIT/DPS/HHSC stay English), metaphor lexicon (el muro / el camino / las cuentas / el grafo / el precipicio), register split (editorial vs utility), allowlisted byte-identical pairs, machine-checkable test contract. Editorial reference for every future EN/ES addition.
+2. **`lib/i18n/__tests__/missingKeysAudit.test.ts`** (6 tests) — Whole-catalog set diff (EN ↔ ES) + `[ES-pending-review]` flag rejection + non-empty leaf assertion. Prevents future drivers from leaking placeholder markers OR shipping a key in EN without ES.
+3. **`hooks/useResponsiveTier.ts`** (10 tests) — Viewport-based responsive tier (`mobile` | `tablet` | `desktop`) with boundary-correct breakpoints (768, 1024) matching Tailwind md/lg. Resize-aware (subscribes to `window.resize`). SSR-safe (`desktop` default to avoid hydration mismatch). Other components consume this without re-deriving from `window.innerWidth`.
+
+**Files modified:**
+- `frontend/src/lib/translations/es.json` — 8 [ES-pending-review] flags closed with native-fluent translations
+- `frontend/src/components/wall/WallContainer.tsx` — added mobile-viewport gate + MobileWallFallback import
+- `frontend/src/lib/i18n/__tests__/missingKeysAudit.test.ts` (NEW)
+- `frontend/src/lib/i18n/__tests__/chapterLocaleSwap.test.ts` (NEW)
+- `frontend/src/lib/i18n/spanishVoiceConventions.md` (NEW)
+- `frontend/src/hooks/useResponsiveTier.ts` (NEW)
+- `frontend/src/hooks/__tests__/useResponsiveTier.test.ts` (NEW)
+- `frontend/src/components/wall/MobileWallFallback.tsx` (NEW)
+- `frontend/src/components/wall/__tests__/LanguageToggle.persistence.test.tsx` (NEW)
+- `frontend/src/components/wall/__tests__/LocaleToggle.chapters.test.tsx` (NEW)
+- `frontend/src/components/wall/__tests__/EdgeStates.es.test.tsx` (NEW)
+- `frontend/src/components/wall/__tests__/MobileWallFallback.test.tsx` (NEW)
+- `frontend/src/components/wall/__tests__/WallContainer-mobile.test.tsx` (NEW)
+- `frontend/src/components/wall/__tests__/TabletScaled.test.tsx` (NEW)
+
+**Constraints respected:**
+- DO NOT modify chapter component source — confirmed; Ch1-10 source untouched.
+- DO NOT touch protected paths (`.claude/`, `.paircoder/`, `CLAUDE.md`) — confirmed; only state.md updated as required.
+- DO NOT regress bundle — no new eager chapter imports; MobileWallFallback only loads when viewport < 768.
+- ARCH limits — all new files within source (<400 lines, <50 lines/fn) and test (<600 lines) limits. Architecture check ✓ on every modified file.
+
+**Honest uncertainty (per dispatch):**
+- C4: Tablet keeps the same `INITIAL_CAMERA` as desktop — threading a tablet-specific zoom into `MapboxScene` is one prop away (future driver reads `useResponsiveTier().isTablet` inside the scene component).
+- C5: Spanish idiom phrasings used best-judgment Spanish-speaker phrasing; every modification documented in `spanishVoiceConventions.md` §6 with one-line swap alternatives if a true native reviewer flags any string.
+
+**Verification gates:**
+- Frontend test suite: 3062/3062 pass (no regression).
+- Backend i18n completeness: 8/8 pass (allowlist clean; no untranslated passthroughs).
+- New tests: 88 across 9 new files (≥30 floor exceeded).
+- Architecture check ✓ on `WallContainer.tsx`, `MobileWallFallback.tsx`, `useResponsiveTier.ts`, plus all 9 new test files.
+- Branch pushed: `w4-driver-b/spanish-edge-mobile` (commit `540bbc9`).
 
 ### 2026-04-28 — W3 Driver D: Maximization + Cross-Driver Integration + 6 Spotlight inventions
 
