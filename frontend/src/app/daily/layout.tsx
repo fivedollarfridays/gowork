@@ -8,22 +8,22 @@ export const metadata: Metadata = {
   description: DAILY_DESCRIPTION,
   openGraph: {
     type: 'website',
-    siteName: 'MontGoWork',
-    title: 'Daily Plan | MontGoWork',
+    siteName: 'GoWork',
+    title: 'Daily Plan | GoWork',
     description: DAILY_DESCRIPTION,
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'MontGoWork Daily Plan',
+        alt: 'GoWork Daily Plan',
       },
     ],
     locale: 'en_US',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Daily Plan | MontGoWork',
+    title: 'Daily Plan | GoWork',
     description: DAILY_DESCRIPTION,
     images: ['/og-image.png'],
   },

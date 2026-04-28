@@ -22,7 +22,7 @@ export function Header() {
           <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-8">
             <Link href="/" className="flex items-center gap-2">
               <span className="text-2xl font-extrabold tracking-tight text-primary drop-shadow-[0_0_12px_rgba(255,255,255,0.7)]">
-                MontGoWork
+                GoWork
               </span>
             </Link>
             <NavBar />

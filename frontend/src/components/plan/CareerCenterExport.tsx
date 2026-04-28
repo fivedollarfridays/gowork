@@ -33,7 +33,7 @@ export function CareerCenterExport({ sessionId, token }: CareerCenterExportProps
       await html2pdf()
         .set({
           margin: [10, 10, 10, 10],
-          filename: `montgowork-career-center-${date}.pdf`,
+          filename: `gowork-career-center-${date}.pdf`,
           image: { type: "jpeg", quality: 0.98 },
           html2canvas: { scale: 2, useCORS: true },
           jsPDF: { unit: "mm", format: "letter", orientation: "portrait" },

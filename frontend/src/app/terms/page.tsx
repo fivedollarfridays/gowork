@@ -1,5 +1,5 @@
 // COUNSEL REVIEW REQUIRED BEFORE PROD — this is a hackathon-grade placeholder
-// authored fresh for the MontGoWork submission, NOT legally-vetted boilerplate.
+// authored fresh for the GoWork submission, NOT legally-vetted boilerplate.
 // Production rollout requires actual contract counsel to set governing law,
 // arbitration terms, liability caps, and DMCA / safe-harbor language.
 "use client";
@@ -64,13 +64,13 @@ function EnglishBody({ t }: { t: (key: string) => string }) {
 
       <Section heading={t("terms.service.heading")}>
         <p>
-          MontGoWork is a workforce navigator: we help you assess barriers to
+          GoWork is a workforce navigator: we help you assess barriers to
           employment, match against jobs and resources in your area, generate
           a resume and cover letter, and follow through on a personalized
           plan.
         </p>
         <p>
-          MontGoWork is <strong>not</strong> legal advice, <strong>not</strong>{" "}
+          GoWork is <strong>not</strong> legal advice, <strong>not</strong>{" "}
           a guarantee of employment, and <strong>not</strong> a substitute
           for a human case worker, attorney, or social worker. Treat what we
           surface as a starting point.
@@ -79,7 +79,7 @@ function EnglishBody({ t }: { t: (key: string) => string }) {
 
       <Section heading={t("terms.account.heading")}>
         <p>
-          MontGoWork does not use traditional accounts. Each session is
+          GoWork does not use traditional accounts. Each session is
           identified by a random session token tied to your browser. The token
           is the access key to your data. Do not share your URL with anyone
           you do not want to see your plan; whoever holds the token can view,
@@ -196,10 +196,10 @@ function EnglishBody({ t }: { t: (key: string) => string }) {
         <p>
           Questions about these terms:{" "}
           <a
-            href="mailto:legal@montgowork.example"
+            href="mailto:legal@gowork.example"
             className="underline hover:text-primary"
           >
-            legal@montgowork.example
+            legal@gowork.example
           </a>
           .
         </p>

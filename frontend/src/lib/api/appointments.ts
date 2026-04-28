@@ -1,5 +1,5 @@
 /**
- * Typed API client for the MontGoWork Appointments feature.
+ * Typed API client for the GoWork Appointments feature.
  *
  * All endpoints accept a `token` query parameter for auth. The backend
  * validates the token against the session referenced by `session_id`.

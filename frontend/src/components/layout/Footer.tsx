@@ -11,7 +11,7 @@ import { useTranslation } from "@/hooks/useTranslation";
  * (`footer.privacy`, `footer.terms`, `footer.entity`, `footer.tagline`).
  *
  * Note: the entity name is a hackathon-grade placeholder. Replace with the
- * registered entity name (e.g., "MontGoWork, Inc." or the operating LLC)
+ * registered entity name (e.g., "GoWork, Inc." or the operating LLC)
  * before any production rollout — see /privacy and /terms for the same
  * COUNSEL REVIEW REQUIRED caveat.
  */

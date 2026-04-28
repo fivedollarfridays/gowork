@@ -45,7 +45,7 @@ describe("Footer", () => {
   it("shows the legal entity name", () => {
     renderFooter();
     // Hackathon-grade placeholder: explicitly labels itself as not-yet-incorporated
-    expect(screen.getByText(/MontGoWork/)).toBeInTheDocument();
+    expect(screen.getByText(/GoWork/)).toBeInTheDocument();
   });
 
   it("renders Spanish labels when locale is es", () => {

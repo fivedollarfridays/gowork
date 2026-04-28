@@ -30,12 +30,12 @@ const FORT_WORTH_CONFIG: CityConfig = {
 };
 
 describe("useCityConfig", () => {
-  it("returns AL defaults while loading", () => {
+  it("returns TX defaults while loading", () => {
     mockFetch.mockReturnValue(new Promise(() => {})); // never resolves
     const { result } = renderHook(() => useCityConfig());
-    expect(result.current.state).toBe("AL");
+    expect(result.current.state).toBe("TX");
     expect(result.current.loading).toBe(true);
-    expect(result.current.name).toBe("Montgomery");
+    expect(result.current.name).toBe("Fort Worth");
   });
 
   it("fetches and returns city config from API", async () => {
@@ -50,19 +50,19 @@ describe("useCityConfig", () => {
     expect(result.current.location).toBe("Fort Worth, TX");
   });
 
-  it("falls back to AL defaults on fetch error", async () => {
+  it("falls back to TX defaults on fetch error", async () => {
     mockFetch.mockRejectedValueOnce(new Error("Network error"));
     const { result } = renderHook(() => useCityConfig());
     await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.state).toBe("AL");
-    expect(result.current.name).toBe("Montgomery");
+    expect(result.current.state).toBe("TX");
+    expect(result.current.name).toBe("Fort Worth");
   });
 
-  it("falls back to AL defaults on non-ok response", async () => {
+  it("falls back to TX defaults on non-ok response", async () => {
     mockFetch.mockResolvedValueOnce({ ok: false, status: 500 });
     const { result } = renderHook(() => useCityConfig());
     await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.state).toBe("AL");
+    expect(result.current.state).toBe("TX");
   });
 
   it("caches the result across multiple renders", async () => {

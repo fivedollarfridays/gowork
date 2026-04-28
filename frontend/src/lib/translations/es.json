@@ -33,13 +33,13 @@
   },
   "hero": {
     "title": "Que te impide conseguir un trabajo?",
-    "subtitle": "MontGoWork es un navegador laboral que te ayuda a superar barreras y encontrar tu camino al empleo.",
+    "subtitle": "GoWork es un navegador laboral que te ayuda a superar barreras y encontrar tu camino al empleo.",
     "cta": "Obtener Tu Plan",
     "creditCta": "Verificar Credito"
   },
   "home": {
     "heroQuestion": "¿Qué te impide conseguir un trabajo?",
-    "heroBlurb": "MontGoWork es un navegador laboral que te ayuda a superar barreras y encontrar tu camino al empleo.",
+    "heroBlurb": "GoWork es un navegador laboral que te ayuda a superar barreras y encontrar tu camino al empleo.",
     "ctaPlan": "Obtener tu plan",
     "ctaCredit": "Revisar tu crédito",
     "howHeading": "Cómo funciona",
@@ -255,7 +255,7 @@
   },
   "dashboard": {
     "heading": "Panel del Gestor de Casos",
-    "description": "Metricas agregadas de las evaluaciones de MontGoWork",
+    "description": "Metricas agregadas de las evaluaciones de GoWork",
     "totalAssessments": "Total de Evaluaciones",
     "barrierInstances": "Instancias de Barreras",
     "avgBarriers": "Barreras Promedio/Persona",
@@ -437,7 +437,7 @@
     "noteGenericError": "No se pudo enviar la nota. Inténtalo de nuevo."
   },
   "footer": {
-    "entity": "MontGoWork (proyecto de hackatón)",
+    "entity": "GoWork (proyecto de hackatón)",
     "tagline": "Navegador laboral",
     "navLabel": "Legal",
     "privacy": "Privacidad",
@@ -446,7 +446,7 @@
   "privacy": {
     "heading": "Política de Privacidad",
     "lastUpdated": "Última actualización",
-    "counselNotice": "Marcador de posición a nivel de hackatón: esta política fue redactada para la entrega de MontGoWork y no ha sido revisada por un abogado. El lanzamiento a producción requiere revisión legal.",
+    "counselNotice": "Marcador de posición a nivel de hackatón: esta política fue redactada para la entrega de GoWork y no ha sido revisada por un abogado. El lanzamiento a producción requiere revisión legal.",
     "seeAlso": "Consulta también nuestros",
     "termsLink": "Términos del Servicio",
     "esPlaceholder": "Esta política de privacidad está disponible en inglés. La traducción al español está en desarrollo y se publicará antes del lanzamiento a producción. Mientras tanto, puedes contactarnos para obtener un resumen en español de tus derechos sobre tus datos.",
@@ -487,7 +487,7 @@
   "terms": {
     "heading": "Términos del Servicio",
     "lastUpdated": "Última actualización",
-    "counselNotice": "Marcador de posición a nivel de hackatón: estos términos fueron redactados para la entrega de MontGoWork y no han sido revisados por un abogado. El lanzamiento a producción requiere revisión legal.",
+    "counselNotice": "Marcador de posición a nivel de hackatón: estos términos fueron redactados para la entrega de GoWork y no han sido revisados por un abogado. El lanzamiento a producción requiere revisión legal.",
     "seeAlso": "Consulta también nuestra",
     "privacyLink": "Política de Privacidad",
     "esPlaceholder": "Estos términos del servicio están disponibles en inglés. La traducción al español está en desarrollo y se publicará antes del lanzamiento a producción.",

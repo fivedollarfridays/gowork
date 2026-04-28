@@ -29,7 +29,7 @@ export function PlanExport({ plan, creditResult, feedbackToken }: PlanExportProp
       await html2pdf()
         .set({
           margin: [10, 10, 10, 10],
-          filename: `montgowork-plan-${plan.session_id}.pdf`,
+          filename: `gowork-plan-${plan.session_id}.pdf`,
           image: { type: "jpeg", quality: 0.98 },
           html2canvas: { scale: 2, useCORS: true },
           jsPDF: { unit: "mm", format: "letter", orientation: "portrait" },
@@ -110,7 +110,7 @@ function PdfHeader({ date }: { date: string }) {
   return (
     <div style={{ borderBottom: "2px solid #0d9488", paddingBottom: "8px", ...sectionSpacing }}>
       <h1 style={{ fontSize: "22px", fontWeight: "bold", color: "#0d9488", margin: 0 }}>
-        MontGoWork Re-Entry Plan
+        GoWork Re-Entry Plan
       </h1>
       <p style={{ fontSize: "11px", color: "#6b7280", margin: "4px 0 0" }}>
         Generated {date}
