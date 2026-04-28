@@ -15,6 +15,14 @@ vi.mock("../MapboxScene", () => ({
   default: () => React.createElement("div", { "data-testid": "mapbox-scene-stub" }),
 }));
 
+// W3 Driver C — Chapter 10's "Start your assessment" CTA reaches
+// `useRouter`. WallContainer composition tests don't mount a Next.js
+// app router, so stub it out the same way `Chapter10FindYourPath.test`
+// does.
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn() }),
+}));
+
 // Driver B chapters reach `useTranslation`. Driver C chapters reach the
 // `lib/i18n` singleton directly. Both need to resolve to deterministic
 // strings without a TranslationProvider in this composition test.
@@ -39,15 +47,22 @@ vi.mock("@/hooks/useDeviceCapability", () => ({
   }),
 }));
 
+// W3 Driver D — Wave 3 differentiates dynamic loaders by source so the
+// MapboxScene fallback testid can't collide with the cliff chart loader's.
 vi.mock("next/dynamic", () => ({
   default: (loader: () => Promise<{ default: React.ComponentType }>) => {
     let Component: React.ComponentType | null = null;
     void loader().then((mod) => {
       Component = mod.default;
     });
+    const loaderSrc = String(loader);
+    const isCliffChart = /BenefitsCliffChart/.test(loaderSrc);
+    const fallbackTestId = isCliffChart
+      ? "cliff-chart-dynamic-stub"
+      : "mapbox-scene-stub";
     const Wrapper: React.FC<Record<string, unknown>> = (props) => {
       if (Component) return React.createElement(Component, props);
-      return React.createElement("div", { "data-testid": "mapbox-scene-stub" });
+      return React.createElement("div", { "data-testid": fallbackTestId });
     };
     return Wrapper;
   },

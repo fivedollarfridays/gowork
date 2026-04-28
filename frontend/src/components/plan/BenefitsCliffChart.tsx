@@ -18,6 +18,29 @@ interface BenefitsCliffChartProps {
   analysis: CliffAnalysis | null;
 }
 
+/**
+ * W3 Driver D — Wave 4: temperature-aware stroke color.
+ *
+ * The Wall's `--accent-current` token interpolates between cyan (cool)
+ * and rose (hot) via the `--temperature-multiplier` formula in
+ * `app/styles/tokens/colors.css`:
+ *   --accent-current: color-mix(in oklch, --accent-cyan,
+ *                               --accent-rose calc((mult - 1) * 100%))
+ *
+ * Ch6's wage slider drives `--temperature-multiplier` on the chapter root
+ * (scope-respecting via setTemperatureMultiplier). When the cliff chart
+ * paints its area-stroke as `var(--accent-current)`, the stroke
+ * automatically reads cool at low wages, hot at cliff wages.
+ *
+ * For /plan's standalone usage (where --temperature-multiplier defaults
+ * to 1.0 root-wide), this resolves to the cool cyan token — the existing
+ * brand-color baseline. So the change is additive: Ch6 gets temperature
+ * response, /plan stays visually identical.
+ */
+const STROKE_TEMPERATURE_AWARE = "var(--accent-current)";
+const FILL_TEMPERATURE_AWARE =
+  "color-mix(in oklch, var(--accent-current) 12%, transparent)";
+
 function buildSummary(analysis: CliffAnalysis): string {
   if (analysis.cliff_points.length === 0) {
     return "No significant benefits cliff detected at any wage level.";
@@ -84,8 +107,8 @@ export function BenefitsCliffChart({ analysis }: BenefitsCliffChartProps) {
                 <Area
                   type="monotone"
                   dataKey="net"
-                  stroke="hsl(var(--primary))"
-                  fill="hsl(var(--primary) / 0.1)"
+                  stroke={STROKE_TEMPERATURE_AWARE}
+                  fill={FILL_TEMPERATURE_AWARE}
                   strokeWidth={2}
                 />
                 {/* Current income reference line */}

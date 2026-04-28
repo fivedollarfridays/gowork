@@ -26,6 +26,8 @@ export interface GeoJSONSourceConfig {
   data: string;
   /** Optional Mapbox `generateId` for feature-state hover. */
   generateId?: boolean;
+  /** Optional Mapbox `lineMetrics` (enables line-progress for line-gradient). */
+  lineMetrics?: boolean;
 }
 
 /** Mapbox layer descriptor (paint expressions allowed). */

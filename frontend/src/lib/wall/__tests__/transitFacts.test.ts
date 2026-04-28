@@ -35,3 +35,31 @@ describe("transitFacts — TRINITY_METRO_BRAND", () => {
     expect(TRINITY_METRO_BRAND.sourceDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 });
+
+describe("transitFacts — CARLOS_PATH_LEG_ROUTES (W3 Driver B per-leg highlights)", () => {
+  it("exposes one route assignment per leg between waypoints", async () => {
+    const { CARLOS_PATH_LEG_ROUTES } = await import("../transitFacts");
+    const { CARLOS_PATH_WAYPOINTS } = await import("../paths");
+    const expectedLegCount = CARLOS_PATH_WAYPOINTS.length - 1;
+    expect(CARLOS_PATH_LEG_ROUTES).toHaveLength(expectedLegCount);
+  });
+
+  it("each leg references at least one Trinity Metro route id (string)", async () => {
+    const { CARLOS_PATH_LEG_ROUTES } = await import("../transitFacts");
+    for (const leg of CARLOS_PATH_LEG_ROUTES) {
+      expect(leg.routes.length).toBeGreaterThan(0);
+      for (const r of leg.routes) {
+        expect(typeof r).toBe("string");
+        expect(r).toMatch(/^[0-9]+$/);
+      }
+    }
+  });
+
+  it("the Bus 4 + Bus 6 combination appears at least once (Carlos's commute spine)", async () => {
+    const { CARLOS_PATH_LEG_ROUTES } = await import("../transitFacts");
+    const has46 = CARLOS_PATH_LEG_ROUTES.some(
+      (l) => l.routes.includes("4") && l.routes.includes("6"),
+    );
+    expect(has46).toBe(true);
+  });
+});

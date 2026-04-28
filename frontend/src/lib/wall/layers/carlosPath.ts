@@ -115,6 +115,10 @@ const sourceConfig: GeoJSONSourceConfig = {
   type: "geojson",
   data: "/data/wall/carlos-path.geojson",
   generateId: false,
+  // W3 Ch7 — line-gradient on the trace requires per-vertex line-progress
+  // metrics. Mapbox computes them at source level; W2's hidden trace also
+  // benefits because the property is a no-op when visibility is none.
+  lineMetrics: true,
 };
 
 /** Home pin: amber dot, fades in during Ch3. */
