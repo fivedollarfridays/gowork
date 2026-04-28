@@ -30,10 +30,11 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import type { ReactElement } from "react";
+import dynamic from "next/dynamic";
 import { t } from "@/lib/i18n";
 import { useAriaAnnounce } from "@/components/wall/AriaLiveRegion";
 import { play as playSound } from "@/lib/wall/sound";
-import { BenefitsCliffChart } from "@/components/plan/BenefitsCliffChart";
+import { CliffChartSkeleton } from "./CliffChartSkeleton";
 import {
   MIN_WAGE_USD,
   MAX_WAGE_USD,
@@ -46,6 +47,23 @@ import {
   WAGE_SLIDER_STEP,
   formatWageUsd,
 } from "@/lib/wall/chapters/ch6Math";
+
+// W3 Driver D — Wave 3 bundle recovery: BenefitsCliffChart pulls in Recharts
+// (~130KB minified). Loading it via next/dynamic with ssr:false keeps that
+// dependency out of the eager chunk for `/`. The skeleton renders during
+// hydration so there's no layout shift when the chart arrives. Until lazy:
+// `/` First Load JS = 273KB. After lazy: target < 200KB. The bundleBudget
+// regression-guard test pins this contract.
+const BenefitsCliffChart = dynamic(
+  () =>
+    import("@/components/plan/BenefitsCliffChart").then((m) => ({
+      default: m.BenefitsCliffChart,
+    })),
+  {
+    ssr: false,
+    loading: () => <CliffChartSkeleton />,
+  },
+);
 
 export interface Chapter06TheMathProps {
   /** Local Ch6 progress 0..1. */

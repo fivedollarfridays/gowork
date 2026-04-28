@@ -164,8 +164,11 @@ export const CHAPTER_CAMERAS: Readonly<
     bearing: 25,
     flyToOptions: { curve: 1.2, speed: 1.0, easing: EASE_LINEAR_SIG },
   },
-  // Ch8 — The 3D Barrier Graph (W3 Driver B). Pitch 70 is the dramatic
-  // tilt that lets the constellation feel like it floats above downtown.
+  // Ch8 — The 3D Barrier Graph (W3 Driver B). Pitch 60 is the dramatic
+  // tilt that lets the constellation feel like it floats above downtown
+  // while keeping the Ch8->Ch9 audit constraint intact (max 60° delta to
+  // Ch9's pitch 0). Driver D retuned from 70 → 60 after un-skipping the
+  // cameraTransitionsAudit-w3 pair 8->9 surfaced the violation.
   // Bearing 0 (north-up) so judges read the graph orthogonally; the
   // breathing motion of the constellation does the dynamism, the camera
   // doesn't have to.
@@ -173,7 +176,7 @@ export const CHAPTER_CAMERAS: Readonly<
     longitude: -97.3308,
     latitude: 32.7555,
     zoom: 12,
-    pitch: 70,
+    pitch: 60,
     bearing: 0,
     flyToOptions: { curve: 1.2, speed: 1.1, easing: EASE_LINEAR_SIG },
   },
@@ -224,7 +227,22 @@ export const TRANSITION_SPEEDS: Readonly<Record<string, number>> = {
   "4a->4b": 0.6, // Sub-chapter bearing pivots are short and snappy.
   "4b->4c": 0.6,
   "4c->4d": 0.6,
-  // W3: Driver C owns 9->10 (final beat — settle into FW overhead).
-  // Drivers A+B own 5->6, 6->7, 7->8, 8->9 in their respective lanes.
+  // W3 Driver D — completes the spine. Audited deltas (cameraTransitionsAudit-w3):
+  //   5->6  Labyrinth (zoom 11, pitch 30) → DFW5 (zoom 14, pitch 50): cinematic
+  //         standard. 1.0 matches Ch2->Ch3's "we're zooming into someone's life."
+  //   6->7  DFW5 (zoom 14) → midpoint of Carlos's path (zoom 13): adjacent
+  //         altitude, snappier reframe. 0.95 reads "next reveal" without
+  //         feeling like a separate cinematic.
+  //   7->8  Path (pitch 60) → Constellation (pitch 70, zoom 12): the deliberate
+  //         tilt-up moment that becomes the sprint's signature beat. 1.1 is the
+  //         same speed Ch8 chose for its own flyToOptions; the table mirrors it.
+  //   8->9  Constellation (zoom 12, pitch 70) → Continental (zoom 3.5, pitch 0):
+  //         the long zoom-out + tilt-down. 1.4 matches Ch1->Ch2's continental
+  //         dolly so the open and the close share rhythm.
+  "5->6": 1.0,
+  "6->7": 0.95,
+  "7->8": 1.1,
+  "8->9": 1.4,
+  // W3 Driver C — final beat: settle into FW overhead for the /assess handoff.
   "9->10": 0.85,
 };

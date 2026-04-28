@@ -13,6 +13,10 @@ import React from "react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, cleanup } from "@testing-library/react";
 import { runAxeOnChapter } from "@/lib/a11y/axeChapterRunner";
+import { Chapter06TheMath } from "../chapters/Chapter06TheMath";
+import { Chapter07ThePath } from "../chapters/Chapter07ThePath";
+import { Chapter08TheGraph } from "../chapters/Chapter08TheGraph";
+import { Chapter09AnyCity } from "../chapters/Chapter09AnyCity";
 import { Chapter10FindYourPath } from "../chapters/Chapter10FindYourPath";
 
 vi.mock("next/navigation", () => ({
@@ -66,27 +70,91 @@ describe("T3.24 — Ch10 axe-core sweep (Driver C lane)", () => {
   });
 });
 
-// Drivers A+B own Ch6/Ch7/Ch8/Ch9. Souji-sweep un-skips after merge.
-describe.skip("T3.24 — Ch6 axe-core sweep (un-skip after Driver B Ch6 merge)", () => {
-  it("placeholder until Driver B's Chapter06 component lands", () => {
-    expect(true).toBe(true);
+// Drivers A+B own Ch6/Ch7/Ch8/Ch9. Driver D un-skipped after W3 merge.
+describe("T3.24 — Ch6 axe-core sweep (un-skipped by Driver D)", () => {
+  it("Chapter06TheMath at progress=0 — 0 moderate-or-above violations", async () => {
+    const { container } = render(
+      React.createElement(Chapter06TheMath, { progress: 0, active: true }),
+    );
+    const violations = await runAxeOnChapter(container);
+    expect(violations).toEqual([]);
+  });
+
+  it("Chapter06TheMath with reducedMotion=true — 0 violations", async () => {
+    const { container } = render(
+      React.createElement(Chapter06TheMath, {
+        progress: 0.5,
+        active: true,
+        reducedMotion: true,
+      }),
+    );
+    const violations = await runAxeOnChapter(container);
+    expect(violations).toEqual([]);
   });
 });
 
-describe.skip("T3.24 — Ch7 axe-core sweep (un-skip after Driver A Ch7 merge)", () => {
-  it("placeholder until Driver A's Chapter07 component lands", () => {
-    expect(true).toBe(true);
+describe("T3.24 — Ch7 axe-core sweep (un-skipped by Driver D)", () => {
+  it("Chapter07ThePath at progress=0 — 0 moderate-or-above violations", async () => {
+    const { container } = render(
+      React.createElement(Chapter07ThePath, { progress: 0, active: true }),
+    );
+    const violations = await runAxeOnChapter(container);
+    expect(violations).toEqual([]);
+  });
+
+  it("Chapter07ThePath with reducedMotion=true (static SVG path) — 0 violations", async () => {
+    const { container } = render(
+      React.createElement(Chapter07ThePath, {
+        progress: 0.5,
+        active: true,
+        reducedMotion: true,
+      }),
+    );
+    const violations = await runAxeOnChapter(container);
+    expect(violations).toEqual([]);
   });
 });
 
-describe.skip("T3.24 — Ch8 axe-core sweep (un-skip after Driver B Ch8 merge)", () => {
-  it("placeholder until Driver B's Chapter08 component lands", () => {
-    expect(true).toBe(true);
+describe("T3.24 — Ch8 axe-core sweep (un-skipped by Driver D)", () => {
+  it("Chapter08TheGraph at progress=0 — 0 moderate-or-above violations", async () => {
+    const { container } = render(
+      React.createElement(Chapter08TheGraph, { progress: 0, active: true }),
+    );
+    const violations = await runAxeOnChapter(container);
+    expect(violations).toEqual([]);
+  });
+
+  it("Chapter08TheGraph with reducedMotion=true (static SVG fallback) — 0 violations", async () => {
+    const { container } = render(
+      React.createElement(Chapter08TheGraph, {
+        progress: 0.5,
+        active: true,
+        reducedMotion: true,
+      }),
+    );
+    const violations = await runAxeOnChapter(container);
+    expect(violations).toEqual([]);
   });
 });
 
-describe.skip("T3.24 — Ch9 axe-core sweep (un-skip after Driver A Ch9 merge)", () => {
-  it("placeholder until Driver A's Chapter09 component lands", () => {
-    expect(true).toBe(true);
+describe("T3.24 — Ch9 axe-core sweep (un-skipped by Driver D)", () => {
+  it("Chapter09AnyCity at progress=0 — 0 moderate-or-above violations", async () => {
+    const { container } = render(
+      React.createElement(Chapter09AnyCity, { progress: 0, active: true }),
+    );
+    const violations = await runAxeOnChapter(container);
+    expect(violations).toEqual([]);
+  });
+
+  it("Chapter09AnyCity with reducedMotion=true — 0 violations", async () => {
+    const { container } = render(
+      React.createElement(Chapter09AnyCity, {
+        progress: 0.5,
+        active: true,
+        reducedMotion: true,
+      }),
+    );
+    const violations = await runAxeOnChapter(container);
+    expect(violations).toEqual([]);
   });
 });

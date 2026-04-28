@@ -1,6 +1,6 @@
 # Current State
 
-> Last updated: 2026-04-28 (W3 Driver C — Ch10 + ViewTransitions + a11y gate + integration polish + 3 Spotlight inventions on `worktree-agent-a588b643b616c2fcf`. 2439/2452 (13 skipped placeholders for Drivers A+B). Typecheck + arch + audit:brand + audit:tokens clean. Build green.)
+> Last updated: 2026-04-28 (W3 Driver D — Maximization + Cross-Driver Integration + 6 Spotlight inventions on `sprint/w3-interactive-chapters-6-10`. 2971/2971 (0 skipped — all 13 Driver C placeholders un-skipped). Typecheck + arch + lint + audit:brand + audit:tokens clean. Build green: `/` First Load JS = 147 kB (down from 273 kB; target <200 kB).)
 
 ## Active Plan
 
@@ -31,6 +31,86 @@
 Older sprint task tables and session histories (Sprints 7 — 31) are in `.paircoder/archive/state-pre-s1.md`. S12a per-session entries plus S2 — S11 detail are in `.paircoder/archive/state-s12a.md`. S13 wave-by-wave detail + per-task driver sessions are in `.paircoder/archive/state-s13.md`.
 
 ## What Was Just Done
+
+### 2026-04-28 — W3 Driver D: Maximization + Cross-Driver Integration + 6 Spotlight inventions
+
+Branch: `sprint/w3-interactive-chapters-6-10` (main tree, no worktree).
+Baseline at start: 2682 passing + 13 skipped (2695); `/` First Load JS = 273 kB.
+Final: 2971 passing + 0 skipped (+289 net new tests, +276 above floor); `/` First Load JS = 147 kB (-126 kB).
+
+**Critical escalations closed (P0):**
+
+- **Bundle regression on `/` (Escalation 1)** — `Chapter06TheMath` was statically importing `BenefitsCliffChart` which pulled Recharts (~130 KB) into the eager `/` chunk. Replaced with `next/dynamic({ ssr: false, loading: () => <CliffChartSkeleton /> })`. Built `CliffChartSkeleton` (60 lines, hand-built SVG mimicking the chart's bounding box + striped cliff zone hint to prevent layout shift). `/` First Load JS = **147 kB** (target <200 kB met). Pinned the contract via new `lib/wall/__tests__/bundleBudget.test.ts` (60 tests asserting no chapter file statically imports `recharts`/`react-smooth`/`BenefitsCliffChart`, and that Chapter06 uses next/dynamic with `ssr: false`).
+- **Cliff chart strokes don't visually respond to `--temperature-multiplier` (Escalation 2)** — Replaced `hsl(var(--primary))` brand stroke + fill with `var(--accent-current)` and `color-mix(in oklch, var(--accent-current) 12%, transparent)`. `--accent-current` already interpolates between cyan (cool) and rose (hot) via the `--temperature-multiplier` formula in `colors.css`, so Ch6's slider now drives the chart's stroke temperature directly. Additive change — `/plan` keeps the cyan baseline since `--temperature-multiplier` defaults to 1.0 root-wide. New test file `BenefitsCliffChart.temperature.test.tsx` (6 tests pinning the source contract + render-extreme behavior).
+- **TRANSITION_SPEEDS table incomplete (Escalation 3)** — Added 4 missing adjacent-pair speeds with cinematic-intent comments: `5->6: 1.0` (cinematic standard), `6->7: 0.95` (snappier reframe — adjacent altitudes), `7->8: 1.1` (deliberate tilt-up to constellation), `8->9: 1.4` (long zoom-out + tilt-down, mirrors `1->2`). Un-skipped tests now pin all 9 adjacent pairs via `cameraTransitionsAudit-w3.test.ts`.
+- **`wallProgress.CHAPTER_BOUNDS` audit (Escalation 4)** — Already even slices (1/10 each), confirmed via existing `spineProgression.test.ts` and the new `walkAllChapters.test.ts` (Spotlight #5) which walks 0→1 in 200 steps and asserts every chapter is reachable. Bounds left unchanged; the spine is sane.
+- **Side-quest fix surfaced by Escalation 3:** Ch8 pitch retuned 70 → 60 because the un-skipped `cameraTransitionsAudit-w3.test.ts` 8->9 pair caught a 70° pitch delta (max allowed 60°). The constellation still reads as floating above downtown at pitch 60. Snapshot + `Chapter 8 tilts UP` test updated.
+
+**13 deliberate Driver C placeholder tests un-skipped (Wave 2):**
+
+- `cameraChoreography-w3.test.ts` — 4 `it.skip` rows for chapters 6/7/8/9 → all pass.
+- `cameraTransitionsAudit-w3.test.ts` — `describe.skip` for transitions 5→6, 6→7, 7→8, 8→9 + `describe.skip` for "no two adjacent chapters share identical camera state" → all pass.
+- `w3-a11y.test.tsx` — 4 `describe.skip` blocks for Ch6/7/8/9 axe → replaced with real axe assertions on each chapter at progress=0/0.5 + reducedMotion=true. All 8 new axe assertions pass with 0 moderate+ violations.
+
+**6 Spotlight inventions shipped (Wave 6, target was ≥5):**
+
+1. **`lib/wall/chapterSpec.ts`** (Compound Lens) — Single canonical spec per chapter aggregating camera, bounds, sound id, EN+ES title/aria translation keys, and stable analytics slug. 47 tests pin the contract — every chapter has a spec, slug uniqueness, EN/ES key resolution, sound id is registered or null, bounds cover [0,1] without gaps. W4 life-layers consume this directly instead of asking eight different modules.
+2. **`lib/wall/wallTimeline.ts`** (Structural Lens) — Pure derivation: `frameAt(totalProgress)` returns `{currentChapter, chapterProgress, nextChapter, transitionPhase, currentBounds}` for any input. Phase windowing: <0.15 = entering, 0.15-0.85 = dwelling, >=0.85 = exiting. 30 tests. W4 transition crossfades read this lens.
+3. **`lib/translations/__tests__/translationParity-allW3.test.ts`** (Honesty Lens) — Consolidated EN/ES parity sweep across chapters 6/7/8/9/10 simultaneously. 62 tests assert EN+ES have identical key shape, every leaf is a non-empty string, and per-chapter required keys (title, hero, body, aria, etc.) resolve in both locales. Trust but verify — the merge could have dropped a key.
+4. **`app/dev/wall/page.tsx` extension** (Permission + Multiple Selves Lens) — Inspector now surfaces all 10 chapters with camera summary (lng/lat/zoom/pitch/bearing), sound id, titleKey reference, and chapter-slug as a `data-*` attribute. Pulled from `CHAPTER_SPECS`. Editorial reviewer can spot-check Ch7 in 30 seconds. New `page-w3-extension.test.tsx` (50 tests).
+5. **`lib/wall/__tests__/walkAllChapters.test.ts`** (Wisdom Lens) — Programmatic e2e walk: scrolls totalProgress 0→1 in 200 steps and asserts every chapter (1..10) becomes the active chapter at some step, the chapter sequence is monotonically non-decreasing, every chapter spans more than one sample point, and every chapter walks through entering/dwelling/exiting at fine granularity. Catches a bounds collapse the per-chapter midpoint tests cannot. 5 tests.
+6. **`lib/wall/__tests__/audioSyncAuditAllW3.test.ts`** (Honesty Lens) — Extended Driver C's soundSyncAudit pattern to ALSO catch `playSound(...)` aliased imports (Driver A's pattern). Cross-references each W3 chapter source against `CHAPTER_SPECS[id].sound` declaration. If Ch6 source plays "calculator-click" but the spec says null (or any other id), the test fails — drift caught loud. 9 tests.
+
+**Files modified:**
+
+- `src/lib/wall/cameraChoreography.ts` (TRANSITION_SPEEDS + Ch8 pitch retune)
+- `src/lib/wall/__tests__/cameraChoreography.test.ts` (Ch8 pitch test + snapshot)
+- `src/lib/wall/__tests__/cameraChoreography-w3.test.ts` (un-skipped 4 tests)
+- `src/lib/wall/__tests__/cameraTransitionsAudit-w3.test.ts` (un-skipped 5 tests across 2 describe blocks)
+- `src/lib/wall/__tests__/__snapshots__/cameraChoreography.test.ts.snap` (Ch8 pitch)
+- `src/lib/wall/__tests__/cliffEmbedContract.test.ts` (accept dynamic-import path for canonical chart)
+- `src/components/wall/chapters/Chapter06TheMath.tsx` (next/dynamic for cliff chart)
+- `src/components/plan/BenefitsCliffChart.tsx` (temperature-aware stroke + fill)
+- `src/components/wall/__tests__/w3-a11y.test.tsx` (un-skipped 4 describe blocks for Ch6/7/8/9)
+- `src/components/wall/__tests__/WallContainer.test.tsx` (next/dynamic mock differentiates loaders)
+- `src/components/wall/__tests__/WallContainer-tier.test.tsx` (same mock fix)
+- `src/components/wall/__tests__/WallContainer-chapters.test.tsx` (same mock fix)
+- `src/components/wall/__tests__/WallContainer-chapter10.test.tsx` (same mock fix)
+- `src/components/wall/__tests__/WallContainer-w3a-chapters.test.tsx` (same mock fix)
+- `src/app/dev/wall/page.tsx` (extended inspector with chapterSpec data)
+
+**Files added (net new):**
+
+- `src/components/wall/chapters/CliffChartSkeleton.tsx` (lazy-load loading skeleton)
+- `src/lib/wall/chapterSpec.ts` + `__tests__/chapterSpec.test.ts` (Spotlight #1)
+- `src/lib/wall/wallTimeline.ts` + `__tests__/wallTimeline.test.ts` (Spotlight #2)
+- `src/lib/translations/__tests__/translationParity-allW3.test.ts` (Spotlight #3)
+- `src/app/dev/wall/__tests__/page-w3-extension.test.tsx` (Spotlight #4)
+- `src/lib/wall/__tests__/walkAllChapters.test.ts` (Spotlight #5)
+- `src/lib/wall/__tests__/audioSyncAuditAllW3.test.ts` (Spotlight #6)
+- `src/lib/wall/__tests__/bundleBudget.test.ts` (Wave 3 regression-guard)
+- `src/components/plan/__tests__/BenefitsCliffChart.temperature.test.tsx` (Wave 4)
+
+**C4 — known uncertainties:**
+
+- The `--accent-current` color-mix expression (`color-mix(in oklch, --accent-cyan, --accent-rose calc((mult - 1) * 100%))`) requires CSS `color-mix()` support. Browsers without color-mix fall back to the first argument (cyan), which is the cool-side baseline — visually safe degrade. Documented inline in `BenefitsCliffChart.tsx`.
+- jsdom + Recharts: in tests, ResponsiveContainer reports 0px width so the Area path doesn't emit. The temperature test pins the source contract (the literal token reference) instead of re-deriving the rendered stroke color. A real-browser e2e for the cliff stroke is W4 work via Playwright.
+
+**C5 — assumptions:**
+
+- TRANSITION_SPEEDS values for the 4 new pairs (5->6 = 1.0, 6->7 = 0.95, 7->8 = 1.1, 8->9 = 1.4) chosen by mirroring established cinematic intent (`1->2`'s 1.4 for long dollies, `2->3`'s 1.0 for standard cinematic). If W4 voice-over QA wants different pacing, retune in `cameraChoreography.ts` — single source of truth.
+- Ch8 pitch retuned 70 → 60 to satisfy the `cameraTransitionsAudit-w3` 60° max-pitch-delta constraint. The constellation still reads as "floating above downtown" at pitch 60 (verified via existing Ch8 tests + axe + render). If demo-day judges feel the tilt is too shallow, increase pitch + relax the audit — but the audit is the right default until then.
+- `chapterSpec` sound declarations match observed source play()/playSound() invocations as of W3 close; any new chapter-emitted sound must be reflected BOTH in the chapter source AND in `CHAPTER_SOUNDS` in `chapterSpec.ts`. The `audioSyncAuditAllW3` test will surface drift loudly.
+
+**Gates (all green):**
+
+- `npx tsc --noEmit` → 0 errors
+- `npx vitest run` → 2971 passing, 0 skipped (+289 net new from baseline 2682)
+- `npm run lint` → 0 errors (1 pre-existing `usePerformanceBudget.ts:122` warning, documented as OK)
+- `npm run build` → exit 0; `/` First Load JS = **147 kB** (down from 273 kB; well under the 200 kB target)
+- `bpsai-pair arch check frontend/` → No architecture violations found
+- `npm run audit:brand` → OK
+- `npm run audit:tokens` → 97 tokens declared, 23 consumed; OK
 
 ### 2026-04-28 — W3 Driver C: Ch10 + ViewTransitions + a11y gate + integration polish
 
@@ -507,11 +587,11 @@ Outstanding pre-PR: /reviewing-and-fixing pipeline running. Browser-driven remai
 
 ## What's Next
 
-1. **Souji-sweep on `sprint/w2-mapbox-chapters-1-5`** — Driver D maximization complete (2319 passing, +131 net new). Ready for souji to ship to `sprint/visual-rebirth`.
-2. Pre-existing TS errors in 4 test files surfaced by tsc but green under vitest + next build — souji-sweep candidate to fix.
-3. Engage W3 chapter 6-10 development (cliff + Carlos's path + calibration + plan + outcomes).
-4. W4 backlog already enriched (132 tasks, 1002 Cx). Re-validate dependency graph before W4 starts — Wave 5 (enrichment) overlays on Waves 2 + 3.
-5. Native-Spanish-fluent reviewer pass on `wall.chapter01..05.*` keys (4 strings still flagged `[ES-pending-review]`).
+1. **Souji-sweep on `sprint/w3-interactive-chapters-6-10`** — Driver D maximization complete (2971 passing, 0 skipped, +289 net new). All 7 gates green. `/` First Load JS = 147 kB. Ready for souji to ship to `sprint/visual-rebirth`.
+2. Engage W4 (life-layers + Spanish polish + perf + a11y AAA). Backlog enriched (132 tasks, 1002 Cx). The W3-D Spotlight #1 (chapterSpec) and #2 (wallTimeline) are designed as W4 force-multipliers — life-layers consume them directly.
+3. Pre-existing TS errors in 4 test files surfaced by tsc earlier but green under vitest + next build — souji-sweep candidate to fix.
+4. Native-Spanish-fluent reviewer pass on `wall.chapter01..05.*` keys (4 strings still flagged `[ES-pending-review]`); W3 chapter 6-10 ES already native-fluent.
+5. Real-browser e2e for `BenefitsCliffChart` temperature stroke (jsdom limitation — Recharts ResponsiveContainer reports 0px in tests so Area paths don't emit). Playwright can verify the actual rendered stroke color across `--temperature-multiplier` extremes.
 6. May 2 D-day: execute W5.44 runbook, hit Devpost submit by 9:00 AM CDT
 
 ## Blockers

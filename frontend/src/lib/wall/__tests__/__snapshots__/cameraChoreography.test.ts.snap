@@ -153,7 +153,7 @@ exports[`T2.4 + T2.7 — regression-guard snapshot of camera coords > coordinate
       },
       "latitude": 32.7555,
       "longitude": -97.3308,
-      "pitch": 70,
+      "pitch": 60,
       "zoom": 12,
     },
     "9": {

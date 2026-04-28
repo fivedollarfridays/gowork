@@ -50,24 +50,24 @@ describe("W3 Ch10 camera choreography (T3.20)", () => {
     expect(TRANSITION_SPEEDS["9->10"]).toBeGreaterThan(0);
   });
 
-  // Drivers A+B extend chapters 6, 7, 8, 9 in their lanes. The rows are
-  // skipped here so souji-sweep un-skips after the W3 merge.
-  it.skip("CHAPTER_CAMERAS[6] is defined (Driver B — un-skip after merge)", () => {
+  // Drivers A+B's W3 chapters extend the table; Driver D un-skipped these
+  // after the W3 merge consolidated all 10 entries.
+  it("CHAPTER_CAMERAS[6] is defined (Driver A Ch6 — un-skipped by Driver D)", () => {
     const cameras = CHAPTER_CAMERAS as unknown as Record<number, unknown>;
     expect(cameras[6]).toBeDefined();
   });
 
-  it.skip("CHAPTER_CAMERAS[7] is defined (Driver A — un-skip after merge)", () => {
+  it("CHAPTER_CAMERAS[7] is defined (Driver B Ch7 — un-skipped by Driver D)", () => {
     const cameras = CHAPTER_CAMERAS as unknown as Record<number, unknown>;
     expect(cameras[7]).toBeDefined();
   });
 
-  it.skip("CHAPTER_CAMERAS[8] is defined (Driver B — un-skip after merge)", () => {
+  it("CHAPTER_CAMERAS[8] is defined (Driver B Ch8 — un-skipped by Driver D)", () => {
     const cameras = CHAPTER_CAMERAS as unknown as Record<number, unknown>;
     expect(cameras[8]).toBeDefined();
   });
 
-  it.skip("CHAPTER_CAMERAS[9] is defined (Driver A — un-skip after merge)", () => {
+  it("CHAPTER_CAMERAS[9] is defined (Driver A Ch9 — un-skipped by Driver D)", () => {
     const cameras = CHAPTER_CAMERAS as unknown as Record<number, unknown>;
     expect(cameras[9]).toBeDefined();
   });
