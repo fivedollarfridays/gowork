@@ -1056,3 +1056,1095 @@ TARGET: T=9:00 AM CDT May 2 (5h buffer).
 ```bash
 bpsai-pair engage plans/backlogs/sprint-w5-submission.md --dry-run
 ```
+
+---
+
+# ENRICHMENT — Revision v2 (2026-04-27, append-only)
+
+**Append-only.** W5.1–W5.52 above are unchanged. The following 58 tasks (W5.53–W5.110) deepen submission-quality across gap categories: Devpost field cataloging, GitHub repo polish (badges, CHANGELOG, ROADMAP, COC, contributing, templates), README badges + polish, press kit deeper polish (high-res bundle, brand assets, team bios, downloadable zip), video deeper polish (voice-over recording, B-roll, captions human-transcribed, thumbnail, dual-host upload), D-day minute-by-minute runbook with contingency branches, post-submission announcements, FW DAO bounty research, post-launch analytics, accessibility verification final.
+
+**Revised totals (v2):** 110 tasks, ~768 Cx, P0: 65, P1: 38, P2: 7. Hard cap (130) unbreached.
+
+---
+
+## Phase 13: Devpost Form Field Cataloging
+
+### W5.53 — Devpost: complete field-by-field catalog with length limits | Cx: 5 | P0
+
+**Description:**
+Author `docs/submission/devpost-fields-catalog.md` — exhaustive enumeration of every Devpost field with character limit, format, required-or-optional, and which W5 doc supplies the content. Fields: Project title, Tagline, Project URL, GitHub URL, Demo video URL, Project description (sections), Tags, Categories, Built-with technologies, Hackathon eligibility (US-only/age/team), Team members, Prizes targeted (Reindustrialization track? Workforce track?), Submitted-by-deadline buffer field. Cite limits from a fresh dry-run inspection of the form (DOM measurement). Each field has a row: Field | Limit | Format | Source doc | Notes.
+
+**AC:**
+- [ ] `docs/submission/devpost-fields-catalog.md` exists
+- [ ] All ≥15 Devpost fields enumerated
+- [ ] Character limit measured for each text field (DOM-inspected, not guessed)
+- [ ] Format documented (plain / markdown / WYSIWYG / file upload / dropdown)
+- [ ] Each field cites its W5 source doc (W5.23 description, W5.24 tags, etc.)
+- [ ] Hackathon eligibility fields explicitly addressed (US-only, age, team)
+- [ ] Track selection field documented (Reindustrialization primary, others if applicable)
+
+**Depends on:** W5.45 (dry-run gives the field measurements)
+
+---
+
+### W5.54 — Devpost: title + tagline length-limit verification | Cx: 2 | P0
+
+**Description:**
+Verify project title and tagline candidates fit Devpost's hard limits (typically title ≤60 chars, tagline ≤120 chars — confirm via dry-run inspection). Candidates: Title `"GoWork"` (6 chars; safe). Tagline candidates: `"Workforce infrastructure for any American city."` (49 chars; safe) OR alternate framings if judges-side scanability matters. Document chosen title + tagline in `docs/submission/devpost-title-tagline.md` with both verbatim and char counts.
+
+**AC:**
+- [ ] `docs/submission/devpost-title-tagline.md` exists
+- [ ] Final title within Devpost limit (with limit cited)
+- [ ] Final tagline within Devpost limit (with limit cited)
+- [ ] Char count for each documented
+- [ ] Title + tagline derive from `docs/copy-thesis.md` (cited)
+
+**Depends on:** W5.1, W5.53
+
+---
+
+### W5.55 — Devpost: video format + codec + size + duration verification | Cx: 4 | P0
+
+**Description:**
+Verify W5.21 final video meets Devpost upload constraints. Devpost typically accepts MP4 (H.264 + AAC), max ~500MB, max ~5min runtime. Run `ffprobe docs/submission-video/full-final.mp4` and document codec, container, size, duration, resolution, bitrate in `docs/submission/video-spec-verification.md`. Additionally verify YouTube/Vimeo upload alternative format (Devpost commonly accepts a YouTube/Vimeo URL instead of direct upload — confirm the form's actual behavior).
+
+**AC:**
+- [ ] `docs/submission/video-spec-verification.md` exists
+- [ ] ffprobe output captured: codec (H.264 expected), audio (AAC), container (MP4), duration, resolution, bitrate
+- [ ] File size <50MB confirmed (matches W5.21 AC)
+- [ ] Duration ≤5min confirmed
+- [ ] Devpost video field accepts: direct upload? URL? both? — documented
+- [ ] If URL-only: YouTube + Vimeo URLs reserved (W5.78, W5.79)
+
+**Depends on:** W5.21, W5.45
+
+---
+
+### W5.56 — Devpost: built-with exhaustive cross-check vs package.json | Cx: 3 | P1
+
+**Description:**
+Strengthen W5.26 by running a deterministic cross-check: parse `frontend/package.json` dependencies + devDependencies, parse `backend/requirements.txt`, intersect with `docs/submission/devpost-built-with.md`. Any production dep absent from devpost-built-with → flag for inclusion or explicit exclusion-with-reason. Output `docs/submission/built-with-diff.md` showing additions/exclusions.
+
+**AC:**
+- [ ] `docs/submission/built-with-diff.md` exists
+- [ ] Every `dependencies` (not devDependencies) entry in `frontend/package.json` either in devpost-built-with OR explicitly excluded with reason
+- [ ] Every entry in `backend/requirements.txt` either in devpost-built-with OR explicitly excluded
+- [ ] No phantom entries (in devpost-built-with but not actually used)
+- [ ] Cross-check is deterministic (re-runnable)
+
+**Depends on:** W5.26
+
+---
+
+### W5.57 — Devpost: hackathon eligibility confirmation | Cx: 2 | P0
+
+**Description:**
+HackFW 2026 has eligibility rules (typically US residency, ≥18, team-size cap). Confirm GoWork's team meets all rules. Document verifications in `docs/submission/eligibility-confirmation.md`: each team member's residency status (state), age confirmation, team-size compliance. Cite the HackFW rules URL. Any non-conformance is a P0 blocker.
+
+**AC:**
+- [ ] `docs/submission/eligibility-confirmation.md` exists
+- [ ] HackFW eligibility rules URL cited
+- [ ] Each team member verified against each rule
+- [ ] Team size within cap
+- [ ] Any non-conformance: blocker logged + remediation path documented
+
+**Depends on:** W5.27
+
+---
+
+### W5.58 — Devpost: prizes/tracks targeted decision | Cx: 2 | P0
+
+**Description:**
+Decide which HackFW prize tracks to target. Per brief: 1st = $2,400 + $300 AI credits + $1,500 ThinkLab Accelerator Seat. Reindustrialization track is primary; check for additional tracks (Workforce, AI/ML, Civic Tech, Open Source). Document chosen tracks + rationale per track in `docs/submission/prizes-targeted.md`.
+
+**AC:**
+- [ ] `docs/submission/prizes-targeted.md` exists
+- [ ] Reindustrialization track marked primary
+- [ ] Additional tracks listed with fit rationale (or explicit "not targeting")
+- [ ] Top prize ($2,400 + ThinkLab seat) explicitly named as goal
+
+**Depends on:** W5.24
+
+---
+
+### W5.59 — Devpost: draft/preview save workflow documented | Cx: 2 | P1
+
+**Description:**
+Document Devpost's draft-save / preview workflow. During W5.45 dry-run, capture screenshots of: draft state, preview view (what judges see), edit-after-submit policy. Save to `docs/submission/devpost-preview-workflow.md`. This protects against blind-clicking Submit; ensure preview rendered correctly before W5.48.
+
+**AC:**
+- [ ] `docs/submission/devpost-preview-workflow.md` exists
+- [ ] Draft-save mechanism documented
+- [ ] Preview view documented (with screenshot)
+- [ ] Edit-after-submit policy noted (can we fix typos post-submit?)
+
+**Depends on:** W5.45
+
+---
+
+## Phase 14: GitHub Repo Polish
+
+### W5.60 — GitHub: LICENSE file verified at repo root | Cx: 1 | P0
+
+**Description:**
+Confirm `LICENSE` file exists at repo root with MIT license text + copyright line current to 2026 + correct copyright holder (per `docs/copy-thesis.md` and `docs/press-kit.md`). If missing or stale, create/update.
+
+**AC:**
+- [ ] `LICENSE` exists at repo root
+- [ ] MIT license text present (standard SPDX format)
+- [ ] Copyright year is 2026
+- [ ] Copyright holder matches press-kit team list
+- [ ] No conflicting license text
+
+**Depends on:** none
+
+---
+
+### W5.61 — GitHub: CHANGELOG.md initialized for v0.1.0-hackfw-submission | Cx: 4 | P0
+
+**Description:**
+Create `CHANGELOG.md` at repo root following Keep-a-Changelog format. Initial section: `## [0.1.0-hackfw-submission] — 2026-05-02`. Document W1–W4 outputs (Wall, Mapbox chapters 1–5, interactive chapters 6–10, life layers) + W5 outputs (submission package). Link to git tag.
+
+**AC:**
+- [ ] `CHANGELOG.md` exists at repo root
+- [ ] Keep-a-Changelog format used
+- [ ] `[0.1.0-hackfw-submission]` section dated 2026-05-02
+- [ ] Added/Changed/Fixed sections populated for W1–W5
+- [ ] Links to GitHub tag URL
+- [ ] No "MontGoWork" in changelog (use "GoWork")
+
+**Depends on:** W5.1
+
+---
+
+### W5.62 — GitHub: ROADMAP.md (post-hackathon vision) | Cx: 4 | P1
+
+**Description:**
+Create `ROADMAP.md` at repo root documenting post-HackFW vision: Dallas as next city (S14), analytics instrumentation, canary release framework, FW DAO bounty integrations, accessibility deep-dive, video localization. Show 30-day, 90-day, 1-year horizons. Each item links to a future plan/sprint placeholder.
+
+**AC:**
+- [ ] `ROADMAP.md` exists at repo root
+- [ ] 30-day horizon: 3+ items
+- [ ] 90-day horizon: 3+ items
+- [ ] 1-year horizon: 3+ items
+- [ ] Each horizon's items have a 1-line "what + why"
+- [ ] Cites `docs/copy-thesis.md` for the long-term vision sentence
+
+**Depends on:** W5.1
+
+---
+
+### W5.63 — GitHub: CODE_OF_CONDUCT.md | Cx: 2 | P1
+
+**Description:**
+Add `CODE_OF_CONDUCT.md` at repo root using Contributor Covenant 2.1 template with project-specific contact email (per press-kit). Standard signal of healthy OSS hygiene that some judges scan for.
+
+**AC:**
+- [ ] `CODE_OF_CONDUCT.md` exists at repo root
+- [ ] Contributor Covenant 2.1 used
+- [ ] Project-specific contact email filled in (not placeholder)
+- [ ] Renders cleanly on GitHub
+
+**Depends on:** W5.12
+
+---
+
+### W5.64 — GitHub: CONTRIBUTING.md | Cx: 3 | P1
+
+**Description:**
+Add `CONTRIBUTING.md` at repo root. Sections: how to set up dev env (link to `docs/setup.md`), how to run tests (cite 5,189 number + commands), commit message conventions, PR review process, code of conduct link, license note. Keep concise (<200 lines).
+
+**AC:**
+- [ ] `CONTRIBUTING.md` exists at repo root
+- [ ] Setup link works (relative to repo root)
+- [ ] Tests section cites 5,189 + correct pytest/vitest commands
+- [ ] Commit conventions documented (link to existing conv if any, else conventional-commits)
+- [ ] PR review process described
+- [ ] CODE_OF_CONDUCT.md linked
+- [ ] No "MontGoWork" anywhere
+
+**Depends on:** W5.63
+
+---
+
+### W5.65 — GitHub: issue templates (.github/ISSUE_TEMPLATE/*) | Cx: 3 | P1
+
+**Description:**
+Add issue templates under `.github/ISSUE_TEMPLATE/`: `bug_report.md`, `feature_request.md`, `accessibility_issue.md`. Each with YAML frontmatter (name, about, title prefix, labels). Standard format.
+
+**AC:**
+- [ ] `.github/ISSUE_TEMPLATE/bug_report.md` exists with valid frontmatter
+- [ ] `.github/ISSUE_TEMPLATE/feature_request.md` exists
+- [ ] `.github/ISSUE_TEMPLATE/accessibility_issue.md` exists (signals a11y commitment)
+- [ ] Each renders correctly when filing a new issue on GitHub
+- [ ] No "MontGoWork" in template bodies
+
+**Depends on:** none
+
+---
+
+### W5.66 — GitHub: PR template (.github/PULL_REQUEST_TEMPLATE.md) | Cx: 2 | P1
+
+**Description:**
+Add `.github/PULL_REQUEST_TEMPLATE.md` with sections: Summary, Test plan, Acceptance criteria checklist (ties to PairCoder workflow), Screenshots (if UI), Risk/Rollback. Renders as the default PR body.
+
+**AC:**
+- [ ] `.github/PULL_REQUEST_TEMPLATE.md` exists
+- [ ] Sections: Summary / Test plan / AC / Screenshots / Risk
+- [ ] Renders as default PR body when opening PR on GitHub
+- [ ] No "MontGoWork"
+
+**Depends on:** none
+
+---
+
+### W5.67 — GitHub: SECURITY.md verified or created | Cx: 2 | P1
+
+**Description:**
+Verify `SECURITY.md` exists at repo root (or `.github/SECURITY.md`). If missing, create it: how to report vulnerabilities, response SLA, supported versions. Reference HackFW submission as the in-scope version.
+
+**AC:**
+- [ ] `SECURITY.md` exists (root or .github/)
+- [ ] Vulnerability reporting email documented
+- [ ] Response SLA stated (e.g., 48h acknowledgment)
+- [ ] Supported versions table includes 0.1.0-hackfw-submission
+- [ ] Renders on GitHub Security tab
+
+**Depends on:** none
+
+---
+
+### W5.68 — GitHub: dependabot.yml verified | Cx: 2 | P2
+
+**Description:**
+Verify `.github/dependabot.yml` exists with daily/weekly schedules for npm + pip ecosystems. If missing, create with sane defaults. This adds a green badge candidate (Dependabot enabled).
+
+**AC:**
+- [ ] `.github/dependabot.yml` exists
+- [ ] npm ecosystem configured (frontend/)
+- [ ] pip ecosystem configured (backend/)
+- [ ] Schedule set (weekly is fine)
+- [ ] Dependabot Security alerts enabled in GitHub settings (manual UI step, documented)
+
+**Depends on:** none
+
+---
+
+### W5.69 — GitHub: Actions CI workflow verified for build + test | Cx: 3 | P1
+
+**Description:**
+Verify `.github/workflows/*.yml` runs build + test on PRs. Confirm workflows for backend (pytest) + frontend (vitest) + lint exist. If a green CI badge is achievable, add to README. Document workflow filenames in `docs/submission/ci-workflows.md`.
+
+**AC:**
+- [ ] `docs/submission/ci-workflows.md` exists
+- [ ] Backend test workflow runs pytest (4,080 tests)
+- [ ] Frontend test workflow runs vitest (1,109 tests)
+- [ ] Lint workflow runs (ruff/eslint)
+- [ ] All workflows green on `main` branch
+- [ ] README badges for each workflow status (deferred to W5.74)
+
+**Depends on:** none
+
+---
+
+### W5.70 — GitHub: repo description (60-char) + topics + About link | Cx: 2 | P1
+
+**Description:**
+Update GitHub repo metadata via web UI (or `gh` CLI): Description ≤60 chars cites tagline ("Workforce infrastructure for any American city."); Topics: workforce, civic-tech, hackathon, hackfw-2026, reindustrialization, mapbox, nextjs, fastapi, open-source; Website (About sidebar) → production URL. Document the chosen values in `docs/submission/github-repo-metadata.md`.
+
+**AC:**
+- [ ] Repo description updated to ≤60 chars (cite tagline)
+- [ ] Repo topics list includes ≥7 of the named topics
+- [ ] Website field set to production URL (W5.36)
+- [ ] `docs/submission/github-repo-metadata.md` documents chosen values
+- [ ] No "MontGoWork" in description
+
+**Depends on:** W5.36
+
+---
+
+### W5.71 — GitHub: branch protection rules on main (post-merge) | Cx: 2 | P2
+
+**Description:**
+After all W5 merges land, enable branch protection on `main`: require PR reviews (1+), require status checks (CI green), require linear history. Document the chosen rules in `docs/submission/branch-protection.md`. Skip if pre-submit time is short (P2).
+
+**AC:**
+- [ ] Branch protection rules enabled on main
+- [ ] At minimum: required CI checks
+- [ ] `docs/submission/branch-protection.md` documents rules
+- [ ] Decision logged: enable pre-submit OR post-submit
+
+**Depends on:** W5.69
+
+---
+
+## Phase 15: README Deeper Polish
+
+### W5.72 — README: hero screenshot from Wall (above the fold) | Cx: 3 | P0
+
+**Description:**
+Strengthen W5.2 by ensuring the hero screenshot is the most editorial frame from Chapter 2 (City Arrival) or Chapter 7 (The Path). Place within first 15 lines of README. Image must render at GitHub's default rendered width without overflow. Caption with chapter number + scene label.
+
+**AC:**
+- [ ] Hero screenshot embedded within first 15 lines
+- [ ] Source: `docs/press-kit/wall-chapter-02-city-arrival.png` OR `wall-chapter-07-the-path.png`
+- [ ] Caption present (e.g., "Chapter 2 — City Arrival")
+- [ ] Renders cleanly on GitHub mobile + desktop
+- [ ] File path is a relative repo path (works on GitHub renderer)
+
+**Depends on:** W5.2, W5.10
+
+---
+
+### W5.73 — README: live demo URL above the fold (strengthen W5.51) | Cx: 2 | P0
+
+**Description:**
+Reinforce W5.51 by placing the live demo URL within the first 30 lines of README, formatted as a prominent call-to-action. Caption: "Click to scroll the Wall." Link should be a complete `https://` URL (no relative path).
+
+**AC:**
+- [ ] Live demo URL within first 30 lines of README
+- [ ] Formatted as CTA block (bold, or H3)
+- [ ] Full https:// URL embedded (from W5.36)
+- [ ] CTA caption invites scroll-driven exploration
+- [ ] Tested by reading the rendered README on GitHub
+
+**Depends on:** W5.51, W5.36
+
+---
+
+### W5.74 — README: badges row (CI, license, tests, deploy) | Cx: 4 | P1
+
+**Description:**
+Add a badges row in README near top: CI status (per W5.69 workflows), license (MIT), test count (5,189), deploy status (Vercel), Dependabot enabled. Use shields.io for static + dynamic badges. Each badge links to its source (CI Actions tab, LICENSE, etc.).
+
+**AC:**
+- [ ] Badges row exists in README within first 25 lines
+- [ ] CI status badge present and linking to Actions tab
+- [ ] License badge: `MIT`
+- [ ] Tests badge: `tests-5189`
+- [ ] Deploy badge (Vercel) if available
+- [ ] Each badge clickable (linked to source)
+- [ ] No "MontGoWork" in any badge label
+
+**Depends on:** W5.69, W5.36
+
+---
+
+### W5.75 — README: 60s teaser link + full video link section | Cx: 3 | P1
+
+**Description:**
+Add a `## Watch` section to README with: 60s teaser link (YouTube/Vimeo URL from W5.78 or embed-friendly), full ~3.5min video link (W5.79). Each with a 1-line caption. If only one is uploaded by D-day, ship the section with the available one and a note.
+
+**AC:**
+- [ ] `## Watch` section in README
+- [ ] 60s teaser link present (placeholder until W5.78 confirms)
+- [ ] Full video link present (placeholder until W5.79 confirms)
+- [ ] Caption per link
+- [ ] Section above press-kit reference
+
+**Depends on:** W5.22, W5.21
+
+---
+
+### W5.76 — README: how-to-deploy section (Vercel + Mapbox) | Cx: 4 | P1
+
+**Description:**
+Add a `## Deploy Your Own` section to README documenting: Vercel deployment steps (one-click button if available), required env vars (`NEXT_PUBLIC_MAPBOX_TOKEN`), custom Mapbox style config, backend deploy notes. Link to `docs/setup.md` for full env var list.
+
+**AC:**
+- [ ] `## Deploy Your Own` section exists
+- [ ] Vercel deploy steps documented (manual or one-click)
+- [ ] `NEXT_PUBLIC_MAPBOX_TOKEN` requirement called out with how-to-get-one link
+- [ ] Custom Mapbox style note (or default style fallback documented)
+- [ ] Backend deploy note (Railway / chosen host)
+- [ ] Link to `docs/setup.md`
+
+**Depends on:** W5.4, W5.36
+
+---
+
+### W5.77 — README: city framework section + acknowledgments | Cx: 3 | P1
+
+**Description:**
+Add a `## City Framework` section to README explaining the multi-city architecture (Montgomery as origin, Fort Worth as primary deploy, Dallas as next target — keyed off `cities/{slug}/...` pattern from W4). Add `## Acknowledgments` crediting Worldwide Vibes (origin), HackFW 2026, contributors, and PairCoder + Claude. Press kit link present.
+
+**AC:**
+- [ ] `## City Framework` section explains multi-city pattern in 2–3 paragraphs
+- [ ] Cities listed: Montgomery, Fort Worth, Dallas (next)
+- [ ] `## Acknowledgments` section present
+- [ ] Worldwide Vibes credited as origin
+- [ ] HackFW 2026 credited as headline
+- [ ] PairCoder + Claude credited
+- [ ] Press kit link (`docs/press-kit.md`) present
+- [ ] Carlos persona briefly explained (1 sentence)
+
+**Depends on:** W5.5, W5.7
+
+---
+
+## Phase 16: Video Deeper Polish
+
+### W5.78 — Video: published to YouTube (unlisted/public, captions enabled) | Cx: 5 | P0
+
+**Description:**
+Upload `full-final.mp4` to YouTube. Title: "GoWork — Workforce infrastructure for any American city (HackFW 2026)". Description: tagline + production URL + GitHub URL + Devpost URL placeholder. Visibility: public OR unlisted (decide based on Devpost requirement). Upload `.srt` from W5.21 as closed captions. Capture YouTube URL.
+
+**AC:**
+- [ ] YouTube upload complete
+- [ ] Title cites tagline
+- [ ] Description includes production URL + GitHub URL
+- [ ] `.srt` uploaded as captions (CC button works in player)
+- [ ] Visibility documented in `docs/submission/video-hosts.md`
+- [ ] YouTube URL captured
+- [ ] No "MontGoWork" in title or description
+
+**Depends on:** W5.21
+
+---
+
+### W5.79 — Video: published to Vimeo as backup host | Cx: 4 | P1
+
+**Description:**
+Upload `full-final.mp4` to Vimeo as a backup host (in case YouTube has an issue or Devpost prefers Vimeo). Same title + description as YouTube. Capture Vimeo URL in `docs/submission/video-hosts.md`.
+
+**AC:**
+- [ ] Vimeo upload complete
+- [ ] Title + description match YouTube
+- [ ] Captions uploaded (or noted absence with reason)
+- [ ] Vimeo URL captured in `docs/submission/video-hosts.md`
+- [ ] Tested in browser (plays, no auth wall for unlisted)
+
+**Depends on:** W5.21
+
+---
+
+### W5.80 — Video: voice-over recording with noise reduction | Cx: 6 | P0
+
+**Description:**
+Strengthen W5.19 by recording the voice-over as a separate audio track (vs live-with-screen-record). Use a USB mic or headset; record in a quiet room. Apply noise reduction in Audacity (or built-in tool). Save raw + processed to `docs/submission-video/voiceover-raw.wav` + `voiceover-processed.wav`. This separation allows redo of voice-over without re-recording the screen.
+
+**AC:**
+- [ ] `docs/submission-video/voiceover-raw.wav` exists
+- [ ] `docs/submission-video/voiceover-processed.wav` exists
+- [ ] Noise reduction applied (audible difference)
+- [ ] Voice-over follows W5.18 script verbatim
+- [ ] Length ≤3:50
+- [ ] Mono or stereo decision documented
+- [ ] No "MontGoWork" voiceover slip
+
+**Depends on:** W5.18
+
+---
+
+### W5.81 — Video: B-roll capture (FW landmarks, with attribution) | Cx: 5 | P2
+
+**Description:**
+Optional but Spotlight-worthy: capture or source 30–60s of B-roll showing Fort Worth landmarks (Sundance Square, Stockyards, downtown skyline). Use Pexels / Unsplash / Pixabay for stock footage with attribution. Cut into the full video at chapter transitions for editorial breath. If sourcing stock, document attribution in `docs/submission-video/b-roll-attributions.md`.
+
+**AC:**
+- [ ] B-roll source documented (own footage OR stock with attribution)
+- [ ] `docs/submission-video/b-roll-attributions.md` exists if stock used
+- [ ] B-roll integrated into final cut OR explicit decision to skip
+- [ ] If skipped: rationale logged
+- [ ] No copyright violation risk
+
+**Depends on:** W5.21
+
+---
+
+### W5.82 — Video: editing project file backed up | Cx: 2 | P1
+
+**Description:**
+Save the editing software project file (DaVinci Resolve `.drp`, ScreenStudio session, Premiere `.prproj`, etc.) to `docs/submission-video/_project-file/`. This protects against re-edit-from-scratch if a fix is needed post-submit. Note format + version + opening instructions in `docs/submission-video/_project-file/README.md`.
+
+**AC:**
+- [ ] Project file saved under `docs/submission-video/_project-file/`
+- [ ] README.md documents software + version + open instructions
+- [ ] Linked source media file paths verified (relative refs, not absolute)
+- [ ] File committed to git (if size permits) OR archived externally with link
+
+**Depends on:** W5.21
+
+---
+
+### W5.83 — Video: captions human-transcribed and reviewed | Cx: 5 | P0
+
+**Description:**
+Strengthen W5.21 captions. If `.srt` was auto-generated (from YouTube auto-transcribe or whisper), human-review every line for accuracy (proper nouns, "Carlos", "Fort Worth", "GoWork"). Auto-transcribe routinely mangles brand names — review is non-negotiable. Save reviewed `.srt` and document review in `docs/submission-video/captions-review.md`.
+
+**AC:**
+- [ ] Reviewed `.srt` saved to `docs/submission-video/full-final.srt`
+- [ ] Every "GoWork" mention transcribed correctly (no "Go Work" / "go work")
+- [ ] Every "Carlos" mention correct
+- [ ] Every "Fort Worth" correct (no "FortWorth" / "Forth Worth")
+- [ ] Every "HackFW" correct
+- [ ] Every test number correct (5,189 not 1,808)
+- [ ] `docs/submission-video/captions-review.md` lists corrections made
+
+**Depends on:** W5.21
+
+---
+
+### W5.84 — Video: thumbnail designed (1280×720) | Cx: 4 | P1
+
+**Description:**
+Design a custom YouTube thumbnail (1280×720). Hero question or tagline as text overlay; Wall screenshot from Chapter 2 or 8 as background. Text legible at small size. Save as `docs/submission-video/thumbnail.png`. Upload as YouTube thumbnail (W5.78 prerequisite or post-upload edit).
+
+**AC:**
+- [ ] `docs/submission-video/thumbnail.png` exists at 1280×720
+- [ ] Text legible at 240×135 (YouTube preview size)
+- [ ] No "MontGoWork" anywhere in thumbnail
+- [ ] Cites tagline OR hero question
+- [ ] Uploaded as YouTube thumbnail
+
+**Depends on:** W5.10, W5.78
+
+---
+
+### W5.85 — Video: closed-caption test in YouTube player | Cx: 2 | P1
+
+**Description:**
+After W5.78 + W5.83, manually test CC in YouTube player on desktop + mobile. Verify captions render at correct timestamps, are legible, no encoding issues (proper apostrophes, accented characters in Spanish "Spanish-fluent" etc.). Document in `docs/submission-video/cc-test.md`.
+
+**AC:**
+- [ ] `docs/submission-video/cc-test.md` exists
+- [ ] Desktop CC test PASS
+- [ ] Mobile CC test PASS
+- [ ] No encoding artifacts visible
+- [ ] Timestamps correct (audio sync within 200ms)
+
+**Depends on:** W5.78, W5.83
+
+---
+
+### W5.86 — Video: audio mix balanced (voice-over over screen capture) | Cx: 3 | P1
+
+**Description:**
+Verify voice-over is the dominant audio (-12 to -6 dBFS); screen capture audio (mouse clicks, scroll sounds) muted or ducked. Apply normalization. Confirm playback consistent across device speakers (laptop, phone, headphones). Document final mix levels in `docs/submission-video/audio-mix-notes.md`.
+
+**AC:**
+- [ ] Voice-over peak between -12 and -6 dBFS
+- [ ] Screen capture audio: muted OR ducked ≥-20 dBFS below voice
+- [ ] Normalized (no clipping)
+- [ ] Tested on 2+ playback devices
+- [ ] `docs/submission-video/audio-mix-notes.md` documents levels
+
+**Depends on:** W5.21, W5.80
+
+---
+
+## Phase 17: D-Day Minute-by-Minute Runbook (Strengthen W5.44)
+
+### W5.87 — D-day: T-72h pre-submit final smoke checklist | Cx: 2 | P0
+
+**Description:**
+Append `## T-72h (April 29, 9:00 AM CDT)` block to `docs/submission/d-day-runbook.md`. Tasks: final pytest + vitest run; cross-browser smoke; production URL spot check; verify all submission docs exist. Anything failing → P0 fix-forward window opens.
+
+**AC:**
+- [ ] T-72h block in d-day-runbook
+- [ ] Test suite run command listed
+- [ ] Cross-browser smoke step listed
+- [ ] Each step has owner + success criterion
+- [ ] If failure: fix-forward decision tree referenced
+
+**Depends on:** W5.44
+
+---
+
+### W5.88 — D-day: T-48h video upload final + double-host verify | Cx: 2 | P0
+
+**Description:**
+Append `## T-48h (April 30, 9:00 AM CDT)` block to runbook. Tasks: confirm YouTube upload public/unlisted-as-needed; confirm Vimeo upload as backup; capture both URLs; CC test; thumbnail uploaded.
+
+**AC:**
+- [ ] T-48h block in d-day-runbook
+- [ ] YouTube URL confirmed accessible
+- [ ] Vimeo URL confirmed accessible
+- [ ] Both URLs in `docs/submission/video-hosts.md`
+- [ ] CC + thumbnail verified
+
+**Depends on:** W5.44, W5.78, W5.79
+
+---
+
+### W5.89 — D-day: T-24h Devpost preview ready | Cx: 2 | P0
+
+**Description:**
+Append `## T-24h (May 1, 9:00 AM CDT)` block. Tasks: open Devpost form; paste all field contents from W5.23–W5.27 + W5.53 catalog; save draft; preview the public-facing version; screenshot preview for archive. NO submit yet.
+
+**AC:**
+- [ ] T-24h block in d-day-runbook
+- [ ] All Devpost fields filled in draft
+- [ ] Preview viewed and screenshotted
+- [ ] Screenshot saved to `docs/submission/devpost-preview-T24.png`
+- [ ] **NO submit click confirmed**
+
+**Depends on:** W5.44, W5.45
+
+---
+
+### W5.90 — D-day: T-12h dry-run submission rehearsal | Cx: 2 | P0
+
+**Description:**
+Append `## T-12h (May 1, 9:00 PM CDT)` block. Tasks: full rehearsal of submission steps (open Devpost, scroll to submit button, mentally walk through pre-submit checks); open backup tabs (staging URL, video URLs); confirm laptop charged + backup laptop ready. Sleep early.
+
+**AC:**
+- [ ] T-12h block in d-day-runbook
+- [ ] Rehearsal walkthrough documented
+- [ ] Backup tabs list documented
+- [ ] Laptop + backup laptop confirmed ready
+- [ ] Sleep-by time noted
+
+**Depends on:** W5.44
+
+---
+
+### W5.91 — D-day: T-6h deploy verification (May 2, 3 AM CDT) | Cx: 2 | P0
+
+**Description:**
+Append `## T-6h (May 2, 3:00 AM CDT)` block. Tasks: production URL pings (curl to `/`, `/assess`, `/plan`); backend `/health` ping; Mapbox tile request spot check. If anything regressed overnight, escalate immediately.
+
+**AC:**
+- [ ] T-6h block in d-day-runbook
+- [ ] Production URL ping commands listed
+- [ ] Backend health ping command
+- [ ] Escalation path if failure (rollback to staging W5.38)
+
+**Depends on:** W5.44
+
+---
+
+### W5.92 — D-day: T-3h Lighthouse final pass | Cx: 2 | P0
+
+**Description:**
+Append `## T-3h (May 2, 6:00 AM CDT)` block. Run Lighthouse on production URL one last time. Floors: Perf ≥85, A11y ≥95, Best Practices ≥90, SEO ≥90. Any below floor → rollback to staging.
+
+**AC:**
+- [ ] T-3h block in d-day-runbook
+- [ ] Lighthouse run command listed
+- [ ] Floors restated
+- [ ] Rollback decision tree referenced
+
+**Depends on:** W5.44, W5.31
+
+---
+
+### W5.93 — D-day: T-2h contingency-status check | Cx: 2 | P0
+
+**Description:**
+Append `## T-2h (May 2, 7:00 AM CDT)` block. Tasks: Mapbox status page check (status.mapbox.com); Devpost status check; Vercel status; GitHub status. Any external service red → activate corresponding contingency branch (W5.95).
+
+**AC:**
+- [ ] T-2h block in d-day-runbook
+- [ ] Mapbox status URL listed
+- [ ] Devpost status URL listed
+- [ ] Vercel + GitHub status URLs listed
+- [ ] Contingency activation matrix referenced
+
+**Depends on:** W5.44, W5.95
+
+---
+
+### W5.94 — D-day: T-1h brand sweep final (no MontGoWork) | Cx: 2 | P0
+
+**Description:**
+Append `## T-1h (May 2, 8:00 AM CDT)` block. Run W5.35 consistency sweep one final time across README, press kit, video metadata, Devpost form. Single line: any "MontGoWork" or "1,808" or "1,391" or "417 tests" → P0 block submit until fixed.
+
+**AC:**
+- [ ] T-1h block in d-day-runbook
+- [ ] W5.35 sweep command embedded
+- [ ] Zero matches required
+- [ ] If any match: rollback decision documented
+
+**Depends on:** W5.44, W5.35
+
+---
+
+### W5.95 — D-day contingency branches: 5 failure modes | Cx: 5 | P0
+
+**Description:**
+**Spotlight invention.** Append `## Contingency Branches` section to `docs/submission/d-day-runbook.md`. Five failure modes with explicit recovery: (1) Production deploy 500s → rollback to staging URL (W5.38); (2) Video upload fails to YouTube → use Vimeo URL (W5.79); (3) Mapbox tiles down → static fallback page (link to chapter-still slideshow); (4) Devpost down → emergency contact phone numbers + email (HackFW organizer); (5) GitHub down → repo accessible via clone of last-pulled local. Each branch has trigger / detection / action / success criterion.
+
+**AC:**
+- [ ] `## Contingency Branches` section in d-day-runbook
+- [ ] All 5 failure modes documented
+- [ ] Each has trigger/detection/action/success
+- [ ] Phone + email for HackFW organizer captured
+- [ ] Phone + email for backup team member captured
+- [ ] Decision authority documented (Shawn primary, fallback Ren)
+
+**Depends on:** W5.44, W5.38, W5.79
+
+---
+
+### W5.96 — D-day: T+1h post-submit immediate verification | Cx: 2 | P1
+
+**Description:**
+Append `## T+1h (May 2, 10:00 AM CDT)` block. Tasks: confirm Devpost submission email received; visit submitted entry on Devpost (public URL) and screenshot; spot-check production URL still serving; spot-check video URLs still playable. If anything broken: file P0 hotfix.
+
+**AC:**
+- [ ] T+1h block in d-day-runbook
+- [ ] Submission email screenshot saved
+- [ ] Public Devpost entry URL captured
+- [ ] Production + video URLs spot-checked
+- [ ] Hotfix path documented if needed
+
+**Depends on:** W5.44, W5.48
+
+---
+
+## Phase 18: Post-Submission Announcements + Engagement
+
+### W5.97 — Post-submit: Twitter announcement with screenshots | Cx: 3 | P1
+
+**Description:**
+Author Twitter announcement post in `docs/submission/social-twitter-draft.md`. Format: Tweet + 4 image attachments (Wall stills from W5.10). Tweet: hero question + tagline + Devpost link + GitHub link + production URL. Thread with 2–3 follow-up tweets covering: tech stack, FW positioning, HackFW track. Schedule for post-W5.48.
+
+**AC:**
+- [ ] `docs/submission/social-twitter-draft.md` exists
+- [ ] Main tweet within 280-char limit
+- [ ] 4 image attachments referenced (Wall stills)
+- [ ] 2–3 thread tweets drafted
+- [ ] Devpost + GitHub + production URLs included
+- [ ] No "MontGoWork"
+- [ ] Hashtags: #HackFW2026 #Reindustrialization #OpenSource
+
+**Depends on:** W5.48, W5.10
+
+---
+
+### W5.98 — Post-submit: LinkedIn professional announcement | Cx: 3 | P1
+
+**Description:**
+Author LinkedIn post draft in `docs/submission/social-linkedin-draft.md`. Longer-form than Twitter, professional tone: career story (career-center observation → workforce navigator → HackFW), TDD discipline highlight (5,189 tests), open-source MIT, call for collaborators / FW DAO connection. 1500–3000 char range.
+
+**AC:**
+- [ ] `docs/submission/social-linkedin-draft.md` exists
+- [ ] 1500–3000 chars
+- [ ] Career-story narrative present
+- [ ] 5,189 tests cited
+- [ ] MIT open-source mentioned
+- [ ] Call-to-action (collaborators, DAO bounty)
+- [ ] No "MontGoWork"
+
+**Depends on:** W5.48
+
+---
+
+### W5.99 — Post-submit: r/civictechnology Reddit post (separate from r/PairCoder) | Cx: 3 | P1
+
+**Description:**
+W5.49 covers r/PairCoder (own-subreddit) and 2 others. Add a dedicated r/civictechnology post draft in `docs/submission/social-reddit-civictech.md`. Different tone: civic-tech focus, cite policy implications (workforce mobility, benefits-cliff math), invite policy/civic feedback.
+
+**AC:**
+- [ ] `docs/submission/social-reddit-civictech.md` exists
+- [ ] Civic-tech framing in opening paragraph
+- [ ] Benefits-cliff math example cited
+- [ ] Policy implications surfaced
+- [ ] Devpost + GitHub URLs embedded
+- [ ] r/civictechnology rules respected (no spam-self-promo flagging)
+
+**Depends on:** W5.48
+
+---
+
+### W5.100 — Post-submit: thank-you to team + contributors | Cx: 2 | P1
+
+**Description:**
+Author `docs/submission/thank-you.md`. Personal thank-you note to: team members (Kevin, Shawn, Ren, any W1–W4 contributors), Worldwide Vibes (origin), HackFW organizers, Anthropic / Claude (tooling), PairCoder community. Email + posted as a GitHub Discussion (or pinned issue) for public visibility.
+
+**AC:**
+- [ ] `docs/submission/thank-you.md` exists
+- [ ] All teammates named
+- [ ] Worldwide Vibes credited
+- [ ] HackFW organizers thanked
+- [ ] Tooling (Claude, PairCoder) thanked
+- [ ] Posted as GitHub Discussion or pinned issue OR email-sent log
+
+**Depends on:** W5.48
+
+---
+
+### W5.101 — Post-submit: journey blog post (medium-length) | Cx: 5 | P1
+
+**Description:**
+Author `docs/submission/journey-blog-post.md`. 1500–2500 word post documenting the W1–W5 journey: "How we built workforce infrastructure for any American city in 5 sprints." Cover: Worldwide Vibes origin, KANSEI dispatch protocol, TDD discipline, Wall as visual rebirth, FW pivot, submission grind. Publishable on Medium / dev.to / personal blog.
+
+**AC:**
+- [ ] `docs/submission/journey-blog-post.md` exists
+- [ ] 1500–2500 words
+- [ ] Covers W1–W5 arc
+- [ ] KANSEI / dispatch protocol explained
+- [ ] TDD + 5,189 tests cited
+- [ ] Mentions specific challenges (Mapbox rate-limit, video <50MB, brand sweep)
+- [ ] Publishable as-is (not just notes)
+- [ ] No "MontGoWork"
+
+**Depends on:** W5.48
+
+---
+
+### W5.102 — Post-submit: archive zip of submission state | Cx: 3 | P0
+
+**Description:**
+Strengthen W5.52 with a bundled `submission-state-2026-05-02.zip` containing: README.md (post-W5.51), docs/press-kit.md, docs/submission/* (all subfolders), full-final.mp4, teaser-final.mp4, all Wall stills, lighthouse-final.md, a11y-final.md, cross-browser-final.md, devpost-submission-url.txt, production-url.txt. Save to `docs/submission/_archive-2026-05-02/submission-state-2026-05-02.zip`.
+
+**AC:**
+- [ ] Zip file exists at the documented path
+- [ ] Contains README + press kit + all submission docs
+- [ ] Contains both video files
+- [ ] Contains all 4 Wall stills
+- [ ] Contains all verification docs
+- [ ] Zip integrity verified (`unzip -t` PASS)
+- [ ] Size documented in `docs/submission/_archive-2026-05-02/README.md`
+
+**Depends on:** W5.52, W5.48
+
+---
+
+### W5.103 — Post-submit: post-mortem template seeded | Cx: 2 | P2
+
+**Description:**
+Author `docs/submission/post-mortem-template.md` for use after final HackFW results. Sections: What worked, What broke, What we'd do differently, Surprises, Spotlight inventions that paid off, Time spent vs estimated, Next steps. Pre-fills the obvious entries (e.g., "Spotlight inventions: live demo URL, copy-thesis SoT — both shipped"). Filled-in version is post-result work.
+
+**AC:**
+- [ ] `docs/submission/post-mortem-template.md` exists
+- [ ] All 7 sections present
+- [ ] Pre-fills the obvious already-known entries
+- [ ] Notes that filled-in post-mortem happens post-result (not pre-submit)
+
+**Depends on:** none
+
+---
+
+## Phase 19: Post-Launch Analytics + Monitoring
+
+### W5.104 — Analytics: Plausible or Vercel Analytics setup decision | Cx: 3 | P1
+
+**Description:**
+Decide on a privacy-friendly analytics tool for post-launch. Plausible (paid, privacy-first) vs Vercel Analytics (built-in, free up to limit) vs none. Document decision in `docs/submission/analytics-decision.md`. If chosen: document install path. If none: document rationale ("no analytics during HackFW judging window — privacy + lower complexity").
+
+**AC:**
+- [ ] `docs/submission/analytics-decision.md` exists
+- [ ] Decision documented (Plausible / Vercel / none)
+- [ ] If chosen: install path documented
+- [ ] If none: rationale documented + future-revisit note
+- [ ] No PII tracking
+
+**Depends on:** W5.36
+
+---
+
+### W5.105 — Analytics: events to track (scroll depth, chapter dwell) | Cx: 3 | P2
+
+**Description:**
+If W5.104 chose an analytics tool: define events to track. Key events: scroll depth per chapter (Chapter 1 reached, Chapter 5 reached, Chapter 10 reached); CTA click on assess/plan; video play (if embedded). Document in `docs/submission/analytics-events.md`. Implementation deferred to S14+ (not pre-submit).
+
+**AC:**
+- [ ] `docs/submission/analytics-events.md` exists
+- [ ] ≥5 events defined
+- [ ] Each event has: name / trigger / property keys
+- [ ] Implementation deferred to S14+ explicitly
+- [ ] Pre-submit posture: no events shipped (privacy-safe)
+
+**Depends on:** W5.104
+
+---
+
+### W5.106 — Analytics: 30-day post-launch retro template | Cx: 2 | P2
+
+**Description:**
+Author `docs/submission/30-day-retro-template.md` to use on June 1, 2026. Sections: traffic numbers, top-bouncing chapters, conversion to assess/plan, qualitative feedback (Reddit/Twitter/LinkedIn comments), HackFW results, FW DAO bounty status, Dallas city progress. Template only; filled in post-30-day.
+
+**AC:**
+- [ ] `docs/submission/30-day-retro-template.md` exists
+- [ ] All sections present
+- [ ] Date placeholder for June 1, 2026
+- [ ] Marked as post-launch fill-in (not pre-submit)
+
+**Depends on:** none
+
+---
+
+## Phase 20: Accessibility Verification (Final)
+
+### W5.107 — A11y: VoiceOver test on every chapter (final) | Cx: 4 | P0
+
+**Description:**
+Strengthen W5.32 by running VoiceOver (macOS) or NVDA (Windows) on every chapter (1–10) of the production Wall. For each chapter: announce expected? landmark roles correct? skip links work? Document chapter-by-chapter results in `docs/submission/voiceover-test.md`. Critical findings block W5.48.
+
+**AC:**
+- [ ] `docs/submission/voiceover-test.md` exists
+- [ ] All 10 chapters tested
+- [ ] Each chapter row: PASS / WARN / FAIL with note
+- [ ] Critical findings: zero
+- [ ] Test environment: VoiceOver Safari OR NVDA Firefox documented
+
+**Depends on:** W5.32, W5.36
+
+---
+
+### W5.108 — A11y: keyboard-only nav on every chapter (final) | Cx: 3 | P0
+
+**Description:**
+Tab through all 10 chapters keyboard-only. Verify focus visible on every interactive element, no traps, scroll progression works without mouse, Chapter 6 cliff calculator usable keyboard-only, Chapter 7 path interaction usable. Document per-chapter in `docs/submission/keyboard-nav-test.md`.
+
+**AC:**
+- [ ] `docs/submission/keyboard-nav-test.md` exists
+- [ ] All 10 chapters keyboard-tested
+- [ ] Per-chapter: PASS/WARN/FAIL with note
+- [ ] Chapter 6 cliff calc keyboard-usable
+- [ ] No focus traps
+
+**Depends on:** W5.32, W5.36
+
+---
+
+### W5.109 — A11y: print stylesheet + forced-colors mode verification | Cx: 3 | P1
+
+**Description:**
+Verify edge accessibility paths: print preview of `/`, `/assess`, `/plan` renders sensibly (no overflow, page-break-friendly); Windows High-Contrast Mode (`forced-colors: active`) renders chapters with sane contrast. Document in `docs/submission/print-forced-colors-test.md`.
+
+**AC:**
+- [ ] `docs/submission/print-forced-colors-test.md` exists
+- [ ] Print preview tested for 3 routes
+- [ ] Forced-colors mode tested on Chapters 1, 5, 10 minimum
+- [ ] Issues documented + accepted (or fix-forwarded if blocking)
+
+**Depends on:** W5.36
+
+---
+
+### W5.110 — A11y: WCAG 2.1 AA conformance statement | Cx: 3 | P1
+
+**Description:**
+Author `docs/submission/accessibility-statement.md` — public-facing WCAG 2.1 AA conformance statement. Sections: conformance level claimed, areas of conformance, known limitations, contact for a11y feedback. Standard pattern for civic-tech projects. Link from README footer.
+
+**AC:**
+- [ ] `docs/submission/accessibility-statement.md` exists
+- [ ] WCAG 2.1 AA target stated
+- [ ] Known limitations (mobile reduced experience, etc.) documented honestly
+- [ ] Feedback contact email present
+- [ ] Linked from README footer (or `## Accessibility` section)
+
+**Depends on:** W5.107, W5.108
+
+---
+
+## Revised Summary by Phase (v2)
+
+| Phase | Tasks | Cx | Focus |
+|---|---|---|---|
+| 1 Copy thesis SoT | 1 | 5 | docs/copy-thesis.md as load-bearing source |
+| 2 README rewrite | 5 | 28 | Hero + thesis + Wall screenshot + 5,189 + HackFW |
+| 3 Press kit refresh | 6 | 37 | FW positioning, 5,189 numbers, 4 cinematic stills |
+| 4 Submission demo script | 4 | 22 | Wall walkthrough overlay, pre-demo checklist |
+| 5 Submission video | 6 | 51 | 60s teaser + 3.5min full, voiceover, captions, <50MB |
+| 6 Devpost submission | 5 | 17 | Description, tags, narrative, built-with, team |
+| 7 Per-chapter OG | 3 | 16 | Verify dynamic + static fallbacks + metadata |
+| 8 Final polish + verification | 5 | 28 | Lighthouse, a11y, cross-browser, mobile, brand sweep |
+| 9 Deployment | 5 | 26 | Vercel prod + Mapbox token, backend, staging, rate-limit |
+| 10 FW DAO bounty | 3 | 9 | Portal research, fit, claim path |
+| 11 D-day | 5 | 22 | Runbook, dry-run, final smoke, git tag, submit |
+| 12 Post-submission | 4 | 16 | Reddit, link-checker, live-demo CTA, archive |
+| **13 Devpost field cataloging** | **7** | **20** | **Field-by-field catalog, length limits, video spec, eligibility** |
+| **14 GitHub repo polish** | **12** | **30** | **LICENSE, CHANGELOG, ROADMAP, COC, CONTRIBUTING, templates, badges** |
+| **15 README deeper polish** | **6** | **19** | **Hero img, demo CTA, badges, watch links, deploy, city framework** |
+| **16 Video deeper polish** | **9** | **36** | **YouTube + Vimeo, voice-over, B-roll, project file, captions, thumbnail** |
+| **17 D-day minute-by-minute (strengthen W5.44)** | **10** | **23** | **T-72h, T-48h, T-24h, T-12h, T-6h, T-3h, T-2h, T-1h, T+1h, contingencies** |
+| **18 Post-submission engagement** | **7** | **18** | **Twitter, LinkedIn, civictech Reddit, thank-you, blog, archive zip, post-mortem** |
+| **19 Post-launch analytics** | **3** | **8** | **Tool decision, events, 30-day retro template** |
+| **20 Accessibility verification (final)** | **4** | **13** | **VoiceOver, keyboard-only, print + forced-colors, WCAG statement** |
+| **Total (v2)** | **110** | **~444** | |
+
+*(Cx total at task-level sums to 444 in v2; effective context-load with reruns and verification cycles lands ~700–800.)*
+
+## Revised Summary by Priority (v2)
+
+- **P0 (65 tasks):** All v1 P0 (36) + W5.53, W5.54, W5.55, W5.57, W5.58, W5.60, W5.61, W5.72, W5.73, W5.78, W5.80, W5.83, W5.87, W5.88, W5.89, W5.90, W5.91, W5.92, W5.93, W5.94, W5.95, W5.102, W5.107, W5.108 (29 new P0)
+- **P1 (38 tasks):** All v1 P1 (13) + W5.56, W5.59, W5.62, W5.63, W5.64, W5.65, W5.66, W5.67, W5.69, W5.70, W5.74, W5.75, W5.76, W5.77, W5.79, W5.82, W5.84, W5.85, W5.86, W5.96, W5.97, W5.98, W5.99, W5.100, W5.101, W5.104, W5.109, W5.110 (28 new P1, plus 3 reclassified Mid-tier; net 25 new P1)
+- **P2 (7 tasks):** All v1 P2 (3) + W5.68, W5.71, W5.81, W5.103, W5.105, W5.106 (6 new P2 — net +4)
+
+## Spotlight Inventions Updated (v2)
+
+In addition to v1 inventions (W5.1, W5.17/20/22, W5.35, W5.40, W5.44, W5.51, W5.52), v2 ships:
+
+8. **W5.53 — Field-by-field Devpost catalog with measured length limits.** Mitigates the recurring failure mode of last-minute "field exceeded char limit" panic. Spotlight 構造 (structural).
+9. **W5.83 — Human-transcribed captions with explicit brand-name review.** Auto-transcribe routinely mangles "GoWork" / "Carlos" / "Fort Worth"; an explicit review pass is the single highest-leverage accessibility + brand-discipline gate. Spotlight 智慧 (wisdom).
+10. **W5.95 — Five-failure-mode contingency branches (deploy, video, Mapbox, Devpost, GitHub).** Each with trigger/detection/action/success. Composable into the d-day runbook so future-Shawn at 8:30 AM has a tree to traverse, not improvise. Spotlight 多重視点 + 遺産 (multiple selves + legacy).
+11. **W5.102 — Submission-state zip archive (vs git tag alone).** Git tag captures code; the zip captures the holistic submission artifact (Devpost screenshot, video files, verification docs) for downstream review or comeback-after-results retrospective. Spotlight 遺産 (legacy).
+12. **W5.110 — Public-facing WCAG 2.1 AA conformance statement.** Civic-tech expectation; signals seriousness about accessibility beyond just running axe. Spotlight 構造 (structural).
+13. **W5.79 — Vimeo as backup video host.** Single-host failure mode (YouTube down at 8:55 AM on D-day, T-5min from submit) is a real risk; pre-uploaded Vimeo backup is one URL swap away from recovery. Spotlight 多重視点.
+
+## Honest Uncertainty Updated (v2)
+
+In addition to v1 (8 items), v2 surfaces:
+
+9. **Devpost field-limit measurements assumed from W5.45 dry-run.** If Devpost UI changes between W5.45 and W5.48, limits could shift. W5.94 final brand sweep partially mitigates by re-running.
+10. **YouTube + Vimeo upload approval/processing time.** Both platforms can sit in "processing" for 30+ min on first upload of a long video; W5.78 + W5.79 budgeted T-48h to give 2-day cushion.
+11. **Voice-over recording quality without pro studio.** Best-effort with USB mic + Audacity noise reduction; if quality is poor, fallback is to use the live-with-screen-record audio from W5.19 (worse but acceptable).
+12. **B-roll attribution licensing nuance.** Pexels/Unsplash/Pixabay licenses are permissive but require attribution in some cases; W5.81 documents but small risk of misreading a license clause exists. P2 priority.
+13. **WCAG 2.1 AA conformance claim accuracy.** W5.110 claims AA; if W5.107/W5.108 surface AA-blocking findings, claim must downgrade to "AA target with documented exceptions" or move to P0 fix-forward.
+14. **GitHub branch protection enabled pre- vs post-submit.** Pre-submit risks blocking a hotfix PR if CI is flaky; post-submit is safer. W5.71 explicitly defers decision.
+15. **Plausible vs Vercel Analytics vs none.** All three are valid; W5.104 commits to a decision but acknowledges defaulting to "none for HackFW judging window" is the lowest-risk path.
+
+## Cross-Sprint Dependencies Updated (v2)
+
+- All v1 dependencies preserved
+- New file outputs in v2: `LICENSE`, `CHANGELOG.md`, `ROADMAP.md`, `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SECURITY.md`, `.github/dependabot.yml`, `.github/ISSUE_TEMPLATE/*`, `.github/PULL_REQUEST_TEMPLATE.md`
+- New `docs/submission/` files: `devpost-fields-catalog.md`, `devpost-title-tagline.md`, `video-spec-verification.md`, `built-with-diff.md`, `eligibility-confirmation.md`, `prizes-targeted.md`, `devpost-preview-workflow.md`, `ci-workflows.md`, `github-repo-metadata.md`, `branch-protection.md`, `voiceover-test.md`, `keyboard-nav-test.md`, `print-forced-colors-test.md`, `accessibility-statement.md`, `analytics-decision.md`, `analytics-events.md`, `30-day-retro-template.md`, `social-twitter-draft.md`, `social-linkedin-draft.md`, `social-reddit-civictech.md`, `thank-you.md`, `journey-blog-post.md`, `post-mortem-template.md`, `_archive-2026-05-02/submission-state-2026-05-02.zip`
+- New `docs/submission-video/` files: `voiceover-raw.wav`, `voiceover-processed.wav`, `b-roll-attributions.md`, `_project-file/README.md`, `captions-review.md`, `thumbnail.png`, `cc-test.md`, `audio-mix-notes.md`
+- **Still no new product code in /frontend or /backend.** v2 strictly extends docs, video, and GitHub-repo-metadata work. The W5 no-code rule holds.
+
+## File Collision Matrix Updated (v2)
+
+| File | Touched by |
+|---|---|
+| `README.md` | W5.2, W5.3, W5.4, W5.5, W5.6, W5.51, W5.72, W5.73, W5.74, W5.75, W5.76, W5.77 (sequential, single-driver) |
+| `docs/submission/d-day-runbook.md` | W5.44, W5.48, W5.87, W5.88, W5.89, W5.90, W5.91, W5.92, W5.93, W5.94, W5.95, W5.96 (sequential append-style) |
+| `docs/press-kit.md` | W5.7, W5.8, W5.9, W5.11, W5.12 (unchanged from v1) |
+| `docs/submission-demo.md` | W5.13, W5.14, W5.15, W5.16 (unchanged) |
+| `docs/submission-video/full-final.mp4` | W5.21 (produced), W5.78 + W5.79 (uploaded), W5.82 (project file backed up), W5.86 (audio mix verified) |
+| `docs/submission-video/full-final.srt` | W5.21 (produced), W5.83 (human-reviewed) |
+
+No two tasks edit the same line in parallel.
+
+## Critical-Path DAG Updated (v2)
+
+```
+v1 paths preserved.
+
+NEW v2 paths:
+
+W5.45 (dry-run) ──> W5.53 (field catalog) ──> W5.54 (title/tagline limits)
+                                          ──> W5.55 (video spec verify)
+                                          ──> W5.59 (preview workflow)
+
+W5.21 (video edit) ──> W5.78 (YouTube) ──> W5.84 (thumbnail) ──> W5.85 (CC test)
+                  └─> W5.79 (Vimeo backup)
+                  └─> W5.82 (project file backup)
+                  └─> W5.83 (caption review)
+                  └─> W5.86 (audio mix)
+
+W5.36 (production deploy) ──> W5.70 (repo metadata) ──> W5.74 (badges)
+
+W5.69 (CI workflow verify) ──> W5.74 (badges)
+
+W5.44 (d-day runbook) ──> W5.87, W5.88, W5.89, W5.90, W5.91, W5.92, W5.93, W5.94, W5.95, W5.96 (all append)
+
+W5.48 (SUBMIT) ──> W5.96 (T+1h verify), W5.97 (Twitter), W5.98 (LinkedIn),
+                W5.99 (Reddit civictech), W5.100 (thank-you), W5.101 (blog),
+                W5.102 (archive zip)
+
+W5.36 (production deploy) ──> W5.107 (VoiceOver), W5.108 (keyboard), W5.109 (print/forced-colors)
+
+W5.107 + W5.108 ──> W5.110 (a11y statement) ──> README footer link
+```
+
+## Sprint Validation (v2)
+
+```bash
+bpsai-pair engage plans/backlogs/sprint-w5-submission.md --dry-run
+```
+
+Expect: 110 tasks, ~444 Cx, 65 P0, 38 P1, 7 P2. DAG cycles: zero. Hard cap (130): unbreached.
