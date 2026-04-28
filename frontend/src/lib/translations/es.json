@@ -472,6 +472,7 @@
       "title": "El Muro",
       "subtitle": "Un mapa interactivo de Fort Worth, Texas · abril de 2026"
     },
+<<<<<<< HEAD
     "chapter01": {
       "heroQuestion": "¿Qué se interpone entre tú y un empleo?",
       "editorial": "Estados Unidos visto desde arriba. Un punto en la oscuridad — Fort Worth, Texas.",
@@ -534,6 +535,22 @@
       "officesLabel": "oficinas por visitar",
       "pullquote": "Cada oficina me dio un formulario y otra dirección.",
       "aria": "Capítulo 5: el Laberinto. Cinco oficinas y cuarenta y siete formularios — el caos antes de que GoWork ordene el camino."
+    },
+    "ch1": {
+      "title": "Capítulo 1 — Continental",
+      "hero": "¿Qué te separa de un trabajo?",
+      "subhero": "No deberías tener que descifrar el muro tú solo. Nosotros hacemos las cuentas, ordenamos el camino y te entregamos el plan.",
+      "ariaLive": "Capítulo 1: Continental — vista cenital de Estados Unidos"
+    },
+    "ch2": {
+      "title": "Capítulo 2 — Llegada a la ciudad",
+      "body": "Aquí vive Carlos. Código postal 76119. Al este del centro — pasando Sundance Square, pasando los juzgados.",
+      "ariaLive": "Capítulo 2: Llegada a la ciudad — Fort Worth desde la altura"
+    },
+    "ch3": {
+      "title": "Capítulo 3 — El barrio",
+      "body": "Carlos tiene 29 años. Código postal 76119. Padre soltero de una hija de cuatro años. Recién regresó a casa — con la sentencia cumplida hace tres años. Trae $300 en efectivo, no tiene vehículo y cuenta con cuatro años de experiencia en bodega y manejo de montacargas. Está listo para trabajar. Cuatro barreras se interponen entre él y un sueldo.",
+      "ariaLive": "Capítulo 3: El barrio — código postal 76119"
     }
   },
   "edge": {
