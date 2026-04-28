@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, "sprint/**"]
   pull_request:
-    branches: [main]
+    branches: [main, "sprint/**"]
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -87,6 +87,15 @@ jobs:
 
       - name: Run tests
         run: npx vitest run
+
+      - name: Brand integrity audit (W1)
+        run: npm run audit:brand
+
+      - name: WCAG AAA contrast check (W1)
+        run: npm run contrast
+
+      - name: SVGO config validation (W1)
+        run: npx svgo --config svgo.config.mjs --show-plugins > /dev/null
 
       - name: Build
         run: npm run build | tee /tmp/next-build.log
