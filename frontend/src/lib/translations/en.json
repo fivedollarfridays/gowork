@@ -534,6 +534,22 @@
       "officesLabel": "offices to visit",
       "pullquote": "Every office gave me one form and another address.",
       "aria": "Chapter 5: the Labyrinth. Five offices and forty-seven forms — the chaos before GoWork sequences the path."
+    },
+    "ch1": {
+      "title": "Chapter 1 — Continental",
+      "hero": "What's standing between you and a job?",
+      "subhero": "You shouldn't have to figure out the wall. We do the math, sequence the path, and hand you the plan.",
+      "ariaLive": "Chapter 1: Continental — top-down view of America"
+    },
+    "ch2": {
+      "title": "Chapter 2 — City Arrival",
+      "body": "Carlos lives here. ZIP 76119. East of downtown — past Sundance Square, past the courthouse.",
+      "ariaLive": "Chapter 2: City Arrival — Fort Worth at altitude"
+    },
+    "ch3": {
+      "title": "Chapter 3 — The Neighborhood",
+      "body": "Carlos is 29. ZIP 76119. Single father of one daughter, four years old. Recently released — sentence complete, three years past. He has $300 in cash, no vehicle, and four years of warehouse and forklift experience. He is ready to work. Four barriers stand between him and a paycheck.",
+      "ariaLive": "Chapter 3: The Neighborhood — ZIP 76119"
     }
   },
   "edge": {

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  T2.16 — Wall marker sprite. Each <symbol> is 32×32 in W1 brand colors
+  (amber + cyan accents on dark navy). Mapbox runtimes load rasterized
+  variants via `frontend/src/lib/wall/markerSymbols.ts`; this committed
+  file is the editorial source-of-truth and dev-time reference.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="gowork-office-court" viewBox="0 0 32 32">
+      <circle cx="16" cy="16" r="13" fill="oklch(0.20 0.04 250)" stroke="oklch(0.86 0.18 80)" stroke-width="1.5"/>
+      <path d="M10 22h12M16 10v12M10 14h12M12 14l-2 4M22 14l-2 4M14 14l-2 4M20 14l-2 4" stroke="oklch(0.86 0.18 80)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="gowork-office-benefits" viewBox="0 0 32 32">
+      <circle cx="16" cy="16" r="13" fill="oklch(0.20 0.04 250)" stroke="oklch(0.78 0.13 215)" stroke-width="1.5"/>
+      <path d="M12 12h8v10h-8z M14 16h4 M14 18h4 M14 14h2" stroke="oklch(0.78 0.13 215)" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="gowork-office-dps" viewBox="0 0 32 32">
+      <circle cx="16" cy="16" r="13" fill="oklch(0.20 0.04 250)" stroke="oklch(0.86 0.18 80)" stroke-width="1.5"/>
+      <path d="M16 9l5 3v5c0 4-2.5 6-5 7-2.5-1-5-3-5-7v-5z" stroke="oklch(0.86 0.18 80)" stroke-width="1.4" fill="none" stroke-linejoin="round"/>
+      <path d="M14 16l1.5 1.5L19 14" stroke="oklch(0.86 0.18 80)" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="gowork-office-workforce" viewBox="0 0 32 32">
+      <circle cx="16" cy="16" r="13" fill="oklch(0.20 0.04 250)" stroke="oklch(0.78 0.13 215)" stroke-width="1.5"/>
+      <path d="M11 18h10v4H11z M14 18v-3h4v3 M16 12v3" stroke="oklch(0.78 0.13 215)" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="gowork-office-legal" viewBox="0 0 32 32">
+      <circle cx="16" cy="16" r="13" fill="oklch(0.20 0.04 250)" stroke="oklch(0.86 0.18 80)" stroke-width="1.5"/>
+      <path d="M10 14h12 M16 10v12 M11 14l-1 4h2zM21 14l-1 4h2z" stroke="oklch(0.86 0.18 80)" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="gowork-office-transit" viewBox="0 0 32 32">
+      <circle cx="16" cy="16" r="13" fill="oklch(0.20 0.04 250)" stroke="oklch(0.78 0.13 215)" stroke-width="1.5"/>
+      <rect x="11" y="11" width="10" height="9" rx="2" stroke="oklch(0.78 0.13 215)" stroke-width="1.3" fill="none"/>
+      <circle cx="13.5" cy="22" r="1.2" fill="oklch(0.78 0.13 215)"/>
+      <circle cx="18.5" cy="22" r="1.2" fill="oklch(0.78 0.13 215)"/>
+    </symbol>
+    <symbol id="gowork-office-employer" viewBox="0 0 32 32">
+      <circle cx="16" cy="16" r="13" fill="oklch(0.20 0.04 250)" stroke="oklch(0.86 0.18 80)" stroke-width="1.5"/>
+      <path d="M11 14h10v8H11z M14 14v-3h4v3 M11 18h10" stroke="oklch(0.86 0.18 80)" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+</svg>
