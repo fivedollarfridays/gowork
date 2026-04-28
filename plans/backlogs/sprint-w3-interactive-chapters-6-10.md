@@ -1269,6 +1269,1016 @@ Playwright (preferred) or vitest+jsdom integration test that scrolls through the
 
 ---
 
+### Phase 13: Carlos Voice & Presence (Apex enrichment — humanity layer)
+
+> The brief described Carlos via biography. The enrichment plants Carlos's voice as quoted editorial, gives the avatar four-frame motion, directional facing, ground shadow, gestures, and idle/discovery states — the bones of presence. None of this exceeds 8 KB of new bundle weight cumulatively.
+
+### T3.71 — Carlos quoted editorial overlay (Ch6 + Ch7) | Cx: 9 | P0
+
+**Description:**
+Render Carlos's quoted editorial on Ch6 + Ch7 as `<blockquote>` micro-overlays positioned bottom-left, dignified typography (italic, 0.9em, --fg-muted), with attribution `— Carlos, Fort Worth`. Locked Ch6 quote: `"I came home with $300 and a daughter, and the system told me to go to five offices."` Locked Ch7 quote (per office reached, single rotation): `"Each office took a half-day. I missed shifts to be there."` Quotes hold 4 s on chapter entry then fade to 30% opacity (still readable). Feed locked strings via translation keys `wall.ch6.carlosQuote` and `wall.ch7.carlosQuote`. Reduced-motion: hold at 100% opacity (no fade).
+
+**AC:**
+- [ ] `frontend/src/components/wall/CarlosQuote.tsx` exists, < 60 lines, single export
+- [ ] Used in Ch6 + Ch7 chapter scaffolds
+- [ ] Locked EN quotes match this task's wording verbatim
+- [ ] ES translations native-fluent (Texas Spanish; reviewed against existing `cliffSimulator.*` voice)
+- [ ] axe-core: blockquote has correct semantic markup
+- [ ] Reduced-motion: no fade
+- [ ] Vitest test: renders both locales; reduced-motion path verified
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.1, T3.7, T3.69
+
+---
+
+### T3.72 — Per-waypoint Carlos voice line (Ch7) | Cx: 11 | P1
+
+**Description:**
+Each of the 5 waypoints in Ch7 emits a brief Carlos voice line (text only, NOT audio) when the avatar arrives. Lines: DPS — `"License first. They wouldn't take applications without ID."`; HHSC — `"They asked for paystubs I didn't have."`; Legal Aid — `"They cleared the record in 30 days. I cried in the parking lot."`; Workforce Solutions — `"They believed me before the resume did."`; Amazon FC — `"$18.50/hr. First shift Monday."` Lines render as a small toast above the timeline rail, 3 s hold, fade. Spanish translations honor Texas regional voice. Locked copy in `wall.ch7.carlosWaypointVoice.{dps,hhsc,legalAid,workforceSolutions,amazonFc}`.
+
+**AC:**
+- [ ] All 5 voice lines locked in en.json + es.json
+- [ ] Toast component reused or thinly wrapped (does NOT add new layout primitive)
+- [ ] Each toast displays only when avatar arrival event fires (NOT on rapid scroll-through)
+- [ ] Reduced-motion: shows for fixed 5 s, no fade
+- [ ] axe-core: toast announced via `aria-live="polite"`
+- [ ] Vitest test: avatar arrival at each waypoint emits expected toast
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.10, T3.71
+
+---
+
+### T3.73 — Carlos voice on Ch6 cliff math moment | Cx: 6 | P1
+
+**Description:**
+When the cliff slider crosses the cliff threshold (T3.5 detects), Carlos's voice toast appears above the cliff overlay: `"That's why I almost said no to the job."` Single emission per chapter visit (debounced, max 1x). Spanish: `"Por eso casi le dije que no al trabajo."` Locked copy in `wall.ch6.carlosCliffVoice`.
+
+**AC:**
+- [ ] Single emission per chapter entry, even if user re-crosses threshold
+- [ ] Toast positioned above cliff overlay (does NOT obscure the chart)
+- [ ] EN + ES locked
+- [ ] aria-live announces once
+- [ ] Reduced-motion: toast persists for 5 s, no fade
+- [ ] Vitest test: drag below + above threshold once -> 1 emission; drag again -> 0 emissions
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.5, T3.71
+
+---
+
+### T3.74 — Carlos avatar 4-frame walk cycle upgrade | Cx: 14 | P1
+
+**Description:**
+Spotlight enrichment of T3.10. Upgrade the SVG avatar from 2-frame to 4-frame walk cycle: stride-left, mid-passing, stride-right, mid-passing-mirror. Frames swap on scroll velocity at clamp(40, 600 / velocity, 200) ms. Total SVG size MUST remain under 6 KB (4 frames inside one `<svg>` with `<g>` toggling). Honesty test: render at 24/48/96 px and confirm fluid motion vs 2-frame. Falls back to 2-frame under sustained low velocity (battery-friendly), and to single static frame under reduced-motion. Performance budget: walk-cycle frame swap allocates 0 extra rAF; reuses existing scroll listener.
+
+**AC:**
+- [ ] CarlosAvatar.tsx upgraded to 4-frame cycle (single SVG, 4 `<g>` groups)
+- [ ] Total SVG payload < 6 KB
+- [ ] Frame swap rate clamped per velocity formula
+- [ ] Battery-friendly downshift to 2-frame when velocity < threshold for 800 ms
+- [ ] Reduced-motion: single static frame (T3.10 behavior preserved)
+- [ ] Vitest test: 4-frame mode vs 2-frame mode vs static, each verified
+- [ ] Manual perf test documented: avatar at 60 fps on Surface Go @ 96 px
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.10
+
+---
+
+### T3.75 — Carlos avatar directional facing | Cx: 8 | P1
+
+**Description:**
+Compute path-tangent direction from `lib/wall/paths.ts` waypoints; mirror the SVG horizontally when path heading is east-bound vs west-bound (Carlos faces the direction of travel). Implementation: a single `transform: scaleX(-1)` toggle based on `direction = waypointB.coord[0] > waypointA.coord[0] ? "east" : "west"`. Reduced-motion: avatar facing East (default) statically.
+
+**AC:**
+- [ ] Avatar mirrors based on segment direction
+- [ ] No flicker when crossing segment boundary (transition over 240 ms)
+- [ ] Reduced-motion: static East-facing
+- [ ] Vitest test: at progress 0.1 (DPS->HHSC, east) avatar facing east; at progress 0.6 (Legal Aid->Workforce, west) facing west
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.10, T3.74
+
+---
+
+### T3.76 — Carlos avatar ground shadow projection | Cx: 7 | P2
+
+**Description:**
+A subtle elliptical shadow under Carlos (radial gradient, 6% opacity, fixed below feet). Pure SVG `<ellipse>` with `<radialGradient>` filter; no extra DOM nodes. Shadow stretches slightly during stride frames (1 px taller on stride-frames vs passing-frames) to suggest weight. Reduced-motion: static shadow, no stretch.
+
+**AC:**
+- [ ] Shadow renders below avatar at all 4 frames
+- [ ] Stretch tied to stride frame (1 px taller on strides)
+- [ ] Reduced-motion: no stretch
+- [ ] Total payload delta < 600 bytes
+- [ ] Vitest test: shadow element present, attribute changes per frame
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.74
+
+---
+
+### T3.77 — Carlos arrival gesture on each waypoint | Cx: 9 | P2
+
+**Description:**
+On waypoint arrival (avatar settles for the 200 ms pause from T3.10), play a subtle gesture: head tilts 4 degrees toward the waypoint marker, holds 600 ms, returns. This is a one-frame transform on a `<g class="head">` element via CSS animation `gesture-tilt 600ms ease-out`. Reduced-motion: no tilt. Total animation cost: ~0 GPU (single transform, composited).
+
+**AC:**
+- [ ] Gesture fires on each of 5 waypoint arrivals
+- [ ] Single CSS animation, no JS rAF
+- [ ] Reduced-motion: gesture skipped
+- [ ] Vitest test: at simulated waypoint arrival, head element has gesture class for ~600 ms
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.74
+
+---
+
+### T3.78 — Carlos thinking/idle state on scroll pause | Cx: 8 | P2
+
+**Description:**
+When scroll velocity remains 0 for > 1.5 s mid-Ch7, Carlos enters a "thinking" idle: subtle 2 px vertical bob (cycle 1.6 s) + slight head tilt 2 degrees. Implementation: CSS animation toggled by a `useScrollVelocity()` derived state. Reduced-motion: no bob.
+
+**AC:**
+- [ ] Idle state activates on velocity = 0 for > 1.5 s
+- [ ] CSS-only animation (no rAF)
+- [ ] Reduced-motion: no bob
+- [ ] Vitest test: with mocked velocity = 0 over 2 s, idle class applied; on resumed velocity, idle class removed
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.74
+
+---
+
+### T3.79 — Carlos discovery state on first waypoint entry | Cx: 7 | P2
+
+**Description:**
+The FIRST time the avatar arrives at each waypoint in this session, hold the avatar 600 ms longer than the standard 200 ms pause and emit a discovery glow (a soft cyan halo, 800 ms fade). Subsequent passes use the standard 200 ms pause with no glow. State stored in `useCarlosNarrative` (extended) as `Set<waypointId>`. Reduced-motion: no glow, no extended pause.
+
+**AC:**
+- [ ] State tracked in `useCarlosNarrative` extension (no new global)
+- [ ] First arrival: 800 ms total pause + glow; subsequent: 200 ms pause, no glow
+- [ ] State persists across Ch7 scroll-back (cumulative max behavior)
+- [ ] Reduced-motion: no glow / no extended pause (always 200 ms)
+- [ ] Vitest test: first arrival vs second arrival timing distinguishable
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.66, T3.10
+
+---
+
+### T3.80 — Week markers on path-line (visible time progression) | Cx: 9 | P1
+
+**Description:**
+Render small numeric `Wk N` labels along the Ch7 path-line at each segment midpoint. Labels are typographic (no marker dot — the line itself is the timeline). Mobile: labels collapse to tooltip on tap. Tied to `carlosWaypoints[i].week`. Color: `--fg-muted` so they don't compete with the cyan glow.
+
+**AC:**
+- [ ] 5 week-labels render along the path line at midpoints
+- [ ] Mobile: tap shows label as tooltip (NOT permanent overlay)
+- [ ] Color reads as muted (per token contrast check)
+- [ ] axe-core: labels announced as tour stops, not decorative
+- [ ] Vitest test: 5 labels render; mobile tap reveals
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.11
+
+---
+
+### Phase 14: Cliff Calculator Persona Presets + Polish
+
+> The brief said "wage slider drives temperature multiplier." This phase makes the cliff calc a persona-driven narrative tool that judges, case managers, and Spanish-speakers can each project their own story onto.
+
+### T3.81 — Persona presets (Carlos, Maria, Custom) for Ch6 cliff | Cx: 14 | P0
+
+**Description:**
+Add a small persona-selector pill above the cliff slider (Ch6 only): three options — Carlos (default), Maria (Montgomery alt), Custom. Each preset loads a different `CliffAnalysis` fixture: Carlos uses `fixtures/cliffAnalysisCarlos.ts` (T3.4); Maria uses `fixtures/cliffAnalysisMaria.ts` (new, Montgomery-localized cliff data); Custom loads an empty fixture and reveals an inline `<input type="number">` for hourly wage. Persona switch animates the cliff curve transition over 400 ms. Spotlight: this is the moment when judges start projecting their OWN scenario.
+
+**AC:**
+- [ ] `frontend/src/components/wall/CliffPersonaSelector.tsx` exists, < 100 lines
+- [ ] 3 fixtures committed: `cliffAnalysisCarlos.ts` (T3.4 reuse), `cliffAnalysisMaria.ts` (NEW), `cliffAnalysisCustom.ts` (empty/typed shape)
+- [ ] Persona switch animates curve transition over 400 ms (framer-motion)
+- [ ] Reduced-motion: instant fixture swap
+- [ ] aria-pressed semantics on each pill; keyboard reachable
+- [ ] EN + ES locked names: Carlos, Maria, Custom / Personalizado
+- [ ] Vitest test: select each persona, simulator receives correct fixture; reduced-motion path verified
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.4
+
+---
+
+### T3.82 — Persona-aware Carlos voice quote | Cx: 6 | P1
+
+**Description:**
+The Carlos cliff voice quote (T3.73) only emits when persona is "Carlos". Maria emits a different locked line: `"My niño's daycare costs more than my raise was worth."` ES: `"La guardería de mi niño cuesta más que el aumento."` Custom: no quote (user is projecting). Locked in `wall.ch6.cliffVoice.{carlos,maria}`.
+
+**AC:**
+- [ ] Carlos voice fires for Carlos persona only
+- [ ] Maria voice locked + ES translated, fires for Maria persona only
+- [ ] Custom persona: no quote
+- [ ] Vitest test: persona switch -> correct quote (or none)
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.73, T3.81
+
+---
+
+### T3.83 — Per-phase-out tooltip (SNAP / Medicaid / Childcare) | Cx: 12 | P0
+
+**Description:**
+On the cliff chart, each benefit phase-out band (SNAP, Medicaid, Childcare Subsidy CCS) has a focusable / hoverable region with a tooltip: "$X/mo SNAP value lost at $Y/hr wage" etc. Numbers come from the active persona's `CliffAnalysis.phase_outs[]`. Tooltip is keyboard-reachable (Tab through phase-out segments), screen-reader announces. Implementation: add `<rect>` overlays atop the existing chart bands with `role="button"` `tabindex="0"`; do NOT modify `BenefitsCliffSimulator` (read its DOM via wrapper).
+
+**AC:**
+- [ ] 3 tooltip overlays render: SNAP, Medicaid, Childcare CCS (when applicable)
+- [ ] Tab cycles through phase-out segments; Enter/Space opens tooltip
+- [ ] Screen reader announces threshold + lost value
+- [ ] BenefitsCliffSimulator NOT modified (verified via git diff)
+- [ ] Reduced-motion: tooltip appears instantly (no fade)
+- [ ] axe-core: zero violations
+- [ ] Vitest test: tab cycles 3 segments; each tooltip shows correct value from fixture
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.4
+
+---
+
+### T3.84 — Shareable wage URL (?wage=14&persona=carlos) | Cx: 11 | P1
+
+**Description:**
+Wage slider value + persona selection writes to URL via `replaceState` on each change (debounced 300 ms). On page load, `?wage=14&persona=maria` restores both. Spotlight: "Share Carlos's Chapter 6 cliff math" — direct deep link. Includes copy-link button that surfaces toast `"Link copied"`. Honesty: documented uncertainty — URL state restoration timing relative to BenefitsCliffSimulator hydration must be verified (potential race condition).
+
+**AC:**
+- [ ] Slider drag debounced-writes `?wage=N` to URL (does NOT push history)
+- [ ] Persona selection writes `?persona=name` to URL
+- [ ] Page load with `?wage=14&persona=maria` restores both before first paint of cliff
+- [ ] Copy-link button surfaces toast
+- [ ] Vitest test: load with query params, assert restored state; drag, assert URL updated
+- [ ] axe-core: toast announced via aria-live
+- [ ] `bpsai-pair arch check` passes
+- [ ] Document hydration race condition + mitigation in task notes
+
+**Depends on:** T3.5, T3.81
+
+---
+
+### T3.85 — Keyboard arrow-key drag on slider | Cx: 6 | P0
+
+**Description:**
+Reaffirm and TEST: cliff slider supports keyboard arrow keys (1-step), PgUp/PgDn (5-step), Home/End (min/max). T3.40 covered audit; T3.85 adds explicit vitest assertion — under both Carlos AND Maria personas, arrow keys move slider AND fire all the same side-effects (URL update, temperature multiplier, voice quote).
+
+**AC:**
+- [ ] Vitest test: keyboard arrow events trigger URL write, multiplier change, and voice quote (when crossing threshold)
+- [ ] Verified for Carlos AND Maria personas
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.40, T3.84
+
+---
+
+### T3.86 — Reset to default button | Cx: 5 | P1
+
+**Description:**
+"Reset" button next to the persona pills. Click resets: slider to persona-default wage, multiplier to 1.0, URL params cleared, voice quote dismissed. EN: `Reset`, ES: `Reiniciar`. Locked in `wall.ch6.resetButton`. Reduced-motion: instant reset (no animation).
+
+**AC:**
+- [ ] Reset button reachable via Tab
+- [ ] Click: slider, URL, multiplier, voice all reset to persona default
+- [ ] EN + ES copy locked
+- [ ] aria-label specifies "Reset cliff calculator"
+- [ ] Vitest test: full reset flow
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.81, T3.84
+
+---
+
+### T3.87 — "What-if" scenario side-by-side comparison | Cx: 13 | P2
+
+**Description:**
+Stretch: a `Compare` button on Ch6 (P2 — descope candidate). Click reveals a second cliff overlay rendered side-by-side (mobile: stacked) showing the prior wage as a faded baseline + the current wage's net income delta highlighted. Single-state comparison (NOT history mode). Reduced-motion: instant render. Documented as P2 — first to cut if Cx breaches 1100.
+
+**AC:**
+- [ ] Compare button toggles second overlay
+- [ ] Mobile: stacks vertically, no horizontal overflow
+- [ ] Comparison highlights net income delta
+- [ ] Reduced-motion: instant render
+- [ ] Vitest test: toggle on/off, second overlay mounts/unmounts
+- [ ] `bpsai-pair arch check` passes
+- [ ] If Cx total breaches 1100 mid-sprint, this task is descoped first
+
+**Depends on:** T3.81
+
+---
+
+### T3.88 — Cliff persona switch animates | Cx: 7 | P1
+
+**Description:**
+When switching persona pill, the cliff curve animates (framer-motion path morph) over 400 ms instead of jump-cut. Honesty: recharts (the chart lib BenefitsCliffSimulator uses) may not expose path morphing — fallback is a 250 ms fade between the two curves. Reduced-motion: instant.
+
+**AC:**
+- [ ] Persona switch animates curve transition (morph or fade)
+- [ ] Reduced-motion: instant swap
+- [ ] Vitest test: animation classes applied during transition; absent under reduced-motion
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.81
+
+---
+
+### Phase 15: Path-Line & Timeline Polish
+
+### T3.89 — Gradient amber-to-cyan path line over Wk 1-12 | Cx: 8 | P0
+
+**Description:**
+Refines T3.11. The Ch7 path line uses a gradient that progresses amber (Wk 1, struggle) -> cyan (Wk 12, success) along its length. Implementation: SVG `<linearGradient>` with stops at each waypoint week proportional to total span. Reduced-motion: same gradient (it's static color, not motion). Honesty: Mapbox `LineLayer` does NOT support SVG gradient — implement as DOM SVG overlay positioned over the map projection (fallback).
+
+**AC:**
+- [ ] Gradient stops at Wk 1 (amber), Wk 4, Wk 8, Wk 10, Wk 12 (cyan)
+- [ ] DOM SVG overlay correctly registered against Mapbox projection (verified at zoom 12, 13, 14)
+- [ ] Color tokens used (no hardcoded hex)
+- [ ] Reduced-motion: same gradient
+- [ ] Vitest test: gradient stops match `--accent-amber` and `--accent-cyan`
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.11
+
+---
+
+### T3.90 — Glowing milestone dots at each waypoint | Cx: 7 | P1
+
+**Description:**
+Refines T3.11. At each of 5 waypoints, a small glowing dot (`<circle>` with `filter: drop-shadow(0 0 8px var(--accent-cyan))`) marks the office. Pulse animation (1.6 s cycle, +/- 10% scale) at the CURRENT milestone (where Carlos is). Other dots: static glow. Reduced-motion: all dots static, no pulse.
+
+**AC:**
+- [ ] 5 milestone dots render at waypoint coords
+- [ ] Active dot pulses (1.6 s cycle)
+- [ ] Other dots static glow
+- [ ] Reduced-motion: all static
+- [ ] Vitest test: at progress 0.4 (Wk 4 = HHSC), dot[1] has pulse class; others don't
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.10, T3.89
+
+---
+
+### T3.91 — Path line thickens approaching job (Wk 12) | Cx: 6 | P1
+
+**Description:**
+Refines T3.11. Stroke width interpolates from 3 px at Wk 1 to 6 px at Wk 12 — a subtle visual reinforcement that progress accumulates. Implementation: per-segment stroke-width attribute. Reduced-motion: uniform 4 px thickness.
+
+**AC:**
+- [ ] Per-segment stroke widths: 3, 4, 4.5, 5, 6 px (Wk 1 -> Wk 12)
+- [ ] Reduced-motion: uniform 4 px
+- [ ] Vitest test: each segment renders with expected stroke-width
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.89
+
+---
+
+### T3.92 — Path completion celebration (subtle, non-intrusive) | Cx: 9 | P1
+
+**Description:**
+When avatar reaches Wk 12 / Amazon FC, a subtle celebration: 3 cyan particle dots emit upward from the marker, fade over 1.2 s. Branded chime (single 200 ms note, < 5 KB) optionally plays (mute respected). NO confetti (avoids cliché, preserves dignity). Reduced-motion: no particles, no chime — only a soft text overlay `Job landed.` / `Trabajo conseguido.`
+
+**AC:**
+- [ ] 3 particle dots emit from Wk 12 marker on avatar arrival
+- [ ] Fade over 1.2 s
+- [ ] Optional chime (rate-limited to 1 per chapter visit)
+- [ ] Reduced-motion: text overlay only, no particles, no sound
+- [ ] EN + ES text overlay locked in `wall.ch7.celebration`
+- [ ] Vitest test: arrival emits particles; reduced-motion path uses text overlay
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.10, T3.91
+
+---
+
+### T3.93 — Keyboard step-through-weeks mode | Cx: 9 | P0
+
+**Description:**
+On Ch7, a hidden-by-default "Step through weeks" button (revealed on Tab focus) lets keyboard users advance through weeks without scrolling. Pressing the button (or the keyboard shortcut Right Arrow when not in slider focus) moves the avatar one waypoint forward; Left Arrow moves back. Each step also moves the page scroll position to the corresponding chapter scroll segment. aria-live announces `"Week N: <waypoint label>"`.
+
+**AC:**
+- [ ] Hidden button revealed on Tab focus (skip-link pattern)
+- [ ] Right/Left Arrow advances/reverses by waypoint when not focused on slider
+- [ ] Page scroll syncs with avatar position
+- [ ] aria-live announces each step
+- [ ] Vitest test: keyboard arrow keys advance avatar; aria-live receives expected announcements
+- [ ] axe-core: zero violations
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.10
+
+---
+
+### Phase 16: 3D Barrier Graph Polish
+
+### T3.94 — Node hover reveals details panel | Cx: 11 | P0
+
+**Description:**
+On node hover (mouse) or focus (keyboard via T3.41), a side panel slides in from the right (250 ms ease-out) showing: barrier name, category, description, severity score, and connected barriers count. Single panel instance, swap content on hover-change. ESC dismisses. Reduced-motion: instant slide.
+
+**AC:**
+- [ ] Hover/focus on any of 33 nodes reveals panel
+- [ ] Panel content correct per node (verified via fixture)
+- [ ] ESC dismisses
+- [ ] Reduced-motion: instant slide
+- [ ] axe-core: panel has correct dialog semantics; focus trapped while open
+- [ ] Vitest test: hover node X -> panel content matches barrier X data
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.18, T3.41
+
+---
+
+### T3.95 — Click-to-zoom on node | Cx: 10 | P1
+
+**Description:**
+Click a node — Three.js camera smoothly orbits to focus on that node (1.4 s ease-in-out, distance 3). Click empty space — camera returns to default distance 8. Reduced-motion: snap (no orbit). Mobile: tap = same behavior. Constraint: zoom does not invert axes (preserve up-vector).
+
+**AC:**
+- [ ] Click node: camera orbits to focus (distance 3)
+- [ ] Click empty space: camera returns to default (distance 8)
+- [ ] Reduced-motion: snap
+- [ ] Up-vector preserved (no upside-down flip)
+- [ ] Vitest test: click event triggers camera target update; reduced-motion path = snap
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.18, T3.94
+
+---
+
+### T3.96 — Severity / category legend with toggle | Cx: 9 | P0
+
+**Description:**
+A small legend overlay (top-right of Ch8) shows: severity color scale (low/med/high) + category icon set (financial / legal / logistical / health). Click any legend item to toggle filter (dim non-matching nodes to 20% opacity). Toggle button to hide/show legend. Reduced-motion: instant filter, no fade.
+
+**AC:**
+- [ ] Legend renders at top-right; toggle button in chapter header
+- [ ] Click any legend item filters constellation
+- [ ] Multi-toggle supported (hold Shift for additive)
+- [ ] axe-core: legend has correct list semantics; filter buttons announce state
+- [ ] Vitest test: filter applied -> non-matching nodes dimmed
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.18
+
+---
+
+### T3.97 — Drag and rearrange nodes (with reset) | Cx: 13 | P2
+
+**Description:**
+Stretch (P2): user can drag any node in 3D space; positions persist in session memory until reset. "Reset layout" button restores deterministic seeded positions (T3.17). Reduced-motion: drag disabled (constellation static). Honesty uncertainty: drag interaction in @react-three/fiber requires `<TransformControls>` or custom raycaster — added complexity; documented as descope-first if breach.
+
+**AC:**
+- [ ] Drag any of 33 nodes -> position updates in real-time
+- [ ] "Reset layout" button restores seeded positions
+- [ ] Reduced-motion: drag disabled (cursor returns to default)
+- [ ] Vitest test: drag event updates node position; reset restores
+- [ ] `bpsai-pair arch check` passes
+- [ ] Descope first if W3 breaches 1100 Cx
+
+**Depends on:** T3.18, T3.95
+
+---
+
+### T3.98 — Filter constellation by severity | Cx: 8 | P1
+
+**Description:**
+Three buttons (or a slider): Low, Medium, High severity. Click to filter visible nodes (others fade to 20% opacity). Filters constraint-restrict the legend. Reduced-motion: instant filter, no fade.
+
+**AC:**
+- [ ] 3 severity filter controls render
+- [ ] Click any filter -> non-matching nodes dim
+- [ ] Reduced-motion: instant
+- [ ] Vitest test: severity filter applied -> correct nodes visible
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.96
+
+---
+
+### T3.99 — Search a barrier | Cx: 9 | P1
+
+**Description:**
+A small search input (top of Ch8) filters nodes matching name or category. Matching nodes pulse briefly (800 ms) on type. ESC clears. Spanish search supported (matches both EN + ES barrier names from `barrier_graph_seed.json` localized fields). Reduced-motion: no pulse.
+
+**AC:**
+- [ ] Search input present, keyboard reachable, aria-labeled
+- [ ] Type "credit" -> credit-related barriers pulse
+- [ ] ES locale: type "crédito" -> same nodes match
+- [ ] ESC clears + dismisses pulse
+- [ ] Reduced-motion: no pulse, just visible filter
+- [ ] Vitest test: search match correctly filters; ESC clears
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.18
+
+---
+
+### T3.100 — Constellation rotation constraint (no upside-down) | Cx: 6 | P0
+
+**Description:**
+The orbital drift (T3.18) on Y-axis MUST clamp to prevent upside-down rotation. OrbitControls rotation limits: polar angle [Math.PI / 4, 3 * Math.PI / 4]. Without this, the constellation can flip and become disorienting. Reduced-motion: rotation disabled entirely (T3.21 SVG fallback).
+
+**AC:**
+- [ ] Polar angle clamped [Math.PI / 4, 3 * Math.PI / 4]
+- [ ] No constellation flip during 60-second drift
+- [ ] Reduced-motion: rotation disabled
+- [ ] Vitest test: simulate drift over 100 frames; assert polar angle stays in bounds
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.18
+
+---
+
+### T3.101 — Constellation 2D SVG fallback explicit (low-power mode) | Cx: 9 | P1
+
+**Description:**
+When `useDeviceCapability` (W1) reports a low-end device tier (<= "low"), render the SVG constellation (T3.21) instead of Three.js — even WITHOUT prefers-reduced-motion. This is the explicit low-power path the brief said to make explicit, not hide. A small UI hint `Reduced visuals — low power mode` appears for 4 s on first detect, with a one-click "Show full" override.
+
+**AC:**
+- [ ] Low-end tier detected -> SVG constellation renders (Three.js chunk NOT loaded)
+- [ ] UI hint shown for 4 s on detect
+- [ ] "Show full" override re-mounts Three.js
+- [ ] Battery API fallback: < 20% battery also forces low-power mode
+- [ ] EN + ES locked hint copy
+- [ ] Vitest test: mock low tier -> SVG rendered, Canvas not mounted
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.21
+
+---
+
+### Phase 17: Ch9 Fly-to-Montgomery Polish
+
+### T3.102 — Flight progress indicator + ambient sound | Cx: 11 | P1
+
+**Description:**
+During the 3-second Mapbox flyTo (T3.25), render a thin horizontal progress bar at the bottom of the viewport that advances 0 -> 100% over the flight. Ambient `whoosh` sound plays (rate-limited to 1 per flight, < 8 KB asset, mute respected). Reduced-motion: progress bar shown briefly (300 ms full), no sound.
+
+**AC:**
+- [ ] Progress bar visible during flight; advances 0 -> 100%
+- [ ] `flight-whoosh.mp3` < 8 KB, registered in `lib/wall/sound.ts`
+- [ ] Mute respected; reduced-motion: 300 ms progress, no sound
+- [ ] aria-live announces flight start, mid, arrival
+- [ ] Vitest test: progress advances; sound fires once; reduced-motion path verified
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.25
+
+---
+
+### T3.103 — Cities along flight route lit briefly (Easter egg) | Cx: 10 | P2
+
+**Description:**
+During the 3 s flight, faint pin-flashes appear over Dallas, Memphis, and Birmingham as the camera passes. Each pin glows for 350 ms then fades. Pure visual; not interactive. Reduced-motion: skipped. Spotlight: subtle map-as-narrative moment.
+
+**AC:**
+- [ ] 3 pins flash sequentially during the flight
+- [ ] Each flash lasts 350 ms
+- [ ] Reduced-motion: no flashes
+- [ ] Vitest test: at flight progress 0.3 / 0.55 / 0.8, expected pin has flash class
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.25
+
+---
+
+### T3.104 — Montgomery view: full 5-chapter Mapbox structure (proof of framework) | Cx: 14 | P1
+
+**Description:**
+After arrival in Montgomery, a small chevron `Explore Montgomery's chapters ->` reveals a mini-tour: 5 condensed Mapbox views (Wall / Path / Math / Graph / Find) at Montgomery scope, each 2-3 s auto-cycle (or arrow-key step). Proves the city framework is reusable, not just FW-specific. Reduced-motion: static thumbnail of all 5 stacked.
+
+**AC:**
+- [ ] Chevron CTA visible after Montgomery arrival
+- [ ] Click reveals 5-view condensed tour with arrow-key step
+- [ ] Auto-cycle pauses on focus / hover
+- [ ] Reduced-motion: 5 static thumbnails stacked
+- [ ] EN + ES copy locked
+- [ ] axe-core: zero violations; keyboard reachable
+- [ ] Vitest test: 5 views render in correct order
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.26
+
+---
+
+### T3.105 — Keyboard shortcuts: M for Montgomery, F for Fort Worth | Cx: 7 | P1
+
+**Description:**
+Press `M` (when no input is focused) -> trigger fly-to-Montgomery. Press `F` -> trigger return-to-FW. Shortcut hints appear in a small "?" tooltip in the top-right of Ch9. Mobile: hints suppressed, only buttons remain.
+
+**AC:**
+- [ ] `M` keypress triggers fly-to-Montgomery (when no input focused)
+- [ ] `F` keypress triggers return-to-FW
+- [ ] Tooltip shows shortcuts on `?` hover/focus
+- [ ] Mobile: shortcut hints suppressed
+- [ ] Vitest test: keypress events trigger correct fly action
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.25, T3.27
+
+---
+
+### T3.106 — Animated count-up on stat band + timestamp | Cx: 9 | P1
+
+**Description:**
+Refines T3.23. The stat band counts up from 0 to final values over 1.4 s on Ch9 entry (5,189 tests, 13 sprints, 2 cities, MIT). Uses `useCountUp` (W1 hook). Below the band, a small `as of <today>` timestamp generated at build time (read from `package.json` build date or git commit timestamp). Reduced-motion: instant final values, no count-up.
+
+**AC:**
+- [ ] Count-up over 1.4 s on Ch9 entry
+- [ ] Timestamp `as of <YYYY-MM-DD>` rendered, build-time generated
+- [ ] Reduced-motion: instant values
+- [ ] EN + ES locked timestamp prefix (`as of` / `al`)
+- [ ] Vitest test: at progress 0% / 50% / 100%, count value matches
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.23
+
+---
+
+### Phase 18: View Transitions & Deep Linking
+
+### T3.107 — Pre-load /assess route in background | Cx: 9 | P1
+
+**Description:**
+When user enters Ch10 (T3.29), Next.js `router.prefetch('/assess')` fires. By the time user clicks the CTA, the assess page chunk is already downloaded. Verify via network tab: `/assess` JS loads during Ch10 entry, NOT at click time. Pre-load only fires once per session.
+
+**AC:**
+- [ ] Ch10 entry triggers `router.prefetch('/assess')`
+- [ ] Pre-load fires once per session (verified via spy)
+- [ ] No regression: standard click navigation still works if pre-load fails
+- [ ] Vitest test: Ch10 entry -> prefetch spy called once
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.29
+
+---
+
+### T3.108 — Deep linking #chapter-N preserves scroll state | Cx: 11 | P0
+
+**Description:**
+Loading the page with `#chapter-06` scrolls to Ch6 entry on hydration. Loading with `#chapter-08` scrolls to Ch8 mid-point. Each chapter scaffold (T3.1, T3.7, T3.15, T3.23, T3.29) registers a stable id (`chapter-06` etc.). Browser back/forward navigation preserves the fragment. Reduced-motion: instant scroll (no smooth-scroll).
+
+**AC:**
+- [ ] Each chapter has a stable `id="chapter-N"` anchor
+- [ ] Page load with fragment scrolls to correct chapter (after hydration)
+- [ ] Back/forward preserves fragment
+- [ ] Reduced-motion: instant scroll
+- [ ] Vitest test: load with fragment -> scroll position matches expected
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.1, T3.7, T3.15, T3.23, T3.29
+
+---
+
+### T3.109 — Skip-to-assessment early CTA (a11y) | Cx: 7 | P0
+
+**Description:**
+A skip-link appears on first Tab focus on the page: `Skip to assessment` -> instantly scrolls to Ch10 CTA. For screen-reader users + keyboard users who don't want to read the full essay. ES: `Saltar a la evaluación`.
+
+**AC:**
+- [ ] Skip-link visible only on Tab focus (skip-link pattern)
+- [ ] Click scrolls to Ch10 CTA
+- [ ] EN + ES locked
+- [ ] axe-core: skip-link has correct tabindex, role
+- [ ] Vitest test: Tab focus reveals; click scrolls
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.29
+
+---
+
+### T3.110 — Cross-fade fallback animation (browser feature dev report) | Cx: 8 | P1
+
+**Description:**
+Refines T3.32. In dev mode only, on page load, log a small report to console: `View Transitions API: <supported|fallback>`, `prefers-reduced-motion: <true|false>`, `Battery API: <supported|n/a>`, `Vibration API: <supported|n/a>`. Useful for debugging on weird devices.
+
+**AC:**
+- [ ] Dev-only feature detection report logs on first paint
+- [ ] Production build does NOT log (verified by `process.env.NODE_ENV`)
+- [ ] Vitest test: dev mock -> console.log called; prod mock -> not called
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.32
+
+---
+
+### Phase 19: Audio Polish
+
+### T3.111 — Per-chapter ambient sound layer | Cx: 13 | P1
+
+**Description:**
+Each of Ch6-Ch10 has its own ambient layer (single mp3, looping, < 18 KB each, total < 90 KB across 5). Layers crossfade on chapter boundary (1 s). Volume per layer auto-adjusts to master volume slider (T3.114). Mute toggle suppresses all. Reduced-motion: ambient tracks NOT loaded (saves bandwidth).
+
+**AC:**
+- [ ] 5 ambient mp3s committed, each < 18 KB, all CC0 / royalty-free with provenance in commit message
+- [ ] Crossfade on chapter boundary (1 s)
+- [ ] Mute respected; reduced-motion: ambient NOT loaded (verified via network)
+- [ ] Vitest test: chapter transition -> crossfade fires
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.6, T3.13
+
+---
+
+### T3.112 — Footstep variations (4 samples, randomized) | Cx: 7 | P1
+
+**Description:**
+Refines T3.13. 4 footstep samples (`footstep-01.mp3` .. `04.mp3`, each < 4 KB), randomized per step to avoid robotic repetition. Selection uniform random across 4. Mute + reduced-motion still suppress (T3.13 behavior preserved).
+
+**AC:**
+- [ ] 4 footstep samples committed, each < 4 KB
+- [ ] Random selection per step (verified via 100-step sample distribution test)
+- [ ] Mute + reduced-motion suppression (T3.13)
+- [ ] Vitest test: 100 steps -> all 4 samples used; reduced-motion -> 0 plays
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.13
+
+---
+
+### T3.113 — Paper rustle volume tied to scroll velocity | Cx: 8 | P2
+
+**Description:**
+A subtle paper-rustle layer plays during fast scroll (velocity > 30 px/frame), volume scales with velocity (clamp 0.0 - 0.4). Stops at velocity 0. Mute respected. Reduced-motion: NOT loaded.
+
+**AC:**
+- [ ] Paper-rustle.mp3 < 8 KB, registered
+- [ ] Volume scales 0.0 - 0.4 based on velocity (clamp)
+- [ ] Reduced-motion: not loaded
+- [ ] Vitest test: at simulated velocity 50, volume = 0.3 +/- 0.05
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.111
+
+---
+
+### T3.114 — Master volume slider in mute toggle | Cx: 10 | P0
+
+**Description:**
+The W1 mute toggle expands to also include a small volume slider (0 - 1.0). Position persists in `localStorage` (`gowork-volume`). Slider is keyboard accessible (Arrow keys). All Howler sounds receive scaled volume. Mute (volume = 0) is functionally equivalent to muting.
+
+**AC:**
+- [ ] Volume slider added to mute toggle
+- [ ] Persists in localStorage
+- [ ] Keyboard reachable (Arrow keys, Home/End)
+- [ ] All sounds scale to slider value
+- [ ] aria-valuetext announces percentage
+- [ ] axe-core: zero violations
+- [ ] Vitest test: slider -> sound volume scales; persists across reloads
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** W1 mute toggle
+
+---
+
+### T3.115 — Audio ducks on cliff slider drag + stops on tab blur | Cx: 9 | P0
+
+**Description:**
+While user drags the cliff slider (T3.5 emits drag events), all ambient + footstep audio ducks to 0.3 of master volume; restores 1 s after drag end. On tab blur (T3.63 already pauses Three.js + Mapbox), audio mutes entirely; restores on focus. Reduced-motion: ambient not loaded (no ducking needed).
+
+**AC:**
+- [ ] Drag start -> ambient + footstep volume scales to 0.3 of master
+- [ ] Drag end + 1 s -> volume restored
+- [ ] Tab blur -> audio muted; tab focus -> restored
+- [ ] Vitest test: drag event triggers duck; visibilitychange triggers mute/resume
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.5, T3.63, T3.114
+
+---
+
+### Phase 20: Accessibility Deeper
+
+### T3.116 — Reading mode toggle (text-only) | Cx: 12 | P0
+
+**Description:**
+A "Reading mode" toggle in the page header. When activated, the Wall renders as a vertical document: editorial copy + Carlos voice quotes + waypoint labels + stat band, all stacked, no Mapbox / no Three.js / no audio. Persists in `localStorage`. Switches mid-session re-render the page. Spotlight: serves screen-reader users + judges who prefer text. EN + ES toggle copy locked.
+
+**AC:**
+- [ ] Toggle visible in header (or accessibility menu); aria-pressed
+- [ ] Activated -> Mapbox, Three.js, audio NOT loaded (verified via network)
+- [ ] Editorial copy + quotes + waypoint labels + stat band rendered as document
+- [ ] Persists in localStorage
+- [ ] EN + ES copy locked: `Reading mode` / `Modo lectura`
+- [ ] axe-core: zero violations in reading mode
+- [ ] Vitest test: toggle on -> Canvas / Mapbox not mounted; toggle off -> remount
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.34, T3.35, T3.36, T3.37, T3.38
+
+---
+
+### T3.117 — Forced Colors Mode (Windows high contrast) | Cx: 9 | P0
+
+**Description:**
+Verify `forced-colors: active` media query: chapter text / buttons / focus rings remain legible; tokens fall back to `CanvasText` / `Highlight` system colors. Mapbox / Three.js gracefully degrade — Three.js Canvas hidden, SVG fallback shown. Test on Windows High Contrast Black + White themes via Playwright.
+
+**AC:**
+- [ ] All chapter text legible in forced-colors mode (verified via axe-core or Playwright screenshots)
+- [ ] Focus rings use `Highlight` system color
+- [ ] Three.js auto-replaced with SVG (T3.21 path)
+- [ ] Mapbox layers fall back to monochrome
+- [ ] Documented in `docs/qa/w3-forced-colors.md`
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.21
+
+---
+
+### T3.118 — Vibration on chapter transitions (touch only) | Cx: 7 | P2
+
+**Description:**
+On chapter boundary crossing (touch devices only, via Vibration API), a subtle 8 ms vibration fires. Mute toggle / reduced-motion / forced-colors all suppress. Battery API < 20%: also suppress.
+
+**AC:**
+- [ ] `navigator.vibrate(8)` on chapter boundary (touch devices only)
+- [ ] Suppressed under: mute, reduced-motion, low-battery, forced-colors
+- [ ] Vitest test: chapter boundary -> vibrate spy called; reduced-motion path -> 0 calls
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.59
+
+---
+
+### T3.119 — Battery API: low-battery reduced animations | Cx: 8 | P1
+
+**Description:**
+Use Battery Status API (where available) to detect battery level. When level < 20% AND not charging: auto-enable reduced motion semantics (Three.js -> SVG fallback, no ambient, no flicker). UI hint `Battery saver active` shown for 4 s. Honesty: Battery API has been deprecated in some browsers — fallback gracefully when unavailable.
+
+**AC:**
+- [ ] Battery < 20% + not charging -> reduced semantics activate
+- [ ] UI hint shown for 4 s
+- [ ] EN + ES hint copy locked
+- [ ] Battery API unavailable -> no-op (no error)
+- [ ] Vitest test: mock battery 0.15 + discharging -> reduced active; 0.5 + charging -> not active
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.21, T3.101
+
+---
+
+### T3.120 — Skip-to-chapter keyboard menu (1-0 for chapters 1-10) | Cx: 9 | P0
+
+**Description:**
+Press number keys 1-0 (when no input focused) to jump to that chapter. Number 0 = Ch10 (last). Number 1 = Ch1. Lingering header tooltip on Tab focus shows the shortcut menu. Mobile: shortcut menu suppressed; only Tab cycle remains. ES localized header copy.
+
+**AC:**
+- [ ] Number keys 1-9 jump to Ch1-Ch9, 0 jumps to Ch10
+- [ ] Tooltip menu appears on Tab focus to header
+- [ ] Mobile: tooltip suppressed
+- [ ] EN + ES locked menu copy
+- [ ] Vitest test: keypress 5 -> scroll position = Ch5 entry; keypress 0 -> Ch10 entry
+- [ ] axe-core: zero violations
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.108
+
+---
+
+### Phase 21: Social & Sharing
+
+### T3.121 — Web Share API integration for chapters | Cx: 11 | P1
+
+**Description:**
+Each chapter has a "Share" icon button. Click invokes `navigator.share({ url, title, text })` with locked share copy. iOS Safari behavior verified (uncertainty: iOS Safari may prompt with limited UI). Fallback for unsupported browsers: copy URL + show toast (T3.123). Locked share text: `Carlos's Chapter {N} on GoWork — {chapter title}`.
+
+**AC:**
+- [ ] Share button on each of Ch6-Ch10 (5 buttons)
+- [ ] Web Share API invoked when supported
+- [ ] Fallback: copy URL + toast when unsupported
+- [ ] EN + ES locked share text in `wall.share.{chN}`
+- [ ] iOS Safari behavior verified manually + documented
+- [ ] axe-core: zero violations
+- [ ] Vitest test: share supported path; fallback path
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.108
+
+---
+
+### T3.122 — Per-chapter URL share preview matches OG image | Cx: 6 | P2
+
+**Description:**
+W4 ships per-chapter dynamic OG via Vercel Satori. W3 prep: ensure each chapter URL fragment generates a distinct `og:image` placeholder. For W3, all 5 chapters share the W2 default OG; W4 adds the dynamic per-chapter image. Document in `docs/qa/w3-og-prep.md`.
+
+**AC:**
+- [ ] Doc records OG strategy for W3 -> W4 handoff
+- [ ] Each chapter URL fragment renders the W2 default OG image
+- [ ] No regression: existing OG meta tags intact
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.108
+
+---
+
+### T3.123 — "Copy link to this chapter" button | Cx: 6 | P1
+
+**Description:**
+Per-chapter "Copy link" button (next to Share button). Click writes `<host>/#chapter-N` to clipboard, surfaces toast `Link copied`. Spanish: `Enlace copiado`. Used as Web Share API fallback (T3.121).
+
+**AC:**
+- [ ] Copy button per Ch6-Ch10
+- [ ] Click writes correct URL fragment to clipboard
+- [ ] Toast renders with EN/ES copy
+- [ ] axe-core: button + toast announced via aria-live
+- [ ] Vitest test: click -> clipboard.writeText spy called with expected URL
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.108
+
+---
+
+### Phase 22: Scroll & State Resilience
+
+### T3.124 — Chapter scroll-back state preservation (cliff value, persona) | Cx: 11 | P0
+
+**Description:**
+When user scrolls past Ch6 then back, the chosen persona (T3.81) AND wage value (T3.5) are preserved (NOT reset on chapter exit). Implementation: persona + wage stored in `useChapterState()` Context (NOT chapter-local state). Cleared only on full page navigation.
+
+**AC:**
+- [ ] Persona + wage persist across Ch6 exit/re-entry
+- [ ] State cleared on `/assess` navigation (not preserved across full nav)
+- [ ] Reduced-motion: same behavior
+- [ ] Vitest test: scroll Ch6 (set persona Maria, wage 18) -> scroll Ch10 -> scroll back to Ch6 -> persona = Maria, wage = 18
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.5, T3.81
+
+---
+
+### T3.125 — Tab-blur pause + audio mute (combined behavior) | Cx: 7 | P0
+
+**Description:**
+Refines T3.63 + T3.115. On tab blur: Three.js paused, Mapbox stopped, audio muted, animations frozen. On tab focus: all resume EXCEPT audio (audio resumes only on next user gesture, per browser autoplay rules). UI hint shown briefly: `Animations paused while you were away.` Reduced-motion: silent resume (no hint).
+
+**AC:**
+- [ ] Combined behavior: blur -> all paused; focus -> animations resume, audio waits for gesture
+- [ ] UI hint on focus (only if blur lasted > 5 s)
+- [ ] Reduced-motion: no hint
+- [ ] EN + ES locked hint copy
+- [ ] Vitest test: simulate blur -> assertions; simulate focus -> assertions
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.63, T3.115
+
+---
+
+### T3.126 — Long-scroll memory leak prevention test | Cx: 7 | P1
+
+**Description:**
+Refines T3.64. Add an automated long-scroll test (Playwright): scroll Ch1->Ch10 + back 10 cycles, capture heap snapshots before + after, assert delta < 5 MB after GC. Runs in CI nightly (NOT every PR).
+
+**AC:**
+- [ ] Playwright test: 10 cycles + GC + heap delta
+- [ ] CI: scheduled nightly only (not on PR; tagged `@slow`)
+- [ ] If test fails: blocks merge to main
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.64
+
+---
+
+### Phase 23: Cross-Chapter Carlos State Integration
+
+### T3.127 — Cross-chapter Carlos state consistency (Ch6 wage <-> Ch7 path <-> Ch8 graph) | Cx: 11 | P0
+
+**Description:**
+The persona selected in Ch6 (T3.81) propagates to Ch7 + Ch8 + Ch9. If user picks Maria in Ch6 -> Ch7 path is Montgomery-localized (different waypoints, fewer offices, since Montgomery's data is sparser); Ch8 constellation dims FW-specific barriers; Ch9 stat band shows Montgomery-active stats. Honesty: Maria-mode Ch7 path requires `mariaWaypoints` constant; if Montgomery data is sparse (W3 acceptable), Ch7 in Maria-mode shows a "Coming soon" overlay over the path with explanation.
+
+**AC:**
+- [ ] Persona propagates Ch6 -> Ch7 -> Ch8 -> Ch9 via `useCarlosNarrative`
+- [ ] Maria-mode Ch7: shows Montgomery waypoints OR "Coming soon" overlay (locked decision in `docs/adr/w3-maria-mode.md`)
+- [ ] Maria-mode Ch8: FW-specific barriers dimmed
+- [ ] Carlos-mode (default): no behavior change
+- [ ] EN + ES locked overlay copy if "Coming soon" path chosen
+- [ ] Vitest test: persona switch -> Ch7 / Ch8 / Ch9 receive correct state
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.66, T3.81
+
+---
+
+### T3.128 — Reading mode persists across chapters | Cx: 6 | P1
+
+**Description:**
+Reading mode (T3.116) persists across chapter scroll, page reload (localStorage). Toggle in any chapter applies globally. Off-state same. Per-chapter inheritance verified.
+
+**AC:**
+- [ ] Reading mode persists across chapters AND reloads
+- [ ] Toggle from Ch3 + scroll to Ch7 -> still in reading mode
+- [ ] Vitest test: toggle, navigate, assert state persists
+- [ ] `bpsai-pair arch check` passes
+
+**Depends on:** T3.116
+
+---
+
 ## Delivery Summary
 
 | Phase | Title | Tasks | Cx |
