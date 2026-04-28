@@ -13,3 +13,10 @@ export * from "./env";
 export * from "./types";
 export * as sound from "./sound";
 export * from "./network";
+// Wave 2 + Spotlight additions.
+export * from "./storage";
+export * from "./featureDetect";
+export * from "./brandAssets";
+export * from "./cinematic";
+export * from "./landmarks";
+export { log } from "./log";

@@ -12,6 +12,16 @@
  * Geometry mirrors the on-disk file : 16-coordinate viewBox, 270°
  * G arc with stroke-width 2.4, horizontal cyan #22D3EE path-line
  * extending to x=15 (past the right edge). Designed at 16px first.
+ *
+ * T1.107 (Wave-1) — when `interactive` is true, the wrapper class
+ * `.gowork-mark--hover` is added so the cyan path-line draws on
+ * hover (CSS in tokens/animations.css). The cyan `<line>` is wrapped
+ * in `<g class="path-draw">` so the CSS selector lands cleanly even
+ * if the component grows additional path-line variants later.
+ *
+ * Spotlight — `loading` prop applies the `.brand-loading` class which
+ * cycles the path-line draw on a 3s loop. Used during Mapbox boot
+ * (W2) and edge-state fallbacks.
  */
 export interface BrandMarkProps {
   /** Square pixel size. Defaults to 24. */
@@ -20,13 +30,27 @@ export interface BrandMarkProps {
   className?: string;
   /** Whether the cyan path-line should be visible (default true). */
   showPath?: boolean;
+  /** When true, applies hover/focus path-draw animation (T1.107). */
+  interactive?: boolean;
+  /** When true, loops the path-draw animation as a loading affordance. */
+  loading?: boolean;
 }
 
 export function BrandMark({
   size = 24,
   className = "",
   showPath = true,
+  interactive = false,
+  loading = false,
 }: BrandMarkProps): JSX.Element {
+  const classes = [
+    "gowork-mark",
+    interactive ? "gowork-mark--hover" : "",
+    loading ? "brand-loading" : "",
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
   return (
     <svg
       role="img"
@@ -34,7 +58,7 @@ export function BrandMark({
       width={size}
       height={size}
       viewBox="0 0 16 16"
-      className={`gowork-mark ${className}`}
+      className={classes}
     >
       <g
         fill="none"
@@ -46,16 +70,18 @@ export function BrandMark({
         <path d="M 14 8 A 6 6 0 1 0 8 14" />
       </g>
       {showPath ? (
-        <line
-          x1={8}
-          y1={8}
-          x2={15}
-          y2={8}
-          stroke="#22D3EE"
-          strokeWidth={2.4}
-          strokeLinecap="round"
-          className="gowork-mark__path"
-        />
+        <g className="path-draw">
+          <line
+            x1={8}
+            y1={8}
+            x2={15}
+            y2={8}
+            stroke="#22D3EE"
+            strokeWidth={2.4}
+            strokeLinecap="round"
+            className="gowork-mark__path"
+          />
+        </g>
       ) : null}
     </svg>
   );

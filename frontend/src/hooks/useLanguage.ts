@@ -3,11 +3,12 @@
 import { useEffect, useRef } from "react";
 import { useTranslation } from "./useTranslation";
 import type { Locale } from "@/lib/i18n";
+import { STORAGE_KEYS } from "@/lib/wall/storage";
 
 /** Preferred storage key for the GoWork rebrand. */
-export const GOWORK_LOCALE_KEY = "gowork.locale";
+export const GOWORK_LOCALE_KEY = STORAGE_KEYS.LOCALE;
 /** Legacy key (montgowork era) — kept for session continuity per dispatch. */
-export const LEGACY_LOCALE_KEY = "montgowork-locale";
+export const LEGACY_LOCALE_KEY = STORAGE_KEYS.LOCALE_LEGACY;
 
 export interface UseLanguageResult {
   locale: Locale;

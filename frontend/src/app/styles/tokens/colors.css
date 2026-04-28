@@ -39,7 +39,7 @@
 
 @layer base {
   :root {
-    /* MontGoWork palette: Navy, Teal, Amber, Coral, Green, Off-white, Dark gray */
+    /* shadcn-era HSL palette retained for back-compat: Navy, Teal, Amber, Coral, Green, Off-white, Dark gray */
     --background: 60 20% 95%;
     --foreground: 195 9% 19%;
     --card: 0 0% 100%;

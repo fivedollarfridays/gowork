@@ -16,7 +16,9 @@
     "analyze": "ANALYZE=true npm run build",
     "size:check": "node ./scripts/bundle-size-check.mjs",
     "contrast": "node ./scripts/verify-contrast.mjs",
-    "svgo": "svgo -f public -r --config svgo.config.mjs"
+    "svgo": "svgo -f public -r --config svgo.config.mjs",
+    "audit:brand": "node ./scripts/audit-legacy-brand.mjs",
+    "audit:tokens": "node ./scripts/audit-tokens.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -57,7 +59,8 @@
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
     "tesseract.js": "7.0.0",
-    "three": "^0.160.1"
+    "three": "^0.160.1",
+    "web-vitals": "^4.2.4"
   },
   "devDependencies": {
     "@lhci/cli": "^0.15.1",

@@ -2,12 +2,17 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
+import { STORAGE_KEYS, getStored, setStored } from "@/lib/wall/storage";
+import { setMuted as setSoundMuted } from "@/lib/wall/sound";
 
 /**
  * T1.53 — Mute toggle.
  *
- * Persists the user's audio preference to localStorage. The default is
- * MUTED (the considerate default for shared spaces, screen-reader
+ * Persists the user's audio preference to localStorage under the canonical
+ * `STORAGE_KEYS.MUTED` (= "gowork.muted") namespace, so Driver B's audio
+ * module + Driver C's MuteToggle agree on a single source of truth.
+ *
+ * The default is MUTED (considerate for shared spaces, screen-reader
  * users, and surprise auto-play). Once the user opts in, we remember.
  *
  * The button uses `role="switch"` + `aria-checked` so assistive tech
@@ -18,17 +23,14 @@ import { useTranslation } from "@/hooks/useTranslation";
  * The on-screen icon is inline SVG (no external icon font); a single
  * speaker-glyph that swaps a slash overlay when muted.
  */
-export const MUTE_STORAGE_KEY = "gowork-muted";
+/** @deprecated — use STORAGE_KEYS.MUTED. Kept as a re-export so existing
+ * test imports continue to compile until they are refactored. */
+export const MUTE_STORAGE_KEY = STORAGE_KEYS.MUTED;
 
 function loadInitial(): boolean {
-  if (typeof window === "undefined") return true;
-  try {
-    const v = window.localStorage.getItem(MUTE_STORAGE_KEY);
-    if (v === "true") return true;
-    if (v === "false") return false;
-  } catch {
-    /* ignore */
-  }
+  const v = getStored<string>(STORAGE_KEYS.MUTED, "true");
+  if (v === "true") return true;
+  if (v === "false") return false;
   return true; // default: muted
 }
 
@@ -37,11 +39,9 @@ export function MuteToggle(): JSX.Element {
   const [muted, setMuted] = useState<boolean>(loadInitial);
 
   useEffect(() => {
-    try {
-      window.localStorage.setItem(MUTE_STORAGE_KEY, muted ? "true" : "false");
-    } catch {
-      /* ignore */
-    }
+    setStored(STORAGE_KEYS.MUTED, muted ? "true" : "false");
+    // Mirror to the sound module so play() respects the toggle live.
+    setSoundMuted(muted);
   }, [muted]);
 
   const toggle = useCallback(() => setMuted((m) => !m), []);

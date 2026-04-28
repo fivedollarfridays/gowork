@@ -1,0 +1,103 @@
+/* W1 animations — keyframe + transition primitives that compose with
+ * tokens (motion.css, colors.css). Wave-1 carry-overs:
+ *   T1.107 — Brand-mark hover path-draw
+ *   Spotlight — `.brand-loading` (loop draw) + `.editorial-link` underline
+ *
+ * All animations respect prefers-reduced-motion via the global !important
+ * killswitch in motion.css; an explicit per-class fallback adds belt-and-
+ * braces clarity for high-contrast / forced-colors environments.
+ */
+
+/* ─── T1.107 — Brand mark hover path-draw ────────────────────────────────────
+ * The cyan path-line in `<g class="path-draw">` draws left-to-right on hover.
+ * Uses stroke-dasharray + dashoffset transition; total path length ≈ 7 in
+ * viewBox units (16-coord viewBox * scaled to actual rendered width). The
+ * dash length is set generously (192) to cover any size scale, with offset
+ * animating to 0.
+ *
+ * Apply via `.gowork-mark--hover` wrapper on parent.
+ */
+.gowork-mark--hover .gowork-mark__path,
+.gowork-mark--hover .path-draw line {
+  stroke-dasharray: 192;
+  stroke-dashoffset: 192;
+  transition: stroke-dashoffset 600ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gowork-mark--hover:hover .gowork-mark__path,
+.gowork-mark--hover:hover .path-draw line,
+.gowork-mark--hover:focus-visible .gowork-mark__path,
+.gowork-mark--hover:focus-visible .path-draw line {
+  stroke-dashoffset: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gowork-mark--hover .gowork-mark__path,
+  .gowork-mark--hover .path-draw line {
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+    transition: none;
+  }
+}
+
+/* ─── Spotlight — Brand-mark loading state ──────────────────────────────────
+ * 3s loop: stroke-dashoffset cycles 192 → 0 (draw) → 192 (erase). Used at
+ * Mapbox boot (W2) + edge-state fallbacks. Reduced-motion variant pulses
+ * opacity instead of redrawing the path so the signal still reads.
+ */
+@keyframes brand-loading-draw {
+  0%   { stroke-dashoffset: 192; }
+  50%  { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: 192; }
+}
+
+@keyframes brand-loading-pulse {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 1.0; }
+}
+
+.brand-loading .gowork-mark__path,
+.brand-loading .path-draw line {
+  stroke-dasharray: 192;
+  animation: brand-loading-draw 3s var(--ease-linear-sig, ease-in-out) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-loading .gowork-mark__path,
+  .brand-loading .path-draw line {
+    stroke-dasharray: none;
+    animation: brand-loading-pulse 1.6s ease-in-out infinite;
+  }
+}
+
+/* ─── Editorial-link gradient underline ─────────────────────────────────────
+ * Wave-3 polish: two-tone (cyan → amber) underline for editorial links.
+ * Uses background-image so the underline width animates smoothly without
+ * shifting layout. Reduced-motion swaps to a solid amber underline.
+ */
+.editorial-link {
+  background-image: linear-gradient(
+    to right,
+    var(--accent-cyan, #22d3ee),
+    var(--accent-amber, #f59e0b)
+  );
+  background-size: 100% 2px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 200ms var(--ease-linear-sig, ease-out);
+  text-decoration: none;
+  padding-bottom: 1px;
+}
+
+.editorial-link:hover,
+.editorial-link:focus-visible {
+  background-size: 100% 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .editorial-link {
+    background-image: none;
+    border-bottom: 2px solid var(--accent-amber, #f59e0b);
+    transition: none;
+  }
+}

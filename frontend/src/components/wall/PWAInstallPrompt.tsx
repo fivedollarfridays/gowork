@@ -63,7 +63,8 @@ export function PWAInstallPrompt(): JSX.Element | null {
     <div
       role="region"
       aria-label="Install GoWork"
-      className="fixed bottom-4 right-4 z-[55] flex items-center gap-2 rounded-full border border-foreground/15 bg-background/95 px-4 py-2 text-sm shadow-lg backdrop-blur"
+      style={{ zIndex: "var(--z-pwa-prompt, 30)" }}
+      className="fixed bottom-4 right-4 flex items-center gap-2 rounded-full border border-foreground/15 bg-background/95 px-4 py-2 text-sm shadow-lg backdrop-blur"
     >
       <span className="text-foreground/80">Install GoWork</span>
       <button

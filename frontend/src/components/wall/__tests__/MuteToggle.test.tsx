@@ -1,11 +1,10 @@
 /**
  * W1 Driver C — T1.53 MuteToggle.
  *
- * Persists the muted boolean to localStorage under the key
- * `gowork-muted` (default: false / sound ON, but the dispatch defaults
- * to OFF i.e. muted=true on first visit so the page is silent until
- * the user opts in — this is the considerate default for offices,
- * libraries, and screen-reader users).
+ * Persists the muted boolean to localStorage under the canonical
+ * STORAGE_KEYS.MUTED key (= "gowork.muted") so MuteToggle, sound.ts, and
+ * any future audio surface share a single source of truth. Default is
+ * MUTED (considerate for offices, libraries, and screen-reader users).
  */
 import { describe, it, expect, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
@@ -38,11 +37,12 @@ describe("MuteToggle (T1.53)", () => {
     expect(btn).toHaveAttribute("aria-checked", "true");
   });
 
-  it("persists preference to localStorage under gowork-muted", () => {
+  it("persists preference to localStorage under the canonical gowork.muted key", () => {
     wrap(<MuteToggle />);
     const btn = screen.getByRole("switch", { name: /toggle ambient sound/i });
     fireEvent.click(btn);
     expect(localStorage.getItem(MUTE_STORAGE_KEY)).toBe("false");
+    expect(MUTE_STORAGE_KEY).toBe("gowork.muted");
     fireEvent.click(btn);
     expect(localStorage.getItem(MUTE_STORAGE_KEY)).toBe("true");
   });
