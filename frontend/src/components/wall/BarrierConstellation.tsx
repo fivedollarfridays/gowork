@@ -123,6 +123,23 @@ function ConstellationEdges({
   );
 }
 
+/**
+ * Build the aria-label that screen readers narrate for the 3D scene.
+ *
+ * # Why a textual summary
+ *
+ * The 33-node constellation is decorative — SR users cannot meaningfully
+ * traverse a Three.js scene. Without `role="img"` + `aria-label`, NVDA
+ * announces "graphic" with zero substance. The summary tells the user
+ * what the scene REPRESENTS instead of trying to describe how it looks.
+ */
+function buildAriaLabel(completeness: number, reducedMotion: boolean): string {
+  const pct = Math.round(completeness * 100);
+  const totalNodes = BARRIER_GRAPH.nodes.length;
+  const motionNote = reducedMotion ? " Static view." : "";
+  return `Barrier constellation. ${totalNodes} barriers across 7 categories. Path completeness ${pct}%.${motionNote}`;
+}
+
 export function BarrierConstellation({
   pathCompleteness,
   reducedMotion = false,
@@ -131,10 +148,16 @@ export function BarrierConstellation({
   const breathingHz = reducedMotion
     ? BREATHING_HZ_REDUCED_MOTION
     : BREATHING_HZ_DEFAULT;
+  const ariaLabel = useMemo(
+    () => buildAriaLabel(completeness, reducedMotion),
+    [completeness, reducedMotion],
+  );
 
   return (
     <div
       data-testid="constellation-root"
+      role="img"
+      aria-label={ariaLabel}
       data-path-completeness={completeness.toFixed(3)}
       data-breathing-hz={breathingHz.toString()}
       data-reduced-motion={reducedMotion ? "true" : "false"}
