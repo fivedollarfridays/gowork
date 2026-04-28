@@ -542,6 +542,17 @@
       "officesLabel": "oficinas por visitar",
       "pullquote": "Cada oficina me dio un formulario y otra dirección.",
       "aria": "Capítulo 5: el Laberinto. Cinco oficinas y cuarenta y siete formularios — el caos antes de que GoWork ordene el camino."
+    },
+    "chapter10": {
+      "title": "Encuentra tu camino",
+      "hero": "Encuentra tu camino.",
+      "subhero": "Nosotros hacemos las cuentas. Ordenamos la ruta. Tú das el primer paso.",
+      "body": "Ya viste el muro. Ya viste el laberinto. Ahora sáltatelos — empieza tu evaluación y te entregamos un plan que ya recorrió las oficinas, los formularios y las cuentas.",
+      "aria": "Capítulo 10: Encuentra tu camino. Comienza tu evaluación para recibir un plan personalizado.",
+      "ctaPrimary": "Comienza tu evaluación",
+      "ctaSecondary": "O lee el código abierto en GitHub →",
+      "githubLinkLabel": "Ver el código abierto en GitHub",
+      "footerBrand": "GoWork · Fort Worth, TX"
     }
   },
   "edge": {

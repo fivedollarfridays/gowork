@@ -24,6 +24,7 @@ import { useDemoMode } from "@/hooks/useDemoMode";
 import { useCityConfig } from "@/hooks/useCityConfig";
 import { getResumeRecommendations } from "@/lib/resume/recommend";
 import { t } from "@/lib/i18n";
+import { WALL_TO_ASSESS_TRANSITION_NAME } from "@/lib/wall/viewTransitions";
 
 const DEFAULT_FORM_DATA: BarrierFormData = {
   zipCode: "",
@@ -376,7 +377,16 @@ export default function AssessPage() {
 
   return (
     <main className="min-h-screen px-4 py-8 sm:px-8">
-      <div className="mx-auto max-w-2xl space-y-6">
+      {/* W3 Driver C T3.21 — view-transition-name pairs with Chapter 10's
+          morph-target so Chrome users see the cinematic Mapbox→form
+          morph. Firefox users get a standard navigation (no morph).
+          The name lives in `WALL_TO_ASSESS_TRANSITION_NAME` so any
+          future refactor changes one constant in one place. */}
+      <div
+        className="mx-auto max-w-2xl space-y-6"
+        data-testid="assess-hero-morph-target"
+        style={{ viewTransitionName: WALL_TO_ASSESS_TRANSITION_NAME }}
+      >
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold text-primary">{t("assess.navTitle")}</h1>
           <p className="text-muted-foreground">

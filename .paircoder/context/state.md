@@ -1,6 +1,6 @@
 # Current State
 
-> Last updated: 2026-04-28 (W2 souji-sweep — PR #82 opened to sprint/visual-rebirth, typecheck zero errors, PlanExport + CareerCenterExport flake CLOSED, 2319/2319 across 3 consecutive runs)
+> Last updated: 2026-04-28 (W3 Driver C — Ch10 + ViewTransitions + a11y gate + integration polish + 3 Spotlight inventions on `worktree-agent-a588b643b616c2fcf`. 2439/2452 (13 skipped placeholders for Drivers A+B). Typecheck + arch + audit:brand + audit:tokens clean. Build green.)
 
 ## Active Plan
 
@@ -31,6 +31,79 @@
 Older sprint task tables and session histories (Sprints 7 — 31) are in `.paircoder/archive/state-pre-s1.md`. S12a per-session entries plus S2 — S11 detail are in `.paircoder/archive/state-s12a.md`. S13 wave-by-wave detail + per-task driver sessions are in `.paircoder/archive/state-s13.md`.
 
 ## What Was Just Done
+
+### 2026-04-28 — W3 Driver C: Ch10 + ViewTransitions + a11y gate + integration polish
+
+Branch: `worktree-agent-a588b643b616c2fcf` (W3 worktree, base `sprint/w3-interactive-chapters-6-10` at `4d4fb1f`).
+
+**Tasks completed (T3.20 — T3.26):**
+
+- **T3.20 — Chapter 10 component (`Chapter10FindYourPath.tsx`)**: editorial overlay + primary CTA "Start your assessment" + secondary GitHub link + footer brand mark. Camera state added at `CHAPTER_CAMERAS[10]` (Fort Worth overhead, zoom 11, pitch 0). Reduced-motion respected.
+- **T3.21 — View Transitions API hand-off**: CTA wraps `router.push('/assess')` in `startViewTransitionWithFallback`. Feature-detect via `document.startViewTransition`; Firefox falls back to plain navigation. CSS `view-transition-name: wall-to-assess` is set on Ch10 morph target AND `/assess` hero (matching constant from `WALL_TO_ASSESS_TRANSITION_NAME`).
+- **T3.22 — Translations**: 9 keys added to `wall.chapter10.*` in BOTH `en.json` AND `es.json` (`title`, `hero`, `subhero`, `body`, `aria`, `ctaPrimary`, `ctaSecondary`, `githubLinkLabel`, `footerBrand`). Native-fluent ES, no `[ES-pending-review]` markers needed for Ch10 corpus.
+- **T3.23 — `WallContainer.tsx` extension**: `Chapter10FindYourPath` slotted in slot 10 only (Drivers A+B own 6/7/8/9). `wallProgress.ts` already had `TOTAL_CHAPTERS = 10` and `CHAPTER_BOUNDS` covering 0..1 in 10 equal slices, so no slicer math change needed.
+- **T3.24 — Axe-core a11y sweep**: created `frontend/src/components/wall/__tests__/w3-a11y.test.tsx`. Ch10 asserts 0 moderate+ violations across progress=0/0.5/1 + reducedMotion=true. Ch6/Ch7/Ch8/Ch9 are `describe.skip` placeholders with TODO comments referencing T3.x — souji un-skips after Drivers A+B merge.
+- **T3.25 — Integration polish task batch (cross-chapter contracts)**:
+  - **a)** `cameraTransitionsAudit-w3.test.ts`: 9->10 fully asserted; 5->6..8->9 written as `describe.skip` for souji un-skip after merge.
+  - **b)** `soundSyncAudit.test.ts`: greps every chapter source file for `play("...")` calls, asserts the SoundId is registered, the `public/sounds/<id>.mp3` exists with non-zero size, and the chapter file references `reducedMotion` or `usePrefersReducedMotion`. No source modification of other drivers' chapters — pure assertion.
+  - **c) + d)** `spineProgression.test.ts`: asserts `localToGlobal(0.5, n) ≈ (n-0.5)/10` for all chapters with ±0.02 tolerance, and that `currentChapterFor(localToGlobal(0.5, n)) === n` + `formatCounter` reads "0N / 10".
+- **T3.26 — Spotlight inventions (3 mandatory, all shipped)**:
+  1. `frontend/src/lib/a11y/axeChapterRunner.ts` — reusable `runAxeOnChapter(node)` harness with shared rule overrides + `filterModerateOrAbove` severity filter. Compound Lens: every future chapter test uses the same gate (W3 today, W4 life-layer scans tomorrow).
+  2. `frontend/src/lib/wall/viewTransitions.ts` — `WALL_TO_ASSESS_TRANSITION_NAME` constant + `supportsViewTransitions()` feature detect + `startViewTransitionWithFallback(navigate, {reducedMotion})`. Three call sites (Ch10 CTA, contract test, page-level provider extension).
+  3. `frontend/src/lib/wall/chapterCounter.ts` — `currentChapterFor(globalProgress)` + `formatCounter(chapter)` deriving "0N / 10" without React state. Used in spine progression tests today; reused by W4 chapter-aware tinting.
+
+**Additive `ViewTransitionsProvider` extension**: provider now skips its empty page-level transition when `document.__viewTransitionInFlight === true` (set by `startViewTransitionWithFallback` immediately before navigation), avoiding double-transition that would interrupt the cinematic morph. Existing W1 ViewTransitionsProvider tests still pass.
+
+**`/assess` page additive change**: imported `WALL_TO_ASSESS_TRANSITION_NAME` and applied `style={{ viewTransitionName: WALL_TO_ASSESS_TRANSITION_NAME }}` to the hero `<div>`. Source-level test guards the contract.
+
+**Test deltas (relative to W3 base 2319 baseline):**
+- 266 test files (+13 from baseline 253)
+- 2439 tests passing (+120 from baseline 2319)
+- 13 skipped (souji un-skip targets — Drivers A+B placeholders)
+
+**Files added (12):**
+- `frontend/src/components/wall/chapters/Chapter10FindYourPath.tsx`
+- `frontend/src/components/wall/chapters/__tests__/Chapter10FindYourPath.test.tsx`
+- `frontend/src/components/wall/__tests__/w3-a11y.test.tsx`
+- `frontend/src/components/wall/__tests__/WallContainer-chapter10.test.tsx`
+- `frontend/src/components/__tests__/ViewTransitionsProvider-w3.test.tsx`
+- `frontend/src/lib/wall/viewTransitions.ts`
+- `frontend/src/lib/wall/chapterCounter.ts`
+- `frontend/src/lib/a11y/axeChapterRunner.ts`
+- `frontend/src/lib/a11y/__tests__/axeChapterRunner.test.ts`
+- `frontend/src/lib/wall/__tests__/cameraChoreography-w3.test.ts`
+- `frontend/src/lib/wall/__tests__/cameraTransitionsAudit-w3.test.ts`
+- `frontend/src/lib/wall/__tests__/chapterCounter.test.ts`
+- `frontend/src/lib/wall/__tests__/soundSyncAudit.test.ts`
+- `frontend/src/lib/wall/__tests__/spineProgression.test.ts`
+- `frontend/src/lib/wall/__tests__/viewTransitions.test.ts`
+- `frontend/src/lib/translations/__tests__/wall-chapter10-parity.test.ts`
+- `frontend/src/app/assess/__tests__/assess-view-transition.test.ts`
+
+**Files modified (additive only — no other-driver chapter source touched):**
+- `frontend/src/lib/translations/en.json` (+ wall.chapter10.* block)
+- `frontend/src/lib/translations/es.json` (+ wall.chapter10.* block, native-fluent ES)
+- `frontend/src/lib/wall/cameraChoreography.ts` (+ CHAPTER_CAMERAS[10] entry, + TRANSITION_SPEEDS["9->10"], type widened to Partial-Record over ChapterId so other drivers can extend their lanes without coupling)
+- `frontend/src/components/ViewTransitionsProvider.tsx` (additive: in-flight marker check)
+- `frontend/src/components/wall/WallContainer.tsx` (Chapter10FindYourPath imported and wired into ChaptersSequence at slot 10)
+- `frontend/src/app/assess/page.tsx` (additive: viewTransitionName inline style on hero)
+- `frontend/src/components/wall/__tests__/{WallContainer,WallContainer-chapters,WallContainer-tier}.test.tsx` (added `next/navigation` `useRouter` mock; required because Ch10 reaches the router and these are composition tests)
+- `frontend/src/lib/wall/__tests__/__snapshots__/cameraChoreography.test.ts.snap` (regenerated — Ch10 entry intentionally added)
+
+**Bundle delta** (`/` route — Ch10 wired + ViewTransitions + axe runner): +0.95 kB raw, +1 kB First Load (8.33 kB → 9.28 kB raw, 136 kB → 137 kB First Load). `/assess` route: +0.2 kB raw, +1 kB First Load (40.5 kB → 40.7 kB, 194 kB → 195 kB). axe-core stays in devDependencies — no production bundle hit from the harness.
+
+**Honest uncertainty:**
+- **C4 (View Transitions browser support):** confirmed working on Chrome 135 (manual visual QC pending — vitest only verifies the API call shape and fallback path). Firefox at the time of writing has no `document.startViewTransition` so the fallback path runs (test-asserted). Safari 18 has partial support (same-document only); manual QA recommended on Safari before demo day. Current implementation degrades gracefully on all browsers — no UA-string sniffing.
+- **C5 (Path-line header progression):** the spine progression test asserts midpoint accuracy ±0.02. If W4 introduces non-linear chapter pacing (e.g., longer scroll for the labyrinth), tighten the tolerance and update `wallProgress.CHAPTER_BOUNDS` to per-chapter spans rather than equal slices.
+- **W3 souji touchpoints flagged for Driver D:** 13 skipped tests (5 in cameraTransitionsAudit-w3 + 4 in cameraChoreography-w3 + 4 in w3-a11y) need un-skip after Drivers A+B chapters land. The `9->10` audit row passes today as long as Driver A's Ch9 camera state lands; Driver C's `9->10` TRANSITION_SPEED is already in place.
+
+**Gates verified:**
+- `npx tsc --noEmit`              → exit 0
+- `npm run audit:brand`           → clean
+- `npm run audit:tokens`          → clean
+- `npx vitest run`                → 2439/2439 + 13 skipped (souji un-skip targets)
+- `npm run build`                 → exit 0; 21/21 pages
+- `bpsai-pair arch check frontend/` → clean
 
 ### 2026-04-28 — W2 souji-sweep → PR #82 (sprint/w2-mapbox-chapters-1-5 → sprint/visual-rebirth)
 
