@@ -22,20 +22,20 @@ describe("Wave 4 — BrandMark loading + cinematic + lib/wall barrel", () => {
   it("BrandMark loading=true wires the brand-loading class for the keyframe", () => {
     const { container } = render(<BrandMark loading />);
     const svg = container.querySelector("svg.gowork-mark");
-    expect(svg?.className.baseVal).toMatch(/brand-loading/);
+    expect(svg?.getAttribute("class")).toMatch(/brand-loading/);
   });
 
   it("BrandMark interactive=true wires gowork-mark--hover for T1.107 hover draw", () => {
     const { container } = render(<BrandMark interactive />);
     const svg = container.querySelector("svg.gowork-mark");
-    expect(svg?.className.baseVal).toMatch(/gowork-mark--hover/);
+    expect(svg?.getAttribute("class")).toMatch(/gowork-mark--hover/);
   });
 
   it("BrandMark default does NOT animate (no loading nor interactive)", () => {
     const { container } = render(<BrandMark />);
     const svg = container.querySelector("svg.gowork-mark");
-    expect(svg?.className.baseVal).not.toMatch(/brand-loading/);
-    expect(svg?.className.baseVal).not.toMatch(/gowork-mark--hover/);
+    expect(svg?.getAttribute("class")).not.toMatch(/brand-loading/);
+    expect(svg?.getAttribute("class")).not.toMatch(/gowork-mark--hover/);
   });
 
   it("cinematic system integrates via lib/wall barrel", () => {
