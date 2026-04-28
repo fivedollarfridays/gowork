@@ -14,7 +14,8 @@
     "lhci:collect": "lhci collect",
     "lhci:assert": "lhci assert",
     "analyze": "ANALYZE=true npm run build",
-    "size:check": "node ./scripts/bundle-size-check.mjs"
+    "size:check": "node ./scripts/bundle-size-check.mjs",
+    "contrast": "node ./scripts/verify-contrast.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

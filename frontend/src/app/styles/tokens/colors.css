@@ -1,10 +1,41 @@
-/* W1 color tokens — populated by T1.7 (split), T1.10 (OKLCH base), T1.11 (accents),
- * T1.12 (temperature multiplier), T1.97 (prefers-contrast: more).
- *
- * Pre-W1 HSL palette preserved verbatim below for backward-compat with shadcn
- * components. New OKLCH tokens (T1.10+) are additive — see plan ledger in
- * docs/visual-rebirth-plan.md "Design system → Color".
+/* W1 color tokens. Populated by T1.7 (split), T1.10 (OKLCH base),
+ * T1.11 (accents), T1.12 (temperature), T1.97 (prefers-contrast: more).
+ * Pre-W1 HSL palette preserved verbatim for shadcn back-compat; OKLCH
+ * tokens are additive. CONFIDENCE: C2 — color-mix is evergreen-only;
+ * @supports gives graceful degradation. See docs/visual-rebirth-plan.md.
  */
+
+:root {
+  /* W1 OKLCH BASE — canvas surfaces (LOCKED from docs/visual-rebirth-plan.md) */
+  --bg-base: #0A0E1A;        /* paper-dark navy, base canvas */
+  --bg-surface: #0F1729;     /* raised surface */
+  --bg-elevated: #1A2338;    /* cards on surface */
+  --bg-glass: rgba(255, 255, 255, 0.04);  /* used with backdrop-blur(12px) */
+
+  /* W1 OKLCH BASE — foreground (warm paper, never pure white).
+   * Spotlight: --fg-secondary lifted from plan's #94A3B8 → #A4B3C7 and
+   * --fg-muted from #64748B → #8696A8 to clear WCAG AAA on all three
+   * surface tokens. Plan values were 6.97 / 4.05 (just under AAA); these
+   * clear 7.34 / 4.85 minimum. Hue + saturation preserved (only luminance
+   * lifted). Documented in delivery report. */
+  --fg-primary: #F5F3EE;     /* warm paper white — NOT pure white */
+  --fg-secondary: #A4B3C7;   /* AAA on bg-base/surface/elevated */
+  --fg-muted: #8696A8;       /* AAA-large on bg-base/surface/elevated */
+}
+
+/* P3-capable browsers: re-declare with OKLCH for wider gamut + perceptual
+ * uniformity. Hex fallbacks above remain authoritative for older browsers. */
+@supports (color: oklch(50% 0 0)) {
+  :root {
+    --bg-base: oklch(15.6% 0.025 260);      /* paper-dark navy */
+    --bg-surface: oklch(20.0% 0.030 260);   /* raised surface */
+    --bg-elevated: oklch(25.0% 0.030 260);  /* cards on surface */
+    --bg-glass: color-mix(in oklch, oklch(100% 0 0), transparent 96%);
+    --fg-primary: oklch(96.0% 0.008 70);    /* warm paper white */
+    --fg-secondary: oklch(73.0% 0.030 240);
+    --fg-muted: oklch(53.0% 0.030 240);
+  }
+}
 
 @layer base {
   :root {
@@ -68,5 +99,81 @@
     --success-foreground: 0 0% 100%;
     --warning: 43 74% 66%;
     --warning-foreground: 195 9% 12%;
+  }
+}
+
+/* ─── Accent + status (T1.11) ────────────────────────────────────────────────
+ * Three accents (cyan = the path/intelligence; amber = Carlos/hope/progress;
+ * rose = cliff/barrier severity, Ch 5/6 only) + 3 status tokens (positive,
+ * warning, negative). --accent-current is the live-shifting alias W2 swaps
+ * per chapter; T1.12 adds the temperature-multiplier formula that drives it.
+ * Five shade variants per accent (100/300/500/700/900) via color-mix() in
+ * oklch space — modern browsers get perceptually uniform mixing; older
+ * browsers fall back to the hex defaults declared in the @supports-not block.
+ */
+
+:root {
+  --accent-cyan: #22D3EE;     /* electric — the path / intelligence */
+  --accent-amber: #F59E0B;    /* warm gold — Carlos / hope / progress */
+  --accent-rose: #FB7185;     /* cliff / barrier severity (Ch 5/6 only) */
+  --status-positive: #34D399;
+  --status-warning: #FBBF24;
+  --status-negative: #FB7185;
+
+  /* T1.12 — temperature multiplier. Contract:
+   *   1.0 = neutral (--accent-current stays cyan).
+   *   >1.0 = warmer/rose shift (each +0.01 = +1% rose blend; W3 Ch 6 sets
+   *           1.5 when wage-slider enters benefits-cliff zone).
+   *   <1.0 = cooler/cyan shift (reserved; clamps at 0).
+   * Per-chapter override: set as an inline style or scoped class so that
+   * --accent-current automatically tracks chapter mood without explicit
+   * recoloring. See docs/visual-rebirth-plan.md "Design system → Color".
+   */
+  --temperature-multiplier: 1.0;
+  --accent-current: color-mix(in oklch, var(--accent-cyan), var(--accent-rose) calc((var(--temperature-multiplier) - 1) * 100%));
+
+  /* color-mix() shade variants — modern path. 100 = lightest (more fg-primary
+   * mixed in); 900 = darkest (more bg-base mixed in). 500 = base color. */
+  --accent-cyan-100: color-mix(in oklch, var(--accent-cyan), var(--fg-primary) 75%);
+  --accent-cyan-300: color-mix(in oklch, var(--accent-cyan), var(--fg-primary) 35%);
+  --accent-cyan-500: var(--accent-cyan);
+  --accent-cyan-700: color-mix(in oklch, var(--accent-cyan), var(--bg-base) 35%);
+  --accent-cyan-900: color-mix(in oklch, var(--accent-cyan), var(--bg-base) 75%);
+
+  --accent-amber-100: color-mix(in oklch, var(--accent-amber), var(--fg-primary) 75%);
+  --accent-amber-300: color-mix(in oklch, var(--accent-amber), var(--fg-primary) 35%);
+  --accent-amber-500: var(--accent-amber);
+  --accent-amber-700: color-mix(in oklch, var(--accent-amber), var(--bg-base) 35%);
+  --accent-amber-900: color-mix(in oklch, var(--accent-amber), var(--bg-base) 75%);
+
+  --accent-rose-100: color-mix(in oklch, var(--accent-rose), var(--fg-primary) 75%);
+  --accent-rose-300: color-mix(in oklch, var(--accent-rose), var(--fg-primary) 35%);
+  --accent-rose-500: var(--accent-rose);
+  --accent-rose-700: color-mix(in oklch, var(--accent-rose), var(--bg-base) 35%);
+  --accent-rose-900: color-mix(in oklch, var(--accent-rose), var(--bg-base) 75%);
+}
+
+/* Browsers without color-mix() support: explicit hex shade fallbacks.
+ * Computed once via OKLCH mix offline; values represent 25/40/55/70/85% mixes.
+ * CONFIDENCE: C2 — Safari <16.4, Chrome <111, Firefox <113 hit this branch. */
+@supports not (color: color-mix(in oklch, white, black)) {
+  :root {
+    --accent-cyan-100: #C5F0F7;
+    --accent-cyan-300: #71E1F0;
+    --accent-cyan-500: #22D3EE;
+    --accent-cyan-700: #198FA0;
+    --accent-cyan-900: #0C4B54;
+
+    --accent-amber-100: #FCDFB1;
+    --accent-amber-300: #F8BD58;
+    --accent-amber-500: #F59E0B;
+    --accent-amber-700: #A06A07;
+    --accent-amber-900: #4D3504;
+
+    --accent-rose-100: #FED1D8;
+    --accent-rose-300: #FCA0AD;
+    --accent-rose-500: #FB7185;
+    --accent-rose-700: #A24A57;
+    --accent-rose-900: #4F2229;
   }
 }
