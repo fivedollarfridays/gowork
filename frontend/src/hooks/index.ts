@@ -19,6 +19,14 @@ export type { LiveNowState } from "./useLiveNow";
 export { useScrollProgress } from "./useScrollProgress";
 export type { ScrollProgressState } from "./useScrollProgress";
 
+// W2 hook — sticky-pin escape hatch for chapter scaffolds (T2.10).
+export { useScrollPin } from "./useScrollPin";
+export type { ScrollPinState } from "./useScrollPin";
+
+// W2 hook — chapter-aware progress derived from useScrollProgress (T2.8).
+export { useChapterProgress } from "./useChapterProgress";
+export type { ChapterProgressState } from "./useChapterProgress";
+
 export { useVariableFontWeight } from "./useVariableFontWeight";
 
 export { useScrollVelocity } from "./useScrollVelocity";
