@@ -65,3 +65,38 @@
     font-weight: 500;
   }
 }
+
+/* ─── T1.102 — Variable font axis tokens ─────────────────────────────────────
+ * Mirrors FONT_AXES in tokens.ts. Display rendering reaches for
+ * opszDisplay (32) so Inter Variable picks heavier, more architectural
+ * letterforms; body stays at opszBody (14). slntItalic = -10deg uses the
+ * slant axis for true editorial italic without a separate font file.
+ */
+:root {
+  --font-axis-wght-display: 900;
+  --font-axis-wght-body: 400;
+  --font-axis-opsz-display: 32;
+  --font-axis-opsz-body: 14;
+  --font-axis-slnt-italic: -10;
+}
+
+@layer utilities {
+  .italic-axis {
+    font-style: oblique -10deg;
+  }
+}
+
+/* ─── T1.103 — Drop cap utility ──────────────────────────────────────────────
+ * 500-year-old editorial convention. Used at the start of each chapter's
+ * first paragraph; signals "this is a magazine essay, not a webpage."
+ * Print stylesheet (T1.45) overrides color to black for legibility on
+ * paper.
+ */
+.dropcap::first-letter {
+  float: left;
+  font-size: 5em;
+  line-height: 0.85;
+  padding: 0.05em 0.1em 0 0;
+  font-variation-settings: "wght" 800, "opsz" 60;
+  color: var(--accent-cyan);
+}

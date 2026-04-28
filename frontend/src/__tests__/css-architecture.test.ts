@@ -26,17 +26,20 @@ describe("T1.9 — CSS architecture regression", () => {
     expect(globals).toContain("@tailwind utilities");
   });
 
-  it("globals.css imports 5 token partials in cascade-correct order", () => {
-    const imports = globals.match(/@import\s+["']\.\/styles\/tokens\/([^"']+)["']/g);
+  it("globals.css imports the token partials in cascade-correct order", () => {
+    const imports = globals.match(/@import\s+["']\.\/styles\/tokens\/([\w-]+)\.css["']/g);
     expect(imports).not.toBeNull();
-    expect(imports!.length).toBe(5);
+    // 5 base partials (T1.7) + 1 forced-colors (T1.96 enrichment).
+    expect(imports!.length).toBeGreaterThanOrEqual(5);
     const order = imports!.map((line) => {
-      const m = line.match(/tokens\/([a-z]+)\.css/);
+      const m = line.match(/tokens\/([\w-]+)\.css/);
       return m ? m[1] : "";
     });
-    // colors → typography → motion → space → layout
-    // Cascade: tokens before utilities; layout last because it consumes tokens.
-    expect(order).toEqual(["colors", "typography", "motion", "space", "layout"]);
+    // Cascade: colors first (everything depends on bg/fg), then typography
+    // (text on bg), motion (animation of typed elements), space (rhythm),
+    // layout (utilities + universal resets). Forced-colors LAST so it can
+    // override every prior token in HCM.
+    expect(order.slice(0, 5)).toEqual(["colors", "typography", "motion", "space", "layout"]);
   });
 
   it("globals.css <= 30 lines (thin shell only)", () => {

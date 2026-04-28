@@ -50,3 +50,20 @@ export const STAGGER_INITIAL_DEFAULT = { opacity: 0, y: 20 } as const;
 
 /** Default animate-to state for staggered children (visible + at rest). */
 export const STAGGER_ANIMATE_DEFAULT = { opacity: 1, y: 0 } as const;
+
+// ─── T1.102 — Variable font axis tokens ─────────────────────────────────────
+
+/** Inter Variable axis values. wght = weight axis, opsz = optical-size axis,
+ *  slnt = slant axis (Inter's true italic alternative — modern typography
+ *  prefers oblique slant over swapping to a separate italic font file).
+ *
+ *  Drop caps (T1.103) and pull quotes (T1.104) reach for opszDisplay so the
+ *  letterforms get the heavier, more architectural rendering Inter ships at
+ *  larger optical sizes. Body text uses opszBody (smaller, tighter spacing). */
+export const FONT_AXES = {
+  wghtDisplay: 900,
+  wghtBody: 400,
+  opszDisplay: 32,
+  opszBody: 14,
+  slntItalic: -10,
+} as const;
