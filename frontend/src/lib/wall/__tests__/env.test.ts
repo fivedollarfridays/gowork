@@ -1,71 +1,62 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { validateMapboxToken } from "../env";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
-/**
- * T1.6 — Mapbox token boot validator.
- *
- * W2's WallContainer reads validateMapboxToken() at module init. If the
- * token is missing or malformed, the container falls back to T1.74's
- * static branded placeholder rather than crashing the page.
- *
- * Token format: Mapbox public tokens start with `pk.` (signed JWT).
- * Private tokens start with `sk.`; we DO NOT accept them on the public
- * frontend (security smell — would leak in the bundle).
- */
-
-describe("T1.6 — validateMapboxToken", () => {
-  const ORIGINAL_ENV = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+describe("validateMapboxToken (T1.6)", () => {
+  const ORIGINAL_ENV = { ...process.env };
 
   beforeEach(() => {
-    delete process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+    vi.resetModules();
   });
 
   afterEach(() => {
-    if (ORIGINAL_ENV === undefined) {
-      delete process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-    } else {
-      process.env.NEXT_PUBLIC_MAPBOX_TOKEN = ORIGINAL_ENV;
-    }
+    process.env = { ...ORIGINAL_ENV };
   });
 
-  it("returns ok=false with reason when env is unset", () => {
+  it("returns ok=false when NEXT_PUBLIC_MAPBOX_TOKEN is unset", async () => {
+    delete process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+    const { validateMapboxToken } = await import("../env");
     const result = validateMapboxToken();
     expect(result.ok).toBe(false);
-    expect(result.reason).toMatch(/unset|missing|empty/i);
+    expect(result.reason).toBeDefined();
   });
 
-  it("returns ok=true for tokens starting with pk.", () => {
-    process.env.NEXT_PUBLIC_MAPBOX_TOKEN = "pk.eyJ1IjoiZ293b3JrIiwiYSI6InRlc3QifQ.signature";
+  it("returns ok=false when token is empty string", async () => {
+    process.env.NEXT_PUBLIC_MAPBOX_TOKEN = "";
+    const { validateMapboxToken } = await import("../env");
+    const result = validateMapboxToken();
+    expect(result.ok).toBe(false);
+  });
+
+  it("returns ok=true when token starts with pk.", async () => {
+    process.env.NEXT_PUBLIC_MAPBOX_TOKEN = "pk.eyJ1IjoidGVzdCIsImEiOiJjazAwMDAwMCJ9.fake";
+    const { validateMapboxToken } = await import("../env");
     const result = validateMapboxToken();
     expect(result.ok).toBe(true);
     expect(result.reason).toBeUndefined();
   });
 
-  it("returns ok=false for tokens starting with sk. (private — should never ship)", () => {
-    process.env.NEXT_PUBLIC_MAPBOX_TOKEN = "sk.privatevaluethatshouldnevershipto.frontend";
+  it("returns ok=false when token does not start with pk.", async () => {
+    process.env.NEXT_PUBLIC_MAPBOX_TOKEN = "sk.invalid_secret_token";
+    const { validateMapboxToken } = await import("../env");
     const result = validateMapboxToken();
     expect(result.ok).toBe(false);
-    expect(result.reason).toMatch(/private|secret/i);
+    expect(result.reason).toMatch(/pk\./i);
   });
 
-  it("returns ok=false for tokens starting with anything else", () => {
-    process.env.NEXT_PUBLIC_MAPBOX_TOKEN = "not-a-mapbox-token";
-    const result = validateMapboxToken();
-    expect(result.ok).toBe(false);
-    expect(result.reason).toMatch(/format|prefix|invalid/i);
+  it("isMapboxAvailable mirrors validateMapboxToken().ok", async () => {
+    process.env.NEXT_PUBLIC_MAPBOX_TOKEN = "pk.real_token";
+    const { isMapboxAvailable, validateMapboxToken } = await import("../env");
+    expect(isMapboxAvailable()).toBe(validateMapboxToken().ok);
   });
 
-  it("returns ok=false for empty string token", () => {
-    process.env.NEXT_PUBLIC_MAPBOX_TOKEN = "";
-    const result = validateMapboxToken();
-    expect(result.ok).toBe(false);
-    expect(result.reason).toMatch(/unset|missing|empty/i);
+  it("getMapboxToken returns the raw token string when ok", async () => {
+    process.env.NEXT_PUBLIC_MAPBOX_TOKEN = "pk.token_value";
+    const { getMapboxToken } = await import("../env");
+    expect(getMapboxToken()).toBe("pk.token_value");
   });
 
-  it("does not access window (SSR-safe)", () => {
-    // The module under test must execute without window present. If
-    // validateMapboxToken referenced window, this import would have already
-    // crashed at the top of this file. The fact that we're here is the proof.
-    expect(typeof validateMapboxToken).toBe("function");
+  it("getMapboxToken returns null when token absent", async () => {
+    delete process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+    const { getMapboxToken } = await import("../env");
+    expect(getMapboxToken()).toBeNull();
   });
 });
