@@ -1,23 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="GoWork — Workforce Navigator">
-  <title>GoWork — Workforce Navigator</title>
+<!--
+  GoWork OG share image.
+
+  - 1200x630 canvas (Facebook/Twitter/LinkedIn standard).
+  - Dark gradient base: #0A0E1A → #0F1729 (--bg-base → --bg-surface).
+  - GoWork wordmark in Inter weight 800 letterform (rendered as text;
+    consumers without Inter fall back to the system humanist sans —
+    deliberately permissive, since OG cards rasterize on first encounter).
+  - Brand mark (G + cyan path-line) anchored top-left at 1/10 the canvas.
+  - Tagline (locked): "Workforce infrastructure for any American city."
+  - Subtagline: the hero question (locked copy thesis).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="GoWork — Workforce infrastructure for any American city">
+  <title>GoWork — Workforce infrastructure for any American city</title>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#1c3461"/>
-      <stop offset="100%" stop-color="#0f1f3d"/>
+      <stop offset="0%" stop-color="#0A0E1A"/>
+      <stop offset="100%" stop-color="#0F1729"/>
     </linearGradient>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
-  <!-- Brand mark, top-left -->
-  <g transform="translate(80,80)">
-    <rect width="120" height="120" rx="24" fill="#2a9d8f"/>
-    <text x="60" y="84" text-anchor="middle" font-family="system-ui, -apple-system, Segoe UI, Inter, sans-serif" font-weight="800" font-size="56" fill="#ffffff">GW</text>
+  <!-- Brand mark, top-left (G arc + horizontal cyan path-line) -->
+  <g transform="translate(80,80)" fill="none" stroke="#F5F3EE" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 110 60 A 50 50 0 1 0 60 110" />
   </g>
-  <!-- Headline + tagline -->
-  <g font-family="system-ui, -apple-system, Segoe UI, Inter, sans-serif" fill="#f3f1ea">
-    <text x="80" y="340" font-size="84" font-weight="800">GoWork</text>
-    <text x="80" y="410" font-size="40" font-weight="600" fill="#f4c66d">Workforce Navigator</text>
-    <text x="80" y="490" font-size="32" font-weight="400" fill="#cbd5e1">Overcome barriers. Find your path to employment.</text>
-    <text x="80" y="552" font-size="24" font-weight="500" fill="#94a3b8">Assess · Match · Plan</text>
+  <line x1="140" y1="140" x2="220" y2="140" stroke="#22D3EE" stroke-width="14" stroke-linecap="round"/>
+  <!-- Wordmark + tagline -->
+  <g font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif" fill="#F5F3EE">
+    <text x="80" y="340" font-size="120" font-weight="800" letter-spacing="-4">GoWork</text>
+    <text x="80" y="430" font-size="44" font-weight="600" fill="#22D3EE">What's standing between you and a job?</text>
+    <text x="80" y="520" font-size="36" font-weight="400" fill="#94A3B8">Workforce infrastructure for any American city.</text>
+    <text x="80" y="580" font-size="22" font-weight="500" fill="#64748B">An interactive map of Fort Worth, Texas · April 2026</text>
   </g>
 </svg>
