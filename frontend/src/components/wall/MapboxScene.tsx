@@ -26,13 +26,15 @@
  * fallback — never a half-rendered stall.
  */
 
-import { useCallback, useEffect, useRef, type CSSProperties } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import Map, { AttributionControl, type MapRef } from "react-map-gl";
 import { getMapboxToken } from "@/lib/wall/env";
 import { resolveMapboxStyleUrl } from "@/lib/wall/mapboxStyle";
 import { INITIAL_CAMERA } from "@/lib/wall/cameraChoreography";
 import { registerAllLayers, removeAllLayers } from "@/lib/wall/layers";
 import { registerMarkerSymbols } from "@/lib/wall/markerSymbols";
+import { useMapboxSkyForTimeOfDay, type MapLike } from "@/hooks/useMapboxSkyForTimeOfDay";
+import { MapCursorFlashlight } from "./MapCursorFlashlight";
 
 /** Public props — kept narrow because chapters consume the map via context
  *  (T2.2 WallContainer), not via prop drilling. */
@@ -58,8 +60,19 @@ type MapboxGlInstance = {
 export default function MapboxScene({ style }: MapboxSceneProps) {
   const mapRef = useRef<MapRef | null>(null);
   const layersRegisteredRef = useRef<boolean>(false);
+  // W4 — exposed once `onLoad` fires so the time-of-day sky setter can
+  // call setPaintProperty / setLight against a real map instance. We do
+  // not pull the ref directly inside the hook because the ref's
+  // mutation does not retrigger the hook's effect — the state setter
+  // does. Spotlight (Multiple Selves Lens — Driver A): the airplane-mode
+  // judge with no Mapbox load event sees the static sky default fall
+  // through. The page never crashes for the missing sky.
+  const [mapInstance, setMapInstance] = useState<MapLike | null>(null);
   const token = getMapboxToken() ?? "";
   const styleUrl = resolveMapboxStyleUrl();
+
+  // W4 T4.A.1 — sync time-of-day to the map's sky + light.
+  useMapboxSkyForTimeOfDay(mapInstance);
 
   /** Wave 4 — onLoad handler runs sprite registration FIRST (offices symbol
    *  layer's `icon-image` needs the sprite available before its source +
@@ -71,6 +84,10 @@ export default function MapboxScene({ style }: MapboxSceneProps) {
     const raw = mapRef.current?.getMap?.() as unknown;
     if (!raw) return;
     const map = raw as MapboxGlInstance;
+    // W4 T4.A.1 — publish the live map instance so the sky-setter hook
+    // can target it. Done AFTER onLoad so the style is ready for paint
+    // property writes.
+    setMapInstance(raw as MapLike);
     try {
       registerMarkerSymbols(map as Parameters<typeof registerMarkerSymbols>[0]);
       registerAllLayers(map as Parameters<typeof registerAllLayers>[0]);
@@ -110,33 +127,37 @@ export default function MapboxScene({ style }: MapboxSceneProps) {
   }, []);
 
   return (
-    <Map
-      ref={mapRef}
-      mapboxAccessToken={token}
-      mapStyle={styleUrl}
-      onLoad={handleMapLoad}
-      initialViewState={{
-        longitude: INITIAL_CAMERA.longitude,
-        latitude: INITIAL_CAMERA.latitude,
-        zoom: INITIAL_CAMERA.zoom,
-        pitch: INITIAL_CAMERA.pitch,
-        bearing: INITIAL_CAMERA.bearing,
-      }}
-      // Chapter scroll drives the camera — these controls are off.
-      dragRotate={false}
-      scrollZoom={false}
-      // Touch + keyboard remain reachable (a11y).
-      dragPan={true}
-      touchZoomRotate={true}
-      // T2.78 — attribution is rendered explicitly so styling can wrap it
-      // without losing the legal-required link.
-      attributionControl={false}
-      style={{ ...DEFAULT_STYLE, ...style }}
-    >
-      <AttributionControl
-        position="bottom-left"
-        customAttribution={["© GoWork · The Wall"]}
-      />
-    </Map>
+    <div style={{ position: "relative", ...DEFAULT_STYLE, ...style }}>
+      <Map
+        ref={mapRef}
+        mapboxAccessToken={token}
+        mapStyle={styleUrl}
+        onLoad={handleMapLoad}
+        initialViewState={{
+          longitude: INITIAL_CAMERA.longitude,
+          latitude: INITIAL_CAMERA.latitude,
+          zoom: INITIAL_CAMERA.zoom,
+          pitch: INITIAL_CAMERA.pitch,
+          bearing: INITIAL_CAMERA.bearing,
+        }}
+        // Chapter scroll drives the camera — these controls are off.
+        dragRotate={false}
+        scrollZoom={false}
+        // Touch + keyboard remain reachable (a11y).
+        dragPan={true}
+        touchZoomRotate={true}
+        // T2.78 — attribution is rendered explicitly so styling can wrap it
+        // without losing the legal-required link.
+        attributionControl={false}
+        style={DEFAULT_STYLE}
+      >
+        <AttributionControl
+          position="bottom-left"
+          customAttribution={["© GoWork · The Wall"]}
+        />
+      </Map>
+      {/* W4 T4.A.3 — cursor flashlight overlay over the map. */}
+      <MapCursorFlashlight />
+    </div>
   );
 }
