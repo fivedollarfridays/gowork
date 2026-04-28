@@ -23,6 +23,12 @@ vi.mock("../MapboxScene", () => ({
   default: () => React.createElement("div", { "data-testid": "mapbox-scene-stub" }),
 }));
 
+// W3 Driver C — Chapter 10 reaches `useRouter`. Composition tests don't
+// mount a Next.js app router, so stub it.
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn() }),
+}));
+
 // Wave 2 (Driver D) — chapters now render inside WallContainer. Mock the
 // translation surface so this composition test stays focused on
 // container orchestration.
@@ -53,17 +59,37 @@ vi.mock("@/hooks/useDeviceCapability", () => ({
 // `next/dynamic` returns a placeholder until the import resolves — in tests
 // we want the resolved component immediately so assertions don't have to
 // await the microtask queue. Swap dynamic for a synchronous shim.
+//
+// W3 Driver D — Wave 3: Chapter06 now also uses next/dynamic to lazy-load
+// the BenefitsCliffChart (Recharts ~130KB out of the eager bundle). The
+// shim must serialize the source string of the loader to differentiate
+// "is this the MapboxScene dynamic, or the cliff chart dynamic?" so the
+// MapboxScene fallback testid stays unique to that loader and the cliff
+// chart loader gets a separate placeholder that does NOT collide with
+// `getByTestId("mapbox-scene-stub")`.
 vi.mock("next/dynamic", () => ({
-  default: (loader: () => Promise<{ default: React.ComponentType }>) => {
+  default: (
+    loader: () => Promise<{ default: React.ComponentType }>,
+  ) => {
     let Component: React.ComponentType | null = null;
-    // Trigger the import immediately and store the module's default.
     void loader().then((mod) => {
       Component = mod.default;
     });
+    // Identify which dynamic this is by looking at the loader source. The
+    // MapboxScene loader text contains "./MapboxScene"; the cliff chart
+    // loader contains "BenefitsCliffChart". Anything else falls through
+    // to a generic placeholder.
+    const loaderSrc = String(loader);
+    const isMapbox = /MapboxScene/.test(loaderSrc);
+    const isCliffChart = /BenefitsCliffChart/.test(loaderSrc);
+    const fallbackTestId = isMapbox
+      ? "mapbox-scene-stub"
+      : isCliffChart
+        ? "cliff-chart-dynamic-stub"
+        : "dynamic-stub";
     const Wrapper: React.FC<Record<string, unknown>> = (props) => {
       if (Component) return React.createElement(Component, props);
-      // Fallback: render the test-stub synchronously.
-      return React.createElement("div", { "data-testid": "mapbox-scene-stub" });
+      return React.createElement("div", { "data-testid": fallbackTestId });
     };
     return Wrapper;
   },

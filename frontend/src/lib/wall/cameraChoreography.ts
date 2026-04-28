@@ -22,6 +22,8 @@ import type { ChapterId } from "./types";
 /** W2 ships chapters 1–5; W3 extends with 6–10. Sub-chapters 4a/4b/4c/4d
  *  share Chapter 4's camera state (bearing tilts handled at runtime). */
 export type W2ChapterId = Extract<ChapterId, 1 | 2 | 3 | 4 | 5>;
+/** W3 chapter ids — Drivers A (6, 9), B (7, 8), C (10) extend CHAPTER_CAMERAS. */
+export type W3ChapterId = Extract<ChapterId, 6 | 7 | 8 | 9 | 10>;
 export type { ChapterId };
 
 /** Mapbox camera + flyTo options. Mirrors mapbox-gl `CameraOptions`. */
@@ -62,13 +64,24 @@ export const INITIAL_CAMERA: ChapterCameraState = {
 };
 
 /**
- * Per-chapter camera states for W2 (1–5). W3 will extend this object.
+ * Per-chapter camera states for W2 (1–5) and W3 (6, 9, 10 — and 7, 8 on
+ * the next driver merge). Type is `Partial<Record<ChapterId, ...>>` so
+ * each W3 driver could extend its own slot in its own commit without
+ * coordinating on a shared union literal.
+ *
+ * Consumers that index `CHAPTER_CAMERAS[n]` MUST handle `undefined`
+ * (the orchestrator already does so at line ~74 of flyToOrchestrator.ts).
  *
  * Coordinates verified within Tarrant County bounding box (lng -97.6 to
- * -97.0, lat 32.5 to 33.0) for chapters 2–5; chapter 1 is continental
- * (centered ~ -98, 39 — north-central US).
+ * -97.0, lat 32.5 to 33.0) for chapters 2–5 + 6. Chapter 1 + 9 are
+ * continental views. Chapter 10 returns to the Fort Worth overhead frame
+ * to mirror the opening "we've returned home" beat for the View
+ * Transitions hand-off into /assess.
  */
-export const CHAPTER_CAMERAS: Readonly<Record<W2ChapterId, ChapterCameraState>> = {
+export const CHAPTER_CAMERAS: Readonly<
+  Partial<Record<ChapterId, ChapterCameraState>> &
+    Record<W2ChapterId, ChapterCameraState>
+> = {
   // Ch1 — Continental top-down America. Centered roughly Kansas; W1 city
   // lights layer (T2.20) makes FW + Montgomery glow brighter than other
   // metros so the eye is led down to Fort Worth in Ch2.
@@ -124,6 +137,76 @@ export const CHAPTER_CAMERAS: Readonly<Record<W2ChapterId, ChapterCameraState>> 
     bearing: 0,
     flyToOptions: { curve: 1.2, speed: 1.0, easing: EASE_LINEAR_SIG },
   },
+  // Ch6 — The Math. Camera lands on Amazon FC DFW5 (Heritage Pkwy ~76177).
+  // Zoom 14 + pitch 50 mirrors Ch3's "we are inside someone's life" altitude
+  // but tilted toward an EMPLOYER instead of a neighborhood, signaling that
+  // Carlos's destination has come into focus. The wage slider beneath the
+  // camera drives `--temperature-multiplier` (W3 Spotlight #1) so the cliff
+  // chart's tint redirects from cool→hot as wages cross known cliffs.
+  6: {
+    longitude: -97.3399,
+    latitude: 32.9942,
+    zoom: 14,
+    pitch: 50,
+    bearing: 0,
+    flyToOptions: { curve: 1.2, speed: 1.0, easing: EASE_LINEAR_SIG },
+  },
+  // Ch7 — The Path (W3 Driver B). Pulls to neighborhood altitude (zoom 13)
+  // with a strong tilt (pitch 60) and a bearing angled east (25°) so the
+  // camera "looks along" Carlos's path from Berry St toward downtown.
+  // Centered at the midpoint of the 5-waypoint polyline so the avatar
+  // stays visible across the full walk without re-flying.
+  7: {
+    longitude: -97.3221,
+    latitude: 32.7344,
+    zoom: 13,
+    pitch: 60,
+    bearing: 25,
+    flyToOptions: { curve: 1.2, speed: 1.0, easing: EASE_LINEAR_SIG },
+  },
+  // Ch8 — The 3D Barrier Graph (W3 Driver B). Pitch 60 is the dramatic
+  // tilt that lets the constellation feel like it floats above downtown
+  // while keeping the Ch8->Ch9 audit constraint intact (max 60° delta to
+  // Ch9's pitch 0). Driver D retuned from 70 → 60 after un-skipping the
+  // cameraTransitionsAudit-w3 pair 8->9 surfaced the violation.
+  // Bearing 0 (north-up) so judges read the graph orthogonally; the
+  // breathing motion of the constellation does the dynamism, the camera
+  // doesn't have to.
+  8: {
+    longitude: -97.3308,
+    latitude: 32.7555,
+    zoom: 12,
+    pitch: 60,
+    bearing: 0,
+    flyToOptions: { curve: 1.2, speed: 1.1, easing: EASE_LINEAR_SIG },
+  },
+  // Ch9 — Any City. Returns to the continental top-down America view (zoom
+  // 3.5, pitch 0) so two cities (Fort Worth + Montgomery) glow as lit dots
+  // with six dotted future cities (Dallas, Houston, Atlanta, Memphis,
+  // Charlotte, Birmingham). The "Fly to Montgomery" button triggers a 3s
+  // cross-country dolly into Montgomery (32.36°N, -86.28°W).
+  9: {
+    longitude: -98.5,
+    latitude: 39.8,
+    zoom: 3.5,
+    pitch: 0,
+    bearing: 0,
+    flyToOptions: { curve: 1.42, speed: 1.4, easing: EASE_LINEAR_SIG },
+  },
+  // Ch10 — Find Your Path. Camera returns to Fort Worth at zoom 11,
+  // pitch 0 (top-down), bearing 0 (north-up). The "we've returned home"
+  // framing — same lng/lat as INITIAL_CAMERA so the cinematic dolly
+  // ends where it started, ready for the View Transitions handoff into
+  // /assess. Slightly slower flyTo (speed 0.85) so the final beat feels
+  // like a cinematic settle, not a race.
+  10: {
+    longitude: -97.3308,
+    latitude: 32.7555,
+    zoom: 11,
+    pitch: 0,
+    bearing: 0,
+    flyToOptions: { curve: 1.2, speed: 0.85, easing: EASE_LINEAR_SIG },
+  },
 };
 
 /**
@@ -144,4 +227,22 @@ export const TRANSITION_SPEEDS: Readonly<Record<string, number>> = {
   "4a->4b": 0.6, // Sub-chapter bearing pivots are short and snappy.
   "4b->4c": 0.6,
   "4c->4d": 0.6,
+  // W3 Driver D — completes the spine. Audited deltas (cameraTransitionsAudit-w3):
+  //   5->6  Labyrinth (zoom 11, pitch 30) → DFW5 (zoom 14, pitch 50): cinematic
+  //         standard. 1.0 matches Ch2->Ch3's "we're zooming into someone's life."
+  //   6->7  DFW5 (zoom 14) → midpoint of Carlos's path (zoom 13): adjacent
+  //         altitude, snappier reframe. 0.95 reads "next reveal" without
+  //         feeling like a separate cinematic.
+  //   7->8  Path (pitch 60) → Constellation (pitch 70, zoom 12): the deliberate
+  //         tilt-up moment that becomes the sprint's signature beat. 1.1 is the
+  //         same speed Ch8 chose for its own flyToOptions; the table mirrors it.
+  //   8->9  Constellation (zoom 12, pitch 70) → Continental (zoom 3.5, pitch 0):
+  //         the long zoom-out + tilt-down. 1.4 matches Ch1->Ch2's continental
+  //         dolly so the open and the close share rhythm.
+  "5->6": 1.0,
+  "6->7": 0.95,
+  "7->8": 1.1,
+  "8->9": 1.4,
+  // W3 Driver C — final beat: settle into FW overhead for the /assess handoff.
+  "9->10": 0.85,
 };

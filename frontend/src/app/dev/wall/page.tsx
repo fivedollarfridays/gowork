@@ -21,6 +21,7 @@
  * still hits the page but the surface is informational only.
  */
 import { CHAPTER_BOUNDS } from "@/lib/wall/wallProgress";
+import { CHAPTER_SPECS } from "@/lib/wall/chapterSpec";
 
 const CHAPTER_LABELS: Record<number, string> = {
   1: "Continental",
@@ -28,13 +29,28 @@ const CHAPTER_LABELS: Record<number, string> = {
   3: "Neighborhood",
   4: "The Wall",
   5: "Labyrinth",
-  // W3 placeholders so reviewers see the full sequence
-  6: "Cliff (W3)",
-  7: "Carlos's path (W3)",
-  8: "Calibration (W3)",
-  9: "Plan (W3)",
-  10: "Outcomes (W3)",
+  // W3 — Driver D updated labels post-merge so reviewers see the actual
+  // chapter intent, not a placeholder. Pulled from the chapterSpec slugs.
+  6: "The Math (cliff)",
+  7: "The Path (5 stops)",
+  8: "The Graph (constellation)",
+  9: "Any City",
+  10: "Find Your Path",
 };
+
+function formatCameraSummary(
+  cam: ReturnType<typeof Object.values>[number] | undefined,
+): string {
+  if (!cam || typeof cam !== "object") return "(no camera)";
+  const c = cam as {
+    longitude: number;
+    latitude: number;
+    zoom: number;
+    pitch: number;
+    bearing: number;
+  };
+  return `lng ${c.longitude.toFixed(2)} · lat ${c.latitude.toFixed(2)} · z${c.zoom} · pitch ${c.pitch}° · bearing ${c.bearing}°`;
+}
 
 export default function WallInspectorPage() {
   if (process.env.NODE_ENV === "production") {
@@ -61,14 +77,18 @@ export default function WallInspectorPage() {
       <ul className="mt-8 grid gap-3">
         {CHAPTER_BOUNDS.map((bounds) => {
           const label = CHAPTER_LABELS[bounds.chapter] ?? "(unnamed)";
+          const spec = CHAPTER_SPECS.find((s) => s.id === bounds.chapter);
           const startPct = (bounds.start * 100).toFixed(0);
           const endPct = (bounds.end * 100).toFixed(0);
           const jumpHref = `/?scroll=${bounds.start.toFixed(2)}#chapter-${bounds.chapter}`;
+          const cameraSummary = formatCameraSummary(spec?.camera);
+          const soundLabel = spec?.sound ?? "(silent)";
           return (
             <li
               key={bounds.chapter}
               className="rounded border border-foreground/20 px-4 py-3"
               data-chapter-jump={String(bounds.chapter)}
+              data-chapter-slug={spec?.slug ?? "unknown"}
             >
               <div className="flex items-baseline gap-3">
                 <span className="font-semibold tabular-nums">
@@ -78,6 +98,21 @@ export default function WallInspectorPage() {
                 <span className="ml-auto text-sm text-foreground/60 tabular-nums">
                   {startPct}% – {endPct}%
                 </span>
+              </div>
+              <div className="mt-1 text-xs text-foreground/60">
+                <span data-testid={`ch${bounds.chapter}-camera-summary`}>
+                  {cameraSummary}
+                </span>
+              </div>
+              <div className="mt-1 text-xs text-foreground/60">
+                <span data-testid={`ch${bounds.chapter}-sound-id`}>
+                  Sound: {soundLabel}
+                </span>
+                {spec?.titleKey ? (
+                  <span className="ml-3" data-testid={`ch${bounds.chapter}-title-key`}>
+                    titleKey: {spec.titleKey}
+                  </span>
+                ) : null}
               </div>
               <a
                 className="mt-2 inline-block text-sm underline"
@@ -101,7 +136,7 @@ export default function WallInspectorPage() {
           </li>
           <li>Ch10.end = 1.0 INCLUSIVE so progress=1.0 keeps Ch10 active.</li>
           <li>
-            Total chapters: 10 (5 in W2 — bottom 5 are W3 placeholders).
+            Total chapters: 10 (W3 close: all chapters present, all wired).
           </li>
         </ul>
       </section>

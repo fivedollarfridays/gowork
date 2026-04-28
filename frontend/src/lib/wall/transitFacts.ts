@@ -47,3 +47,56 @@ export const TRINITY_METRO_BRAND = {
   sourceUrl: "https://ride.trinitymetro.org/",
   sourceDate: "2026-04-27",
 } as const;
+
+/**
+ * Per-leg route assignments for Carlos's path (W3 Ch7 — T3.12).
+ *
+ * Each entry maps a leg index (0-based, between waypoints i and i+1) to the
+ * Trinity Metro route ids active on that leg. Ch7's CarlosAvatar consumes
+ * the active leg via `avatarPath.segmentIndexAt(t)` and Ch7 highlights
+ * those route ids.
+ *
+ * # Editorial source
+ *
+ * The five waypoints (home → DPS → HHSC → Legal Aid → Workforce Solutions)
+ * span a mix of commutes:
+ *   - Leg 0 (home → DPS): cross-city west, Bus 4 + Bus 6 transfer
+ *   - Leg 1 (DPS → HHSC): downtown reroute via Bus 6
+ *   - Leg 2 (HHSC → Legal Aid): courthouse-adjacent local Bus 4
+ *   - Leg 3 (Legal Aid → Workforce Solutions): Bus 4 back south to 76119
+ *
+ * Honest uncertainty: real-world routing requires GTFS trip planning. The
+ * editorial assignments above echo the demo narrative (Bus 4 + Bus 6 spine)
+ * without claiming GTFS-precision. W4 may swap in real route resolution.
+ */
+export interface CarlosLegRoute {
+  /** 0-based leg index (segment between waypoints i and i+1). */
+  legIndex: number;
+  /** Trinity Metro route ids active on this leg (strings to match GTFS). */
+  routes: readonly string[];
+  /** Editorial label (EN). */
+  editorialLabel: string;
+}
+
+export const CARLOS_PATH_LEG_ROUTES: readonly CarlosLegRoute[] = [
+  {
+    legIndex: 0,
+    routes: ["4", "6"],
+    editorialLabel: "Bus 4 + Bus 6 transfer — 71 minutes",
+  },
+  {
+    legIndex: 1,
+    routes: ["6"],
+    editorialLabel: "Bus 6 reroute via downtown",
+  },
+  {
+    legIndex: 2,
+    routes: ["4"],
+    editorialLabel: "Bus 4 — courthouse loop",
+  },
+  {
+    legIndex: 3,
+    routes: ["4"],
+    editorialLabel: "Bus 4 — back south to 76119",
+  },
+] as const;

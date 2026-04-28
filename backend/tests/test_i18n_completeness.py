@@ -65,6 +65,23 @@ IDENTICAL_PAIR_ALLOWLIST: dict[str, str] = {
     # tally. The descriptive label ('formsCounterLabel') carries the
     # translation; the count itself is identical in any language.
     "wall.chapter05.formsCounter": "'47' — pure integer count; identical in EN/ES.",
+    # W3 Chapter 6 stat-pill ("71 min") is a compact numeric duration; the
+    # 'min' abbreviation is identical in Spanish (abbrev. of 'minuto').
+    # statLabel carries the descriptive translation.
+    "wall.chapter06.statValue": "'71 min' — numeric duration with 'min' abbreviation identical in EN/ES.",
+    # W3 Chapter 9 lights up two deployed cities + six future cities. All
+    # are US place names that don't translate (proper nouns).
+    "wall.chapter09.cityFW": "'Fort Worth, TX' — US city proper noun.",
+    "wall.chapter09.cityMontgomery": "'Montgomery, AL' — US city proper noun.",
+    "wall.chapter09.futureCityDallas": "'Dallas' — US city proper noun.",
+    "wall.chapter09.futureCityHouston": "'Houston' — US city proper noun.",
+    "wall.chapter09.futureCityAtlanta": "'Atlanta' — US city proper noun.",
+    "wall.chapter09.futureCityMemphis": "'Memphis' — US city proper noun.",
+    "wall.chapter09.futureCityCharlotte": "'Charlotte' — US city proper noun.",
+    "wall.chapter09.futureCityBirmingham": "'Birmingham' — US city proper noun.",
+    # W3 Chapter 10's footer brand mark is the GoWork wordmark + city. The
+    # brand wordmark + place name are proper nouns that don't translate.
+    "wall.chapter10.footerBrand": "'GoWork · Fort Worth, TX' — brand mark + US city, both proper nouns.",
 }
 
 

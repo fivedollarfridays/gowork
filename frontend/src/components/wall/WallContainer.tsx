@@ -50,6 +50,12 @@ import { Chapter02CityArrival } from "./chapters/Chapter02CityArrival";
 import { Chapter03Neighborhood } from "./chapters/Chapter03Neighborhood";
 import { Chapter04TheWall } from "./chapters/Chapter04TheWall";
 import { Chapter05Labyrinth } from "./chapters/Chapter05Labyrinth";
+// W3 chapters — Drivers A (6, 9), B (7, 8), C (10).
+import { Chapter06TheMath } from "./chapters/Chapter06TheMath";
+import { Chapter07ThePath } from "./chapters/Chapter07ThePath";
+import { Chapter08TheGraph } from "./chapters/Chapter08TheGraph";
+import { Chapter09AnyCity } from "./chapters/Chapter09AnyCity";
+import { Chapter10FindYourPath } from "./chapters/Chapter10FindYourPath";
 
 /** Context shape consumed by chapter components (Drivers B/C). */
 export interface WallContextValue {
@@ -162,6 +168,16 @@ function ChaptersSequence({
       <Chapter03Neighborhood progress={local(3)} active={active(3)} />
       <Chapter04TheWall progress={local(4)} />
       <Chapter05Labyrinth progress={local(5)} />
+      {/* W3 Driver A — Ch6 (The Math) */}
+      <Chapter06TheMath progress={local(6)} active={active(6)} />
+      {/* W3 Driver B — Ch7 (The Path + Carlos Avatar) */}
+      <Chapter07ThePath progress={local(7)} active={active(7)} chapterNumber={7} />
+      {/* W3 Driver B — Ch8 (3D Barrier Graph, lazy Three.js) */}
+      <Chapter08TheGraph progress={local(8)} active={active(8)} chapterNumber={8} />
+      {/* W3 Driver A — Ch9 (Any City + Fly to Montgomery) */}
+      <Chapter09AnyCity progress={local(9)} active={active(9)} />
+      {/* W3 Driver C — Ch10 (Find Your Path + View Transitions) */}
+      <Chapter10FindYourPath progress={local(10)} active={active(10)} />
     </>
   );
 }
