@@ -28,6 +28,19 @@ export { useChapterProgress } from "./useChapterProgress";
 export type { ChapterProgressState } from "./useChapterProgress";
 
 export { useVariableFontWeight } from "./useVariableFontWeight";
+// W4 — hero + chapter-heading variants (T4.A.6).
+export {
+  useHeroFontWeight,
+  useChapterHeadingFontWeight,
+} from "./useHeroFontWeight";
+
+// W4 — Mapbox sky setter (T4.A.1) and rAF throttler (Spotlight #2).
+export { useMapboxSkyForTimeOfDay } from "./useMapboxSkyForTimeOfDay";
+export type { MapLike } from "./useMapboxSkyForTimeOfDay";
+export { useThrottledRAF } from "./useThrottledRAF";
+// W4 — locale-aware Live Now formatter (T4.A.4).
+export { useLiveNowFormatted } from "./useLiveNowFormatted";
+export type { LiveNowFormattedState } from "./useLiveNowFormatted";
 
 export { useScrollVelocity } from "./useScrollVelocity";
 export type { ScrollVelocityState } from "./useScrollVelocity";

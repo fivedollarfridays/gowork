@@ -1,14 +1,33 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import {
+  derivePhaseDescriptor,
+  type AccentToken,
+  type SkyTypeName,
+} from "@/lib/wall/timeOfDayPalette";
 
 export type TimePhase = "morning" | "day" | "evening" | "night";
 export type AccentShift = "cyan" | "amber" | "rose" | "navy";
 
 export interface TimeOfDayState {
+  /** Coarse 4-phase bucket retained for W2/W3 back-compat. */
   phase: TimePhase;
-  sunPosition: number; // 0..1, where 1 is solar noon
+  /** Normalised solar elevation 0..1 (1 ≈ solar noon). */
+  sunPosition: number;
+  /** Coarse accent name retained for W2/W3 back-compat. */
   accentShift: AccentShift;
+  /** W4 — sun altitude in degrees, 0..90 (always positive in our cosine
+   *  model; below-horizon clamps at 0). */
+  sunAltitudeDeg: number;
+  /** W4 — Mapbox sky-type recipe ('atmosphere' for daylight,
+   *  'gradient' for dusk/night to keep the night sky readable). */
+  skyTypeName: SkyTypeName;
+  /** W4 — OKLCH-formatted sky base colour. */
+  skyColor: string;
+  /** W4 — phase-derived accent token slug for `--accent-current`
+   *  (W4 spec: amber/cyan/blue/rose/indigo). */
+  accentToken: AccentToken;
 }
 
 const FORT_WORTH_LATITUDE = 32.7555;
@@ -17,6 +36,10 @@ const SSR_DEFAULT: TimeOfDayState = {
   phase: "day",
   sunPosition: 0.5,
   accentShift: "cyan",
+  sunAltitudeDeg: 60,
+  skyTypeName: "atmosphere",
+  skyColor: "oklch(0.85 0.05 230)",
+  accentToken: "blue",
 };
 
 function phaseFor(hour: number): TimePhase {
@@ -59,10 +82,17 @@ function computeSunPosition(date: Date, latitude: number): number {
 
 function snapshot(latitude: number, now: Date): TimeOfDayState {
   const phase = phaseFor(now.getHours());
+  const sunPosition = computeSunPosition(now, latitude);
+  const sunAltitudeDeg = Math.max(0, Math.min(90, sunPosition * 90));
+  const w4 = derivePhaseDescriptor(now.getHours(), sunPosition);
   return {
     phase,
-    sunPosition: computeSunPosition(now, latitude),
+    sunPosition,
     accentShift: accentFor(phase),
+    sunAltitudeDeg,
+    skyTypeName: w4.skyTypeName,
+    skyColor: w4.skyColor,
+    accentToken: w4.accentToken,
   };
 }
 
@@ -75,6 +105,9 @@ function snapshot(latitude: number, now: Date): TimeOfDayState {
  *
  * Updates every minute so the page eases through phase transitions
  * without a reload. Cleans up the interval on unmount.
+ *
+ * **W4 fields** are additive — existing W2/W3 callers reading only
+ * `phase`, `sunPosition`, `accentShift` are unaffected.
  *
  * @param latitude Optional — defaults to Fort Worth (32.7555°N).
  *                 Used by W2's Mapbox sky setter for cross-city accuracy.

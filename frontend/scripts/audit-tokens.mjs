@@ -78,6 +78,9 @@ const EXTERNAL_VARS = new Set([
   // CursorFlashlight sets these inline via JS.
   "--flashlight-x",
   "--flashlight-y",
+  // W4 MapCursorFlashlight sets these inline via JS (T4.A.3).
+  "--cursor-x",
+  "--cursor-y",
   // next/font injects these.
   "--font-inter",
 ]);
