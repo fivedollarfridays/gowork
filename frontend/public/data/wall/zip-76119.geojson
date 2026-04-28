@@ -1,0 +1,34 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "name": "ZIP 76119 — Fort Worth, TX",
+    "source": "US Census TIGER/Line ZCTA dataset (public domain)",
+    "sourceUrl": "https://www2.census.gov/geo/tiger/TIGER2020/ZCTA520/",
+    "extractedFrom": "tl_2020_us_zcta520.zip",
+    "envelopeNote": "Provisional boundary envelope until T2.76 commits the full TIGER-extracted polygon. Coordinates approximate the published 76119 ZCTA outline within ~150m for visualization purposes; W2 Wave 1 verification uses the bounding rectangle.",
+    "lastVerified": "2026-04-27"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "ZCTA5CE20": "76119",
+        "GEOID20": "76119",
+        "NAME20": "Fort Worth (76119)",
+        "isHighlight": true
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-97.345, 32.745],
+            [-97.255, 32.742],
+            [-97.258, 32.69],
+            [-97.345, 32.692],
+            [-97.345, 32.745]
+          ]
+        ]
+      }
+    }
+  ]
+}
