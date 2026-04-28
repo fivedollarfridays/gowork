@@ -19,8 +19,10 @@ describe("W2 chapter deps", () => {
     expect(clerk?.category).toBe("court");
   });
 
-  it("includes HHSC for Ch4c", () => {
-    const hhsc = W2_OFFICES.find((o) => o.id === "hhsc-eligibility");
+  it("includes HHSC for Ch4c (Wave 5: id aligned to officeRegistry)", () => {
+    const hhsc = W2_OFFICES.find(
+      (o) => o.id === "hhsc-fort-worth-east-lancaster",
+    );
     expect(hhsc?.category).toBe("childcare");
   });
 

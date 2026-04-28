@@ -48,36 +48,46 @@ export interface OfficeFeature {
  * 4c — HHSC Eligibility Office (no childcare)
  * 5  — adds Legal Aid + Workforce Solutions for the Labyrinth
  */
+/**
+ * IDs ALIGNED to Driver B's `officeRegistry.ts` (Wave 5 Driver D pass).
+ *
+ * Driver C's pre-merge deps.ts shipped placeholder IDs (`trinity-metro-hq`,
+ * `hhsc-eligibility`, etc.) before Driver B's registry landed. Now that
+ * `officeRegistry.ts` is the canonical source, every `id` here matches a
+ * `TARRANT_OFFICES[].id` so cross-module lookups resolve. The `category`
+ * type widens to include "transit" (a driver-C concept; not in Driver B's
+ * registry — kept for ch4b's intent "the office Carlos can't reach").
+ */
 export const W2_OFFICES: readonly OfficeFeature[] = [
   {
     id: "tarrant-district-clerk",
     name: "Tarrant County District Clerk",
     category: "court",
-    coords: [-97.3322, 32.7521], // 100 N Calhoun St, Fort Worth
+    coords: [-97.3326, 32.7553], // 200 E Weatherford St (canonical address)
   },
   {
-    id: "trinity-metro-hq",
-    name: "Trinity Metro",
+    id: "tx-dps-mega-center-fort-worth",
+    name: "Texas DPS — Fort Worth Driver License Office",
     category: "transit",
-    coords: [-97.3231, 32.7607], // 801 Cherry St
+    coords: [-97.4216, 32.7396], // 1849 Cherry Ln — the long-bus-ride destination
   },
   {
-    id: "hhsc-eligibility",
-    name: "Texas HHSC Eligibility Office",
+    id: "hhsc-fort-worth-east-lancaster",
+    name: "Texas HHSC — Fort Worth Benefits Office",
     category: "childcare",
-    coords: [-97.2895, 32.6886], // E. Berry St area, 76119-adjacent
+    coords: [-97.3134, 32.7506], // 1200 E Lancaster Ave (canonical)
   },
   {
-    id: "legal-aid-nw-texas",
-    name: "Legal Aid of NorthWest Texas",
+    id: "legal-aid-northwest-texas-fw",
+    name: "Legal Aid of NorthWest Texas — Fort Worth",
     category: "legal",
-    coords: [-97.3308, 32.7498], // 600 E Weatherford St
+    coords: [-97.3289, 32.7549], // 600 E Weatherford St (canonical)
   },
   {
-    id: "workforce-solutions-belknap",
-    name: "Workforce Solutions — E. Belknap",
+    id: "workforce-solutions-tarrant",
+    name: "Workforce Solutions — Tarrant",
     category: "workforce",
-    coords: [-97.2747, 32.7929], // 3210 E Belknap St
+    coords: [-97.3046, 32.7164], // 1200 Circle Dr (canonical)
   },
 ] as const;
 

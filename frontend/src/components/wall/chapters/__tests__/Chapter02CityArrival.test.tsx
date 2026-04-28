@@ -14,11 +14,11 @@ vi.mock("@/hooks/useTranslation", () => ({
   useTranslation: vi.fn(() => ({
     locale: "en",
     t: (key: string) => {
-      if (key === "wall.ch2.body")
+      if (key === "wall.chapter02.body")
         return "Carlos lives here. ZIP 76119. East of downtown — past Sundance Square, past the courthouse.";
-      if (key === "wall.ch2.ariaLive")
-        return "Chapter 2: City Arrival — Fort Worth at altitude";
-      if (key === "wall.ch2.title") return "Chapter 2 — City Arrival";
+      if (key === "wall.chapter02.aria")
+        return "Chapter 2: Fort Worth at altitude. Trinity Metro routes drawn in cyan.";
+      if (key === "wall.chapter02.title") return "Chapter 2 — City Arrival";
       return key;
     },
     switchLocale: vi.fn(),

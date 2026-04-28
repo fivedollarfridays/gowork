@@ -31,6 +31,19 @@ vi.mock("../MapboxScene", () => ({
     React.createElement("div", { "data-testid": "mapbox-scene-stub" }),
 }));
 
+// Wave 2 (Driver D) — chapters now render inside WallContainer. Mock the
+// translation surface so this composition test stays focused on
+// container orchestration.
+vi.mock("@/hooks/useTranslation", () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+    locale: "en",
+    setLocale: () => undefined,
+  }),
+  TranslationProvider: ({ children }: { children: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children),
+}));
+
 vi.mock("next/dynamic", () => ({
   default: (loader: () => Promise<{ default: React.ComponentType }>) => {
     let Component: React.ComponentType | null = null;

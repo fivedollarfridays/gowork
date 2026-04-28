@@ -10,6 +10,7 @@
  *     chapterProgress, isMapboxMounted)
  *   - the static fallback render path (branded GoWork · Fort Worth, TX
  *     placeholder when Mapbox is unavailable)
+ *   - the end-to-end composition of W2 chapters 1-5 (Driver D Wave 2)
  *
  * Lazy-loading (T2.58) is layered in via a dynamic import for
  * `MapboxScene` so the heavy mapbox-gl bundle never enters the initial
@@ -20,6 +21,11 @@
  * Vercel preview lacks the Mapbox secret still sees a beautiful branded
  * placeholder, NOT a crashed page. The static fallback is the still
  * image that's still beautiful.
+ *
+ * Wave 2 (Driver D): chapters 1-5 wire end-to-end here. Each chapter
+ * receives LOCAL progress (sliced via wallProgress.globalToLocal) plus
+ * an `active` flag so sound triggers fire on chapter enter and overlays
+ * fade in/out on the right boundaries.
  */
 
 import {
@@ -33,6 +39,17 @@ import dynamic from "next/dynamic";
 import { validateToken } from "@/lib/wall/mapboxToken";
 import { useChapterProgress } from "@/hooks/useChapterProgress";
 import { useDeviceCapability } from "@/hooks/useDeviceCapability";
+import { useScrollProgress } from "@/hooks/useScrollProgress";
+import {
+  globalToLocal,
+  TOTAL_CHAPTERS,
+  type ChapterIndex,
+} from "@/lib/wall/wallProgress";
+import { Chapter01Continental } from "./chapters/Chapter01Continental";
+import { Chapter02CityArrival } from "./chapters/Chapter02CityArrival";
+import { Chapter03Neighborhood } from "./chapters/Chapter03Neighborhood";
+import { Chapter04TheWall } from "./chapters/Chapter04TheWall";
+import { Chapter05Labyrinth } from "./chapters/Chapter05Labyrinth";
 
 /** Context shape consumed by chapter components (Drivers B/C). */
 export interface WallContextValue {
@@ -70,6 +87,7 @@ export default function WallContainer({ children }: WallContainerProps) {
   const tokenOk = validateToken();
   const { tier, supportsWebGL } = useDeviceCapability();
   const { currentChapter, chapterProgress } = useChapterProgress();
+  const { totalProgress } = useScrollProgress(TOTAL_CHAPTERS);
 
   // Spotlight Wave 5 — tier-based fallback. Carlos on a 2GB Pixel 4a
   // sees the still-image, not stalled JS. Low-tier devices and WebGL-
@@ -105,8 +123,46 @@ export default function WallContainer({ children }: WallContainerProps) {
       >
         <MapboxScene />
       </div>
-      <div style={{ position: "relative", zIndex: 1 }}>{children}</div>
+      <main
+        data-testid="wall-chapters"
+        style={{ position: "relative", zIndex: 1 }}
+      >
+        <ChaptersSequence
+          currentChapter={currentChapter}
+          totalProgress={totalProgress}
+        />
+        {children}
+      </main>
     </WallContext.Provider>
+  );
+}
+
+/**
+ * Wave 2 sequence — renders all five W2 chapters in scroll order. Each
+ * chapter receives:
+ *   - `progress`: LOCAL 0..1 within its own scroll range
+ *   - `active`: true when the global chapter pointer is on this chapter
+ *
+ * W3 chapters 6-10 plug into this same sequence by appending more
+ * `<ChapterX />` siblings; no refactor needed.
+ */
+function ChaptersSequence({
+  currentChapter,
+  totalProgress,
+}: {
+  currentChapter: number;
+  totalProgress: number;
+}) {
+  const local = (id: ChapterIndex) => globalToLocal(totalProgress, id);
+  const active = (id: ChapterIndex) => currentChapter === id;
+  return (
+    <>
+      <Chapter01Continental progress={local(1)} />
+      <Chapter02CityArrival progress={local(2)} />
+      <Chapter03Neighborhood progress={local(3)} active={active(3)} />
+      <Chapter04TheWall progress={local(4)} />
+      <Chapter05Labyrinth progress={local(5)} />
+    </>
   );
 }
 

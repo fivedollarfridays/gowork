@@ -71,7 +71,7 @@ export function Chapter02CityArrival({
           border: 0,
         }}
       >
-        {t("wall.ch2.ariaLive")}
+        {t("wall.chapter02.aria")}
       </div>
 
       <div
@@ -101,7 +101,7 @@ export function Chapter02CityArrival({
             color: "var(--fg-primary)",
           }}
         >
-          {t("wall.ch2.title")}
+          {t("wall.chapter02.title")}
         </h2>
         <p
           style={{
@@ -111,7 +111,7 @@ export function Chapter02CityArrival({
             color: "var(--fg-secondary, var(--fg-primary))",
           }}
         >
-          {t("wall.ch2.body")}
+          {t("wall.chapter02.body")}
         </p>
       </div>
     </section>

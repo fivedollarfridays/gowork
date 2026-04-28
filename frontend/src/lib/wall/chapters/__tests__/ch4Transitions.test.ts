@@ -20,10 +20,12 @@ describe("planCh4Transition", () => {
     expect(plan.changes).toHaveLength(0);
   });
 
-  it("dims the previous office and lights the next one", () => {
+  it("dims the previous office and lights the next one (Wave 5: ids aligned)", () => {
     const plan = planCh4Transition("4a", "4b", false);
     const dim = plan.changes.find((c) => c.officeId === "tarrant-district-clerk");
-    const light = plan.changes.find((c) => c.officeId === "trinity-metro-hq");
+    const light = plan.changes.find(
+      (c) => c.officeId === "tx-dps-mega-center-fort-worth",
+    );
     expect(dim?.targetOpacity).toBe(0.4);
     expect(light?.targetOpacity).toBe(1.0);
   });
@@ -38,12 +40,13 @@ describe("planCh4Transition", () => {
     expect(plan.durationMs).toBe(CH4_TRANSITION_DURATION_REDUCED_MS);
   });
 
-  it("handles the 4d transition (no highlight office) without crashing", () => {
+  it("handles the 4d transition (no highlight office) without crashing (Wave 5: ids aligned)", () => {
     // 4c → 4d — 4d has no highlightOfficeId; only the prev dims.
     const plan = planCh4Transition("4c", "4d", false);
     expect(
-      plan.changes.find((c) => c.officeId === "hhsc-eligibility")
-        ?.targetOpacity,
+      plan.changes.find(
+        (c) => c.officeId === "hhsc-fort-worth-east-lancaster",
+      )?.targetOpacity,
     ).toBe(0.4);
     // No light-up entry (4d highlights jobs, not an office).
     expect(plan.changes.length).toBe(1);

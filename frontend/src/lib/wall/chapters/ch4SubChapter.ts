@@ -46,7 +46,10 @@ export const CH4_SUBCHAPTERS: readonly Ch4SubChapter[] = [
     id: "4b",
     barrier: "noTransit",
     statValue: "87 min",
-    highlightOfficeId: "trinity-metro-hq",
+    // Wave 5 (Driver D): aligned to Driver B's officeRegistry. The "no
+    // transit" sub-chapter highlights the DPS office — the long-bus-ride
+    // destination Carlos must reach for ID renewal + license reinstatement.
+    highlightOfficeId: "tx-dps-mega-center-fort-worth",
     bearingOffset: 30,
     soundId: "footstep",
   },
@@ -54,7 +57,10 @@ export const CH4_SUBCHAPTERS: readonly Ch4SubChapter[] = [
     id: "4c",
     barrier: "noChildcare",
     statValue: "$1,200/mo",
-    highlightOfficeId: "hhsc-eligibility",
+    // Wave 5 (Driver D): aligned to Driver B's officeRegistry id for the
+    // HHSC benefits office (handles childcare scholarship intake referenced
+    // in Ch4c per the demo script).
+    highlightOfficeId: "hhsc-fort-worth-east-lancaster",
     bearingOffset: -15,
     soundId: "paper-rustle",
   },

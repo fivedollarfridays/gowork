@@ -80,7 +80,7 @@ export function Chapter01Continental({
           border: 0,
         }}
       >
-        {t("wall.ch1.ariaLive")}
+        {t("wall.chapter01.aria")}
       </div>
 
       <div
@@ -110,7 +110,7 @@ export function Chapter01Continental({
             fontVariationSettings: fontVariation,
           }}
         >
-          {t("wall.ch1.hero")}
+          {t("wall.chapter01.hero")}
         </h1>
         <p
           style={{
@@ -120,7 +120,7 @@ export function Chapter01Continental({
             color: "var(--fg-secondary, var(--fg-primary))",
           }}
         >
-          {t("wall.ch1.subhero")}
+          {t("wall.chapter01.subhero")}
         </p>
       </div>
     </section>

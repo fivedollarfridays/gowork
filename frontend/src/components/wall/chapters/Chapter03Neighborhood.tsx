@@ -116,7 +116,7 @@ export function Chapter03Neighborhood({
           border: 0,
         }}
       >
-        {t("wall.ch3.ariaLive")}
+        {t("wall.chapter03.aria")}
       </div>
 
       <div
@@ -146,7 +146,7 @@ export function Chapter03Neighborhood({
             color: "var(--fg-primary)",
           }}
         >
-          {t("wall.ch3.title")}
+          {t("wall.chapter03.title")}
         </h2>
         <p
           style={{
@@ -156,7 +156,7 @@ export function Chapter03Neighborhood({
             color: "var(--fg-secondary, var(--fg-primary))",
           }}
         >
-          {t("wall.ch3.body")}
+          {t("wall.chapter03.body")}
         </p>
       </div>
     </section>
