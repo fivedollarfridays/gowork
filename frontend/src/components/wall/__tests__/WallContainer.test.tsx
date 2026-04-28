@@ -23,6 +23,12 @@ vi.mock("../MapboxScene", () => ({
   default: () => React.createElement("div", { "data-testid": "mapbox-scene-stub" }),
 }));
 
+// W3 Driver C — Chapter 10 reaches `useRouter`. Composition tests don't
+// mount a Next.js app router, so stub it.
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn() }),
+}));
+
 // Wave 2 (Driver D) — chapters now render inside WallContainer. Mock the
 // translation surface so this composition test stays focused on
 // container orchestration.

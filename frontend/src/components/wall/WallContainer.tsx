@@ -50,6 +50,7 @@ import { Chapter02CityArrival } from "./chapters/Chapter02CityArrival";
 import { Chapter03Neighborhood } from "./chapters/Chapter03Neighborhood";
 import { Chapter04TheWall } from "./chapters/Chapter04TheWall";
 import { Chapter05Labyrinth } from "./chapters/Chapter05Labyrinth";
+import { Chapter10FindYourPath } from "./chapters/Chapter10FindYourPath";
 
 /** Context shape consumed by chapter components (Drivers B/C). */
 export interface WallContextValue {
@@ -162,6 +163,11 @@ function ChaptersSequence({
       <Chapter03Neighborhood progress={local(3)} active={active(3)} />
       <Chapter04TheWall progress={local(4)} />
       <Chapter05Labyrinth progress={local(5)} />
+      {/* W3 chapters 6-9 land in Drivers A+B's lanes; Driver C wires
+          Ch10 into slot 10 here. The brief intentionally lets the
+          spine grow chapter-by-chapter — no DOM placeholders for 6-9
+          yet so souji-sweep merges with no conflicts. */}
+      <Chapter10FindYourPath progress={local(10)} active={active(10)} />
     </>
   );
 }

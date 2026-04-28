@@ -542,6 +542,17 @@
       "officesLabel": "offices to visit",
       "pullquote": "Every office gave me one form and another address.",
       "aria": "Chapter 5: the Labyrinth. Five offices and forty-seven forms — the chaos before GoWork sequences the path."
+    },
+    "chapter10": {
+      "title": "Find your path",
+      "hero": "Find your path.",
+      "subhero": "We do the math. We sequence the route. You take the first step.",
+      "body": "You've seen the wall. You've seen the labyrinth. Now skip both — start your assessment and we'll hand you a plan that's already done the offices, forms, and math.",
+      "aria": "Chapter 10: Find your path. Begin your assessment to receive a personalized plan.",
+      "ctaPrimary": "Start your assessment",
+      "ctaSecondary": "Or read the open-source code on GitHub →",
+      "githubLinkLabel": "View the open-source code on GitHub",
+      "footerBrand": "GoWork · Fort Worth, TX"
     }
   },
   "edge": {
