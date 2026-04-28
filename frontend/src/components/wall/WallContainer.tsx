@@ -39,7 +39,9 @@ import dynamic from "next/dynamic";
 import { validateToken } from "@/lib/wall/mapboxToken";
 import { useChapterProgress } from "@/hooks/useChapterProgress";
 import { useDeviceCapability } from "@/hooks/useDeviceCapability";
+import { useResponsiveTier } from "@/hooks/useResponsiveTier";
 import { useScrollProgress } from "@/hooks/useScrollProgress";
+import { MobileWallFallback } from "./MobileWallFallback";
 import {
   globalToLocal,
   TOTAL_CHAPTERS,
@@ -92,6 +94,7 @@ interface WallContainerProps {
 export default function WallContainer({ children }: WallContainerProps) {
   const tokenOk = validateToken();
   const { tier, supportsWebGL } = useDeviceCapability();
+  const { isMobile: viewportIsMobile } = useResponsiveTier();
   const { currentChapter, chapterProgress } = useChapterProgress();
   const { totalProgress } = useScrollProgress(TOTAL_CHAPTERS);
 
@@ -99,13 +102,31 @@ export default function WallContainer({ children }: WallContainerProps) {
   // sees the still-image, not stalled JS. Low-tier devices and WebGL-
   // disabled browsers route through the same branded fallback.
   const tierBlocksMapbox = tier === "low" || !supportsWebGL;
-  const mountMapbox = tokenOk && !tierBlocksMapbox;
+  // W4 — mobile viewport gating (T4.B.9). Mobile users get the editorial
+  // scroll fallback even on high-tier hardware: a 360-pixel column
+  // running Mapbox + 3D buildings is brutal on UX, not just battery.
+  const mountMapbox = tokenOk && !tierBlocksMapbox && !viewportIsMobile;
   const [isMapboxMounted] = useState<boolean>(mountMapbox);
 
   const contextValue = useMemo<WallContextValue>(
     () => ({ currentChapter, chapterProgress, isMapboxMounted }),
     [currentChapter, chapterProgress, isMapboxMounted],
   );
+
+  if (viewportIsMobile) {
+    // Mobile viewport: editorial-scroll fallback (full chapter copy in
+    // a single column). The MobileWallFallback is a richer experience
+    // than the bare StaticFallback (which is now reserved for the
+    // tablet/desktop low-tier or no-WebGL path), so mobile wins
+    // unconditionally — even on low-tier mobile hardware the editorial
+    // scroll is more usable than a single wordmark.
+    return (
+      <WallContext.Provider value={contextValue}>
+        <MobileWallFallback />
+        {children}
+      </WallContext.Provider>
+    );
+  }
 
   if (!mountMapbox) {
     return (
