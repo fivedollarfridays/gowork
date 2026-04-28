@@ -32,6 +32,55 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+### 2026-04-28 — Sprint W1 Driver B (worktree-agent-aa3c7da3ebd00af01) — hooks + audio + cursor + types/barrels + enrichment
+
+Branch: `w1-driver-b/hooks-utilities-audio-cursor`. Lane: hooks + utilities + audio + cursor + types + barrels + enrichment. Driver A and C work in parallel sibling worktrees.
+
+**Wave 1 (Mapbox boot validator):** T1.6 — `frontend/src/lib/wall/env.ts` exports `validateMapboxToken()`, `isMapboxAvailable()`, `getMapboxToken()`. Public-token-only contract (`pk.` prefix required; `sk.` rejected). 7 vitest cases, all green.
+
+**Wave 2 (10 utility hooks, T1.24–T1.33):** All SSR-safe with cleanups; tests cover initial state, behavior, unmount. `useTimeOfDay` (4-phase + sun position + accent shift, latitude-aware), `useCursorPosition` (rAF-throttled normalized x/y + signed vx/vy; touch fallback via `navigator.maxTouchPoints`), `useLiveNow` (TanStack Query 10s poll; graceful 404 fallback), `useScrollProgress` (framer-motion useScroll wrapper, chapter-aware), `useVariableFontWeight` (memoized wght 700–900 / opsz 14–32; reduced-motion locks at 800/23), `useScrollVelocity` (rAF delta sampling, isFast threshold), `usePrefersReducedMotion` (matchMedia subscription, SSR fail-open false), `useIdleState` (4-listener cluster: pointermove/keydown/wheel/touchstart), `useViewTransitionsSupport` (one-shot feature detect), `useLanguage` (wraps useTranslation; `gowork.locale` + legacy `montgowork-locale` dual write).
+
+**Wave 3 (audio system, T1.56–T1.59):** `frontend/src/lib/wall/sound.ts` Howler singleton with lazy import (Howler not in main bundle until first unmuted play); default-muted; `play/stop/setMuted/isMuted/setVolume/getVolume/unlock`; localStorage `gowork.muted` persistence; `unlock()` resumes suspended AudioContext exactly once (T1.58). `frontend/public/sounds/` scaffolded with 5 silent 104-byte placeholder MP3s + README documenting replacement contract (≤50KB, 44.1kHz mono, CC0 license).
+
+**Wave 4 (cursor system, T1.60–T1.62):** `CursorTrail` (8px cyan dot, position fixed, pointer-events none, returns null on touch + reduced-motion); `CursorFlashlight` (80px radial gradient, sets `--flashlight-x` and `--flashlight-y` CSS vars; uniform-bright fallback for touch/reduced-motion). T1.62 reduced-motion paths verified by tests.
+
+**Wave 5 (types + barrels, T1.67–T1.69):** `lib/wall/types.ts` (TimePhase, AccentShift, ChapterId 1..10, ChapterState, MapboxLayer, CameraState, SoundId, LocaleCode, BarrierType, BarrierGraphNode, RumSessionId branded type — 10 vitest expectTypeOf cases). `lib/wall/index.ts` re-exports env + types + sound (tokens.ts deferred to Driver A merge). `hooks/index.ts` re-exports all 10 W1 hooks + legacy useTranslation/useCityConfig/TranslationProvider. Barrel tests verify every public symbol resolves.
+
+**Wave 7 (enrichment, P1 priorities):** `useBatteryAware` (T1.98 — getBattery API, levelchange + chargingchange listeners, isLow at <20% AND not charging), `useDeviceCapability` (T1.75 — tier=low/medium/high from deviceMemory + hardwareConcurrency + saveData, WebGL probe cached at module level), `usePerformanceBudget` (T1.73 — PerformanceObserver longtask + heap + dropped-frames; isUnderPressure thresholds; spotlight invention 1), `lib/error-reporter.ts` (T1.117 — singleton report() with PII scrub: `<EMAIL>` for matching values + `/Users/<USER>` and `C:\Users\<USER>` for stack traces; dev console / prod fetch with silent failure), `SectionErrorBoundary` (T1.115 — class boundary with retry button, custom fallback prop, default branded fallback when Driver C's ErrorState not yet merged), `lib/wall/network.ts` (T1.99 — `getNetworkProfile()` from `navigator.connection`; effectiveType normalized to `2g|3g|4g|unknown`; `isSaveDataOn` and `isSlowConnection` helpers), `lib/analytics/session-id.ts` (T1.81 — async `getSessionId()` SHA-256 hash of UA + screen + nonce; sessionStorage key `gowork.rum.sid`; non-crypto FNV fallback when subtle.digest unavailable; `'ssr'` literal during server render), `useMemoryProfiler` (T1.128 — dev-only sampler, no-op in production, tracks usedMb + peakMb).
+
+**Tests:** 151 Driver-B vitest cases across 26 files, all green. Full project suite: 1288/1290 pass — the 2 failures are pre-existing flake in `CareerCenterExport.test.tsx` (unrelated to Driver B).
+
+**Arch check:** `bpsai-pair arch check` clean across `frontend/src/hooks/`, `frontend/src/lib/wall/`, `frontend/src/lib/analytics/`, `frontend/src/components/wall/`, and `frontend/src/lib/error-reporter.ts`. No source file >200 lines; no function >50; no file >15 functions or >20 imports.
+
+**Spotlight inventions (≥3 required):**
+1. `usePerformanceBudget` — live RUM canary feeding W2/W3 their own perf budget, beyond the brief's CI-only Lighthouse gate.
+2. `useDeviceCapability` — tier classification beyond `window.innerWidth`; the brief's mobile fallback would have shipped a Three.js scene to a 2GB Android.
+3. `useBatteryAware` — animations off path for the demo viewer at 18% battery; brief never named this surface.
+4. PII-scrubbing error reporter — `<EMAIL>` + `<USER>` regex defenses mean the production logs are demo-day-safe even if a future hook accidentally passes through user data.
+5. Async SHA-256 session id — privacy-safe RUM correlation without cookies, with a graceful non-crypto fallback so jsdom tests + older browsers still work.
+6. `useMemoryProfiler` — dev-only memory sampler that's tree-shaken from prod via `NODE_ENV` guard; gives Driver agents in W2/W3 a real-time signal during heavy build sessions.
+7. Lazy Howler import — Howler.js never enters the main bundle until the first unmuted play; the default-muted contract means most users never download it.
+
+**Cross-driver coordination:**
+- `lib/wall/index.ts` does NOT yet re-export from `./tokens` (Driver A's lane); a one-line addition at merge time will close the gap. Documented inline.
+- `SectionErrorBoundary` ships with a default branded fallback so it compiles standalone; Driver C's `ErrorState` (T1.44) can be passed in via the `fallback` prop after merge.
+- `useCursorPosition` + `CursorTrail` + `CursorFlashlight` standardized on `navigator.maxTouchPoints > 0` for touch detection (jsdom has `'ontouchstart' in window` truthy by default — using it as the sole signal would break tests + downstream consumers on hybrid laptops).
+- localStorage keys: `gowork.locale` + legacy `montgowork-locale` (both written by `useLanguage.setLocale`); `gowork.muted` (sound module); `gowork.rum.sid` (sessionStorage, RUM session id). All keys namespaced for the GoWork rebrand.
+
+**Honest uncertainty (C4/C5):**
+- C4: Battery API is dropping in Firefox; iOS Safari has never supported it. `useBatteryAware` correctly returns `null` + `isLow=false` on those browsers but consumers must check `level !== null` before showing battery-specific UI.
+- C4: `performance.memory` is Chrome-only; `usePerformanceBudget` reports `jsHeapUsedMb=0` on Safari/Firefox — long-task data still works but isUnderPressure may underfire if heap is the bottleneck.
+- C4: `useViewTransitionsSupport` reads `document.startViewTransition` once on mount — accurate today (April 2026) but the API surface has been moving. W3 chapter-10 transition fallback path must be tested in browser, not jsdom.
+- C5: vitest 4 default `pool: 'forks'` ran out of memory when the framer-motion mock returned a fresh object on every render — fixed by hoisting the mock to a stable singleton. Without that fix, the worker exits with a heap allocation failure rather than a test assertion.
+- C3: Howler `iOS` audio-context-resume is genuinely flaky on real devices; the `unlock()` API surface is correct but real hardware testing is W2 work.
+
+**Memory profile:** No leaks observed. Cleanup discipline tested for all hooks: every `addEventListener` has a matching `removeEventListener` in the cleanup; every `setInterval` is cleared; every rAF id is canceled.
+
+**Cross-driver concerns / merge notes:**
+- I installed `howler` + `@types/howler` with `--no-save` so my standalone vitest works. Driver A's package.json install will be the merge winner; my package-lock.json change was reverted.
+- W2 will need to add Driver A's `tokens.ts` re-export to my `lib/wall/index.ts` at merge time (single line: `export * from "./tokens"`).
+- All file ownership respected — no edits to globals.css, layout.tsx, Header/Footer, edge-state components, or translation jsons. Coordination only via the `gowork.locale` localStorage key dual-write contract for Driver C's LanguageToggle.
+
 ### 2026-04-27 — Sprint W1 backlog drafted (foundation + brand + edge states)
 
 Authored `plans/backlogs/sprint-w1-foundation.md`: 68 tasks, 582 Cx, 17 phases (visual; engage parser collapses to 1 phase but priority order preserved via `Depends on:` DAG). P0/P1/P2 split: 51/14/3. Critical path: T1.1 install + T1.7 globals.css split (Wave 1, parallel) → infra installs + CSS imports + Mapbox token validator (Wave 2) → tokens (color/type/motion) + 10 utility hooks + types (Wave 3, parallel) → brand mark + edge states + header/footer + audio + cursor + a11y + barrels + Spotlight (Wave 4, max parallel) → arch sweep + vitest gate (Wave 5). Spotlight inventions beyond the brief: T1.73 `usePerformanceBudget` (telemetry canary for W2/W3 perf gate); T1.74 Mapbox-token-missing branded fallback (first-impression rescue when judges clone without env setup); T1.75 `useDeviceCapability` (low-end Android tier detection beyond window.innerWidth); T1.76 dev-only `/tokens` gallery route (Storybook substitute, 10x cheaper review surface); T1.77 legacy M-shape retirement audit script + state.md note (explicit retirement receipt). Honest uncertainty section called out: C4 next/font opsz axis stability, C4 Lightning CSS @import ordering, C4 color-mix() Safari fallback, C4 @vercel/og Next 15 runtime, C5 dev-only route bundle isolation, C3 Mapbox style URL, C2 Spanish translation tone, C3 Howler iOS audio unlock. Dependency graph verified: 0 missing references, 0 cycles. Dry-run validation passes: `bpsai-pair engage plans/backlogs/sprint-w1-foundation.md --dry-run` parses 68 tasks cleanly. Foundation file collision matrix flags 17 file-level collisions, all resolved via serialization or single-rewrite ownership. Brand retirement of legacy M-shape `icon.svg` is explicit (T1.34 replaces; T1.77 audits).
