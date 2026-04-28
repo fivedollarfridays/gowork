@@ -22,6 +22,8 @@ import type { ChapterId } from "./types";
 /** W2 ships chapters 1–5; W3 extends with 6–10. Sub-chapters 4a/4b/4c/4d
  *  share Chapter 4's camera state (bearing tilts handled at runtime). */
 export type W2ChapterId = Extract<ChapterId, 1 | 2 | 3 | 4 | 5>;
+/** Chapters added by W3 dispatch (Drivers A: 6,9; B: 7,8; C: 10). */
+export type W3ChapterId = Extract<ChapterId, 6 | 7 | 8 | 9 | 10>;
 export type { ChapterId };
 
 /** Mapbox camera + flyTo options. Mirrors mapbox-gl `CameraOptions`. */
@@ -62,13 +64,18 @@ export const INITIAL_CAMERA: ChapterCameraState = {
 };
 
 /**
- * Per-chapter camera states for W2 (1–5). W3 will extend this object.
+ * Per-chapter camera states for W2 (1–5). W3 extends this object with
+ * 6–10 across multiple drivers (A: 6, 9; B: 7, 8; C: 10). Type is a
+ * Partial-Record so each driver can extend its own indices without
+ * coupling to the others' lanes; runtime asserts presence per use-site.
  *
  * Coordinates verified within Tarrant County bounding box (lng -97.6 to
  * -97.0, lat 32.5 to 33.0) for chapters 2–5; chapter 1 is continental
- * (centered ~ -98, 39 — north-central US).
+ * (centered ~ -98, 39 — north-central US). Chapter 10 returns to the
+ * Fort Worth overhead frame to mirror the opening "we've returned home"
+ * narrative beat.
  */
-export const CHAPTER_CAMERAS: Readonly<Record<W2ChapterId, ChapterCameraState>> = {
+export const CHAPTER_CAMERAS: Readonly<Partial<Record<ChapterId, ChapterCameraState>>> & Record<W2ChapterId | 10, ChapterCameraState> = {
   // Ch1 — Continental top-down America. Centered roughly Kansas; W1 city
   // lights layer (T2.20) makes FW + Montgomery glow brighter than other
   // metros so the eye is led down to Fort Worth in Ch2.
@@ -124,6 +131,20 @@ export const CHAPTER_CAMERAS: Readonly<Record<W2ChapterId, ChapterCameraState>> 
     bearing: 0,
     flyToOptions: { curve: 1.2, speed: 1.0, easing: EASE_LINEAR_SIG },
   },
+  // Ch10 — Find Your Path. Camera returns to Fort Worth at zoom 11,
+  // pitch 0 (top-down), bearing 0 (north-up). The "we've returned home"
+  // framing — same lng/lat as INITIAL_CAMERA so the cinematic dolly
+  // ends where it started, ready for the View Transitions handoff into
+  // /assess. Slightly slower flyTo (speed 0.85) so the final beat feels
+  // like a cinematic settle, not a race.
+  10: {
+    longitude: -97.3308,
+    latitude: 32.7555,
+    zoom: 11,
+    pitch: 0,
+    bearing: 0,
+    flyToOptions: { curve: 1.2, speed: 0.85, easing: EASE_LINEAR_SIG },
+  },
 };
 
 /**
@@ -144,4 +165,7 @@ export const TRANSITION_SPEEDS: Readonly<Record<string, number>> = {
   "4a->4b": 0.6, // Sub-chapter bearing pivots are short and snappy.
   "4b->4c": 0.6,
   "4c->4d": 0.6,
+  // W3: Driver C owns 9->10 (final beat — settle into FW overhead).
+  // Drivers A+B own 5->6, 6->7, 7->8, 8->9 in their respective lanes.
+  "9->10": 0.85,
 };

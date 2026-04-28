@@ -15,6 +15,14 @@ vi.mock("../MapboxScene", () => ({
   default: () => React.createElement("div", { "data-testid": "mapbox-scene-stub" }),
 }));
 
+// W3 Driver C — Chapter 10's "Start your assessment" CTA reaches
+// `useRouter`. WallContainer composition tests don't mount a Next.js
+// app router, so stub it out the same way `Chapter10FindYourPath.test`
+// does.
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn() }),
+}));
+
 // Driver B chapters reach `useTranslation`. Driver C chapters reach the
 // `lib/i18n` singleton directly. Both need to resolve to deterministic
 // strings without a TranslationProvider in this composition test.

@@ -20,6 +20,23 @@ exports[`T2.4 + T2.7 — regression-guard snapshot of camera coords > coordinate
       "pitch": 0,
       "zoom": 3,
     },
+    "10": {
+      "bearing": 0,
+      "flyToOptions": {
+        "curve": 1.2,
+        "easing": [
+          0.32,
+          0.72,
+          0,
+          1,
+        ],
+        "speed": 0.85,
+      },
+      "latitude": 32.7555,
+      "longitude": -97.3308,
+      "pitch": 0,
+      "zoom": 11,
+    },
     "2": {
       "bearing": 0,
       "flyToOptions": {
