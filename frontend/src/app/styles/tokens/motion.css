@@ -1,0 +1,7 @@
+/* W1 motion tokens — populated by T1.19 (spring presets), T1.20 (easing+duration),
+ * T1.21 (stagger timing), T1.22 (prefers-reduced-motion disable), T1.23 (idle pulse).
+ *
+ * CSS-side mirrors of TS exports in frontend/src/lib/wall/tokens.ts.
+ * No magic numbers in animation utilities — every duration/stiffness/damping
+ * value resolves through a token here.
+ */

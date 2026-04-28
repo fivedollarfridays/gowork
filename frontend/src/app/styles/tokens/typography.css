@@ -1,0 +1,8 @@
+/* W1 typography tokens — populated by T1.15 (Inter Variable + opsz),
+ * T1.16 (fluid type scale), T1.17 (tabular nums), T1.102 (axis tokens),
+ * T1.103 (drop cap).
+ *
+ * Tokens here drive font-variation-settings, fluid clamp() type scale,
+ * and editorial typography (drop caps, pull quotes). Consumed by W4's
+ * useVariableFontWeight hook for scroll-driven weight axis interpolation.
+ */
