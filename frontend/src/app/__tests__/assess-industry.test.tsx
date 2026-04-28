@@ -18,6 +18,17 @@ vi.mock("@/lib/resume", () => ({
   extractResumeText: vi.fn(),
 }));
 
+// Mock useCityConfig — see assess-schedule.test.tsx for rationale.
+vi.mock("@/hooks/useCityConfig", () => ({
+  useCityConfig: () => ({
+    name: "Montgomery",
+    state: "AL",
+    location: "Montgomery, AL",
+    zip_ranges: ["36101-36199"],
+    loading: false,
+  }),
+}));
+
 // Skip framer-motion animations to prevent timeouts during multi-step navigation
 vi.mock("framer-motion", async () => {
   const actual = await vi.importActual("framer-motion");

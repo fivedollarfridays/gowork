@@ -18,6 +18,20 @@ vi.mock("@/lib/resume", () => ({
   extractResumeText: vi.fn(),
 }));
 
+// Mock useCityConfig — without a backend the hook hangs on a 10s fetch
+// AbortController timeout, then falls back to Fort Worth (TX). That makes
+// Montgomery ZIPs (36xxx, used by these legacy tests) fail validation in
+// CI. Default to Montgomery for these wizard tests.
+vi.mock("@/hooks/useCityConfig", () => ({
+  useCityConfig: () => ({
+    name: "Montgomery",
+    state: "AL",
+    location: "Montgomery, AL",
+    zip_ranges: ["36101-36199"],
+    loading: false,
+  }),
+}));
+
 // Skip framer-motion animations to prevent timeouts during multi-step navigation
 vi.mock("framer-motion", async () => {
   const actual = await vi.importActual("framer-motion");

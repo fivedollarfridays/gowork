@@ -21,6 +21,17 @@ vi.mock("@/lib/resume", () => ({
   extractResumeText: vi.fn(),
 }));
 
+// Mock useCityConfig — see assess-schedule.test.tsx for rationale.
+vi.mock("@/hooks/useCityConfig", () => ({
+  useCityConfig: () => ({
+    name: "Montgomery",
+    state: "AL",
+    location: "Montgomery, AL",
+    zip_ranges: ["36101-36199"],
+    loading: false,
+  }),
+}));
+
 function renderWithClient(ui: React.ReactElement) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },

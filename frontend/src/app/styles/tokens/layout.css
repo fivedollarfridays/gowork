@@ -1,0 +1,139 @@
+/* W1 layout tokens + base utilities — preserved from globals.css (T1.7),
+ * extended by T1.65 (focus rings + selection), T1.106 (branded scrollbar),
+ * T1.107 (brand mark hover path-draw).
+ *
+ * @layer utilities holds composable utility classes; @layer base holds the
+ * universal selector resets that previously lived in globals.css.
+ */
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    transition: background-color 150ms ease-in-out, border-color 150ms ease-in-out, color 150ms ease-in-out;
+  }
+  html, body {
+    overscroll-behavior: none;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* ─── T1.65 — Focus rings + text selection ───────────────────────────────────
+ * 2px cyan focus outline with animated entry (outline-offset 0 → 2px) so
+ * keyboard users get a clear "here you are" signal that doesn't feel jarring.
+ * Reduced-motion users get the static offset thanks to the universal
+ * transition-duration override in motion.css (T1.22).
+ *
+ * ::selection tints the highlight with a 40%-mixed cyan glass — the brand
+ * accent shows even in selected-text states. WCAG: cyan-on-base ≥3:1
+ * (verified by T1.13 contrast script).
+ */
+*:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+  transition: outline-offset 150ms var(--ease-linear-sig);
+}
+
+::selection {
+  background-color: color-mix(in oklch, var(--accent-cyan), transparent 60%);
+  color: var(--fg-primary);
+}
+
+::-moz-selection {
+  background-color: color-mix(in oklch, var(--accent-cyan), transparent 60%);
+  color: var(--fg-primary);
+}
+
+/* ─── T1.106 — Branded scrollbar ─────────────────────────────────────────────
+ * Default OS scrollbar shouts "this is a webpage." Brand-tinted track + a
+ * cyan-mixed thumb carries identity into the chrome. Webkit covers Chrome /
+ * Safari / Edge; scrollbar-color + scrollbar-width cover Firefox. Older
+ * browsers ignore both branches without error.
+ */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in oklch, var(--accent-cyan), var(--bg-elevated) 60%);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-cyan);
+}
+
+html {
+  scrollbar-color: var(--accent-cyan) var(--bg-surface);
+  scrollbar-width: thin;
+}
+
+/* ─── Wave-2 — Z-stack hierarchy tokens ──────────────────────────────────────
+ * One source of truth for stacking-order across overlays. Discovered during
+ * W1 maximization that two overlays (CookieBanner + PWAInstallPrompt) shipped
+ * at literal `z-[55]` and would collide whenever both surfaced (a reduced-
+ * motion + first-visit + Chromium user). This token system sets the canonical
+ * order; consumers use `var(--z-*)` (or Tailwind's `z-[var(...)]` arbitrary
+ * value) instead of literal numbers.
+ *
+ *   --z-skip-link:        100 — keyboard users land here first; never occluded
+ *   --z-modal:             80 — modal dialogs (W2/W3 reserved)
+ *   --z-toast:             70 — transient announcements
+ *   --z-header:            50 — sticky header chrome
+ *   --z-banner:            40 — stall-alert banner UNDER header chrome
+ *   --z-pwa-prompt:        30 — install prompt
+ *   --z-cookie:            30 — cookie disclosure (sibling layer to PWA)
+ *   --z-cursor-flashlight:  5 — overlay above content, below chrome
+ *   --z-content:            1 — default page content
+ *
+ * Hierarchy intent: keyboard a11y > modal > toast > chrome > banner > prompts
+ *                   > cursor effects > content. Never invert without arch
+ *                   review.
+ */
+:root {
+  --z-skip-link: 100;
+  --z-modal: 80;
+  --z-toast: 70;
+  --z-header: 50;
+  --z-banner: 40;
+  --z-pwa-prompt: 30;
+  --z-cookie: 30;
+  --z-cursor-flashlight: 5;
+  --z-content: 1;
+}
+
+/* ─── Wave-2 — Skip-to-content link (z-skip-link consumer) ───────────────────
+ * Visible-on-focus, NEVER visually-hidden. Per visual-rebirth-plan.md "Skip
+ * link is proudly visible on focus, not a screen-reader-only hack." Lifts to
+ * `--z-skip-link` (100) so it cannot be occluded by any chrome/banner.
+ */
+.skip-to-content {
+  position: fixed;
+  top: -100px;
+  left: 1rem;
+  z-index: var(--z-skip-link, 100);
+  padding: 0.5rem 1rem;
+  background: var(--accent-cyan);
+  color: var(--bg-base);
+  border-radius: 6px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: top 150ms var(--ease-linear-sig, ease-in-out);
+}
+
+.skip-to-content:focus {
+  top: 1rem;
+  outline: none;
+}

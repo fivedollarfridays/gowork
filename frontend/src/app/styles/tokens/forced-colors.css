@@ -1,0 +1,54 @@
+/* T1.96 — Forced Colors Mode (Windows High Contrast Mode) adaptations.
+ *
+ * ~3% of users have HCM enabled (often by accessibility necessity). Without
+ * mapping our brand tokens to system colors, they see broken / invisible
+ * brand mark and unreadable accent text. This partial maps the
+ * brand-critical tokens to the corresponding system color keywords so HCM
+ * still renders the Wall as functional civic infrastructure.
+ *
+ * System color reference (CSS Color Module 4):
+ *   Canvas      — page background
+ *   CanvasText  — primary foreground
+ *   LinkText    — link / interactive accent
+ *   VisitedText — visited link
+ *   Mark        — emphasis / warning highlight
+ *   Highlight   — selection / focus
+ *
+ * CONFIDENCE: C2 — system color names are stable across Edge/Firefox/Chromium.
+ * Manual smoke required on Windows + Edge with HCM enabled.
+ */
+
+@media (forced-colors: active) {
+  :root {
+    --bg-base: Canvas;
+    --bg-surface: Canvas;
+    --bg-elevated: Canvas;
+    --bg-glass: Canvas;
+    --fg-primary: CanvasText;
+    --fg-secondary: CanvasText;
+    --fg-muted: GrayText;
+
+    --accent-cyan: LinkText;
+    --accent-amber: Mark;
+    --accent-rose: Mark;
+    --accent-current: LinkText;
+
+    --status-positive: LinkText;
+    --status-warning: Mark;
+    --status-negative: Mark;
+  }
+
+  /* Brand mark: ensure SVG strokes use CanvasText so the G + path-line
+   * remain visible regardless of currentColor inheritance. */
+  svg [stroke="currentColor"],
+  svg [fill="currentColor"] {
+    stroke: CanvasText;
+    fill: CanvasText;
+  }
+
+  /* Focus ring: Highlight is the system "this is selected" color. */
+  *:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+}
