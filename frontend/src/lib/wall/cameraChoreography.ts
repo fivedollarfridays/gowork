@@ -22,7 +22,7 @@ import type { ChapterId } from "./types";
 /** W2 ships chapters 1–5; W3 extends with 6–10. Sub-chapters 4a/4b/4c/4d
  *  share Chapter 4's camera state (bearing tilts handled at runtime). */
 export type W2ChapterId = Extract<ChapterId, 1 | 2 | 3 | 4 | 5>;
-/** Chapters added by W3 dispatch (Drivers A: 6,9; B: 7,8; C: 10). */
+/** W3 chapter ids — Drivers A (6, 9), B (7, 8), C (10) extend CHAPTER_CAMERAS. */
 export type W3ChapterId = Extract<ChapterId, 6 | 7 | 8 | 9 | 10>;
 export type { ChapterId };
 
@@ -79,7 +79,8 @@ export const INITIAL_CAMERA: ChapterCameraState = {
  * Transitions hand-off into /assess.
  */
 export const CHAPTER_CAMERAS: Readonly<
-  Partial<Record<ChapterId, ChapterCameraState>>
+  Partial<Record<ChapterId, ChapterCameraState>> &
+    Record<W2ChapterId, ChapterCameraState>
 > = {
   // Ch1 — Continental top-down America. Centered roughly Kansas; W1 city
   // lights layer (T2.20) makes FW + Montgomery glow brighter than other
@@ -149,6 +150,32 @@ export const CHAPTER_CAMERAS: Readonly<
     pitch: 50,
     bearing: 0,
     flyToOptions: { curve: 1.2, speed: 1.0, easing: EASE_LINEAR_SIG },
+  },
+  // Ch7 — The Path (W3 Driver B). Pulls to neighborhood altitude (zoom 13)
+  // with a strong tilt (pitch 60) and a bearing angled east (25°) so the
+  // camera "looks along" Carlos's path from Berry St toward downtown.
+  // Centered at the midpoint of the 5-waypoint polyline so the avatar
+  // stays visible across the full walk without re-flying.
+  7: {
+    longitude: -97.3221,
+    latitude: 32.7344,
+    zoom: 13,
+    pitch: 60,
+    bearing: 25,
+    flyToOptions: { curve: 1.2, speed: 1.0, easing: EASE_LINEAR_SIG },
+  },
+  // Ch8 — The 3D Barrier Graph (W3 Driver B). Pitch 70 is the dramatic
+  // tilt that lets the constellation feel like it floats above downtown.
+  // Bearing 0 (north-up) so judges read the graph orthogonally; the
+  // breathing motion of the constellation does the dynamism, the camera
+  // doesn't have to.
+  8: {
+    longitude: -97.3308,
+    latitude: 32.7555,
+    zoom: 12,
+    pitch: 70,
+    bearing: 0,
+    flyToOptions: { curve: 1.2, speed: 1.1, easing: EASE_LINEAR_SIG },
   },
   // Ch9 — Any City. Returns to the continental top-down America view (zoom
   // 3.5, pitch 0) so two cities (Fort Worth + Montgomery) glow as lit dots
