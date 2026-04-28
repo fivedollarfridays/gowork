@@ -101,6 +101,37 @@ describe("localToGlobal — round-trip", () => {
   });
 });
 
+describe("wallProgress — W3 Ch7 + Ch8 bounds (Driver B extension)", () => {
+  it("Ch7 spans global progress 0.6 .. 0.7", () => {
+    const b = chapterBoundsFor(7);
+    expect(b.start).toBeCloseTo(0.6, 9);
+    expect(b.end).toBeCloseTo(0.7, 9);
+  });
+
+  it("Ch8 spans global progress 0.7 .. 0.8", () => {
+    const b = chapterBoundsFor(8);
+    expect(b.start).toBeCloseTo(0.7, 9);
+    expect(b.end).toBeCloseTo(0.8, 9);
+  });
+
+  it("Ch7 mid global progress (0.65) maps to local 0.5", () => {
+    expect(globalToLocal(0.65, 7)).toBeCloseTo(0.5, 9);
+  });
+
+  it("Ch8 start global progress (0.7) maps to local 0", () => {
+    expect(globalToLocal(0.7, 8)).toBeCloseTo(0, 9);
+  });
+
+  it("Ch7 end belongs to Ch8 (exclusive boundary, slight epsilon)", () => {
+    // Floating-point note: 7 * 0.1 = 0.7000000000000001, so 0.7 itself is
+    // technically *below* Ch7's end. We assert with a value strictly above
+    // Ch7's computed end to validate the exclusive-end contract.
+    const aboveCh7End = chapterBoundsFor(7).end + 1e-9;
+    expect(isChapterActive(aboveCh7End, 7)).toBe(false);
+    expect(isChapterActive(aboveCh7End, 8)).toBe(true);
+  });
+});
+
 describe("isChapterActive", () => {
   it("returns true when global progress is inside the chapter range", () => {
     expect(isChapterActive(0.05, 1)).toBe(true);

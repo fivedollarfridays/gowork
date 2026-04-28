@@ -22,6 +22,8 @@ import type { ChapterId } from "./types";
 /** W2 ships chapters 1–5; W3 extends with 6–10. Sub-chapters 4a/4b/4c/4d
  *  share Chapter 4's camera state (bearing tilts handled at runtime). */
 export type W2ChapterId = Extract<ChapterId, 1 | 2 | 3 | 4 | 5>;
+/** W3 chapter ids — Drivers A/B/C extend `CHAPTER_CAMERAS` for 6..10. */
+export type W3ChapterId = Extract<ChapterId, 6 | 7 | 8 | 9 | 10>;
 export type { ChapterId };
 
 /** Mapbox camera + flyTo options. Mirrors mapbox-gl `CameraOptions`. */
@@ -68,7 +70,10 @@ export const INITIAL_CAMERA: ChapterCameraState = {
  * -97.0, lat 32.5 to 33.0) for chapters 2–5; chapter 1 is continental
  * (centered ~ -98, 39 — north-central US).
  */
-export const CHAPTER_CAMERAS: Readonly<Record<W2ChapterId, ChapterCameraState>> = {
+export const CHAPTER_CAMERAS: Readonly<
+  Partial<Record<ChapterId, ChapterCameraState>> &
+    Record<W2ChapterId, ChapterCameraState>
+> = {
   // Ch1 — Continental top-down America. Centered roughly Kansas; W1 city
   // lights layer (T2.20) makes FW + Montgomery glow brighter than other
   // metros so the eye is led down to Fort Worth in Ch2.
@@ -123,6 +128,32 @@ export const CHAPTER_CAMERAS: Readonly<Record<W2ChapterId, ChapterCameraState>> 
     pitch: 30,
     bearing: 0,
     flyToOptions: { curve: 1.2, speed: 1.0, easing: EASE_LINEAR_SIG },
+  },
+  // Ch7 — The Path (W3 Driver B). Pulls to neighborhood altitude (zoom 13)
+  // with a strong tilt (pitch 60) and a bearing angled east (25°) so the
+  // camera "looks along" Carlos's path from Berry St toward downtown.
+  // Centered at the midpoint of the 5-waypoint polyline so the avatar
+  // stays visible across the full walk without re-flying.
+  7: {
+    longitude: -97.3221,
+    latitude: 32.7344,
+    zoom: 13,
+    pitch: 60,
+    bearing: 25,
+    flyToOptions: { curve: 1.2, speed: 1.0, easing: EASE_LINEAR_SIG },
+  },
+  // Ch8 — The 3D Barrier Graph (W3 Driver B). Pitch 70 is the dramatic
+  // tilt that lets the constellation feel like it floats above downtown.
+  // Bearing 0 (north-up) so judges read the graph orthogonally; the
+  // breathing motion of the constellation does the dynamism, the camera
+  // doesn't have to.
+  8: {
+    longitude: -97.3308,
+    latitude: 32.7555,
+    zoom: 12,
+    pitch: 70,
+    bearing: 0,
+    flyToOptions: { curve: 1.2, speed: 1.1, easing: EASE_LINEAR_SIG },
   },
 };
 

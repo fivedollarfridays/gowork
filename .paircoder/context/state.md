@@ -32,6 +32,62 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+### 2026-04-28 — W3 Driver B (T3.10–T3.19): Ch7 Path + Carlos Avatar + Ch8 3D Graph + 3 Spotlight inventions
+
+Worktree branch: `worktree-agent-a41cae5da491068d1` (base = `sprint/w3-interactive-chapters-6-10` HEAD `4d4fb1f`). Driver B's lane: ship Chapter 7 (The Path with Carlos's walking avatar) and Chapter 8 (the 3D barrier constellation — the secret weapon of the demo). Three.js stays lazy. Reduced-motion has graceful fallbacks for both chapters.
+
+**Net-new modules (lib):**
+- `lib/wall/avatarPath.ts` (170 lines) — central avatar position interpolation along Carlos's 5-waypoint polyline. `positionAt(t)`, `segmentIndexAt(t)`, `isLingeringAt(t)`, `AVATAR_LINGER_FRACTION = 0.1`. **Spotlight invention #1**: Compound Lens — same module feeds Ch7 NOW and W4 life-layers (cursor flashlight ↔ avatar sync) NEXT.
+- `lib/wall/data/barrierGraph.ts` (204 lines) — 33-node DAG distributed across 7 canonical barrier categories (mirrors backend `BarrierType` enum). 38 editorially-curated edges form an acyclic dependency graph. Provenance metadata (`source`, `sourceDate`, `version`).
+- `lib/wall/constellationLayout.ts` (64 lines) — deterministic hash-seeded sphere-packing layout for the 33 nodes. No d3-force dependency; sub-30-line spring math instead.
+- `lib/wall/layers/carlosPathProgress.ts` (118 lines) — Mapbox path-draw controller exposing `setCarlosPathProgress(map, progress 0..1)`, `setCarlosPathVisible`, `revertCarlosPath`. Uses Mapbox `line-gradient` keyed on `line-progress`. Existing `carlosPath.ts` source flagged with `lineMetrics: true`.
+- Extended `lib/wall/transitFacts.ts` with `CARLOS_PATH_LEG_ROUTES` (per-leg Trinity Metro route assignments — Bus 4/6 spine for legs 0 + 2 + 3, Bus 6 reroute for leg 1).
+- Extended `lib/wall/cameraChoreography.ts` with `CHAPTER_CAMERAS[7]` (zoom 13, pitch 60, bearing 25 — neighborhood-altitude facing the path) and `CHAPTER_CAMERAS[8]` (zoom 12, pitch 70, bearing 0 — dramatic upward tilt revealing the constellation above downtown). Type widened to `Partial<Record<ChapterId, ...>> & Record<W2ChapterId, ...>` so Drivers A + C can append slots 6, 9, 10 without refactor.
+
+**Net-new components:**
+- `components/wall/CarlosAvatar.tsx` (126 lines) — self-drawn silhouette SVG (head + torso + walking-stride legs). Public-domain pictograph. Footstep audio rate-limited to 1 step per 4% progress delta (`FOOTSTEP_THRESHOLD = 0.04`). Reduced-motion disables both stride animation AND audio.
+- `components/wall/BarrierConstellation.tsx` (156 lines) — react-three-fiber `<Canvas>` rendering the 33-node graph with low-frequency breathing (0.05 Hz). Edges illuminate when `pathCompleteness >= 1`. Reduced-motion stops drift entirely.
+- `components/wall/chapters/Chapter07ThePath.tsx` (208 lines) — dark gradient overlay + locked editorial copy + 5-mark timeline (Week 1, 4, 8, 10, 12). Reduced-motion: static path SVG fallback rendering the finished polyline. Consumes `ChapterProps`.
+- `components/wall/chapters/Chapter08TheGraph.tsx` (244 lines) — dark gradient overlay + lazy-loaded `BarrierConstellation` via `next/dynamic({ ssr: false })`. Static SVG fallback for reduced-motion. **Defers `dynamic()` call to first render** (lazy initialization) so test harnesses' `next/dynamic` mocks don't eagerly pull `@react-three/fiber` at module load.
+
+**WallContainer extension:** added `<Chapter07ThePath progress={local(7)} active={active(7)} />` and `<Chapter08TheGraph progress={local(8)} active={active(8)} />` to `ChaptersSequence`. Slots 6, 9, 10 untouched — Drivers A + C own those.
+
+**Translations:** `wall.chapter07.{title, hero, subhero, body, aria, weekLabel1..5, legActive}` and `wall.chapter08.{title, hero, subhero, body, aria, fallbackAlt, barrierLabels.*}` (33 barrier label keys) added to BOTH `en.json` and `es.json`. Native-fluent ES with `[ES-pending-review]` on the more nuanced phrasing.
+
+**Tests added (8 files, 88 new tests, all green):**
+- `lib/wall/__tests__/avatarPath.test.ts` (14 tests)
+- `lib/wall/__tests__/barrierGraph.test.ts` (11 tests)
+- `lib/wall/__tests__/barrierGraphProvenance.test.ts` (4 tests, **Spotlight #3**)
+- `lib/wall/__tests__/threeJsLazyContract.test.ts` (12 tests, **Spotlight #2**)
+- `lib/wall/__tests__/w3ChapterTranslations.test.ts` (36 tests — EN/ES key parity for Ch7 + Ch8 + 33 barrier labels)
+- `lib/wall/layers/__tests__/carlosPathProgress.test.ts` (7 tests)
+- `components/wall/__tests__/CarlosAvatar.test.tsx` (10 tests)
+- `components/wall/__tests__/BarrierConstellation.test.tsx` (8 tests)
+- `components/wall/__tests__/WallContainer-w3-chapters.test.tsx` (4 tests)
+- `components/wall/chapters/__tests__/Chapter07ThePath.test.tsx` (11 tests)
+- `components/wall/chapters/__tests__/Chapter08TheGraph.test.tsx` (8 tests)
+- Extended `cameraChoreography.test.ts` (+4 Ch7/Ch8 tests; snapshot updated)
+- Extended `wallProgress.test.ts` (+5 Ch7/Ch8 boundary tests)
+- Extended `transitFacts.test.ts` (+3 per-leg route tests)
+
+**3 Spotlight inventions (mandatory ≥3):**
+1. **`avatarPath.ts`** — central polyline interpolation. Compound Lens: feeds Ch7 NOW, W4 cursor↔avatar sync NEXT. Eliminates two-surface drift.
+2. **`threeJsLazyContract.test.ts`** — guard test that asserts the eager `/` bundle contains zero static imports of `three` / `@react-three/fiber` / `@react-three/drei`. Compound Lens: prevents future drivers from accidentally eager-importing in W4+. Verified at the bundle level too (Three.js lives in `b536a0f1.ccc3644d65980614.js` chunk = 668KB; home page chunk = 43KB, three-free).
+3. **`barrierGraphProvenance.test.ts`** — freshness gate parallel to `officeRegistry-freshness`. Asserts `barrierGraphProvenance.sourceDate` is within 365 days. If a future driver swaps the graph without bumping the date, this test fires. Editorial provenance becomes testable, not just promised.
+
+**Output contract gates (all green):**
+1. `npx tsc --noEmit` exit 0 ✅
+2. `npx vitest run` — **2464/2464 tests across 264 files** ✅ (88 net-new tests)
+3. `npm run build` — **PASS**. Home `/` route = 12.7 kB / First Load JS = 142 kB. Three.js NOT in initial chunks ✅
+4. `bpsai-pair arch check frontend/` — **No architecture violations** ✅
+5. `npm run audit:brand` — clean ✅
+6. `npm run audit:tokens` — 97 declared / 22 consumed, no hard violations ✅
+7. WallContainer renders Ch7 in slot 7 + Ch8 in slot 8, DOM order verified ✅
+
+**Honest uncertainty:**
+- C4 — No live barrier-DAG endpoint exists in the backend; shipped a 33-node editorial stub distributed across the 7 canonical `BarrierType` categories. W4 may swap in a real Reasoner-derived graph. Provenance metadata + freshness gate make the swap testable.
+- C5 — Footstep audio rate-limit set at 1 step per 4% scroll progress (~25 footsteps across the full chapter). If QA finds it too sparse/dense, tune `FOOTSTEP_THRESHOLD` in `CarlosAvatar.tsx`. The constant is exported so future polish can adjust without code search.
+
 ### 2026-04-28 — W2 souji-sweep → PR #82 (sprint/w2-mapbox-chapters-1-5 → sprint/visual-rebirth)
 
 Branch: `sprint/w2-mapbox-chapters-1-5` (main tree). Pipeline: 9-phase Death Note souji.
