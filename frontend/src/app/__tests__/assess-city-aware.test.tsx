@@ -21,6 +21,19 @@ vi.mock("@/lib/resume", () => ({
   extractResumeText: vi.fn(),
 }));
 
+// Mock useCityConfig — top-level static mock (Montgomery AL). vi.doMock +
+// vi.resetModules was order-dependent in CI parallel runs; the static
+// mock matches the AL-only test scenarios reliably.
+vi.mock("@/hooks/useCityConfig", () => ({
+  useCityConfig: () => ({
+    name: "Montgomery",
+    state: "AL",
+    location: "Montgomery, AL",
+    zip_ranges: ["36101-36199"],
+    loading: false,
+  }),
+}));
+
 function renderWithClient(ui: React.ReactElement) {
   const qc = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -29,22 +42,7 @@ function renderWithClient(ui: React.ReactElement) {
 }
 
 describe("AssessPage city-aware ZIP validation", () => {
-  beforeEach(() => {
-    vi.resetModules();
-  });
-
   it("accepts Montgomery ZIP (36104) when city is AL", async () => {
-    // Default city is AL
-    vi.doMock("@/hooks/useCityConfig", () => ({
-      useCityConfig: () => ({
-        name: "Montgomery",
-        state: "AL",
-        location: "Montgomery, AL",
-        zip_ranges: ["36101-36199"],
-        loading: false,
-      }),
-    }));
-
     const user = userEvent.setup();
     renderWithClient(<AssessPage />);
 
@@ -56,16 +54,6 @@ describe("AssessPage city-aware ZIP validation", () => {
   });
 
   it("shows error for Fort Worth ZIP when city is AL", async () => {
-    vi.doMock("@/hooks/useCityConfig", () => ({
-      useCityConfig: () => ({
-        name: "Montgomery",
-        state: "AL",
-        location: "Montgomery, AL",
-        zip_ranges: ["36101-36199"],
-        loading: false,
-      }),
-    }));
-
     const user = userEvent.setup();
     renderWithClient(<AssessPage />);
 
