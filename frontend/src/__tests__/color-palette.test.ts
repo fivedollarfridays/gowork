@@ -25,8 +25,10 @@ function findSourceFiles(dir: string, ext: string[]): string[] {
   return results;
 }
 
-describe("Color palette tokens in globals.css", () => {
-  const css = readFile("src/app/globals.css");
+describe("Color palette tokens in tokens/colors.css", () => {
+  // Post-T1.7 split: legacy HSL tokens live in tokens/colors.css partial,
+  // imported by globals.css. Test still asserts the same tokens exist.
+  const css = readFile("src/app/styles/tokens/colors.css");
 
   it("defines --success variable in :root", () => {
     expect(css).toContain("--success:");
