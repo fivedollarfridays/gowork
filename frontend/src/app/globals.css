@@ -6,6 +6,14 @@
  * colors first (everything depends on bg/fg), then typography (text on bg),
  * then motion (animations of typed elements), then space (rhythm), then
  * layout (utilities + universal resets that consume all above).
+ *
+ * NOTE: Tailwind v3's PostCSS plugin processes each imported partial
+ * independently, so partials cannot use `@layer base` / `@layer utilities`
+ * (Tailwind's layer registration only applies to the file that declares
+ * `@tailwind base`). The partials therefore write rules at the global scope
+ * (no @layer wrapper). They still benefit from cascade order (this file's
+ * @tailwind directives come first) and tree-shaking (Tailwind compiles
+ * before they're inlined).
  */
 @import "./styles/tokens/colors.css";
 @import "./styles/tokens/typography.css";
