@@ -1,6 +1,6 @@
 # Current State
 
-> Last updated: 2026-04-28 (W4 Driver D — Maximization + Per-Chapter OG + 7 Spotlight inventions on `sprint/w4-life-layers` (main tree, no worktree). 3211 → 3428 vitest passing (+217 net new tests, exceeds +200 floor). All 7 gates green: tsc 0 errors, lint 0 errors (1 pre-existing W1 warning), arch clean, audit:brand clean, audit:tokens clean, build green at `/` First Load JS = 150 kB (+1 kB from baseline 149 kB; well under 200 kB), per-chapter `/api/og/[chapter]` + `/api/og/default` Edge routes shipped. Closed: Driver A's deferred hero-font-wiring (Ch1 now consumes `useHeroFontWeight(globalProgress)` 700→900) + tablet zoom (10 vs desktop 11). Print stylesheet extended to cover `section[data-chapter-id]` (every chapter now print-paginated). View Transitions polished. Scroll-velocity motion-blur + idle ambient drift wired non-destructively.
+> Last updated: 2026-04-28 (W5 Driver B — Demo overlay + video script + take plan + SRT + static OG fallback on `sprint/w5-submission` worktree branch `w5-driver-b/demo-video-script` at base `f18e8e8`. 96 net new tests across 9 files, all green. All 7 gates pass on Driver B's deliverables: `tsc --noEmit` exit 0, `vitest run` (Driver B scope) exit 0, `npm run build` exit 0 with `/api/og/[chapter]` + `/api/og/default` routes shipped, `bpsai-pair arch check frontend/` clean, `audit:brand` clean, `audit:tokens` clean. Three Spotlight inventions: voiceover↔chapter-copy parity guard, take-recorder CLI helper for the recording operator, cross-doc narrative-completeness invariant. OG route now wraps `ImageResponse` in try/catch and 307-redirects to `/og/<chapter>.png` on Satori failure — generator script + public/og/README documented for one-command PNG generation. Pre-existing W4 driver D entry preserved below.
 
 ## Active Plan
 
@@ -31,6 +31,78 @@
 Older sprint task tables and session histories (Sprints 7 — 31) are in `.paircoder/archive/state-pre-s1.md`. S12a per-session entries plus S2 — S11 detail are in `.paircoder/archive/state-s12a.md`. S13 wave-by-wave detail + per-task driver sessions are in `.paircoder/archive/state-s13.md`.
 
 ## What Was Just Done
+
+### 2026-04-28 — W5 Driver B: Demo overlay + video script + take plan + SRT + static OG fallback (T5.B.1–T5.B.5, T5.B.7, T5.B.8)
+
+Branch: `w5-driver-b/demo-video-script` (worktree at `agent-a5ed4efb8f0cbe6b0`) based on `sprint/w5-submission` HEAD `f18e8e8`. Commit: `5984373`. Pushed to `origin/w5-driver-b/demo-video-script`.
+
+**Tasks closed (P0):**
+
+- **T5.B.1 — Submission demo script** — Replaced `docs/submission-demo.md` with a chapter-locked walkthrough overlay. Per-chapter beats Ch1..Ch10 with locked timing windows from the dispatch (Ch1: 0–30s, Ch4: 70–110s, Ch5: 110–140s, Ch6: 140–180s, Ch7: 180–230s, Ch8: 230–280s [secret weapon], Ch9: 280–310s [cross-country], Ch10: 310–340s [View Transitions morph]). Each beat names visual / narration / interaction / visual anchor. Backup paths section: Mapbox failure, Firefox / Safari View Transitions degradation, Three.js stutter, slider lag, flyTo hang, audio sync, all-else-fails fallback. Pre-demo checklist (T-30 → T-0): Mapbox token health endpoint, Chrome 135+ verification, hardware GPU, Fast 4G slow-network test, ?locale=es Spanish toggle, prefers-reduced-motion. Total runtime locked at 5:40. The legacy S13-era staging walk preserved at `docs/demo-script.md`.
+- **T5.B.2 — Submission video script** — New `docs/submission-video-script.md` with 90s intro (silent hold + hook + what-is-GoWork + Carlos setup + bridge), 3min walkthrough (chapter-by-chapter narration with master-timeline cuts), 15s outro ("MIT, Fort Worth, Montgomery, HackFW 2026"). Master timeline at 4:30 (under Devpost 4-min ceiling guidance with breath; aggressive cut lands at 4:00). Spanish voiceover plan deferred behind W4 ES parity — recording plan documented; not a submission blocker. Recording notes for the demo-runner (don't talk over slider, hold Ch10 CTA).
+- **T5.B.3 — Submission video take plan** — New `docs/submission-video-take-plan.md` with 11 numbered shots. Recording specs: 1920×1080 @ 60fps, OBS / Loom / QuickTime, USB mic, H.264 MP4, 50 MB cap. Take counts: Ch9 fly-to-Montgomery gets 5 takes (highest variance — Mapbox tile pop-in mitigation), Ch8 graph reveal gets 3 takes (the wow moment), Ch10 View Transitions morph gets 3 takes (Chrome 135+ only), Ch1→Ch2 dive gets 3 takes (scroll smoothness), Ch7 avatar path gets 2 takes (footstep sync). Total 22 takes ≈ 33 minutes recording + setup. Recording-day prep (T-30..T-0) and editor handoff documented.
+- **T5.B.4 — Captions file** — New `docs/submission-video.srt` with 14 cues sync'd to the master timeline. Standard SRT format (HH:MM:SS,mmm), parses cleanly, total runtime 4:30, every cue has text, indices sequential.
+- **T5.B.5 — Static OG fallback** — Two-pronged shipping:
+  - `frontend/scripts/generate-static-og.mjs` — fetches `/api/og/<chapter>` from a running dev server for chapters 1..10 + default, writes 1200×630 PNGs to `frontend/public/og/`. Documented (npm run dev + node script) so Shawn runs it post-merge as a one-command step. Optional `--locale es` / `--out` / `--skip-existing` flags.
+  - `frontend/src/app/api/og/[chapter]/route.ts` — wraps `new ImageResponse(...)` in try/catch. On Satori error (font miss, edge cold-start tip-over, memory cap), 307-redirects to `${origin}/og/${chapter}.png`. `console.error` logs the failure for observability without breaking demo-day unfurls.
+  - `frontend/public/og/README.md` — documents the rescue gallery + when the fallback fires + why PNGs aren't committed.
+
+**Spotlight inventions (3 — meets dispatch requirement of ≥3):**
+
+1. **`frontend/src/__tests__/wall-voiceover-script-parity.test.ts`** (18 tests) — Guard test that every chapter's voiceover anchor (a load-bearing phrase like "Each one says go to the next one" or "Five stops. Twelve weeks.") round-trips between `frontend/src/lib/translations/en.json` `wall.chapter01..10.*` keys and `docs/submission-video-script.md`. Normalizes whitespace + curly apostrophes + em-dashes + markdown blockquote markers so anchors that wrap across lines still resolve. If editorial rewrites a chapter, the script test fires loud.
+2. **`frontend/scripts/take-recorder.mjs`** — CLI helper that prints structured shot list (shotIndex / chapter / startSec / endSec / fragment / takes / interaction / note) for the recording operator. Modes: human-readable table, `--json` for tooling, `--shot N` for one shot, `--base URL` to prefix deeplink fragments with a real origin. Exports `SHOTS` and `CHAPTER_FRAGMENTS` for programmatic consumers (OBS scene-change automation, future test gates).
+3. **`frontend/src/__tests__/submission-narrative-completeness.test.ts`** (32 tests) — Cross-doc invariant: every Wall chapter (Ch1..Ch10) appears in all three submission artifacts (demo overlay, video script, SRT). Per-doc patterns are tuned (Ch headings in markdown vs prose anchors in SRT). Catches the "we forgot to caption Ch7" bug class before judges hear the gap.
+
+**Files added (net new):**
+
+- `docs/submission-video-script.md` (250 lines)
+- `docs/submission-video-take-plan.md` (185 lines)
+- `docs/submission-video.srt` (70 lines, 14 cues)
+- `frontend/scripts/generate-static-og.mjs` (169 lines)
+- `frontend/scripts/take-recorder.mjs` (251 lines)
+- `frontend/public/og/README.md` (70 lines)
+- `frontend/src/__tests__/static-og-fallback.test.ts` (6 tests)
+- `frontend/src/__tests__/submission-demo-walkthrough.test.ts` (7 tests)
+- `frontend/src/__tests__/submission-narrative-completeness.test.ts` (32 tests — Spotlight #3)
+- `frontend/src/__tests__/submission-video-script.test.ts` (8 tests)
+- `frontend/src/__tests__/submission-video-srt.test.ts` (8 tests)
+- `frontend/src/__tests__/submission-video-take-plan.test.ts` (8 tests)
+- `frontend/src/__tests__/take-recorder-script.test.ts` (6 tests)
+- `frontend/src/__tests__/wall-voiceover-script-parity.test.ts` (18 tests — Spotlight #1)
+- `frontend/src/app/api/og/__tests__/og-route-fallback.test.ts` (3 tests)
+
+**Files modified:**
+
+- `docs/submission-demo.md` — wholesale rewrite as Wall walkthrough overlay
+- `frontend/src/app/api/og/[chapter]/route.ts` — wraps ImageResponse in try/catch, redirects to static PNG on Satori error
+
+**Test count:** 96 net new tests across 9 files (well over the dispatch's ≥8 floor).
+
+**C4 — known uncertainties:**
+
+- Static OG generation requires running dev server. Documented script + manual run path (`npm run dev` in one terminal, `node scripts/generate-static-og.mjs` in another). No headless Satori path that works from a worktree without Edge-API shims. Shawn runs the script post-merge.
+- Recording is not in this driver's lane. Dispatch was explicit: Driver B ships scripts/captions/take plan; Shawn (or someone with recording capability) does the actual capture. Take plan calibrated for ~33 minutes of recording bandwidth + setup.
+- Pre-existing WallContainer test flakes (3) on full-suite parallel runs (5000ms test timeout under 3500-test contention). They pass when run alone or in smaller batches. Unrelated to W5 Driver B's changes — confirmed by running Driver B's 96 new tests in isolation (all green, exit 0) plus running WallContainer.test.tsx + WallContainer-tier.test.tsx alone (all green).
+
+**C5 — assumptions:**
+
+- Video script tunes for third-person narrator describing Carlos's twelve weeks. Translations carry both first-person ("I came home with $300...") pull-quotes and third-person body copy; the script uses the third-person framing. If Shawn prefers Carlos-voice (first person), the chapter copy already exists in that voice — swap is one rewrite pass.
+- The voiceover-parity guard uses chapter "anchors" (load-bearing phrases) rather than full-string equality. This is intentional: voiceover compresses chapter copy for breath. Anchors require a distinctive phrase to round-trip so the script can't drift to a completely different idea, but allow the natural condensation a recorded voiceover demands.
+- Static fallback PNGs not committed (binary, ~80–200 KB each). The chain is: Satori → static PNG → no card. If the static PNG is missing the redirect 404s — strictly better than a corrupted Satori output. Pre-deploy belt-and-suspenders: run the script in CI before `vercel deploy`.
+
+**All 7 gates green:**
+
+- `npx tsc --noEmit` — exit 0
+- `npx vitest run` (Driver B's 9 new files) — 96/96 passing, exit 0
+- `npm run build` — exit 0; `/api/og/[chapter]` + `/api/og/default` Edge routes still in route manifest
+- `bpsai-pair arch check frontend/` — clean ("No architecture violations found")
+- `npm run audit:brand` — clean ("OK — no unexpected legacy brand references")
+- `npm run audit:tokens` — clean ("OK — 97 tokens declared, 25 consumed")
+- ≥3 Spotlight inventions — 3 shipped (parity guard, take-recorder CLI, narrative-completeness invariant)
+
+**Branch:** `w5-driver-b/demo-video-script` pushed to `origin`. PR URL: `https://github.com/fivedollarfridays/montgowork/pull/new/w5-driver-b/demo-video-script`.
+
+---
 
 ### 2026-04-28 — W4 Driver D: Maximization + Per-Chapter OG + 7 Spotlight inventions (T4.D.1–T4.D.7)
 
@@ -718,8 +790,11 @@ Outstanding pre-PR: /reviewing-and-fixing pipeline running. Browser-driven remai
 
 ## What's Next
 
-1. **Souji-sweep on `sprint/w4-life-layers`** — W4 Drivers A + B + C + D all merged. Driver D maximization complete (3428 passing, +217 net new tests). All 7 gates green. `/` First Load JS = 150 kB. Per-chapter dynamic OG cards via Vercel Satori live at `/api/og/[chapter]`. Ready for souji to ship to `sprint/visual-rebirth`.
-2. Engage W5 (press kit, README, video, Devpost). Spotlight #1 (cardComposer) is designed as a W5 force-multiplier — the press-kit OG card generator and email digest send-time card both consume the same pure-function tree.
+1. **W5 Driver B complete** — `w5-driver-b/demo-video-script` pushed; ready for souji-merge into `sprint/w5-submission`. Coordinated lane: Driver A (README + press + Devpost) + Driver C (submission readiness checklist). Driver B's deliverables are dependency-free for those lanes — Driver A can reference `docs/submission-video.srt` for accessibility credit; Driver C's submission checklist gates on "video assets exist" which now resolves true.
+2. **Recording day execution** — Shawn (or designated recorder) runs the take plan against the pre-demo checklist. Plan ~33 minutes screen-capture bandwidth + ~10 minutes voiceover + setup. The `take-recorder.mjs` CLI prints structured shots; the demo overlay drives on-screen scroll timing; the script drives voiceover. After capture: editor cuts to the master timeline using the SRT for caption parity.
+3. **Static OG generation** — Run `cd frontend && npm run dev` in one terminal, `node scripts/generate-static-og.mjs` in another to populate `frontend/public/og/[1..10].png` + `default.png` post-merge. The PNGs are not committed (binary, ~80–200 KB each, change with branding). Vercel's deploy step will pick them up from `public/`.
+4. **Souji-sweep on `sprint/w4-life-layers`** — W4 Drivers A + B + C + D all merged. Already shipped per prior session.
+5. Engage further W5 lanes (Driver A README + press + Devpost; Driver C submission readiness checklist). Spotlight #1 (cardComposer from W4-D) remains a force-multiplier — W5 press-kit OG card generator and email digest send-time card both consume the same pure-function tree.
 3. Real-browser Lighthouse runner verification (deferred from W4-C — port 3000 conflict in C's environment). Bundle is well under the 200 kB ceiling (150 kB/`/`); perf floor 0.9 should hold on CI Ubuntu.
 4. Real-browser view-transition keyframe verification (W4 D wired forward + reverse + reduced-motion + Firefox fallback at unit level). Manual QA in Chrome 135+.
 5. Real-browser print preview verification (W4 D extended print.css + chapter `data-chapter-id` sweep + Spotlight #5 contract module). Magazine layout pinned at unit level; visual proof in W5 manual QA.
