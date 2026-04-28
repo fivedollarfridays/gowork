@@ -471,6 +471,77 @@
       "presenter": "GoWork presents",
       "title": "The Wall",
       "subtitle": "An interactive map of Fort Worth, Texas · April 2026"
+    },
+    "chapter01": {
+      "title": "Chapter 1 — Continental",
+      "heroQuestion": "What's standing between you and a job?",
+      "hero": "What's standing between you and a job?",
+      "subhero": "You shouldn't have to figure out the wall. We do the math, sequence the path, and hand you the plan.",
+      "editorial": "America from above. One pin in the dark — Fort Worth, Texas.",
+      "carlosLead": "We'll meet a worker named Carlos.",
+      "pullquote": "You shouldn't have to figure out the wall.",
+      "aria": "Chapter 1: Continental — top-down view of America"
+    },
+    "chapter02": {
+      "title": "Chapter 2 — City Arrival",
+      "body": "Carlos lives here. ZIP 76119. East of downtown — past Sundance Square, past the courthouse.",
+      "editorial": "Carlos lives here. ZIP 76119. East of downtown.",
+      "detail": "Trinity Metro routes thread the city in cyan. Half of them don't reach the warehouses.",
+      "aria": "Chapter 2: Fort Worth at altitude. Trinity Metro routes drawn in cyan."
+    },
+    "chapter03": {
+      "title": "Chapter 3 — The Neighborhood",
+      "body": "Carlos is 29. ZIP 76119. Single father of one daughter, four years old. Recently released — sentence complete, three years past. He has $300 in cash, no vehicle, and four years of warehouse and forklift experience. He is ready to work. Four barriers stand between him and a paycheck.",
+      "carlosIntro": "Carlos is 29. A father of one — his daughter is four. Three years ago, a misdemeanor theft charge. Sentence complete. Four years of warehouse work behind him; a forklift cert in his pocket. Now he's home, trying to go back to work.",
+      "neighborhoodLabel": "ZIP 76119 — East Fort Worth",
+      "aria": "Chapter 3: a neighborhood block in 76119. Carlos is introduced."
+    },
+    "chapter04": {
+      "title": "The Wall",
+      "lede": "Most workforce sites pretend barriers don't matter. We do the math to prove they do.",
+      "aria": "Chapter 4: The Wall. Four barriers, named one at a time."
+    },
+    "chapter04a": {
+      "title": "Criminal record",
+      "detail": "4.8 miles. Bus 4 + Bus 6 = 71 minutes.",
+      "statValue": "71 min",
+      "statLabel": "to the District Clerk",
+      "pullquote": "I came home with $300 and a daughter, and the system told me to go to five offices.",
+      "aria": "Barrier one: criminal record. Tarrant County District Clerk is 4.8 miles away. Bus 4 plus Bus 6 totals 71 minutes."
+    },
+    "chapter04b": {
+      "title": "No transit",
+      "detail": "He lives in 76119. Bus 4 to downtown is 45 minutes. Plus a transfer. Plus a wait.",
+      "statValue": "87 min",
+      "statLabel": "downtown commute",
+      "pullquote": "Forty-five minutes is the schedule. Eighty-seven is the day.",
+      "aria": "Barrier two: no transit. The downtown commute on Bus 4 with a transfer is 87 minutes."
+    },
+    "chapter04c": {
+      "title": "No childcare",
+      "detail": "His daughter is 4. Childcare is $1,200 a month he doesn't have.",
+      "statValue": "$1,200/mo",
+      "statLabel": "without subsidy",
+      "pullquote": "I can't take a job that starts before her daycare opens.",
+      "aria": "Barrier three: no childcare. Market rate is $1,200 a month without a subsidy."
+    },
+    "chapter04d": {
+      "title": "Bad credit",
+      "detail": "540. Late payments. One collection account. Half the apartments won't take him — and one in three jobs runs a credit check.",
+      "statValue": "33%",
+      "statLabel": "of jobs unreachable",
+      "pullquote": "A score I can't see is closing doors I never knocked on.",
+      "aria": "Barrier four: bad credit. Roughly one in three job listings runs a credit check Carlos would not pass."
+    },
+    "chapter05": {
+      "title": "The Labyrinth",
+      "editorial": "5 offices. 47 forms. Each one says go to the next one.",
+      "lede": "Without GoWork, this is the path. We named it so we could replace it.",
+      "formsCounter": "47",
+      "formsCounterLabel": "forms to fill out",
+      "officesLabel": "offices to visit",
+      "pullquote": "Every office gave me one form and another address.",
+      "aria": "Chapter 5: the Labyrinth. Five offices and forty-seven forms — the chaos before GoWork sequences the path."
     }
   },
   "edge": {

@@ -9,7 +9,20 @@
  */
 
 export * from "./tokens";
-export * from "./env";
+// W1 env.ts shipped an `isMapboxAvailable` (sync, shape-check only). W2's
+// `mapboxToken` introduces an async `isMapboxAvailable` that is the public
+// API going forward. Explicit re-exports here keep the W1 sync helper
+// available under a non-clashing name.
+export {
+  getMapboxToken,
+  validateMapboxToken,
+  type MapboxTokenCheck,
+} from "./env";
+export { isMapboxAvailable as isMapboxTokenShapeValid } from "./env";
+export * from "./mapboxToken";
+export * from "./mapboxStyle";
+export * from "./cameraChoreography";
+export * from "./flyToOrchestrator";
 export * from "./types";
 export * as sound from "./sound";
 export * from "./network";

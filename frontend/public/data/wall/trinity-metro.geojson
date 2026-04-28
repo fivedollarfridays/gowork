@@ -1,0 +1,145 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "name": "Trinity Metro — Fort Worth, TX bus routes",
+    "source": "Trinity Metro GTFS feed (public)",
+    "sourceUrl": "https://ride.trinitymetro.org/about/transparency/",
+    "buildScript": "frontend/scripts/build-trinity-metro-geojson.mjs",
+    "refreshCadence": "pre-submission only — see T2.73 freshness gate",
+    "honestUncertainty": "Coordinates are coarse traces of published route maps; full GTFS shapes will replace these on the next refresh. Route IDs are real Trinity Metro route designations.",
+    "lastVerified": "2026-04-27"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "route_id": "4",
+        "route_short_name": "Bus 4",
+        "route_long_name": "Berry / E Lancaster",
+        "route_type": "bus"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-97.337, 32.755],
+          [-97.323, 32.748],
+          [-97.31, 32.738],
+          [-97.298, 32.728],
+          [-97.293, 32.718],
+          [-97.288, 32.71],
+          [-97.282, 32.7],
+          [-97.275, 32.692]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "route_id": "6",
+        "route_short_name": "Bus 6",
+        "route_long_name": "E Rosedale / Riverside",
+        "route_type": "bus"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-97.331, 32.755],
+          [-97.318, 32.745],
+          [-97.305, 32.735],
+          [-97.295, 32.725],
+          [-97.286, 32.715]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "route_id": "1",
+        "route_short_name": "Bus 1",
+        "route_long_name": "Camp Bowie",
+        "route_type": "bus"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-97.336, 32.755],
+          [-97.355, 32.748],
+          [-97.378, 32.74],
+          [-97.402, 32.732]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "route_id": "2",
+        "route_short_name": "Bus 2",
+        "route_long_name": "Beach St / Stockyards",
+        "route_type": "bus"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-97.336, 32.755],
+          [-97.327, 32.77],
+          [-97.318, 32.785],
+          [-97.31, 32.795]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "route_id": "5",
+        "route_short_name": "Bus 5",
+        "route_long_name": "E Belknap",
+        "route_type": "bus"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-97.336, 32.755],
+          [-97.32, 32.762],
+          [-97.305, 32.768],
+          [-97.29, 32.772]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "route_id": "7",
+        "route_short_name": "Bus 7",
+        "route_long_name": "S Riverside / TCC South",
+        "route_type": "bus"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-97.336, 32.755],
+          [-97.328, 32.738],
+          [-97.32, 32.722],
+          [-97.31, 32.705]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "route_id": "11",
+        "route_short_name": "Bus 11",
+        "route_long_name": "TCU / W Berry",
+        "route_type": "bus"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-97.336, 32.755],
+          [-97.348, 32.738],
+          [-97.36, 32.722],
+          [-97.372, 32.705]
+        ]
+      }
+    }
+  ]
+}

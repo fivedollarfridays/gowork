@@ -29,12 +29,17 @@ Edit `frontend/lighthouserc.json` under `ci.assert.assertions`:
 Lower a floor temporarily by changing `minScore` (e.g. `0.75`) and committing.
 Prefer fixing the regression over loosening the floor.
 
-## Why `numberOfRuns: 1`
+## Why `numberOfRuns: 3`
 
 Lighthouse scores are noisy; the canonical recommendation is `numberOfRuns: 3`
-(median wins). For CI budget reasons (six routes x ~30s/run x 3 runs = ~9 min)
-we run once. If you see flaky failures on the perf category, bump to `3` in
-`lighthouserc.json` rather than lowering the floor.
+(median wins). W2 introduced a Mapbox-heavy `/` route which pushed single-run
+variance high enough to flake the perf gate (observed 0.72 once vs the 0.80
+floor on PR #82, while the parallel run on the same commit scored ≥0.80).
+Per W2 souji we bumped to 3 runs and take the median — the canonical
+mitigation. Cost: six routes x ~30s/run x 3 runs ≈ 9 min in CI.
+
+If `/` perf still flakes after this, fix the underlying regression rather
+than lowering the floor.
 
 ## Route list rationale
 
