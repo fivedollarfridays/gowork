@@ -25,12 +25,27 @@ import type {
   MapboxLikeMap,
   WallDataLayer,
 } from "./types";
+import { getEmployerById, EMPLOYER_DFW5_ID } from "../employerRegistry";
 
 export const TRINITY_METRO_SOURCE_ID = "trinity-metro-source";
 export const TRINITY_METRO_LINE_ID = "trinity-metro-line";
 
 /** Routes singled out for editorial highlight (Carlos's commute). */
 export const TRINITY_METRO_HIGHLIGHTED_ROUTE_IDS: readonly string[] = ["4", "6"] as const;
+
+/**
+ * W3 Driver A — Bus 4 → DFW5 corridor accent (T3.3).
+ *
+ * Identifies the derived GeoJSON line that connects Bus 4's served
+ * downtown corridor to Amazon FC DFW5. The corridor is a programmatic
+ * accent (NOT in the Trinity Metro GTFS feed) — it shows the route the
+ * REAL Bus 4 + transfer takes to reach DFW5. Ch6 toggles its visibility
+ * via feature-state when the chapter is active.
+ */
+export const BUS4_TO_DFW5_CORRIDOR = {
+  id: "trinity-metro-bus4-dfw5-corridor",
+  routeId: "4",
+} as const;
 
 const CYAN = "oklch(0.78 0.13 215)";
 const AMBER = "oklch(0.78 0.16 75)";
@@ -91,3 +106,38 @@ export const trinityMetroLayer: WallDataLayer = {
     removeLayer(map, TRINITY_METRO_SOURCE_ID, layerIds);
   },
 };
+
+/** GeoJSON LineString for the Bus 4 → DFW5 corridor accent. */
+export interface CorridorFeature {
+  type: "Feature";
+  properties: { route: string; corridor: string };
+  geometry: { type: "LineString"; coordinates: [number, number][] };
+}
+
+/**
+ * Build the Bus 4 → DFW5 corridor feature programmatically.
+ *
+ * Three control points: Carlos's neighborhood (76119) → downtown FW
+ * (Bus 4 spine) → DFW5 (Heritage Pkwy / Haslet). The middle leg is the
+ * actual Bus-4 corridor; the final leg is a derived "transfer + walk"
+ * vector to DFW5 — not a Trinity Metro route by itself.
+ */
+export function buildBus4Dfw5CorridorFeature(): CorridorFeature {
+  const dfw5 = getEmployerById(EMPLOYER_DFW5_ID);
+  // 76119 representative block (Carlos's home, NOT exact address — PII safe).
+  const carlosBlock: [number, number] = [-97.27, 32.71];
+  // Downtown FW Trinity Metro hub (T&P/Intermodal Transportation Center).
+  const downtownHub: [number, number] = [-97.3289, 32.7549];
+  // DFW5 (fallback to coords if registry hasn't been initialized in tests).
+  const dest: [number, number] = dfw5
+    ? [dfw5.longitude, dfw5.latitude]
+    : [-97.3399, 32.9942];
+  return {
+    type: "Feature",
+    properties: { route: BUS4_TO_DFW5_CORRIDOR.routeId, corridor: "dfw5" },
+    geometry: {
+      type: "LineString",
+      coordinates: [carlosBlock, downtownHub, dest],
+    },
+  };
+}

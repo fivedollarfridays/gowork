@@ -542,6 +542,42 @@
       "officesLabel": "oficinas por visitar",
       "pullquote": "Cada oficina me dio un formulario y otra dirección.",
       "aria": "Capítulo 5: el Laberinto. Cinco oficinas y cuarenta y siete formularios — el caos antes de que GoWork ordene el camino."
+    },
+    "chapter06": {
+      "title": "Las Cuentas",
+      "hero": "Cuando ganar más significa tener menos.",
+      "subhero": "Hacemos las cuentas del precipicio para que la decisión sea honesta. Mueve el control — mira cómo cae.",
+      "body": "Carlos surte estantes en el centro de Amazon DFW5 — a 71 minutos de su casa en el Bus 4. Un aumento de $2 por hora suena bien. El precipicio de beneficios dice otra cosa: el subsidio de cuidado infantil termina a $14/hr, los cupones SNAP terminan a $17/hr. La gráfica es el recibo.",
+      "statValue": "71 min",
+      "statLabel": "de la casa de Carlos a DFW5 en el Bus 4",
+      "wageSliderLabel": "Salario por hora",
+      "wageSliderHint": "Arrastra para ver el precipicio moverse con el salario.",
+      "wageSliderMinLabel": "$7.25 — mínimo federal",
+      "wageSliderMaxLabel": "$25.00 — pasado el precipicio",
+      "wageSliderValueLabel": "Salario actual",
+      "cliffChartLabel": "Ingreso neto mensual vs. salario por hora",
+      "cliffChartCaption": "Proyección de demostración — perfil de Carlos (padre soltero, 1 dependiente, 76119, sin pensión alimenticia).",
+      "aria": "Capítulo 6: Las Cuentas. La cámara aterriza en el centro de distribución Amazon DFW5. Un control de salario mueve la gráfica del precipicio en tiempo real para ver cómo un aumento se convierte en pérdida."
+    },
+    "chapter09": {
+      "title": "Cualquier Ciudad",
+      "hero": "Funciona en Fort Worth. Va a funcionar en Montgomery. Va a funcionar donde tú estés.",
+      "subhero": "Dos ciudades encendidas. Seis dibujadas en puntos. Las cuentas, el camino, el plan — donde esté el trabajo.",
+      "body": "GoWork se entrega como plantilla de ciudad. Fort Worth es el despliegue de referencia. Montgomery es el segundo. Seis ciudades más están en camino — mismo motor, mismo plan, datos locales.",
+      "statValue": "5,189 pruebas · 13 sprints · 2 ciudades · MIT",
+      "statLabel": "entregado, abierto, listo",
+      "flyToMontgomeryButton": "Volar a Montgomery",
+      "returnToFortWorthButton": "Volver a Fort Worth",
+      "cityFW": "Fort Worth, TX",
+      "cityMontgomery": "Montgomery, AL",
+      "futureCitiesLabel": "Próximas",
+      "futureCityDallas": "Dallas",
+      "futureCityHouston": "Houston",
+      "futureCityAtlanta": "Atlanta",
+      "futureCityMemphis": "Memphis",
+      "futureCityCharlotte": "Charlotte",
+      "futureCityBirmingham": "Birmingham",
+      "aria": "Capítulo 9: Cualquier Ciudad. La cámara regresa a la vista continental. Dos ciudades — Fort Worth y Montgomery — brillan como desplegadas; seis más están por llegar. Un botón vuela la cámara a Montgomery."
     }
   },
   "edge": {

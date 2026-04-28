@@ -121,3 +121,46 @@ describe("isChapterActive", () => {
     expect(isChapterActive(1, 10)).toBe(true);
   });
 });
+
+/* -------------------------------------------------------------------------
+ * W3 Driver A — guard for Ch6 + Ch9 boundary slots.
+ * Drivers B/C will lock 7/8/10 in their own commits.
+ * ----------------------------------------------------------------------- */
+
+describe("W3 Driver A — Ch6 (The Math) bounds", () => {
+  it("Ch6 occupies global progress [0.5, 0.6]", () => {
+    const b = chapterBoundsFor(6);
+    expect(b.start).toBeCloseTo(0.5, 9);
+    expect(b.end).toBeCloseTo(0.6, 9);
+  });
+
+  it("globalToLocal resolves Ch6 progress correctly at midpoint (0.55)", () => {
+    expect(globalToLocal(0.55, 6)).toBeCloseTo(0.5, 6);
+  });
+
+  it("isChapterActive reports Ch6 active inside its bound (0.5, 0.55)", () => {
+    expect(isChapterActive(0.5, 6)).toBe(true);
+    expect(isChapterActive(0.55, 6)).toBe(true);
+    // 0.4999 is below the start; treat as Ch5
+    expect(isChapterActive(0.4999, 6)).toBe(false);
+  });
+});
+
+describe("W3 Driver A — Ch9 (Any City) bounds", () => {
+  it("Ch9 occupies global progress [0.8, 0.9]", () => {
+    const b = chapterBoundsFor(9);
+    expect(b.start).toBeCloseTo(0.8, 9);
+    expect(b.end).toBeCloseTo(0.9, 9);
+  });
+
+  it("globalToLocal resolves Ch9 progress correctly at midpoint (0.85)", () => {
+    expect(globalToLocal(0.85, 9)).toBeCloseTo(0.5, 6);
+  });
+
+  it("isChapterActive reports Ch9 active inside its bound (0.8, 0.85)", () => {
+    expect(isChapterActive(0.8, 9)).toBe(true);
+    expect(isChapterActive(0.85, 9)).toBe(true);
+    // 0.7999 is below the start; treat as Ch8
+    expect(isChapterActive(0.7999, 9)).toBe(false);
+  });
+});

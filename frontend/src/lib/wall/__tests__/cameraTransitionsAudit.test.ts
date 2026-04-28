@@ -42,8 +42,8 @@ describe("cameraTransitionsAudit — every adjacent W2 pair has a sane transitio
   it.each(W2_PAIRS)(
     "Ch%i → Ch%i — pitch delta within bounds",
     (from, to) => {
-      const a = CHAPTER_CAMERAS[from];
-      const b = CHAPTER_CAMERAS[to];
+      const a = CHAPTER_CAMERAS[from]!;
+      const b = CHAPTER_CAMERAS[to]!;
       expect(Math.abs(a.pitch - b.pitch)).toBeLessThanOrEqual(MAX_PITCH_DELTA);
     },
   );
@@ -51,8 +51,8 @@ describe("cameraTransitionsAudit — every adjacent W2 pair has a sane transitio
   it.each(W2_PAIRS)(
     "Ch%i → Ch%i — bearing delta within bounds",
     (from, to) => {
-      const a = CHAPTER_CAMERAS[from];
-      const b = CHAPTER_CAMERAS[to];
+      const a = CHAPTER_CAMERAS[from]!;
+      const b = CHAPTER_CAMERAS[to]!;
       expect(Math.abs(a.bearing - b.bearing)).toBeLessThanOrEqual(
         MAX_BEARING_DELTA,
       );
@@ -62,8 +62,8 @@ describe("cameraTransitionsAudit — every adjacent W2 pair has a sane transitio
   it.each(W2_PAIRS)(
     "Ch%i → Ch%i — zoom delta within bounds",
     (from, to) => {
-      const a = CHAPTER_CAMERAS[from];
-      const b = CHAPTER_CAMERAS[to];
+      const a = CHAPTER_CAMERAS[from]!;
+      const b = CHAPTER_CAMERAS[to]!;
       expect(Math.abs(a.zoom - b.zoom)).toBeLessThanOrEqual(MAX_ZOOM_DELTA);
     },
   );
@@ -71,8 +71,8 @@ describe("cameraTransitionsAudit — every adjacent W2 pair has a sane transitio
   it.each(W2_PAIRS)(
     "Ch%i → Ch%i — lng/lat delta within continental scale",
     (from, to) => {
-      const a = CHAPTER_CAMERAS[from];
-      const b = CHAPTER_CAMERAS[to];
+      const a = CHAPTER_CAMERAS[from]!;
+      const b = CHAPTER_CAMERAS[to]!;
       expect(Math.abs(a.longitude - b.longitude)).toBeLessThanOrEqual(
         MAX_LNG_DELTA_DEG,
       );
@@ -93,8 +93,8 @@ describe("cameraTransitionsAudit — every adjacent W2 pair has a sane transitio
 
   it("no two adjacent chapters share identical camera state (every pair is a real move)", () => {
     for (const [from, to] of W2_PAIRS) {
-      const a = CHAPTER_CAMERAS[from];
-      const b = CHAPTER_CAMERAS[to];
+      const a = CHAPTER_CAMERAS[from]!;
+      const b = CHAPTER_CAMERAS[to]!;
       const identical =
         a.longitude === b.longitude &&
         a.latitude === b.latitude &&
