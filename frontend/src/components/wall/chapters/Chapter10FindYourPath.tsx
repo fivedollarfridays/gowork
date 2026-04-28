@@ -68,6 +68,7 @@ export function Chapter10FindYourPath({
     <section
       data-testid="chapter10-find-your-path"
       data-chapter="10"
+      data-chapter-id="find-your-path"
       data-reduced-motion={reducedMotion ? "true" : "false"}
       aria-labelledby={HEADING_ID}
       aria-label={t("wall.chapter10.aria")}
