@@ -9,8 +9,11 @@ function makeWrapper() {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false, staleTime: 0 } },
   });
-  return ({ children }: { children: ReactNode }) =>
-    React.createElement(QueryClientProvider, { client }, children);
+  function QueryWrapper({ children }: { children: ReactNode }) {
+    return React.createElement(QueryClientProvider, { client }, children);
+  }
+  QueryWrapper.displayName = "QueryWrapper";
+  return QueryWrapper;
 }
 
 describe("useLiveNow (T1.26)", () => {
