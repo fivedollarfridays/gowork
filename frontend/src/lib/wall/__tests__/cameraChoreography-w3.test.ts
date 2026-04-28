@@ -20,6 +20,8 @@ describe("W3 Ch10 camera choreography (T3.20)", () => {
 
   it("Ch10 frames Fort Worth at overhead zoom (the 'home' framing)", () => {
     const ch10 = CHAPTER_CAMERAS[10];
+    expect(ch10).toBeDefined();
+    if (!ch10) return;
     // Centered on Fort Worth city centroid (matches INITIAL_CAMERA + Ch2)
     expect(ch10.longitude).toBeCloseTo(-97.3308, 3);
     expect(ch10.latitude).toBeCloseTo(32.7555, 3);
@@ -33,7 +35,10 @@ describe("W3 Ch10 camera choreography (T3.20)", () => {
   });
 
   it("Ch10 flyToOptions are sane (curve > 1, speed > 0, easing length 4)", () => {
-    const opts = CHAPTER_CAMERAS[10].flyToOptions;
+    const ch10 = CHAPTER_CAMERAS[10];
+    expect(ch10).toBeDefined();
+    if (!ch10) return;
+    const opts = ch10.flyToOptions;
     expect(opts.curve).toBeGreaterThan(1);
     expect(opts.speed).toBeGreaterThan(0);
     expect(opts.easing).toHaveLength(4);
