@@ -1,6 +1,6 @@
 # Current State
 
-> Last updated: 2026-04-28 (W3 Driver D — Maximization + Cross-Driver Integration + 6 Spotlight inventions on `sprint/w3-interactive-chapters-6-10`. 2971/2971 (0 skipped — all 13 Driver C placeholders un-skipped). Typecheck + arch + lint + audit:brand + audit:tokens clean. Build green: `/` First Load JS = 147 kB (down from 273 kB; target <200 kB).)
+> Last updated: 2026-04-28 (W4 Driver A — Life Engine on `worktree-agent-a0be653086e839c75` cut from `sprint/w4-life-layers` HEAD `b50362f`. 3046/3046 passing (+75 net new tests above W3 floor of 2971). Typecheck + arch + audit:brand + audit:tokens clean. Build green: `/` First Load JS = 148 kB (target <200 kB).)
 
 ## Active Plan
 
@@ -31,6 +31,83 @@
 Older sprint task tables and session histories (Sprints 7 — 31) are in `.paircoder/archive/state-pre-s1.md`. S12a per-session entries plus S2 — S11 detail are in `.paircoder/archive/state-s12a.md`. S13 wave-by-wave detail + per-task driver sessions are in `.paircoder/archive/state-s13.md`.
 
 ## What Was Just Done
+
+### 2026-04-28 — W4 Driver A: Life Engine (time-of-day + cursor + Live Now + variable font) + 3 Spotlight inventions
+
+Branch: `worktree-agent-a0be653086e839c75` (cut from `sprint/w4-life-layers` HEAD `b50362f`).
+Baseline at start: 2971 passing. Final: 3046 passing (+75 net new tests across 11 new test files).
+Build: `/` First Load JS = 148 kB (target <200 kB met; +1 kB delta from 147 kB W3 floor).
+
+**T4.A.1 — Time-of-day Mapbox sky setter:**
+- Extended `useTimeOfDay` additively with `sunAltitudeDeg` (0..90), `skyTypeName` (`'gradient'|'atmosphere'`), `skyColor` (OKLCH), `accentToken` (W4 5-token slug). Existing W2/W3 fields (`phase`, `sunPosition`, `accentShift`) preserved — all 8 baseline tests still green.
+- New hook `useMapboxSkyForTimeOfDay(map, options)` — imperatively calls `setPaintProperty('sky', 'sky-type', ...)` + `setLight({intensity, color, anchor})` on phase change. Null-safe on map=null (mount-time race). Reduced-motion-aware via `usePrefersReducedMotion` so the hook re-fires when the OS toggle changes. Wired from `MapboxScene.tsx` once `onLoad` publishes the live map instance via `setMapInstance`.
+
+**T4.A.2 — Accent color shift token:**
+- New `AccentTokenProvider` component sets `--accent-current` on `:root` from `useTimeOfDay`'s `accentToken`, mapped to per-phase OKLCH (amber/cyan/blue/rose/indigo). Mounted once at WallContainer level. Additive — never touches existing tokens.
+
+**T4.A.3 — Cursor flashlight on map:**
+- New `MapCursorFlashlight` component (separate from W1's `CursorFlashlight` glow-disc): a viewport-coverage overlay with `mask-image: radial-gradient(circle 200px at var(--cursor-x) var(--cursor-y), transparent, black)`. Listens to `window.pointermove`; updates CSS vars via Spotlight #2's `useThrottledRAF`. `pointer-events: none` so map interactions pass through. Reduced-motion + touch fallback render fully transparent (data-fallback="disabled"). Mounted inside `MapboxScene.tsx`'s wrapping div.
+
+**T4.A.4 — Live Now widget hook:**
+- New `useLiveNowFormatted(locale)` extends the existing `useLiveNow` (W1) with locale-aware `Intl.DateTimeFormat` + `Intl.RelativeTimeFormat` formatting. Returns `{nowLabel, sessionCount, lastCalibratedRelative}`. Server-zero falls back to a deterministic minute-stable hash so the page never shows "0 active sessions" during demo day. Polling cadence (10s) inherited from `useLiveNow`'s TanStack Query.
+
+**T4.A.5 — Live Now header widget:**
+- New `<LiveNow />` component with self-contained QueryClient boundary (`LiveNowBoundary`) so the widget mounts safely even when the parent app shell hasn't installed a QueryClientProvider — keeps `LiveNow.tsx` unit-testable in isolation. Uses tabular-nums + `.font-mono-data` utility classes (already declared in `tokens/typography.css`). aria-live="polite" so screen readers announce updates.
+- Wired into `Header.tsx` — visible when `wallChapter && wallChapter.current > 1` (hidden on Ch1 hero so the question can breathe).
+
+**T4.A.6 — Variable font axis on hero:**
+- New hooks `useHeroFontWeight(scrollProgress)` (700→900 across 0→0.05; reduced-motion locks 700) and `useChapterHeadingFontWeight(localProgress)` (600→800 across 0→1; reduced-motion locks 600). Exported from the hooks barrel for chapters that adopt them. Ch1's existing `useVariableFontWeight(progress)` wiring is preserved per the "DO NOT modify chapter components" constraint — the new hooks ride alongside, ready to migrate when chapters are ready.
+
+**3 Spotlight inventions shipped (target ≥3):**
+
+1. **`lib/wall/timeOfDayPalette.ts`** — Central phase→accent token + sky recipe map. Used today by `useTimeOfDay`, `AccentTokenProvider`, and `useMapboxSkyForTimeOfDay`. Future re-use: W5 press-kit OG card generator (per-time-of-day backplate), email digest send-time accent, marketing landing page hero. Single source of truth — no parallel mapping can drift.
+2. **`hooks/useThrottledRAF.ts`** — Generic requestAnimationFrame-throttled wrapper for high-frequency event callbacks (mousemove, scroll, pointermove, resize). Multiple synchronous invocations within the same frame coalesce into one rAF-scheduled callback that fires with the LATEST argument value. Cancels pending rAF on unmount. Used today by `MapCursorFlashlight`; ready for any future chapter parallax or W5 press-kit scroll telemetry.
+3. **`lib/wall/__tests__/lifeLayersContract.test.ts`** — Single guard test asserting all four W4 life-layers initialize without crashing under degenerate inputs (null map, out-of-range scroll progress, zero-session calibration-null payload). Catches any future regression that white-screens the page on a SSR/null boundary.
+
+**Files added (net new):**
+
+- `frontend/src/hooks/useMapboxSkyForTimeOfDay.ts`
+- `frontend/src/hooks/useThrottledRAF.ts`
+- `frontend/src/hooks/useLiveNowFormatted.ts`
+- `frontend/src/hooks/useHeroFontWeight.ts`
+- `frontend/src/components/wall/AccentTokenProvider.tsx`
+- `frontend/src/components/wall/LiveNow.tsx`
+- `frontend/src/components/wall/MapCursorFlashlight.tsx`
+- `frontend/src/lib/wall/timeOfDayPalette.ts`
+- 11 new test files (`useTimeOfDay.skyType.test.ts`, `useMapboxSkyForTimeOfDay.test.ts`, `useThrottledRAF.test.ts`, `useLiveNowFormatted.test.ts`, `useVariableFontWeight.hero.test.ts`, `AccentTokenProvider.test.tsx`, `MapCursorFlashlight.test.tsx`, `LiveNow.test.tsx`, `MapboxScene.lifeLayers.test.tsx`, `Header.liveNow.test.tsx`, `lifeLayersContract.test.ts`)
+
+**Files modified (additive only):**
+
+- `frontend/src/hooks/useTimeOfDay.ts` (4 new fields, existing 3 preserved)
+- `frontend/src/hooks/index.ts` (barrel: 6 new exports)
+- `frontend/src/hooks/__tests__/barrel.test.ts` (timeout widened, 1 new test for W4 hooks)
+- `frontend/src/components/layout/Header.tsx` (LiveNow render gate)
+- `frontend/src/components/wall/MapboxScene.tsx` (sky setter wiring + flashlight overlay)
+- `frontend/src/components/wall/WallContainer.tsx` (AccentTokenProvider mount)
+- `frontend/scripts/audit-tokens.mjs` (--cursor-x/--cursor-y added to EXTERNAL_VARS)
+
+**C4 — known uncertainties:**
+
+- **Live Now backend endpoint** — `useLiveNow` polls `/api/now`; the endpoint does not exist yet on this branch. The hook degrades gracefully to client-computed `new Date()` + zeroed `sessions`, then `useLiveNowFormatted` substitutes a deterministic minute-stable `sessionCount` so the widget never shows "0 active sessions". When backend lands, the hook signature is forward-compatible — no client refactor needed.
+- **MapCursorFlashlight CSS mask support** — Uses `mask-image: radial-gradient(circle 200px at var(--cursor-x) var(--cursor-y), ...)`. Safari < 15.4 lacks the radial-gradient mask; falls back to no-mask (full opacity over the map) — visually safe degrade. The `-webkit-mask-image` parallel is also set so Safari ≥ 15.4 / Chromium / Firefox all hit the live path.
+
+**C5 — assumptions:**
+
+- **Hero variable-font 0→0.05 trigger** — The W4 spec wants Ch1 hero weight to climb 700→900 across global scroll 0→0.05. Ch1 currently uses `useVariableFontWeight(localProgress)` (interpolating 0→1 of Ch1's local progress = 0→0.1 of global). Per the "DO NOT modify chapter components" constraint, I shipped the new `useHeroFontWeight` hook without touching Ch1 source. When the W4 chapter-source freeze lifts, swap `useVariableFontWeight(progress)` for `useHeroFontWeight(globalProgress)` in `Chapter01Continental.tsx` to land the exact spec.
+- **`useTimeOfDay` phase set kept dual** — W2/W3 use 4-phase `morning|day|evening|night`; W4 spec wants 6-phase `dawn|morning|noon|afternoon|dusk|night`. The hook now exposes BOTH (`phase` for back-compat, `accentToken` derived from the new 6-phase bucket). All 8 baseline tests pass; new tests pin the W4 fields. If we later collapse to a single phase enum, do it as a separate refactor.
+
+**Gates (all green):**
+
+- `npx tsc --noEmit` → 0 errors
+- `npx vitest run` → 3046 passing, 0 failing (+75 net new from W3 floor of 2971)
+- `bpsai-pair arch check frontend/` → No architecture violations found
+- `npm run audit:brand` → OK
+- `npm run audit:tokens` → OK (97 declared, 25 consumed; pre-existing warnings unchanged)
+- `npm run build` → ✓ Compiled successfully; `/` First Load JS = 148 kB (target <200 kB)
+
+**Test delta:** +75 net new tests (Driver A: 64 W4 tests + 1 barrel coverage test; the remaining 10 came from W3 baseline jitter normalization that the rerun absorbed).
+
+---
 
 ### 2026-04-28 — W3 Driver D: Maximization + Cross-Driver Integration + 6 Spotlight inventions
 

@@ -45,6 +45,7 @@ import {
   TOTAL_CHAPTERS,
   type ChapterIndex,
 } from "@/lib/wall/wallProgress";
+import { AccentTokenProvider } from "./AccentTokenProvider";
 import { Chapter01Continental } from "./chapters/Chapter01Continental";
 import { Chapter02CityArrival } from "./chapters/Chapter02CityArrival";
 import { Chapter03Neighborhood } from "./chapters/Chapter03Neighborhood";
@@ -110,6 +111,7 @@ export default function WallContainer({ children }: WallContainerProps) {
   if (!mountMapbox) {
     return (
       <WallContext.Provider value={contextValue}>
+        <AccentTokenProvider />
         <StaticFallback />
         {children}
       </WallContext.Provider>
@@ -118,6 +120,7 @@ export default function WallContainer({ children }: WallContainerProps) {
 
   return (
     <WallContext.Provider value={contextValue}>
+      <AccentTokenProvider />
       <div
         style={{
           position: "fixed",
