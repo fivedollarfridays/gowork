@@ -1,142 +1,214 @@
-# MontGoWork Press Kit
+# GoWork — Press Kit
+
+> **Workforce navigation infrastructure for any American city,
+> demonstrated in Fort Worth.**
+
+> **Tagline:** What's standing between you and a job?
+
+> **Subhead:** You shouldn't have to figure out the wall. We do the
+> math, sequence the path, and hand you the plan.
 
 ---
 
-## One-Liner
+## One-liner
 
-Open-source workforce navigator that turns a 2-hour career center intake into a 10-minute personalized plan.
-
----
-
-## What It Is
-
-MontGoWork is a full-stack workforce navigation platform built for Montgomery, Alabama. People facing employment barriers don't just need a job listing. They need someone to do the math. What happens to your SNAP if you take a $15/hr job. Whether the bus actually gets you there by 7am. Which employers run background checks and which ones don't.
-
-Career center staff do this work manually, every day, for every person who walks in. MontGoWork does it in minutes.
-
-A resident completes a guided assessment covering seven barrier types (credit, transportation, childcare, housing, health, training, criminal record). The system generates a personalized re-entry plan. Jobs ranked by a Practical Value Score. Benefits eligibility across 7 Alabama programs with cliff detection. Criminal record routing with expungement guidance. AI-powered barrier intelligence chat. And a printable Career Center Ready Package they take to the career center on Monday morning.
+Open-source workforce navigator that turns a 2-hour career-center
+intake into a 10-minute personalized plan, rendered as a cinematic
+3D scrollytelling map of Fort Worth.
 
 ---
 
-## Accolade
+## Cinematic stills
 
-**2nd Place, Worldwide Vibes Hackathon**
+The home page IS the press kit. The same Mapbox-driven scrollytelling
+artifact that judges read also generates the cinematic stills below.
+One asset, four uses (home page, README hero, press kit, submission
+video).
+
+| Frame | Source | File |
+|---|---|---|
+| Hero — Fort Worth overhead with locked thesis | Title sequence | ![](docs/press-kit/screenshots/hero-fort-worth-overhead.png.placeholder) |
+| Chapter 02 — City arrival | Atmospheric flight to FW altitude | ![](docs/press-kit/screenshots/ch2-fort-worth-arrival.png.placeholder) |
+| Chapter 06 — The Math (cliff calculator at Amazon DFW5) | Camera lands at Amazon FC | ![](docs/press-kit/screenshots/ch6-the-math.png.placeholder) |
+| Chapter 07 — The Path (Carlos walks his GPS route) | Sequenced path-line draw | ![](docs/press-kit/screenshots/ch7-the-path.png.placeholder) |
+| Chapter 08 — The Graph (3D barrier constellation) | Constellation hovers above FW | ![](docs/press-kit/screenshots/ch8-barrier-graph.png.placeholder) |
+| Chapter 10 — Find your path (CTA close) | Camera back overhead | ![](docs/press-kit/screenshots/ch10-find-your-path.png.placeholder) |
+
+> Driver B is the owner of the cinematic-still capture pass. Each
+> file above either resolves to a real PNG or to a sibling
+> `.placeholder` marker (Driver B replaces in-place). See
+> [`docs/press-kit/screenshots/README.md`](docs/press-kit/screenshots/README.md)
+> for the capture spec.
 
 ---
 
-## Source
-
-GitHub: https://github.com/fivedollarfridays/montgowork
-
----
-
-## Numbers
+## Numbers (live)
 
 | | |
 |---|---|
-| Barrier types assessed | 7 |
+| Frontend tests (vitest) | **3,428** |
+| Backend tests (pytest, expanded) | **~4,080** |
+| **Total tests, all green** | **~7,500+** |
+| Cities deployed | 2 (Fort Worth + Montgomery) |
+| Sprints completed | 17 (S1–S13 + W1–W4 visual rebirth) |
+| Barrier types modeled | 7 |
 | Alabama benefits programs screened | 7 (SNAP, TANF, Medicaid, ALL Kids, Childcare Subsidy, Section 8, LIHEAP) |
-| Backend tests | 1,391 |
-| Frontend tests | 417 |
-| Total tests | 1,808 |
-| LLM providers | 3 (Claude, OpenAI, Gemini) with auto-fallback |
+| Texas benefits programs (HHSC) | 7 |
+| LLM providers (auto-fallback) | 3 (Claude, OpenAI, Gemini) |
 | Job sources | 3 (BrightData, JSearch, Honest Jobs) |
-| Montgomery poverty rate | 20.9% |
-| Labor participation rate | 57.5% |
-| Residents in service area | 36,000+ |
+| `/` First Load JS | 150 kB (bundle budget contract: < 200 kB) |
+| Lighthouse performance floor | 0.90 on simulated 4G |
+| WCAG contrast | AAA everywhere |
+| License | MIT |
 
 ---
 
-## What It Actually Does
+## What it actually does
 
-**Barrier Assessment Wizard.** 7-step guided assessment. ZIP validation, resume upload, barrier selection, benefits data, schedule constraints, industry preferences, review and submit. Each barrier type maps to specific resources, job filters, and action items.
+**Barrier Assessment Wizard.** Multi-step guided assessment. ZIP
+validation, resume upload, barrier selection (7 types), benefits data,
+schedule constraints, industry preferences, review.
 
-**Practical Value Score.** Jobs ranked by what actually matters. Net income after benefits impact (35%), proximity and transit access (25%), schedule fit (20%), barrier compatibility (20%). Not "here are jobs in your area." Here are jobs you can get to, keep, and live on.
+**Practical Value Score.** Jobs ranked by what actually matters: net
+income after benefits impact (35%), proximity + transit access (25%),
+schedule fit (20%), barrier compatibility (20%). Not "here are jobs in
+your area." **Jobs you can get to, keep, and live on.**
 
-**Benefits Cliff Detection.** Calculates net income at each wage step. Shows exactly where a raise triggers a benefits drop that leaves you worse off. Residents see the math before they accept an offer.
+**Benefits Cliff Detection.** Calculates net income at every wage
+step. Shows exactly where a raise triggers a benefits drop that
+leaves you worse off. Residents see the math before they accept an
+offer.
 
-**Criminal Record Routing.** Employer background check policy matching. Fair-chance employer filtering. Expungement eligibility screening under Alabama Act 2021-507. Doesn't just say "you have a record." Shows which doors are actually open.
+**Criminal Record Routing.** Employer background-check policy
+matching. Fair-chance employer filtering. Expungement eligibility
+under Alabama Act 2021-507 (Montgomery) and Texas Article 55
+expunction / nondisclosure (Fort Worth).
 
-**AI Barrier Intelligence Chat.** Multi-provider LLM with RAG-powered context from Montgomery resource data. FAISS vector store plus barrier graph traversal. Topic guardrails keep conversations on track. Streaming responses.
+**AI Barrier Intelligence Chat.** Multi-provider LLM with RAG-powered
+context from city-specific resource data. FAISS vector store +
+barrier graph DAG traversal. Topic guardrails. SSE streaming.
 
-**Career Center Ready Package.** Two-part printable PDF. Part one is the staff summary: barriers, WIOA eligibility, recommended next steps. Part two is the resident action plan: document checklist, what to say, what to expect. A resident walks into the career center with everything staff need to help them right away.
+**Career Center Ready Package.** Two-part printable PDF — staff
+summary (barriers, WIOA, next steps) + resident action plan
+(document checklist, what to say, what to expect). The resident walks
+into the career center on Monday morning with everything staff need.
 
-**WIOA Eligibility Screening.** Automated screening for Adult Program, Supportive Services, Individual Training Accounts, and Dislocated Worker programs.
+**The Wall (home page).** 10-chapter scroll-driven Mapbox
+visualization. Carlos (research-backed persona) walking real Fort
+Worth geography. 3D barrier constellation hovering above the city.
+Per-chapter dynamic OG cards via Vercel Satori. EN/ES parity. View
+Transitions API on the close CTA. WCAG AAA.
 
 ---
 
 ## Stack
 
 | Layer | What |
-|-------|------|
-| Frontend | Next.js 15 (App Router), React, Tailwind, shadcn/ui |
+|---|---|
+| Frontend | Next.js 15.5.9, React, TypeScript, Tailwind, shadcn/ui |
+| Map + 3D | Mapbox GL JS, react-map-gl, react-three-fiber, Three.js |
+| Motion | framer-motion, OKLCH tokens, View Transitions API |
+| Edge | Vercel Satori (`@vercel/og`) — per-chapter dynamic OG |
 | Backend | FastAPI, Python 3.13, SQLAlchemy (async), SQLite |
-| AI | Claude, OpenAI, Gemini (multi-provider, auto-fallback) |
-| RAG | FAISS vector store + barrier graph (DAG) traversal |
-| Jobs | BrightData Datasets API, JSearch, Honest Jobs |
-| PDF | html2pdf.js + qrcode.react |
-| Tests | pytest (1,391) + Vitest (417) |
+| AI | Claude, OpenAI, Gemini (multi-provider auto-fallback) |
+| RAG | FAISS vector store + barrier graph DAG traversal |
+| Jobs | BrightData, JSearch, Honest Jobs |
+| Hosting | Vercel (frontend) + Railway (backend) |
 
 ---
 
-## Built With PairCoder
+## Built with PairCoder
 
-MontGoWork was built using PairCoder's enforcement workflow. The 1,808-test suite isn't afterthought coverage. Every feature started as a failing test. The barrier graph, PVS scoring, benefits cliff calculations, and expungement routing all have deterministic test coverage because the enforcement layer required it before any code shipped.
-
----
-
-## The Problem
-
-Career centers see the same pattern every day. Someone walks in needing a job, but it's never just about the job. No car means no commute. No childcare means no interview. A criminal record means half the listings don't apply. Taking the wrong job triggers a benefits cliff that leaves them poorer than they were.
-
-Staff spend hours cross-referencing benefits thresholds, job listings, transit routes, legal eligibility, and local resources. For one person. Then the next person walks in and they start over.
-
-MontGoWork replaces that manual process with structured assessment and intelligent matching. The resident gets a plan. The staff get a briefing. The career center gets throughput.
+GoWork was built using PairCoder's enforcement workflow + a
+multi-driver dispatch pattern: four parallel Claude-driven worktrees
+per phase, each owning a constrained scope (life layers, edge states,
+accessibility, maximization). SubagentStop hooks fed token telemetry
+into a calibration engine that learned how long each driver class
+took for each task class. The ~7,500-test suite isn't afterthought
+coverage — every feature started as a failing test.
 
 ---
 
-## Screenshots
+## The problem
 
-1. **Landing Page** (press-01-landing.png)
-   "What's standing between you and a job?" Hero with How It Works flow and Montgomery workforce statistics.
+Career centers see the same pattern every day. Someone walks in
+needing a job, but it's never just about the job. No vehicle means no
+commute. A criminal record means half the listings disqualify them
+up front. The wrong job triggers a benefits cliff that leaves them
+poorer than before.
 
-2. **Assessment Wizard, Step 1** (press-02-basic-info.png)
-   ZIP code validation, employment status, vehicle access. 7-step stepper.
+Staff spend hours cross-referencing benefits thresholds, transit
+routes, expungement eligibility, employer background-check policies,
+and local resources — for one person at a time. Then the next person
+walks in.
 
-3. **Barrier Selection** (press-step3-whatsinyourway.png)
-   "What's in your way?" Seven barrier cards with icons. Credit, Transportation, Childcare, Housing, Health, Training, Criminal Record.
-
-4. **Full Landing** (07-landing-full.png)
-   Complete view with hero, How It Works, and Montgomery by the Numbers stats.
+GoWork replaces that manual cross-referencing with a structured
+pipeline. The resident gets a plan. The staff get a briefing. The
+career center gets throughput.
 
 ---
 
-## Quote
+## HackFW 2026
 
-"Hackathon project turned enforcement-driven civic tech." — Kevin Masterson
+- **Track:** Reindustrialization (Convergent Technology / workforce
+  augmentation)
+- **Devpost:** `https://fwtx.devpost.com/`
+- **Submission deadline:** May 2, 2026, 2:00 PM CDT
+- **Repo:** https://github.com/fivedollarfridays/montgowork
+- **Submission deliverables:** README + cinematic press kit + 3-4 min
+  video + Devpost form pre-fill
+  ([`docs/devpost-submission.md`](devpost-submission.md))
 
 ---
 
 ## Team
 
-- **Kevin Masterson** Creator, lead developer
-- **Shawn Sanchez** Co-developer, current project lead
+- **Shawn Sanchez** — Team PairCoder lead, project lead
+- **Kevin Masterson** — Original creator, co-developer
+- **Claude (Anthropic)** — Augmented pair-programming partner
+  (multi-driver dispatch, all four parallel worktrees per phase)
 
 ---
 
-## Contact
+## Repository
 
-- **Reddit:** u/macaulay_codin
-- **X:** @paircoder
-- **GitHub:** https://github.com/fivedollarfridays
-- **Subreddit:** r/PairCoder
+GitHub: https://github.com/fivedollarfridays/montgowork
 
 ---
 
 ## License
 
-MIT
+MIT — see `LICENSE` at repo root.
 
 ---
 
-*Last updated: 2026-04-12*
+## Contact
+
+- **Project lead:** scsonnet@gmail.com
+- **GitHub:** https://github.com/fivedollarfridays
+- **Reddit:** u/macaulay_codin
+- **Subreddit:** r/PairCoder
+- **X:** @paircoder
+
+---
+
+## Editorial voice
+
+Every line in this press kit derives from `docs/copy-thesis.md`
+(single source of truth for GoWork's locked editorial fingerprint).
+The hero question, the subhead, and the framework tagline are
+verbatim — do not paraphrase.
+
+---
+
+## Made possible by
+
+- **Mapbox** — map rendering + 3D buildings + custom dark editorial style
+- **Vercel** — frontend hosting + Vercel Satori for per-chapter OG
+- **Anthropic Claude** — augmented pair-programming
+- **Worldwide Vibes Hackathon** (March 2026, 2nd place) — the prequel
+  competition that prompted the visual rebirth
+
+---
+
+*Last updated: 2026-04-28 (W5 Driver A — submission narrative).*

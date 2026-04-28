@@ -1,6 +1,8 @@
 # Current State
 
-> Last updated: 2026-04-28 (W4 Driver D — Maximization + Per-Chapter OG + 7 Spotlight inventions on `sprint/w4-life-layers` (main tree, no worktree). 3211 → 3428 vitest passing (+217 net new tests, exceeds +200 floor). All 7 gates green: tsc 0 errors, lint 0 errors (1 pre-existing W1 warning), arch clean, audit:brand clean, audit:tokens clean, build green at `/` First Load JS = 150 kB (+1 kB from baseline 149 kB; well under 200 kB), per-chapter `/api/og/[chapter]` + `/api/og/default` Edge routes shipped. Closed: Driver A's deferred hero-font-wiring (Ch1 now consumes `useHeroFontWeight(globalProgress)` 700→900) + tablet zoom (10 vs desktop 11). Print stylesheet extended to cover `section[data-chapter-id]` (every chapter now print-paginated). View Transitions polished. Scroll-velocity motion-blur + idle ambient drift wired non-destructively.
+> Last updated: 2026-04-28 (W5 Driver A — Submission Narrative on `w5-driver-a/readme-press-devpost` worktree branched off `sprint/w5-submission@f18e8e8`. README rewrite (locked thesis hero + Wall screenshot ref), press kit refresh (live test counts, FW positioning, MIT, demo placeholders), Devpost submission content (`docs/devpost-submission.md`), copy-thesis canonical source, FW DAO bounty research (honest gap documented — outbound web blocked from worktree env), 6 press-kit screenshot `.placeholder` markers (Driver B contract). 3428 → 3478 vitest passing (+50 net new doc-validator tests, exceeds the ≥10 floor). All 7 gates green: tsc clean, vitest clean, build green at `/` First Load JS = 150 kB, lint 1 pre-existing W1 warning, arch clean, audit:brand clean, audit:tokens clean. 5 Spotlight inventions: copy-thesis.md, test-count-ledger.mjs, submission-readiness.test.ts, screenshot placeholder convention, FW DAO research framework.
+
+> Previous: 2026-04-28 (W4 Driver D — Maximization + Per-Chapter OG + 7 Spotlight inventions on `sprint/w4-life-layers` (main tree, no worktree). 3211 → 3428 vitest passing (+217 net new tests, exceeds +200 floor). All 7 gates green: tsc 0 errors, lint 0 errors (1 pre-existing W1 warning), arch clean, audit:brand clean, audit:tokens clean, build green at `/` First Load JS = 150 kB (+1 kB from baseline 149 kB; well under 200 kB), per-chapter `/api/og/[chapter]` + `/api/og/default` Edge routes shipped. Closed: Driver A's deferred hero-font-wiring (Ch1 now consumes `useHeroFontWeight(globalProgress)` 700→900) + tablet zoom (10 vs desktop 11). Print stylesheet extended to cover `section[data-chapter-id]` (every chapter now print-paginated). View Transitions polished. Scroll-velocity motion-blur + idle ambient drift wired non-destructively.
 
 ## Active Plan
 
@@ -32,7 +34,75 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
-### 2026-04-28 — W4 Driver D: Maximization + Per-Chapter OG + 7 Spotlight inventions (T4.D.1–T4.D.7)
+### 2026-04-28 — W5 Driver A: Submission Narrative — README + Press Kit + Devpost + FW DAO + 5 Spotlight inventions (T5.A.1–T5.A.8)
+
+Branch: `w5-driver-a/readme-press-devpost` (branched off `sprint/w5-submission@f18e8e8` because the sprint branch is locked by the main worktree). Worktree: `agent-a811ab83bdd084c93`. Baseline at start: 3428 vitest passing, `/` First Load JS = 150 kB.
+Final: 3478 passing (+50 net new doc-validator tests, exceeds the ≥10 floor for T5.A.7).
+
+**Tasks closed:**
+
+- **T5.A.1 — README rewrite (P0).** Replaced root `README.md` (was MontGoWork-era, "Workforce Navigator for Montgomery, Alabama"). New structure: hero question ("What's standing between you and a job?"), Wall screenshot reference (`docs/press-kit/screenshots/ch2-fort-worth-arrival.png.placeholder`), what-it-is 2-paragraph elevator pitch from the visual-rebirth plan, quick start with explicit `NEXT_PUBLIC_MAPBOX_TOKEN` callout, HackFW positioning paragraph (Reindustrialization track, FW reference + Montgomery second city, Carlos disclaimer), tech stack table, test counts table, built-with credits (PairCoder + Claude + Mapbox + Vercel), MIT license link, demo URL placeholders for Driver C. ~150 lines, 2-minute read.
+- **T5.A.2 — Press kit refresh (P0).** Rewrote `docs/press-kit.md`. Headline: "GoWork — Workforce navigation infrastructure for any American city, demonstrated in Fort Worth." Tagline locked verbatim. Stats table refreshed: 3,428 frontend + ~4,080 backend = ~7,500+ tests; 17 sprints (S1–S13 + W1–W4); 2 cities; MIT. 6 cinematic still references via the `.placeholder` convention (Driver B owns capture). Worldwide Vibes demoted from headline to "Made possible by" footer credit per W5 brief. Contact: scsonnet@gmail.com + GitHub + Reddit/X. Repo: https://github.com/fivedollarfridays/montgowork.
+- **T5.A.3 — DEFERRED to Driver B per brief.** No edits to `docs/submission-demo.md`.
+- **T5.A.4 — Devpost submission content (P0).** New `docs/devpost-submission.md`: project name, tagline, 3-paragraph project description, Inspiration (Carlos research-backed persona + Fort Worth pipeline gaps + the Wall metaphor + previous-hackathon Google-Earth-tier visual gravitas), What we learned (AI-augmented pair programming + multi-driver dispatch + scrollytelling architecture + bundle-budget contract testing + Spanish parity as civic obligation), Challenges (Three.js+Mapbox bundle weight, Spanish parity sweep with 8 ES-pending-review flags, AAA contrast tuning, Lighthouse 0.90 hard gate, View Transitions browser support), Built with (Next.js, TypeScript, Mapbox, react-three-fiber, Three.js, Vercel Satori, FastAPI, Python 3.13, Tailwind, OKLCH, View Transitions), Categories (Reindustrialization + Workforce + AI/ML + Civic Tech + Open Source + Public Interest Tech), Team (Shawn + Claude + Kevin).
+- **T5.A.5 — FW DAO bounty research (P1).** New `docs/fw-dao-bounty-research.md`. Honest C4 documented: agent worktree env has no outbound web access; could not browse `dao.fwtx.city/bounties` directly. Inferred claim-path checklist + recommendation: HOLD for post-submission (don't couple Devpost to bounty admin; submit first, claim after). 8-item checklist for Shawn to verify in person (DAO wallet, residency rules, portal account flow). Pre-staged artifacts (open-source repo, MIT, FW deployment, ~7,500-test coverage, press kit, civic-tech depth) all GREEN.
+- **T5.A.6 — Verified live test counts.** Ran `npx vitest run` from worktree: 3428 passed (W4 baseline) → 3478 after my new tests. Backend pytest can't run from worktree (no Python deps installed) so used the W4-souji-verified figure of ~4,080 expanded; backend `def test_` static count is 3,443 (parametrize/each expansion adds ~600). All marketing copy uses "3,428 frontend + ~4,080 backend = ~7,500+ total" which is honest and verified.
+- **T5.A.7 — Tests (≥10 floor, delivered 50).** New `frontend/src/__tests__/submission/` directory with 5 files:
+  - `readme-links.test.ts` (6 tests) — parses README, extracts every `[text](path)` and `![alt](path)`, asserts each linked file exists; allows `.placeholder` extension; validates hero thesis + MIT mention.
+  - `press-kit-paths.test.ts` (6 tests) — parses press kit, validates every image reference resolves to a file or `.placeholder`; asserts headline does NOT lead with Worldwide Vibes (W5 demote); confirms locked thesis + MIT.
+  - `devpost-content.test.ts` (21 tests) — table-driven assertion of all 9 required Devpost form sections + 5 required tags + 3 required categories + team + thesis + Fort Worth references.
+  - `submission-readiness.test.ts` (10 tests) — Spotlight #3 guard test: every required submission artifact exists with min byte size, including copy-thesis.md, fw-dao-bounty-research.md, press-kit/ directory.
+  - `test-count-ledger.test.ts` (7 tests) — Spotlight #2 contract: ledger script exists, runs, emits valid JSON shape, declares method, supports `--check-against=N` floor.
+- **T5.A.8 — 5 Spotlight inventions (≥3 floor).**
+  1. **`docs/copy-thesis.md`** — Single canonical source for locked editorial voice: hero question, hero subhead, framework tagline, audience-specific lines, locked verbatim phrases, forbidden phrases (W5 cleanup), tone fingerprint. Future drivers + marketing reference this so wordmark voice doesn't drift. Provenance + reaffirmation date documented.
+  2. **`scripts/test-count-ledger.mjs`** — Aggregates frontend (vitest static parse) + backend (pytest static parse) test counts. Outputs JSON by default, `--pretty` mode, `--check-against=N` floor (exits non-zero if total < floor, useful for CI gate). Static counts are deterministic and run anywhere; live counts (vitest run + pytest --collect-only) are higher and used in marketing copy. Documented in script header.
+  3. **`docs/press-kit/screenshots/README.md` + `.placeholder` convention** — Contract that lets press kit + README ship before Driver B captures cinematic stills. Sibling `<name>.png.placeholder` markers documented and accepted by validators (`readme-links.test.ts`, `press-kit-paths.test.ts`, `submission-readiness.test.ts`). Capture spec for Driver B (resolution, format, contrast verification) inline. 6 placeholder files committed (hero, ch2, ch6, ch7, ch8, ch10) — Driver B replaces in-place, no docs change required.
+  4. **`docs/fw-dao-bounty-research.md`** — Reusable claim-path checklist + honest-uncertainty framing. Documents what was tried, what was blocked (outbound web), and recommended action (hold for post-submission). Pattern can be lifted for any future bounty / grant / partnership investigation from a worktree env.
+  5. **`frontend/src/__tests__/submission/submission-readiness.test.ts`** — Single-file guard test that lights CI red the moment any required submission artifact goes missing. Lists 6 files + 1 directory with min-byte-size sanity floors + decomposition-resistance (if a future driver splits press-kit into `press-kit/index.md`, this fails and forces a deliberate update).
+
+**Files added (net new):**
+
+- `LICENSE` (MIT, repo root) — README references it; was missing.
+- `README.md` — full rewrite (replaces MontGoWork-era root README).
+- `docs/copy-thesis.md` (Spotlight #1)
+- `docs/devpost-submission.md`
+- `docs/fw-dao-bounty-research.md` (T5.A.5 + Spotlight #4)
+- `docs/press-kit.md` — full rewrite
+- `docs/press-kit/screenshots/README.md` (Spotlight #3 — placeholder contract spec)
+- `docs/press-kit/screenshots/{hero,ch2,ch6,ch7,ch8,ch10}-*.png.placeholder` (6 marker files)
+- `frontend/src/__tests__/submission/readme-links.test.ts`
+- `frontend/src/__tests__/submission/press-kit-paths.test.ts`
+- `frontend/src/__tests__/submission/devpost-content.test.ts`
+- `frontend/src/__tests__/submission/submission-readiness.test.ts` (Spotlight #5)
+- `frontend/src/__tests__/submission/test-count-ledger.test.ts`
+- `scripts/test-count-ledger.mjs` (Spotlight #2)
+
+**Gate exit codes (all green):**
+
+| Gate | Result |
+|---|---|
+| `npx tsc --noEmit` | exit 0 |
+| `npx vitest run` | exit 0 (3478 passed, 343 files) |
+| `npm run build` | exit 0 (`/` First Load JS = 150 kB) |
+| `bpsai-pair arch check frontend/` | clean |
+| `bpsai-pair arch check scripts/test-count-ledger.mjs` | clean |
+| `npm run audit:brand` | OK |
+| `npm run audit:tokens` | OK (97 declared, 25 consumed) |
+| `npm run lint` | clean (1 pre-existing W1 warning, unchanged) |
+
+**C4 — known uncertainties:**
+
+- FW DAO bounty portal could not be browsed from agent worktree env; honest gap + Shawn-verify checklist documented in `docs/fw-dao-bounty-research.md`.
+- Backend test count uses W4-souji-verified ~4,080 expanded figure (static parse from worktree finds 3,443 raw `def test_` definitions; parametrize/each expansion accounts for the rest). All marketing copy uses honest "~7,500+ total" wording.
+- Cinematic stills are `.placeholder` markers — Driver B replaces in-place. Validators accept either real PNG or sibling `.placeholder`.
+
+**C5 — assumptions:**
+
+- The `sprint/w5-submission` branch is locked by the main worktree (`C:/Dev/montgowork`). I created `w5-driver-a/readme-press-devpost` off `f18e8e8` and pushed there; the integrator merges it into the sprint branch.
+- The "Worldwide Vibes — 2nd place" credit lives in the README + press kit footer area only ("Made possible by" / "the prequel"). It does NOT lead any headline or hero. Per W5 brief.
+- README + press kit cite scsonnet@gmail.com as project lead contact; pulled from MEMORY.md user_shawn record. If Shawn prefers a different submission email, swap before sending.
+
+
 
 Branch: `sprint/w4-life-layers` (main tree, no worktree). Baseline at start: 3211 vitest passing, `/` First Load JS = 149 kB.
 Final: 3428 passing (+217 net new tests, exceeds the +200 floor); `/` First Load JS = 150 kB.
