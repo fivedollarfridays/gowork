@@ -24,3 +24,29 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ─── T1.65 — Focus rings + text selection ───────────────────────────────────
+ * 2px cyan focus outline with animated entry (outline-offset 0 → 2px) so
+ * keyboard users get a clear "here you are" signal that doesn't feel jarring.
+ * Reduced-motion users get the static offset thanks to the universal
+ * transition-duration override in motion.css (T1.22).
+ *
+ * ::selection tints the highlight with a 40%-mixed cyan glass — the brand
+ * accent shows even in selected-text states. WCAG: cyan-on-base ≥3:1
+ * (verified by T1.13 contrast script).
+ */
+*:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+  transition: outline-offset 150ms var(--ease-linear-sig);
+}
+
+::selection {
+  background-color: color-mix(in oklch, var(--accent-cyan), transparent 60%);
+  color: var(--fg-primary);
+}
+
+::-moz-selection {
+  background-color: color-mix(in oklch, var(--accent-cyan), transparent 60%);
+  color: var(--fg-primary);
+}
