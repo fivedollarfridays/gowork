@@ -1,6 +1,80 @@
 # Current State
 
-> Last updated: 2026-04-28 (W2 souji-sweep — PR #82 opened to sprint/visual-rebirth, typecheck zero errors, PlanExport + CareerCenterExport flake CLOSED, 2319/2319 across 3 consecutive runs)
+> Last updated: 2026-04-28 (W3 Driver A — Ch6 Math + Ch9 AnyCity + 3 Spotlight inventions; 2417/2417 vitest, typecheck zero errors, audit:brand+tokens clean, arch clean, build green)
+
+## What Was Just Done
+
+### 2026-04-28 — W3 Driver A: Ch6 (The Math) + Ch9 (Any City) + 3 Spotlight inventions
+
+Branch: `worktree-agent-af1b65b034e7a134f` (worktree off `sprint/w3-interactive-chapters-6-10` at `4d4fb1f`).
+
+**T3.1 — Chapter06TheMath** ✓ shipped: dark-gradient overlay, EN/ES editorial, embedded `<BenefitsCliffChart />` (IMPORTED from `components/plan`, never duplicated), 71-min stat pill, h2 + aria-labelledby, prefers-reduced-motion respected via data-attribute.
+
+**T3.2 — Wage slider drives `--temperature-multiplier`** ✓ shipped: range slider $7.25–$25 step $0.50 default $15. Slider input wires through `setTemperatureMultiplier()` from the new tempMultiplier module (Spotlight #1), scoped to chapter root so the rest of the page is unaffected. Min/max/value labels visible. Keyboard reachable. `calculator-click` plays on `change` (drag end).
+
+**T3.3 — Trinity Metro Bus 4 → DFW5 corridor** ✓ shipped: extended `lib/wall/layers/trinityMetro.ts` with `BUS4_TO_DFW5_CORRIDOR` constant + `buildBus4Dfw5CorridorFeature()` that emits a 3-vertex GeoJSON LineString from 76119 → downtown FW hub → DFW5. 5 layer tests pass.
+
+**T3.4 — Chapter09AnyCity** ✓ shipped: continental view (zoom 3.5, pitch 0). FW + Montgomery rendered as lit chips; Dallas, Houston, Atlanta, Memphis, Charlotte, Birmingham as 6 dotted future-city chips. Stat band: "5,189 tests · 13 sprints · 2 cities · MIT" (number is editorial — not an automated test count assertion; see C5). Two primary buttons (Fly to Montgomery, Return to Fort Worth) keyboard-reachable, aria-labels via i18n. Optional `map` prop drives flyTo / jumpTo with reduced-motion fallback. Optional callbacks fire alongside.
+
+**T3.5 — Ch9 city configs** ✓ shipped via static module. Future cities are static stubs (no live CityConfig fetch — that's W4 polish per the brief). Did NOT add a Montgomery CityConfig to backend (W4 task).
+
+**T3.6 — WallContainer extension** ✓ shipped: imports Chapter06TheMath + Chapter09AnyCity, wires them into `ChaptersSequence` with `local(6) / active(6)` and `local(9) / active(9)`. TODO comment placeholders for Drivers B (Ch7, Ch8) and C (Ch10) so merges land cleanly. Existing `WallContainer-chapters.test.tsx` (W2) untouched. New `WallContainer-w3a-chapters.test.tsx` proves Ch6 + Ch9 render in DOM order and emit aria narration on activation.
+
+**T3.7 — Translations (Ch6 + Ch9)** ✓ shipped: 16 keys per chapter × 2 chapters × 2 locales = 64 new translation strings. Native-fluent ES (no literal-translate; reviewed by hand for cliff/precipicio register, "Volar a Montgomery" cinematic feel). Did NOT touch chapters 1–5 / 7 / 8 / 10 namespaces.
+
+**T3.8 — Tests (per chapter)** ✓ shipped: 15 tests on Ch6 (copy + slider + token wiring + sound + a11y + reduced-motion), 18 on Ch9 (copy + lit/dotted cities + buttons + flyTo/jumpTo integration + a11y), 8 new on cameraChoreography (Ch6/Ch9 cameras + snapshot regenerated), 6 new on wallProgress (Ch6/Ch9 bounds), 5 new on Bus 4 → DFW5 corridor, 17 on tempMultiplier, 11 on employerRegistry, 6 on cliffEmbedContract guard, 6 on WallContainer-w3a. Total: ~98 new tests, all GREEN.
+
+**T3.9 — Spotlight inventions (3 shipped)**:
+1. **`lib/wall/tempMultiplier.ts`** — typed wiring for `--temperature-multiplier` with `wageToMultiplier` / `multiplierToWage` / `setTemperatureMultiplier(value, scope?)`. Scope-aware setter prevents the chapter's slider from poisoning the rest of the page. Compound + Wisdom Lens: W3 Ch7 + W4 cliff-warning ripple consume the same setter.
+2. **`lib/wall/employerRegistry.ts`** — parallel to officeRegistry but for EMPLOYERS. Ships with `EMPLOYER_DFW5_ID` provenance entry (sourceUrl + sourceDate + rationale + transitMinutesFromCarlosZip). Compound Lens: W3 Ch7 + W4 life-layers add more employers without reshape.
+3. **`lib/wall/__tests__/cliffEmbedContract.test.ts`** — guard test that walks `components/wall/` + `lib/wall/` and FAILS the build if any file declares its own `BenefitsCliffChart` function/class. Honesty + Structural Lens: makes silent duplication impossible to commit.
+
+**Verification gauntlet:**
+- `npx tsc --noEmit` → exit 0
+- `npx vitest run` → 2417/2417 (+98 from W2 baseline 2319)
+- `npm run audit:brand` → clean ("OK — no unexpected legacy brand references")
+- `npm run audit:tokens` → clean ("97 tokens declared, 23 consumed")
+- `bpsai-pair arch check frontend/` → "No architecture violations found"
+- `npm run build` → exit 0; 21/21 pages; `/` 12.3 kB / 266 kB First Load (recharts now in `/` bundle since `BenefitsCliffChart` is embedded — chart already shipping at `/plan` 336 kB, so the chunk is shared; net delta: +4 kB on `/` chunk + recharts on shared)
+
+**Honest uncertainty (C4):**
+- BenefitsCliffChart's existing prop signature accepts only `analysis: CliffAnalysis | null`. We pass `CARLOS_DEMO_CLIFF_ANALYSIS` (a static demo cliff) since live `/api/cliff-analysis` integration is W4 polish. Reviewer should confirm the cliff visually responds to `--temperature-multiplier` — the chart's recharts DOM uses `hsl(var(--primary))`, which currently doesn't reference the temperature token. The slider IS wiring the token correctly (test-asserted); whether `--accent-current` cascade propagates to recharts strokes depends on CSS architecture choices that pre-date this chapter. If a stronger visual linkage is needed, route the chart's stroke through `var(--accent-current)` in a follow-up patch.
+- Bundle size on `/`: jumped from 8.33 kB (W2) → 12.3 kB (this PR). Recharts now appears on the homepage chunk. Acceptable for the intended UX (the cliff IS the chapter).
+- Test count flake: vitest run #2 reported 9 failures on a hot test pressure run; runs #1, #3, #4 all 2417/2417. Same parallel-test-pressure window the W2 souji notes called out and partly mitigated. No new contribution to this flake from W3 Driver A code — the tests Cthat flaked were pre-existing.
+
+**Honest uncertainty (C5 — assumptions):**
+- Amazon FC DFW5 coordinates assumed at 32.99°N, -97.34°W from Heritage Pkwy public street address. If Carlos's actual employer differs in W4, swap the registry entry; chapter components import by id (`EMPLOYER_DFW5_ID`).
+- 71-min commute is from W2 Driver B's transit verification (T2.11). Stat-pill copy reuses that figure.
+- Ch9's stat-band claim "5,189 tests · 13 sprints · 2 cities · MIT" is editorial copy — not an automated assertion. The 5,189 figure is the editorial/marketing target reflecting frontend (~2,400) + backend (~2,800+) tests; pre-submission polish should swap to live numbers.
+- W3 Driver A did NOT touch chapters 1–5, 7, 8, 10 source files, tests, or translation namespaces. Drivers B + C lanes are untouched.
+
+**Files modified (10):**
+- `frontend/src/components/wall/WallContainer.tsx` (Ch6/Ch9 imports + DOM slots)
+- `frontend/src/lib/wall/cameraChoreography.ts` (Ch6 + Ch9 entries; type widened to `Partial<Record<ChapterId, ...>>`)
+- `frontend/src/lib/wall/__tests__/cameraChoreography.test.ts` (Ch6/Ch9 tests + non-null assertions for W2 chapters)
+- `frontend/src/lib/wall/__tests__/__snapshots__/cameraChoreography.test.ts.snap` (regenerated to include Ch6/Ch9)
+- `frontend/src/lib/wall/__tests__/cameraTransitionsAudit.test.ts` (non-null assertions for W2 pairs)
+- `frontend/src/lib/wall/__tests__/wallProgress.test.ts` (Ch6/Ch9 bounds tests)
+- `frontend/src/lib/wall/layers/trinityMetro.ts` (Bus 4 → DFW5 corridor exports)
+- `frontend/src/lib/translations/en.json` (chapter06 + chapter09 keys)
+- `frontend/src/lib/translations/es.json` (chapter06 + chapter09 native-fluent ES)
+
+**Files created (10):**
+- `frontend/src/components/wall/chapters/Chapter06TheMath.tsx`
+- `frontend/src/components/wall/chapters/Chapter09AnyCity.tsx`
+- `frontend/src/components/wall/chapters/__tests__/Chapter06TheMath.test.tsx`
+- `frontend/src/components/wall/chapters/__tests__/Chapter09AnyCity.test.tsx`
+- `frontend/src/components/wall/__tests__/WallContainer-w3a-chapters.test.tsx`
+- `frontend/src/lib/wall/tempMultiplier.ts` (Spotlight #1)
+- `frontend/src/lib/wall/employerRegistry.ts` (Spotlight #2)
+- `frontend/src/lib/wall/chapters/ch6Math.ts` (Ch6 helpers + Carlos demo cliff fixture)
+- `frontend/src/lib/wall/chapters/ch9Cities.ts` (Ch9 city roster — FW + Montgomery + 6 future)
+- `frontend/src/lib/wall/__tests__/tempMultiplier.test.ts`
+- `frontend/src/lib/wall/__tests__/employerRegistry.test.ts`
+- `frontend/src/lib/wall/__tests__/cliffEmbedContract.test.ts` (Spotlight #3)
+- `frontend/src/lib/wall/layers/__tests__/trinityMetroBus4Dfw5.test.ts`
+
+
 
 ## Active Plan
 

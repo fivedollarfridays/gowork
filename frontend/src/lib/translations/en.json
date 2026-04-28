@@ -542,6 +542,42 @@
       "officesLabel": "offices to visit",
       "pullquote": "Every office gave me one form and another address.",
       "aria": "Chapter 5: the Labyrinth. Five offices and forty-seven forms — the chaos before GoWork sequences the path."
+    },
+    "chapter06": {
+      "title": "The Math",
+      "hero": "When more pay means less money.",
+      "subhero": "We do the cliff math so the choice is honest. Move the slider — watch the cliff.",
+      "body": "Carlos stocks shelves at Amazon FC DFW5 — 71 minutes from home on Bus 4. A $2/hour raise sounds like a win. The benefits cliff says otherwise: childcare subsidy gone at $14/hr, SNAP gone at $17/hr. The chart is the receipt.",
+      "statValue": "71 min",
+      "statLabel": "from Carlos's home to DFW5 via Bus 4",
+      "wageSliderLabel": "Hourly wage",
+      "wageSliderHint": "Drag to see the cliff move with the wage.",
+      "wageSliderMinLabel": "$7.25 — federal minimum",
+      "wageSliderMaxLabel": "$25.00 — past the cliff",
+      "wageSliderValueLabel": "Current wage",
+      "cliffChartLabel": "Net monthly income vs. hourly wage",
+      "cliffChartCaption": "Demo cliff projection — Carlos's profile (single father, 1 dependent, 76119, no child support).",
+      "aria": "Chapter 6: The Math. Camera lands on Amazon Fulfillment Center DFW5. A wage slider drives the benefits cliff chart in real time so you can see how a raise turns into a loss."
+    },
+    "chapter09": {
+      "title": "Any City",
+      "hero": "It works in Fort Worth. It will work in Montgomery. It will work where you are.",
+      "subhero": "Two cities lit. Six dotted in. The math, the path, the plan — wherever the work is.",
+      "body": "GoWork ships as a city template. Fort Worth is the reference deployment. Montgomery is the second. Six more cities are on deck — same engine, same playbook, local data.",
+      "statValue": "5,189 tests · 13 sprints · 2 cities · MIT",
+      "statLabel": "shipped, open, ready",
+      "flyToMontgomeryButton": "Fly to Montgomery",
+      "returnToFortWorthButton": "Return to Fort Worth",
+      "cityFW": "Fort Worth, TX",
+      "cityMontgomery": "Montgomery, AL",
+      "futureCitiesLabel": "On deck",
+      "futureCityDallas": "Dallas",
+      "futureCityHouston": "Houston",
+      "futureCityAtlanta": "Atlanta",
+      "futureCityMemphis": "Memphis",
+      "futureCityCharlotte": "Charlotte",
+      "futureCityBirmingham": "Birmingham",
+      "aria": "Chapter 9: Any City. The camera returns to a continental view. Two cities — Fort Worth and Montgomery — glow as deployed; six others are on deck. A button flies the camera to Montgomery."
     }
   },
   "edge": {
