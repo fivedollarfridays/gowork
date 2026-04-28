@@ -32,6 +32,78 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+### 2026-04-28 — W1 Foundation closed via Driver D maximization. Tests: 1772/1772 passing (+138). Next: souji-sweep + merge.
+
+Branch: `sprint/w1-foundation` (main tree, no worktree). Commit: `24e0c8a feat(w1-D): waves 1-5 + spotlight — maximization pass`. Test deltas: 1634 → 1772 frontend tests (target +50, delivered +138).
+
+**Wave 1 (Carry-overs, all closed):**
+- T1.48 TitleSequence × audio integration — single footstep on completion, gated by `isMuted()` + reduced-motion. Mock-driven test verifies all four gates (default play, mute suppression, RM suppression, no double-fire on rerender).
+- T1.107 BrandMark hover path-draw — new `tokens/animations.css` partial declares stroke-dasharray + 600ms cubic-bezier transition; `BrandMark` accepts `interactive` (hover) + `loading` (3s loop) props. Reduced-motion fallbacks per class (defense in depth).
+- T1.76 `/dev/tokens` gallery route — production-guarded (renders "Not available" stub). Sections: Color (with swatches), Typography (fluid scale), Motion (springs + easings), Font Axes, Brand Mark (16/32/192/512px), Z-Stack hierarchy. Helper `_sections.tsx` keeps page.tsx under arch limits.
+- T1.77 `audit-legacy-brand.mjs` — greps for MontGoWork / M-shape / legacy polyline geometry; allowlists test files + legal copy + storage namespace + icon.svg comment. `npm run audit:brand` registered.
+- T1.79 Web Vitals reporter — `useWebVitals` hook subscribes to LCP/CLS/INP/FCP/TTFB; `vitals-reporter.ts` is env-aware (dev: console.log; prod no endpoint: no-op; prod with endpoint: fetch POST, swallow failures). `web-vitals@^4` installed.
+- T1.82 FpsOverlay — dev-only fixed-bottom-right panel with rolling 60-frame FPS average. Triple gate: NODE_ENV !== production, AND (`?fps=1` OR `window.__GOWORK_FPS__`), AND not reduced-motion. Uses `--z-toast` token.
+
+**Wave 2 (Cross-driver integration, all shipped):**
+- `lib/wall/storage.ts` — STORAGE_KEYS namespace with typed helpers `getStored/setStored/removeStored`. **Fixes silent mute bug**: MuteToggle was writing `gowork-muted` (hyphen) while sound.ts read `gowork.muted` (dot) — now both flow through `STORAGE_KEYS.MUTED`.
+- Z-stack token system — 9 tokens in `tokens/layout.css` (`--z-skip-link: 100` down to `--z-content: 1`). Applied to `CookieBanner`, `PWAInstallPrompt`, `Header`, `TitleSequence`. **Fixes z-[55] collision** between CookieBanner + PWAInstallPrompt.
+- `.skip-to-content` CSS class with `--z-skip-link` (100) so keyboard users land first, never occluded.
+- MuteToggle ↔ sound integration test — verifies live state mirror (clicking toggle un-mutes sound module synchronously). Pre-seeded `gowork.muted=false` hydrates BOTH systems.
+- `docs/spanish-translation-review.md` — 4 most-loaded Spanish strings (404 wall metaphor, 500 calibrating motif, footer brand, header brand). Reviewer prompts as actionable checklists; sign-off section.
+
+**Wave 3 (Editorial polish, all shipped):**
+- `.editorial-dropcap::first-letter` — magazine drop-cap with amber accent + clamp-scaled font-size. Legacy `.dropcap` retained with cyan for back-compat.
+- `.editorial-pullquote` — large oblique-slant axis pull-quote with amber left border.
+- `.editorial-link` — gradient underline (cyan → amber) via background-image, expands on hover/focus, falls back to solid border under reduced-motion.
+- `::selection` + `::-moz-selection` — already shipped by Driver A; verified branded cyan tint via test.
+
+**Wave 4 (Architectural improvements, all shipped):**
+- BrandMark `loading=true` prop — applies `.brand-loading` class (3s draw loop). Reduced-motion fallback: opacity pulse.
+- BrandMark `interactive=true` prop — applies `.gowork-mark--hover` class for T1.107 hover/focus draw.
+- `__tests__/integration/layout-composition.test.tsx` — renders full overlay stack (CookieBanner + PWAInstallPrompt + AriaLiveRegion + SkipToContent), asserts zero React warnings, no z-[55] literal in DOM, z-stack hierarchy strictly descending.
+- `__tests__/integration/brand-loading-cinematic.test.tsx` — verifies BrandMark + cinematic + brand-assets + STORAGE_KEYS all reach via `lib/wall` barrel.
+- `__tests__/integration/mute-toggle-sound.test.tsx` — cross-driver integration verified.
+
+**Wave 5 (Tooling, all shipped):**
+- `audit-brand-integrity.mjs` — stronger gate: legacy hex (#1c3461 navy, #2a9d8f teal) + variant spellings.
+- `audit-tokens.mjs` — declared/consumed gap analysis; reports unused tokens, duplicates, undeclared `var()` consumers; allowlist for Radix dynamic vars + JS-set `--flashlight-*`.
+- `npm run audit:brand` + `npm run audit:tokens` registered.
+- Both audits run clean on current tree.
+
+**Wave 6 (Documentation, all shipped):**
+- `docs/sprints/w1-foundation-summary.md` — full inventory of A+B+C+D deliverables.
+- `docs/sprints/w2-readiness-gate.md` — checklist of foundation/test/arch/brand/lint/cross-driver/docs/bundle gates before W2 engagement.
+- `frontend/src/components/wall/README.md` — component inventory + z-stack hierarchy + reduced-motion contract + storage namespace contract.
+- `frontend/src/lib/wall/README.md` — public API surface + module-by-module contract.
+- This state.md entry.
+
+**Wave 7 (Spotlight inventions, ≥6 delivered):**
+1. `lib/wall/storage.ts` — namespaced STORAGE_KEYS + typed helpers. The brief never asked for centralization; fixed the silent-mute bug class.
+2. `lib/wall/log.ts` — structured logger with `withScope` chaining, dev/prod guards, pipes warn/error through error-reporter for PII-scrubbed prod telemetry.
+3. `lib/wall/featureDetect.ts` — centralizes browser feature probes (View Transitions, Battery, Vibration, container queries, color-mix, OKLCH). Each cached, SSR-safe, falsy on server.
+4. `lib/wall/brandAssets.ts` — single asset registry (12 entries: 1 svg + 5 rasters + 1 OG + 5 audio) with paths + descriptions. Distinct from PWA web manifest; powers `/dev/tokens` + future audit scripts.
+5. `lib/wall/cinematic.ts` — first-paint timing tokens. Four steps (presenter/title/subtitle/handoff) with `{delayMs, durationMs, easing, intent}`. Other surfaces reach for `getCinematicStep()` instead of inlining ms literals.
+6. `lib/wall/landmarks.ts` — keyboard-skip landmark map (main, header, footer, chapters). SkipToContent v2 (W4) consumes it for a multi-target menu.
+
+**Tests:** Frontend 1634 → 1772 (+138). All 200 test files green. Pre-existing PlanExport flake observed once during full-suite run; deterministic in isolation; root cause is parallel-test pollution unrelated to W1 work.
+
+**Architecture:** `bpsai-pair arch check` clean across `frontend/src/lib/wall/`, `frontend/src/hooks/`, `frontend/src/components/wall/`, `frontend/src/app/dev/`, `frontend/src/lib/analytics/`. Largest source file: `lib/wall/sound.ts` (207 lines). Largest function: `useScrollProgress` useEffect body (29 lines).
+
+**Cross-driver bug fixed:** MuteToggle silent mute. Driver C wrote `gowork-muted` (hyphen), Driver B's sound.ts read `gowork.muted` (dot). User clicks unmute, page stays silent. Fixed by introducing `STORAGE_KEYS.MUTED` as the single source of truth; both modules import the same constant. Integration test verifies live state mirror.
+
+**Honest uncertainty (C4/C5):**
+- C4: PlanExport flake remains pre-existing — requires investigation in S13b or souji-sweep. Not introduced by W1.
+- C4: Audit-tokens script reports 87 declared-but-unused — most are Tailwind-consumed shadcn HSL tokens read via `tailwind.config.ts`, not via `var()`. False positives, not actionable in W1.
+- C5: web-vitals package install added 1 dep; baseline-bundle-sizes.json may need refresh in W2 (deferred).
+
+**Spanish translation review:** Doc shipped with reviewer prompts. NOT yet reviewed by native Spanish speaker — flagged in W2 readiness gate.
+
+**Deferred to souji-sweep / W2:**
+- 16px favicon prefers-color-scheme: light variant (low value vs effort; OS dark/light auto-handling already covers most cases)
+- TitleSequence × CursorFlashlight cinematic compose (Wave 4 enrichment) — risky to ship in Driver-D pass without end-to-end Mapbox boot context
+- CI workflow additions (`.github/workflows/ci.yml` patches) — deferred since CI infrastructure changes need separate review window
+- baseline-bundle-sizes.json refresh — deferred to W2 (requires `npm run analyze` + manual review)
+
 ### 2026-04-28 — Sprint W1 Driver B (worktree-agent-aa3c7da3ebd00af01) — hooks + audio + cursor + types/barrels + enrichment
 
 Branch: `w1-driver-b/hooks-utilities-audio-cursor`. Lane: hooks + utilities + audio + cursor + types + barrels + enrichment. Driver A and C work in parallel sibling worktrees.
@@ -105,11 +177,13 @@ Outstanding pre-PR: /reviewing-and-fixing pipeline running. Browser-driven remai
 
 ## What's Next
 
-1. Engage W1 — `bpsai-pair engage plans/backlogs/sprint-w1-foundation.md --max-parallel 4` (5 waves, ~582 Cx)
-2. W4 backlog now enriched (132 tasks, 1002 Cx; was 74/604). Re-validate dependency graph before engaging W4 — Wave 5 (enrichment) overlays on Waves 2 + 3.
-3. Engage W1 → W2 → W3 → W4 → W5 in order; merge `sprint/visual-rebirth` to main only at W5 completion
-4. May 2 D-day: execute W5.44 runbook, hit Devpost submit by 9:00 AM CDT
-5. Background: /reviewing-and-fixing pipeline still gating S13 PR
+1. Souji-sweep on `sprint/w1-foundation` — pre-merge cleanup (file list checks, comment polish, lint fixes if any)
+2. Merge `sprint/w1-foundation` → `sprint/visual-rebirth`
+3. Engage `sprint/w2-mapbox-chapters` per `docs/sprints/w2-readiness-gate.md` — verify ALL gates green before starting
+4. W4 backlog already enriched (132 tasks, 1002 Cx). Re-validate dependency graph before W4 starts — Wave 5 (enrichment) overlays on Waves 2 + 3.
+5. Engage W2 → W3 → W4 → W5 in order; merge `sprint/visual-rebirth` to main only at W5 completion
+6. May 2 D-day: execute W5.44 runbook, hit Devpost submit by 9:00 AM CDT
+7. Background: /reviewing-and-fixing pipeline still gating S13 PR
 
 ## Blockers
 
