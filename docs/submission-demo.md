@@ -1,8 +1,15 @@
-# MontGoWork — Hackathon Submission Demo Script
+# GoWork — Wall Walkthrough Overlay (HackFW 2026 Submission Demo)
 
-> Live judges' demo. 5-7 minutes of narrative + UI walk-through over the
-> staging environment. Authored T13.111 (S13 Submission Readiness).
-> Dry-run against staging on 2026-04-25 — every beat verified.
+> **Audience:** judges & graders watching The Wall live (or via the
+> submission video). **Mode:** chapter-locked scrollytelling demo. The
+> Wall does the storytelling — this overlay tells the demo-runner *when
+> to breathe, when to talk, and what to point at*.
+>
+> Authored W5 Driver B (sprint/w5-submission). The S13-era staging walk
+> (assess → plan → daily) is preserved at `docs/demo-script.md` as the
+> Carlos persona reference; this overlay supersedes it for the
+> submission demo because the Wall *is* the product surface that
+> judges see first.
 
 ---
 
@@ -10,388 +17,250 @@
 
 | Item | Value |
 |------|-------|
-| Frontend | <https://montgowork-staging-web.fly.dev> |
-| Backend | <https://montgowork-staging-api.fly.dev> |
-| Demo data | 10 sessions seeded (5 stall states × 2 cities); deterministic UUIDs (see §A) |
-| Reset (only if state drifts) | `python scripts/qc_reset.py --db-path /app/data/montgowork.db` (run via `fly ssh console --app montgowork-staging-api`) |
-| Smoke | `STAGING_FRONTEND_URL=https://montgowork-staging-web.fly.dev STAGING_API_URL=https://montgowork-staging-api.fly.dev bash scripts/staging-smoke.sh` (must report 19/19 PASS) |
+| Demo URL | `https://gowork.fly.dev` (or local: `http://localhost:3000`) |
+| Required browser | Chrome 135+ (View Transitions API on by default) |
+| GPU | Hardware-accelerated (Three.js Ch8 graph + Mapbox WebGL) |
+| Mapbox token | Set as `NEXT_PUBLIC_MAPBOX_TOKEN`; verify before share-screen |
+| Audio | Optional — Wall has no required audio; voiceover lives in the video |
+| Recording (if recording) | OBS / Loom / QuickTime, 1920×1080 @ 60fps |
 
-> The demo runs end-to-end on staging — no localhost required. Every URL
-> in the beats below is copy-paste-runnable.
-
----
-
-## 1. Pitch (90 seconds, before any UI)
-
-> **Read aloud, do not show slides.**
-
-A job board tells you what jobs exist. **MontGoWork tells you why you
-can't get one** — and then helps you fix it.
-
-In Montgomery, Alabama and Fort Worth, Texas, the people who need work
-the most are stuck behind a wall of barriers a job board can't see:
-no transportation, a record from ten years ago, a credit score that
-disqualifies them from the apartment they need to keep the job, a
-benefits cliff that makes a $2/hr raise cost them $400 in SNAP.
-
-MontGoWork is a worker companion that maps those barriers, builds a
-personalized plan around them, and keeps the worker moving with a daily
-digest, a stall detector, and a case manager looking over their
-shoulder. Today we'll show you a worker arriving with nothing, walking
-through their personal plan, generating a tailored resume, tracking
-applications, and the case manager intervening when the worker stalls.
-We'll also show you the compliance gate — the same one a city contract
-will require — and the 12 production-grade fixes we shipped this
-sprint to make this submission-ready, not hackathon-ready.
-
-**The differentiator:** we are not a job-search tool. We are a
-**barrier-removal tool** with a job-search tool inside it.
+> **Total runtime:** 5:40 (340s). Budget for ≤6 minutes including
+> on-camera intro / outro. Stop scrolling at Ch10 CTA — do not navigate
+> away during the take.
 
 ---
 
-## 2. Demo flow (5-7 min — total 4:45 + 30s slack)
+## 1. Chapter-locked walkthrough overlay
 
-> Pre-load all 7 tabs (§5). Speak in the present tense ("the worker
-> sees..."), not "if you click here you'd see...".
+Each chapter beat lists: **timing window** · **what the Wall is doing
+visually** · **what the demo-runner says** · **interaction trigger**
+(if any). Scroll progress drives chapter changes — let the Wall
+animate; do **not** scroll faster than the timing windows below.
 
-### Beat 1 — Worker arrival (60s)
+> Pacing rule: when in doubt, *let it breathe*. The Wall is a film,
+> not a slide deck.
 
-**URL:** <https://montgowork-staging-web.fly.dev/>
+### Ch1 — Continental (0–30s) · *Hover and breathe*
 
-What you do:
+- **Visual:** America from above, single pin lit on Fort Worth. Hero
+  question: "What's standing between you and a job?"
+- **Narration:** "What's standing between you and a job? That's the
+  question every workforce site dodges. The Wall doesn't."
+- **Interaction:** none. **Hold the scroll for the full 30 seconds.**
+  Most demo-runners cut this short — that's a mistake. The hero
+  question must land before any motion happens.
+- **Visual anchor:** the single Fort Worth pin in the dark.
 
-1. Land on home. Read the hero question + city stats aloud
-   ("Montgomery poverty 21.4%. Labor participation 58.2%. We build
-   for the 30% the market leaves behind.").
-2. Click **Get Your Plan** → `/assess`.
-3. Walk the assessment for a `medium` Montgomery session (barriers
-   *transportation, credit, fair-chance*). The demo session is
-   pre-seeded; click through defaults — `/plan` reads from the
-   seeded session.
-4. Open `/plan` (NavBar → Plan).
+### Ch2 — City Arrival (30–50s) · *Dolly into Fort Worth*
 
-What the judges see:
+- **Visual:** Camera dives from continental to city altitude. Trinity
+  Metro routes thread the map in cyan.
+- **Narration:** "Carlos lives here. ZIP 76119. East of downtown.
+  Trinity Metro routes thread the city — half of them don't reach the
+  warehouses."
+- **Interaction:** scroll continuously. Camera tween is scroll-driven.
+- **Visual anchor:** cyan transit lines lighting up.
 
-- The **barrier inventory** — every blocker named, ranked, and tagged
-  with "what we'd need to do."
-- The **benefits cliff chart** (`BenefitsCliffChart` component) — a
-  $2/hr raise vs. SNAP loss, drawn from live ALICE/SNAP rules.
-- The **personalized action plan** — Monday-morning checklist
-  (`MondayMorning`), career-center handoff, and resume / credit
-  callouts.
-- The **share button** — generates a redacted token-gated link the
-  worker can send to a case manager (PII-stripped per T13.71 fix).
+### Ch3 — The Neighborhood (50–70s) · *Meet Carlos*
 
-Lead line: "Every barrier ties to a specific next step, and every step
-has a community resource — and we don't push the worker into a raise
-that costs them more in lost SNAP than it earns."
+- **Visual:** Camera dolly continues to a neighborhood block in
+  76119. Carlos's portrait beat surfaces.
+- **Narration:** "Carlos is 29. Single father of one. Three years
+  past a misdemeanor charge — sentence complete. Four years of
+  warehouse work behind him. He has $300, no car, and four barriers."
+- **Interaction:** scroll. **Pause at the bottom of Ch3 for one
+  beat** — let the four-barriers framing land before the wall reveal.
+- **Visual anchor:** Carlos's neighborhood label "ZIP 76119 — East
+  Fort Worth".
 
-### Beat 2 — Daily loop (60s)
+### Ch4 — The Wall (70–110s) · *Four barriers, named one at a time*
 
-**URL:** <https://montgowork-staging-web.fly.dev/daily>
+- **Visual:** **The wall reveals.** Five offices appear as pins.
+  Paths animate between Carlos's home and each office. The 47-form
+  counter ticks up alongside the office count.
+- **Narration:** "Most workforce sites pretend barriers don't matter.
+  We do the math to prove they do. Criminal record. No transit. No
+  childcare. Bad credit. Each one is a number — 71-minute commute,
+  $1,200/month childcare, 33% of jobs unreachable, 540 credit score."
+- **Interaction:** scroll-driven barrier reveal (Ch4a–4d). Don't
+  rush — each barrier card lands on its own scroll tick. The 47-form
+  counter must finish ticking up before you scroll past Ch5.
+- **Visual anchor:** the **47-form counter** ticking up; barrier
+  pull-quotes ("I came home with $300 and a daughter…").
 
-What you do:
+### Ch5 — The Labyrinth (110–140s) · *Counter lands at 47*
 
-1. Switch to the `/daily` tab. The digest is computed nightly by the
-   T12.20 composer + T12.18 stall detector.
-2. Point at the three sections rendered by `DigestYesterdaySection`,
-   `DigestTodaySection`, `DigestWeekSection`.
-3. If the seeded session has `counts.stall > 0`, the
-   **StallAlert banner** is up — point at it and say "the platform
-   noticed the worker hasn't moved in 10 days; the plan is auto-
-   refreshing to break the stall."
-4. Mark one action checkbox complete on the `/plan` page (toggle in
-   the `JobReadinessResults` panel) and switch back to `/daily`.
+- **Visual:** Labyrinth animation — five offices wired into a chaotic
+  graph of forms, transfers, dead-ends. The "47" counter is now
+  static and bright.
+- **Narration:** "Five offices. Forty-seven forms. Each one says go
+  to the next one. Without GoWork, this is the path. We named it so
+  we could replace it."
+- **Interaction:** scroll. The labyrinth animation runs scroll-tied.
+- **Visual anchor:** "47 forms to fill out" stat label.
 
-What the judges see:
+### Ch6 — The Math (140–180s) · *Cliff slider drag*
 
-- A digest tailored to *yesterday → today → this week*, not a
-  one-size-fits-all dashboard.
-- The **stall detector** — soft / medium / hard / breakthrough levels
-  with corresponding intervention copy.
-- The **plan refresher** firing on `stall_hard` or `barrier_resolved`
-  triggers (T12.24).
+- **Visual:** Camera lands on Amazon FC DFW5. Wage slider appears.
+  Cliff chart renders.
+- **Narration:** "When more pay means less money. Carlos stocks
+  shelves at DFW5 — 71 minutes from home on Bus 4. A $2-an-hour raise
+  sounds like a win. The benefits cliff says otherwise."
+- **Interaction:** **Drag the wage slider from $7.25 to $25**, slowly,
+  in one smooth motion. The cliff color shifts across the entire
+  page as you drag — that color shift is the wow moment for Ch6,
+  don't rush it.
+- **Visual anchor:** cliff chart line dropping at $14/hr (childcare
+  subsidy) and $17/hr (SNAP).
 
-Lead line: "Nightly digest, today's three actions, this week's funnel.
-If the worker stalls 10 days, the plan rewrites itself — no dead
-checklists."
+### Ch7 — The Path (180–230s) · *Carlos's avatar walks 5 waypoints*
 
-### Beat 3 — Documents (45s)
+- **Visual:** Carlos's avatar appears on the map. The 12-week path
+  draws itself: Home → DPS → HHSC → Legal Aid → Workforce → Hired.
+  Trinity Metro Bus 4 + Bus 6 highlight as active legs.
+- **Narration:** "Five stops. Twelve weeks. One plan. GoWork
+  sequences the same offices Carlos was bouncing between — but in
+  the right order, with the right form, at the right week."
+- **Interaction:** scroll continuously. The avatar walks at a fixed
+  pace tied to scroll. Stay on the chapter long enough for the
+  avatar to reach Week 12 / Hired.
+- **Visual anchor:** the active leg highlighting cyan as Carlos
+  reaches each waypoint.
 
-**URL:** <https://montgowork-staging-web.fly.dev/documents/resume>
+### Ch8 — The Graph (230–280s) · *THE WALL'S SECRET WEAPON*
 
-What you do:
+- **Visual:** **The 3D barrier graph rises** above downtown Fort
+  Worth. Camera tilts up. 33 nodes. 7 categories. Edges glow with
+  dependency relationships. The constellation breathes.
+- **Narration:** "The wall isn't a list. It's a graph. Every barrier
+  connects to two more. Resolve one, and three others move within
+  reach. Thirty-three nodes. Seven categories. We mapped the wall so
+  we could route around it."
+- **Interaction:** scroll, then **stop**. Let the graph rotate on its
+  own for 5 seconds. This is the chapter that wins the demo. Don't
+  step on it.
+- **Visual anchor:** the constellation hovering — the camera tilt-up
+  reveal.
 
-1. Show the version history list — every prior generation persisted
-   with `generation_method` ("template" or "ai").
-2. Paste a one-liner job description into the target-job textarea
-   (e.g. "Warehouse associate, second shift, Fort Worth, fair-chance
-   employer"), click **Generate Resume**.
-3. The markdown preview renders. Click the version's **Download PDF**
-   link to confirm WeasyPrint pipeline streams a real PDF (open in a
-   new tab; let it render briefly; close the tab).
+### Ch9 — Any City (280–310s) · *Cross-country flight to Montgomery*
 
-What the judges see:
+- **Visual:** Camera retreats to continental. Two cities lit (Fort
+  Worth + Montgomery). Six dotted in (Dallas, Houston, Atlanta,
+  Memphis, Charlotte, Birmingham). **"Fly to Montgomery" button.**
+- **Narration:** "It works in Fort Worth. It will work in Montgomery.
+  It will work where you are. GoWork ships as a city template — Fort
+  Worth is the reference deployment. Montgomery is the second."
+- **Interaction:** **Click "Fly to Montgomery."** The camera flies
+  cross-country (Mapbox flyTo, ~3 seconds). Wait for it to land. Then
+  click "Return to Fort Worth" — the return is the second cinematic
+  beat. **This is the longest cinematic in the demo and the most
+  variance-prone.** If recording: take 5+ tries, pick the smoothest.
+- **Visual anchor:** dotted future-city pins; "5,189 tests · 13
+  sprints · 2 cities · MIT" stat.
 
-- Worker-voice resume copy — the `apply_worker_voice` rule chain
-  strips em-dashes, hedge words, AI-isms, and reads at F-K grade <9.
-- The **fair-chance branch** if the seeded session has a record —
-  resume includes a one-line reframe drawn from
-  `criminal.fair_chance_index`.
-- The **PDF** — server-side WeasyPrint with print-friendly template.
+### Ch10 — Find Your Path (310–340s) · *CTA + View Transitions morph*
 
-Lead line (security wins): "AI generation is gated by feature flag —
-default off. Every worker-controlled string passes a prompt-injection
-filter (T13 expanded its scope). Every version writes a row the
-worker owns."
-
-### Beat 4 — Jobs kanban (45s)
-
-**URL:** <https://montgowork-staging-web.fly.dev/jobs>
-
-What you do:
-
-1. Show the kanban — 5 status columns + funnel sidebar with
-   conversion rates.
-2. Drag an application from "Applied" to "Interview" (dnd-kit);
-   `updateApplicationStatus` fires; sidebar live-updates.
-3. Click an application card; show the **resume version reference**
-   (linked from Beat 3) + `generation_method` badge.
-
-What the judges see:
-
-- City-aware sourcing — the seeded jobs come from BrightData scrapes
-  for Montgomery / Fort Worth specifically; no Alabama-resident is
-  ever shown a Dallas warehouse job.
-- The funnel — applications → interviews → offers, with the
-  conversion rate computed live.
-
-Lead line: "The funnel feeds the weekly review, and every application
-is tied back to the exact resume version that was sent."
-
-### Beat 5 — Compliance gate (30s)
-
-**Run this in a visible terminal pane.**
-
-```bash
-# 1. Show the route is wired (POST without body returns 422)
-curl -s -m 15 -X POST \
-    -o /tmp/c.json -w "\nHTTP=%{http_code}\n" \
-    https://montgowork-staging-api.fly.dev/api/compliance/export
-cat /tmp/c.json
-
-# 2. Show the auth gate (bogus token returns 401)
-curl -s -m 15 -X POST \
-    -H "Content-Type: application/json" \
-    -d '{"session_id":"<demo-uuid-from-§A>","session_token":"bogus"}' \
-    -o /tmp/c2.json -w "\nHTTP=%{http_code}\n" \
-    https://montgowork-staging-api.fly.dev/api/compliance/export
-cat /tmp/c2.json
-```
-
-Lead line: "Production-grade compliance gate. Right-to-export,
-right-to-delete with a `confirm: 'DELETE'` speed bump, retention
-sweep, hashed `compliance_audit` tombstone. CAN-SPAM unsubscribe is
-signed with a 7-day key-rotation overlap. Twelve production-grade
-fixes landed this sprint — see §B."
-
-### Beat 6 — Case manager view (45s)
-
-**URL:** <https://montgowork-staging-web.fly.dev/case-manager>
-(open in a second window, ideally on a second monitor).
-
-What you do:
-
-1. Paste advisor token into the URL: `?advisor_token=<adv-mgm-...>`
-   (§A for staging values).
-2. Show the **Needs Attention** inbox — `StalledSessionsList` shows
-   city-scoped workers (cross-city → 403).
-3. Click into one stalled session, open `SendAdvisorNoteDialog`,
-   write a one-line note, send.
-4. Switch back to the worker tab; the note lands in their next
-   digest (describe the loop, don't wait for nightly).
-
-What the judges see:
-
-- The **city-scoped advisor model** — `advisor_tokens` table with
-  partial active-token index, instant revoke, SHA256 audit hash.
-- The **stalled-session list** — drawn from the same T12.18 stall
-  detector that fires the worker's stall banner.
-- The **Send Note** flow — per-advisor rate limit, audit row.
-
-Lead line: "Same data model on both sides. The case manager isn't
-watching from a CRM — they see the worker's plan, scoped to their
-city, with a full audit trail."
-
-### Beat 7 — Close (30s)
-
-> Stop sharing screen. Speak directly.
-
-Three things nothing else does: **(1) cliff awareness** — every plan
-models SNAP/Medicaid/childcare cliffs so a "good job" doesn't cost
-the worker money; **(2) fair-chance routing** — record-aware resume
-gen + sourcing, partnered with the FW fair-chance employer index;
-**(3) worker + case manager tandem** — same data model on both
-sides; the case manager is a co-pilot, not a CRM observer.
-
-Ask: your **attention and feedback**. We're targeting city-
-government contracts in Q3 — the questions you ask are the questions
-a procurement officer will ask in July. Tell us what's missing.
+- **Visual:** Hero CTA "Start your assessment." Footer brand "GoWork
+  · Fort Worth, TX." GitHub link.
+- **Narration:** "You've seen the wall. You've seen the labyrinth.
+  Now skip both. Start your assessment, and we'll hand you a plan
+  that's already done the offices, forms, and math."
+- **Interaction:** **Click "Start your assessment."** Chrome 135+
+  triggers the View Transitions API morph from /the-wall to /assess.
+  This is the closing wow beat.
+- **Visual anchor:** the morph itself.
 
 ---
 
-## 3. Backup paths (if a beat breaks live)
+## 2. Backup paths (if a beat breaks live)
 
 | If this breaks | Do this |
 |----------------|---------|
-| Frontend cold-start >5s on first hit | Pre-warm at T-2 minutes (§5). If still slow live, narrate over the loading state — "Fly.io is rotating the machine; staging runs on a single shared host." |
-| Backend cold-start (`/health/live` 503) | Wait 30s and retry. Cold start measured at ~28s on dry-run (2026-04-25). Skip Beat 5's curl pane and verbally describe the compliance gate. |
-| `medium` Montgomery session has stale data | Switch to `medium` Fort Worth (UUID in §A). All 5 stall states are seeded for both cities — pick another. |
-| Resume generation fails on Beat 3 | Click into an existing version in the history list and download its PDF. The version row is pre-seeded by the demo factory. |
-| Drag fails on Beat 4 | Use the **Move** button on the application card (the `MoveMenu` modal lists every column). Same mutation, different UI affordance. |
-| Advisor token rejected on Beat 6 | Re-run `qc_reset.py` (§0). The advisor token is regenerated deterministically by the seed. |
-| All else fails | Switch to slides + screenshots in `docs/press-kit/`. The submission package includes static screenshots of every beat. |
+| **Mapbox fails to load** (network blip / token rotation) | The Wall renders a static fallback image for the map layers. Narrate over it: "Fort Worth is rendered live with Mapbox in production; for this demo we're using the cached map tile." Do NOT skip Ch9 — describe the cross-country fly verbally and point at the dotted future cities. |
+| **View Transitions don't fire** (Firefox or Safari in audience) | Ch10's morph degrades to a normal navigation. Call it out: "On Chrome 135+ this morphs as a continuous transform — your browser's stepping us through it as a regular nav. Same destination." |
+| **Three.js Ch8 graph stutters** (low-end GPU) | The reduced-motion fallback is a static image of the constellation. Narrate over it: "The 3D constellation is interactive on a real machine — what you're seeing is the static rendering of the same 33-node graph." |
+| **Wage slider lags on Ch6** | Drag once smoothly $7.25 → $25, don't oscillate. If it still stutters, point at the chart and read the cliffs aloud: "$14/hr childcare subsidy gone. $17/hr SNAP gone." |
+| **"Fly to Montgomery" hangs (Mapbox flyTo no-op)** | Reload the page, scroll back to Ch9, and re-click. If it hangs again, narrate: "Production has the second city deployed at gowork-mgm.fly.dev — same engine, same playbook, local data." |
+| **Audio missing or out of sync** (recording) | Captions file at `docs/submission-video.srt` is the canonical script. Re-record voiceover only; the screen capture stays. |
+| **All else fails** | Switch to the static OG fallback gallery: `/og/1.png` through `/og/10.png` are 1200×630 stills of every chapter. They are the fallback story. |
 
 ---
 
-## 4. Timing budget
+## 3. Pre-demo checklist (T-30 minutes before judging)
 
-| Beat | Budget | Dry-run page load (warm) |
-|------|-------:|--------------------------:|
-| Pitch (verbal) | 90s | — |
-| 1 Arrival | 60s | 4.84s cold → 0.08s warm |
-| 2 Daily | 60s | 0.13s |
-| 3 Documents | 45s | 0.13s (+ ~10s for resume gen) |
-| 4 Jobs | 45s | 0.15s |
-| 5 Compliance (curl) | 30s | 0.07s × 2 |
-| 6 Case manager | 45s | 0.08s |
-| 7 Close (verbal) | 30s | — |
-| **Total** | **6:45** | 30s slack within 7-min cap |
-
----
-
-## 5. Pre-demo checklist (T-30 minutes)
-
-- [ ] **T-30: wake the staging machines.** First Fly.io hit can take
-      30-90s on a stopped machine. Cold-start measured at ~28s on
-      backend `/`, ~4.8s on frontend `/` (2026-04-25).
-      ```bash
-      curl -s -m 90 -o /dev/null -w "API=%{http_code} WEB=" \
-          https://montgowork-staging-api.fly.dev/
-      curl -s -m 90 -o /dev/null -w "%{http_code}\n" \
-          https://montgowork-staging-web.fly.dev/
-      ```
-- [ ] **T-25: verify demo data fresh.** `curl
-      https://montgowork-staging-api.fly.dev/api/dashboard/stats` —
-      non-zero counts.
-- [ ] **T-20: if drift, reset.** `fly ssh console --app
-      montgowork-staging-api` then `python scripts/qc_reset.py
-      --db-path /app/data/montgowork.db`.
-- [ ] **T-15: smoke check.** Must report 19/19 PASS.
-      ```bash
-      STAGING_FRONTEND_URL=https://montgowork-staging-web.fly.dev \
-      STAGING_API_URL=https://montgowork-staging-api.fly.dev \
-          bash scripts/staging-smoke.sh
-      ```
-- [ ] **T-10: pre-load all 7 tabs** — `/`, `/assess`, `/plan`,
-      `/daily`, `/documents/resume`, `/jobs`, `/case-manager?
-      advisor_token=<§A>` — in this order.
-- [ ] **T-5: open a terminal pane** for Beat 5; have the two curl
-      commands ready in scrollback.
-- [ ] **T-2: re-warm.** Fly machines sleep after ~10 minutes idle.
-      One final `/health` curl on each keeps them awake.
+- [ ] **T-30: verify Mapbox token loaded.** Hit
+      `https://gowork.fly.dev/api/wall/health` (or your deploy's
+      health endpoint). Response should include
+      `{"mapbox":"ok","tilesetReachable":true}`. If 503, rotate the
+      token and redeploy.
+- [ ] **T-30: confirm Chrome 135+** is the demo browser. Open
+      `chrome://version` in the demo window — anything <135 means
+      View Transitions Ch10 morph won't fire. **Do not use Firefox
+      or Safari for the live demo.**
+- [ ] **T-25: verify hardware-accelerated GPU.** Open
+      `chrome://gpu` — "WebGL: Hardware accelerated" must show
+      green. If software-rendered, Ch8 will lag.
+- [ ] **T-20: slow-network test.** Throttle to "Fast 4G" in DevTools
+      and reload `/the-wall`. The Wall must render Ch1 within 3
+      seconds. If it doesn't, the production deploy isn't using the
+      Edge bundle — investigate before judging starts.
+- [ ] **T-15: Spanish toggle test.** Append `?locale=es` to the URL,
+      reload. Every chapter heading should swap to ES. If any
+      English copy persists, that's a parity bug — flag it but
+      proceed in EN for the live demo.
+- [ ] **T-10: reduced-motion test.** Toggle system "Reduce motion"
+      preference (macOS: System Settings → Accessibility → Display;
+      Windows: Settings → Accessibility → Visual effects). Reload.
+      Wall should fall back to fades + static graph. Restore the
+      preference before the live demo.
+- [ ] **T-5: open one tab pre-loaded at `/the-wall`.** Scroll to
+      Ch1 and re-load so the page starts at the top. Have a second
+      tab ready at `/assess` so the Ch10 morph has somewhere to
+      land if View Transitions fail.
+- [ ] **T-2: re-warm.** Hit `/the-wall` once more so the SSR cache
+      is hot.
 - [ ] **T-0: deep breath, smile, hit "Share Screen."**
 
----
-
-## 6. Verification log (2026-04-25 dry-run)
-
-**Smoke script:** `bash scripts/staging-smoke.sh` → **19/19 PASS**
-(every backend health + public-API + admin-auth route + every demo
-frontend page).
-
-**Cold-start (Fly.io spin-up):** backend `/` 28s, backend
-`/health/live` 36s with mid-spin-up 503 (recovered to 200 within
-10s), frontend `/` 4.8s. **Warm:** every route <200ms.
-
-**Compliance gate (Beat 5) verified:** `POST /api/compliance/
-export` with no body → 422 + missing-field detail; with bogus
-session token → 401 "Invalid token". 0.07s warm.
-
-**`/health/ready` returned 503 (warm)** — known: RAG index not
-loaded in staging; smoke accepts 200/503 (component QC suites cover
-the dep-up assertion).
-
-**Beats that need session/advisor token to exercise fully** (route
-shells verified 200; interactive paths covered by T13.10–T13.52
-browser suites): Beat 1 form click-through, Beat 2 checklist
-toggle, Beat 3 Generate-Resume + PDF download, Beat 4 kanban drag,
-Beat 6 advisor inbox.
+> If any T-30..T-10 check fails, **fix it before going live.** Backup
+> paths exist for live failures, but the pre-demo checklist exists so
+> we don't need them.
 
 ---
 
-## 7. Talking-point cheat sheet
+## 4. Timing budget summary
 
-- **Differentiator:** "Barrier-removal tool with a job-search tool inside it, not the other way around."
-- **Cliffs:** "A $2 raise that costs $400 in SNAP isn't a raise. We model that explicitly."
-- **Fair-chance:** "Record-aware resume generation and job sourcing, partnered with the FW fair-chance index."
-- **Stall:** "Soft / medium / hard / breakthrough. Hard fires the plan refresher; breakthrough fires confetti."
-- **Compliance:** "Right-to-export, right-to-delete, hashed audit, signed unsubscribe, retention sweep — the same gate a city contract requires."
-- **Security:** "Prompt-injection filter on every worker input. PII redaction on share endpoints. Kid-whitelist downgrade defense on every signing path."
-- **Tandem:** "Worker and case manager share the same data model. The advisor isn't watching from a CRM."
-
----
-
-## A. Demo data reference (seeded by `app.demo_seed_s12b`)
-
-10 sessions = 5 stall states × 2 cities. Session IDs are
-deterministic UUIDs hashed from `s12b-demo:{city}:{state}`:
-
-| City | Stall state | Session UUID |
-|------|-------------|--------------|
-| montgomery | none | `05931d47-0c3a-4170-bb2c-9cf836fc0168` |
-| montgomery | soft | `7f665990-2793-4277-ad99-5dc6c928e68b` |
-| montgomery | **medium** *(primary demo)* | `f888fa8b-c8ae-49e4-84fd-410751aaa697` |
-| montgomery | hard | `88aa2ba4-1d57-471d-9391-8b31abc0b5ec` |
-| montgomery | breakthrough | `58980aa4-84a8-4257-b09b-93119a7126d4` |
-| fort-worth | none | `f38fb0fa-c417-44a9-bc72-c57cc2fa2d61` |
-| fort-worth | soft | `af96078f-5020-45fc-80de-7f78510f33fd` |
-| fort-worth | medium *(backup)* | `7eb63d01-fcab-4235-af42-aaabba1e0fae` |
-| fort-worth | hard | `cea3b444-12bc-4130-b42e-fc7a144da32d` |
-| fort-worth | breakthrough | `1c070ab5-3744-4a5b-975d-7b0cdc22bed9` |
-
-**Advisor tokens** rotate per `qc_reset` run. Pull the plaintext via
-`fly ssh console --app montgowork-staging-api` then `sqlite3
-/app/data/montgowork.db "SELECT advisor_id, plaintext FROM
-advisor_tokens WHERE advisor_id LIKE 'adv-demo-%';"`. URL pattern for
-Beat 6: `…/case-manager?advisor_token=<plaintext>`. Token persists to
-`sessionStorage` on first load.
+| Chapter | Window | Cumulative | Critical interaction |
+|---------|--------|-----------:|----------------------|
+| Ch1 Continental | 0–30s | 0:30 | Hold for full 30s |
+| Ch2 City Arrival | 30–50s | 0:50 | Scroll-driven dolly |
+| Ch3 Neighborhood | 50–70s | 1:10 | Pause at end |
+| Ch4 The Wall | 70–110s | 1:50 | 47-form counter ticks up |
+| Ch5 Labyrinth | 110–140s | 2:20 | Counter lands at 47 |
+| Ch6 The Math | 140–180s | 3:00 | Drag slider $7.25 → $25 |
+| Ch7 The Path | 180–230s | 3:50 | Avatar walks to Hired |
+| Ch8 The Graph (**secret weapon**) | 230–280s | 4:40 | Stop, let it rotate 5s |
+| Ch9 Any City | 280–310s | 5:10 | **Cross-country flight** |
+| Ch10 Find Your Path | 310–340s | 5:40 | View Transitions morph |
+| **Total** | **5:40** | — | — |
 
 ---
 
-## B. Production-fix highlights (S13)
+## 5. References
 
-Twelve fixes shipped: share-endpoint PII redaction (T13.71),
-document + credit rate limits (T13.99), PII log scrubber (T13.94),
-`/plan` empty-state UX (T13.72), Spanish translation parity
-(T13.77), Dependabot (T13.104), kid-whitelist downgrade defense
-across appointments + compliance export + unsubscribe (T13.62 +
-follow-up), boot-time env validator (T13.118), compliance cascade
-introspection guard (T13.70), DST-safe weekly-review boundaries
-(T13.66), QC dashboard at `/admin/qc` (T13.8). Test count: backend
-3257 → 4012 (+755), frontend 946 → 1055 (+109).
-
----
-
-## C. References
-
-`.paircoder/config.yaml` (project description), `.paircoder/
-context/state.md` (sprint summaries), `docs/runbooks/staging-
-deploy.md`, `docs/ops/compliance-operations.md`,
-`backend/app/demo_seed_s12b.py` + `app/_demo_seed_qc.py` (seed
-factories), `scripts/staging-smoke.sh`, `scripts/qc_reset.py`.
+- `frontend/src/lib/translations/en.json` — chapter copy (Ch1..Ch10)
+- `docs/visual-rebirth-plan.md` — narrative architecture
+- `docs/visual-rebirth-briefs.md` — per-sprint briefs
+- `docs/demo-script.md` — Carlos persona (assess → plan flow,
+  preserved as reference for the post-Wall product walk)
+- `docs/submission-video-script.md` — voiceover for the submission
+  video (lifts the chapter copy directly)
+- `docs/submission-video-take-plan.md` — numbered shot list with
+  multiple-take requirements
+- `docs/submission-video.srt` — captions file
+- `frontend/public/og/[chapter].png` — static OG fallback (1200×630)
 
 ---
 
-> **Authored:** S13 T13.111. **Dry-run:** 2026-04-25. **Cap:** ≤7 min
-> live + ≤2 min Q&A. Every route measured.
+> **Authored:** W5 Driver B. **Branch:** `sprint/w5-submission` →
+> `w5-driver-b/demo-video-script`. **Total runtime:** 5:40 + slack
+> within the ≤6:30 submission budget. Every chapter measured.
