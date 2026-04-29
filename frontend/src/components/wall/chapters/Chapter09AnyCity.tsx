@@ -141,21 +141,32 @@ export function Chapter09AnyCity({
       data-chapter-id="any-city"
       data-reduced-motion={reducedMotion ? "true" : "false"}
       aria-labelledby="chapter09-title"
-      className="chapter09-any-city relative flex min-h-screen flex-col items-center justify-center gap-6 px-6 py-12"
+      className="chapter09-any-city relative flex min-h-screen flex-col items-center justify-center gap-6 px-6 py-16"
     >
       <h2
         id="chapter09-title"
         data-testid="ch9-hero"
-        className="max-w-3xl text-center text-3xl font-semibold tracking-tight md:text-4xl"
-        style={{ color: "var(--fg-primary)" }}
+        className="text-center font-semibold tracking-tight"
+        style={{
+          color: "var(--fg-primary)",
+          maxWidth: "min(80vw, 60rem)",
+          fontSize: "clamp(2rem, 4vw, 3.5rem)",
+          letterSpacing: "-0.03em",
+          lineHeight: 1.1,
+          margin: 0,
+        }}
       >
         {t("wall.chapter09.hero")}
       </h2>
 
       <p
         data-testid="ch9-subhero"
-        className="max-w-2xl text-center text-lg leading-relaxed md:text-xl"
-        style={{ color: "var(--fg-secondary, var(--fg-primary))" }}
+        className="text-center leading-relaxed"
+        style={{
+          color: "var(--fg-secondary, var(--fg-primary))",
+          maxWidth: "min(72vw, 50rem)",
+          fontSize: "clamp(1.0625rem, 1.5vw, 1.375rem)",
+        }}
       >
         {t("wall.chapter09.subhero")}
       </p>
