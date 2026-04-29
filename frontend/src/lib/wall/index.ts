@@ -21,8 +21,6 @@ export {
 export { isMapboxAvailable as isMapboxTokenShapeValid } from "./env";
 export * from "./mapboxToken";
 export * from "./mapboxStyle";
-export * from "./cameraChoreography";
-export * from "./flyToOrchestrator";
 export * from "./types";
 export * as sound from "./sound";
 export * from "./network";
