@@ -22,3 +22,6 @@
 @import "./styles/tokens/layout.css";
 @import "./styles/tokens/animations.css";
 @import "./styles/tokens/forced-colors.css";
+
+/* Driver C — sprint/gowork-facelift homepage Ch04/Ch05/Ch06 visuals. */
+@import "./styles/home-chapters.css";

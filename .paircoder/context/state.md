@@ -34,6 +34,36 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+### 2026-04-29 — sprint/gowork-facelift Driver C: Ch4 (Mapbox + scroll cam + commentary) + Ch5 (4-card fan-out) + Ch6 (live-jobs marquee + 3 hero JobCards) (worktree agent-a51d6affcdffd73eb)
+
+Branch: `sprint/gowork-facelift` (worktree). HackFW 2026 facelift dispatch — Driver C scope: 3 chapters that need real data + Mapbox.
+
+**Files added:**
+
+- `frontend/src/lib/home/employers.ts` (96 lines) — single source of truth for the 3 hero employers (Alcon, BNSF, JE Dunn) used by Ch4 markers/paths + Ch6 JobCards. Each entry carries id/logo/logoColor/name/address/wage/commute/shift/blurb/lng-lat. 6 unit tests.
+- `frontend/src/components/home/chapters/Chapter04TheMap.tsx` (165 lines) — pinned full-bleed Mapbox + scroll-driven cam + 4 commentary cards. Renders branded fallback when Mapbox can't mount (jsdom, airplane mode, no token). 10 tests.
+- `frontend/src/components/home/chapters/Chapter04TheMap.mount.ts` (262 lines) — imperative Mapbox mount: dynamic `mapbox-gl` import, dark-v11/light-v11 style swap via `<html data-theme>`, layer tinting (background/water/parks/roads/buildings via `MAPBOX_COLORS` shim), `setFog`, 3 path arcs (curve helper), 4 markers, 3D buildings extrusion, publishes `window._gw_map` for SiteHeader theme bridge.
+- `frontend/src/components/home/chapters/Chapter04TheMap.layers.ts` (104 lines) — pure-data helpers: HOME_LNG_LAT, CH04_INITIAL_VIEW, GwMap typing, perpendicular-bias arc helper, buildPathArcs, buildBuildingsLayer.
+- `frontend/src/components/home/chapters/Chapter04TheMap.choreography.ts` (146 lines) — ScrollTrigger: 4 keyframes (Tuesday 6:42a home → 10a DPS → 12:30p Workforce Solutions → 3:27p Alcon), flyTo + jumpTo via `window._gw_map_fly`, reduced-motion → step 3 jump.
+- `frontend/src/components/home/chapters/Chapter05ThePlan.tsx` (185 lines) — 4-card fan-out with perspective; per-card transform (`(i-1.5)*8*t` angle, `(i-1.5)*220*t` x, `|i-1.5|*30*t` y, opacity 0.5+0.5*t, zIndex 10+t*i, scale 1−i*0.02). Mon/Tue/Wed/Thu copy. 7 tests.
+- `frontend/src/components/home/chapters/Chapter05ThePlan.fanout.ts` (83 lines) — ScrollTrigger 0..1 progress feed, reduced-motion → progress=1.
+- `frontend/src/components/home/chapters/Chapter06LiveJobs.tsx` (161 lines) — eyebrow + LivePill (useLiveNow + 60s tick) + h2 + WageMarquee (xPercent -50 over 32s infinite via gsap) + 3-col JobCard grid. **Replaced** Driver D's stub (kept the i18n keys + props compat). 9 tests.
+- `frontend/src/components/home/chapters/Chapter06LiveJobs.helpers.ts` (48 lines) — WAGE_MARQUEE_ENTRIES (6 unique × 2 = 12), formatLiveAgo with SSR/0-date guard.
+- `frontend/src/components/home/chapters/_internal/JobCard.tsx` (95 lines) — 1 employer card, reads from `lib/home/employers.ts` + i18n, links to `/assess?employer={id}`. Logo chip color-keyed amber/cyan/green.
+- `frontend/src/app/styles/home-chapters.css` — Ch04/Ch05/Ch06 visuals: pinned `.ch04-pin` + `#map`, `.ch04-atmosphere` 3 radial-gradients screen-blend, `.ch04-hud` + `.ch04-cards`, `.ch05-fan` perspective + 4 tones, `.ch06-marquee` mask-image fade + linear scroll, `.ch06-card` hover lift, `.ch06-live-pill` pulse dot. Wired via `globals.css`.
+- `frontend/src/lib/translations/en.json` + `es.json` — added `home.ch4.*` (eyebrow, scenes 1-4, hud labels, fallback, 4 commentary cards), `home.ch5.*` (eyebrow, h2 splits, intro, 4 day-cards × num/tag/title/body/foot), `home.ch6.*` (eyebrow, livePill prefix/suffix, h2 splits, marqueeAria, 3 employers × 6 fields, applyCta). Native-fluent ES translations. Translation parity tests still green.
+
+**Coverage:** 26 net-new tests across the 4 test files (6 employers + 10 Ch4 + 7 Ch5 + 9 Ch6 = 32 in my files; -6 because the existing Ch6 stub had ~6 simpler tests it implicitly replaced). All 217 tests under `src/components/home/` + `src/lib/home/` + `src/lib/translations/__tests__/` green. Lint clean (only the pre-existing `usePerformanceBudget` warning). TypeCheck on my files clean (HomePage.tsx props mismatches are Driver A/D's wiring; not my scope).
+
+**Critical contract held:**
+- Reused `MAPBOX_COLORS` shim — Mapbox can't parse oklch.
+- Wrapped `mapbox-gl` import in async dynamic; jsdom + airplane-mode survive.
+- prefers-reduced-motion: Ch4 jumps to keyframe 4, Ch5 cards render fanned, Ch6 marquee + dot pulse pause.
+- All copy via `useTranslation()` — EN/ES toggle live.
+- `aria-labelledby` on every chapter section, `data-bg="dark"`.
+- `window._gw_map` published for SiteHeader theme swap; matches Driver A's bridge contract exactly.
+- File-size compliance: every file under 400 lines (mount.ts is 262 — warning territory but justified by the 8 helper functions doing distinct tinting/source/marker/fog work; would split further only if it grew past 320).
+
 ### 2026-04-28 — W5 Driver D: Final Maximization + Vitest Flake Fix + Post-Submission + Git Tag + Cross-Doc Linking + State Stitch + 7 Spotlight inventions (T5.D.1–T5.D.6)
 
 Branch: `sprint/w5-submission` (main tree, no worktree). Baseline at start: 3675 vitest passing (W5 A + B + C all merged — 3428 W4 baseline + W5-A delta 50 + W5-B delta 96 + W5-C delta 101 = 3675).
