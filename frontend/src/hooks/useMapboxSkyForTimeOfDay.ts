@@ -3,6 +3,17 @@
 import { useEffect } from "react";
 import { useTimeOfDay } from "./useTimeOfDay";
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
+import { oklchToHex } from "@/lib/wall/colors";
+
+/** Parse `oklch(L C H)` strings to Mapbox-safe hex; pass-through anything
+ *  else. Mapbox doesn't understand oklch(). */
+function oklchStringToHex(value: string): string | null {
+  const match = value.match(
+    /oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\)/i,
+  );
+  if (!match) return null;
+  return oklchToHex(parseFloat(match[1]), parseFloat(match[2]), parseFloat(match[3]));
+}
 
 /**
  * T4.A.1 — useMapboxSkyForTimeOfDay.
@@ -33,6 +44,10 @@ import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
 export interface MapLike {
   setPaintProperty?: (layer: string, property: string, value: unknown) => void;
   setLight?: (light: { intensity: number; color?: string; anchor?: string }) => void;
+  /** Optional — present on real mapbox-gl Maps. The hook uses it to guard
+   *  setPaintProperty('sky', ...) on styles that don't ship a 'sky' layer
+   *  (e.g. dark-v11). When absent we assume the style has no sky and skip. */
+  getLayer?: (id: string) => unknown;
 }
 
 export interface UseMapboxSkyOptions {
@@ -60,19 +75,27 @@ export function useMapboxSkyForTimeOfDay(
 
   useEffect(() => {
     if (!map) return;
+    // Mapbox doesn't parse oklch() — convert if needed.
+    const mapboxColor = oklchStringToHex(skyColor) ?? skyColor;
     try {
-      if (typeof map.setPaintProperty === "function") {
+      // Only set sky paint if the style actually has a 'sky' layer.
+      // dark-v11 vector style does NOT include one; styles like
+      // mapbox/standard do. Guard avoids the "layer 'sky' does not exist"
+      // error that fires every effect re-run.
+      const hasSkyLayer =
+        typeof map.getLayer === "function" && Boolean(map.getLayer("sky"));
+      if (hasSkyLayer && typeof map.setPaintProperty === "function") {
         map.setPaintProperty("sky", "sky-type", skyTypeName);
         map.setPaintProperty(
           "sky",
           skyTypeName === "atmosphere" ? "sky-atmosphere-color" : "sky-gradient",
-          skyColor,
+          mapboxColor,
         );
       }
       if (typeof map.setLight === "function") {
         map.setLight({
           intensity: computeIntensity(sunAltitudeDeg, ceiling),
-          color: skyColor,
+          color: mapboxColor,
           anchor: "viewport",
         });
       }
