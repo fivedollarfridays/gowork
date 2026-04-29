@@ -1,17 +1,20 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
+import { ChapterRailTooltip } from "./ChapterRailTooltip";
 
 /**
- * ChapterRail — sprint/gowork-facelift Driver A.
+ * ChapterRail — sprint/gowork-facelift Driver A. Polish-2 T3 adds tooltip preview.
  *
  * Fixed-left vertical chapter list with 8 ticks + a 60px progress bar
  * that fills cyan→amber as the page scrolls. Hidden below 1100px viewport
  * via the `chapter-rail--hidden` media query in tokens/layout.css.
  *
- * Stateless — receives `activeChapter` (1..8) and `progress` (0..1) as
- * props so the parent can drive both with `useChapterProgress` +
- * `useScrollProgress` without forcing this component to re-subscribe.
+ * Stateless wrt scroll — receives `activeChapter` (1..8) and `progress` (0..1)
+ * as props. Owns local hover/focus state for the chapter preview tooltip
+ * (T3): the tooltip slides out on mouseenter or focus and disappears on
+ * mouseleave or blur.
  *
  * Active tick gets the cyan accent + 1.08x scale + a gradient marker bar
  * to the left. Click on any tick smooth-scrolls to the corresponding
@@ -25,15 +28,23 @@ export interface ChapterRailProps {
   progress: number;
 }
 
-const CHAPTERS: ReadonlyArray<{ id: number; labelKey: string; anchor: string }> = [
-  { id: 1, labelKey: "chapterRail.ch1", anchor: "#chapter-1" },
-  { id: 2, labelKey: "chapterRail.ch2", anchor: "#chapter-2" },
-  { id: 3, labelKey: "chapterRail.ch3", anchor: "#chapter-3" },
-  { id: 4, labelKey: "chapterRail.ch4", anchor: "#chapter-4" },
-  { id: 5, labelKey: "chapterRail.ch5", anchor: "#chapter-5" },
-  { id: 6, labelKey: "chapterRail.ch6", anchor: "#chapter-6" },
-  { id: 7, labelKey: "chapterRail.ch7", anchor: "#chapter-7" },
-  { id: 8, labelKey: "chapterRail.ch8", anchor: "#chapter-8" },
+interface ChapterRailEntry {
+  id: number;
+  labelKey: string;
+  anchor: string;
+  /** Filename (under /home/chapter-thumbs/) for the preview tooltip. */
+  thumbnail: string;
+}
+
+const CHAPTERS: ReadonlyArray<ChapterRailEntry> = [
+  { id: 1, labelKey: "chapterRail.ch1", anchor: "#chapter-1", thumbnail: "01-hero.jpg" },
+  { id: 2, labelKey: "chapterRail.ch2", anchor: "#chapter-2", thumbnail: "02-the-numbers.jpg" },
+  { id: 3, labelKey: "chapterRail.ch3", anchor: "#chapter-3", thumbnail: "03-meet-carlos.jpg" },
+  { id: 4, labelKey: "chapterRail.ch4", anchor: "#chapter-4", thumbnail: "04-mapbox-detailed-v2.jpg" },
+  { id: 5, labelKey: "chapterRail.ch5", anchor: "#chapter-5", thumbnail: "05-the-plan.jpg" },
+  { id: 6, labelKey: "chapterRail.ch6", anchor: "#chapter-6", thumbnail: "06-open-jobs.jpg" },
+  { id: 7, labelKey: "chapterRail.ch7", anchor: "#chapter-7", thumbnail: "07-wage-cliff.jpg" },
+  { id: 8, labelKey: "chapterRail.ch8", anchor: "#chapter-8", thumbnail: "08-manifesto.jpg" },
 ];
 
 function pad2(n: number): string {
@@ -49,6 +60,7 @@ function clamp01(v: number): number {
 export function ChapterRail({ activeChapter, progress }: ChapterRailProps): JSX.Element {
   const { t } = useTranslation();
   const fillPct = `${(clamp01(progress) * 100).toFixed(2)}%`;
+  const [hoveredChapter, setHoveredChapter] = useState<number | null>(null);
 
   return (
     <nav
@@ -60,17 +72,29 @@ export function ChapterRail({ activeChapter, progress }: ChapterRailProps): JSX.
       <ol className="flex flex-col gap-3 list-none p-0 m-0">
         {CHAPTERS.map((c) => {
           const isActive = c.id === activeChapter;
+          const isHovered = hoveredChapter === c.id;
           return (
-            <li key={c.id} data-chapter-id={c.id}>
+            <li
+              key={c.id}
+              data-chapter-id={c.id}
+              className="relative"
+              onMouseEnter={() => setHoveredChapter(c.id)}
+              onMouseLeave={() => setHoveredChapter((id) => (id === c.id ? null : id))}
+            >
               <a
                 href={c.anchor}
                 aria-current={isActive ? "true" : undefined}
+                aria-describedby={isHovered ? `chapter-rail-tip-${c.id}` : undefined}
                 className="chapter-rail__tick group flex items-center gap-3 transition-transform"
                 style={{
                   color: isActive ? "var(--accent-cyan)" : "var(--fg-muted)",
                   transform: isActive ? "scale(1.08)" : "scale(1)",
                   transformOrigin: "left center",
                 }}
+                onFocus={() => setHoveredChapter(c.id)}
+                onBlur={() =>
+                  setHoveredChapter((id) => (id === c.id ? null : id))
+                }
               >
                 <span
                   aria-hidden="true"
@@ -93,6 +117,14 @@ export function ChapterRail({ activeChapter, progress }: ChapterRailProps): JSX.
                   {t(c.labelKey)}
                 </span>
               </a>
+              {isHovered ? (
+                <ChapterRailTooltip
+                  chapterId={c.id}
+                  eyebrow={t(c.labelKey)}
+                  thumbnailSrc={`/home/chapter-thumbs/${c.thumbnail}`}
+                  alt={`${t("chapterRail.tooltip.altPrefix")} ${t(c.labelKey)}`}
+                />
+              ) : null}
             </li>
           );
         })}

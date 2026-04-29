@@ -362,7 +362,14 @@
       "ctaMeta": "~3 min · web o texto · en inglés o español",
       "wordmarkRow1": "GO",
       "wordmarkRow2": "WORK",
-      "ariaLabel": "Encuentra tu camino: obtén tu plan"
+      "ariaLabel": "Encuentra tu camino: obtén tu plan",
+      "wordmark": {
+        "spokenCityFw": "Fort Worth, TX",
+        "spokenCityComing": "Próximamente:",
+        "spokenCityMont": "Montgomery, AL",
+        "spokenCityDal": "Dallas, TX",
+        "spokenCityHou": "Houston, TX"
+      }
     }
   },
   "howItWorks": {

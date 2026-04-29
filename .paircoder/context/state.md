@@ -36,6 +36,54 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+### 2026-04-29 — sprint/polish-2 Driver A: T1-T10 chrome + magnetics (worktree agent-af3aad41184d2f090)
+
+Branch: `sprint/polish-2` (worktree). HackFW 2026 polish-2 dispatch — Driver A scope: site chrome polish + magnetic micro-interactions. 10 tasks, TDD strict, all green.
+
+- **T1 useMagneticHover** — filled hook scaffold. Reads `--magnetic-pull-distance` (80px) and `--magnetic-pull-max` (10px) from CSS. Pulls element toward cursor inside proximity radius via lerp 0.18 rAF easing. Disabled on coarse-pointer + reduced-motion. 5 unit tests covering pull direction, return-to-origin on leave, coarse-pointer no-op, reduced-motion no-op, disabled flag.
+- **T2 SiteHeader scroll-direction hide/show** — filled `useScrollDirection` hook (rAF-coalesced, threshold-gated, SSR-safe with cleanup); SiteHeader writes `data-header-state="hidden|visible"` and `transform: translateY(-100%)` over 240ms ease.
+- **T3 ChapterRailTooltip** — new component renders 200×96 glass tooltip with chapter screenshot + eyebrow on `mouseenter`/`focus`. Slides in via `translateX(-8px)→0` + opacity 0→1 over 200ms `--ease-linear-sig`. Maps chapter ids to `/home/chapter-thumbs/0[1-8]-*.jpg`.
+- **T4 ChromeAccentBridge** — new IO-driven component sets `--chrome-accent` on `:root` as each chapter crosses ≥50% intersection. Accent map: Ch1=cyan, Ch2/3/5=amber, Ch4/8=cyan, Ch6=status-positive, Ch7=rose. SiteHeader CTA bg + brand-mark glow + bottom border read `var(--chrome-accent)` and transition over 800ms.
+- **T5 Editorial-link** — added `.editorial-link` rule to `home-chapters.css` (gradient cyan→amber 1.5px underline, `background-size: 0 1.5px → 100% 1.5px` on hover/focus over 280ms). Applied to all in-prose anchors in SiteFooter.
+- **T6 SkipToContent polish** — restyled to cyan pill (10/16px padding) with `translateY(-200%)→0` slide on focus over 200ms. Honors `data-theme="light"` (navy text on cyan via `var(--bg-base)`); MutationObserver tracks data-theme attr.
+- **T7 BrandMark loading wiring** — `[data-brand-mark][data-loading="true"]` until first non-zero scroll OR custom `gowork:ch1-entered` event. Then flips to `interactive`.
+- **T8 SiteFooter wordmark** — reverse-scroll "GOWORK · GOWORK …" marquee row below legal/credit. Reads `useScrollVelocity` + frame-by-frame dy, accumulates offset opposite to scroll direction. CSS provides 12rem scale, 12% opacity, top/bottom mask.
+- **T9 PageMeta LIVE row** — 5th HUD row "LIVE — N sessions · last calibrated Mm ago" driven by `useLiveNowFormatted` (locale-aware). EN/ES translations use `{count}` / `{when}` placeholders + tiny in-component `fillPlaceholders` helper.
+- **T10 HeaderProgressRail** — new 8-segment 2px-tall component pinned just below SiteHeader. Segments fill cyan as scroll passes each chapter; active segment glows. Reduced-motion mode collapses to single thin bar showing total %.
+- **i18n** — added `nav.muteToggle.*`, `chapterRail.tooltip.altPrefix`, `pageMeta.{live,liveSessions,liveCalibrated,batterySaver}` keys with native-fluent ES (no machine translation).
+- **Decomposition** — SiteHeader split into `BrandColumn`, `PrimaryNav`, `ChromeControls`, `ThemeButton`, `CtaPill`, `MobileDrawer`, `useBrandLoading`, `useThemeMirror`. SiteFooter split into `BrandColumn`, `FooterColumn`, `InternalLink`, `ExternalLink`, `LegalNav`, `CreditRow`, `ColumnsGrid`, `ReverseWordmark`. Every function ≤ 50 lines.
+- **Tests** — 11 new test files (5 hook + 6 component); 81 new + extended assertions; full polish-2 driver-A scope at 132/132 green. ESLint clean (no errors). Driver C/D failures in `chapters/__tests__/Chapter06LiveJobs.test.tsx` and `Chapter08FindYourPath.test.tsx` are pre-existing in their lanes (not Driver A files).
+
+**Files added:**
+- `frontend/src/components/home/ChapterRailTooltip.tsx`
+- `frontend/src/components/home/ChromeAccentBridge.tsx`
+- `frontend/src/components/home/HeaderProgressRail.tsx`
+- `frontend/src/components/home/__tests__/SiteHeader.scrollDirection.test.tsx`
+- `frontend/src/components/home/__tests__/SiteHeader.brandLoading.test.tsx`
+- `frontend/src/components/home/__tests__/ChapterRailTooltip.test.tsx`
+- `frontend/src/components/home/__tests__/ChromeAccentBridge.test.tsx`
+- `frontend/src/components/home/__tests__/HeaderProgressRail.test.tsx`
+- `frontend/src/components/home/__tests__/PageMeta.liveNow.test.tsx`
+- `frontend/src/components/home/__tests__/SiteFooter.editorialLink.test.tsx`
+- `frontend/src/components/home/__tests__/SiteFooter.wordmark.test.tsx`
+- `frontend/src/components/wall/__tests__/SkipToContent.polish.test.tsx`
+- `frontend/src/hooks/__tests__/useMagneticHover.test.tsx`
+- `frontend/src/hooks/__tests__/useScrollDirection.test.ts`
+
+**Files modified:**
+- `frontend/src/hooks/useMagneticHover.ts` (filled scaffold)
+- `frontend/src/hooks/useScrollDirection.ts` (filled scaffold)
+- `frontend/src/components/home/SiteHeader.tsx` (T2/T4/T7 + decomposition)
+- `frontend/src/components/home/SiteFooter.tsx` (T5/T8 + decomposition)
+- `frontend/src/components/home/ChapterRail.tsx` (T3 hover/focus tooltip)
+- `frontend/src/components/home/PageMeta.tsx` (T9 LIVE row)
+- `frontend/src/components/home/__tests__/PageMeta.test.tsx` (mock useLiveNowFormatted to keep legacy tests green without QueryClientProvider)
+- `frontend/src/components/wall/SkipToContent.tsx` (T6 polish)
+- `frontend/src/app/styles/home-chapters.css` (polish-2 driver-A namespaced block: tooltip keyframe, editorial-link, footer wordmark, header progress rail)
+- `frontend/src/lib/translations/en.json` + `es.json` (nav.muteToggle.*, chapterRail.tooltip, pageMeta.live*, batterySaver — native-fluent ES)
+
+**What's Next:** Driver E mounts `<HeaderProgressRail />` and `<ChromeAccentBridge />` in `HomePage.tsx` at integration time (immediately after `<CursorFlashlight />`). Other polish-2 drivers continue independent lanes; Driver C's `Chapter06LiveJobs.test.tsx` needs a `fireEvent` import fix in their lane.
+
 ### 2026-04-29 — sprint/gowork-facelift Driver D: Phase D1 archive + D2 i18n + D3 page wiring + D4 smoke (worktree agent-a884de798036f92b3)
 
 Branch: `sprint/gowork-facelift` (worktree). HackFW 2026 facelift dispatch — Driver D scope: integrator + archivist (page wiring + obsolete test archive + i18n catalog + integration smoke).
