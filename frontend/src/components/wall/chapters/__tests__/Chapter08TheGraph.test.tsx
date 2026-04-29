@@ -89,7 +89,19 @@ describe("Chapter08TheGraph — reduced motion fallback", () => {
 });
 
 describe("Chapter08TheGraph — lazy-load contract (T3.13)", () => {
-  it("imports BarrierConstellation via next/dynamic with ssr:false", async () => {
+  it("does NOT statically import BarrierConstellation (severed import edge)", async () => {
+    // Demo-day guard (commit e59a7b9 fix(ch8): sever BarrierConstellation
+    // import edge entirely): r3f v8 references React 18 internals
+    // (`ReactCurrentOwner`) that React 19 removed. Until r3f is upgraded
+    // to v9+, the 3D BarrierConstellation path is severed entirely —
+    // webpack must NEVER discover the import edge to
+    // `../BarrierConstellation`. The next/dynamic loader was REMOVED on
+    // purpose so even an `import()` resolution doesn't pre-warm the
+    // chunk on Ch8 render. Static fallback is mandatory.
+    //
+    // Re-enable plan (post-HackFW): see top of Chapter08TheGraph.tsx.
+    // When r3f@^9 lands, restore the dynamic loader and re-enable this
+    // test to assert next/dynamic + ssr:false again.
     const fs = await import("node:fs");
     const path = await import("node:path");
     const filePath = path.resolve(
@@ -98,15 +110,18 @@ describe("Chapter08TheGraph — lazy-load contract (T3.13)", () => {
       "Chapter08TheGraph.tsx",
     );
     const source = fs.readFileSync(filePath, "utf-8");
-    expect(source).toMatch(/import\s+dynamic\s+from\s+["']next\/dynamic["']/);
-    expect(source).toMatch(
-      /dynamic\s*\(\s*\(\s*\)\s*=>\s*import\s*\(\s*["'][^"']*BarrierConstellation["']\s*\)/,
-    );
-    expect(source).toMatch(/ssr:\s*false/);
-    // Forbid a static import of BarrierConstellation
+    // The negative invariant (no static import of BarrierConstellation)
+    // is the load-bearing one — it's what keeps the three.js bundle out
+    // of the eager chunk regardless of which loader is used.
     expect(source).not.toMatch(
       /^import\s+\{?\s*BarrierConstellation\s*\}?\s+from\s+["'][^"']*BarrierConstellation["']/m,
     );
+    // ConstellationHost stub must be present — it's the local component
+    // that decides between the static SVG fallback and (eventually) the
+    // dynamic Three.js host. The stub mounts no Canvas while the import
+    // edge is severed.
+    expect(source).toMatch(/function\s+ConstellationHost\s*\(/);
+    expect(source).toMatch(/StaticConstellationFallback/);
   });
 });
 

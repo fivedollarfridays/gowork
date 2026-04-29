@@ -120,20 +120,46 @@ describe("Long-term stability — framework invariants (Driver D Spotlight)", ()
     const CHECKLIST = join(REPO_ROOT, "docs", "submission-checklist.md");
     const DEMO = join(REPO_ROOT, "docs", "submission-demo.md");
 
-    it("README discoverability hub references all 5 submission lanes", () => {
+    it("README is the audience-facing entry point (no submission-only spokes)", () => {
+      // Narrative reset (sprint/narrative-reset, commit 03dff3c): the
+      // README was rewritten as a public, audience-facing entry point —
+      // not a submission discoverability hub. Submission artifacts
+      // (press-kit, Devpost form, submission-demo, submission-checklist,
+      // vercel-deploy-runbook, post-submission/) were intentionally
+      // stripped from the README to keep the public-facing surface
+      // focused on what GoWork is and how to run it. The submission
+      // packet still exists under docs/ — judges discover it via the
+      // Devpost submission form, not via README spokes.
+      //
+      // What the README MUST still have: project title (GoWork), the
+      // city framing (Fort Worth), an MIT license reference, and at
+      // least one architecture-level doc link (docs/architecture.md or
+      // docs/setup.md) so a contributor can land on the repo and find
+      // the next file.
       const md = readFileSync(README, "utf8");
-      expect(md).toMatch(/press-kit\.md/);
-      expect(md).toMatch(/devpost-submission\.md/);
-      expect(md).toMatch(/submission-demo\.md/);
-      expect(md).toMatch(/submission-checklist\.md/);
-      expect(md).toMatch(/vercel-deploy-runbook\.md/);
+      expect(md).toMatch(/GoWork/);
+      expect(md).toMatch(/Fort Worth/i);
+      expect(md).toMatch(/MIT/);
+      expect(md).toMatch(/docs\/(architecture|setup|api|DEPLOYMENT)\.md/i);
     });
 
-    it("Press kit references repo + screenshots + devpost", () => {
+    it("Press kit is rebranded for HackFW with the locked thesis", () => {
+      // Narrative reset: the press-kit was rewritten audience-first.
+      // Cinematic-still references (`docs/press-kit/screenshots/...`),
+      // the Devpost cross-link, and the scsonnet@gmail.com contact
+      // line were dropped — the press kit is now a one-pager that
+      // judges + reporters can read top-to-bottom without bouncing.
+      // What MUST still be in the press kit: GoWork branding, the
+      // HackFW 2026 framing, the locked thesis question, an MIT
+      // license declaration, and at least one repo-level pointer
+      // (the GitHub org URL is sufficient — full /montgowork path
+      // is not load-bearing for a press kit).
       const md = readFileSync(PRESS_KIT, "utf8");
-      expect(md).toMatch(/github\.com\/fivedollarfridays\/montgowork/);
-      expect(md).toMatch(/press-kit\/screenshots/);
-      expect(md).toMatch(/devpost-submission\.md/);
+      expect(md).toMatch(/GoWork/);
+      expect(md).toMatch(/HackFW 2026/);
+      expect(md).toMatch(/standing between you and a job/i);
+      expect(md).toMatch(/MIT/);
+      expect(md).toMatch(/github\.com\/fivedollarfridays/);
     });
 
     it("Devpost references README + press kit + repo + license", () => {
@@ -151,11 +177,25 @@ describe("Long-term stability — framework invariants (Driver D Spotlight)", ()
       expect(md).toMatch(/post-submission/);
     });
 
-    it("Submission demo references video script + take plan + SRT", () => {
+    it("Submission demo is a self-contained live-demo script", () => {
+      // Narrative reset (sprint/narrative-reset, commit 03dff3c)
+      // reverted submission-demo.md to a self-contained live-demo
+      // script (Beat 1..7) and dropped the cross-links to
+      // submission-video-script.md, submission-video-take-plan.md, and
+      // submission-video.srt. Those video assets still exist under
+      // docs/ and are exercised by submission-readiness.test.ts; they
+      // simply aren't linked from the demo script anymore (a live
+      // demo and a recorded video are independent tracks).
+      //
+      // What the demo MUST still have: a Pitch section, Beat 1..7
+      // structure with timing budgets, a backup-paths section, and a
+      // pre-demo checklist. Those are checked in
+      // submission-demo-walkthrough.test.ts; here we just guard the
+      // doc's existence and substantive size.
       const md = readFileSync(DEMO, "utf8");
-      expect(md).toMatch(/submission-video-script\.md/);
-      expect(md).toMatch(/submission-video-take-plan\.md/);
-      expect(md).toMatch(/submission-video\.srt/);
+      expect(md.length).toBeGreaterThan(2000);
+      expect(md).toMatch(/Beat 1\b/i);
+      expect(md).toMatch(/pre-demo checklist/i);
     });
   });
 

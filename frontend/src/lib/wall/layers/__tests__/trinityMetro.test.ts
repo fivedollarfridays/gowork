@@ -62,11 +62,18 @@ describe("trinityMetroLayer — config", () => {
     expect(TRINITY_METRO_HIGHLIGHTED_ROUTE_IDS).toContain("6");
   });
 
-  it("layer config uses no hardcoded hex (design tokens via OKLCH literals)", () => {
+  it("layer config uses centralized MAPBOX_COLORS hex tokens (Mapbox-parseable)", () => {
+    // Commit 2b9adca: Mapbox GL JS only parses hex/rgb/hsl, not oklch().
+    // The OKLCH design tokens are precomputed once into MAPBOX_COLORS in
+    // lib/wall/colors.ts; layer paints reference those hex values
+    // directly. Layer registration no longer crashes with "color
+    // expected, oklch(...) found". The contract here is "any literal
+    // colors must be valid Mapbox colors" — i.e. hex / rgb / hsl, not
+    // oklch().
     const paint = JSON.stringify(
       trinityMetroLayer.layerConfigs.find((l) => l.id === TRINITY_METRO_LINE_ID)?.paint ?? {},
     );
-    expect(paint).not.toMatch(/#[0-9a-fA-F]{3,8}/);
+    expect(paint).not.toMatch(/oklch\s*\(/i);
   });
 
   it("layer paint is a feature-state-aware expression so highlight switches color without re-render", () => {
