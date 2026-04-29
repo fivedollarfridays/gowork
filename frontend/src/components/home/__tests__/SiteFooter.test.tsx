@@ -42,10 +42,30 @@ describe("SiteFooter — structure", () => {
     expect(link).toBeTruthy();
   });
 
-  it("links Outcomes dashboard to /case-manager/outcomes", () => {
+  it("links Outcomes dashboard to a real /case-manager target", () => {
+    // Polish: the dedicated /case-manager/outcomes subroute is not built yet,
+    // so we soft-land on the existing /case-manager page with a query flag —
+    // navigators won't 404 from the home footer pre-launch.
     const { container } = wrap(<SiteFooter />);
-    const link = container.querySelector('a[href="/case-manager/outcomes"]');
+    const link = container.querySelector(
+      'a[href="/case-manager?view=outcomes"]',
+    );
     expect(link).toBeTruthy();
+  });
+
+  it("links Press kit to the canonical GitHub press kit doc", () => {
+    const { container } = wrap(<SiteFooter />);
+    const link = container.querySelector(
+      'a[href="https://github.com/fivedollarfridays/montgowork/blob/main/docs/press-kit.md"]',
+    );
+    expect(link).toBeTruthy();
+  });
+
+  it("renders the legal nav row (Privacy / Terms / Accessibility / GitHub)", () => {
+    const { container } = wrap(<SiteFooter />);
+    expect(container.querySelector('a[href="/privacy"]')).toBeTruthy();
+    expect(container.querySelector('a[href="/terms"]')).toBeTruthy();
+    expect(container.querySelector('a[href="/accessibility"]')).toBeTruthy();
   });
 
   it("links Deploy GoWork to the GitHub repo", () => {

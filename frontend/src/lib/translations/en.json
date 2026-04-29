@@ -55,7 +55,9 @@
     "citiesPress": "Press kit",
     "citiesOpenSource": "Open source · MIT",
     "creditLine": "HackFW 2026 · Fort Worth, TX",
-    "shippedLine": "Built in Texas. Shipped to anywhere."
+    "shippedLine": "Built in Texas. Shipped to anywhere.",
+    "legalNavLabel": "Legal and accessibility",
+    "legalAccessibility": "Accessibility"
   },
   "banner": {
     "stallTitle": "Let's get you unstuck",

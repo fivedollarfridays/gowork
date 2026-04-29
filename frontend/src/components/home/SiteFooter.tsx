@@ -29,6 +29,7 @@ interface SiteFooterProps {
 }
 
 const REPO_URL = "https://github.com/fivedollarfridays/montgowork";
+const PRESS_KIT_URL = `${REPO_URL}/blob/main/docs/press-kit.md`;
 
 export function SiteFooter({ version }: SiteFooterProps = {}): JSX.Element {
   const { t } = useTranslation();
@@ -107,14 +108,19 @@ export function SiteFooter({ version }: SiteFooterProps = {}): JSX.Element {
               </Link>
             </li>
             <li>
-              <Link href="/case-manager/outcomes" className="footer-link">
+              <Link href="/case-manager?view=outcomes" className="footer-link">
                 {t("siteFooter.navigatorsOutcomes")}
               </Link>
             </li>
             <li>
-              <Link href="#" className="footer-link">
+              <a
+                href={`${REPO_URL}/blob/main/docs/case-manager-training.md`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-link"
+              >
                 {t("siteFooter.navigatorsTraining")}
-              </Link>
+              </a>
             </li>
           </ul>
         </div>
@@ -139,9 +145,14 @@ export function SiteFooter({ version }: SiteFooterProps = {}): JSX.Element {
               </a>
             </li>
             <li>
-              <Link href="/about" className="footer-link">
+              <a
+                href={PRESS_KIT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-link"
+              >
                 {t("siteFooter.citiesPress")}
-              </Link>
+              </a>
             </li>
             <li>
               <a
@@ -157,13 +168,44 @@ export function SiteFooter({ version }: SiteFooterProps = {}): JSX.Element {
         </div>
       </div>
 
-      {/* Rule + credit row */}
-      <div
-        className="mx-auto max-w-screen-2xl mt-12 pt-6 flex flex-col md:flex-row gap-3 md:items-center md:justify-between text-xs"
+      {/* Legal row — Privacy / Terms / Accessibility / Feedback (carried over
+          from the canonical app Footer so users still reach legal+a11y from
+          the home page, even though the canonical chrome is suppressed on `/`
+          via ChromeFrame). */}
+      <nav
+        aria-label={t("siteFooter.legalNavLabel")}
+        className="mx-auto max-w-screen-2xl mt-10 pt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs"
         style={{
           borderTop: "1px solid color-mix(in oklch, var(--fg-primary), transparent 92%)",
           color: "var(--fg-muted)",
         }}
+      >
+        <Link href="/privacy" className="footer-link">
+          {t("footer.privacy")}
+        </Link>
+        <span aria-hidden="true" style={{ opacity: 0.4 }}>·</span>
+        <Link href="/terms" className="footer-link">
+          {t("footer.terms")}
+        </Link>
+        <span aria-hidden="true" style={{ opacity: 0.4 }}>·</span>
+        <Link href="/accessibility" className="footer-link">
+          {t("siteFooter.legalAccessibility")}
+        </Link>
+        <span aria-hidden="true" style={{ opacity: 0.4 }}>·</span>
+        <a
+          href={REPO_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="footer-link"
+        >
+          {t("footer.github")}
+        </a>
+      </nav>
+
+      {/* Credit row */}
+      <div
+        className="mx-auto max-w-screen-2xl mt-3 flex flex-col md:flex-row gap-3 md:items-center md:justify-between text-xs"
+        style={{ color: "var(--fg-muted)" }}
       >
         <span>{t("siteFooter.creditLine")}</span>
         <span>{t("siteFooter.shippedLine")}</span>

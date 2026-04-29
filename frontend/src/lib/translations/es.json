@@ -55,7 +55,9 @@
     "citiesPress": "Kit de prensa",
     "citiesOpenSource": "Código abierto · MIT",
     "creditLine": "HackFW 2026 · Fort Worth, TX",
-    "shippedLine": "Hecho en Texas. Enviado a cualquier parte."
+    "shippedLine": "Hecho en Texas. Enviado a cualquier parte.",
+    "legalNavLabel": "Legal y accesibilidad",
+    "legalAccessibility": "Accesibilidad"
   },
   "banner": {
     "stallTitle": "Vamos a destrabar tu proceso",
