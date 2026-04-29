@@ -139,3 +139,106 @@ html {
   top: 1rem;
   outline: none;
 }
+
+/* ─── sprint/gowork-facelift Driver A — Site chrome layout ──────────────────
+ * The home chrome (SiteHeader / ChapterRail / PageMeta / SiteFooter /
+ * CursorFlashlight) lives outside chapter content rectangles and renders on
+ * every screen of the GoWork story. Tokens-only, breakpoint-gated.
+ */
+
+/* ChapterRail — hidden below 1100px viewport per the design handoff. We use
+ * Tailwind's `xl:` (1280px) inside the component for the *desktop* show, but
+ * still want the rail visible on the 1100..1280 window where Tailwind's xl
+ * doesn't yet kick in. This rule covers that gap precisely. */
+@media (min-width: 1100px) {
+  [data-chapter-rail] {
+    display: flex !important;
+  }
+}
+@media (max-width: 1099px) {
+  [data-chapter-rail] {
+    display: none !important;
+  }
+}
+
+/* PageMeta — hidden below 720px viewport per the design handoff. */
+@media (max-width: 719px) {
+  [data-page-meta] {
+    display: none !important;
+  }
+}
+
+/* Site-nav underline-on-hover — cyan→amber gradient. Lives on the SiteHeader's
+ * `.site-nav__link` anchors. The link itself stays a bare neutral; the ::after
+ * draws the gradient bar that scales 0→1 from the left on hover/focus. */
+.site-nav__link {
+  position: relative;
+}
+.site-nav__link::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 4px;
+  height: 2px;
+  background: linear-gradient(to right, var(--accent-cyan), var(--accent-amber));
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 220ms var(--ease-linear-sig, ease-in-out);
+  border-radius: 2px;
+}
+.site-nav__link:hover::after,
+.site-nav__link:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* Footer link styling — match the underline-on-hover affordance at a smaller
+ * scale so hover state is consistent with the header. */
+.footer-link {
+  color: var(--fg-secondary);
+  transition: color 180ms var(--ease-linear-sig, ease-in-out);
+}
+.footer-link:hover,
+.footer-link:focus-visible {
+  color: var(--accent-cyan);
+}
+
+/* Time-of-day → background tint. Chapter sections set `data-bg` (`dark` /
+ * `warm` / `rose`) and the body picks up the matching gradient/wash. The
+ * 1.4s transition keeps the cross-chapter mood swap from feeling jarring. */
+body {
+  transition: background 1400ms ease-out;
+}
+body[data-bg="dark"] {
+  background: var(--bg-base);
+}
+body[data-bg="warm"] {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--bg-base), var(--accent-amber) 4%) 0%,
+    var(--bg-base) 100%
+  );
+}
+body[data-bg="rose"] {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--bg-base), var(--accent-rose) 5%) 0%,
+    var(--bg-base) 100%
+  );
+}
+
+/* CursorFlashlight — fade in via body.cursor-active. The data-attribute
+ * version (used by the React component) controls opacity inline; the body
+ * class hook here is a parallel signal so other layers (e.g. chapter
+ * vignettes) can react to "cursor is engaged" without subscribing to the
+ * pointermove stream themselves. */
+@media (prefers-reduced-motion: reduce) {
+  [data-home-cursor-flashlight] {
+    display: none !important;
+  }
+}
+@media (pointer: coarse) {
+  [data-home-cursor-flashlight] {
+    display: none !important;
+  }
+}
