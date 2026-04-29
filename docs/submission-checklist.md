@@ -19,7 +19,11 @@
 - [ ] `NEXT_PUBLIC_LAST_CALIBRATED` updated to `2026-05-01T<h>:<m>:00Z`
 - [ ] Devpost account confirmed working (login, profile, team)
 - [ ] Press kit final on `docs/press-kit.md` and shipped images present
-- [ ] Submission video v3.5min final, captions present (.srt or burned-in)
+- [ ] Submission video < 4:00 final (target 3:55 per
+      `docs/submission-video-script.md` master timeline; W5-D
+      compressed from 4:30 to satisfy
+      `docs/visual-rebirth-briefs.md` "Final video < 4 min" rule),
+      captions present (.srt or burned-in)
 - [ ] 60-second teaser final
 - [ ] Get a full night of sleep — past-Shawn's gift to future-Shawn
 
@@ -62,7 +66,11 @@
       (https://github.com/fivedollarfridays/montgowork/blob/main/README.md)
 - [ ] Press kit images load
 - [ ] Submission video file is < 50 MB
-- [ ] Submission video runtime is ≤ 4:30 (Devpost cap)
+- [ ] Submission video runtime is **< 4:00** (target 3:55 per master
+      timeline; W5-D verified against visual-rebirth-briefs.md
+      "Final video < 4 min" requirement). If Devpost rules tighten to
+      3:00, fall back to the emergency cut documented in Section G of
+      `docs/submission-video-script.md`
 - [ ] Captions verified — open the video, confirm text matches audio
 
 ---
@@ -126,17 +134,26 @@
 
 ## T+15 minutes (post-submit hygiene)
 
-- [ ] Tag the git commit:
+- [ ] Tag the git commit using the canonical script (W5 Driver D):
       ```
-      git tag v0.1.0-hackfw-submission
-      git push origin v0.1.0-hackfw-submission
+      node scripts/tag-submission.mjs
       ```
+      The script verifies a clean working tree, the branch
+      (`sprint/visual-rebirth` / `sprint/w5-submission` / `main`),
+      the absence of an existing `v0.1.0-hackfw-submission` tag,
+      writes the structured tag message (sprint summary, test counts,
+      Lighthouse scores, deployment URL), creates the annotated tag,
+      and pushes it to origin. Pass `--dry-run` first to preview the
+      message; pass `--force` to re-tag (audited). Override defaults
+      with `--tests-frontend=N --bundle-kb=N --lighthouse-perf=X
+      --deploy-url=URL` flags or matching env vars at tag time.
 - [ ] Verify the tag appears on GitHub at
       `https://github.com/fivedollarfridays/montgowork/releases/tag/v0.1.0-hackfw-submission`
 - [ ] Update Devpost "Code repository" field to the tag URL if not done
       pre-submit
-- [ ] Reddit / X post drafts published (if applicable — see
-      `docs/post-submission-social.md`)
+- [ ] Reddit / X / LinkedIn post drafts published (drafts in
+      `docs/post-submission/` — `reddit-r-civic-tech.md`,
+      `twitter-thread.md`, `linkedin-announcement.md`)
 - [ ] Slack the team with the Devpost project URL + git tag
 - [ ] Eat. Drink water. Stop touching the keyboard.
 

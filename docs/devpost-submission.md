@@ -182,13 +182,18 @@ OG image generator.
 
 - **Production deployment:** _Driver C will fill on deploy._
 - **Source code:** `https://github.com/fivedollarfridays/montgowork`
+- **README (repo root):** `https://github.com/fivedollarfridays/montgowork/blob/main/README.md`
+- **Press kit:** [`docs/press-kit.md`](press-kit.md) — cinematic stills + media-ready stats
+- **Live demo script:** [`docs/submission-demo.md`](submission-demo.md)
 - **License:** MIT (`LICENSE` at repo root)
 
 ---
 
 ## Editorial reference
 
-This document derives its voice from `docs/copy-thesis.md` (single
-source of truth for the GoWork editorial fingerprint). When the form
-on `https://fwtx.devpost.com/` is filled, paste sections verbatim from
-above. Do not paraphrase the locked phrases.
+This document derives its voice from [`docs/copy-thesis.md`](copy-thesis.md)
+(single source of truth for the GoWork editorial fingerprint). When the
+form on `https://fwtx.devpost.com/` is filled, paste sections verbatim
+from above. Do not paraphrase the locked phrases. Cross-references:
+[README.md](../README.md), [`docs/press-kit.md`](press-kit.md),
+[`docs/submission-demo.md`](submission-demo.md).

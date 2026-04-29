@@ -165,6 +165,12 @@ The format is the innovation. Civic tech doesn't have its NYT
 | [`docs/press-kit.md`](docs/press-kit.md) | Press kit with cinematic stills + stats |
 | [`docs/devpost-submission.md`](docs/devpost-submission.md) | Devpost form pre-fill content |
 | [`docs/submission-demo.md`](docs/submission-demo.md) | Live judges' demo script (Driver B) |
+| [`docs/submission-video-script.md`](docs/submission-video-script.md) | 3:55 submission video script (Driver B) |
+| [`docs/submission-checklist.md`](docs/submission-checklist.md) | T-1h Death Note checklist (Driver C) |
+| [`docs/vercel-deploy-runbook.md`](docs/vercel-deploy-runbook.md) | Production deploy procedure (Driver C) |
+| [`docs/cross-browser-test-plan.md`](docs/cross-browser-test-plan.md) | Manual QA per browser (Driver C) |
+| [`docs/mobile-slow-3g-test-plan.md`](docs/mobile-slow-3g-test-plan.md) | Mobile + slow-3G validation (Driver C) |
+| [`docs/lighthouse-final-scores.md`](docs/lighthouse-final-scores.md) | Lighthouse measurement log (Driver C) |
 | [`docs/visual-rebirth-plan.md`](docs/visual-rebirth-plan.md) | The Wall plan + 12 life-layers |
 | [`docs/setup.md`](docs/setup.md) | Local development setup |
 | [`docs/api.md`](docs/api.md) | Backend API reference with curl examples |
@@ -172,6 +178,10 @@ The format is the innovation. Civic tech doesn't have its NYT
 | [`docs/SECURITY.md`](docs/SECURITY.md) | Security posture + threat model |
 | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Railway + Vercel deployment guides |
 | [`docs/fw-dao-bounty-research.md`](docs/fw-dao-bounty-research.md) | FW DAO claim path investigation |
+| [`docs/contributors-onboarding.md`](docs/contributors-onboarding.md) | 30-minute onboarding for new contributors (Driver D) |
+| [`docs/multi-city-expansion-playbook.md`](docs/multi-city-expansion-playbook.md) | How to add a new city (Driver D) |
+| [`docs/architecture-decisions/`](docs/architecture-decisions) | ADRs for major design decisions (Driver D) |
+| [`docs/post-submission/`](docs/post-submission) | Reddit + Twitter + LinkedIn drafts + post-mortem template (Driver D) |
 | [`ROADMAP.md`](ROADMAP.md) | Feature roadmap and known gaps |
 
 ---
