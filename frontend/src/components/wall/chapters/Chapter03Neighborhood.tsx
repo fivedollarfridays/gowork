@@ -98,6 +98,7 @@ export function Chapter03Neighborhood({
         minHeight: "100vh",
         display: "grid",
         placeItems: "center",
+        padding: "4rem 0",
       }}
     >
       <div
@@ -125,12 +126,18 @@ export function Chapter03Neighborhood({
         data-zip-fill-opacity={zipFillOpacity.toFixed(3)}
         data-carlos-pin-opacity={carlosPinOpacity.toFixed(3)}
         style={{
-          maxWidth: "44rem",
-          padding: "1.5rem 2rem",
+          // Heroic scale (T-Render.1).
+          maxWidth: "min(72vw, 56rem)",
+          width: "min(92vw, 56rem)",
+          padding: "clamp(2rem, 4vw, 4rem) clamp(1.5rem, 4vw, 3rem)",
           color: "var(--fg-primary)",
-          background: "color-mix(in oklch, var(--bg-base) 70%, transparent)",
+          background:
+            "linear-gradient(180deg, color-mix(in oklch, var(--bg-base) 88%, transparent) 0%, color-mix(in oklch, var(--bg-base) 92%, transparent) 100%)",
           borderRadius: "var(--radius)",
-          backdropFilter: "blur(8px)",
+          backdropFilter: "blur(12px) saturate(140%)",
+          WebkitBackdropFilter: "blur(12px) saturate(140%)",
+          boxShadow:
+            "0 24px 80px color-mix(in oklch, var(--bg-base) 60%, transparent)",
           opacity: reduced ? 1 : Math.max(0.85, progress),
           transition: reduced ? "none" : "opacity 200ms ease-out",
         }}
@@ -139,9 +146,9 @@ export function Chapter03Neighborhood({
           id="ch3-heading"
           style={{
             fontFamily: "var(--font-inter-stack)",
-            fontSize: "clamp(1.5rem, 3vw, 2.25rem)",
+            fontSize: "clamp(2rem, 4vw, 3.5rem)",
             letterSpacing: "-0.03em",
-            lineHeight: 1.15,
+            lineHeight: 1.1,
             margin: 0,
             color: "var(--fg-primary)",
           }}
@@ -150,8 +157,8 @@ export function Chapter03Neighborhood({
         </h2>
         <p
           style={{
-            marginTop: "1rem",
-            fontSize: "1.0625rem",
+            marginTop: "1.25rem",
+            fontSize: "clamp(1.0625rem, 1.5vw, 1.375rem)",
             lineHeight: 1.65,
             color: "var(--fg-secondary, var(--fg-primary))",
           }}

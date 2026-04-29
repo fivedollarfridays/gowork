@@ -80,7 +80,7 @@ export function Chapter10FindYourPath({
         alignItems: "center",
         justifyContent: "center",
         gap: "2rem",
-        padding: "3rem 1.5rem",
+        padding: "4rem 1.5rem",
         background:
           "linear-gradient(180deg, color-mix(in oklch, var(--bg-base) 70%, transparent) 0%, var(--bg-base) 75%)",
         color: "var(--fg-primary)",
@@ -89,8 +89,18 @@ export function Chapter10FindYourPath({
       <div
         data-testid="chapter10-morph-target"
         style={{
-          maxWidth: "44rem",
+          // Heroic scale (T-Render.1).
+          maxWidth: "min(78vw, 60rem)",
+          width: "min(92vw, 60rem)",
+          padding: "clamp(2rem, 4vw, 4rem) clamp(1.5rem, 4vw, 3rem)",
           textAlign: "center",
+          background:
+            "linear-gradient(180deg, color-mix(in oklch, var(--bg-base) 88%, transparent) 0%, color-mix(in oklch, var(--bg-base) 92%, transparent) 100%)",
+          borderRadius: "var(--radius)",
+          backdropFilter: "blur(12px) saturate(140%)",
+          WebkitBackdropFilter: "blur(12px) saturate(140%)",
+          boxShadow:
+            "0 24px 80px color-mix(in oklch, var(--bg-base) 60%, transparent)",
           viewTransitionName: WALL_TO_ASSESS_TRANSITION_NAME,
         }}
       >
@@ -99,7 +109,7 @@ export function Chapter10FindYourPath({
           style={{
             margin: 0,
             fontFamily: "var(--font-inter-stack)",
-            fontSize: "clamp(2.25rem, 5vw, 4rem)",
+            fontSize: "clamp(2.5rem, 5vw, 4.5rem)",
             letterSpacing: "-0.04em",
             lineHeight: 1.05,
             color: "var(--fg-primary)",
@@ -109,8 +119,8 @@ export function Chapter10FindYourPath({
         </h2>
         <p
           style={{
-            marginTop: "1.25rem",
-            fontSize: "clamp(1rem, 1.6vw, 1.25rem)",
+            marginTop: "1.5rem",
+            fontSize: "clamp(1.0625rem, 1.5vw, 1.375rem)",
             lineHeight: 1.55,
             color: "var(--fg-secondary, var(--fg-primary))",
           }}

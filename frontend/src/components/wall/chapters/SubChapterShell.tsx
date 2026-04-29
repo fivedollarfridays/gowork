@@ -63,12 +63,31 @@ export function SubChapterShell({
       data-emphasis-tint={tint}
       data-progress={progress.toFixed(2)}
       aria-labelledby={`ch4-${subChapterId}-title`}
-      className="ch4-subchapter relative flex max-w-3xl flex-col gap-6 px-6 py-8"
+      className="ch4-subchapter relative flex flex-col gap-6"
+      style={{
+        // Heroic scale (T-Render.1).
+        maxWidth: "min(72vw, 56rem)",
+        width: "min(92vw, 56rem)",
+        padding: "clamp(2rem, 4vw, 4rem) clamp(1.5rem, 4vw, 3rem)",
+        background:
+          "linear-gradient(180deg, color-mix(in oklch, var(--bg-base) 88%, transparent) 0%, color-mix(in oklch, var(--bg-base) 92%, transparent) 100%)",
+        borderRadius: "var(--radius)",
+        backdropFilter: "blur(12px) saturate(140%)",
+        WebkitBackdropFilter: "blur(12px) saturate(140%)",
+        boxShadow:
+          "0 24px 80px color-mix(in oklch, var(--bg-base) 60%, transparent)",
+      }}
     >
       <h2
         id={`ch4-${subChapterId}-title`}
-        className="ch4-subchapter__title text-3xl font-semibold tracking-tight"
-        style={{ color: tintVar }}
+        className="ch4-subchapter__title font-semibold tracking-tight"
+        style={{
+          color: tintVar,
+          fontSize: "clamp(2rem, 4vw, 3.5rem)",
+          letterSpacing: "-0.03em",
+          lineHeight: 1.1,
+          margin: 0,
+        }}
       >
         {title}
       </h2>
@@ -80,8 +99,12 @@ export function SubChapterShell({
         >
           <span
             data-testid="ch4-stat-value"
-            className="ch4-stat-band__value text-5xl font-semibold tabular-nums"
-            style={{ color: tintVar }}
+            className="ch4-stat-band__value font-semibold tabular-nums"
+            style={{
+              color: tintVar,
+              fontSize: "clamp(2.5rem, 5vw, 4.5rem)",
+              lineHeight: 1,
+            }}
           >
             {statValue}
           </span>
@@ -92,7 +115,8 @@ export function SubChapterShell({
 
         <p
           data-testid="ch4-detail"
-          className="ch4-subchapter__detail text-lg leading-relaxed text-[var(--fg-primary)] md:text-xl"
+          className="ch4-subchapter__detail leading-relaxed text-[var(--fg-primary)]"
+          style={{ fontSize: "clamp(1.0625rem, 1.5vw, 1.375rem)" }}
         >
           {detail}
         </p>
