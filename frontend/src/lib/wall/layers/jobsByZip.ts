@@ -23,8 +23,9 @@ import type {
 export const JOBS_BY_ZIP_SOURCE_ID = "jobs-by-zip-source";
 export const JOBS_BY_ZIP_CIRCLE_ID = "jobs-by-zip-circle";
 
-const AMBER = "oklch(0.78 0.16 75)";
-const MUTED_GRAY = "oklch(0.52 0.02 250)";
+import { MAPBOX_COLORS } from "../colors";
+const AMBER = MAPBOX_COLORS.amber;
+const MUTED_GRAY = MAPBOX_COLORS.mutedGray;
 
 export interface JobsByZipFeature {
   type: "Feature";

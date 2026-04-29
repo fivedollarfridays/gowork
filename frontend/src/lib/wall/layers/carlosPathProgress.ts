@@ -16,7 +16,8 @@ import { CARLOS_PATH_LINE_ID } from "./carlosPath";
 
 export { CARLOS_PATH_LINE_ID } from "./carlosPath";
 
-const AMBER_STRONG = "oklch(0.86 0.18 80)";
+import { MAPBOX_COLORS } from "../colors";
+const AMBER_STRONG = MAPBOX_COLORS.amberStrong;
 
 function clamp01(v: number): number {
   if (!Number.isFinite(v)) return 0;

@@ -143,10 +143,17 @@ function ConstellationHost({
   );
 }
 
+// Demo-day guard: react-three-fiber v8 references React 18 internals
+// (`ReactCurrentOwner`) that React 19 removed. Until r3f is upgraded to
+// v9+, force the static SVG fallback unconditionally so Ch8 still
+// delivers its editorial moment without a runtime crash. Flip back to
+// `false` after `npm install @react-three/fiber@^9 @react-three/drei@^9`.
+const FORCE_STATIC_FALLBACK = true;
+
 export function Chapter08TheGraph(props: ChapterProps): ReactElement {
   const { progress, reducedMotion, active } = props;
   const prefersReduced = usePrefersReducedMotion();
-  const useStatic = reducedMotion ?? prefersReduced;
+  const useStatic = FORCE_STATIC_FALLBACK || (reducedMotion ?? prefersReduced);
   const completeness = clamp01(progress);
   const [mounted, setMounted] = useState<boolean>(false);
   const cleanupRef = useRef<boolean>(false);

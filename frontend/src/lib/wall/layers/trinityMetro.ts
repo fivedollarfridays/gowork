@@ -47,8 +47,9 @@ export const BUS4_TO_DFW5_CORRIDOR = {
   routeId: "4",
 } as const;
 
-const CYAN = "oklch(0.78 0.13 215)";
-const AMBER = "oklch(0.78 0.16 75)";
+import { MAPBOX_COLORS } from "../colors";
+const CYAN = MAPBOX_COLORS.cyan;
+const AMBER = MAPBOX_COLORS.amber;
 
 const sourceConfig: GeoJSONSourceConfig = {
   type: "geojson",

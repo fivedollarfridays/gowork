@@ -91,20 +91,18 @@ export default function RootLayout({
                 <ViewTransitionsProvider>
                   <TranslationProvider>
                     <SkipToContent />
-                  </TranslationProvider>
-                  <Header />
-                  <ErrorBoundary>
-                    <main
-                      id="main"
-                      className="flex min-h-[calc(100vh-3.5rem)] flex-col"
-                    >
-                      <div className="flex-1">{children}</div>
-                      <TranslationProvider>
+                    <Header />
+                    <ErrorBoundary>
+                      <main
+                        id="main"
+                        className="flex min-h-[calc(100vh-3.5rem)] flex-col"
+                      >
+                        <div className="flex-1">{children}</div>
                         <Footer />
-                      </TranslationProvider>
-                    </main>
-                  </ErrorBoundary>
-                  <AriaLiveRegion />
+                      </main>
+                    </ErrorBoundary>
+                    <AriaLiveRegion />
+                  </TranslationProvider>
                 </ViewTransitionsProvider>
               </AriaLiveProvider>
             </SmoothScroll>

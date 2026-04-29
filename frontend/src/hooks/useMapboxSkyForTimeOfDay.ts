@@ -3,6 +3,17 @@
 import { useEffect } from "react";
 import { useTimeOfDay } from "./useTimeOfDay";
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
+import { oklchToHex } from "@/lib/wall/colors";
+
+/** Parse `oklch(L C H)` strings to Mapbox-safe hex; pass-through anything
+ *  else (including pre-hex values). Mapbox doesn't understand oklch(). */
+function oklchStringToHex(value: string): string | null {
+  const match = value.match(
+    /oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\)/i,
+  );
+  if (!match) return null;
+  return oklchToHex(parseFloat(match[1]), parseFloat(match[2]), parseFloat(match[3]));
+}
 
 /**
  * T4.A.1 — useMapboxSkyForTimeOfDay.
@@ -60,19 +71,28 @@ export function useMapboxSkyForTimeOfDay(
 
   useEffect(() => {
     if (!map) return;
+    // Mapbox doesn't parse oklch() — convert if needed.
+    // Map raw oklch literal to hex via cheap parsing of the L/C/H triple.
+    const mapboxColor = oklchStringToHex(skyColor) ?? skyColor;
     try {
-      if (typeof map.setPaintProperty === "function") {
+      // Only set sky paint if the style actually has a 'sky' layer.
+      // dark-v11 vector style does NOT include one; styles like
+      // mapbox/standard do. Guard avoids the "layer 'sky' does not exist"
+      // error that fires every effect re-run.
+      const hasSkyLayer =
+        typeof map.getLayer === "function" && Boolean(map.getLayer("sky"));
+      if (hasSkyLayer && typeof map.setPaintProperty === "function") {
         map.setPaintProperty("sky", "sky-type", skyTypeName);
         map.setPaintProperty(
           "sky",
           skyTypeName === "atmosphere" ? "sky-atmosphere-color" : "sky-gradient",
-          skyColor,
+          mapboxColor,
         );
       }
       if (typeof map.setLight === "function") {
         map.setLight({
           intensity: computeIntensity(sunAltitudeDeg, ceiling),
-          color: skyColor,
+          color: mapboxColor,
           anchor: "viewport",
         });
       }

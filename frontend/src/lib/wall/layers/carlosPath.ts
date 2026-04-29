@@ -26,8 +26,9 @@ export const CARLOS_PATH_SOURCE_ID = "carlos-path-source";
 export const CARLOS_HOME_SYMBOL_ID = "carlos-home-symbol";
 export const CARLOS_PATH_LINE_ID = "carlos-path-line";
 
-const AMBER_STRONG = "oklch(0.86 0.18 80)";
-const CYAN = "oklch(0.78 0.13 215)";
+import { MAPBOX_COLORS } from "../colors";
+const AMBER_STRONG = MAPBOX_COLORS.amberStrong;
+const CYAN = MAPBOX_COLORS.cyan;
 
 interface PathFeatureCommon {
   type: "Feature";
