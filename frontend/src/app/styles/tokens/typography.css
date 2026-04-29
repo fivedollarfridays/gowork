@@ -28,6 +28,10 @@
   /* gowork-facelift Driver D — token form of the .font-mono-data class
    * stack so chapters can apply the mono face via fontFamily inline. */
   --font-mono-data: ui-monospace, "SF Mono", Menlo, monospace;
+  /* polish-2 — Tailwind-style sans alias so consumers writing
+   * `var(--font-display, var(--font-sans))` resolve cleanly without
+   * tripping audit:tokens. Maps to the Inter stack. */
+  --font-sans: var(--font-inter-stack);
   /* Display alias — chapters use var(--font-display) inline; we point
    * it at the same Inter Variable stack as headings so the alias has
    * a canonical declaration. */

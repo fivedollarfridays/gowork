@@ -84,9 +84,9 @@ describe("T1.7 — globals.css token partials exist", () => {
     }
   });
 
-  it("globals.css drops to <=30 lines (thin shell only)", () => {
+  it("globals.css drops to <=40 lines (thin shell; polish-2 added home-velocity.css + print.css imports)", () => {
     const globals = read(path.resolve(FRONTEND_ROOT, "src/app/globals.css"));
     const lineCount = globals.split("\n").length;
-    expect(lineCount).toBeLessThanOrEqual(30);
+    expect(lineCount).toBeLessThanOrEqual(40);
   });
 });

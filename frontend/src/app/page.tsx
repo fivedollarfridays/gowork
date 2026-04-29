@@ -82,7 +82,9 @@ export async function generateMetadata(
 }
 
 export default async function Home({ searchParams }: HomePageProps) {
-  const sp = await searchParams;
+  // searchParams is a Promise in Next 15; tests that mount <Home /> as a client
+  // component without the Next runtime pass nothing (undefined) — guard both.
+  const sp = (searchParams ? await searchParams : {}) ?? {};
   const chapter = readChapter(sp.chapter);
   const locale = readLocale(sp.locale);
   const jsonld = buildHomeStructuredData({ chapter, locale });

@@ -126,11 +126,14 @@
 
   /* polish-2 — chrome accent bridge (T4) + drop cap (T15/T36).
    * --chrome-accent is mutated at runtime by ChromeAccentBridge as the user
-   * scrolls between chapters; defaults to cyan so SSR + JS-disabled paint
-   * stays brand-correct. --drop-cap-color overridden per-chapter on the
-   * <DropCap> component. */
+   * scrolls between chapters. --drop-cap-color overridden per-chapter on the
+   * <DropCap> component. --tod-sky-* default fallbacks for the Ch4
+   * atmosphere overlay; useMapboxSkyForTimeOfDay overrides at runtime. */
   --chrome-accent: var(--accent-cyan);
   --drop-cap-color: var(--accent-amber);
+  --tod-sky-1: var(--accent-amber);
+  --tod-sky-2: var(--accent-cyan);
+  --tod-sky-3: rgba(10, 14, 26, 0.6);
 
   /* T1.12 — temperature multiplier. Contract:
    *   1.0 = neutral (--accent-current stays cyan).

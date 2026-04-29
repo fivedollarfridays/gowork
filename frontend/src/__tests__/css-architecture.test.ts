@@ -42,8 +42,8 @@ describe("T1.9 — CSS architecture regression", () => {
     expect(order.slice(0, 5)).toEqual(["colors", "typography", "motion", "space", "layout"]);
   });
 
-  it("globals.css <= 30 lines (thin shell only)", () => {
-    expect(globals.split("\n").length).toBeLessThanOrEqual(30);
+  it("globals.css <= 40 lines (thin shell; polish-2 added home-velocity.css + print.css imports)", () => {
+    expect(globals.split("\n").length).toBeLessThanOrEqual(40);
   });
 
   it.each([
