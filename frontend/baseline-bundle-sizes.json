@@ -1,27 +1,36 @@
 {
   "_meta": {
-    "captured_at": "2026-04-25",
+    "captured_at": "2026-04-29",
     "next_version": "15.5.9",
     "first_load_js_routes": "Per-route First Load JS in KB; +10% over baseline triggers CI failure (T13.87).",
     "regen_command": "cd frontend && NEXT_PUBLIC_API_URL=http://localhost:8000 npm run build, then copy the printed table into this file.",
     "threshold_pct": 10,
-    "unit": "kB"
+    "unit": "kB",
+    "notes": "Regenerated post sprint/gowork-facelift souji-sweep. The +10-15% across non-home routes vs the 2026-04-25 capture is the accepted cost of the GSAP+ChapterRail+SiteHeader+SiteFooter chain landing in the shared chunk. The home route ITSELF improved (161 -> 153 kB) thanks to next/dynamic chapter lazy-loading. New routes added by W5+facelift: /accessibility, /api/og/[chapter], /api/og/default, /archive, /dev/tokens."
   },
   "routes": {
-    "/": 161,
+    "/": 153,
+    "/_not-found": 103,
+    "/accessibility": 106,
     "/admin/qc": 103,
-    "/appointments": 210,
-    "/assess": 190,
-    "/case-manager": 139,
-    "/credit": 165,
-    "/daily": 139,
-    "/documents/cover-letters": 139,
-    "/documents/resume": 138,
-    "/feedback/[token]": 127,
-    "/jobs": 152,
-    "/plan": 328,
-    "/privacy": 121,
-    "/shared/[token]": 129,
-    "/terms": 121
+    "/api/og/[chapter]": 103,
+    "/api/og/default": 103,
+    "/appointments": 228,
+    "/archive": 179,
+    "/assess": 208,
+    "/case-manager": 156,
+    "/credit": 183,
+    "/daily": 157,
+    "/dev/tokens": 103,
+    "/documents/cover-letters": 157,
+    "/documents/resume": 156,
+    "/feedback/[token]": 128,
+    "/jobs": 170,
+    "/plan": 348,
+    "/privacy": 139,
+    "/robots.txt": 103,
+    "/shared/[token]": 146,
+    "/sitemap.xml": 103,
+    "/terms": 139
   }
 }
