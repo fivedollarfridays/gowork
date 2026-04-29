@@ -29,7 +29,19 @@
 :root {
   --ease-linear-sig: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);     /* polish-2 — alias for entrance ease used by magnetic + flip + tooltip */
   --duration-baseline: 280ms;
+}
+
+/* ─── polish-2 — magnetic-hover + grain + chrome-accent tokens ───────────────
+ * Drivers A/C consume --magnetic-* on CTA pulls; Driver B consumes
+ * --grain-intensity for Ch1 hover-ramp; ChromeAccentBridge writes
+ * --chrome-accent at runtime.
+ */
+:root {
+  --magnetic-pull-distance: 80px;
+  --magnetic-pull-max: 10px;
+  --grain-intensity: 0.06;
 }
 
 /* ─── T1.21 — Stagger timing ─────────────────────────────────────────────────
