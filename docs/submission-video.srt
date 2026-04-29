@@ -1,0 +1,70 @@
+1
+00:00:05,000 --> 00:00:25,000
+What if the path through the wall was visible? Not the jobs — the wall.
+Five offices, forty-seven forms, a bus that takes seventy-one minutes.
+
+2
+00:00:25,000 --> 00:00:50,000
+GoWork is a workforce navigator. It maps the wall — every barrier
+between a worker and a paycheck — and routes them around it.
+
+3
+00:00:50,000 --> 00:01:15,000
+We're going to walk through one resident's twelve weeks in Fort Worth.
+Carlos is twenty-nine. A father of one. Four years of warehouse work.
+
+4
+00:01:15,000 --> 00:01:30,000
+He has three hundred dollars and no car. He is ready to work.
+This is The Wall.
+
+5
+00:01:30,000 --> 00:01:42,000
+Fort Worth, Texas. Carlos lives east of downtown. ZIP 76119.
+Trinity Metro routes thread the city — half don't reach the warehouses.
+
+6
+00:01:42,000 --> 00:01:55,000
+Single father of one daughter, four years old. Three years past a
+misdemeanor — sentence complete. Forklift certified. Four barriers.
+
+7
+00:01:55,000 --> 00:02:25,000
+Most workforce sites pretend barriers don't matter. We do the math.
+Criminal record: 71-minute commute. No childcare: $1,200 a month.
+Bad credit: 540 score, one in three jobs unreachable.
+
+8
+00:02:25,000 --> 00:02:42,000
+Five offices. Forty-seven forms. Each one says go to the next one.
+Without GoWork, this is the path. We named it so we could replace it.
+
+9
+00:02:42,000 --> 00:03:05,000
+When more pay means less money. A two-dollar raise sounds like a win.
+Childcare subsidy gone at $14/hr. SNAP gone at $17/hr.
+
+10
+00:03:05,000 --> 00:03:25,000
+Five stops. Twelve weeks. One plan. Home to DPS to HHSC to Legal Aid
+to Workforce Solutions. Trinity Metro Bus 4 and Bus 6 carry him.
+
+11
+00:03:25,000 --> 00:03:55,000
+The wall isn't a list. It's a graph. Thirty-three nodes. Seven
+categories. Resolve one barrier and three others move within reach.
+
+12
+00:03:55,000 --> 00:04:08,000
+It works in Fort Worth. It will work in Montgomery. It will work
+where you are. Two cities deployed. Six on deck. Same engine.
+
+13
+00:04:08,000 --> 00:04:15,000
+You've seen the wall. You've seen the labyrinth. Now skip both —
+start your assessment.
+
+14
+00:04:15,000 --> 00:04:30,000
+GoWork is open-source under MIT. Fort Worth is the reference
+deployment. Montgomery is the second. Built for HackFW 2026.

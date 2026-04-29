@@ -31,6 +31,7 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -162,15 +163,22 @@ export default function WallContainer({ children }: WallContainerProps) {
   return (
     <WallContext.Provider value={contextValue}>
       <AccentTokenProvider />
+      {/* T-Render.8 — body/html bg = bg-base while The Wall is mounted, so
+       *  scroll past the Mapbox area never reveals the light-mode cream
+       *  default from the global stylesheet. The data attribute lets us
+       *  scope the override to The Wall (no leak into other pages). */}
+      <WallBackgroundLock />
       {/* W4 T4.D.7 — idle ambient drift; sets data-life-idle on :root. */}
       <IdleStateProvider />
       <div
+        data-testid="wall-mapbox-fixed-host"
         style={{
           position: "fixed",
           inset: 0,
           zIndex: 0,
           width: "100%",
           height: "100%",
+          background: "var(--bg-base)",
         }}
       >
         {/* W4 T4.D.6 — motion-blur on fast scroll, reduced-motion safe. */}
@@ -195,6 +203,31 @@ export default function WallContainer({ children }: WallContainerProps) {
       />
     </WallContext.Provider>
   );
+}
+
+/**
+ * T-Render.8 — Locks body + html background to `var(--bg-base)` while
+ * The Wall is mounted. Removed on unmount so other pages keep their
+ * default theme. Inline rather than a CSS file because the side effect
+ * is mount-scoped, not document-global.
+ */
+function WallBackgroundLock(): null {
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const body = document.body;
+    const html = document.documentElement;
+    const prevBodyBg = body.style.background;
+    const prevHtmlBg = html.style.background;
+    body.style.background = "var(--bg-base)";
+    html.style.background = "var(--bg-base)";
+    body.dataset.wallActive = "true";
+    return () => {
+      body.style.background = prevBodyBg;
+      html.style.background = prevHtmlBg;
+      delete body.dataset.wallActive;
+    };
+  }, []);
+  return null;
 }
 
 /**

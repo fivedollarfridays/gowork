@@ -80,18 +80,28 @@ export function Chapter05Labyrinth({
       data-reduced-motion={reducedMotion ? "true" : "false"}
       data-converged={showConvergence ? "true" : "false"}
       aria-labelledby="chapter05-title"
-      className="chapter05-labyrinth relative flex min-h-screen flex-col items-center justify-center gap-8 px-6 py-12"
+      className="chapter05-labyrinth relative flex min-h-screen flex-col items-center justify-center gap-8 px-6 py-16"
     >
       <h2
         id="chapter05-title"
-        className="chapter05-labyrinth__title text-3xl font-semibold tracking-tight md:text-4xl"
+        className="chapter05-labyrinth__title font-semibold tracking-tight"
+        style={{
+          fontSize: "clamp(2rem, 4vw, 3.5rem)",
+          letterSpacing: "-0.03em",
+          lineHeight: 1.1,
+          margin: 0,
+        }}
       >
         {t("wall.chapter05.title")}
       </h2>
 
       <p
         data-testid="ch5-editorial"
-        className="chapter05-labyrinth__editorial max-w-2xl text-center text-xl leading-relaxed text-[var(--fg-primary)] md:text-2xl"
+        className="chapter05-labyrinth__editorial text-center leading-relaxed text-[var(--fg-primary)]"
+        style={{
+          maxWidth: "min(72vw, 50rem)",
+          fontSize: "clamp(1.125rem, 1.8vw, 1.5rem)",
+        }}
       >
         {t("wall.chapter05.editorial")}
       </p>
@@ -141,23 +151,49 @@ function LabyrinthSvg({
   return (
     <svg
       data-testid="ch5-labyrinth-svg"
-      className="chapter05-labyrinth__svg h-72 w-full max-w-3xl"
+      className="chapter05-labyrinth__svg w-full"
+      style={{
+        maxWidth: "min(78vw, 60rem)",
+        minHeight: 320,
+        height: "clamp(320px, 40vh, 520px)",
+      }}
       viewBox="0 0 1000 800"
       preserveAspectRatio="xMidYMid meet"
       aria-hidden="true"
       focusable="false"
     >
+      <defs>
+        <filter id="ch5-path-glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="2" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      {/* Faint ghost path so users see where the chaos goes even before
+       *  scroll has progressed. */}
+      <path
+        d={LABYRINTH_PATH_D}
+        fill="none"
+        stroke="var(--accent-amber)"
+        strokeWidth={4}
+        strokeOpacity={0.18}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
       <path
         data-testid="ch5-labyrinth-path"
         d={LABYRINTH_PATH_D}
         fill="none"
         stroke="var(--accent-amber)"
-        strokeWidth={3}
+        strokeWidth={5}
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeDasharray={LABYRINTH_PATH_LENGTH}
         strokeDashoffset={dashoffset}
-        opacity={0.85}
+        opacity={0.95}
+        filter="url(#ch5-path-glow)"
       />
       {LABYRINTH_NODES.map((node, idx) => (
         <OfficeMarker
@@ -187,14 +223,25 @@ function OfficeMarker({
       data-testid={`ch5-office-group-${node.id}`}
       data-barrier={node.barrierKey}
     >
+      {lit ? (
+        <circle
+          cx={node.x}
+          cy={node.y}
+          r={32}
+          fill="var(--accent-amber)"
+          opacity={0.18}
+        />
+      ) : null}
       <circle
         data-testid={`ch5-office-${node.id}`}
         data-lit={lit ? "true" : "false"}
         cx={node.x}
         cy={node.y}
-        r={lit ? 14 : 8}
+        r={lit ? 22 : 14}
         fill={lit ? "var(--accent-amber)" : "var(--fg-muted)"}
-        opacity={lit ? 1 : 0.4}
+        opacity={lit ? 1 : 0.55}
+        stroke={lit ? "var(--bg-base)" : "transparent"}
+        strokeWidth={lit ? 3 : 0}
       >
         <title>{barrierLabel}</title>
       </circle>
