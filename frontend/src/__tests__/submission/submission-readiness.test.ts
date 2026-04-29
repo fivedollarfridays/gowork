@@ -47,9 +47,68 @@ const REQUIRED_FILES: { path: string; minBytes: number; reason: string }[] = [
     minBytes: 600,
     reason: "T5.A.5 FW DAO claim path",
   },
+  // W5 Driver D — extended cross-document linking sweep (T5.D.4)
+  {
+    path: "docs/submission-checklist.md",
+    minBytes: 1500,
+    reason: "T-1h Death Note checklist (Driver C)",
+  },
+  {
+    path: "docs/vercel-deploy-runbook.md",
+    minBytes: 1500,
+    reason: "Production deploy runbook (Driver C)",
+  },
+  {
+    path: "docs/submission-video-script.md",
+    minBytes: 1500,
+    reason: "Submission video script (Driver B)",
+  },
+  {
+    path: "docs/submission-video-take-plan.md",
+    minBytes: 1000,
+    reason: "Submission video take plan (Driver B)",
+  },
+  {
+    path: "docs/submission-video.srt",
+    minBytes: 500,
+    reason: "Submission video captions (Driver B)",
+  },
+  {
+    path: "docs/post-submission/reddit-r-civic-tech.md",
+    minBytes: 1500,
+    reason: "Driver D — Reddit announcement draft",
+  },
+  {
+    path: "docs/post-submission/twitter-thread.md",
+    minBytes: 800,
+    reason: "Driver D — Twitter / X thread draft",
+  },
+  {
+    path: "docs/post-submission/linkedin-announcement.md",
+    minBytes: 2000,
+    reason: "Driver D — LinkedIn announcement draft",
+  },
+  {
+    path: "docs/post-submission/post-mortem-template.md",
+    minBytes: 1500,
+    reason: "Driver D — Post-HackFW post-mortem template",
+  },
+  {
+    path: "scripts/tag-submission.mjs",
+    minBytes: 1500,
+    reason: "Driver D — git tag automation script",
+  },
+  {
+    path: "LICENSE",
+    minBytes: 1000,
+    reason: "MIT license (referenced by README)",
+  },
 ];
 
-const REQUIRED_DIRS = [{ path: "docs/press-kit", reason: "press kit assets" }];
+const REQUIRED_DIRS = [
+  { path: "docs/press-kit", reason: "press kit assets" },
+  { path: "docs/post-submission", reason: "Driver D — post-submission drafts" },
+];
 
 describe("Submission-readiness guard (Spotlight #3)", () => {
   it.each(REQUIRED_FILES)(
@@ -78,6 +137,23 @@ describe("Submission-readiness guard (Spotlight #3)", () => {
     // The README is the hub for the submission packet — both spokes must be
     // discoverable from it.
     expect(md).toMatch(/press[- ]kit/i);
+  });
+
+  it("README references Driver C's submission-checklist + deploy runbook (T5.D.4)", () => {
+    const md = readFileSync(join(REPO_ROOT, "README.md"), "utf8");
+    // W5 Driver D extends the README hub — judges + contributors should
+    // walk from README to the checklist + runbook in one click.
+    expect(md).toMatch(/submission-checklist\.md/);
+    expect(md).toMatch(/vercel-deploy-runbook\.md/);
+  });
+
+  it("README references Driver D's post-submission directory + scripts/tag-submission.mjs (T5.D.4)", () => {
+    const md = readFileSync(join(REPO_ROOT, "README.md"), "utf8");
+    // The README must surface the post-submission drafts so the
+    // post-judging announcement wave is one click away from the repo
+    // root. tag-submission script is referenced indirectly via the
+    // checklist — guard the checklist link only here.
+    expect(md).toMatch(/post-submission/);
   });
 
   it("copy-thesis.md is the canonical source of editorial voice", () => {

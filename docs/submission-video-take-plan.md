@@ -158,7 +158,9 @@
 
 The editor receives:
 - 22 raw screen-capture clips (named `shot-NN-takeM.mp4`).
-- The voiceover audio track (single WAV / MP3, 4:30 length).
+- The voiceover audio track (single WAV / MP3, **3:55** length —
+  W5 Driver D compressed from 4:30 to satisfy
+  `docs/visual-rebirth-briefs.md` "Final video < 4 min" rule).
 - This take plan (chosen-take markings).
 - The captions file (`docs/submission-video.srt`).
 

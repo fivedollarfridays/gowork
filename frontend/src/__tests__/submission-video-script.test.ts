@@ -35,8 +35,14 @@ describe("docs/submission-video-script.md", () => {
     expect(doc).toMatch(/##.*walkthrough|3.minute|3:00|3 minutes/i);
   });
 
-  it("declares a 15-second outro / close section", () => {
-    expect(doc).toMatch(/##.*outro|##.*closing|15.second|15s outro/i);
+  it("declares an outro / close section (W5-D compressed: outro folded into Ch10)", () => {
+    // Driver D compressed runtime to 3:55 to satisfy the
+    // visual-rebirth-briefs < 4 min final-cut requirement. The standalone
+    // 15s outro folds into Ch10's CTA. Either form is valid: the doc
+    // either declares an explicit outro section OR explicitly folds it.
+    expect(doc).toMatch(
+      /##.*outro|##.*closing|15.second|10.second|outro.*folded|folded into/i,
+    );
   });
 
   it("covers all ten Wall chapters with timing markers", () => {
@@ -54,9 +60,11 @@ describe("docs/submission-video-script.md", () => {
     expect(doc).toMatch(/HackFW 2026/);
   });
 
-  it("declares total runtime within the 4:30 ceiling", () => {
-    // Total runtime stated somewhere in the doc as 4:00–4:30.
-    expect(doc).toMatch(/4:[0-2]\d|4 minutes? 0?\d|under 4 minutes?/i);
+  it("declares total runtime under 4:00 (visual-rebirth-briefs final-cut req)", () => {
+    // W5 Driver D — T5.D.6: tightened ceiling from 4:30 to under 4:00 to
+    // satisfy `docs/visual-rebirth-briefs.md` ("Final video < 4 min").
+    // The script must declare a runtime in the 3:50–3:59 window.
+    expect(doc).toMatch(/3:5[0-9]|3 minutes? 5\d|under 4 minutes?/i);
   });
 
   it("includes a Spanish-voiceover plan (record EN first, ES later)", () => {
