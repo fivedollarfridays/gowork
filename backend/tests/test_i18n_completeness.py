@@ -82,6 +82,18 @@ IDENTICAL_PAIR_ALLOWLIST: dict[str, str] = {
     # W3 Chapter 10's footer brand mark is the GoWork wordmark + city. The
     # brand wordmark + place name are proper nouns that don't translate.
     "wall.chapter10.footerBrand": "'GoWork · Fort Worth, TX' — brand mark + US city, both proper nouns.",
+    # Narrative-reset Ch5: each labyrinth office node now carries a proper-noun
+    # name. Office names are organizational entities that don't translate.
+    "wall.chapter05.officeNames.tarrant-district-clerk": "'Tarrant District Clerk' — government office proper noun.",
+    "wall.chapter05.officeNames.hhsc-eligibility": "'HHSC Eligibility' — Texas state agency proper noun.",
+    "wall.chapter05.officeNames.legal-aid-nw-texas": "'Legal Aid of NorthWest Texas' — nonprofit proper noun.",
+    "wall.chapter05.officeNames.workforce-solutions-belknap": "'Workforce Solutions on E. Belknap' — agency + street proper nouns.",
+    "wall.chapter05.officeNames.trinity-metro-hq": "'Trinity Metro HQ' — transit agency proper noun.",
+    # Narrative-reset Ch9: Texas cities replacing Montgomery framing.
+    # All US city proper nouns that don't translate.
+    "wall.chapter09.futureCityAustin": "'Austin' — Texas city proper noun.",
+    "wall.chapter09.futureCitySanAntonio": "'San Antonio' — Texas city proper noun.",
+    "wall.chapter09.futureCityWaco": "'Waco' — Texas city proper noun.",
 }
 
 
