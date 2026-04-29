@@ -77,7 +77,7 @@ export function Chapter04TheWall({
       data-subactive={activeSub}
       data-reduced-motion={reducedMotion ? "true" : "false"}
       aria-labelledby="chapter04-title"
-      className="chapter04-wall relative flex min-h-screen flex-col items-center justify-center"
+      className="chapter04-wall relative flex min-h-screen flex-col items-center justify-center px-6 py-16"
     >
       <h2 id="chapter04-title" className="sr-only">
         {t("wall.chapter04.title")}
