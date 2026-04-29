@@ -75,20 +75,28 @@ describe("zipBoundariesLayer — config", () => {
     );
   });
 
-  it("fill layer uses design-token paint (no hardcoded hex)", () => {
+  it("fill layer uses centralized MAPBOX_COLORS hex tokens (Mapbox-parseable)", () => {
+    // Commit 2b9adca: Mapbox GL JS only parses hex/rgb/hsl, not oklch().
+    // The OKLCH design tokens are precomputed once into MAPBOX_COLORS in
+    // lib/wall/colors.ts; layer paints reference those hex values
+    // directly. The contract here is "no oklch() literals" — the
+    // hardcoded-hex prohibition was relaxed so layer registration stops
+    // crashing with "color expected, oklch(...) found".
     const fill = zipBoundariesLayer.layerConfigs.find((l) => l.id === ZIP_BOUNDARIES_FILL_ID);
     expect(fill).toBeDefined();
     expect(fill?.type).toBe("fill");
     const paint = JSON.stringify(fill?.paint ?? {});
-    expect(paint).not.toMatch(/#[0-9a-fA-F]{3,8}/);
+    expect(paint).not.toMatch(/oklch\s*\(/i);
   });
 
-  it("line layer uses design-token paint (no hardcoded hex)", () => {
+  it("line layer uses centralized MAPBOX_COLORS hex tokens (Mapbox-parseable)", () => {
+    // Same Mapbox parser constraint as the fill layer — see comment
+    // above. Line layer paint must be hex / rgb / hsl, not oklch().
     const line = zipBoundariesLayer.layerConfigs.find((l) => l.id === ZIP_BOUNDARIES_LINE_ID);
     expect(line).toBeDefined();
     expect(line?.type).toBe("line");
     const paint = JSON.stringify(line?.paint ?? {});
-    expect(paint).not.toMatch(/#[0-9a-fA-F]{3,8}/);
+    expect(paint).not.toMatch(/oklch\s*\(/i);
   });
 });
 

@@ -46,9 +46,22 @@ interface DocSpec {
 const DOCS: DocSpec[] = [
   {
     label: "submission-demo.md",
+    // Narrative reset (sprint/narrative-reset, commit 03dff3c) reverted
+    // submission-demo.md from a chapter-locked walkthrough overlay to a
+    // staging-walk Beat 1..7 script. Per-chapter Ch1..Ch10 markers are
+    // no longer authored there. The cross-doc parity contract is now
+    // satisfied by submission-video-script.md + submission-video.srt
+    // (each of which still covers all 10 chapters); the demo script's
+    // contract is structural (Beat 1..7 + pitch + backups + checklist),
+    // tested separately in submission-demo-walkthrough.test.ts.
+    //
+    // We keep the per-chapter assertion as a tautology against the doc's
+    // existence so the cross-doc loop below still exercises the demo
+    // doc; the substantive coverage is enforced by the script + SRT
+    // entries below and by the "every chapter has at least one cross-
+    // doc reference" sweep further down.
     path: DEMO_PATH,
-    // The walkthrough overlay names each chapter as "Ch<N>" in headings.
-    perChapterPattern: (n) => new RegExp(`Ch${n}\\b`, "i"),
+    perChapterPattern: () => /GoWork/,
   },
   {
     label: "submission-video-script.md",

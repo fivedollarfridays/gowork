@@ -16,12 +16,18 @@ import { usePrefersReducedMotion } from "../usePrefersReducedMotion";
 interface FakeMap {
   setPaintProperty: ReturnType<typeof vi.fn>;
   setLight: ReturnType<typeof vi.fn>;
+  // Commit 2b9adca added a guard: setPaintProperty('sky', ...) only fires
+  // when map.getLayer('sky') returns truthy. dark-v11 ships without a
+  // 'sky' layer, so production guards against the layer-missing crash.
+  // The fake map opts INTO the sky-layer code path by returning a stub.
+  getLayer: ReturnType<typeof vi.fn>;
 }
 
 function makeMap(): FakeMap {
   return {
     setPaintProperty: vi.fn(),
     setLight: vi.fn(),
+    getLayer: vi.fn(() => ({ id: "sky", type: "sky" })),
   };
 }
 

@@ -57,7 +57,14 @@ const ANCHORS: AnchorSpec[] = [
   { chapter: "chapter04", anchor: "barriers don't matter" },
   { chapter: "chapter05", anchor: "Each one says go to the next one" },
   { chapter: "chapter06", anchor: "more pay means less money" },
-  { chapter: "chapter07", anchor: "Five stops. Twelve weeks." },
+  // Narrative reset (sprint/narrative-reset, commit 03dff3c) rewrote
+  // chapter07 from a 5-week / 5-stop walk to a same-day case file. The
+  // load-bearing voiceover anchor is now "twelve weeks" — it appears in
+  // the new translation hero ("Don't walk for twelve weeks. Walk in
+  // once.") and in the video script's Carlos timeline ("twelve weeks in
+  // Fort Worth", "Five stops. Twelve weeks. One plan."). Anchor stays
+  // narrow enough to fail on a real drift.
+  { chapter: "chapter07", anchor: "twelve weeks" },
   { chapter: "chapter08", anchor: "isn't a list" },
   { chapter: "chapter09", anchor: "It will work where you are" },
   { chapter: "chapter10", anchor: "skip both" },

@@ -164,30 +164,51 @@ describe("Cross-document linking sweep (T5.D.4)", () => {
   const SUBMISSION_CHECKLIST = join(REPO_ROOT, "docs", "submission-checklist.md");
   const SUBMISSION_DEMO = join(REPO_ROOT, "docs", "submission-demo.md");
 
-  it("README links to press kit + Devpost + LICENSE", () => {
+  it("README pins audience-facing branding + license (no submission spokes)", () => {
+    // Narrative reset (sprint/narrative-reset, commit 03dff3c) rewrote
+    // the README as a public, audience-facing entry point. Submission-
+    // packet cross-links (press-kit.md, devpost-submission.md, the
+    // LICENSE filename) were removed from the README to keep the
+    // public-facing surface focused on what GoWork is and how to run
+    // it. The MIT license is still declared in-line; the LICENSE file
+    // still exists at repo root (covered by submission-readiness.test).
     const md = read(README);
-    expect(md).toMatch(/press-kit\.md/);
-    expect(md).toMatch(/devpost-submission\.md/);
-    expect(md).toMatch(/LICENSE/);
+    expect(md).toMatch(/GoWork/);
+    expect(md).toMatch(/Fort Worth/i);
+    expect(md).toMatch(/MIT/);
   });
 
-  it("README links to submission checklist + deploy runbook", () => {
+  it("README links to at least one architecture or setup doc", () => {
+    // Narrative reset stripped the W5-D submission-checklist + deploy-
+    // runbook spokes from the README; what remains is the docs/
+    // family covering the runtime architecture and setup flow. A
+    // contributor must still be able to walk from README to at least
+    // one architecture-level doc in one click.
     const md = read(README);
-    // Driver D adds these — they're load-bearing for any contributor or
-    // judge who hits the README first.
-    expect(md).toMatch(/submission-checklist\.md/);
-    expect(md).toMatch(/vercel-deploy-runbook\.md/);
+    expect(md).toMatch(/docs\/(architecture|setup|api|DEPLOYMENT)\.md/i);
   });
 
-  it("press kit references repo URL + contact email", () => {
+  it("press kit references the GitHub org and the locked thesis", () => {
+    // Narrative reset dropped the scsonnet@gmail.com contact line and
+    // the cinematic-still gallery from the press kit. What remains is
+    // a one-pager covering: GoWork branding, the HackFW 2026 framing,
+    // the locked thesis (hero question), the GitHub org URL, and an
+    // MIT license declaration. Reporters reach Shawn via the GitHub
+    // profile or the @paircoder handle (already in the press kit's
+    // Contact section).
     const md = read(PRESS_KIT);
-    expect(md).toMatch(/github\.com\/fivedollarfridays\/montgowork/);
-    expect(md).toMatch(/scsonnet@gmail\.com/);
+    expect(md).toMatch(/github\.com\/fivedollarfridays/);
+    expect(md).toMatch(/standing between you and a job/i);
   });
 
-  it("press kit references screenshots directory", () => {
+  it("press kit declares HackFW 2026 + MIT license", () => {
+    // The screenshots directory (`docs/press-kit/screenshots/`) was
+    // dropped from the press kit body during narrative reset — it
+    // still exists on disk for the Devpost upload. The press kit
+    // contract here is the editorial frame: HackFW 2026 + MIT.
     const md = read(PRESS_KIT);
-    expect(md).toMatch(/press-kit\/screenshots/);
+    expect(md).toMatch(/HackFW 2026/);
+    expect(md).toMatch(/MIT/);
   });
 
   it("Devpost references README + press kit + repo", () => {
@@ -207,11 +228,16 @@ describe("Cross-document linking sweep (T5.D.4)", () => {
     expect(md).toMatch(/copy-thesis\.md/);
   });
 
-  it("submission demo links to video script + take plan + SRT", () => {
+  it("submission demo is a self-contained live-demo script", () => {
+    // Narrative reset (sprint/narrative-reset, commit 03dff3c) reverted
+    // submission-demo.md to a Beat 1..7 staging-walk script and dropped
+    // the cross-links to submission-video-script.md / take-plan.md /
+    // SRT. Those video assets still exist (and are exercised by
+    // submission-readiness.test.ts), but the live demo and the recorded
+    // video are independent tracks now.
     const md = read(SUBMISSION_DEMO);
-    expect(md).toMatch(/submission-video-script\.md/);
-    expect(md).toMatch(/submission-video-take-plan\.md/);
-    expect(md).toMatch(/submission-video\.srt/);
+    expect(md).toMatch(/Beat 1\b/i);
+    expect(md).toMatch(/pre-demo checklist/i);
   });
 });
 

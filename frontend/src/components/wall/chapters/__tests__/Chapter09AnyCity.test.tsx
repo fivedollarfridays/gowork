@@ -4,7 +4,8 @@
  * Narrative Reset (sprint/narrative-reset):
  *   - 1 lit city: Fort Worth (Montgomery removed from the wall narrative)
  *   - 5 dotted future cities (Dallas, Houston, Austin, San Antonio, Waco)
- *   - stat band: "13 sprints · 1 city live · 5 on deck" (no MIT chip)
+ *   - stat band: "Built in Fort Worth. Free to use." (audience-correct
+ *     copy — MIT chip and "13 sprints" engineering jargon both stripped)
  *   - "Tour Texas" + "Return to Fort Worth" buttons
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
@@ -30,11 +31,16 @@ describe("Chapter09AnyCity — copy + structure", () => {
     );
   });
 
-  it("stat band reflects the FW-only narrative (no MIT chip)", () => {
+  it("stat band reflects the FW-only narrative (no MIT chip, no engineering jargon)", () => {
+    // Narrative reset (b233102): the stat band was rewritten to strip
+    // engineering jargon. Was: "13 sprints · 1 city live · 5 on deck".
+    // Now: "Built in Fort Worth. Free to use." — audience-correct copy.
+    // The MIT chip was already removed in the narrative-reset commit.
     render(<Chapter09AnyCity progress={0.5} active={true} />);
     const stat = screen.getByTestId("ch9-stat-value").textContent ?? "";
     expect(stat).not.toMatch(/MIT/);
-    expect(stat).toMatch(/sprint/i);
+    expect(stat).not.toMatch(/sprint/i);
+    expect(stat).toMatch(/Fort Worth/i);
   });
 
   it("declares data-chapter='09' on its root", () => {

@@ -27,6 +27,11 @@ vi.mock("react-map-gl", () => {
     setLight: setLightSpy,
     addSource: vi.fn(),
     addLayer: vi.fn(),
+    // Commit 2b9adca added a sky-layer guard to useMapboxSkyForTimeOfDay
+    // — the runtime now skips setPaintProperty('sky', ...) unless
+    // map.getLayer('sky') returns truthy. The fake map opts INTO the
+    // sky-layer code path so the spy can fire.
+    getLayer: vi.fn(() => ({ id: "sky", type: "sky" })),
   };
   const MapStub = React.forwardRef<unknown, Record<string, unknown>>(
     (props, ref) => {

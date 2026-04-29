@@ -132,28 +132,41 @@ describe("Submission-readiness guard (Spotlight #3)", () => {
     );
   });
 
-  it("README references both press kit and Devpost docs", () => {
+  it("README pins the audience-facing surface (no submission-only spokes)", () => {
+    // Narrative reset (sprint/narrative-reset, commit 03dff3c): the
+    // README was rewritten as a public, audience-facing entry point —
+    // submission-only spokes (press-kit, Devpost form, post-submission
+    // drafts) were stripped. Judges find the submission packet via the
+    // Devpost form, not via README. What MUST stay: project name,
+    // Fort Worth framing, MIT license, at least one architecture or
+    // setup doc link.
     const md = readFileSync(join(REPO_ROOT, "README.md"), "utf8");
-    // The README is the hub for the submission packet — both spokes must be
-    // discoverable from it.
-    expect(md).toMatch(/press[- ]kit/i);
+    expect(md).toMatch(/GoWork/);
+    expect(md).toMatch(/Fort Worth/i);
+    expect(md).toMatch(/MIT/);
   });
 
-  it("README references Driver C's submission-checklist + deploy runbook (T5.D.4)", () => {
+  it("README links to at least one architecture or setup doc (T5.D.4)", () => {
+    // Narrative reset stripped the W5-D submission-checklist and
+    // vercel-deploy-runbook spokes from the README — those docs still
+    // exist (covered by REQUIRED_FILES above) but they're not load-
+    // bearing for the public-facing surface. A contributor must still
+    // be able to walk from README to one architecture-level doc.
     const md = readFileSync(join(REPO_ROOT, "README.md"), "utf8");
-    // W5 Driver D extends the README hub — judges + contributors should
-    // walk from README to the checklist + runbook in one click.
-    expect(md).toMatch(/submission-checklist\.md/);
-    expect(md).toMatch(/vercel-deploy-runbook\.md/);
+    expect(md).toMatch(/docs\/(architecture|setup|api|DEPLOYMENT)\.md/i);
   });
 
-  it("README references Driver D's post-submission directory + scripts/tag-submission.mjs (T5.D.4)", () => {
+  it("README documents the docs/ directory as the discoverability surface (T5.D.4)", () => {
+    // Narrative reset rewrote the Documentation section as a flat
+    // table of audience-facing docs (setup, api, architecture,
+    // SECURITY, DEPLOYMENT, demo-script, ROADMAP). Post-submission
+    // drafts live under docs/post-submission/ and are not linked
+    // from README anymore — they're internal scaffolding for the
+    // announcement wave. We assert the audience-facing docs table
+    // is present instead.
     const md = readFileSync(join(REPO_ROOT, "README.md"), "utf8");
-    // The README must surface the post-submission drafts so the
-    // post-judging announcement wave is one click away from the repo
-    // root. tag-submission script is referenced indirectly via the
-    // checklist — guard the checklist link only here.
-    expect(md).toMatch(/post-submission/);
+    expect(md).toMatch(/##\s*Documentation/i);
+    expect(md).toMatch(/ROADMAP\.md|docs\/setup\.md/i);
   });
 
   it("copy-thesis.md is the canonical source of editorial voice", () => {

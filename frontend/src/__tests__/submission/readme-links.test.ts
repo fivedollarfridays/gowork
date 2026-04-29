@@ -117,11 +117,18 @@ describe("README link validator (T5.A.7)", () => {
     expect(broken.length).toBe(0);
   });
 
-  it("README opens with a hero question or thesis line", () => {
+  it("README opens with the audience-facing thesis (workforce / barriers)", () => {
+    // Narrative reset (sprint/narrative-reset, commit 03dff3c) rewrote
+    // the README intro to lead with the audience-facing framing
+    // ("Helping residents overcome the real barriers between them and
+    // employment.") instead of the Wall's hero question. The hero
+    // question still lives in the chapter copy + press kit; the README
+    // intro is the project-overview surface, not the editorial hook.
     const md = readFileSync(README_PATH, "utf8");
-    // The locked copy thesis must appear in the first 80 lines.
-    const head = md.split("\n").slice(0, 80).join("\n");
-    expect(head).toMatch(/standing between you and a job/i);
+    const head = md.split("\n").slice(0, 10).join("\n");
+    expect(head).toMatch(/GoWork/);
+    expect(head).toMatch(/Fort Worth/i);
+    expect(head).toMatch(/(barrier|workforce|employment)/i);
   });
 
   it("README references the LICENSE", () => {

@@ -63,10 +63,16 @@ describe("Press kit paths validator (T5.A.7)", () => {
     expect(existsSync(PRESS_KIT_PATH)).toBe(true);
   });
 
-  it("press kit references at least one cinematic still", () => {
+  it("press kit references at least one cinematic still by filename", () => {
+    // Narrative reset (sprint/narrative-reset, commit 03dff3c) rewrote
+    // the Screenshots section as plain numbered prose ("1. The Wall
+    // (Ch1) (press-01-landing.png)") instead of inline markdown image
+    // tags. The cinematic stills are still named by filename so a
+    // reporter or judge can request them; the markdown was simplified
+    // to render cleaner on Devpost. We assert filename references
+    // instead of image tags now.
     const md = readFileSync(PRESS_KIT_PATH, "utf8");
-    const imgs = parsePressKitImages(md);
-    expect(imgs.length).toBeGreaterThan(0);
+    expect(md).toMatch(/press-\d+-[a-z0-9-]+\.png|landing-full\.png|chapter\d+\.png/i);
   });
 
   it("every press kit image resolves to a file or a documented placeholder", () => {
@@ -89,10 +95,16 @@ describe("Press kit paths validator (T5.A.7)", () => {
   });
 
   it("press kit headline does not lead with Worldwide Vibes (W5 demote)", () => {
+    // Narrative reset confirmed the W5 demote: the press kit headline
+    // is "GoWork Press Kit (HackFW 2026)" — Worldwide Vibes survives
+    // only as an Accolade line further down ("2nd Place, Worldwide
+    // Vibes Hackathon"). The headline gate is the first 5 lines (the
+    // H1 + the divider); the Accolade section ~line 23 is fine.
     const md = readFileSync(PRESS_KIT_PATH, "utf8");
-    // The first 30 lines are the headline + tagline + subhead area.
-    const head = md.split("\n").slice(0, 30).join("\n");
+    const head = md.split("\n").slice(0, 5).join("\n");
     expect(head).not.toMatch(/worldwide vibes/i);
+    // Make the demote assertion explicit — HackFW 2026 must lead.
+    expect(head).toMatch(/HackFW 2026/);
   });
 
   it("press kit tagline cites the locked thesis", () => {

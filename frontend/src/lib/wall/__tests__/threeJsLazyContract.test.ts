@@ -64,8 +64,20 @@ describe("Three.js lazy-load contract — eager bundle is three.js-free", () => 
   });
 });
 
-describe("Three.js lazy-load contract — Chapter08 uses next/dynamic for the constellation", () => {
-  it("Chapter08TheGraph imports BarrierConstellation via next/dynamic", () => {
+describe("Three.js lazy-load contract — Chapter08 keeps the BarrierConstellation edge severed", () => {
+  it("Chapter08TheGraph does NOT statically import BarrierConstellation (demo-day guard)", () => {
+    // Demo-day guard (commit e59a7b9): the BarrierConstellation import
+    // edge was severed entirely so webpack never resolves the
+    // three.js / @react-three/fiber chunk for Ch8 — r3f v8 referenced
+    // React 18 internals that React 19 removed. The dynamic loader was
+    // REMOVED (not just gated at runtime) because webpack pre-resolves
+    // dynamic chunks on first render. Until r3f is upgraded to v9+, the
+    // load-bearing invariant is "no import edge of any kind" — neither
+    // static nor `next/dynamic`.
+    //
+    // Re-enable plan (post-HackFW): see top of Chapter08TheGraph.tsx.
+    // When r3f@^9 lands, restore the next/dynamic loader and flip this
+    // test back to assert the dynamic + ssr:false contract.
     const src = readFileSync(
       resolve(
         FRONTEND_ROOT,
@@ -73,11 +85,19 @@ describe("Three.js lazy-load contract — Chapter08 uses next/dynamic for the co
       ),
       "utf-8",
     );
-    expect(src).toMatch(/import\s+dynamic\s+from\s+["']next\/dynamic["']/);
-    expect(src).toMatch(
-      /dynamic\s*\(\s*\(\s*\)\s*=>\s*import\s*\(\s*["'][^"']*BarrierConstellation["']\s*\)/,
+    // No static import of BarrierConstellation.
+    expect(src).not.toMatch(
+      /^\s*import\s+\{?\s*BarrierConstellation\s*\}?\s+from\s+["'][^"']*BarrierConstellation["']/m,
     );
-    expect(src).toMatch(/ssr:\s*false/);
+    // No bare `import("...BarrierConstellation")` either — the edge is
+    // severed even from dynamic loaders for the duration of the demo-
+    // day guard.
+    expect(src).not.toMatch(
+      /import\s*\(\s*["'][^"']*BarrierConstellation["']\s*\)/,
+    );
+    // The static SVG fallback must be the rendered path while the edge
+    // is severed.
+    expect(src).toMatch(/StaticConstellationFallback/);
   });
 });
 
