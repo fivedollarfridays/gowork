@@ -6,6 +6,7 @@ import { SmoothScroll } from "@/components/SmoothScroll";
 import { ScrollProgress } from "@/components/ScrollProgress";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { ChromeFrame } from "@/components/layout/ChromeFrame";
 import { TranslationProvider } from "@/hooks/useTranslation";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ViewTransitionsProvider } from "@/components/ViewTransitionsProvider";
@@ -91,14 +92,18 @@ export default function RootLayout({
                 <ViewTransitionsProvider>
                   <TranslationProvider>
                     <SkipToContent />
-                    <Header />
+                    <ChromeFrame>
+                      <Header />
+                    </ChromeFrame>
                     <ErrorBoundary>
                       <main
                         id="main"
                         className="flex min-h-[calc(100vh-3.5rem)] flex-col"
                       >
                         <div className="flex-1">{children}</div>
-                        <Footer />
+                        <ChromeFrame>
+                          <Footer />
+                        </ChromeFrame>
                       </main>
                     </ErrorBoundary>
                     <AriaLiveRegion />

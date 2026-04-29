@@ -25,6 +25,13 @@
 :root {
   --font-inter-var: var(--font-inter);
   --font-inter-stack: var(--font-inter-var), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  /* gowork-facelift Driver D — token form of the .font-mono-data class
+   * stack so chapters can apply the mono face via fontFamily inline. */
+  --font-mono-data: ui-monospace, "SF Mono", Menlo, monospace;
+  /* Display alias — chapters use var(--font-display) inline; we point
+   * it at the same Inter Variable stack as headings so the alias has
+   * a canonical declaration. */
+  --font-display: var(--font-inter-stack);
 }
 
 /* ─── T1.16 — Fluid type scale (clamp) ───────────────────────────────────────

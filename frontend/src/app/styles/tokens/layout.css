@@ -140,6 +140,15 @@ html {
   outline: none;
 }
 
+/* ─── sprint/gowork-facelift Driver D — chapter alias tokens ───────────────
+ * `--bg-elev-1` is consumed by `home-chapters.css` as the elevation-level-1
+ * surface. Aliased here (NOT in colors.css) so colors.css stays under its
+ * <200-line size budget (T1.11). Same value as `--bg-elevated`.
+ */
+:root {
+  --bg-elev-1: var(--bg-elevated);
+}
+
 /* ─── sprint/gowork-facelift Driver A — Site chrome layout ──────────────────
  * The home chrome (SiteHeader / ChapterRail / PageMeta / SiteFooter /
  * CursorFlashlight) lives outside chapter content rectangles and renders on

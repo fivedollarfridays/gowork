@@ -1,0 +1,83 @@
+"use client";
+
+/**
+ * Chapter 01 background layers: 4 absolute panels (grid mask + amber glow +
+ * cyan glow + noise) drifting via the `glow-drift` CSS keyframe.
+ *
+ * Pulled out of Chapter01TheWall.tsx to keep the parent file under arch
+ * limits.
+ */
+
+export function Chapter01Background() {
+  return (
+    <div
+      className="ch01-bg"
+      aria-hidden="true"
+      style={{
+        position: "absolute",
+        inset: 0,
+        pointerEvents: "none",
+        zIndex: 0,
+        overflow: "hidden",
+      }}
+    >
+      <div
+        className="bg-grid"
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage:
+            "linear-gradient(rgba(245,235,210,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(245,235,210,0.04) 1px, transparent 1px)",
+          backgroundSize: "80px 80px",
+          maskImage:
+            "radial-gradient(ellipse 80% 60% at 50% 40%, #000 30%, transparent 80%)",
+          WebkitMaskImage:
+            "radial-gradient(ellipse 80% 60% at 50% 40%, #000 30%, transparent 80%)",
+        }}
+      />
+      <div
+        className="bg-glow bg-glow-amber"
+        style={{
+          position: "absolute",
+          width: "60vw",
+          height: "60vw",
+          borderRadius: "999px",
+          filter: "blur(120px)",
+          opacity: 0.5,
+          background:
+            "radial-gradient(circle, rgba(245,158,11,0.45), transparent 60%)",
+          top: "-20vw",
+          left: "-20vw",
+          animation: "glow-drift 18s ease-in-out infinite alternate",
+        }}
+      />
+      <div
+        className="bg-glow bg-glow-cyan"
+        style={{
+          position: "absolute",
+          width: "60vw",
+          height: "60vw",
+          borderRadius: "999px",
+          filter: "blur(120px)",
+          opacity: 0.5,
+          background:
+            "radial-gradient(circle, rgba(34,211,238,0.35), transparent 60%)",
+          bottom: "-25vw",
+          right: "-15vw",
+          animation: "glow-drift 18s ease-in-out infinite alternate -9s",
+        }}
+      />
+      <div
+        className="bg-noise"
+        style={{
+          position: "absolute",
+          inset: 0,
+          opacity: 0.06,
+          mixBlendMode: "overlay",
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E\")",
+        }}
+      />
+    </div>
+  );
+}

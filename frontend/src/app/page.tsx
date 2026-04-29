@@ -1,19 +1,20 @@
 "use client";
 
 /**
- * T2.47 — Home page (post-W2 rewrite).
+ * Home page — sprint/gowork-facelift Driver D (Phase D3).
  *
- * Replaces the legacy hero/flow/stats landing with The Wall. The legacy
- * landing is preserved at `/archive` (T2.46) for rollback insurance.
+ * The 8-chapter scrollytelling homepage replaces the legacy 10-chapter
+ * Wall (preserved on `archive/pre-gowork-facelift`). Returning users
+ * with a completed assessment in sessionStorage skip the homepage and
+ * route to `/daily`; first-time visitors see `<HomePage>`.
  *
- * Returning users (with a completed assessment in sessionStorage) skip
- * the Wall and go straight to `/daily`. First-time visitors see The Wall
- * — Carlos's story rendered as a Mapbox-driven scrollytelling.
+ * The legacy hero/flow/stats landing remains preserved at `/archive`
+ * for rollback insurance (T2.46).
  */
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import WallContainer from "@/components/wall/WallContainer";
+import HomePage from "@/components/home/HomePage";
 import { useAssessmentComplete } from "./home-redirect";
 
 export default function Home() {
@@ -26,5 +27,5 @@ export default function Home() {
     }
   }, [assessmentComplete, router]);
 
-  return <WallContainer />;
+  return <HomePage />;
 }
