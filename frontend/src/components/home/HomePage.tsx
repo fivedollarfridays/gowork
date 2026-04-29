@@ -25,6 +25,10 @@
  * Driver A's Ch1–Ch4 export the chapter as a NAMED export. Ch4 also
  * exports a default; both forms are accepted. Ch5–Ch8 follow the same
  * named-export contract.
+ *
+ * State: ChapterRail and PageMeta are stateless; this shell drives them
+ * with `useScrollProgress(8)` and `useTimeOfDay()` so the bottom-right
+ * HUD reflects the actual page state.
  */
 import dynamic from "next/dynamic";
 import { ChapterRail } from "@/components/home/ChapterRail";
@@ -32,6 +36,26 @@ import { CursorFlashlight } from "@/components/home/CursorFlashlight";
 import { PageMeta } from "@/components/home/PageMeta";
 import { SiteFooter } from "@/components/home/SiteFooter";
 import { SiteHeader } from "@/components/home/SiteHeader";
+import { useEffect, useState } from "react";
+import { useScrollProgress } from "@/hooks/useScrollProgress";
+
+const TOTAL_CHAPTERS = 8;
+const HOME_CITY = "Fort Worth, TX";
+
+/**
+ * Returns the current local hour (0..23). SSR-safe: starts at 12 (noon)
+ * and updates after the first client effect tick. Re-runs every minute.
+ */
+function useCurrentHour(): number {
+  const [hour, setHour] = useState<number>(12);
+  useEffect(() => {
+    const tick = () => setHour(new Date().getHours());
+    tick();
+    const id = window.setInterval(tick, 60_000);
+    return () => window.clearInterval(id);
+  }, []);
+  return hour;
+}
 
 const Chapter01TheWall = dynamic(
   () =>
@@ -91,12 +115,22 @@ const Chapter08FindYourPath = dynamic(
 );
 
 export default function HomePage(): JSX.Element {
+  const { chapter, totalProgress } = useScrollProgress(TOTAL_CHAPTERS);
+  const hour = useCurrentHour();
+  const activeChapter = Math.min(TOTAL_CHAPTERS, Math.max(1, chapter + 1));
+
   return (
     <>
       <CursorFlashlight />
       <SiteHeader />
-      <ChapterRail />
-      <PageMeta />
+      <ChapterRail activeChapter={activeChapter} progress={totalProgress} />
+      <PageMeta
+        city={HOME_CITY}
+        chapter={activeChapter}
+        totalChapters={TOTAL_CHAPTERS}
+        progress={totalProgress}
+        hour={hour}
+      />
       <main id="home-main" data-home-main="true">
         <Chapter01TheWall />
         <Chapter02TheNumbers />
