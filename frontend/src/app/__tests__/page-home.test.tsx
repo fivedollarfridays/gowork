@@ -1,10 +1,7 @@
 /**
  * app/page.tsx — sprint/gowork-facelift Driver D (Phase D3).
- *
- * The home page is now a thin shell:
- *   - Returning users (with a completed assessment in sessionStorage)
- *     are redirected to /daily.
- *   - First-time visitors get the 8-chapter `<HomePage>` shell.
+ * polish-2 T51 — page.tsx is now a server component; the redirect logic
+ * lives in `app/page-client.tsx`.
  *
  * Locks the contract:
  *   - assessmentComplete=false → HomePage renders
@@ -41,27 +38,27 @@ afterEach(() => {
   cleanup();
 });
 
-describe("app/page.tsx — first-time visitors", () => {
+describe("app/page-client.tsx — first-time visitors", () => {
   it("mounts <HomePage> when assessment NOT complete", async () => {
     assessmentCompleteMock.mockReturnValue(false);
-    const { default: Home } = await import("../page");
-    const { getByTestId } = render(React.createElement(Home));
+    const { default: HomeClient } = await import("../page-client");
+    const { getByTestId } = render(React.createElement(HomeClient));
     expect(getByTestId("home-page-stub")).toBeInTheDocument();
   });
 
   it("does NOT redirect when assessment NOT complete", async () => {
     assessmentCompleteMock.mockReturnValue(false);
-    const { default: Home } = await import("../page");
-    render(React.createElement(Home));
+    const { default: HomeClient } = await import("../page-client");
+    render(React.createElement(HomeClient));
     expect(replaceMock).not.toHaveBeenCalled();
   });
 });
 
-describe("app/page.tsx — returning users", () => {
+describe("app/page-client.tsx — returning users", () => {
   it("redirects returning users to /daily via router.replace", async () => {
     assessmentCompleteMock.mockReturnValue(true);
-    const { default: Home } = await import("../page");
-    render(React.createElement(Home));
+    const { default: HomeClient } = await import("../page-client");
+    render(React.createElement(HomeClient));
     expect(replaceMock).toHaveBeenCalledWith("/daily");
   });
 });

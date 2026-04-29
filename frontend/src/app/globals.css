@@ -25,3 +25,11 @@
 
 /* Driver C — sprint/gowork-facelift homepage Ch04/Ch05/Ch06 visuals. */
 @import "./styles/home-chapters.css";
+
+/* Driver E — polish-2 T56/T57/T59 spotlight visual rules
+ * (scroll-velocity blur + battery-saver degradation + idle ambient orbit). */
+@import "./styles/home-velocity.css";
+
+/* Driver E — polish-2 T53 magazine-essay print stylesheet.
+ * The rules are wrapped in @media print so they never affect screen. */
+@import "./styles/print.css";

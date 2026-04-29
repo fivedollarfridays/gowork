@@ -1,0 +1,107 @@
+/**
+ * Driver E — polish-2 T56 / T57 / T59 spotlight CSS.
+ *
+ * Body-attribute-driven rules wired to `ScrollVelocityBridge`:
+ *
+ *   - body[data-scroll-velocity="fast"] → soft motion-blur on chapter
+ *     content (T56). Uses `backdrop-filter: blur(2px)` so the GPU
+ *     compositor handles the work; falls back to no-blur on browsers
+ *     without backdrop-filter support.
+ *
+ *   - body[data-battery-low] → disables expensive cursor / marquee /
+ *     particle effects (T57). The user is in battery-saver and we owe
+ *     them a quiet page.
+ *
+ *   - body[data-idle="true"] .ch04-marker → 1px y-orbit ambient drift
+ *     (T59). The city stays alive while the user is idle.
+ *
+ * Reduced-motion override: every animation here yields to
+ * `prefers-reduced-motion: reduce` — the data-attr may be set but the
+ * animation does not play.
+ */
+
+/* T56 — fast-scroll motion blur on chapter content. */
+@supports (backdrop-filter: blur(2px)) {
+  body[data-scroll-velocity="fast"] .chapter {
+    backdrop-filter: blur(2px);
+    transition: backdrop-filter 180ms ease-out;
+  }
+}
+body[data-scroll-velocity="fast"] .chapter {
+  transition: filter 180ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  body[data-scroll-velocity="fast"] .chapter {
+    backdrop-filter: none !important;
+    filter: none !important;
+    transition: none !important;
+  }
+}
+
+/* T57 — battery-saver degradation. */
+body[data-battery-low] .cursor-flashlight,
+body[data-battery-low] [data-testid="cursor-trail-dot"],
+body[data-battery-low] [data-trail],
+body[data-battery-low] .ch01-marquee,
+body[data-battery-low] [data-marquee],
+body[data-battery-low] [data-particle] {
+  display: none !important;
+  animation: none !important;
+}
+
+body[data-battery-low] .chapter {
+  /* Quiet the page — kill any decorative animation. */
+  animation: none !important;
+}
+
+/* T59 — idle ambient orbit on Ch4 markers. */
+@keyframes goworkIdleOrbit {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50%      { transform: translate3d(0, -1px, 0); }
+}
+body[data-idle="true"] .ch04-marker,
+body[data-idle="true"] [data-ch04-marker] {
+  animation: goworkIdleOrbit 4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  body[data-idle="true"] .ch04-marker,
+  body[data-idle="true"] [data-ch04-marker] {
+    animation: none !important;
+  }
+}
+
+/* T55 — variable-font axis interpolation on chapter eyebrows.
+ * `data-eyebrow-active="true"` is written by HomePage's IntersectionObserver
+ * onto the chapter section. The rule sets the eyebrow numeric to weight 700. */
+[data-eyebrow-active="true"] .eyebrow .num,
+[data-eyebrow-active="true"] [data-eyebrow-num] {
+  font-variation-settings: "wght" 700;
+  transition: font-variation-settings 320ms ease-out;
+}
+.chapter .eyebrow .num,
+.chapter [data-eyebrow-num] {
+  font-variation-settings: "wght" 400;
+  transition: font-variation-settings 320ms ease-out;
+}
+
+/* T48 — Ch1 cursor trail particles. */
+.ch01 [data-trail] {
+  position: fixed;
+  pointer-events: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-amber, #fbbf24);
+  mix-blend-mode: screen;
+  opacity: 0.85;
+  transition: opacity 600ms ease-out, transform 600ms ease-out;
+  will-change: opacity, transform;
+}
+.ch01 [data-trail][data-decay="true"] {
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ch01 [data-trail] {
+    display: none !important;
+  }
+}

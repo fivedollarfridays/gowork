@@ -1,34 +1,21 @@
 "use client";
 
 /**
- * HomePage — sprint/gowork-facelift Driver D (Phase D3).
+ * HomePage — sprint/gowork-facelift Driver D (Phase D3) /
+ * sprint/polish-2 Driver E (T48–T59 wiring).
  *
  * Top-level shell for the 8-chapter scrollytelling homepage. Mounts the
  * dedicated chrome (SiteHeader / ChapterRail / PageMeta / SiteFooter +
  * CursorFlashlight) and lazy-loads each chapter so GSAP / ScrollTrigger
  * / Lenis only register on the client side.
  *
- * Mount order:
- *   1. CursorFlashlight   (fixed, behind everything else)
- *   2. SiteHeader         (sticky, top of page)
- *   3. ChapterRail        (right-edge fixed, xl+ only)
- *   4. PageMeta           (bottom-right fixed, lg+ only)
- *   5. <main>             (chapter content, scroll-driven)
- *   6. SiteFooter         (bottom of document)
- *
- * Each chapter component lives in its own file and imports GSAP at
- * module scope. To keep the SSR pass clean, every chapter is loaded via
- * `next/dynamic({ ssr: false })`. This also keeps the initial bundle
- * small — the chapters that haven't entered the viewport stay deferred.
- *
- * The chapter loaders use the `.then(m => m.ChapterXX)` form because
- * Driver A's Ch1–Ch4 export the chapter as a NAMED export. Ch4 also
- * exports a default; both forms are accepted. Ch5–Ch8 follow the same
- * named-export contract.
- *
- * State: ChapterRail and PageMeta are stateless; this shell drives them
- * with `useScrollProgress(8)` and `useTimeOfDay()` so the bottom-right
- * HUD reflects the actual page state.
+ * polish-2 additions (Driver E):
+ *   - TitleSequenceGate (T49)         — first-paint title bumper
+ *   - Ch01CursorTrail   (T48)         — Ch1-only amber particle wake
+ *   - ScrollVelocityBridge (T56/57/59) — body-attr writer for spotlights
+ *   - EyebrowActiveBridge (T55)       — variable-font axis on active ch
+ *   - FpsOverlayGate    (T54)         — dev-only FPS HUD
+ *   - sound-trigger listener (T50)    — chapters fire DOM events; we play
  */
 import dynamic from "next/dynamic";
 import { ChapterRail } from "@/components/home/ChapterRail";
@@ -36,8 +23,14 @@ import { CursorFlashlight } from "@/components/home/CursorFlashlight";
 import { PageMeta } from "@/components/home/PageMeta";
 import { SiteFooter } from "@/components/home/SiteFooter";
 import { SiteHeader } from "@/components/home/SiteHeader";
+import { Ch01CursorTrail } from "@/components/home/Ch01CursorTrail";
+import { TitleSequenceGate } from "@/components/home/TitleSequenceGate";
+import { ScrollVelocityBridge } from "@/components/home/ScrollVelocityBridge";
+import { EyebrowActiveBridge } from "@/components/home/EyebrowActiveBridge";
+import { FpsOverlayGate } from "@/components/home/FpsOverlayGate";
 import { useEffect, useState } from "react";
 import { useScrollProgress } from "@/hooks/useScrollProgress";
+import { installSoundTriggers } from "@/lib/home/soundTriggers";
 
 const TOTAL_CHAPTERS = 8;
 const HOME_CITY = "Fort Worth, TX";
@@ -119,9 +112,19 @@ export default function HomePage(): JSX.Element {
   const hour = useCurrentHour();
   const activeChapter = Math.min(TOTAL_CHAPTERS, Math.max(1, chapter + 1));
 
+  // Cross-driver sound-trigger listener (T50) — chapters fire DOM events,
+  // this hook plays the matching sound.
+  useEffect(() => {
+    return installSoundTriggers();
+  }, []);
+
   return (
     <>
+      <TitleSequenceGate />
       <CursorFlashlight />
+      <Ch01CursorTrail />
+      <ScrollVelocityBridge />
+      <EyebrowActiveBridge />
       <SiteHeader />
       <ChapterRail activeChapter={activeChapter} progress={totalProgress} />
       <PageMeta
@@ -142,6 +145,7 @@ export default function HomePage(): JSX.Element {
         <Chapter08FindYourPath />
       </main>
       <SiteFooter />
+      <FpsOverlayGate chapter={activeChapter} />
     </>
   );
 }
