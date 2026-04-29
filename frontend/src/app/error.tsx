@@ -5,6 +5,7 @@ import {
   TranslationProvider,
   useTranslation,
 } from "@/hooks/useTranslation";
+import { EdgeStateShell } from "@/components/edge-states/EdgeStateShell";
 
 interface ErrorPageProps {
   error: Error & { digest?: string };
@@ -12,16 +13,14 @@ interface ErrorPageProps {
 }
 
 /**
- * T1.41 — Branded 500 error page.
+ * polish-2 T39 — Branded 500 error page (Driver D).
  *
- * The dispatch locks the motif : "Something stalled. We're calibrating."
- * Copy comes from the i18n catalog (edge.500.*) so EN + ES parity is
- * enforced by the W1 translation gate. The error message and stack
- * trace are NEVER rendered to end users (judges and Carlos see a clean,
- * branded page, not raw exception text). The digest is logged for dev
- * visibility only.
- *
- * Renders a `main#main` landmark so SkipToContent still works on errors.
+ * Lifts the wall metaphor + Ch1 atmosphere onto the failure state via
+ * `EdgeStateShell`. Copy comes from the i18n catalog (`edge.500.*`) so
+ * EN + ES parity is enforced by the W1 translation gate. The error
+ * message and stack trace are NEVER rendered to end users — only the
+ * digest is logged for dev visibility. The retry button calls Next 13's
+ * `reset()` prop directly.
  */
 function ErrorContent({ error, reset }: ErrorPageProps) {
   const { t } = useTranslation();
@@ -34,34 +33,13 @@ function ErrorContent({ error, reset }: ErrorPageProps) {
   }, [error]);
 
   return (
-    <main
-      id="main"
-      role="main"
-      className="mx-auto flex min-h-[70vh] w-full max-w-2xl flex-col items-center justify-center gap-6 px-4 py-12 text-center sm:py-20"
-      data-edge-state="500"
-    >
-      <div
-        aria-hidden="true"
-        className="flex h-20 w-20 items-center justify-center rounded-full bg-destructive/10 text-4xl sm:h-24 sm:w-24 sm:text-5xl"
-      >
-        <span role="img" aria-label="">
-          {"⚠️"}
-        </span>
-      </div>
-
-      <div className="space-y-3">
-        <p className="text-sm font-semibold uppercase tracking-widest text-accent">
-          500
-        </p>
-        <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl">
-          {t("edge.500.title")}
-        </h1>
-        <p className="mx-auto max-w-md text-base text-muted-foreground sm:text-lg">
-          {t("edge.500.body")}
-        </p>
-      </div>
-
-      <div className="flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:items-center">
+    <EdgeStateShell
+      kind="500"
+      eyebrow="500"
+      accent="rose"
+      headline={t("edge.500.title")}
+      body={t("edge.500.body")}
+      cta={
         <button
           type="button"
           onClick={() => reset()}
@@ -69,8 +47,8 @@ function ErrorContent({ error, reset }: ErrorPageProps) {
         >
           {t("edge.500.cta")}
         </button>
-      </div>
-    </main>
+      }
+    />
   );
 }
 

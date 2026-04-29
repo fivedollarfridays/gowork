@@ -1,0 +1,172 @@
+#!/usr/bin/env node
+/**
+ * polish-2 T45 — Critical-CSS extraction (Driver D).
+ *
+ * Scans `frontend/src/app/styles/home-chapters.css` and `tokens/*.css`
+ * for above-the-fold rules — the chrome layout and the Chapter 1 hero
+ * base styles — and emits a compact `critical.css` file the layout
+ * imports inline at the top of `<body>` to kill FOUC.
+ *
+ * The "critical" allowlist is intentionally narrow:
+ *   - `:root` blocks (token declarations cascade into everything)
+ *   - `html` / `body` baseline rules
+ *   - selectors prefixed `.ch01-` (the hero chapter only)
+ *   - `.site-header`, `.brand`, `.cta` (chrome + brand-mark + main CTA)
+ *   - `.skip-to-content` (must be visible on first focus)
+ *
+ * `extractCritical(src)` is a pure function exported for tests; the CLI
+ * harness reads the live stylesheets and writes the output.
+ */
+
+import { readFileSync, writeFileSync, readdirSync, existsSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const FRONTEND_ROOT = resolve(HERE, "..");
+const STYLES_DIR = resolve(FRONTEND_ROOT, "src/app/styles");
+const TOKENS_DIR = resolve(STYLES_DIR, "tokens");
+const HOME_CHAPTERS = resolve(STYLES_DIR, "home-chapters.css");
+const OUT = resolve(STYLES_DIR, "critical.css");
+
+const ALLOWED_SELECTOR_PREFIXES = [
+  ".ch01-",
+  ".site-header",
+  ".brand",
+  ".cta",
+  ".skip-to-content",
+];
+
+const KEEP_BARE_SELECTORS = new Set(["html", "body", ":root", "*"]);
+
+/**
+ * Naïve CSS rule splitter: walks the source character-by-character,
+ * tracks brace depth, and emits each top-level `selector { body }` pair.
+ * Skips @-rules entirely (we don't want @media/@supports gating critical
+ * paint — those duplicate the cascade and bloat the inline budget).
+ *
+ * @param {string} src
+ * @returns {Array<{ selector: string; body: string }>}
+ */
+function splitTopLevelRules(src) {
+  const rules = [];
+  let i = 0;
+  while (i < src.length) {
+    // Strip comments.
+    if (src[i] === "/" && src[i + 1] === "*") {
+      const end = src.indexOf("*/", i + 2);
+      if (end < 0) break;
+      i = end + 2;
+      continue;
+    }
+    // Whitespace.
+    if (/\s/.test(src[i])) {
+      i++;
+      continue;
+    }
+    // @-rules — skip the whole block (or up to ;).
+    if (src[i] === "@") {
+      const semi = src.indexOf(";", i);
+      const brace = src.indexOf("{", i);
+      if (brace < 0 || (semi >= 0 && semi < brace)) {
+        if (semi < 0) break;
+        i = semi + 1;
+        continue;
+      }
+      // Skip the matched braces.
+      let depth = 0;
+      let j = brace;
+      do {
+        if (src[j] === "{") depth++;
+        else if (src[j] === "}") depth--;
+        j++;
+      } while (depth > 0 && j < src.length);
+      i = j;
+      continue;
+    }
+    // Read selector up to next `{`.
+    const open = src.indexOf("{", i);
+    if (open < 0) break;
+    const selector = src.slice(i, open).trim();
+    // Find matching `}`.
+    let depth = 1;
+    let j = open + 1;
+    while (j < src.length && depth > 0) {
+      if (src[j] === "{") depth++;
+      else if (src[j] === "}") depth--;
+      j++;
+    }
+    const body = src.slice(open + 1, j - 1).trim();
+    rules.push({ selector, body });
+    i = j;
+  }
+  return rules;
+}
+
+/**
+ * Decide whether a selector earns its place in the critical bundle.
+ *
+ * @param {string} selector
+ */
+function isCritical(selector) {
+  // Multi-selector rules: if ANY element-selector in the comma list is
+  // critical, keep the whole rule (we don't try to split the body).
+  const parts = selector.split(",").map((s) => s.trim());
+  for (const part of parts) {
+    if (KEEP_BARE_SELECTORS.has(part)) return true;
+    for (const prefix of ALLOWED_SELECTOR_PREFIXES) {
+      if (part.startsWith(prefix)) return true;
+      // Tolerate descendant selectors like `.cta a`, `.brand svg`.
+      if (part.includes(` ${prefix}`)) return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * @param {string} src
+ * @returns {string}
+ */
+export function extractCritical(src) {
+  const rules = splitTopLevelRules(src);
+  const out = [];
+  for (const { selector, body } of rules) {
+    if (isCritical(selector)) {
+      out.push(`${selector} { ${body} }`);
+    }
+  }
+  return out.join("\n");
+}
+
+/**
+ * CLI: read tokens + home-chapters, emit critical.css.
+ * Skipped automatically when imported as a module (test harness).
+ */
+function main() {
+  const sources = [];
+  if (existsSync(TOKENS_DIR)) {
+    for (const name of readdirSync(TOKENS_DIR)) {
+      if (name.endsWith(".css")) {
+        sources.push(readFileSync(resolve(TOKENS_DIR, name), "utf-8"));
+      }
+    }
+  }
+  if (existsSync(HOME_CHAPTERS)) {
+    sources.push(readFileSync(HOME_CHAPTERS, "utf-8"));
+  }
+  const merged = sources.join("\n");
+  const critical = extractCritical(merged);
+  const banner =
+    "/* AUTO-GENERATED by frontend/scripts/extract-critical-css.mjs.\n" +
+    " * polish-2 T45 — above-the-fold critical CSS. Do not edit by hand. */\n";
+  writeFileSync(OUT, banner + critical + "\n", "utf-8");
+  // eslint-disable-next-line no-console
+  console.log(`[critical-css] wrote ${OUT} (${critical.length} bytes)`);
+}
+
+// Only run main() when invoked directly, not when imported by tests.
+const invokedDirectly =
+  process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (invokedDirectly) {
+  main();
+}
