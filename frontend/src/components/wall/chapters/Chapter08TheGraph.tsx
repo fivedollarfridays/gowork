@@ -25,34 +25,26 @@
  */
 import React, { useEffect, useRef, useState } from "react";
 import type { ReactElement } from "react";
-import dynamic from "next/dynamic";
 import { t } from "@/lib/i18n";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { BARRIER_GRAPH } from "@/lib/wall/data/barrierGraph";
 import { positionForNode } from "@/lib/wall/constellationLayout";
 import type { ChapterProps } from "@/lib/wall/chapterContract";
 
-// Lazy-loaded constellation. ssr:false keeps three.js out of the initial
-// chunk; the dynamic loader only resolves when Ch8 actually mounts.
+// Demo-day guard: r3f v8 references React 18 internals (`ReactCurrentOwner`)
+// that React 19 removed. Until r3f is upgraded to v9+, the 3D BarrierConstellation
+// path is severed entirely — webpack must NEVER discover the import edge to
+// `../BarrierConstellation`, otherwise it pre-resolves the chunk on Ch8 render
+// even when the runtime guard says "use static fallback only."
 //
-// Implementation detail: we defer the `dynamic()` call until first render
-// so the loader isn't invoked at module-import time. Some test harnesses
-// (next/dynamic mocks) eagerly call the loader on `dynamic()`, which would
-// pull `@react-three/fiber` into the test jsdom and hang. The lazy
-// contract is preserved (source-level grep still finds the pattern).
+// Re-enable plan (post-HackFW):
+//   1. `npm install @react-three/fiber@^9 @react-three/drei@^9`
+//   2. Restore the import { default: dynamic } from "next/dynamic" line
+//   3. Restore the lazy-loader function below
+//   4. Set FORCE_STATIC_FALLBACK = false
 interface ConstellationProps {
   pathCompleteness: number;
   reducedMotion?: boolean;
-}
-
-let _LazyBarrierConstellation: React.ComponentType<ConstellationProps> | null = null;
-function getBarrierConstellation(): React.ComponentType<ConstellationProps> {
-  if (_LazyBarrierConstellation) return _LazyBarrierConstellation;
-  _LazyBarrierConstellation = dynamic(
-    () => import("../BarrierConstellation").then((m) => m.BarrierConstellation),
-    { ssr: false, loading: () => null },
-  ) as unknown as React.ComponentType<ConstellationProps>;
-  return _LazyBarrierConstellation;
 }
 
 function clamp01(v: number): number {
@@ -190,36 +182,32 @@ function StaticConstellationFallback(): ReactElement {
   );
 }
 
-function ConstellationHost({
-  completeness,
-  reducedMotion,
-}: {
+/**
+ * Demo-day guard: while `FORCE_STATIC_FALLBACK = true`, this component is
+ * never reachable (parent gates on `shouldMountCanvas` which folds with
+ * `useStatic`). Returning null keeps the JSX type-stable without forcing
+ * webpack to discover the BarrierConstellation import edge.
+ *
+ * Re-enable plan: see top of file. Restore `next/dynamic` import + the
+ * `getBarrierConstellation` lazy loader, then return the original JSX.
+ */
+function ConstellationHost(_: {
   completeness: number;
   reducedMotion: boolean;
-}): ReactElement {
-  const Lazy = getBarrierConstellation();
-  return (
-    <div
-      data-testid="ch8-constellation-host"
-      style={{
-        position: "absolute",
-        inset: 0,
-        zIndex: 1,
-        pointerEvents: "none",
-      }}
-    >
-      <Lazy
-        pathCompleteness={completeness}
-        reducedMotion={reducedMotion}
-      />
-    </div>
-  );
+}): ReactElement | null {
+  return null;
 }
 
 export function Chapter08TheGraph(props: ChapterProps): ReactElement {
   const { progress, reducedMotion, active } = props;
   const prefersReduced = usePrefersReducedMotion();
-  const useStatic = reducedMotion ?? prefersReduced;
+  // Demo-day guard: react-three-fiber v8 references React 18 internals
+  // (`ReactCurrentOwner`) that React 19 removed. Until r3f is upgraded
+  // to v9+, force the static SVG fallback unconditionally so Ch8 still
+  // delivers its editorial moment without a runtime crash. Flip back to
+  // `false` after `npm install @react-three/fiber@^9 @react-three/drei@^9`.
+  const FORCE_STATIC_FALLBACK = true;
+  const useStatic = FORCE_STATIC_FALLBACK || (reducedMotion ?? prefersReduced);
   const completeness = clamp01(progress);
   const [mounted, setMounted] = useState<boolean>(false);
   const cleanupRef = useRef<boolean>(false);
