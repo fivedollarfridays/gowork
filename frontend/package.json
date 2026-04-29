@@ -18,7 +18,9 @@
     "contrast": "node ./scripts/verify-contrast.mjs",
     "svgo": "svgo -f public -r --config svgo.config.mjs",
     "audit:brand": "node ./scripts/audit-legacy-brand.mjs",
-    "audit:tokens": "node ./scripts/audit-tokens.mjs"
+    "audit:tokens": "node ./scripts/audit-tokens.mjs",
+    "pre-deploy": "node ./scripts/pre-deploy-gate.mjs",
+    "post-deploy-smoke": "node ./scripts/post-deploy-smoke.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
