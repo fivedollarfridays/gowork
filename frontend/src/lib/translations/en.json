@@ -11,7 +11,12 @@
     "ctaPlan": "Get your plan",
     "themeToggleAria": "Toggle light or dark theme",
     "themeLight": "Light",
-    "themeDark": "Dark"
+    "themeDark": "Dark",
+    "muteToggle": {
+      "aria": "Toggle ambient sound",
+      "ariaMuted": "Sound is muted — turn on",
+      "ariaUnmuted": "Sound is on — mute"
+    }
   },
   "chapterRail": {
     "label": "Chapter navigation",
@@ -23,13 +28,20 @@
     "ch6": "Live jobs",
     "ch7": "The cliff",
     "ch8": "Find your path",
-    "progressLabel": "Reading progress"
+    "progressLabel": "Reading progress",
+    "tooltip": {
+      "altPrefix": "Preview of"
+    }
   },
   "pageMeta": {
     "city": "CITY",
     "chapter": "CHAPTER",
     "scroll": "SCROLL",
     "light": "LIGHT",
+    "live": "LIVE",
+    "liveSessions": "{count} sessions",
+    "liveCalibrated": "last calibrated {when}",
+    "batterySaver": "BATTERY SAVER",
     "lightDawn": "dawn",
     "lightMorning": "morning",
     "lightMidday": "midday",
@@ -140,7 +152,15 @@
         "47-min bus",
         "background",
         "wage cliff"
-      ]
+      ],
+      "idle": {
+        "orbitAria": "The map is alive — markers are drifting"
+      }
+    },
+    "titleSequence": {
+      "presenter": "GoWork presents",
+      "title": "The Wall",
+      "subtitle": "An interactive map of Fort Worth, Texas"
     },
     "ch2": {
       "eyebrow": "The numbers",
@@ -207,7 +227,14 @@
         "card3Body": "Three fair-chance matches. Already filtered. The case worker hands him a printed plan, not a stack of brochures.",
         "card4Time": "03:27 PM · Alcon · shift start",
         "card4Body": "The destination. $22.50 an hour, with insurance. Pre-apprenticeship pays through training. The day ends with him on the floor."
-      }
+      },
+      "legendAria": "Map legend — three layers, three readings",
+      "legendRow1": "CARLOS",
+      "legendRow1Time": "23 mi",
+      "legendRow2": "TRANSIT",
+      "legendRow2Time": "47 min",
+      "legendRow3": "CLIFF",
+      "legendRow3Time": "$2/hr"
     },
     "ch5": {
       "eyebrow": "05 / The plan",
@@ -236,7 +263,27 @@
       "card4Tag": "Thursday",
       "card4Title": "Run the wage math.",
       "card4Body": "$22.50 nets more than $18.50 in Tarrant County — but only after the cliff math. We show the real take-home before you sign.",
-      "card4Foot": "Honest math · before the offer"
+      "card4Foot": "Honest math · before the offer",
+      "card1": {
+        "back1": "Pull DPS records, court records, and any open warrants — in that order.",
+        "back2": "Map each barrier to the job it unlocks (license = CDL, court = bondable employers).",
+        "back3": "Flag the two we can clear this week. Park the rest."
+      },
+      "card2": {
+        "back1": "Stack errands by transit corridor: DPS → Workforce Solutions → site visit.",
+        "back2": "Build a fallback for the bus that runs every 35 minutes.",
+        "back3": "Print the day. Tape it to the fridge. Show it to the case manager."
+      },
+      "card3": {
+        "back1": "Three fair-chance employers within six miles, hiring this week.",
+        "back2": "Each one matched to your record type and shift availability.",
+        "back3": "All three pay through training — no unpaid pre-apprenticeship."
+      },
+      "card4": {
+        "back1": "We compute SNAP, childcare, and Medicaid changes at the offered wage.",
+        "back2": "We show the real take-home — after the cliff — before you sign.",
+        "back3": "If a $2 raise costs $400, we tell you. Honest. On paper."
+      }
     },
     "ch6": {
       "eyebrow": "06 / Live jobs",
@@ -249,6 +296,7 @@
       "h2SixMiles": "six miles.",
       "h2Tail": ".",
       "marqueeAria": "Live wage marquee",
+      "skeletonLabel": "Loading job…",
       "cards": {
         "alconName": "Alcon — Production Tech II",
         "alconAddr": "Alcon Drive · Fort Worth · 76134",
@@ -292,7 +340,16 @@
       "medLapses": "lapses",
       "chartAria": "Wage cliff chart — real take-home by hourly wage",
       "cliffZone": "cliff zone",
-      "ariaLabel": "The benefits cliff — a $2 raise that costs $400"
+      "ariaLabel": "The benefits cliff — a $2 raise that costs $400",
+      "householdLabel": "Household",
+      "householdSize1": "1",
+      "householdSize2": "2",
+      "householdSize3": "3",
+      "householdSize4": "4",
+      "cliff": {
+        "tooltipEdge": "the cliff edge — SNAP cuts to $48/mo, childcare voucher lapses",
+        "tooltipDestination": "Alcon production tech wage — destination job"
+      }
     },
     "ch8": {
       "eyebrow": "Find your path",
@@ -305,7 +362,14 @@
       "ctaMeta": "~3 min · web or text · in English or Spanish",
       "wordmarkRow1": "GO",
       "wordmarkRow2": "WORK",
-      "ariaLabel": "Find your path — get your plan"
+      "ariaLabel": "Find your path — get your plan",
+      "wordmark": {
+        "spokenCityFw": "Fort Worth, TX",
+        "spokenCityComing": "Coming soon:",
+        "spokenCityMont": "Montgomery, AL",
+        "spokenCityDal": "Dallas, TX",
+        "spokenCityHou": "Houston, TX"
+      }
     }
   },
   "howItWorks": {

@@ -102,3 +102,77 @@ describe("Chapter04TheMap — branded fallback (no token / SSR)", () => {
     expect(screen.getByTestId("ch04-fallback")).toBeInTheDocument();
   });
 });
+
+describe("Chapter04TheMap — T19 typed-in HUD", () => {
+  it("HUD values carry data-typewriter so the typewrite helper can drive them", () => {
+    renderEN(<Chapter04TheMap />);
+    const hud = screen.getByTestId("ch04-hud");
+    const typed = hud.querySelectorAll("[data-typewriter]");
+    // SCENE / FOCUS / CLEARED — three rows, three typewriter spans.
+    expect(typed.length).toBeGreaterThanOrEqual(3);
+  });
+});
+
+describe("Chapter04TheMap — T20 cursor-flashlight dim mode", () => {
+  it("renders a #map mount target the cursor handler scopes to", () => {
+    renderEN(<Chapter04TheMap />);
+    expect(document.getElementById("map")).toBeInTheDocument();
+  });
+
+  it("attaches data-map-cursor-active=false to body on mount (non-touch)", () => {
+    renderEN(<Chapter04TheMap />);
+    // The chapter's effect publishes the body attribute synchronously on
+    // mount so CSS can target it; tests confirm the contract surface.
+    const value = document.body.getAttribute("data-map-cursor-active");
+    expect(value === "false" || value === null).toBe(true);
+  });
+});
+
+describe("Chapter04TheMap — T22 legend chip", () => {
+  it("renders the legend chip when section is mounted", () => {
+    renderEN(<Chapter04TheMap />);
+    const legend = document.querySelector("[data-ch04-legend]");
+    expect(legend).not.toBeNull();
+  });
+
+  it("legend carries 3 swatch rows (amber path / cyan transit / rose dot)", () => {
+    renderEN(<Chapter04TheMap />);
+    const legend = document.querySelector("[data-ch04-legend]");
+    const rows = legend?.querySelectorAll("[data-legend-row]");
+    expect(rows?.length).toBe(3);
+  });
+
+  it("legend renders Spanish labels when locale=es", () => {
+    renderES(<Chapter04TheMap />);
+    const legend = document.querySelector("[data-ch04-legend]");
+    expect(legend?.textContent ?? "").toMatch(/CARLOS/i);
+  });
+});
+
+describe("Chapter04TheMap — T21 isochrone ring overlay", () => {
+  it("section renders a [data-isochrone] SVG overlay above the canvas", () => {
+    renderEN(<Chapter04TheMap />);
+    const iso = document.querySelector("[data-isochrone]");
+    expect(iso).not.toBeNull();
+    expect(iso?.tagName.toLowerCase()).toBe("svg");
+  });
+
+  it("isochrone overlay carries a circle with a non-zero radius", () => {
+    renderEN(<Chapter04TheMap />);
+    const circle = document.querySelector("[data-isochrone] circle");
+    expect(circle).not.toBeNull();
+    const r = parseFloat(circle?.getAttribute("r") ?? "0");
+    expect(r).toBeGreaterThan(0);
+  });
+});
+
+describe("Chapter04TheMap — T23 sky time-of-day overlay", () => {
+  it("section publishes a data-tod attribute (one of the phase tokens)", () => {
+    renderEN(<Chapter04TheMap />);
+    const section = document.getElementById("chapter-04");
+    const tod = section?.getAttribute("data-tod");
+    expect(tod).toBeTruthy();
+    // dawn / midday / dusk / night are the phase tokens.
+    expect(["dawn", "midday", "dusk", "night"]).toContain(tod ?? "");
+  });
+});

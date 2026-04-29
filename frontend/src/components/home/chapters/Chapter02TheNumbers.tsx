@@ -34,12 +34,21 @@ const STATS: readonly StatSpec[] = [
   { target: 22.50, prefix: "$", suffix: "/hr", capKey: "home.ch2.stat4Cap", ordinal: 4 },
 ];
 
-function formatStat(spec: StatSpec, value: number): string {
+/**
+ * T14 — locale-aware grouping. EN uses comma thousands separators
+ * (`600,000+`); ES uses European dot separators (`600.000+`). The
+ * `Intl.NumberFormat` BCP-47 tags (`en-US` vs `es-ES`) drive the swap.
+ */
+function localeTag(locale: string): string {
+  return locale === "es" ? "es-ES" : "en-US";
+}
+
+function formatStat(spec: StatSpec, value: number, locale: string): string {
   const fixed = spec.target % 1 === 0
     ? Math.round(value).toString()
     : value.toFixed(2);
   const localized = spec.target >= 1000
-    ? Math.round(value).toLocaleString("en-US")
+    ? Math.round(value).toLocaleString(localeTag(locale))
     : fixed;
   return spec.prefix + localized + spec.suffix;
 }
@@ -49,12 +58,13 @@ export interface Chapter02TheNumbersProps {
 }
 
 export function Chapter02TheNumbers({ id = "chapter-02" }: Chapter02TheNumbersProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const reduced = usePrefersReducedMotion();
 
   const sectionRef = useGsapScrollTrigger<HTMLElement>(({ el, gsap, reduced: r }) => {
     if (r) return;
     const stats = el.querySelectorAll<HTMLElement>("[data-stat]");
+    const tag = localeTag(locale);
     stats.forEach((stat) => {
       const target = parseFloat(stat.dataset.target ?? "0");
       const prefix = stat.dataset.prefix ?? "";
@@ -64,7 +74,7 @@ export function Chapter02TheNumbers({ id = "chapter-02" }: Chapter02TheNumbersPr
       const obj = { v: 0 };
       const fmt = (n: number) => {
         const v = target >= 1000
-          ? Math.round(n).toLocaleString("en-US")
+          ? Math.round(n).toLocaleString(tag)
           : (target % 1 === 0 ? Math.round(n).toString() : n.toFixed(2));
         return prefix + v + suffix;
       };
@@ -165,7 +175,13 @@ export function Chapter02TheNumbers({ id = "chapter-02" }: Chapter02TheNumbersPr
           }}
         >
           {STATS.map((spec, i) => (
-            <Stat key={i} spec={spec} cap={t(spec.capKey)} reduced={reduced} />
+            <Stat
+              key={i}
+              spec={spec}
+              cap={t(spec.capKey)}
+              reduced={reduced}
+              locale={locale}
+            />
           ))}
         </div>
 
@@ -182,22 +198,23 @@ interface StatProps {
   spec: StatSpec;
   cap: string;
   reduced: boolean;
+  locale: string;
 }
 
-function Stat({ spec, cap, reduced }: StatProps) {
+function Stat({ spec, cap, reduced, locale }: StatProps) {
   const numRef = useRef<HTMLSpanElement>(null);
 
   // Reduced-motion: snap to final value on mount.
   useEffect(() => {
     if (reduced && numRef.current) {
-      numRef.current.textContent = formatStat(spec, spec.target);
+      numRef.current.textContent = formatStat(spec, spec.target, locale);
     }
-  }, [reduced, spec]);
+  }, [reduced, spec, locale]);
 
   const ordinalGradient = ordinalToGradient(spec.ordinal);
   // Default to the final value so SSR/jsdom + no-JS users see the truth.
   // GSAP overrides to 0 + counts up on scroll when motion is enabled.
-  const initial = formatStat(spec, spec.target);
+  const initial = formatStat(spec, spec.target, locale);
 
   return (
     <div
@@ -257,17 +274,20 @@ function ordinalToGradient(ord: 1 | 2 | 3 | 4): string {
 
 function PullQuote({ raw, em }: { raw: string; em: string }) {
   // Replace {{tuesday}} with a coloured `<em>` while keeping the rest as text.
+  // T15 — `data-dropcap="on"` flips the home-chapters.css ::first-letter
+  // rule that draws the 4-line amber drop cap (≥768px only; mobile reverts).
   const parts = raw.split("{{tuesday}}");
   return (
     <p
       className="ch02-pull"
+      data-dropcap="on"
       style={{
         marginTop: "56px",
         fontSize: "clamp(1.4rem, 1rem + 1.4vw, 2.4rem)",
         fontWeight: 500,
         letterSpacing: "-0.02em",
         color: "var(--fg-primary)",
-        textAlign: "right",
+        textAlign: "left",
         fontStyle: "oblique -6deg",
       }}
     >

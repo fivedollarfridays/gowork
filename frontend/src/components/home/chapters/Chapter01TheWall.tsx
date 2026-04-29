@@ -19,6 +19,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
+import { useScrollVelocity } from "@/hooks/useScrollVelocity";
 import { useGsapEntrance, useGsapScrollTrigger } from "@/lib/home/gsap";
 import { ChapterMarquee } from "./_internal/ChapterMarquee";
 import { ChapterScrollCue } from "./_internal/ChapterScrollCue";
@@ -72,6 +73,12 @@ export function Chapter01TheWall({ id = "chapter-01" }: Chapter01TheWallProps) {
 
   const morphWords = readMorphWords(t);
   const [morphIdx, setMorphIdx] = useState(0);
+
+  // T13 — bg grain intensifies on hover OR fast scroll.
+  // useScrollVelocity yields px/ms; 0.6 px/ms ≈ 600 px/s (the AC threshold).
+  const { isFast } = useScrollVelocity(0.6);
+  const [hovered, setHovered] = useState(false);
+  const velocityActive = !reduced && (hovered || isFast);
 
   useEffect(() => {
     if (reduced) return;
@@ -161,6 +168,11 @@ export function Chapter01TheWall({ id = "chapter-01" }: Chapter01TheWallProps) {
       data-motion={reduced ? "off" : "on"}
       aria-labelledby="ch01-h1"
       className="chapter ch01"
+      onPointerEnter={() => setHovered(true)}
+      onPointerLeave={() => setHovered(false)}
+      onPointerMove={() => {
+        if (!hovered) setHovered(true);
+      }}
       style={{
         position: "relative",
         minHeight: "100vh",
@@ -171,12 +183,13 @@ export function Chapter01TheWall({ id = "chapter-01" }: Chapter01TheWallProps) {
         gap: "32px",
       }}
     >
-      <Chapter01Background />
+      <Chapter01Background velocityActive={velocityActive} />
 
       <Chapter01Eyebrow label={t("home.ch1.eyebrow")} />
 
       <Chapter01Hero
         morphWord={morphWords[morphIdx] ?? morphWords[0] ?? "wall"}
+        morphWords={morphWords}
         ariaLabel={t("home.ch1.ariaLabel")}
         line2Wall={t("home.ch1.line2Wall")}
         line2Job={t("home.ch1.line2Job")}

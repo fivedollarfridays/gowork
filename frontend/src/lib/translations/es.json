@@ -11,7 +11,12 @@
     "ctaPlan": "Obtén tu plan",
     "themeToggleAria": "Cambiar entre tema claro y oscuro",
     "themeLight": "Claro",
-    "themeDark": "Oscuro"
+    "themeDark": "Oscuro",
+    "muteToggle": {
+      "aria": "Activar o silenciar el sonido ambiente",
+      "ariaMuted": "Sonido silenciado — activar",
+      "ariaUnmuted": "Sonido activado — silenciar"
+    }
   },
   "chapterRail": {
     "label": "Navegación por capítulos",
@@ -23,13 +28,20 @@
     "ch6": "Empleos en vivo",
     "ch7": "El precipicio",
     "ch8": "Encuentra tu camino",
-    "progressLabel": "Progreso de lectura"
+    "progressLabel": "Progreso de lectura",
+    "tooltip": {
+      "altPrefix": "Vista previa de"
+    }
   },
   "pageMeta": {
     "city": "CIUDAD",
     "chapter": "CAPÍTULO",
     "scroll": "AVANCE",
     "light": "LUZ",
+    "live": "EN VIVO",
+    "liveSessions": "{count} sesiones",
+    "liveCalibrated": "última calibración {when}",
+    "batterySaver": "AHORRO DE BATERÍA",
     "lightDawn": "amanecer",
     "lightMorning": "mañana",
     "lightMidday": "mediodía",
@@ -140,7 +152,15 @@
         "autobús 47-min",
         "antecedentes",
         "acantilado"
-      ]
+      ],
+      "idle": {
+        "orbitAria": "El mapa está vivo — los marcadores se mueven suavemente"
+      }
+    },
+    "titleSequence": {
+      "presenter": "GoWork presenta",
+      "title": "El Muro",
+      "subtitle": "Un mapa interactivo de Fort Worth, Texas"
     },
     "ch2": {
       "eyebrow": "Los números",
@@ -207,7 +227,14 @@
         "card3Body": "Tres opciones fair-chance. Ya filtradas. La trabajadora le entrega un plan impreso, no un montón de folletos.",
         "card4Time": "03:27 PM · Alcon · inicio de turno",
         "card4Body": "El destino. $22.50 la hora, con seguro. La pre-aprendizaje paga durante el entrenamiento. El día termina con él en la planta."
-      }
+      },
+      "legendAria": "Leyenda del mapa — tres capas, tres lecturas",
+      "legendRow1": "CARLOS",
+      "legendRow1Time": "23 mi",
+      "legendRow2": "TRÁNSITO",
+      "legendRow2Time": "47 min",
+      "legendRow3": "ABISMO",
+      "legendRow3Time": "$2/hr"
     },
     "ch5": {
       "eyebrow": "05 / El plan",
@@ -236,7 +263,27 @@
       "card4Tag": "Jueves",
       "card4Title": "Corre las cuentas.",
       "card4Body": "$22.50 deja más en la mano que $18.50 en Tarrant County — pero sólo después del acantilado. Te mostramos el sueldo real antes de firmar.",
-      "card4Foot": "Cuentas honestas · antes de la oferta"
+      "card4Foot": "Cuentas honestas · antes de la oferta",
+      "card1": {
+        "back1": "Saca DPS, antecedentes en corte y cualquier orden abierta — en ese orden.",
+        "back2": "Conecta cada barrera con el empleo que desbloquea (licencia = CDL, corte = empleadores con fianza).",
+        "back3": "Marca las dos que podemos resolver esta semana. Las demás esperan."
+      },
+      "card2": {
+        "back1": "Agrupa diligencias por corredor de transporte: DPS → Workforce Solutions → visita al sitio.",
+        "back2": "Arma un plan B para el bus que pasa cada 35 minutos.",
+        "back3": "Imprime el día. Pégalo al refrigerador. Enséñaselo al case manager."
+      },
+      "card3": {
+        "back1": "Tres empleadores fair-chance a menos de seis millas, contratando esta semana.",
+        "back2": "Cada uno ajustado a tu tipo de récord y a tu turno disponible.",
+        "back3": "Los tres pagan durante el entrenamiento — sin pre-aprendizaje sin paga."
+      },
+      "card4": {
+        "back1": "Calculamos cambios en SNAP, cuidado infantil y Medicaid al salario ofrecido.",
+        "back2": "Te mostramos el sueldo real — después del acantilado — antes de firmar.",
+        "back3": "Si un aumento de $2 cuesta $400, te lo decimos. Honesto. En papel."
+      }
     },
     "ch6": {
       "eyebrow": "06 / Empleos en vivo",
@@ -249,6 +296,7 @@
       "h2SixMiles": "seis millas.",
       "h2Tail": ".",
       "marqueeAria": "Marquesina de salarios en vivo",
+      "skeletonLabel": "Cargando empleo…",
       "cards": {
         "alconName": "Alcon — Técnico de Producción II",
         "alconAddr": "Alcon Drive · Fort Worth · 76134",
@@ -292,7 +340,16 @@
       "medLapses": "se cae",
       "chartAria": "Gráfica del acantilado salarial: ingreso real por salario por hora",
       "cliffZone": "zona de acantilado",
-      "ariaLabel": "El acantilado de beneficios: un aumento de $2 que cuesta $400"
+      "ariaLabel": "El acantilado de beneficios: un aumento de $2 que cuesta $400",
+      "householdLabel": "Hogar",
+      "householdSize1": "1",
+      "householdSize2": "2",
+      "householdSize3": "3",
+      "householdSize4": "4",
+      "cliff": {
+        "tooltipEdge": "el filo del acantilado — SNAP baja a $48/mes, el bono de cuidado infantil se cae",
+        "tooltipDestination": "salario de técnico de producción en Alcon — empleo destino"
+      }
     },
     "ch8": {
       "eyebrow": "Encuentra tu camino",

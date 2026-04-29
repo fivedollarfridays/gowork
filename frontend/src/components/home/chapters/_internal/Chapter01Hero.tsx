@@ -3,28 +3,98 @@
 /**
  * Chapter 01 hero h1 — three editorial lines, kinetic morph word.
  *
- * Pulled out of Chapter01TheWall.tsx to keep the parent under arch limits.
- * Caller owns the morph cycle; this component just renders the current
- * morphWord into `#morph-word`.
+ * # T11 — Height-stable morph word.
+ *
+ * The morph word swap used to reflow lines 2/3 because each cycle word
+ * had a different intrinsic width. We now render a hidden width-anchor
+ * (the longest word in the cycle, whichever locale that is) and
+ * absolute-position the active word over it. Layout becomes constant —
+ * even though the rendered character stream changes 7 times.
+ *
+ * # T12 — Variable-font weight axis driven by scrollY.
+ *
+ * The h1 line-1 carries a `fontVariationSettings: "wght" N` axis driven
+ * by `useHeroFontWeight(scrollProgress)`. scrollY 0 → 0.05 of viewport
+ * height interpolates 700 → 900. Reduced-motion locks at 700.
  */
 
-import type { CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
+import { useHeroFontWeight } from "@/hooks/useHeroFontWeight";
 
 export interface Chapter01HeroProps {
   morphWord: string;
+  morphWords: readonly string[];
   ariaLabel: string;
   line2Wall: string;
   line2Job: string;
   line3Down: string;
 }
 
+/** Visual-width tiebreaker: when two morph words have the same character
+ *  count, the one made of *wider* glyphs (no spaces, broad lowercase like
+ *  m/w/g/o) tends to render wider on screen. We score each word by counting
+ *  wide glyphs and subtracting whitespace, then pick the highest score. */
+function pickWidestWord(words: readonly string[]): string {
+  if (words.length === 0) return "";
+  let best = words[0];
+  let bestScore = scoreWidth(best);
+  for (let i = 1; i < words.length; i += 1) {
+    const score = scoreWidth(words[i]);
+    if (score > bestScore) {
+      best = words[i];
+      bestScore = score;
+    }
+  }
+  return best;
+}
+
+function scoreWidth(word: string): number {
+  const wide = /[mwgoabdpquMWGOABDPQU0-9]/g;
+  const wideHits = (word.match(wide)?.length ?? 0);
+  const spaces = (word.match(/\s/g)?.length ?? 0);
+  // Length dominates; wide-glyph bonus + whitespace penalty break ties.
+  return word.length * 10 + wideHits - spaces * 2;
+}
+
+function useScrollProgress(): number {
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    let raf: number | null = null;
+    const sample = () => {
+      const vh = window.innerHeight || 1;
+      const y = window.scrollY ?? 0;
+      // Map 0..0.2 of viewport (the hero zone) onto 0..1 progress.
+      // useHeroFontWeight has its own internal trigger threshold (0.05).
+      const p = Math.max(0, Math.min(1, y / (vh * 0.2)));
+      setProgress(p);
+      raf = null;
+    };
+    const onScroll = () => {
+      if (raf === null) raf = window.requestAnimationFrame(sample);
+    };
+    sample();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf !== null) window.cancelAnimationFrame(raf);
+    };
+  }, []);
+  return progress;
+}
+
 export function Chapter01Hero({
   morphWord,
+  morphWords,
   ariaLabel,
   line2Wall,
   line2Job,
   line3Down,
 }: Chapter01HeroProps) {
+  const longest = pickWidestWord(morphWords) || "background";
+  const scrollProgress = useScrollProgress();
+  const fontWeightAxis = useHeroFontWeight(scrollProgress);
+
   return (
     <h1
       className="ch01-h1"
@@ -45,9 +115,29 @@ export function Chapter01Hero({
         gap: "18px",
       }}
     >
-      <span className="line line-1" style={line1Style()}>
-        <span id="morph-word" className="morph" style={morphStyle()}>
-          {morphWord}
+      <span
+        className="line line-1"
+        style={{ ...line1Style(), fontVariationSettings: fontWeightAxis }}
+      >
+        <span className="morph-anchor-wrap" style={anchorWrapStyle()}>
+          <span
+            className="morph-anchor"
+            data-morph-anchor=""
+            aria-hidden="true"
+            style={anchorStyle()}
+          >
+            {longest}
+          </span>
+          <span id="morph-word" className="morph" style={morphStyle()}>
+            {morphWord}
+          </span>
+          <span
+            className="sr-only"
+            data-morph-live=""
+            aria-live="polite"
+          >
+            {morphWord}
+          </span>
         </span>
       </span>
 
@@ -82,8 +172,27 @@ function line1Style(): CSSProperties {
   };
 }
 
+function anchorWrapStyle(): CSSProperties {
+  return {
+    position: "relative",
+    display: "inline-block",
+  };
+}
+
+function anchorStyle(): CSSProperties {
+  // Visible to the layout engine (it sets the width) but invisible to the
+  // user. We keep it accessible for the layout but not announced.
+  return {
+    display: "inline-block",
+    visibility: "hidden",
+    pointerEvents: "none",
+  };
+}
+
 function morphStyle(): CSSProperties {
   return {
+    position: "absolute",
+    inset: 0,
     display: "inline-block",
     background:
       "linear-gradient(95deg, var(--accent-amber) 0%, var(--accent-rose) 60%, var(--accent-cyan) 100%)",
@@ -93,6 +202,7 @@ function morphStyle(): CSSProperties {
     fontStyle: "oblique -10deg",
     willChange: "transform, opacity",
     padding: "0 5px 0 0",
+    textAlign: "left",
   };
 }
 
