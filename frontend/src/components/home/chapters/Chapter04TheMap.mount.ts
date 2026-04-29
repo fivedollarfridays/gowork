@@ -30,17 +30,22 @@ import {
   type GwMap,
 } from "./Chapter04TheMap.layers";
 
-const FALLBACK_TOKEN =
-  "REDACTED_MAPBOX_PUBLIC_TOKEN";
-
 declare global {
   interface Window {
     _gw_map?: { setStyle: (style: string) => void };
   }
 }
 
+/**
+ * Read the Mapbox public token from env. NO inline fallback — committing a
+ * publishable token (`pk.*`) inflates the demo owner's free tier across any
+ * domain that can ship the bundle, and GitHub secret scanning will (rightly)
+ * block any push that hardcodes one. The Ch4 component renders a branded
+ * fallback gradient when this returns "" so jsdom + airplane-mode + token-
+ * less previews still render the editorial copy without crashing.
+ */
 function readToken(): string {
-  return process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? FALLBACK_TOKEN;
+  return process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "";
 }
 
 function readStyleUrl(): string {
