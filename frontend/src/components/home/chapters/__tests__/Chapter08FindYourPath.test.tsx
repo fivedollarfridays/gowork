@@ -10,10 +10,21 @@
  *   - **NO stat band** (no "5,189 / 13 / 2 / MIT" — narrative-reset strip).
  *   - Spanish toggle swaps eyebrow + manifesto + meta.
  */
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import { TranslationProvider } from "@/hooks/useTranslation";
 import { setLocale } from "@/lib/i18n";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+    refresh: vi.fn(),
+  }),
+}));
 
 import { Chapter08FindYourPath } from "../Chapter08FindYourPath";
 
@@ -96,5 +107,77 @@ describe("Chapter08FindYourPath — manifesto closer", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/Obtén tu plan/i)).toBeInTheDocument();
     expect(screen.getByText(/web o texto/i)).toBeInTheDocument();
+  });
+});
+
+describe("Chapter08FindYourPath — T33 manifesto color-shift", () => {
+  it("each manifesto line carries the .line class with a data-revealed attribute", () => {
+    const { container } = renderEn();
+    const lines = container.querySelectorAll(".ch08-h2 .line");
+    expect(lines.length).toBe(4);
+    for (const ln of Array.from(lines)) {
+      expect(ln.hasAttribute("data-revealed")).toBe(true);
+    }
+  });
+});
+
+describe("Chapter08FindYourPath — T34 wordmark hover speak-the-city", () => {
+  it("wm-row-1 carries data-spoken-city and tabIndex=0", () => {
+    const { container } = renderEn();
+    const row1 = container.querySelector(".ch08-wordmark .wm-row-1");
+    expect(row1).not.toBeNull();
+    expect(row1?.getAttribute("data-spoken-city")).toBe("Fort Worth, TX");
+    expect(row1?.getAttribute("tabindex")).toBe("0");
+  });
+
+  it("hovering wm-row-1 reveals a tooltip with the spoken-city copy", () => {
+    const { container } = renderEn();
+    const row1 = container.querySelector(".ch08-wordmark .wm-row-1") as HTMLElement;
+    fireEvent.pointerEnter(row1);
+    const tip = container.querySelector(".ch08-wordmark__tooltip");
+    expect(tip).not.toBeNull();
+    expect(tip?.textContent ?? "").toMatch(/Fort Worth/i);
+  });
+});
+
+describe("Chapter08FindYourPath — T35 CTA view-transition morph", () => {
+  it("CTA carries view-transition-name=ch8-cta-pill in style", () => {
+    renderEn();
+    const primary = screen.getByRole("link", { name: /Get your plan/i });
+    expect((primary as HTMLAnchorElement).style.viewTransitionName).toBe(
+      "ch8-cta-pill",
+    );
+  });
+
+  it("clicking the CTA invokes document.startViewTransition when supported", () => {
+    const startVT = vi.fn((cb: () => void) => {
+      cb();
+      return { ready: Promise.resolve(), finished: Promise.resolve() };
+    });
+    Object.defineProperty(document, "startViewTransition", {
+      configurable: true,
+      writable: true,
+      value: startVT,
+    });
+    renderEn();
+    const primary = screen.getByRole("link", { name: /Get your plan/i });
+    primary.addEventListener("click", (e) => e.preventDefault());
+    fireEvent.click(primary);
+    expect(startVT).toHaveBeenCalled();
+    // Cleanup so other tests don't see the stub.
+    Reflect.deleteProperty(document, "startViewTransition");
+  });
+
+  it("clicking the CTA falls back to plain navigation when API unsupported", () => {
+    Reflect.deleteProperty(document, "startViewTransition");
+    renderEn();
+    const primary = screen.getByRole("link", { name: /Get your plan/i });
+    let clicked = false;
+    primary.addEventListener("click", (e) => {
+      clicked = true;
+      e.preventDefault();
+    });
+    fireEvent.click(primary);
+    expect(clicked).toBe(true);
   });
 });

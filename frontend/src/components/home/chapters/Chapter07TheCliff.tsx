@@ -1,12 +1,21 @@
 "use client";
 
 /**
- * Chapter 07 — The Cliff (Driver B, sprint/gowork-facelift).
+ * Chapter 07 — The Cliff (Driver B + Driver C polish-2).
  *
  * Two-column: editorial left + cliff chart right. Slider updates the readout
  * and the chart marker live (no scroll required). Math lives in
  * `_internal/cliffMath.ts`; chart in `_internal/CliffChart.tsx`; controls in
  * `_internal/CliffControls.tsx`.
+ *
+ * polish-2 Driver C:
+ *   - T30 — first forward crossing of the Medicaid lapse threshold
+ *     (wage cross 17 with household=1; threshold scales) flashes a
+ *     50ms screen-tint pulse and fires `useHaptic().error()` (10/30/10ms
+ *     pattern). Crossing back doesn't re-trigger.
+ *   - T31 — chart annotations + tooltip (delivered in CliffChart).
+ *   - T32 — household-size segmented control under the slider.
+ *   - T36 — first paragraph wrapped in `<DropCap chapter="7">`.
  *
  * # Reduced-motion contract
  *
@@ -14,15 +23,31 @@
  * slider remains fully interactive (it's the user's input, not motion).
  */
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { useGsapScrollTrigger } from "@/lib/home/gsap";
-import { computeCliff } from "./_internal/cliffMath";
+import { useHaptic } from "@/hooks/useHaptic";
+import { computeCliff, type HouseholdSize } from "./_internal/cliffMath";
 import { CliffChart } from "./_internal/CliffChart";
 import { CliffControls } from "./_internal/CliffControls";
+import { DropCap } from "../typography/DropCap";
 
 const DEFAULT_WAGE = 18.5;
+const PULSE_THRESHOLD_WAGE = 17;
+const PULSE_MS = 50;
+
+/** Module-scoped one-shot guard — the pulse fires once per session
+ *  (matches the W3 narrative: the wall has been seen). Lives outside
+ *  the component so it survives unmount/remount within the same JS
+ *  realm. */
+let cliffPulsedThisSession = false;
+
+/** Test-only — reset the one-shot pulse guard. Production never calls
+ *  this; vitest beforeEach uses it to keep tests independent. */
+export function __resetCliffPulseForTests(): void {
+  cliffPulsedThisSession = false;
+}
 
 export interface Chapter07TheCliffProps {
   id?: string;
@@ -31,8 +56,34 @@ export interface Chapter07TheCliffProps {
 export function Chapter07TheCliff({ id = "chapter-07" }: Chapter07TheCliffProps) {
   const { t } = useTranslation();
   const reduced = usePrefersReducedMotion();
+  const haptic = useHaptic();
   const [wage, setWage] = useState<number>(DEFAULT_WAGE);
-  const outputs = computeCliff(wage);
+  const [household, setHousehold] = useState<HouseholdSize>(1);
+  const outputs = computeCliff(wage, household);
+  // Track whether the user has touched the slider yet. The pulse fires
+  // on the first interaction that resolves to a wage at/above the
+  // threshold; subsequent interactions never re-arm (per-session guard).
+  const hasInteracted = useRef<boolean>(false);
+
+  // T30 — one-shot pulse + haptic on first crossing in this session.
+  useEffect(() => {
+    if (!hasInteracted.current) return;
+    if (cliffPulsedThisSession) return;
+    if (wage < PULSE_THRESHOLD_WAGE) return;
+    cliffPulsedThisSession = true;
+    haptic.error();
+    if (typeof document === "undefined") return;
+    document.body.setAttribute("data-cliff-pulse", "true");
+    const tid = window.setTimeout(() => {
+      document.body.removeAttribute("data-cliff-pulse");
+    }, PULSE_MS);
+    return () => window.clearTimeout(tid);
+  }, [wage, haptic]);
+
+  const handleWageChange = (next: number) => {
+    hasInteracted.current = true;
+    setWage(next);
+  };
 
   const sectionRef = useGsapScrollTrigger<HTMLElement>(({ el, gsap, reduced: r }) => {
     if (r) return;
@@ -77,34 +128,7 @@ export function Chapter07TheCliff({ id = "chapter-07" }: Chapter07TheCliffProps)
           "linear-gradient(180deg, rgba(251,113,133,0.04) 0%, rgba(251,113,133,0.10) 100%)",
       }}
     >
-      <div
-        className="ch07-eb"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "14px",
-          fontFamily: "var(--font-mono-data)",
-          fontSize: "11px",
-          letterSpacing: "0.16em",
-          textTransform: "uppercase",
-          color: "var(--fg-muted)",
-          marginBottom: "40px",
-        }}
-      >
-        <span className="num" style={{ color: "var(--accent-rose)", fontWeight: 600 }}>
-          07
-        </span>
-        <span className="lab">{t("home.ch7.eyebrow")}</span>
-        <span
-          className="rule"
-          aria-hidden="true"
-          style={{
-            flex: 1,
-            height: "1px",
-            background: "color-mix(in oklch, var(--fg-primary), transparent 88%)",
-          }}
-        />
-      </div>
+      <Eyebrow t={t} />
 
       <div
         className="ch07-grid"
@@ -123,7 +147,9 @@ export function Chapter07TheCliff({ id = "chapter-07" }: Chapter07TheCliffProps)
           <Paragraphs t={t} />
           <CliffControls
             wage={wage}
-            onWageChange={setWage}
+            onWageChange={handleWageChange}
+            household={household}
+            onHouseholdChange={setHousehold}
             outputs={outputs}
             labels={{
               controlsLabel: t("home.ch7.controlsLabel"),
@@ -135,6 +161,11 @@ export function Chapter07TheCliff({ id = "chapter-07" }: Chapter07TheCliffProps)
               medSafe: t("home.ch7.medSafe"),
               medAtRisk: t("home.ch7.medAtRisk"),
               medLapses: t("home.ch7.medLapses"),
+              householdLabel: t("home.ch7.householdLabel"),
+              householdSize1: t("home.ch7.householdSize1"),
+              householdSize2: t("home.ch7.householdSize2"),
+              householdSize3: t("home.ch7.householdSize3"),
+              householdSize4: t("home.ch7.householdSize4"),
             }}
           />
         </div>
@@ -155,10 +186,45 @@ export function Chapter07TheCliff({ id = "chapter-07" }: Chapter07TheCliffProps)
             markerY={outputs.markerY}
             ariaLabel={t("home.ch7.chartAria")}
             cliffZoneLabel={t("home.ch7.cliffZone")}
+            tooltipCliff={t("home.ch7.cliff.tooltipEdge")}
+            tooltipDestination={t("home.ch7.cliff.tooltipDestination")}
           />
         </div>
       </div>
     </section>
+  );
+}
+
+function Eyebrow({ t }: { t: (k: string) => string }) {
+  return (
+    <div
+      className="ch07-eb"
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "14px",
+        fontFamily: "var(--font-mono-data)",
+        fontSize: "11px",
+        letterSpacing: "0.16em",
+        textTransform: "uppercase",
+        color: "var(--fg-muted)",
+        marginBottom: "40px",
+      }}
+    >
+      <span className="num" style={{ color: "var(--accent-rose)", fontWeight: 600 }}>
+        07
+      </span>
+      <span className="lab">{t("home.ch7.eyebrow")}</span>
+      <span
+        className="rule"
+        aria-hidden="true"
+        style={{
+          flex: 1,
+          height: "1px",
+          background: "color-mix(in oklch, var(--fg-primary), transparent 88%)",
+        }}
+      />
+    </div>
   );
 }
 
@@ -211,7 +277,7 @@ function Paragraphs({ t }: { t: (k: string) => string }) {
   return (
     <>
       <p className="ch07-p" style={pStyle()}>
-        {p1A}
+        <DropCap chapter="7">{p1A}</DropCap>
         <b style={{ color: "var(--fg-primary)", fontWeight: 600 }}>{p1Wage}</b>
         {p1B}
         <em style={{ color: "var(--accent-rose)", fontStyle: "normal" }}>{p1Loss}</em>

@@ -10,6 +10,11 @@
  * and section id stay byte-compatible with `Chapter06LiveJobsProps`
  * so existing wiring + tests keep working.
  *
+ * polish-2 Driver C:
+ *   - T26 — LivePill diff is wired to `useLiveNow().lastCalibration`.
+ *   - T29 — wage marquee pauses (timeScale=0) on pointerenter / focus-within
+ *     and resumes on pointerleave / blur.
+ *
  * The marquee animation is driven by GSAP's tween helper on a single
  * track element; reduced-motion freezes it. The JobCard rendering
  * lives in `_internal/JobCard.tsx`.
@@ -43,24 +48,51 @@ function Ch06Heading({ id }: { id: string }): ReactElement {
   );
 }
 
-/** Autoscroll wage marquee. The track is animated via the GSAP
- *  entrance helper — we wire an infinite tween once on mount. */
+/** Autoscroll wage marquee (T29 — pause on hover / focus-within). */
 function WageMarquee(): ReactElement {
   const { t } = useTranslation();
   const reduced = usePrefersReducedMotion();
+  const tweenRef = useRef<{ timeScale: (n: number) => unknown } | null>(null);
+
   const trackRef = useGsapEntrance<HTMLDivElement>(({ el, gsap }) => {
-    // Animate from 0 to -50% (the duplicate half completes the loop)
-    // over 32 seconds, repeating forever.
     const tween = gsap.to(el, {
       xPercent: -50,
       duration: 32,
       ease: "none",
       repeat: -1,
     });
-    return () => tween.kill();
+    tweenRef.current = tween as unknown as { timeScale: (n: number) => unknown };
+    return () => {
+      tweenRef.current = null;
+      tween.kill();
+    };
   }, []);
+
+  const onEnter = () => {
+    try {
+      tweenRef.current?.timeScale(0);
+    } catch {
+      /* tween not ready */
+    }
+  };
+  const onLeave = () => {
+    try {
+      tweenRef.current?.timeScale(1);
+    } catch {
+      /* tween not ready */
+    }
+  };
+
   return (
-    <div className="ch06-marquee" aria-label={t("home.ch6.marqueeAria")}>
+    <div
+      className="ch06-marquee"
+      aria-label={t("home.ch6.marqueeAria")}
+      onPointerEnter={onEnter}
+      onPointerLeave={onLeave}
+      onFocus={onEnter}
+      onBlur={onLeave}
+      data-testid="ch06-marquee"
+    >
       <div
         ref={trackRef}
         className="ch06-marquee__track"
@@ -82,16 +114,17 @@ function WageMarquee(): ReactElement {
   );
 }
 
-/** Live pill — "Live · refreshed N min ago". */
+/** Live pill — "Live · refreshed N min ago".
+ *  polish-2 T26: `lastCalibration` from useLiveNow drives the diff. */
 function LivePill(): ReactElement {
   const { t } = useTranslation();
-  const { now } = useLiveNow();
+  const { now, lastCalibration } = useLiveNow();
   const [, setTick] = useState(0);
   useEffect(() => {
     const id = window.setInterval(() => setTick((x) => x + 1), 60_000);
     return () => window.clearInterval(id);
   }, []);
-  const ago = formatLiveAgo(now);
+  const ago = formatLiveAgo(now, lastCalibration);
   const prefix = t("home.ch6.livePillPrefix");
   const suffix = t("home.ch6.livePillSuffix");
   return (

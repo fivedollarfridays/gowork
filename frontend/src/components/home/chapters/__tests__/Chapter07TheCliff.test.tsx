@@ -20,9 +20,13 @@ import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import { TranslationProvider } from "@/hooks/useTranslation";
 import { setLocale } from "@/lib/i18n";
 
-import { Chapter07TheCliff } from "../Chapter07TheCliff";
+import { Chapter07TheCliff, __resetCliffPulseForTests } from "../Chapter07TheCliff";
 
-beforeEach(() => setLocale("en"));
+beforeEach(() => {
+  setLocale("en");
+  __resetCliffPulseForTests();
+  document.body.removeAttribute("data-cliff-pulse");
+});
 afterEach(() => {
   cleanup();
   setLocale("en");
@@ -119,5 +123,77 @@ describe("Chapter07TheCliff — wage cliff calculator", () => {
     expect(screen.getByText(/El acantilado/i)).toBeInTheDocument();
     expect(screen.getByText(/Salario por hora/i)).toBeInTheDocument();
     expect(screen.getByText(/en riesgo/i)).toBeInTheDocument();
+  });
+});
+
+describe("Chapter07TheCliff — T30 cliff-impact pulse + haptic", () => {
+  it("crossing wage from 16 to 18 sets body[data-cliff-pulse='true'] (first-time only)", () => {
+    document.body.removeAttribute("data-cliff-pulse");
+    const { container } = renderEn();
+    const slider = container.querySelector<HTMLInputElement>("input[type='range']")!;
+    fireEvent.change(slider, { target: { value: "16" } });
+    expect(document.body.getAttribute("data-cliff-pulse")).not.toBe("true");
+    fireEvent.change(slider, { target: { value: "18" } });
+    expect(document.body.getAttribute("data-cliff-pulse")).toBe("true");
+  });
+
+  it("crossing back from 18 to 16 does NOT re-trigger the pulse", () => {
+    document.body.removeAttribute("data-cliff-pulse");
+    const { container } = renderEn();
+    const slider = container.querySelector<HTMLInputElement>("input[type='range']")!;
+    // Forward crossing fires once.
+    fireEvent.change(slider, { target: { value: "18" } });
+    // Reset the marker so we can detect a second fire.
+    document.body.removeAttribute("data-cliff-pulse");
+    // Crossing back below the threshold must NOT re-arm.
+    fireEvent.change(slider, { target: { value: "16" } });
+    expect(document.body.getAttribute("data-cliff-pulse")).not.toBe("true");
+    // And re-crossing forward in the same session also doesn't re-fire.
+    fireEvent.change(slider, { target: { value: "20" } });
+    expect(document.body.getAttribute("data-cliff-pulse")).not.toBe("true");
+  });
+});
+
+describe("Chapter07TheCliff — T31 cliff annotations + tooltip", () => {
+  it("hovering the cliff annotation reveals a role=tooltip with cliff copy", () => {
+    const { container } = renderEn();
+    const cliffG = container.querySelector('[data-annotation="cliff"]');
+    expect(cliffG).not.toBeNull();
+    fireEvent.pointerEnter(cliffG!);
+    const tip = container.querySelector('[role="tooltip"]');
+    expect(tip).not.toBeNull();
+    expect(tip?.textContent ?? "").toMatch(/cliff edge|SNAP|childcare/i);
+  });
+
+  it("hovering the destination annotation reveals the Alcon tooltip", () => {
+    const { container } = renderEn();
+    const destG = container.querySelector('[data-annotation="destination"]');
+    expect(destG).not.toBeNull();
+    fireEvent.pointerEnter(destG!);
+    const tip = container.querySelector('[role="tooltip"]');
+    expect(tip).not.toBeNull();
+    expect(tip?.textContent ?? "").toMatch(/Alcon|destination/i);
+  });
+});
+
+describe("Chapter07TheCliff — T32 household-size segmented control", () => {
+  it("renders 4 household-size buttons (1/2/3/4)", () => {
+    renderEn();
+    expect(screen.getByTestId("ch07-household-1")).toBeInTheDocument();
+    expect(screen.getByTestId("ch07-household-2")).toBeInTheDocument();
+    expect(screen.getByTestId("ch07-household-3")).toBeInTheDocument();
+    expect(screen.getByTestId("ch07-household-4")).toBeInTheDocument();
+  });
+
+  it("clicking household=4 shifts the cliff zone (Medicaid 'safe' at $20)", () => {
+    const { container } = renderEn();
+    const slider = container.querySelector<HTMLInputElement>("input[type='range']")!;
+    fireEvent.change(slider, { target: { value: "20" } });
+    const household4 = screen.getByTestId("ch07-household-4");
+    fireEvent.click(household4);
+    // Re-read the Medicaid row.
+    const medRow = container.querySelector(".ctrl-readout")
+      ?.querySelectorAll(".r-row")[3];
+    expect(medRow?.textContent).toMatch(/safe|seguro/i);
   });
 });

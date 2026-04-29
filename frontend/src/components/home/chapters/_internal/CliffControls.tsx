@@ -6,13 +6,24 @@
  * Owns the controlled `<input type="range">` and renders the readout rows
  * (Gross / SNAP / Childcare / Medicaid / Total). The math itself lives in
  * `cliffMath.ts`.
+ *
+ * polish-2 T32 — Adds a 4-state household-size segmented control beneath
+ * the wage slider. Selecting a different household shifts the cliff
+ * thresholds (1/2/3/4 → cliff edge $19/$21/$24/$27).
+ *
+ * polish-2 T30 — The chapter listens for forward crossings of the
+ * Medicaid lapse threshold and momentarily sets `body[data-cliff-pulse]`
+ * once per session. The crossing logic lives in the parent — this file
+ * remains a pure UI surface that emits wage + household changes.
  */
 
-import type { CliffOutputs, MedicaidBucket } from "./cliffMath";
+import type { CliffOutputs, MedicaidBucket, HouseholdSize } from "./cliffMath";
 
 interface CliffControlsProps {
   wage: number;
   onWageChange: (next: number) => void;
+  household: HouseholdSize;
+  onHouseholdChange: (next: HouseholdSize) => void;
   outputs: CliffOutputs;
   labels: ControlLabels;
 }
@@ -27,6 +38,11 @@ export interface ControlLabels {
   medSafe: string;
   medAtRisk: string;
   medLapses: string;
+  householdLabel: string;
+  householdSize1: string;
+  householdSize2: string;
+  householdSize3: string;
+  householdSize4: string;
 }
 
 const MED_LABEL_KEYS: Record<MedicaidBucket, keyof ControlLabels> = {
@@ -35,13 +51,29 @@ const MED_LABEL_KEYS: Record<MedicaidBucket, keyof ControlLabels> = {
   lapses: "medLapses",
 };
 
+const HOUSEHOLD_OPTIONS: ReadonlyArray<HouseholdSize> = [1, 2, 3, 4];
+
 function fmtDelta(v: number): string {
   if (v === 0) return "$0";
   const sign = v < 0 ? "−" : "+";
   return `${sign}$${Math.abs(v)}`;
 }
 
-export function CliffControls({ wage, onWageChange, outputs, labels }: CliffControlsProps) {
+function householdLabelFor(h: HouseholdSize, labels: ControlLabels): string {
+  if (h === 1) return labels.householdSize1;
+  if (h === 2) return labels.householdSize2;
+  if (h === 3) return labels.householdSize3;
+  return labels.householdSize4;
+}
+
+export function CliffControls({
+  wage,
+  onWageChange,
+  household,
+  onHouseholdChange,
+  outputs,
+  labels,
+}: CliffControlsProps) {
   const totalPositive = outputs.total >= 0;
   const medLabel = labels[MED_LABEL_KEYS[outputs.medicaid]];
 
@@ -68,27 +100,14 @@ export function CliffControls({ wage, onWageChange, outputs, labels }: CliffCont
       >
         <span
           className="ctrl-k"
-          style={{
-            fontFamily: "var(--font-mono-data)",
-            fontSize: "11px",
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            color: "var(--fg-muted)",
-          }}
+          style={ctrlKeyStyle()}
         >
           {labels.controlsLabel}
         </span>
         <span
           className="ctrl-v"
           id="ctrl-v-wage"
-          style={{
-            fontFamily: "var(--font-mono-data)",
-            fontVariantNumeric: "tabular-nums",
-            fontSize: "28px",
-            fontWeight: 600,
-            color: "var(--fg-primary)",
-            letterSpacing: "-0.02em",
-          }}
+          style={ctrlValStyle()}
         >
           ${wage.toFixed(2)}
         </span>
@@ -104,17 +123,13 @@ export function CliffControls({ wage, onWageChange, outputs, labels }: CliffCont
         value={wage}
         onChange={(e) => onWageChange(parseFloat(e.target.value))}
         aria-label={labels.controlsLabel}
-        style={{
-          width: "100%",
-          appearance: "none",
-          height: "4px",
-          borderRadius: "2px",
-          background:
-            "linear-gradient(90deg, var(--status-positive) 0%, var(--status-positive) 35%, var(--accent-rose) 50%, var(--accent-rose) 65%, var(--status-positive) 80%, var(--status-positive) 100%)",
-          outline: "none",
-          cursor: "pointer",
-          marginBottom: "24px",
-        }}
+        style={sliderStyle()}
+      />
+
+      <HouseholdSegmented
+        household={household}
+        onChange={onHouseholdChange}
+        labels={labels}
       />
 
       <div
@@ -132,6 +147,73 @@ export function CliffControls({ wage, onWageChange, outputs, labels }: CliffCont
           total
         />
       </div>
+    </div>
+  );
+}
+
+function HouseholdSegmented({
+  household,
+  onChange,
+  labels,
+}: {
+  household: HouseholdSize;
+  onChange: (next: HouseholdSize) => void;
+  labels: ControlLabels;
+}) {
+  return (
+    <div
+      className="ch07-household"
+      role="radiogroup"
+      aria-label={labels.householdLabel}
+      style={{
+        display: "flex",
+        gap: "8px",
+        marginBottom: "20px",
+        padding: "4px",
+        borderRadius: "999px",
+        background: "color-mix(in oklch, var(--fg-primary), transparent 92%)",
+      }}
+    >
+      <span
+        style={{
+          fontFamily: "var(--font-mono-data)",
+          fontSize: "11px",
+          letterSpacing: "0.14em",
+          textTransform: "uppercase",
+          color: "var(--fg-muted)",
+          alignSelf: "center",
+          padding: "0 12px",
+        }}
+      >
+        {labels.householdLabel}
+      </span>
+      {HOUSEHOLD_OPTIONS.map((h) => {
+        const active = h === household;
+        return (
+          <button
+            key={h}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            data-testid={`ch07-household-${h}`}
+            onClick={() => onChange(h)}
+            style={{
+              padding: "6px 14px",
+              borderRadius: "999px",
+              border: "1px solid color-mix(in oklch, var(--fg-primary), transparent 80%)",
+              background: active ? "var(--accent-rose)" : "transparent",
+              color: active ? "#0A0E1A" : "var(--fg-secondary)",
+              fontWeight: 600,
+              fontSize: "13px",
+              cursor: "pointer",
+              fontFamily: "var(--font-mono-data)",
+              transition: "all 220ms var(--ease-linear-sig)",
+            }}
+          >
+            {householdLabelFor(h, labels)}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -186,4 +268,39 @@ function ReadRow({ k, v, tone, total }: ReadRowProps) {
       </span>
     </span>
   );
+}
+
+function ctrlKeyStyle(): React.CSSProperties {
+  return {
+    fontFamily: "var(--font-mono-data)",
+    fontSize: "11px",
+    letterSpacing: "0.14em",
+    textTransform: "uppercase",
+    color: "var(--fg-muted)",
+  };
+}
+
+function ctrlValStyle(): React.CSSProperties {
+  return {
+    fontFamily: "var(--font-mono-data)",
+    fontVariantNumeric: "tabular-nums",
+    fontSize: "28px",
+    fontWeight: 600,
+    color: "var(--fg-primary)",
+    letterSpacing: "-0.02em",
+  };
+}
+
+function sliderStyle(): React.CSSProperties {
+  return {
+    width: "100%",
+    appearance: "none",
+    height: "4px",
+    borderRadius: "2px",
+    background:
+      "linear-gradient(90deg, var(--status-positive) 0%, var(--status-positive) 35%, var(--accent-rose) 50%, var(--accent-rose) 65%, var(--status-positive) 80%, var(--status-positive) 100%)",
+    outline: "none",
+    cursor: "pointer",
+    marginBottom: "20px",
+  };
 }

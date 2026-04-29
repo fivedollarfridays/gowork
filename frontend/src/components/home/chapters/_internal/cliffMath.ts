@@ -8,11 +8,23 @@
  *   - Marker x = 60 + ((w-14)/14) * 520
  *   - Marker y is piecewise across wage zones
  *
+ * polish-2 T32 — household-size aware. Income limits for SNAP /
+ * childcare / Medicaid scale with household size, so the cliff zone
+ * shifts up the wage axis as the household grows. The base zone math
+ * is keyed off household-1 and shifted by `cliffShiftForHousehold(h)`.
+ *
+ *   household 1 → +$0  (cliff edge $19, the historic baseline)
+ *   household 2 → +$2  (cliff edge $21)
+ *   household 3 → +$5  (cliff edge $24)
+ *   household 4 → +$8  (cliff edge $27)
+ *
  * Pulled into its own module so the component file stays under 400 lines and
- * so we can unit-test the math independently if we ever need to.
+ * so we can unit-test the math independently.
  */
 
 export type MedicaidBucket = "safe" | "at risk" | "lapses";
+
+export type HouseholdSize = 1 | 2 | 3 | 4;
 
 export interface CliffOutputs {
   wage: number;
@@ -27,15 +39,40 @@ export interface CliffOutputs {
 
 const HOURS_PER_MONTH = 40 * 4.33;
 
-export function computeCliff(wage: number): CliffOutputs {
+const HOUSEHOLD_SHIFT: Record<HouseholdSize, number> = {
+  1: 0,
+  2: 2,
+  3: 5,
+  4: 8,
+};
+
+/** Wage at which Medicaid lapses for a given household size. */
+export function cliffEdgeForHousehold(h: HouseholdSize): number {
+  return 19 + (HOUSEHOLD_SHIFT[h] ?? 0);
+}
+
+function clampHousehold(h: number | undefined): HouseholdSize {
+  if (h === 2 || h === 3 || h === 4) return h;
+  return 1;
+}
+
+export function computeCliff(
+  wage: number,
+  household: number = 1,
+): CliffOutputs {
+  const h = clampHousehold(household);
+  const shift = HOUSEHOLD_SHIFT[h];
+  const adj = wage - shift;
   const gross = wage * HOURS_PER_MONTH;
+  const snap = snapDelta(adj);
+  const cc = ccDelta(adj);
   return {
     wage,
     gross,
-    snapDelta: snapDelta(wage),
-    ccDelta: ccDelta(wage),
-    medicaid: medicaidBucket(wage),
-    total: snapDelta(wage) + ccDelta(wage),
+    snapDelta: snap,
+    ccDelta: cc,
+    medicaid: medicaidBucket(adj),
+    total: snap + cc,
     markerX: markerX(wage),
     markerY: markerY(wage),
   };

@@ -11,7 +11,7 @@
  *   - EN + ES coverage
  */
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import { TranslationProvider } from "@/hooks/useTranslation";
 import { setLocale } from "@/lib/i18n";
 import { Chapter06LiveJobs } from "../Chapter06LiveJobs";
@@ -117,5 +117,111 @@ describe("Chapter06LiveJobs — copy", () => {
     expect(screen.getByTestId("ch06-card-alcon").textContent).toMatch(
       /\$22\.50\/hr/i,
     );
+  });
+});
+
+describe("Chapter06LiveJobs — T26 LivePill calibration wiring", () => {
+  it("LivePill body matches the formatLiveAgo result", () => {
+    // The pill renders prefix + body + suffix. The body is derived from
+    // formatLiveAgo(now, lastCalibration) — under the test stub fetch
+    // those are null/placeholder, so body falls back to '4 min'.
+    renderEN(<Chapter06LiveJobs />);
+    const pill = screen.getByTestId("ch06-live-pill");
+    expect(pill.textContent).toMatch(/4 min/);
+  });
+});
+
+describe("Chapter06LiveJobs — T27 JobCard skeleton", () => {
+  it("JobCard renders skeleton when loading=true", async () => {
+    const { JobCard } = await import("../_internal/JobCard");
+    const { TranslationProvider } = await import("@/hooks/useTranslation");
+    cleanup();
+    render(
+      <TranslationProvider>
+        <JobCard id="alcon" loading />
+      </TranslationProvider>,
+    );
+    const card = screen.getByTestId("ch06-card-alcon");
+    expect(card.getAttribute("data-skeleton")).toBe("true");
+    const rows = card.querySelectorAll(".ch06-skeleton__row");
+    expect(rows.length).toBe(4);
+  });
+
+  it("JobCard renders real content when loading=false (default)", async () => {
+    const { JobCard } = await import("../_internal/JobCard");
+    const { TranslationProvider } = await import("@/hooks/useTranslation");
+    cleanup();
+    render(
+      <TranslationProvider>
+        <JobCard id="alcon" />
+      </TranslationProvider>,
+    );
+    const card = screen.getByTestId("ch06-card-alcon");
+    expect(card.getAttribute("data-skeleton")).toBe("false");
+    expect(card.querySelectorAll(".ch06-skeleton__row").length).toBe(0);
+  });
+});
+
+describe("Chapter06LiveJobs — T28 Apply CTA haptic + magnetic", () => {
+  it("clicking the apply CTA invokes navigator.vibrate(15)", async () => {
+    const vibrate = vi.fn();
+    Object.defineProperty(navigator, "vibrate", {
+      configurable: true,
+      writable: true,
+      value: vibrate,
+    });
+    renderEN(<Chapter06LiveJobs />);
+    const cta = screen
+      .getByTestId("ch06-card-alcon")
+      .querySelector("a.jc-cta") as HTMLAnchorElement;
+    expect(cta).toBeTruthy();
+    // jsdom navigation: prevent the default to keep the test clean.
+    cta.addEventListener("click", (e) => e.preventDefault());
+    cta.click();
+    expect(vibrate).toHaveBeenCalled();
+  });
+});
+
+describe("Chapter06LiveJobs — T29 marquee pause-on-hover", () => {
+  it("the marquee container exposes pointer-handlers and a data-testid", () => {
+    renderEN(<Chapter06LiveJobs />);
+    const marquee = screen.getByTestId("ch06-marquee");
+    expect(marquee).toBeInTheDocument();
+    // Hover/leave wire to GSAP timeScale internally — without GSAP loaded
+    // in jsdom the tween ref stays null, but the handlers themselves must
+    // exist (no throw on dispatching the events).
+    expect(() => {
+      fireEvent.pointerEnter(marquee);
+      fireEvent.pointerLeave(marquee);
+    }).not.toThrow();
+  });
+});
+
+describe("formatLiveAgo (T26) — calibration diff", () => {
+  it("returns '14 min' when calibration was 14 min before now", async () => {
+    const { formatLiveAgo } = await import("../Chapter06LiveJobs.helpers");
+    const now = new Date("2026-04-29T12:00:00Z");
+    const calibrated = new Date("2026-04-29T11:46:00Z");
+    expect(formatLiveAgo(now, calibrated)).toBe("14 min");
+  });
+
+  it("returns 'just now' when calibration is < 1 min before now", async () => {
+    const { formatLiveAgo } = await import("../Chapter06LiveJobs.helpers");
+    const now = new Date("2026-04-29T12:00:00Z");
+    const calibrated = new Date("2026-04-29T11:59:30Z");
+    expect(formatLiveAgo(now, calibrated)).toBe("just now");
+  });
+
+  it("falls back to '4 min' when calibration is null", async () => {
+    const { formatLiveAgo } = await import("../Chapter06LiveJobs.helpers");
+    const now = new Date("2026-04-29T12:00:00Z");
+    expect(formatLiveAgo(now, null)).toBe("4 min");
+  });
+
+  it("collapses to hours when more than 60 min", async () => {
+    const { formatLiveAgo } = await import("../Chapter06LiveJobs.helpers");
+    const now = new Date("2026-04-29T12:00:00Z");
+    const calibrated = new Date("2026-04-29T09:30:00Z");
+    expect(formatLiveAgo(now, calibrated)).toBe("2h");
   });
 });
