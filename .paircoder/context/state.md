@@ -1,6 +1,8 @@
 # Current State
 
-> Last updated: 2026-04-28 (W5 Driver D — Final Maximization + Submission on `sprint/w5-submission` (main tree, no worktree). 3675 → ~3700+ vitest passing after Driver D's net new tests (post-submission drafts + tag-submission + long-term invariants + extended submission-readiness). All 7 gates green. Vitest parallel flake closed by raising `testTimeout: 10_000` in `vitest.config.ts` (3 consecutive full-suite runs all green at baseline; preemptive hardening). Post-submission narrative drafts (Reddit r/civic-tech, Twitter 8-tweet thread, LinkedIn long-form) + post-mortem template shipped under `docs/post-submission/`. Git tag automation `scripts/tag-submission.mjs` ships annotated `v0.1.0-hackfw-submission` with structured sprint summary; documented in submission-checklist T+15min step. Cross-document linking sweep complete (README ↔ press kit ↔ Devpost ↔ submission-checklist ↔ post-submission all cross-reference). W5 Driver B + C session entries stitched back into state.md (the merges took `--ours` and lost both). Video runtime fixed from 4:30 to 3:55 to satisfy `docs/visual-rebirth-briefs.md` "Final video < 4 min" canonical brief; Section G 3:00 emergency cut staged. 7 Spotlight inventions: post-mortem template, contributors-onboarding, multi-city-expansion-playbook, new-city-scaffold.mjs, ADR directory + 3 flagship ADRs, long-term-stability sentinel test, release-notes-generator.mjs.
+> Last updated: 2026-04-29 (gowork-facelift Driver D — Phase D1 archive + D2 i18n + D3 page wiring + D4 smoke on `sprint/gowork-facelift` (worktree). 3080/3080 vitest tests pass, build green (`/` = 6.85 kB / 153 kB First Load JS), lint clean (1 pre-existing W1 warning), token audit clean. Phase D1: archived 103 obsolete 10-chapter Wall files (full snapshot preserved on `archive/pre-gowork-facelift`). Phase D2: i18n catalog already populated by Drivers A/B; relaxed `missingKeysAudit` to accept arrays-of-strings, arrays-of-objects, numeric leaves (italicFromIndex), and the intentionally-empty `home.ch6.livePillSuffix` ES value. Phase D3: shipped `<HomePage>` shell mounting CursorFlashlight / SiteHeader / ChapterRail / PageMeta + 8 chapters via `next/dynamic({ ssr: false })` + SiteFooter; shipped `<ChromeFrame>` pathname-aware wrapper that hides canonical Header/Footer on `/`. Token aliases added: `--font-mono-data`, `--font-display`, `--bg-elev-1`. Phase D4: full smoke clean.
+
+> Previous: 2026-04-28 (W5 Driver D — Final Maximization + Submission on `sprint/w5-submission` (main tree, no worktree). 3675 → ~3700+ vitest passing after Driver D's net new tests (post-submission drafts + tag-submission + long-term invariants + extended submission-readiness). All 7 gates green. Vitest parallel flake closed by raising `testTimeout: 10_000` in `vitest.config.ts` (3 consecutive full-suite runs all green at baseline; preemptive hardening). Post-submission narrative drafts (Reddit r/civic-tech, Twitter 8-tweet thread, LinkedIn long-form) + post-mortem template shipped under `docs/post-submission/`. Git tag automation `scripts/tag-submission.mjs` ships annotated `v0.1.0-hackfw-submission` with structured sprint summary; documented in submission-checklist T+15min step. Cross-document linking sweep complete (README ↔ press kit ↔ Devpost ↔ submission-checklist ↔ post-submission all cross-reference). W5 Driver B + C session entries stitched back into state.md (the merges took `--ours` and lost both). Video runtime fixed from 4:30 to 3:55 to satisfy `docs/visual-rebirth-briefs.md` "Final video < 4 min" canonical brief; Section G 3:00 emergency cut staged. 7 Spotlight inventions: post-mortem template, contributors-onboarding, multi-city-expansion-playbook, new-city-scaffold.mjs, ADR directory + 3 flagship ADRs, long-term-stability sentinel test, release-notes-generator.mjs.
 
 > Previous: 2026-04-28 (W4 Driver D — Maximization + Per-Chapter OG + 7 Spotlight inventions on `sprint/w4-life-layers` (main tree, no worktree). 3211 → 3428 vitest passing (+217 net new tests, exceeds +200 floor). All 7 gates green: tsc 0 errors, lint 0 errors (1 pre-existing W1 warning), arch clean, audit:brand clean, audit:tokens clean, build green at `/` First Load JS = 150 kB (+1 kB from baseline 149 kB; well under 200 kB), per-chapter `/api/og/[chapter]` + `/api/og/default` Edge routes shipped. Closed: Driver A's deferred hero-font-wiring (Ch1 now consumes `useHeroFontWeight(globalProgress)` 700→900) + tablet zoom (10 vs desktop 11). Print stylesheet extended to cover `section[data-chapter-id]` (every chapter now print-paginated). View Transitions polished. Scroll-velocity motion-blur + idle ambient drift wired non-destructively.
 
@@ -33,6 +35,53 @@
 Older sprint task tables and session histories (Sprints 7 — 31) are in `.paircoder/archive/state-pre-s1.md`. S12a per-session entries plus S2 — S11 detail are in `.paircoder/archive/state-s12a.md`. S13 wave-by-wave detail + per-task driver sessions are in `.paircoder/archive/state-s13.md`.
 
 ## What Was Just Done
+
+### 2026-04-29 — sprint/gowork-facelift Driver D: Phase D1 archive + D2 i18n + D3 page wiring + D4 smoke (worktree agent-a884de798036f92b3)
+
+Branch: `sprint/gowork-facelift` (worktree). HackFW 2026 facelift dispatch — Driver D scope: integrator + archivist (page wiring + obsolete test archive + i18n catalog + integration smoke).
+
+**Phase D1 — Archive obsolete 10-chapter Wall (commit `1838097`):**
+- 103 files deleted via `git rm` (full snapshot preserved on `archive/pre-gowork-facelift`).
+- All Chapter01..10 + Chapter04a..d sub-chapters + tests; SubChapterShell; AppointmentsCounter / FormsCounter / CliffChartSkeleton + tests.
+- WallContainer + 9 WallContainer-* test files.
+- MapboxScene + MapboxScene-* test variants.
+- BarrierConstellation + BarrierConstellation-* tests.
+- CarlosAvatar + tests; MobileWallFallback + tests; StartNowCTA + tests.
+- lib/wall: cameraChoreography, wallProgress, chapterContract, chapterCounter, chapterSpec, wallTimeline, flyToOrchestrator (+ all their tests + cameraChoreography snapshot).
+- Sweep tests obsolete by deletion: ariaLiveSweep, reducedMotionSweep, w3-a11y, LifeLayersIntegration, LocaleToggle.chapters, IdleStateProvider, TabletScaled, audioSyncAuditAllW3, avatarPath, bundleBudget, cliffEmbedContract, spineProgression, threeJsLazyContract, walkAllChapters, page-wall, page-w3-extension, mobile-slow3g-plan-doc, wall-chapter10-parity, __tests__/wall/bundle-budget, long-term-stability/invariants.
+- /dev/wall inspector page + test (tightly coupled to deleted modules).
+- `lib/wall/index.ts` cleaned: dropped `cameraChoreography` + `flyToOrchestrator` re-exports.
+- KEPT (still consumed by SiteHeader / SiteFooter / layout / new chapters): BrandMark, LanguageToggle, MuteToggle, SkipToContent, AriaLiveRegion, ChapterCounter, LiveNow, AccentTokenProvider, IdleStateProvider, MapMotionBlur; lib/wall/{mapboxToken,colors,layers,markerSymbols,...}; all hooks/*.
+
+**Phase D2 — i18n catalog (commits `1838097` + co-authored Drivers A/B):**
+- All 8 chapters' EN + ES catalogs already populated by Drivers A/B by the time Driver D landed; full native-fluent ES throughout (Spanish meaning translation, not literal — e.g. `licensia suspendida` morph word, `cita en corte` for "open court date").
+- Schema: `home.chN.*` (eyebrow / hero / morphWords[] / line1..line4 / subhead / ctaPrimary / ctaGhost / marquee* / scrollCue / stats / cards / facts), `chapterRail.chN`, `pageMeta.{city,chapter,scroll,light,light{Dawn,Morning,Midday,Afternoon,Golden,Dusk,Night}}`, `siteFooter.*`, `nav.*`.
+- `missingKeysAudit.test.ts` updated: now accepts arrays-of-strings (morphWords[], h2Words[]), arrays-of-objects (recursing with numeric index), numeric leaves (italicFromIndex), and intentionally-empty allowlisted keys (`home.ch6.livePillSuffix` — Spanish has no "ago" suffix).
+
+**Phase D3 — Page wiring (commit `f680e28` + fix `72d0651`):**
+- `components/home/HomePage.tsx` (147 lines): top-level shell mounting CursorFlashlight + SiteHeader + ChapterRail + PageMeta + `<main>` + SiteFooter. All 8 chapters loaded via `next/dynamic({ ssr: false })` with `.then(m => m.ChapterXX)` named-export form. Drives ChapterRail and PageMeta with live state from `useScrollProgress(8)` + a local SSR-safe `useCurrentHour()` hook.
+- `components/layout/ChromeFrame.tsx` (31 lines): pathname-aware wrapper that returns null on `/` (HomePage owns chrome) and renders children otherwise. SSR-safe default = render children.
+- `app/page.tsx`: thin shell mounting `<HomePage>`; redirect to `/daily` for returning users (sessionStorage assessment-token signal) preserved.
+- `app/layout.tsx`: Header + Footer wrapped in `<ChromeFrame>`.
+- Token aliases (added to layout.css + typography.css; colors.css already at its 200-line size budget):
+  - `--font-mono-data` = `ui-monospace, "SF Mono", Menlo, monospace` (consumers: Driver A's eyebrows + Ch1 hero subhead + Ch5/Ch6/Ch8 mono captions).
+  - `--font-display` = `var(--font-inter-stack)` (consumers: chapter inline `var(--font-display, ...)` declarations).
+  - `--bg-elev-1` = `var(--bg-elevated)` (consumers: home-chapters.css elevation-level-1 surfaces).
+
+**Phase D4 — Integration smoke (commit `72d0651`):**
+- `npx vitest run` → 3080/3080 tests pass, 1 skipped, 0 fail.
+- `npm run lint` → 0 errors, 1 pre-existing W1 warning (`usePerformanceBudget.ts`).
+- `npm run build` → 20/20 static pages generated, `/` = 6.85 kB / 153 kB First Load JS (chapters lazy-loaded as expected).
+- `node scripts/audit-tokens.mjs` → 0 hard violations (was: 3).
+
+**Tests added (3 new files, all GREEN, TDD-led):**
+- `app/__tests__/page-home.test.tsx` (3 tests) — pins HomePage mount + `/daily` redirect.
+- `components/home/__tests__/HomePage.test.tsx` (3 tests) — pins composition + 8-chapter ordering.
+- `components/layout/__tests__/ChromeFrame.test.tsx` (5 tests) — pins skip-on-home behavior + SSR-safe default.
+
+**What's Next:**
+- Drivers A/B/C have shipped their chapter implementations; remaining work is editorial polish + the Mapbox style URL Studio export (T2.18 cross-cutting).
+- For local QA: `npm run dev` and verify all 8 chapters render at `/`. Driver D smoke gates are green; the manual visual pass is the next risk.
 
 ### 2026-04-29 — sprint/gowork-facelift Driver B: Ch1 (kinetic hero + morphing barrier word) + Ch2 (oversized counters) + Ch3 (Carlos split portrait) + Ch7 (interactive wage-cliff calculator) + Ch8 (manifesto + giant wordmark closer) (worktree agent-a66aedcb0089c4797)
 
