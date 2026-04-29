@@ -27,8 +27,10 @@ export const ZIP_BOUNDARIES_FILL_ID = "zip-76119-fill";
 export const ZIP_BOUNDARIES_LINE_ID = "zip-76119-line";
 
 /** OKLCH literal matching W1 --accent-amber (resolved for Mapbox style). */
-const AMBER = "oklch(0.78 0.16 75)";
-const AMBER_STRONG = "oklch(0.86 0.18 80)";
+// Mapbox doesn't parse oklch() — use precomputed hex equivalents from MAPBOX_COLORS.
+import { MAPBOX_COLORS } from "../colors";
+const AMBER = MAPBOX_COLORS.amber;
+const AMBER_STRONG = MAPBOX_COLORS.amberStrong;
 
 const sourceConfig: GeoJSONSourceConfig = {
   type: "geojson",
