@@ -228,21 +228,26 @@ describe("W3 Driver A — Chapter 6 (The Math) lands at Amazon FC DFW5", () => {
   });
 });
 
-describe("W3 Driver A — Chapter 9 (Any City) is continental", () => {
+describe("W3 Driver A — Chapter 9 (Any City) is Texas-region (Narrative Reset)", () => {
   const ch9 = (CHAPTER_CAMERAS as Partial<Record<ChapterId, ChapterCameraState>>)[9];
 
   it("Ch9 camera state is defined", () => {
     expect(ch9).toBeDefined();
   });
 
-  it("Ch9 is continental US (zoom <= 5; centered roughly Kansas)", () => {
+  it("Ch9 is Texas-region (zoom 4-7, centered in Texas)", () => {
     expect(ch9).toBeDefined();
-    expect(ch9!.zoom).toBeLessThanOrEqual(5);
-    // Continental view — longitude in continental US.
-    expect(ch9!.longitude).toBeGreaterThan(-130);
-    expect(ch9!.longitude).toBeLessThan(-65);
+    // Narrative Reset: Ch9 dropped from continental US (zoom 3.5) to a
+    // Texas-region overview (zoom ~5.5) that frames Fort Worth alongside
+    // 5 dotted Texas cities (Dallas, Houston, Austin, San Antonio, Waco).
+    // Montgomery is gone from the wall narrative.
+    expect(ch9!.zoom).toBeGreaterThanOrEqual(4);
+    expect(ch9!.zoom).toBeLessThanOrEqual(7);
+    // Texas longitude band: -107 to -93. Latitude band: 25 to 37.
+    expect(ch9!.longitude).toBeGreaterThan(-107);
+    expect(ch9!.longitude).toBeLessThan(-93);
     expect(ch9!.latitude).toBeGreaterThan(25);
-    expect(ch9!.latitude).toBeLessThan(50);
+    expect(ch9!.latitude).toBeLessThan(37);
   });
 
   it("Ch9 has no tilt or bearing — top-down map for the city dots", () => {

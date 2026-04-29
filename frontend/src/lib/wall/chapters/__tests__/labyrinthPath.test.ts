@@ -1,5 +1,10 @@
 /**
  * W2 Driver C — labyrinthPath geometry contract.
+ *
+ * Narrative Reset (sprint/narrative-reset): each node now carries a
+ * `barrierKey` mapping it to the barrier the user faces if they have to
+ * visit that office alone. Convergence helpers (CONVERGENCE_THRESHOLD +
+ * isConverged) gate the "47 forms / 5 offices" caption reveal.
  */
 import { describe, it, expect } from "vitest";
 import {
@@ -8,6 +13,8 @@ import {
   LABYRINTH_PATH_LENGTH,
   progressDashoffset,
   isNodeLit,
+  isConverged,
+  CONVERGENCE_THRESHOLD,
 } from "../labyrinthPath";
 
 describe("LABYRINTH_NODES", () => {
@@ -70,6 +77,47 @@ describe("progressDashoffset", () => {
 
   it("clamps progress > 1 to fully drawn", () => {
     expect(progressDashoffset(2)).toBe(0);
+  });
+});
+
+describe("LABYRINTH_NODES — barrier mapping (Narrative Reset)", () => {
+  it("each node carries a barrierKey", () => {
+    for (const n of LABYRINTH_NODES) {
+      expect(typeof n.barrierKey).toBe("string");
+      expect(n.barrierKey.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("each node carries an officeKey matching its id", () => {
+    for (const n of LABYRINTH_NODES) {
+      expect(n.officeKey).toBe(n.id);
+    }
+  });
+
+  it("declares the canonical 5-barrier set: criminalRecord, transit, childcare, credit, id", () => {
+    const keys = LABYRINTH_NODES.map((n) => n.barrierKey).sort();
+    expect(keys).toEqual(
+      ["childcare", "credit", "criminalRecord", "id", "transit"].sort(),
+    );
+  });
+});
+
+describe("isConverged", () => {
+  it("returns false before the convergence threshold", () => {
+    expect(isConverged(0)).toBe(false);
+    expect(isConverged(0.5)).toBe(false);
+    expect(isConverged(CONVERGENCE_THRESHOLD - 0.01)).toBe(false);
+  });
+
+  it("returns true at and past the convergence threshold", () => {
+    expect(isConverged(CONVERGENCE_THRESHOLD)).toBe(true);
+    expect(isConverged(0.95)).toBe(true);
+    expect(isConverged(1)).toBe(true);
+  });
+
+  it("clamps progress > 1 and < 0 safely", () => {
+    expect(isConverged(2)).toBe(true);
+    expect(isConverged(-1)).toBe(false);
   });
 });
 

@@ -1,20 +1,20 @@
-# MontGoWork Press Kit
+# GoWork Press Kit (HackFW 2026)
 
 ---
 
 ## One-Liner
 
-Open-source workforce navigator that turns a 2-hour career center intake into a 10-minute personalized plan.
+Workforce navigator that hands you a same-day case file -- not a 12-week plan.
 
 ---
 
 ## What It Is
 
-MontGoWork is a full-stack workforce navigation platform built for Montgomery, Alabama. People facing employment barriers don't just need a job listing. They need someone to do the math. What happens to your SNAP if you take a $15/hr job. Whether the bus actually gets you there by 7am. Which employers run background checks and which ones don't.
+GoWork is a full-stack workforce navigation platform built for Fort Worth, Texas (HackFW 2026 submission). People facing employment barriers don't just need a job listing. They need someone to do the math. What happens to your SNAP if you take a $15/hr job. Whether Trinity Metro Bus 4 actually gets you there by 7am. Which employers run background checks and which ones don't.
 
-Career center staff do this work manually, every day, for every person who walks in. MontGoWork does it in minutes.
+Career center staff do this work manually, every day, for every person who walks in. GoWork does it the same day.
 
-A resident completes a guided assessment covering seven barrier types (credit, transportation, childcare, housing, health, training, criminal record). The system generates a personalized re-entry plan. Jobs ranked by a Practical Value Score. Benefits eligibility across 7 Alabama programs with cliff detection. Criminal record routing with expungement guidance. AI-powered barrier intelligence chat. And a printable Career Center Ready Package they take to the career center on Monday morning.
+A resident completes a guided assessment covering seven barrier types (credit, transportation, childcare, housing, health, training, criminal record). The system generates a personalized case file. Jobs ranked by a Practical Value Score. Benefits eligibility with cliff detection. Criminal record routing with Texas Article 55 expunction + Chapter 411 nondisclosure guidance. AI-powered barrier intelligence chat. And a printable Career Center Ready Package the resident hands to a case worker -- the same day.
 
 ---
 
@@ -35,15 +35,11 @@ GitHub: https://github.com/fivedollarfridays/montgowork
 | | |
 |---|---|
 | Barrier types assessed | 7 |
-| Alabama benefits programs screened | 7 (SNAP, TANF, Medicaid, ALL Kids, Childcare Subsidy, Section 8, LIHEAP) |
-| Backend tests | 1,391 |
-| Frontend tests | 417 |
-| Total tests | 1,808 |
+| Texas benefits programs screened | SNAP, Medicaid, CHIP, TANF, Texas Workforce, child care subsidy |
 | LLM providers | 3 (Claude, OpenAI, Gemini) with auto-fallback |
-| Job sources | 3 (BrightData, JSearch, Honest Jobs) |
-| Montgomery poverty rate | 20.9% |
-| Labor participation rate | 57.5% |
-| Residents in service area | 36,000+ |
+| Job sources | Texas Workforce Commission, USAJobs |
+| Fort Worth poverty rate (76104, 76119) | 23%+ |
+| Labor participation rate (target ZIPs) | <60% |
 
 ---
 
@@ -57,7 +53,7 @@ GitHub: https://github.com/fivedollarfridays/montgowork
 
 **Criminal Record Routing.** Employer background check policy matching. Fair-chance employer filtering. Expungement eligibility screening under Alabama Act 2021-507. Doesn't just say "you have a record." Shows which doors are actually open.
 
-**AI Barrier Intelligence Chat.** Multi-provider LLM with RAG-powered context from Montgomery resource data. FAISS vector store plus barrier graph traversal. Topic guardrails keep conversations on track. Streaming responses.
+**AI Barrier Intelligence Chat.** Multi-provider LLM with RAG-powered context from Fort Worth resource data. FAISS vector store plus barrier graph traversal. Topic guardrails keep conversations on track. Streaming responses.
 
 **Career Center Ready Package.** Two-part printable PDF. Part one is the staff summary: barriers, WIOA eligibility, recommended next steps. Part two is the resident action plan: document checklist, what to say, what to expect. A resident walks into the career center with everything staff need to help them right away.
 
@@ -81,7 +77,7 @@ GitHub: https://github.com/fivedollarfridays/montgowork
 
 ## Built With PairCoder
 
-MontGoWork was built using PairCoder's enforcement workflow. The 1,808-test suite isn't afterthought coverage. Every feature started as a failing test. The barrier graph, PVS scoring, benefits cliff calculations, and expungement routing all have deterministic test coverage because the enforcement layer required it before any code shipped.
+GoWork was built using PairCoder's enforcement workflow. The test suite isn't afterthought coverage. Every feature started as a failing test. The barrier graph, PVS scoring, benefits cliff calculations, and expunction/nondisclosure routing all have deterministic test coverage because the enforcement layer required it before any code shipped.
 
 ---
 
@@ -91,7 +87,7 @@ Career centers see the same pattern every day. Someone walks in needing a job, b
 
 Staff spend hours cross-referencing benefits thresholds, job listings, transit routes, legal eligibility, and local resources. For one person. Then the next person walks in and they start over.
 
-MontGoWork replaces that manual process with structured assessment and intelligent matching. The resident gets a plan. The staff get a briefing. The career center gets throughput.
+GoWork replaces that manual process with structured assessment and intelligent matching. The resident gets a same-day case file. The staff get a briefing. The career center gets throughput.
 
 ---
 

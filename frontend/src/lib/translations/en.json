@@ -472,6 +472,10 @@
       "title": "The Wall",
       "subtitle": "An interactive map of Fort Worth, Texas · April 2026"
     },
+    "startNowCta": {
+      "label": "Start now",
+      "ariaLabel": "Start your assessment now"
+    },
     "chapter01": {
       "title": "Chapter 1 — Continental",
       "heroQuestion": "What's standing between you and a job?",
@@ -541,7 +545,22 @@
       "formsCounterLabel": "forms to fill out",
       "officesLabel": "offices to visit",
       "pullquote": "Every office gave me one form and another address.",
-      "aria": "Chapter 5: the Labyrinth. Five offices and forty-seven forms — the chaos before GoWork sequences the path."
+      "aria": "Chapter 5: the Labyrinth. Five offices and forty-seven forms — the chaos before GoWork sequences the path.",
+      "convergenceCaption": "47 forms. 5 offices. We sequence them. You walk once.",
+      "barrierLabels": {
+        "criminalRecord": "Criminal record → Tarrant District Clerk",
+        "transit": "No transit → Trinity Metro HQ",
+        "childcare": "Childcare gap → HHSC Eligibility",
+        "credit": "Bad credit → Legal Aid NW Texas",
+        "id": "Missing ID → Workforce Solutions"
+      },
+      "officeNames": {
+        "tarrant-district-clerk": "Tarrant District Clerk",
+        "hhsc-eligibility": "HHSC Eligibility",
+        "trinity-metro-hq": "Trinity Metro HQ",
+        "legal-aid-nw-texas": "Legal Aid of NW Texas",
+        "workforce-solutions-belknap": "Workforce Solutions (Belknap)"
+      }
     },
     "chapter06": {
       "title": "The Math",
@@ -560,16 +579,15 @@
       "aria": "Chapter 6: The Math. Camera lands on Amazon Fulfillment Center DFW5. A wage slider drives the benefits cliff chart in real time so you can see how a raise turns into a loss."
     },
     "chapter07": {
-      "title": "Chapter 7 — The Path",
-      "hero": "Five stops. Twelve weeks. One plan.",
-      "subhero": "GoWork sequences the same offices Carlos was bouncing between — but in the right order, with the right form, at the right week.",
-      "body": "Home → DPS → HHSC → Legal Aid → Workforce Solutions. Trinity Metro Bus 4 and Bus 6 carry him between them. We named the path so we could walk it with him.",
-      "aria": "Chapter 7: The Path. Carlos's twelve-week plan walks five offices in sequence.",
-      "weekLabel1": "Week 1 — DPS",
-      "weekLabel2": "Week 4 — HHSC",
-      "weekLabel3": "Week 8 — Legal Aid",
-      "weekLabel4": "Week 10 — Workforce",
-      "weekLabel5": "Week 12 — Hired",
+      "title": "Your case file. Today.",
+      "hero": "Don't walk for twelve weeks. Walk in once. With everything.",
+      "subhero": "GoWork hands you a case file the same day. You take it to a case worker. You pull jobs. You apply. You go to work.",
+      "body": "We assemble your barriers, your eligibility, your transit options, your job matches into one PDF. Carlos doesn't bounce between five offices — he rides Trinity Metro Bus 4 and Bus 6 once, hands the case file to Workforce Solutions, and starts work that week.",
+      "aria": "Chapter 7: Your case file. Today. Carlos's same-day plan walks one stop with everything in hand.",
+      "weekLabel1": "Today — Case file",
+      "weekLabel2": "Tomorrow — Case worker",
+      "weekLabel3": "Day 3 — Apply",
+      "weekLabel4": "This week — Working",
       "legActive": "Active leg"
     },
     "chapter08": {
@@ -617,33 +635,29 @@
     },
     "chapter09": {
       "title": "Any City",
-      "hero": "It works in Fort Worth. It will work in Montgomery. It will work where you are.",
-      "subhero": "Two cities lit. Six dotted in. The math, the path, the plan — wherever the work is.",
-      "body": "GoWork ships as a city template. Fort Worth is the reference deployment. Montgomery is the second. Six more cities are on deck — same engine, same playbook, local data.",
-      "statValue": "5,189 tests · 13 sprints · 2 cities · MIT",
-      "statLabel": "shipped, open, ready",
-      "flyToMontgomeryButton": "Fly to Montgomery",
+      "hero": "It works in Fort Worth. It will work where you are.",
+      "subhero": "One city lit. Five dotted in. The math, the path, the plan — wherever the work is.",
+      "body": "GoWork ships as a city template. Fort Worth is the reference deployment. Five more Texas cities are on deck — same engine, same playbook, local data.",
+      "statValue": "13 sprints · 1 city live · 5 on deck",
+      "statLabel": "shipped, ready, scaling",
+      "tourTexasButton": "Tour Texas",
       "returnToFortWorthButton": "Return to Fort Worth",
       "cityFW": "Fort Worth, TX",
-      "cityMontgomery": "Montgomery, AL",
       "futureCitiesLabel": "On deck",
       "futureCityDallas": "Dallas",
       "futureCityHouston": "Houston",
-      "futureCityAtlanta": "Atlanta",
-      "futureCityMemphis": "Memphis",
-      "futureCityCharlotte": "Charlotte",
-      "futureCityBirmingham": "Birmingham",
-      "aria": "Chapter 9: Any City. The camera returns to a continental view. Two cities — Fort Worth and Montgomery — glow as deployed; six others are on deck. A button flies the camera to Montgomery."
+      "futureCityAustin": "Austin",
+      "futureCitySanAntonio": "San Antonio",
+      "futureCityWaco": "Waco",
+      "aria": "Chapter 9: Any City. The camera returns to a Texas-wide view. Fort Worth glows as the reference deployment; five Texas cities — Dallas, Houston, Austin, San Antonio, and Waco — are dotted on deck. A button tours the Texas region; another returns to Fort Worth."
     },
     "chapter10": {
       "title": "Find your path",
       "hero": "Find your path.",
       "subhero": "We do the math. We sequence the route. You take the first step.",
-      "body": "You've seen the wall. You've seen the labyrinth. Now skip both — start your assessment and we'll hand you a plan that's already done the offices, forms, and math.",
+      "body": "You've seen the wall. You've seen the labyrinth. Now skip both — start your assessment and we'll hand you a case file the same day. You take it to a case worker. You apply. You go to work.",
       "aria": "Chapter 10: Find your path. Begin your assessment to receive a personalized plan.",
       "ctaPrimary": "Start your assessment",
-      "ctaSecondary": "Or read the open-source code on GitHub →",
-      "githubLinkLabel": "View the open-source code on GitHub",
       "footerBrand": "GoWork · Fort Worth, TX"
     }
   },

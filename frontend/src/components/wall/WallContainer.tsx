@@ -50,6 +50,8 @@ import {
 import { AccentTokenProvider } from "./AccentTokenProvider";
 import { IdleStateProvider } from "./IdleStateProvider";
 import { MapMotionBlur } from "./MapMotionBlur";
+import { StartNowCTA } from "./StartNowCTA";
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { Chapter01Continental } from "./chapters/Chapter01Continental";
 import { Chapter02CityArrival } from "./chapters/Chapter02CityArrival";
 import { Chapter03Neighborhood } from "./chapters/Chapter03Neighborhood";
@@ -100,6 +102,7 @@ export default function WallContainer({ children }: WallContainerProps) {
   const { isMobile: viewportIsMobile } = useResponsiveTier();
   const { currentChapter, chapterProgress } = useChapterProgress();
   const { totalProgress } = useScrollProgress(TOTAL_CHAPTERS);
+  const reducedMotion = usePrefersReducedMotion();
 
   // Spotlight Wave 5 — tier-based fallback. Carlos on a 2GB Pixel 4a
   // sees the still-image, not stalled JS. Low-tier devices and WebGL-
@@ -116,6 +119,11 @@ export default function WallContainer({ children }: WallContainerProps) {
     [currentChapter, chapterProgress, isMapboxMounted],
   );
 
+  // Narrative Reset (T-Reset.4) — persistent floating Start CTA. Visible
+  // from ~5% scroll onward. Mobile gets the bottom-fixed strip; desktop
+  // gets the top-right floating chip.
+  const ctaPosition = viewportIsMobile ? "bottom" : "top-right";
+
   if (viewportIsMobile) {
     // Mobile viewport: editorial-scroll fallback (full chapter copy in
     // a single column). The MobileWallFallback is a richer experience
@@ -126,6 +134,11 @@ export default function WallContainer({ children }: WallContainerProps) {
     return (
       <WallContext.Provider value={contextValue}>
         <MobileWallFallback />
+        <StartNowCTA
+          scrollProgress={totalProgress}
+          reducedMotion={reducedMotion}
+          position={ctaPosition}
+        />
         {children}
       </WallContext.Provider>
     );
@@ -136,6 +149,11 @@ export default function WallContainer({ children }: WallContainerProps) {
       <WallContext.Provider value={contextValue}>
         <AccentTokenProvider />
         <StaticFallback />
+        <StartNowCTA
+          scrollProgress={totalProgress}
+          reducedMotion={reducedMotion}
+          position={ctaPosition}
+        />
         {children}
       </WallContext.Provider>
     );
@@ -170,6 +188,11 @@ export default function WallContainer({ children }: WallContainerProps) {
         />
         {children}
       </main>
+      <StartNowCTA
+        scrollProgress={totalProgress}
+        reducedMotion={reducedMotion}
+        position={ctaPosition}
+      />
     </WallContext.Provider>
   );
 }
@@ -205,7 +228,7 @@ function ChaptersSequence({
       <Chapter07ThePath progress={local(7)} active={active(7)} chapterNumber={7} />
       {/* W3 Driver B — Ch8 (3D Barrier Graph, lazy Three.js) */}
       <Chapter08TheGraph progress={local(8)} active={active(8)} chapterNumber={8} />
-      {/* W3 Driver A — Ch9 (Any City + Fly to Montgomery) */}
+      {/* W3 Driver A — Ch9 (Any City + Tour Texas) */}
       <Chapter09AnyCity progress={local(9)} active={active(9)} />
       {/* W3 Driver C — Ch10 (Find Your Path + View Transitions) */}
       <Chapter10FindYourPath progress={local(10)} active={active(10)} />

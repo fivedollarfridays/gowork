@@ -3,10 +3,16 @@
 /**
  * W3 Driver A — Chapter 09 Any City (T3.4, T3.5).
  *
- * The continental finale of the FW chapter arc. Two lit cities (FW +
- * Montgomery) glow as deployments; six dotted cities sit on deck. Two
- * primary buttons fly the camera between FW and Montgomery — proving
- * the city template ships beyond Fort Worth.
+ * Narrative Reset (sprint/narrative-reset): Fort Worth-only. Montgomery
+ * is gone from the wall narrative. The continental finale becomes a
+ * Texas-region finale: FW glows lit, five Texas cities (Dallas, Houston,
+ * Austin, San Antonio, Waco) sit on deck as dotted future deployments.
+ *
+ * Two primary buttons remain — but their semantics changed:
+ *   - "Tour Texas" — flies the camera to a state-wide overview that frames
+ *     all six Texas cities at once. Replaces the old "Fly to Montgomery"
+ *     cross-country dolly.
+ *   - "Return to Fort Worth" — unchanged: dollies back to FW at zoom 11.
  *
  * # A11y
  *   - h2 + aria-labelledby on root
@@ -18,15 +24,13 @@
  *     A's flyToOrchestrator surface). When present, button clicks call
  *     map.flyTo / map.jumpTo directly. Reduced-motion routes through
  *     jumpTo for the instant cut.
- *   - Optional callbacks (`onFlyToMontgomery`, `onReturnToFortWorth`) let
+ *   - Optional callbacks (`onTourTexas`, `onReturnToFortWorth`) let
  *     parents observe button clicks even without a map (analytics, etc.).
  *
  * # Honest uncertainty (C4/C5)
- *   - The 5,189 test count in stat band is from the W2 baseline (2319 +
- *     ~2870 backend). Verify before submission; if off, surface in
- *     state.md as a polish item.
- *   - Future cities are static stubs; they don't carry CityConfig today
- *     (that's W4 polish per the brief).
+ *   - The stat-band copy was rewritten to drop the MIT chip + 2-cities
+ *     count. Verify wording aligns with submission cadence; if a stat
+ *     drifts, surface in state.md as a polish item.
  */
 
 import { useEffect, useRef, useCallback } from "react";
@@ -35,8 +39,8 @@ import { t } from "@/lib/i18n";
 import { useAriaAnnounce } from "@/components/wall/AriaLiveRegion";
 import {
   FW_CITY,
-  MONTGOMERY_CITY,
   FUTURE_CITIES,
+  TEXAS_REGION_VIEW,
   type CityCoord,
 } from "@/lib/wall/chapters/ch9Cities";
 
@@ -67,21 +71,28 @@ export interface Chapter09AnyCityProps {
   reducedMotion?: boolean;
   /** Optional map; when provided, buttons drive Mapbox directly. */
   map?: Ch9FlyToMap | null;
-  /** Optional callback fired when the user clicks Fly to Montgomery. */
-  onFlyToMontgomery?: () => void;
+  /** Optional callback fired when the user clicks Tour Texas. */
+  onTourTexas?: () => void;
   /** Optional callback fired when the user clicks Return to Fort Worth. */
   onReturnToFortWorth?: () => void;
 }
 
-const MONTGOMERY_FLY = {
-  center: [MONTGOMERY_CITY.longitude, MONTGOMERY_CITY.latitude] as [number, number],
-  zoom: 11,
-  pitch: 30,
-  bearing: 0,
+interface FlyTarget {
+  center: [number, number];
+  zoom: number;
+  pitch: number;
+  bearing: number;
+}
+
+const TEXAS_REGION_FLY: FlyTarget = {
+  center: [TEXAS_REGION_VIEW.longitude, TEXAS_REGION_VIEW.latitude],
+  zoom: TEXAS_REGION_VIEW.zoom,
+  pitch: TEXAS_REGION_VIEW.pitch,
+  bearing: TEXAS_REGION_VIEW.bearing,
 };
 
-const FW_FLY = {
-  center: [FW_CITY.longitude, FW_CITY.latitude] as [number, number],
+const FW_FLY: FlyTarget = {
+  center: [FW_CITY.longitude, FW_CITY.latitude],
   zoom: 11,
   pitch: 0,
   bearing: 0,
@@ -92,7 +103,7 @@ export function Chapter09AnyCity({
   active,
   reducedMotion = false,
   map = null,
-  onFlyToMontgomery,
+  onTourTexas,
   onReturnToFortWorth,
 }: Chapter09AnyCityProps): ReactElement {
   void _progress;
@@ -108,7 +119,7 @@ export function Chapter09AnyCity({
   }, [active, announce]);
 
   const driveMap = useCallback(
-    (target: typeof MONTGOMERY_FLY) => {
+    (target: FlyTarget) => {
       if (!map) return;
       if (reducedMotion) {
         map.jumpTo({
@@ -124,10 +135,10 @@ export function Chapter09AnyCity({
     [map, reducedMotion],
   );
 
-  const handleFly = useCallback(() => {
-    onFlyToMontgomery?.();
-    driveMap(MONTGOMERY_FLY);
-  }, [onFlyToMontgomery, driveMap]);
+  const handleTour = useCallback(() => {
+    onTourTexas?.();
+    driveMap(TEXAS_REGION_FLY);
+  }, [onTourTexas, driveMap]);
 
   const handleReturn = useCallback(() => {
     onReturnToFortWorth?.();
@@ -179,16 +190,16 @@ export function Chapter09AnyCity({
       <div className="flex flex-wrap items-center justify-center gap-3">
         <button
           type="button"
-          data-testid="ch9-fly-to-montgomery"
-          onClick={handleFly}
-          aria-label={t("wall.chapter09.flyToMontgomeryButton")}
+          data-testid="ch9-tour-texas"
+          onClick={handleTour}
+          aria-label={t("wall.chapter09.tourTexasButton")}
           className="rounded-md px-5 py-2 text-base font-medium transition-colors"
           style={{
             background: "var(--accent-current)",
             color: "var(--bg-base)",
           }}
         >
-          {t("wall.chapter09.flyToMontgomeryButton")}
+          {t("wall.chapter09.tourTexasButton")}
         </button>
         <button
           type="button"
@@ -216,7 +227,6 @@ function CityRoster(): ReactElement {
     <div className="flex flex-col items-center gap-3" aria-hidden="false">
       <div className="flex flex-wrap items-center justify-center gap-4">
         <CityChip city={FW_CITY} testId="ch9-city-fw" />
-        <CityChip city={MONTGOMERY_CITY} testId="ch9-city-montgomery" />
       </div>
       <span
         className="text-xs uppercase tracking-wide"

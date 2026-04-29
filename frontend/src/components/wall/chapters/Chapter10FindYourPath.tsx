@@ -5,8 +5,16 @@
  *
  * The closing chapter. Camera (set in `cameraChoreography.CHAPTER_CAMERAS[10]`)
  * settles back over Fort Worth at zoom 11 / pitch 0 — the "we've returned
- * home" framing. The overlay locks the editorial copy + the primary CTA
- * "Start your assessment" + the secondary GitHub link.
+ * home" framing. The overlay locks the editorial copy + a single primary
+ * CTA "Start your assessment".
+ *
+ * # Narrative Reset (sprint/narrative-reset)
+ *
+ * The secondary "Or read the open-source code on GitHub →" link was
+ * removed. User-facing chapter copy must serve the user (someone facing
+ * employment barriers), not the judges. MIT licensing + GitHub URLs live
+ * in the LICENSE file and the Devpost submission form — NOT in the
+ * editorial chapter overlay. A clean primary CTA wins.
  *
  * # View Transitions hand-off (T3.21)
  *
@@ -46,7 +54,6 @@ export interface Chapter10FindYourPathProps {
 }
 
 const HEADING_ID = "chapter10-heading";
-const GITHUB_REPO_URL = "https://github.com/fivedollarfridays/montgowork";
 
 export function Chapter10FindYourPath({
   progress: _progress,
@@ -150,21 +157,6 @@ export function Chapter10FindYourPath({
           >
             {t("wall.chapter10.ctaPrimary")}
           </button>
-          <a
-            data-testid="chapter10-github-link"
-            href={GITHUB_REPO_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={t("wall.chapter10.githubLinkLabel")}
-            style={{
-              fontSize: "0.95rem",
-              color: "var(--fg-secondary, var(--fg-primary))",
-              textDecoration: "underline",
-              textUnderlineOffset: "0.25em",
-            }}
-          >
-            {t("wall.chapter10.ctaSecondary")}
-          </a>
         </div>
       </div>
 
