@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "@/hooks/useTranslation";
+import { useLiveNowFormatted } from "@/hooks/useLiveNowFormatted";
 
 /**
  * PageMeta — sprint/gowork-facelift Driver A.
@@ -62,6 +63,16 @@ export function lightLabelKey(hour: number): string {
   return "pageMeta.lightNight";
 }
 
+/** Replace `{count}` / `{when}` placeholders in a translation string. */
+function fillPlaceholders(
+  template: string,
+  values: Record<string, string | number>,
+): string {
+  return template.replace(/\{(\w+)\}/g, (_, key) =>
+    values[key] !== undefined ? String(values[key]) : `{${key}}`,
+  );
+}
+
 export function PageMeta({
   city,
   chapter,
@@ -69,9 +80,16 @@ export function PageMeta({
   progress,
   hour,
 }: PageMetaProps): JSX.Element {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const scrollPct = Math.round(clamp01(progress) * 100);
   const lightLabel = t(lightLabelKey(hour));
+  const live = useLiveNowFormatted(locale === "es" ? "es-MX" : "en-US");
+  const liveSessions = fillPlaceholders(t("pageMeta.liveSessions"), {
+    count: live.sessionCount,
+  });
+  const liveCalibrated = fillPlaceholders(t("pageMeta.liveCalibrated"), {
+    when: live.lastCalibratedRelative,
+  });
 
   return (
     <aside
@@ -108,6 +126,15 @@ export function PageMeta({
           <dt className="opacity-70">{t("pageMeta.light")}:</dt>
           <dd className="m-0" style={{ color: "var(--accent-amber)" }}>
             {lightLabel}
+          </dd>
+        </div>
+        <div className="flex gap-2" data-page-meta-live>
+          <dt className="opacity-70">{t("pageMeta.live")}</dt>
+          <dd
+            className="m-0"
+            style={{ color: "var(--status-positive, var(--accent-cyan))" }}
+          >
+            {liveSessions} · {liveCalibrated}
           </dd>
         </div>
       </dl>

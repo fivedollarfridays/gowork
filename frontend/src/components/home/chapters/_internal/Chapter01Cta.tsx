@@ -4,7 +4,14 @@
  * Chapter 01 CTA row — primary "Get your plan → /assess" + ghost
  * "See how it works ↓ #chapter-04". Pulled out of Chapter01TheWall.tsx so
  * the parent stays under arch limits.
+ *
+ * polish-2 Driver C T37 — mounts `useMagneticHover` on the primary CTA
+ * and toggles `data-idle-orbit` based on `useIdleState(4000)`. Driver B
+ * owns this file; this is the agreed minimal Driver-C touch.
  */
+
+import { useMagneticHover } from "@/hooks/useMagneticHover";
+import { useIdleState } from "@/hooks/useIdleState";
 
 interface Chapter01CtaProps {
   primaryLabel: string;
@@ -12,6 +19,8 @@ interface Chapter01CtaProps {
 }
 
 export function Chapter01Cta({ primaryLabel, ghostLabel }: Chapter01CtaProps) {
+  const primaryRef = useMagneticHover<HTMLAnchorElement>();
+  const idle = useIdleState(4_000);
   return (
     <div
       className="ch01-cta-row"
@@ -24,7 +33,13 @@ export function Chapter01Cta({ primaryLabel, ghostLabel }: Chapter01CtaProps) {
         flexWrap: "wrap",
       }}
     >
-      <a className="cta cta-primary" href="/assess" style={primaryStyle()}>
+      <a
+        ref={primaryRef}
+        className="cta cta-primary"
+        href="/assess"
+        data-idle-orbit={idle ? "true" : "false"}
+        style={primaryStyle()}
+      >
         <span>{primaryLabel}</span>
         <span className="cta-arr">→</span>
       </a>
@@ -51,6 +66,7 @@ function primaryStyle(): React.CSSProperties {
     boxShadow:
       "0 8px 24px color-mix(in oklch, var(--accent-cyan), transparent 60%)",
     transition: "all 280ms var(--ease-linear-sig)",
+    position: "relative",
   };
 }
 

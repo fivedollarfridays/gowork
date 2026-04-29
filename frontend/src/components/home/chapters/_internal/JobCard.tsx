@@ -5,16 +5,29 @@
  *
  * Renders a single fair-chance hero job card. Reads the employer record
  * from `lib/home/employers.ts` (via id) and pulls EN/ES copy from i18n.
+ *
+ * polish-2 enhancements:
+ *   - T27 — `loading` prop renders a 4-row shimmer skeleton in place of
+ *     the card body.
+ *   - T28 — Apply CTA gets `useMagneticHover` (proximity pull) plus a
+ *     soft `useHaptic().tap()` on click. Both degrade gracefully when
+ *     the underlying capability is unavailable (no vibrate API, reduced
+ *     motion, coarse pointer).
  */
 
-import type { ReactElement } from "react";
+import { useCallback, type ReactElement } from "react";
 import Link from "next/link";
 import { useTranslation } from "@/hooks/useTranslation";
 import { getHomeEmployerById } from "@/lib/home/employers";
+import { useMagneticHover } from "@/hooks/useMagneticHover";
+import { useHaptic } from "@/hooks/useHaptic";
+import { JobCardSkeleton } from "./JobCardSkeleton";
 
 export interface JobCardProps {
   /** Employer id (alcon | bnsf | dunn). */
   id: "alcon" | "bnsf" | "dunn";
+  /** When true, render the shimmer skeleton instead of the real card body. */
+  loading?: boolean;
 }
 
 /** i18n key prefix per employer — keeps the TSX dense without losing
@@ -53,16 +66,43 @@ const KEY_BY_ID: Record<JobCardProps["id"], {
   },
 };
 
-export function JobCard({ id }: JobCardProps): ReactElement | null {
+export function JobCard({ id, loading = false }: JobCardProps): ReactElement | null {
   const { t } = useTranslation();
   const emp = getHomeEmployerById(id);
+  const ctaRef = useMagneticHover<HTMLAnchorElement>({ disabled: loading });
+  const haptic = useHaptic();
+
+  const onCtaClick = useCallback(() => {
+    haptic.tap();
+    try {
+      navigator?.vibrate?.(15);
+    } catch {
+      /* vibrate unsupported */
+    }
+  }, [haptic]);
+
   if (!emp) return null;
   const k = KEY_BY_ID[id];
+
+  if (loading) {
+    return (
+      <article
+        className="ch06-card"
+        data-testid={`ch06-card-${id}`}
+        data-employer={id}
+        data-skeleton="true"
+      >
+        <JobCardSkeleton label={t("home.ch6.skeletonLabel")} />
+      </article>
+    );
+  }
+
   return (
     <article
       className="ch06-card"
       data-testid={`ch06-card-${id}`}
       data-employer={id}
+      data-skeleton="false"
     >
       <div className="ch06-card__head">
         <span
@@ -82,9 +122,11 @@ export function JobCard({ id }: JobCardProps): ReactElement | null {
       </div>
       <p className="ch06-card__blurb">{t(k.blurb)}</p>
       <Link
+        ref={ctaRef}
         className="jc-cta"
         href={`/assess?employer=${id}`}
         aria-label={`${t(k.name)} — ${t("home.ch6.cards.applyCta")}`}
+        onClick={onCtaClick}
       >
         {t("home.ch6.cards.applyCta")}
       </Link>

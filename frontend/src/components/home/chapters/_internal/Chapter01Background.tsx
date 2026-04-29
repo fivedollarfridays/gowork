@@ -6,9 +6,25 @@
  *
  * Pulled out of Chapter01TheWall.tsx to keep the parent file under arch
  * limits.
+ *
+ * # T13 — Grain texture intensifies on hover + fast scroll.
+ *
+ * The `.bg-noise` layer carries a `data-velocity-active` attribute that
+ * the chapter sets to `"true"` when (a) the cursor enters the section, OR
+ * (b) `useScrollVelocity().isFast` flips. The attribute drives a CSS rule
+ * (in `home-chapters.css`) that bumps the noise opacity 0.06 → 0.12 with
+ * a 600ms transition.
  */
 
-export function Chapter01Background() {
+export interface Chapter01BackgroundProps {
+  /** When true, the bg-noise layer reads data-velocity-active="true" so
+   *  the CSS rule can intensify the grain. */
+  velocityActive?: boolean;
+}
+
+export function Chapter01Background({
+  velocityActive = false,
+}: Chapter01BackgroundProps = {}) {
   return (
     <div
       className="ch01-bg"
@@ -69,11 +85,13 @@ export function Chapter01Background() {
       />
       <div
         className="bg-noise"
+        data-velocity-active={velocityActive ? "true" : "false"}
         style={{
           position: "absolute",
           inset: 0,
           opacity: 0.06,
           mixBlendMode: "overlay",
+          transition: "opacity 600ms ease",
           backgroundImage:
             "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E\")",
         }}

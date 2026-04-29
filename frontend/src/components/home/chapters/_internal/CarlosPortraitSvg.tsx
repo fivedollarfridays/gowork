@@ -6,6 +6,16 @@
  *
  * Pulled into its own file to keep Chapter03MeetCarlos.tsx under the per-file
  * function-count limit.
+ *
+ * # T16 — Parallax z-layers.
+ *
+ * Three grouped `<g data-parallax-z="1|2|3">` slices the portrait into:
+ *   - z=1: background blob (gradient + noise wash)
+ *   - z=2: mid-tone shadow (silhouette body)
+ *   - z=3: foreground highlight (cheekbone)
+ *
+ * The chapter's GSAP scrollTrigger walks each layer and tweens it at a
+ * different velocity (-20, -50, -90 px) on scroll, producing depth.
  */
 
 interface CarlosPortraitSvgProps {
@@ -33,13 +43,20 @@ export function CarlosPortraitSvg({ alt }: CarlosPortraitSvgProps) {
           <feColorMatrix values="0 0 0 0 0.96  0 0 0 0 0.94  0 0 0 0 0.92  0 0 0 0.06 0" />
         </filter>
       </defs>
-      <rect x="0" y="0" width="480" height="600" fill="url(#cgrad)" />
-      <rect x="0" y="0" width="480" height="600" filter="url(#cnoise)" />
-      <g fill="rgba(10,14,26,0.78)">
+      {/* z=1 — background blob (gradient + noise wash). */}
+      <g data-parallax-z="1" data-parallax-velocity="-20">
+        <rect x="0" y="0" width="480" height="600" fill="url(#cgrad)" />
+        <rect x="0" y="0" width="480" height="600" filter="url(#cnoise)" />
+      </g>
+      {/* z=2 — mid-tone shadow (silhouette body). */}
+      <g data-parallax-z="2" data-parallax-velocity="-50" fill="rgba(10,14,26,0.78)">
         <ellipse cx="240" cy="220" rx="98" ry="118" />
         <path d="M 90 600 L 90 460 Q 90 350 240 350 Q 390 350 390 460 L 390 600 Z" />
       </g>
-      <ellipse cx="200" cy="200" rx="50" ry="36" fill="rgba(245,235,210,0.18)" />
+      {/* z=3 — foreground cheek highlight. */}
+      <g data-parallax-z="3" data-parallax-velocity="-90">
+        <ellipse cx="200" cy="200" rx="50" ry="36" fill="rgba(245,235,210,0.18)" />
+      </g>
     </svg>
   );
 }

@@ -2,10 +2,22 @@
  * PageMeta — bottom-right HUD rows showing city, chapter, scroll %,
  * and time-of-day light label. Sprint/gowork-facelift Driver A.
  */
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { TranslationProvider } from "@/hooks/useTranslation";
 import { setLocale } from "@/lib/i18n";
+
+// polish-2 T9 — PageMeta now consumes useLiveNowFormatted, which under the
+// hood pulls from @tanstack/react-query. Stub so legacy tests don't need
+// to wrap each render in a QueryClientProvider.
+vi.mock("@/hooks/useLiveNowFormatted", () => ({
+  useLiveNowFormatted: () => ({
+    nowLabel: "12:00 PM",
+    sessionCount: 7,
+    lastCalibratedRelative: "—",
+  }),
+}));
+
 import { PageMeta } from "../PageMeta";
 
 function wrap(node: React.ReactNode) {

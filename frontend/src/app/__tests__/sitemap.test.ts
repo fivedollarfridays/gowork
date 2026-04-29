@@ -70,6 +70,28 @@ describe("sitemap.ts", () => {
     expect(home).toBeDefined();
     expect(home!.priority).toBeGreaterThanOrEqual(0.9);
   });
+
+  // polish-2 T52 — chapter anchors + es-locale alts.
+  it("includes 8 chapter anchors (?chapter=1..8) for deep-link discovery", () => {
+    const urls = sitemap().map((e) => e.url);
+    for (let chapter = 1; chapter <= 8; chapter += 1) {
+      expect(urls.some((u) => u.endsWith(`/?chapter=${chapter}`))).toBe(true);
+    }
+  });
+
+  it("home entry declares an es-locale alternate", () => {
+    const entries = sitemap();
+    const home = entries.find((e) => /\/$/.test(e.url) && !e.url.endsWith("/assess"));
+    expect(home?.alternates?.languages?.es).toBeDefined();
+  });
+
+  it("each chapter anchor declares an es-locale alternate", () => {
+    const entries = sitemap();
+    for (let chapter = 1; chapter <= 8; chapter += 1) {
+      const entry = entries.find((e) => e.url.endsWith(`/?chapter=${chapter}`));
+      expect(entry?.alternates?.languages?.es).toBeDefined();
+    }
+  });
 });
 
 describe("robots.ts", () => {

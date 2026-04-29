@@ -86,3 +86,32 @@ describe("Chapter02TheNumbers — pinned counters", () => {
     expect(screen.getByText(/No son frases/i)).toBeInTheDocument();
   });
 });
+
+describe("Chapter02TheNumbers — T14 locale-aware stat formatter", () => {
+  it("renders 600.000+ with European thousands separators in ES", () => {
+    renderEs();
+    // ES grouping: dot-separated thousands. The "600,000+" English string
+    // must NOT appear when locale=es.
+    expect(screen.queryByText(/600,000\+/)).toBeNull();
+    expect(screen.getByText(/600\.000\+/)).toBeInTheDocument();
+  });
+
+  it("renders 600,000+ with comma thousands separators in EN", () => {
+    renderEn();
+    expect(screen.getByText(/600,000\+/)).toBeInTheDocument();
+  });
+});
+
+describe("Chapter02TheNumbers — T15 pull quote drop cap", () => {
+  it("pull quote carries the ch02-pull class so the ::first-letter rule applies", () => {
+    const { container } = renderEn();
+    const pull = container.querySelector(".ch02-pull");
+    expect(pull).not.toBeNull();
+  });
+
+  it("pull quote carries data-dropcap='on' so the drop-cap CSS rule triggers", () => {
+    const { container } = renderEn();
+    const pull = container.querySelector(".ch02-pull");
+    expect(pull?.getAttribute("data-dropcap")).toBe("on");
+  });
+});

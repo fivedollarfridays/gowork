@@ -90,3 +90,54 @@ describe("Chapter03MeetCarlos — split portrait + parallax text", () => {
     expect(screen.getByText(/cada 47 minutos/i)).toBeInTheDocument();
   });
 });
+
+describe("Chapter03MeetCarlos — T16 portrait depth z-layers", () => {
+  it("portrait SVG splits into 3 parallax z-layers", () => {
+    const { container } = renderEn();
+    const layers = container.querySelectorAll('.carlos-svg [data-parallax-z]');
+    // Background blob, mid-tone shadow, foreground silhouette.
+    expect(layers.length).toBe(3);
+  });
+
+  it("each parallax z-layer carries a unique depth value", () => {
+    const { container } = renderEn();
+    const layers = container.querySelectorAll('.carlos-svg [data-parallax-z]');
+    const depths = Array.from(layers).map(
+      (g) => g.getAttribute("data-parallax-z") ?? "",
+    );
+    // Three distinct depth ids (1, 2, 3).
+    expect(new Set(depths).size).toBe(3);
+    expect(depths).toEqual(["1", "2", "3"]);
+  });
+});
+
+describe("Chapter03MeetCarlos — T17 photo-caption gradient border", () => {
+  it("portrait wrapper carries the ch03-portrait class so the gradient rule applies", () => {
+    const { container } = renderEn();
+    const portrait = container.querySelector(".ch03-portrait");
+    expect(portrait).not.toBeNull();
+  });
+
+  it("portrait wrapper opts in to the gradient border via data-gradient-border", () => {
+    const { container } = renderEn();
+    const portrait = container.querySelector(".ch03-portrait");
+    expect(portrait?.getAttribute("data-gradient-border")).toBe("on");
+  });
+});
+
+describe("Chapter03MeetCarlos — T18 fact-grid lift + count-up", () => {
+  it("each fact carries a data-countup target attribute", () => {
+    const { container } = renderEn();
+    const facts = container.querySelectorAll(".ch03-facts .fact[data-countup]");
+    // 4 facts in the grid; all opt into count-up tween.
+    expect(facts.length).toBe(4);
+  });
+
+  it("each fact-num carries a data-stat-num hook so the GSAP tween can drive it", () => {
+    const { container } = renderEn();
+    const nums = container.querySelectorAll(
+      ".ch03-facts .fact .fact-num[data-stat-num]",
+    );
+    expect(nums.length).toBe(4);
+  });
+});

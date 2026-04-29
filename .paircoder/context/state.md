@@ -36,6 +36,99 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+### 2026-04-29 — sprint/polish-2 Driver E: T48-T60 spotlights + SEO + print (worktree agent-a855862582b88aa6d)
+
+Branch: `polish-2-driver-c` worktree off `sprint/polish-2` (containing Drivers A/B/C/D commits as base). HackFW 2026 polish-2 dispatch — Driver E scope: spotlights + global instrumentation + SEO/PWA/print. 13 tasks, TDD strict, 229/229 owned-surface tests green.
+
+- **T48 Ch1 cursor particle trail** — new `Ch01CursorTrail.tsx` mounts a fixed 100vh root and listens to document `pointermove`. Filters with `target.closest('.ch01')` so particles only spawn inside Chapter 1. Pool capped at 12; each particle is a `<span data-trail>` that decays 600ms via CSS rule in `home-velocity.css`. Disabled on coarse pointer (matchMedia + maxTouchPoints) and reduced-motion.
+- **T49 TitleSequenceGate** — new `TitleSequenceGate.tsx` mounts wall `<TitleSequence>` only when `sessionStorage["gowork-title-seen"] !== "1"` AND `prefers-reduced-motion: reduce` is off. On completion the gate writes the flag and unmounts. SSR-safe (decision deferred to first effect to avoid hydration mismatch).
+- **T50 Sound triggers cross-driver wiring** — new `lib/home/soundTriggers.ts` exports `installSoundTriggers()` (mounted at HomePage) plus three fire-helpers: `fireChapter4Step` → `footstep`, `fireChapter5FanComplete` → `chime`, `fireChapter7CliffCross` → `calculator-click`. Chapters dispatch DOM events, the listener plays the matching sound. First user gesture (`pointerdown`/`keydown`) calls `unlock()` exactly once. SiteHeader MuteToggle + chapter event firing documented in `POLISH-2-FOLLOWUP.md` for A/B/C.
+- **T51 generateMetadata + JSON-LD** — converted `app/page.tsx` to a server component that exports `generateMetadata({ searchParams })`. Reads `?chapter=N` (1..8) and emits `og:image` pointing at `/api/og/[chapter]?locale=…` (default fallback for out-of-range). Added `<script type="application/ld+json">` inline with WebSite + BreadcrumbList + (when chapter is set) Article schema sourced from the now-filled `lib/seo/structuredData.ts`. The redirect logic moved into `app/page-client.tsx`.
+- **T52 Sitemap + RSS** — extended `app/sitemap.ts` with 8 chapter anchors `/?chapter=N` and `alternates.languages.es` on every entry. New route `app/jobs/rss.xml/route.ts` emits RSS 2.0 (XML-escaped) for `HOME_EMPLOYERS` (Alcon / BNSF / JE Dunn). Cache headers: `public, max-age=3600, stale-while-revalidate=86400`.
+- **T53 Print stylesheet** — wired through `globals.css @import "./styles/print.css"`. Extended print rules to cover `.chapter` (homepage marker class) with `break-after: page`, plus a 6-col `.editorial-grid` opt-in for pull-quotes/numerics. `@page { @bottom-left / @bottom-right }` adds running version + page counter (Prince/weasyprint render; Chrome silently ignores but the rule remains valid).
+- **T54 FpsOverlayGate** — new `FpsOverlayGate.tsx` triple-gates: NODE_ENV ≠ production AND `localStorage["gowork-fps"] === "1"`. Bottom-right HUD shows rolling 60-frame avg FPS + active chapter index. In production: always returns null (defense in depth).
+- **T55 EyebrowActiveBridge** — new IO-driven component sets `data-eyebrow-active="true"` on the chapter section at ≥40% viewport intersection. CSS rule (`home-velocity.css`) reads `[data-eyebrow-active] .eyebrow .num` and lifts `font-variation-settings: "wght" 700`. Single-active-at-a-time invariant. Drivers B/C just need to wrap the eyebrow numeric in `<span className="num">` (one-prop edit; documented in POLISH-2-FOLLOWUP.md).
+- **T56 ScrollVelocityBridge — fast-scroll motion blur** — new bridge component reads `useScrollVelocity(0.8)` (≈800px/s) and writes `body[data-scroll-velocity="fast"]`. CSS rule applies `backdrop-filter: blur(2px)` (with @supports gate + reduced-motion override) to `.chapter` while flipping; transitions 180ms.
+- **T57 Battery-aware degradation** — same bridge reads `useBatteryAware().isLow` and writes `body[data-battery-low]`. CSS rule disables cursor flashlight, particle trail, marquees, and chapter animations. PageMeta chip wiring deferred to Driver A (POLISH-2-FOLLOWUP.md). i18n key `pageMeta.batterySaver` already populated.
+- **T58 useEffectiveConnection hook** — new helper hook reads `navigator.connection.effectiveType` and maps to `"slow" | "fast" | "unknown"`. SSR-safe; subscribes to `change` event for live updates. Driver A's `ChapterRailTooltip` consumes at integration to skip WebP on slow connections.
+- **T59 Idle ambient orbit on Ch4** — same bridge reads `useIdleState(8000)` and writes `body[data-idle="true"]`. CSS keyframe `goworkIdleOrbit` applies a 4s 1px y-orbit to `body[data-idle="true"] .ch04-marker`. Reduced-motion overrides to `animation: none`.
+- **T60 FW DAO bounty link spec** — decision: link goes in SiteFooter "For cities" column (not Ch8 — Ch8's single-CTA discipline preserved). Spec in `POLISH-2-FOLLOWUP.md` for Driver A: `https://dao.fwtx.city/bounties` + new i18n key `siteFooter.citiesDaoBounties`.
+- **i18n** — Added `home.titleSequence.{presenter,title,subtitle}` and `home.ch1.idle.orbitAria` in en + es. Driver A's `pageMeta.batterySaver` and `nav.muteToggle.*` keys were already populated.
+- **HomePage wiring** — `HomePage.tsx` now mounts (in order) `TitleSequenceGate` → `CursorFlashlight` → `Ch01CursorTrail` → `ScrollVelocityBridge` → `EyebrowActiveBridge` → `SiteHeader` → `ChapterRail` → `PageMeta` → `<main>` (8 chapters) → `SiteFooter` → `FpsOverlayGate`. `useEffect(() => installSoundTriggers(), [])` registers the cross-driver sound listener.
+- **Files added:** 12 new source files (`Ch01CursorTrail.tsx`, `TitleSequenceGate.tsx`, `ScrollVelocityBridge.tsx`, `EyebrowActiveBridge.tsx`, `FpsOverlayGate.tsx`, `useEffectiveConnection.ts`, `lib/home/soundTriggers.ts`, `app/page-client.tsx`, `app/jobs/rss.xml/route.ts`, `styles/home-velocity.css`) + 13 new test files (16 test files total in driver-E scope).
+- **Files modified (mine only):** `app/page.tsx` (server-component split), `app/sitemap.ts` (+chapter anchors + es alts), `app/styles/print.css` (+`.chapter` selector + 6-col grid + @page running areas), `app/globals.css` (+2 @imports), `lib/seo/structuredData.ts` (filled the scaffold canonically), `components/home/HomePage.tsx` (+5 mounts + sound-trigger effect), `app/__tests__/sitemap.test.ts` (+T52 chapter anchor + es alt assertions), `app/__tests__/page-home.test.tsx` (re-target to `page-client`), `lib/translations/{en,es}.json` (4 keys total).
+- **Tests** — 229/229 owned-surface tests green: 16 new Driver-E test files (94 tests across `structuredData`, `useEffectiveConnection`, `soundTriggers`, `ScrollVelocityBridge`, `Ch01CursorTrail`, `TitleSequenceGate`, `EyebrowActiveBridge`, `FpsOverlayGate`, `HomePage.polish-2`, `sitemap`, `page-metadata`, `page-jsonld`, `page-home`, `jobs/rss.xml`, `printStylesheet`) + parity tests (107) + print-contract tests (24) + TitleSequence existing (6).
+- **Arch check** — All 12 owned source files clean (`bpsai-pair arch check` pass on each individually). Largest file: `HomePage.tsx` at 147 lines.
+- **Lint** — `next lint` clean on every Driver-E new file; only pre-existing warning in `usePerformanceBudget.ts` (not mine).
+
+### 2026-04-29 — sprint/polish-2 Driver D: T38-T47 edge + a11y + perf (worktree agent-a1aaa2cd8f1dee367)
+
+Branch: `polish-2-driver-b` worktree off `sprint/polish-2`. HackFW 2026 polish-2 dispatch — Driver D scope: edge states + accessibility + performance. 10 tasks, TDD strict, all green at 97/97 in Driver-D-owned tests.
+
+- **T38 404 page redesign** — Lifted the wall metaphor through Ch1 hero atmosphere. Filled the `EdgeStateShell` scaffold (90 lines): renders `main#main` with `[data-edge-state="404|500|loading"]`, mounts `Chapter01Background` (grid + dual glow + grain), drops eyebrow / headline / body / CTA into branded slots, accent prop selects cyan/amber/rose. `app/not-found.tsx` consumes the shell with `edge.404.*` i18n + single CTA back home.
+- **T39 500 error page redesign** — Same shell with `accent="rose"` for severity. Retry button calls Next 13's `reset()` prop. Copy still drawn from `edge.500.*` (existing keys) so EN+ES parity holds. Error.message never leaks to users.
+- **T40 Loading shell** — New `app/loading.tsx` (segment-level Suspense fallback). Renders the `BrandLoop` SVG (rotating cyan ring + amber pulse, motion gated by `--motion-disabled` token) + `LoadingState` 4-row skeleton, all under the EdgeStateShell.
+- **T41 PWAInstallPrompt polish** — Extended W7 base: 12s auto-hide on no interaction, `localStorage["gowork-pwa-dismissed"]` 30-day persistence (suppresses re-surfacing within window), bottom-LEFT chip with inline brand-mark SVG + "Install GoWork" + dismiss X. 9/9 tests pass (3 base + 6 polish).
+- **T42 Color-blind safe palette test** — New `tokens-color-blind.test.ts` implements the full sRGB→linear→LMS→simulated-LMS→sRGB→Lab→ΔE76 pipeline with Brettel-Mollon-Vienot 1997 coefficients. Asserts ΔE ≥ 18 across 18 pairs (4 accents × 3 dichromat sims). Found 3 known-failing pairs (cyan↔green tritanopia, amber↔rose tritanopia, rose↔green deuteranopia); each marked `it.fails()` with documented non-color disambiguator + flagged for human (no auto-tweak per dispatch).
+- **T43 Focus-ring audit** — Static-scan test asserts no home-route component sets `outline:none` without a `focus-visible:ring|outline|bg` disambiguator. `tokens/layout.css` `.skip-to-content:focus { outline: none }` allowlisted (the visible cyan pill IS the affordance). Auto-generated `critical.css` allowlisted as derived artifact.
+- **T44 Reduced-motion parity** — New `home-reduced-motion.test.tsx` asserts each of the 8 chapters references `usePrefersReducedMotion` AND gates animation logic on its return value. Includes a render-time check for Ch5 cards and source scans for Ch6 marquee, Ch7 chart, Ch8 wordmark final-state branches. 20/20 green.
+- **T45 Critical CSS extraction** — New `frontend/scripts/extract-critical-css.mjs` build helper exports a pure `extractCritical(src)` function (tokens-only naïve top-level rule splitter; allowlists `.ch01-*`, `.site-header`, `.brand`, `.cta`, `.skip-to-content`, `:root`, `html`, `body`). CLI emits `frontend/src/app/styles/critical.css` (~8.2 KB). `app/layout.tsx` now reads it via `fs.readFileSync` at server-render time and injects a `<style data-critical-css>` block at the top of `<body>` to kill FOUC. Smoke test asserts the inline block contains `--bg-base`.
+- **T46 SiteFooter BrandMark lazy-load audit** — `SiteFooter.tsx` is Driver A's lane; written audit + recommendation to `frontend/POLISH-2-FOLLOWUP.md` with the exact `next/dynamic` migration snippet. Added `SiteFooter.bundle-budget.test.ts` to keep the file under arch limits and verify the follow-up doc exists. Note: Driver E appended their follow-ups (T50/T55/T57/T58/T60) to the same file after I shipped — that's expected cross-driver collaboration on shared follow-up artifacts.
+- **T47 Responsive `<picture>` build script** — New `frontend/scripts/build-chapter-thumbs.mjs` emits 200w/400w/800w × {webp, avif} variants from `frontend/public/home/chapter-thumbs/0[1-8]-*.jpg` using `sharp` (transitively via `next`). `planChapterThumbs(srcs)` is the pure unit-tested core. `<picture>` markup change to `ChapterRailTooltip.tsx` is documented in `POLISH-2-FOLLOWUP.md` for Driver A's follow-up commit.
+- **i18n** — No new keys. `edge.404.*` / `edge.500.*` / `edge.loading.*` already populated by W1; my changes consume them unchanged.
+- **Files added:** `frontend/POLISH-2-FOLLOWUP.md`, `frontend/scripts/extract-critical-css.mjs`, `frontend/scripts/build-chapter-thumbs.mjs`, `frontend/scripts/__tests__/build-chapter-thumbs.test.ts`, `frontend/src/app/loading.tsx`, `frontend/src/app/styles/critical.css`, plus 11 test files under `__tests__/`.
+- **Files modified (mine only):** `frontend/src/components/edge-states/EdgeStateShell.tsx` (filled scaffold), `frontend/src/app/not-found.tsx`, `frontend/src/app/error.tsx`, `frontend/src/app/layout.tsx` (T45 inline critical CSS — only allowed layout edit), `frontend/src/components/wall/PWAInstallPrompt.tsx`.
+- **Tests** — 97/97 owned tests green (`npx vitest run` on the Driver-D scope). Pre-existing failures elsewhere (Chapter08, css-architecture, daily.test.tsx) trace to Drivers A/B/C/E lanes — none are caused by my changes.
+- **Arch check** — All 6 owned source files clean (`bpsai-pair arch check` pass).
+
+### 2026-04-29 — sprint/polish-2 Driver A: T1-T10 chrome + magnetics (worktree agent-af3aad41184d2f090)
+
+Branch: `sprint/polish-2` (worktree). HackFW 2026 polish-2 dispatch — Driver A scope: site chrome polish + magnetic micro-interactions. 10 tasks, TDD strict, all green.
+
+- **T1 useMagneticHover** — filled hook scaffold. Reads `--magnetic-pull-distance` (80px) and `--magnetic-pull-max` (10px) from CSS. Pulls element toward cursor inside proximity radius via lerp 0.18 rAF easing. Disabled on coarse-pointer + reduced-motion. 5 unit tests covering pull direction, return-to-origin on leave, coarse-pointer no-op, reduced-motion no-op, disabled flag.
+- **T2 SiteHeader scroll-direction hide/show** — filled `useScrollDirection` hook (rAF-coalesced, threshold-gated, SSR-safe with cleanup); SiteHeader writes `data-header-state="hidden|visible"` and `transform: translateY(-100%)` over 240ms ease.
+- **T3 ChapterRailTooltip** — new component renders 200×96 glass tooltip with chapter screenshot + eyebrow on `mouseenter`/`focus`. Slides in via `translateX(-8px)→0` + opacity 0→1 over 200ms `--ease-linear-sig`. Maps chapter ids to `/home/chapter-thumbs/0[1-8]-*.jpg`.
+- **T4 ChromeAccentBridge** — new IO-driven component sets `--chrome-accent` on `:root` as each chapter crosses ≥50% intersection. Accent map: Ch1=cyan, Ch2/3/5=amber, Ch4/8=cyan, Ch6=status-positive, Ch7=rose. SiteHeader CTA bg + brand-mark glow + bottom border read `var(--chrome-accent)` and transition over 800ms.
+- **T5 Editorial-link** — added `.editorial-link` rule to `home-chapters.css` (gradient cyan→amber 1.5px underline, `background-size: 0 1.5px → 100% 1.5px` on hover/focus over 280ms). Applied to all in-prose anchors in SiteFooter.
+- **T6 SkipToContent polish** — restyled to cyan pill (10/16px padding) with `translateY(-200%)→0` slide on focus over 200ms. Honors `data-theme="light"` (navy text on cyan via `var(--bg-base)`); MutationObserver tracks data-theme attr.
+- **T7 BrandMark loading wiring** — `[data-brand-mark][data-loading="true"]` until first non-zero scroll OR custom `gowork:ch1-entered` event. Then flips to `interactive`.
+- **T8 SiteFooter wordmark** — reverse-scroll "GOWORK · GOWORK …" marquee row below legal/credit. Reads `useScrollVelocity` + frame-by-frame dy, accumulates offset opposite to scroll direction. CSS provides 12rem scale, 12% opacity, top/bottom mask.
+- **T9 PageMeta LIVE row** — 5th HUD row "LIVE — N sessions · last calibrated Mm ago" driven by `useLiveNowFormatted` (locale-aware). EN/ES translations use `{count}` / `{when}` placeholders + tiny in-component `fillPlaceholders` helper.
+- **T10 HeaderProgressRail** — new 8-segment 2px-tall component pinned just below SiteHeader. Segments fill cyan as scroll passes each chapter; active segment glows. Reduced-motion mode collapses to single thin bar showing total %.
+- **i18n** — added `nav.muteToggle.*`, `chapterRail.tooltip.altPrefix`, `pageMeta.{live,liveSessions,liveCalibrated,batterySaver}` keys with native-fluent ES (no machine translation).
+- **Decomposition** — SiteHeader split into `BrandColumn`, `PrimaryNav`, `ChromeControls`, `ThemeButton`, `CtaPill`, `MobileDrawer`, `useBrandLoading`, `useThemeMirror`. SiteFooter split into `BrandColumn`, `FooterColumn`, `InternalLink`, `ExternalLink`, `LegalNav`, `CreditRow`, `ColumnsGrid`, `ReverseWordmark`. Every function ≤ 50 lines.
+- **Tests** — 11 new test files (5 hook + 6 component); 81 new + extended assertions; full polish-2 driver-A scope at 132/132 green. ESLint clean (no errors). Driver C/D failures in `chapters/__tests__/Chapter06LiveJobs.test.tsx` and `Chapter08FindYourPath.test.tsx` are pre-existing in their lanes (not Driver A files).
+
+**Files added:**
+- `frontend/src/components/home/ChapterRailTooltip.tsx`
+- `frontend/src/components/home/ChromeAccentBridge.tsx`
+- `frontend/src/components/home/HeaderProgressRail.tsx`
+- `frontend/src/components/home/__tests__/SiteHeader.scrollDirection.test.tsx`
+- `frontend/src/components/home/__tests__/SiteHeader.brandLoading.test.tsx`
+- `frontend/src/components/home/__tests__/ChapterRailTooltip.test.tsx`
+- `frontend/src/components/home/__tests__/ChromeAccentBridge.test.tsx`
+- `frontend/src/components/home/__tests__/HeaderProgressRail.test.tsx`
+- `frontend/src/components/home/__tests__/PageMeta.liveNow.test.tsx`
+- `frontend/src/components/home/__tests__/SiteFooter.editorialLink.test.tsx`
+- `frontend/src/components/home/__tests__/SiteFooter.wordmark.test.tsx`
+- `frontend/src/components/wall/__tests__/SkipToContent.polish.test.tsx`
+- `frontend/src/hooks/__tests__/useMagneticHover.test.tsx`
+- `frontend/src/hooks/__tests__/useScrollDirection.test.ts`
+
+**Files modified:**
+- `frontend/src/hooks/useMagneticHover.ts` (filled scaffold)
+- `frontend/src/hooks/useScrollDirection.ts` (filled scaffold)
+- `frontend/src/components/home/SiteHeader.tsx` (T2/T4/T7 + decomposition)
+- `frontend/src/components/home/SiteFooter.tsx` (T5/T8 + decomposition)
+- `frontend/src/components/home/ChapterRail.tsx` (T3 hover/focus tooltip)
+- `frontend/src/components/home/PageMeta.tsx` (T9 LIVE row)
+- `frontend/src/components/home/__tests__/PageMeta.test.tsx` (mock useLiveNowFormatted to keep legacy tests green without QueryClientProvider)
+- `frontend/src/components/wall/SkipToContent.tsx` (T6 polish)
+- `frontend/src/app/styles/home-chapters.css` (polish-2 driver-A namespaced block: tooltip keyframe, editorial-link, footer wordmark, header progress rail)
+- `frontend/src/lib/translations/en.json` + `es.json` (nav.muteToggle.*, chapterRail.tooltip, pageMeta.live*, batterySaver — native-fluent ES)
+
+**What's Next:** Driver E mounts `<HeaderProgressRail />` and `<ChromeAccentBridge />` in `HomePage.tsx` at integration time (immediately after `<CursorFlashlight />`). Other polish-2 drivers continue independent lanes; Driver C's `Chapter06LiveJobs.test.tsx` needs a `fireEvent` import fix in their lane.
+
 ### 2026-04-29 — sprint/gowork-facelift Driver D: Phase D1 archive + D2 i18n + D3 page wiring + D4 smoke (worktree agent-a884de798036f92b3)
 
 Branch: `sprint/gowork-facelift` (worktree). HackFW 2026 facelift dispatch — Driver D scope: integrator + archivist (page wiring + obsolete test archive + i18n catalog + integration smoke).

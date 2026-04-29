@@ -8,11 +8,14 @@
  * card rotates ±deg and slides ±x. Reduced-motion: rendered in their
  * final fanned position with no scrub.
  *
- * The fan-out math (per-card t, angle, offsetX/offsetY, opacity, zIndex)
- * lives in {@link useCh05FanOut} so the chapter component stays small.
+ * polish-2 Driver C:
+ *   - T24 — hover preview-flip (Y-axis 180deg, 3 bullets per back face).
+ *   - T25 — mobile horizontal scroll-snap (data-mobile-snap on .ch05-fan
+ *     opts the section into the @media (max-width: 767px) rule in
+ *     home-chapters.css).
  */
 
-import { useRef, useState, type ReactElement } from "react";
+import { useRef, useState, useCallback, type ReactElement } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { useCh05FanOut, type CardTransform } from "./Chapter05ThePlan.fanout";
@@ -25,17 +28,12 @@ interface PlanCardSpec {
   title: string;
   body: string;
   foot: string;
+  back1: string;
+  back2: string;
+  back3: string;
 }
 
-const CARD_KEYS: ReadonlyArray<{
-  testId: string;
-  tone: "amber" | "cyan" | "green" | "rose";
-  num: string;
-  tag: string;
-  title: string;
-  body: string;
-  foot: string;
-}> = [
+const CARD_KEYS: ReadonlyArray<PlanCardSpec> = [
   {
     testId: "ch05-card-1",
     tone: "amber",
@@ -44,6 +42,9 @@ const CARD_KEYS: ReadonlyArray<{
     title: "home.ch5.card1Title",
     body: "home.ch5.card1Body",
     foot: "home.ch5.card1Foot",
+    back1: "home.ch5.card1.back1",
+    back2: "home.ch5.card1.back2",
+    back3: "home.ch5.card1.back3",
   },
   {
     testId: "ch05-card-2",
@@ -53,6 +54,9 @@ const CARD_KEYS: ReadonlyArray<{
     title: "home.ch5.card2Title",
     body: "home.ch5.card2Body",
     foot: "home.ch5.card2Foot",
+    back1: "home.ch5.card2.back1",
+    back2: "home.ch5.card2.back2",
+    back3: "home.ch5.card2.back3",
   },
   {
     testId: "ch05-card-3",
@@ -62,6 +66,9 @@ const CARD_KEYS: ReadonlyArray<{
     title: "home.ch5.card3Title",
     body: "home.ch5.card3Body",
     foot: "home.ch5.card3Foot",
+    back1: "home.ch5.card3.back1",
+    back2: "home.ch5.card3.back2",
+    back3: "home.ch5.card3.back3",
   },
   {
     testId: "ch05-card-4",
@@ -71,38 +78,74 @@ const CARD_KEYS: ReadonlyArray<{
     title: "home.ch5.card4Title",
     body: "home.ch5.card4Body",
     foot: "home.ch5.card4Foot",
+    back1: "home.ch5.card4.back1",
+    back2: "home.ch5.card4.back2",
+    back3: "home.ch5.card4.back3",
   },
 ];
 
-/** One plan card, reading copy via the translator and applying the
- *  current fan-out transform. */
+interface ResolvedCardCopy {
+  num: string;
+  tag: string;
+  title: string;
+  body: string;
+  foot: string;
+  back1: string;
+  back2: string;
+  back3: string;
+}
+
+/** One plan card with hover-flip preview (T24). */
 function PlanCard({
   spec,
-  spec: { testId, tone },
   xform,
   resolved,
+  flipped,
+  onEnter,
+  onLeave,
 }: {
   spec: PlanCardSpec;
   xform: CardTransform;
-  resolved: { num: string; tag: string; title: string; body: string; foot: string };
+  resolved: ResolvedCardCopy;
+  flipped: boolean;
+  onEnter: () => void;
+  onLeave: () => void;
 }): ReactElement {
-  void spec; // tone consumed via attr
+  const { testId, tone } = spec;
   return (
     <article
       data-testid={testId}
       data-tone={tone}
+      data-flipped={flipped ? "true" : "false"}
       className="ch05-card"
+      onPointerEnter={onEnter}
+      onPointerLeave={onLeave}
+      onFocus={onEnter}
+      onBlur={onLeave}
       style={{
         transform: `translate(${xform.x}px, ${xform.y}px) rotate(${xform.angle}deg) scale(${xform.scale})`,
         opacity: xform.opacity,
         zIndex: xform.zIndex,
       }}
     >
-      <span className="pc-num">{resolved.num}</span>
-      <span className="pc-tag">{resolved.tag}</span>
-      <h3>{resolved.title}</h3>
-      <p>{resolved.body}</p>
-      <span className="pc-foot">{resolved.foot}</span>
+      <div className="ch05-card__faces">
+        <div className="ch05-card__face" data-face="front">
+          <span className="pc-num">{resolved.num}</span>
+          <span className="pc-tag">{resolved.tag}</span>
+          <h3>{resolved.title}</h3>
+          <p>{resolved.body}</p>
+          <span className="pc-foot">{resolved.foot}</span>
+        </div>
+        <ul
+          className="ch05-card__face ch05-card__back"
+          data-face="back"
+          aria-hidden={flipped ? "false" : "true"}
+        >
+          <li>{resolved.back1}</li>
+          <li>{resolved.back2}</li>
+          <li>{resolved.back3}</li>
+        </ul>
+      </div>
     </article>
   );
 }
@@ -123,10 +166,14 @@ export function Chapter05ThePlan(): ReactElement {
   const reduced = usePrefersReducedMotion();
   const sectionRef = useRef<HTMLElement | null>(null);
   const [progress, setProgress] = useState<number>(reduced ? 1 : 0);
+  const [flippedIdx, setFlippedIdx] = useState<number | null>(null);
 
   useCh05FanOut({ sectionRef, onProgress: setProgress, reduced });
 
   const xforms = CARD_KEYS.map((_, i) => computeFanXform(i, progress));
+
+  const onEnter = useCallback((idx: number) => () => setFlippedIdx(idx), []);
+  const onLeave = useCallback(() => setFlippedIdx(null), []);
 
   return (
     <section
@@ -146,7 +193,7 @@ export function Chapter05ThePlan(): ReactElement {
           <Ch05Heading />
           <p className="ch05-intro">{t("home.ch5.intro")}</p>
         </div>
-        <div className="ch05-fan">
+        <div className="ch05-fan" data-mobile-snap="true">
           {CARD_KEYS.map((spec, i) => (
             <PlanCard
               key={spec.testId}
@@ -158,7 +205,13 @@ export function Chapter05ThePlan(): ReactElement {
                 title: t(spec.title),
                 body: t(spec.body),
                 foot: t(spec.foot),
+                back1: t(spec.back1),
+                back2: t(spec.back2),
+                back3: t(spec.back3),
               }}
+              flipped={flippedIdx === i}
+              onEnter={onEnter(i)}
+              onLeave={onLeave}
             />
           ))}
         </div>

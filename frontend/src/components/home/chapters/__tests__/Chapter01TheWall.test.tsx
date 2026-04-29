@@ -119,3 +119,57 @@ describe("Chapter01TheWall — kinetic hero", () => {
     ).toBeInTheDocument();
   });
 });
+
+describe("Chapter01TheWall — T11 height-stable morph word", () => {
+  it("renders a hidden width-anchor sized to the longest morph word", () => {
+    const { container } = renderEn();
+    const anchor = container.querySelector('[data-morph-anchor]');
+    expect(anchor).not.toBeNull();
+    // Must be the longest fallback / locale word so layout never reflows.
+    expect(anchor?.textContent).toMatch(/background/i);
+  });
+
+  it("active morph word is absolutely positioned over the width anchor", () => {
+    const { container } = renderEn();
+    const morphParent = container.querySelector("#morph-word")?.parentElement;
+    expect(morphParent).not.toBeNull();
+    // Parent must be position:relative so the absolute child anchors to it.
+    expect(morphParent?.getAttribute("style")).toMatch(/position:\s*relative/i);
+    const morph = container.querySelector("#morph-word") as HTMLElement | null;
+    expect(morph?.getAttribute("style")).toMatch(/position:\s*absolute/i);
+  });
+
+  it("aria announces the morph cycle once via aria-live polite", () => {
+    const { container } = renderEn();
+    const live = container.querySelector('[aria-live="polite"][data-morph-live]');
+    expect(live).not.toBeNull();
+  });
+
+  it("Spanish locale also renders a height-stable anchor with the longest ES word", () => {
+    const { container } = renderEs();
+    const anchor = container.querySelector('[data-morph-anchor]');
+    expect(anchor).not.toBeNull();
+    // Spanish anchor must include some longest-word text so it never reflows.
+    expect((anchor?.textContent ?? "").length).toBeGreaterThan(3);
+  });
+});
+
+describe("Chapter01TheWall — T12 hero variable-font weight axis", () => {
+  it("line-1 carries a fontVariationSettings axis when scrolled", () => {
+    const { container } = renderEn();
+    const line1 = container.querySelector(".ch01-h1 .line-1") as HTMLElement | null;
+    expect(line1).not.toBeNull();
+    // Style attribute must carry "wght" — the axis name driven by useHeroFontWeight.
+    expect(line1?.getAttribute("style") ?? "").toMatch(/wght/);
+  });
+});
+
+describe("Chapter01TheWall — T13 background grain texture intensifies on hover", () => {
+  it("renders a bg-noise layer with a data-velocity attribute", () => {
+    const { container } = renderEn();
+    const noise = container.querySelector(".bg-noise");
+    expect(noise).not.toBeNull();
+    // T13: noise carries a data attribute the section drives from velocity.
+    expect(noise?.getAttribute("data-velocity-active")).not.toBeNull();
+  });
+});

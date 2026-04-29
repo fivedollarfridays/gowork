@@ -388,7 +388,10 @@ export default function AssessPage() {
         style={{ viewTransitionName: WALL_TO_ASSESS_TRANSITION_NAME }}
       >
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-primary">{t("assess.navTitle")}</h1>
+          <h1
+            className="text-3xl font-bold text-primary"
+            style={{ viewTransitionName: "assess-pill" }}
+          >{t("assess.navTitle")}</h1>
           <p className="text-muted-foreground">
             {t("assess.navDesc")}
           </p>

@@ -176,6 +176,10 @@ function makeMarkerEl(color: string): HTMLDivElement {
 export interface UseMapboxMountOptions {
   mapDivRef: RefObject<HTMLDivElement | null>;
   onAlive: (alive: boolean) => void;
+  /** Optional — invoked once with the live map instance (or null on
+   *  unmount/failure) so callers can wire reactive hooks like
+   *  `useMapboxSkyForTimeOfDay`. */
+  onMapReady?: (map: GwMap | null) => void;
 }
 
 /** Mount the Mapbox map imperatively, wire layers + markers, swap style
@@ -183,6 +187,7 @@ export interface UseMapboxMountOptions {
 export function useMapboxMount({
   mapDivRef,
   onAlive,
+  onMapReady,
 }: UseMapboxMountOptions): void {
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -227,6 +232,9 @@ export function useMapboxMount({
           add3DBuildings(map);
           addMarkers(mapboxgl, map);
           onAlive(true);
+          // T23 — surface the live map to the chapter so the
+          // useMapboxSkyForTimeOfDay hook can paint the sky once style is in.
+          onMapReady?.(map);
         });
 
         // Bridge for SiteHeader theme toggle.
@@ -261,9 +269,10 @@ export function useMapboxMount({
           delete window._gw_map;
         }
         map?.remove?.();
+        onMapReady?.(null);
       } catch {
         /* ignore */
       }
     };
-  }, [mapDivRef, onAlive]);
+  }, [mapDivRef, onAlive, onMapReady]);
 }
