@@ -168,10 +168,10 @@ exports[`T2.4 + T2.7 — regression-guard snapshot of camera coords > coordinate
         ],
         "speed": 1.4,
       },
-      "latitude": 39.8,
-      "longitude": -98.5,
+      "latitude": 31.3,
+      "longitude": -97.6,
       "pitch": 0,
-      "zoom": 3.5,
+      "zoom": 5.5,
     },
   },
   "initial": {

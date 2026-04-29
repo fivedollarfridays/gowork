@@ -3,11 +3,24 @@
 /**
  * W3 Driver B — Chapter 07 The Path (T3.10).
  *
- * Five stops. Twelve weeks. One plan.
+ * Narrative Reset (sprint/narrative-reset): Same-day case file.
+ *
+ * The original chapter narrative — "Five stops. Twelve weeks." walking
+ * Carlos through DPS → HHSC → Legal Aid → Workforce Solutions over twelve
+ * weeks — was the OLD GoWork story. It's depressing and inaccurate. The
+ * actual GoWork promise is a SAME-DAY case file: we hand you the PDF
+ * today, you take it to a case worker tomorrow, you apply Day 3, you're
+ * working this week.
+ *
+ * The avatar still walks the polyline, but the editorial framing
+ * compresses the timeline from 5 weeks to 4 day-stages:
+ *   Today — Case file
+ *   Tomorrow — Case worker
+ *   Day 3 — Apply
+ *   This week — Working
  *
  * Visual:
- *   - dark gradient overlay with locked editorial copy + 5 timeline marks
- *     (Week 1 / 4 / 8 / 10 / 12)
+ *   - dark gradient overlay with locked editorial copy + 4 day-stage marks
  *   - Mapbox path-draw layer (extends W2's hidden trace) draws progressively
  *   - Carlos avatar walks along the polyline (rendered as a sibling marker)
  *   - per-leg Trinity Metro highlight (CARLOS_PATH_LEG_ROUTES)
@@ -22,15 +35,19 @@ import { CARLOS_PATH_WAYPOINTS } from "@/lib/wall/paths";
 import { buildAvatarPolyline } from "@/lib/wall/avatarPath";
 import type { ChapterProps } from "@/lib/wall/chapterContract";
 
-const WEEK_LABEL_KEYS = [
+/**
+ * Day-stage label keys. Narrative Reset compressed the old 5-week timeline
+ * (Week 1/4/8/10/12) to 4 same-day stages: Today, Tomorrow, Day 3, This week.
+ */
+const DAY_LABEL_KEYS = [
   "wall.chapter07.weekLabel1",
   "wall.chapter07.weekLabel2",
   "wall.chapter07.weekLabel3",
   "wall.chapter07.weekLabel4",
-  "wall.chapter07.weekLabel5",
 ] as const;
 
-const TIMELINE_WEEKS = [1, 4, 8, 10, 12] as const;
+/** Day-stage identifiers used as data-day attributes on each timeline mark. */
+const TIMELINE_DAYS = ["today", "tomorrow", "day-3", "this-week"] as const;
 
 function clamp01(v: number): number {
   if (!Number.isFinite(v)) return 0;
@@ -39,7 +56,7 @@ function clamp01(v: number): number {
   return v;
 }
 
-/** Renders the 5 timeline marks (Week 1, 4, 8, 10, 12). */
+/** Renders the 4 day-stage marks (Today, Tomorrow, Day 3, This week). */
 function TimelineMarks(): ReactElement {
   return (
     <ol
@@ -56,11 +73,11 @@ function TimelineMarks(): ReactElement {
         justifyContent: "center",
       }}
     >
-      {TIMELINE_WEEKS.map((week, idx) => (
+      {TIMELINE_DAYS.map((day, idx) => (
         <li
-          key={week}
-          data-testid={`ch7-timeline-week-${week}`}
-          data-week={String(week)}
+          key={day}
+          data-testid={`ch7-timeline-day-${day}`}
+          data-day={day}
           style={{
             fontSize: "0.85rem",
             color: "var(--fg-secondary)",
@@ -70,7 +87,7 @@ function TimelineMarks(): ReactElement {
             paddingLeft: "0.5rem",
           }}
         >
-          {t(WEEK_LABEL_KEYS[idx])}
+          {t(DAY_LABEL_KEYS[idx])}
         </li>
       ))}
     </ol>

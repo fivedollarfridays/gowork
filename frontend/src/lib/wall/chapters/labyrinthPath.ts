@@ -15,22 +15,77 @@
  * `stroke-dashoffset` for a given progress 0..1. This lets the caller
  * drive the draw animation off scroll without touching the path string
  * itself. Reduced-motion paths simply pass `1` and get `0` back.
+ *
+ * # Narrative Reset (sprint/narrative-reset)
+ *
+ * Each office node now has a `barrierKey` mapping it to the barrier the
+ * user faces if they have to visit that office alone. The chapter
+ * component renders these as hover/focus captions so the labyrinth reads
+ * as MEANING, not just decoration:
+ *   "Without GoWork, you'd visit each office separately. With GoWork,
+ *    the lines converge into ONE PATH."
  */
 
 export interface LabyrinthOfficeNode {
+  /** Stable id used for test selectors + i18n key suffix. */
   id: string;
   /** Position inside the 0..1000 viewBox. */
   x: number;
   y: number;
+  /**
+   * Barrier-label translation key suffix. Each office handles ONE barrier
+   * so the user can read the labyrinth as: "this barrier sends me here."
+   */
+  barrierKey: string;
+  /** Office-name translation key suffix (mirrors `officeNames.*`). */
+  officeKey: string;
 }
 
-/** Five normalized office positions. Order is the labyrinth's draw order. */
+/**
+ * Five normalized office positions. Order is the labyrinth's draw order.
+ * Each carries a barrier label so the chapter can teach meaning:
+ *   - Tarrant District Clerk handles criminal-record barriers
+ *   - Trinity Metro HQ handles transit barriers
+ *   - HHSC Eligibility handles childcare/SNAP/Medicaid barriers
+ *   - Legal Aid of NW Texas handles credit + civil legal barriers
+ *   - Workforce Solutions handles ID + employment barriers
+ */
 export const LABYRINTH_NODES: readonly LabyrinthOfficeNode[] = [
-  { id: "tarrant-district-clerk", x: 220, y: 380 },
-  { id: "hhsc-eligibility", x: 760, y: 480 },
-  { id: "trinity-metro-hq", x: 380, y: 620 },
-  { id: "legal-aid-nw-texas", x: 580, y: 200 },
-  { id: "workforce-solutions-belknap", x: 880, y: 720 },
+  {
+    id: "tarrant-district-clerk",
+    x: 220,
+    y: 380,
+    barrierKey: "criminalRecord",
+    officeKey: "tarrant-district-clerk",
+  },
+  {
+    id: "hhsc-eligibility",
+    x: 760,
+    y: 480,
+    barrierKey: "childcare",
+    officeKey: "hhsc-eligibility",
+  },
+  {
+    id: "trinity-metro-hq",
+    x: 380,
+    y: 620,
+    barrierKey: "transit",
+    officeKey: "trinity-metro-hq",
+  },
+  {
+    id: "legal-aid-nw-texas",
+    x: 580,
+    y: 200,
+    barrierKey: "credit",
+    officeKey: "legal-aid-nw-texas",
+  },
+  {
+    id: "workforce-solutions-belknap",
+    x: 880,
+    y: 720,
+    barrierKey: "id",
+    officeKey: "workforce-solutions-belknap",
+  },
 ] as const;
 
 /**
@@ -85,4 +140,18 @@ export function isNodeLit(index: number, progress: number): boolean {
   const p = Math.max(0, Math.min(1, progress));
   const threshold = index / LABYRINTH_NODES.length;
   return p >= threshold;
+}
+
+/**
+ * Convergence threshold — past this progress, the chaotic labyrinth has
+ * "resolved" and the chapter should reveal the convergence caption
+ * ("47 forms. 5 offices. We sequence them. You walk once."). Tuned to
+ * match the moment all five nodes are lit.
+ */
+export const CONVERGENCE_THRESHOLD = 0.85;
+
+/** Returns true once the labyrinth has converged into the GoWork path. */
+export function isConverged(progress: number): boolean {
+  const p = Math.max(0, Math.min(1, progress));
+  return p >= CONVERGENCE_THRESHOLD;
 }

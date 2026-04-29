@@ -75,11 +75,12 @@ describe("W4 — locale toggle re-renders chapter consumers (T4.B.4)", () => {
     );
   });
 
-  it("swaps Ch7 body to ES on toggle click", () => {
+  it("swaps Ch7 body to ES on toggle click (same-day case file phrasing)", () => {
     renderTree();
     fireEvent.click(screen.getByRole("button", { name: /^es$/i }));
+    // Narrative Reset: Ch7 body teaches the same-day case file promise.
     expect(screen.getByTestId("wall.chapter07.body").textContent).toMatch(
-      /Asistencia Legal/,
+      /expediente|barreras|Workforce/i,
     );
   });
 

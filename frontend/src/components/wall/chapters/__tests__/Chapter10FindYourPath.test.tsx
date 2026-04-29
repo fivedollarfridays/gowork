@@ -1,10 +1,15 @@
 /**
  * W3 Driver C — T3.20 — Chapter 10 component tests.
  *
+ * Narrative Reset (sprint/narrative-reset): the secondary GitHub link
+ * was removed from the user-facing chapter. MIT licensing + repo URLs
+ * live in the LICENSE file and the Devpost form, NOT in the editorial
+ * overlay. Tests now assert the GitHub link is ABSENT.
+ *
  * Asserts the chapter renders with:
  *   - section heading h2 (id stable for aria-labelledby)
  *   - primary CTA button labelled with translated copy
- *   - secondary GitHub link with rel="noopener" + visible aria
+ *   - NO secondary GitHub link
  *   - editorial body + footer brand row
  *   - data-chapter="10" + data-testid="chapter10-find-your-path"
  *
@@ -48,12 +53,16 @@ describe("Chapter10FindYourPath — render contract (T3.20)", () => {
     expect(button.textContent ?? "").toMatch(/start your assessment/i);
   });
 
-  it("renders the secondary GitHub link with target=_blank + rel=noopener", () => {
+  it("does NOT render a secondary GitHub link (Narrative Reset)", () => {
     render(<Chapter10FindYourPath progress={0.5} active />);
-    const link = screen.getByTestId("chapter10-github-link") as HTMLAnchorElement;
-    expect(link.tagName).toBe("A");
-    expect(link.target).toBe("_blank");
-    expect(link.rel).toMatch(/noopener/);
+    expect(screen.queryByTestId("chapter10-github-link")).toBeNull();
+  });
+
+  it("does NOT render any 'GitHub' or 'open-source' user-facing copy", () => {
+    render(<Chapter10FindYourPath progress={0.5} active />);
+    const section = screen.getByTestId("chapter10-find-your-path");
+    expect(section.textContent ?? "").not.toMatch(/GitHub/i);
+    expect(section.textContent ?? "").not.toMatch(/open-source/i);
   });
 
   it("primary CTA carries an aria-label distinct from its visible text", () => {

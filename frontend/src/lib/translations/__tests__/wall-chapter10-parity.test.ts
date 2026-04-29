@@ -29,8 +29,11 @@ function getNested(dict: Dict, path: string): unknown {
 /**
  * Required chapter 10 keys consumed by Chapter10FindYourPath.tsx.
  *
- * Native-fluent ES required for ALL of these. Where the translator was
- * unsure, the value carries an inline `[ES-pending-review]` marker.
+ * Narrative Reset: ctaSecondary + githubLinkLabel were removed when the
+ * GitHub secondary link was stripped from user-facing chapter copy. MIT
+ * licensing + repo URLs live in LICENSE + Devpost form, NOT the chapter.
+ *
+ * Native-fluent ES required for ALL remaining keys.
  */
 const CH10_REQUIRED_KEYS = [
   "wall.chapter10.title",
@@ -39,8 +42,6 @@ const CH10_REQUIRED_KEYS = [
   "wall.chapter10.body",
   "wall.chapter10.aria",
   "wall.chapter10.ctaPrimary",
-  "wall.chapter10.ctaSecondary",
-  "wall.chapter10.githubLinkLabel",
   "wall.chapter10.footerBrand",
 ];
 

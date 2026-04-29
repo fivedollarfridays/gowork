@@ -180,15 +180,18 @@ export const CHAPTER_CAMERAS: Readonly<
     bearing: 0,
     flyToOptions: { curve: 1.2, speed: 1.1, easing: EASE_LINEAR_SIG },
   },
-  // Ch9 — Any City. Returns to the continental top-down America view (zoom
-  // 3.5, pitch 0) so two cities (Fort Worth + Montgomery) glow as lit dots
-  // with six dotted future cities (Dallas, Houston, Atlanta, Memphis,
-  // Charlotte, Birmingham). The "Fly to Montgomery" button triggers a 3s
-  // cross-country dolly into Montgomery (32.36°N, -86.28°W).
+  // Ch9 — Any City. Narrative Reset: Texas-region top-down view (centered
+  // on the state centroid ~31.3°N, -97.6°W at zoom 5.5) so Fort Worth glows
+  // as the lit reference deployment with five dotted Texas future cities
+  // (Dallas, Houston, Austin, San Antonio, Waco) all framed at once. The
+  // "Tour Texas" button refines this view; "Return to Fort Worth" dollies
+  // back to FW at zoom 11. Montgomery and the continental America view
+  // were stripped — this is the Fort Worth hackathon, the camera arc stays
+  // in Texas.
   9: {
-    longitude: -98.5,
-    latitude: 39.8,
-    zoom: 3.5,
+    longitude: -97.6,
+    latitude: 31.3,
+    zoom: 5.5,
     pitch: 0,
     bearing: 0,
     flyToOptions: { curve: 1.42, speed: 1.4, easing: EASE_LINEAR_SIG },
@@ -231,8 +234,12 @@ export const TRANSITION_SPEEDS: Readonly<Record<string, number>> = {
   //   5->6  Labyrinth (zoom 11, pitch 30) → DFW5 (zoom 14, pitch 50): cinematic
   //         standard. 1.0 matches Ch2->Ch3's "we're zooming into someone's life."
   //   6->7  DFW5 (zoom 14) → midpoint of Carlos's path (zoom 13): adjacent
-  //         altitude, snappier reframe. 0.95 reads "next reveal" without
-  //         feeling like a separate cinematic.
+  //         altitude. Narrative Reset slowed this from 0.95 → 1.4 because
+  //         the original pacing felt cramped: Ch6 ends, Ch7 begins, the
+  //         math beat needs to settle before the path beat starts. 1.4
+  //         gives the camera a cinematic settle (matches Ch1->Ch2's dolly
+  //         rhythm) so the user feels the chapter boundary, not just sees
+  //         it.
   //   7->8  Path (pitch 60) → Constellation (pitch 70, zoom 12): the deliberate
   //         tilt-up moment that becomes the sprint's signature beat. 1.1 is the
   //         same speed Ch8 chose for its own flyToOptions; the table mirrors it.
@@ -240,7 +247,7 @@ export const TRANSITION_SPEEDS: Readonly<Record<string, number>> = {
   //         the long zoom-out + tilt-down. 1.4 matches Ch1->Ch2's continental
   //         dolly so the open and the close share rhythm.
   "5->6": 1.0,
-  "6->7": 0.95,
+  "6->7": 1.4, // Narrative Reset: slowed for cinematic settle between math + path beats.
   "7->8": 1.1,
   "8->9": 1.4,
   // W3 Driver C — final beat: settle into FW overhead for the /assess handoff.

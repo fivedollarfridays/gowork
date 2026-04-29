@@ -1,4 +1,8 @@
-Give me links# r/PairCoder Post Draft — MontGoWork Case Study
+# r/PairCoder Post Draft — Legacy MontGoWork Case Study
+
+> **Status:** historical. This draft is for the LEGACY MontGoWork
+> (Montgomery, AL) case study. The HackFW 2026 submission is GoWork
+> (Fort Worth, TX) -- see `docs/press-kit.md` for the active narrative.
 
 **Subreddit:** r/PairCoder
 **Account:** macaulay_codin

@@ -58,28 +58,28 @@ describe("Chapter05Labyrinth — copy + counter", () => {
 describe("Chapter05Labyrinth — office light-up sequencing", () => {
   it("emits one office light-up entry per office (5 total)", () => {
     render(<Chapter05Labyrinth progress={1} />);
-    const offices = screen.getAllByTestId(/^ch5-office-/);
+    // Narrative Reset: each office is wrapped in a <g> group with a circle.
+    // Match on circle data-lit (not the group wrapper).
+    const offices = screen
+      .getAllByTestId(/^ch5-office-/)
+      .filter((el) => el.tagName.toLowerCase() === "circle");
     expect(offices).toHaveLength(5);
   });
 
   it("lights offices progressively as progress grows", () => {
     const { rerender } = render(<Chapter05Labyrinth progress={0.1} />);
-    const lit10 = screen
-      .getAllByTestId(/^ch5-office-/)
-      .filter((n) => n.getAttribute("data-lit") === "true").length;
-    expect(lit10).toBe(1);
+    const litCircles = (): number =>
+      screen
+        .getAllByTestId(/^ch5-office-/)
+        .filter((el) => el.tagName.toLowerCase() === "circle")
+        .filter((n) => n.getAttribute("data-lit") === "true").length;
+    expect(litCircles()).toBe(1);
 
     rerender(<Chapter05Labyrinth progress={0.5} />);
-    const lit50 = screen
-      .getAllByTestId(/^ch5-office-/)
-      .filter((n) => n.getAttribute("data-lit") === "true").length;
-    expect(lit50).toBeGreaterThanOrEqual(2);
+    expect(litCircles()).toBeGreaterThanOrEqual(2);
 
     rerender(<Chapter05Labyrinth progress={1} />);
-    const lit100 = screen
-      .getAllByTestId(/^ch5-office-/)
-      .filter((n) => n.getAttribute("data-lit") === "true").length;
-    expect(lit100).toBe(5);
+    expect(litCircles()).toBe(5);
   });
 });
 
@@ -128,6 +128,69 @@ describe("Chapter05Labyrinth — sound + a11y", () => {
     render(<Chapter05Labyrinth progress={0.5} />);
     const svg = screen.getByTestId("ch5-labyrinth-svg");
     expect(svg.getAttribute("aria-hidden")).toBe("true");
+  });
+});
+
+describe("Chapter05Labyrinth — barrier meaning layer (Narrative Reset)", () => {
+  beforeEach(() => setLocale("en"));
+
+  it("renders five barrier labels — one per office node", () => {
+    render(<Chapter05Labyrinth progress={1} />);
+    const labels = screen.getAllByTestId(/^ch5-barrier-label-/);
+    expect(labels).toHaveLength(5);
+  });
+
+  it("each barrier label contains an arrow pointing barrier → office", () => {
+    render(<Chapter05Labyrinth progress={1} />);
+    const labels = screen.getAllByTestId(/^ch5-barrier-label-/);
+    for (const el of labels) {
+      // ASCII or unicode arrow.
+      expect(el.textContent ?? "").toMatch(/→|->/);
+    }
+  });
+
+  it("renders barrier labels for each canonical key (criminalRecord, transit, childcare, credit, id)", () => {
+    render(<Chapter05Labyrinth progress={1} />);
+    expect(
+      screen.getByTestId("ch5-barrier-label-criminalRecord"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("ch5-barrier-label-transit"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("ch5-barrier-label-childcare"),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("ch5-barrier-label-credit")).toBeInTheDocument();
+    expect(screen.getByTestId("ch5-barrier-label-id")).toBeInTheDocument();
+  });
+
+  it("does NOT show the convergence caption before the threshold", () => {
+    render(<Chapter05Labyrinth progress={0.1} />);
+    expect(screen.queryByTestId("ch5-convergence-caption")).toBeNull();
+  });
+
+  it("shows the convergence caption past the threshold (progress >= 0.85)", () => {
+    render(<Chapter05Labyrinth progress={0.9} />);
+    const caption = screen.getByTestId("ch5-convergence-caption");
+    expect(caption.textContent ?? "").toMatch(/47.*5|sequence|walk once/i);
+  });
+
+  it("data-converged on root toggles to 'true' past the convergence threshold", () => {
+    const { rerender } = render(<Chapter05Labyrinth progress={0.1} />);
+    expect(
+      screen.getByTestId("chapter05-labyrinth").getAttribute("data-converged"),
+    ).toBe("false");
+    rerender(<Chapter05Labyrinth progress={0.95} />);
+    expect(
+      screen.getByTestId("chapter05-labyrinth").getAttribute("data-converged"),
+    ).toBe("true");
+  });
+
+  it("reduced-motion users see the convergence caption from the start", () => {
+    render(<Chapter05Labyrinth progress={0.1} reducedMotion />);
+    expect(
+      screen.getByTestId("ch5-convergence-caption"),
+    ).toBeInTheDocument();
   });
 });
 

@@ -8,6 +8,9 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { setLocale, getTranslation } from "@/lib/i18n";
 import { BARRIER_GRAPH } from "../data/barrierGraph";
 
+// Narrative Reset (sprint/narrative-reset): Ch7 timeline compressed from
+// 5 weeks (weekLabel1..weekLabel5) to 4 day-stages (weekLabel1..weekLabel4
+// renamed Today/Tomorrow/Day 3/This week). weekLabel5 was removed.
 const REQUIRED_CH7_KEYS = [
   "wall.chapter07.title",
   "wall.chapter07.hero",
@@ -18,7 +21,6 @@ const REQUIRED_CH7_KEYS = [
   "wall.chapter07.weekLabel2",
   "wall.chapter07.weekLabel3",
   "wall.chapter07.weekLabel4",
-  "wall.chapter07.weekLabel5",
   "wall.chapter07.legActive",
 ] as const;
 

@@ -467,6 +467,10 @@
     }
   },
   "wall": {
+    "startNowCta": {
+      "label": "Empezar ahora",
+      "ariaLabel": "Comenzar tu evaluación ahora"
+    },
     "titleSequence": {
       "presenter": "GoWork presenta",
       "title": "El Muro",
@@ -541,7 +545,22 @@
       "formsCounterLabel": "formularios por llenar",
       "officesLabel": "oficinas por visitar",
       "pullquote": "Cada oficina me dio un formulario y otra dirección.",
-      "aria": "Capítulo 5: el Laberinto. Cinco oficinas y cuarenta y siete formularios — el caos antes de que GoWork ordene el camino."
+      "aria": "Capítulo 5: el Laberinto. Cinco oficinas y cuarenta y siete formularios — el caos antes de que GoWork ordene el camino.",
+      "convergenceCaption": "47 formularios. 5 oficinas. Nosotros los ordenamos. Tú caminas una vez.",
+      "barrierLabels": {
+        "criminalRecord": "Antecedentes penales → Tarrant District Clerk",
+        "transit": "Sin transporte → Trinity Metro HQ",
+        "childcare": "Sin cuidado infantil → HHSC Eligibility",
+        "credit": "Mal crédito → Legal Aid NW Texas",
+        "id": "Falta ID → Workforce Solutions"
+      },
+      "officeNames": {
+        "tarrant-district-clerk": "Tarrant District Clerk",
+        "hhsc-eligibility": "HHSC Eligibility",
+        "trinity-metro-hq": "Trinity Metro HQ",
+        "legal-aid-nw-texas": "Legal Aid of NW Texas",
+        "workforce-solutions-belknap": "Workforce Solutions (Belknap)"
+      }
     },
     "chapter06": {
       "title": "Las Cuentas",
@@ -560,16 +579,15 @@
       "aria": "Capítulo 6: Las Cuentas. La cámara aterriza en el centro de distribución Amazon DFW5. Un control de salario mueve la gráfica del precipicio en tiempo real para ver cómo un aumento se convierte en pérdida."
     },
     "chapter07": {
-      "title": "Capítulo 7 — El Camino",
-      "hero": "Cinco paradas. Doce semanas. Un solo plan.",
-      "subhero": "GoWork ordena las mismas oficinas por las que Carlos andaba dando vueltas — pero en el orden correcto, con el formulario correcto, en la semana correcta.",
-      "body": "Casa → DPS → HHSC → Asistencia Legal → Workforce Solutions. Los autobuses 4 y 6 de Trinity Metro lo llevan entre una y otra. Le pusimos nombre al camino para poder caminarlo con él.",
-      "aria": "Capítulo 7: El Camino. El plan de doce semanas de Carlos recorre cinco oficinas en orden.",
-      "weekLabel1": "Semana 1 — DPS",
-      "weekLabel2": "Semana 4 — HHSC",
-      "weekLabel3": "Semana 8 — Asistencia Legal",
-      "weekLabel4": "Semana 10 — Workforce",
-      "weekLabel5": "Semana 12 — Contratado",
+      "title": "Tu expediente. Hoy.",
+      "hero": "No camines doce semanas. Entra una vez. Con todo en la mano.",
+      "subhero": "GoWork te entrega un expediente el mismo día. Lo llevas a un asesor. Sacas trabajos. Aplicas. Te vas a trabajar.",
+      "body": "Armamos tus barreras, tu elegibilidad, tus opciones de transporte y tus coincidencias de empleo en un solo PDF. Carlos no anda dando vueltas por cinco oficinas — toma los autobuses 4 y 6 de Trinity Metro una vez, le entrega el expediente a Workforce Solutions, y empieza a trabajar esa misma semana.",
+      "aria": "Capítulo 7: Tu expediente. Hoy. El plan del mismo día de Carlos recorre una sola parada con todo en la mano.",
+      "weekLabel1": "Hoy — Expediente",
+      "weekLabel2": "Mañana — Asesor",
+      "weekLabel3": "Día 3 — Aplicar",
+      "weekLabel4": "Esta semana — Trabajando",
       "legActive": "Tramo activo"
     },
     "chapter08": {
@@ -617,33 +635,29 @@
     },
     "chapter09": {
       "title": "Cualquier Ciudad",
-      "hero": "Funciona en Fort Worth. Va a funcionar en Montgomery. Va a funcionar donde tú estés.",
-      "subhero": "Dos ciudades encendidas. Seis dibujadas en puntos. Las cuentas, el camino, el plan — donde esté el trabajo.",
-      "body": "GoWork se entrega como plantilla de ciudad. Fort Worth es el despliegue de referencia. Montgomery es el segundo. Seis ciudades más están en camino — mismo motor, mismo plan, datos locales.",
-      "statValue": "5,189 pruebas · 13 sprints · 2 ciudades · MIT",
-      "statLabel": "entregado, abierto, listo",
-      "flyToMontgomeryButton": "Volar a Montgomery",
+      "hero": "Funciona en Fort Worth. Va a funcionar donde tú estés.",
+      "subhero": "Una ciudad encendida. Cinco dibujadas en puntos. Las cuentas, el camino, el plan — donde esté el trabajo.",
+      "body": "GoWork se entrega como plantilla de ciudad. Fort Worth es el despliegue de referencia. Cinco ciudades más de Texas están en camino — mismo motor, mismo plan, datos locales.",
+      "statValue": "13 sprints · 1 ciudad activa · 5 en camino",
+      "statLabel": "entregado, listo, escalando",
+      "tourTexasButton": "Recorrer Texas",
       "returnToFortWorthButton": "Volver a Fort Worth",
       "cityFW": "Fort Worth, TX",
-      "cityMontgomery": "Montgomery, AL",
       "futureCitiesLabel": "Próximas",
       "futureCityDallas": "Dallas",
       "futureCityHouston": "Houston",
-      "futureCityAtlanta": "Atlanta",
-      "futureCityMemphis": "Memphis",
-      "futureCityCharlotte": "Charlotte",
-      "futureCityBirmingham": "Birmingham",
-      "aria": "Capítulo 9: Cualquier Ciudad. La cámara regresa a la vista continental. Dos ciudades — Fort Worth y Montgomery — brillan como desplegadas; seis más están por llegar. Un botón vuela la cámara a Montgomery."
+      "futureCityAustin": "Austin",
+      "futureCitySanAntonio": "San Antonio",
+      "futureCityWaco": "Waco",
+      "aria": "Capítulo 9: Cualquier Ciudad. La cámara regresa a una vista del estado de Texas. Fort Worth brilla como el despliegue de referencia; cinco ciudades de Texas — Dallas, Houston, Austin, San Antonio y Waco — aparecen en puntos como próximas. Un botón recorre la región de Texas; otro vuelve a Fort Worth."
     },
     "chapter10": {
       "title": "Encuentra tu camino",
       "hero": "Encuentra tu camino.",
       "subhero": "Nosotros hacemos las cuentas. Ordenamos la ruta. Tú das el primer paso.",
-      "body": "Ya viste el muro. Ya viste el laberinto. Ahora sáltatelos — empieza tu evaluación y te entregamos un plan que ya recorrió las oficinas, los formularios y las cuentas.",
+      "body": "Ya viste el muro. Ya viste el laberinto. Ahora sáltatelos — empieza tu evaluación y te entregamos tu expediente el mismo día. Lo llevas a un asesor. Aplicas. Vas a trabajar.",
       "aria": "Capítulo 10: Encuentra tu camino. Comienza tu evaluación para recibir un plan personalizado.",
       "ctaPrimary": "Comienza tu evaluación",
-      "ctaSecondary": "O lee el código abierto en GitHub →",
-      "githubLinkLabel": "Ver el código abierto en GitHub",
       "footerBrand": "GoWork · Fort Worth, TX"
     }
   },

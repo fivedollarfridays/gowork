@@ -66,12 +66,13 @@ describe("W4 — t() helper switches output when locale toggles", () => {
     expect(esHero).toMatch(/ganar|menos/i);
   });
 
-  it("ch7 body swaps to ES copy after setLocale('es')", () => {
+  it("ch7 body swaps to ES same-day case-file copy after setLocale('es')", () => {
     const enBody = t("wall.chapter07.body");
     setLocale("es");
     const esBody = t("wall.chapter07.body");
     expect(esBody).not.toBe(enBody);
-    expect(esBody).toMatch(/Casa|Asistencia Legal/);
+    // Narrative Reset: Ch7 body now teaches the same-day case file promise.
+    expect(esBody).toMatch(/expediente|barreras|Workforce/i);
   });
 
   it("ch8 subhero swaps to ES copy after setLocale('es')", () => {
@@ -88,9 +89,11 @@ describe("W4 — t() helper switches output when locale toggles", () => {
     setLocale("es");
     const esHero = t("wall.chapter09.hero");
     expect(esHero).not.toBe(enHero);
-    // Proper noun "Fort Worth" stays English; rest is Spanish.
+    // Narrative Reset: Montgomery removed. Proper noun "Fort Worth" stays
+    // English; rest is Spanish.
     expect(esHero).toMatch(/Fort Worth/);
-    expect(esHero).toMatch(/Funciona|donde tú|Montgomery/);
+    expect(esHero).toMatch(/Funciona|donde tú/);
+    expect(esHero).not.toMatch(/Montgomery/);
   });
 
   it("ch10 body swaps to ES copy after setLocale('es')", () => {
@@ -110,8 +113,10 @@ describe("W4 — t() helper switches output when locale toggles", () => {
 });
 
 describe("W4 — proper-noun preservation contract (no over-translation)", () => {
-  // The Spanish voice guide pins: GoWork, Fort Worth, Carlos, Montgomery,
-  // Trinity Metro, Amazon FC DFW5, MIT all stay in English.
+  // The Spanish voice guide pins: GoWork, Fort Worth, Carlos, Trinity Metro,
+  // Amazon FC DFW5, Texas city names — all stay in English.
+  // Narrative Reset: Montgomery removed from the wall narrative — it's the
+  // Fort Worth hackathon, the wall scope is FW + Texas.
   const PROPER_NOUN_LEAVES: Readonly<
     Array<{ key: string; mustContain: string }>
   > = [
@@ -120,7 +125,8 @@ describe("W4 — proper-noun preservation contract (no over-translation)", () =>
     { key: "wall.chapter06.body", mustContain: "DFW5" },
     { key: "wall.chapter07.body", mustContain: "Trinity Metro" },
     { key: "wall.chapter09.hero", mustContain: "Fort Worth" },
-    { key: "wall.chapter09.hero", mustContain: "Montgomery" },
+    { key: "wall.chapter09.body", mustContain: "Fort Worth" },
+    { key: "wall.chapter09.body", mustContain: "Texas" },
   ];
 
   for (const { key, mustContain } of PROPER_NOUN_LEAVES) {
