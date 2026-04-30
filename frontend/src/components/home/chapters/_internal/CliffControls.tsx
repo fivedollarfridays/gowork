@@ -17,7 +17,13 @@
  * remains a pure UI surface that emits wage + household changes.
  */
 
-import type { CliffOutputs, MedicaidBucket, HouseholdSize } from "./cliffMath";
+import {
+  wageGlowColor,
+  wageGlowIntensity,
+  type CliffOutputs,
+  type MedicaidBucket,
+  type HouseholdSize,
+} from "./cliffMath";
 
 interface CliffControlsProps {
   wage: number;
@@ -110,18 +116,17 @@ export function CliffControls({
           "linear-gradient(160deg, rgba(15, 23, 41, 0.65) 0%, rgba(10, 14, 26, 0.55) 100%)",
         backdropFilter: "blur(14px) saturate(135%)",
         WebkitBackdropFilter: "blur(14px) saturate(135%)",
-        border:
-          "1px solid color-mix(in oklch, var(--fg-primary), transparent 84%)",
+        border: `1px solid color-mix(in oklch, ${wageGlowColor(wage, household)}, transparent 65%)`,
         borderRadius: "20px",
         overflow: "hidden",
-        // Threshold-aware shadow mirrors the right card so both
-        // panels feel like a matched pair.
-        boxShadow:
-          outputs.medicaid === "lapses"
-            ? "0 28px 56px rgba(251, 113, 133, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 0 0 1px color-mix(in oklch, var(--accent-rose), transparent 60%)"
-            : outputs.medicaid === "at risk"
-              ? "0 24px 48px rgba(245, 158, 11, 0.20), inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 0 0 1px color-mix(in oklch, var(--accent-amber), transparent 70%)"
-              : "0 20px 40px rgba(10, 14, 26, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06)",
+        // Continuous wage-state glow — same color as the right chart
+        // card so the two panels read as a matched pair while the
+        // user drags the slider. cyan (safe, far below cliff) →
+        // amber (tipping at the edge) → rose (past the cliff).
+        // Slightly softer alpha than the chart card so the user's eye
+        // anchors to the data card on the right; controls are the
+        // input, the chart is the readout.
+        boxShadow: `0 24px 48px color-mix(in oklch, ${wageGlowColor(wage, household)}, transparent ${Math.round((1 - wageGlowIntensity(wage, household) * 0.85) * 100)}%), inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 0 0 1px color-mix(in oklch, ${wageGlowColor(wage, household)}, transparent 65%)`,
         transition:
           "box-shadow 540ms cubic-bezier(0.16, 1, 0.3, 1), border-color 540ms cubic-bezier(0.16, 1, 0.3, 1)",
         position: "relative",

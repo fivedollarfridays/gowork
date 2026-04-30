@@ -28,7 +28,12 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { useGsapScrollTrigger } from "@/lib/home/gsap";
 import { useHaptic } from "@/hooks/useHaptic";
-import { computeCliff, type HouseholdSize } from "./_internal/cliffMath";
+import {
+  computeCliff,
+  wageGlowColor,
+  wageGlowIntensity,
+  type HouseholdSize,
+} from "./_internal/cliffMath";
 import { CliffMoneyTower } from "./_internal/CliffMoneyTower";
 import { CliffControls } from "./_internal/CliffControls";
 import { DropCap } from "../typography/DropCap";
@@ -107,16 +112,36 @@ export function Chapter07TheCliff({ id = "chapter-07" }: Chapter07TheCliffProps)
         toggleActions: "play none none reverse",
       },
     });
-    gsap.from(el.querySelectorAll(".ch07-controls, .ch07-chart"), {
-      y: 40,
+    // Sequential side-in for the two action cards. Adds movement to the
+    // page beyond the simple y/opacity rise the rest of the chapters use.
+    // RIGHT card (chart / money tower) flies in FIRST from x:+200, opacity:0.
+    // LEFT card (controls + readout) follows ~280ms later from x:-200.
+    // Net: the user sees the data card land, then the input panel arrives
+    // beside it — beat-by-beat instead of both fading up together.
+    // toggleActions: "play none none none" — one-shot. Don't reverse on
+    // scroll-up; once revealed, the cards stay revealed (re-triggering on
+    // every scroll-back is annoying).
+    gsap.from(el.querySelectorAll(".ch07-chart"), {
+      x: 200,
       opacity: 0,
       duration: 0.9,
-      stagger: 0.15,
       ease: "power3.out",
       scrollTrigger: {
         trigger: el.querySelector(".ch07-grid"),
         start: "top 75%",
-        toggleActions: "play none none reverse",
+        toggleActions: "play none none none",
+      },
+    });
+    gsap.from(el.querySelectorAll(".ch07-controls"), {
+      x: -200,
+      opacity: 0,
+      duration: 0.9,
+      delay: 0.28,
+      ease: "power3.out",
+      scrollTrigger: {
+        trigger: el.querySelector(".ch07-grid"),
+        start: "top 75%",
+        toggleActions: "play none none none",
       },
     });
 
@@ -227,22 +252,20 @@ export function Chapter07TheCliff({ id = "chapter-07" }: Chapter07TheCliffProps)
               "linear-gradient(160deg, rgba(15, 23, 41, 0.65) 0%, rgba(10, 14, 26, 0.55) 100%)",
             backdropFilter: "blur(14px) saturate(135%)",
             WebkitBackdropFilter: "blur(14px) saturate(135%)",
-            border:
-              "1px solid color-mix(in oklch, var(--fg-primary), transparent 84%)",
+            border: `1px solid color-mix(in oklch, ${wageGlowColor(wage, household)}, transparent 60%)`,
             padding: "28px",
             // overflow: hidden CLIPS the slab track's outer rose
             // glow at the card's edge — was bleeding past the right
             // boundary, now contained.
             overflow: "hidden",
-            // Threshold-aware drop-shadow: cyan-safe → amber-warning
-            // → rose-cliff. Uses CSS filter so the shadow respects
-            // the rounded corners cleanly.
-            boxShadow:
-              outputs.medicaid === "lapses"
-                ? "0 32px 64px rgba(251, 113, 133, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 0 0 1px color-mix(in oklch, var(--accent-rose), transparent 55%)"
-                : outputs.medicaid === "at risk"
-                  ? "0 28px 56px rgba(245, 158, 11, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 0 0 1px color-mix(in oklch, var(--accent-amber), transparent 65%)"
-                  : "0 24px 48px rgba(10, 14, 26, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06)",
+            // Continuous wage-state glow — cyan (safe, far below cliff)
+            // → amber (tipping at the edge) → rose (past the cliff).
+            // Both this card AND the controls panel share the same
+            // computed color so they read as a matched pair while the
+            // user drags the slider. wageGlowIntensity ramps the alpha
+            // up as we approach the cliff edge so the warning tightens
+            // visually with the math.
+            boxShadow: `0 28px 56px color-mix(in oklch, ${wageGlowColor(wage, household)}, transparent ${Math.round((1 - wageGlowIntensity(wage, household)) * 100)}%), inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 0 0 1px color-mix(in oklch, ${wageGlowColor(wage, household)}, transparent 60%)`,
             transition:
               "box-shadow 540ms cubic-bezier(0.16, 1, 0.3, 1), border-color 540ms cubic-bezier(0.16, 1, 0.3, 1)",
           }}
