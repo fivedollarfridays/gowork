@@ -95,6 +95,20 @@ function portraitRimGlowStyle(): CSSProperties {
   };
 }
 
+/**
+ * The caption pill is an editorial dark-glass overlay laid on top of the
+ * Carlos photograph. Its navy backdrop (`rgba(10,14,26,0.86)`) is locked
+ * dark in BOTH themes so it doesn't fight the photo's bright greenhouse
+ * highlights. Because the surface is theme-independent, the inner text
+ * MUST also be theme-independent — using `var(--fg-primary)` flipped to
+ * navy ink in light mode and made the quote invisible on the dark pill.
+ * Cream (#F5F3EE) is the dark-mode `--fg-primary` value frozen as a
+ * literal so it stays cream regardless of the global toggle. The eyebrow
+ * stays `var(--accent-amber)` because that accent reads on dark in both
+ * themes.
+ *
+ * Cross-ref: Bug 1 in feat/light-mode-polish.
+ */
 function captionStyle(): CSSProperties {
   return {
     position: "absolute",
@@ -105,12 +119,12 @@ function captionStyle(): CSSProperties {
     background: "rgba(10,14,26,0.86)",
     backdropFilter: "blur(18px) saturate(140%)",
     WebkitBackdropFilter: "blur(18px) saturate(140%)",
-    border: "1px solid color-mix(in oklch, var(--fg-primary), transparent 80%)",
+    border: "1px solid rgba(245,243,238,0.18)",
     borderRadius: "14px",
     display: "flex",
     flexDirection: "column",
     gap: "8px",
-    color: "var(--fg-primary)",
+    color: "#F5F3EE",
   };
 }
 
@@ -128,7 +142,9 @@ function captionLineStyle(): CSSProperties {
   return {
     fontSize: "15px",
     lineHeight: 1.55,
-    color: "var(--fg-primary)",
+    // Locked-cream over the always-dark caption surface. See captionStyle()
+    // comment for full rationale (Bug 1: light-mode polish sweep).
+    color: "#F5F3EE",
     fontStyle: "oblique -6deg",
   };
 }

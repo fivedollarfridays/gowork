@@ -36,8 +36,13 @@ const PRIMARY_LINKS: ReadonlyArray<NavLink> = [
 ];
 
 const THEME_STORAGE_KEY = "gowork-theme";
-const MAPBOX_STYLE_LIGHT = "mapbox://styles/mapbox/light-v11";
-const MAPBOX_STYLE_DARK = "mapbox://styles/mapbox/dark-v11";
+/* Mapbox style URLs intentionally NOT consumed by `useThemeMirror` —
+ * see the hook's comment block below. The map locks dark in both themes
+ * (Bug 2 / feat/light-mode-polish). When the light variant is re-enabled
+ * in a future polish pass, restore:
+ *   const MAPBOX_STYLE_LIGHT = "mapbox://styles/mapbox/light-v11";
+ *   const MAPBOX_STYLE_DARK = "mapbox://styles/mapbox/dark-v11";
+ * and the `map.setStyle(...)` call in `useThemeMirror`. */
 
 type Theme = "light" | "dark";
 
@@ -74,7 +79,24 @@ function useBrandLoading(): boolean {
   return brandLoading;
 }
 
-/** Hook that mirrors `theme` to the documentElement and Mapbox style. */
+/** Hook that mirrors `theme` to the documentElement.
+ *
+ * The hook deliberately does NOT swap the Mapbox style on theme toggle.
+ * The Ch04 map is locked dark in BOTH themes via
+ * `Chapter04TheMap.mount.ts::readStyleUrl` — the light-v11 branch was
+ * never visually polished (the dark atmosphere overlay washes it out and
+ * `tintStyle()` paints navy chrome over the light base, producing bloomy
+ * unreadable street artifacts that read as "white-on-white glow"). Map
+ * chip text + the SVG overlay are locked to cream literals via
+ * `home-chapters.css` and `home-velocity.css` so they stay legible over
+ * the perma-dark map regardless of theme. See feat/light-mode-polish
+ * (Bug 2) for the full audit trail.
+ *
+ * `MAPBOX_STYLE_LIGHT` / `MAPBOX_STYLE_DARK` constants and the
+ * `_gw_map.setStyle` bridge in mount.ts are intentionally retained — a
+ * future polish pass can re-enable a properly-tinted light variant
+ * without re-introducing the storage key shape change.
+ */
 function useThemeMirror(theme: Theme): void {
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -82,10 +104,6 @@ function useThemeMirror(theme: Theme): void {
     document.documentElement.classList.toggle("dark", theme === "dark");
     if (typeof window !== "undefined") {
       window.localStorage.setItem(THEME_STORAGE_KEY, theme);
-      const map = window._gw_map;
-      if (map && typeof map.setStyle === "function") {
-        map.setStyle(theme === "dark" ? MAPBOX_STYLE_DARK : MAPBOX_STYLE_LIGHT);
-      }
     }
   }, [theme]);
 }

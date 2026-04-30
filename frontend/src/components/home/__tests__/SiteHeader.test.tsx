@@ -5,8 +5,8 @@
  * centered (six items including Plan); theme toggle + language toggle +
  * "Get your plan" CTA on the right. Mobile collapses nav to a hamburger.
  */
-import { describe, it, expect, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { render, screen, act } from "@testing-library/react";
 import { TranslationProvider } from "@/hooks/useTranslation";
 import { setLocale } from "@/lib/i18n";
 import { SiteHeader } from "../SiteHeader";
@@ -79,5 +79,53 @@ describe("SiteHeader — i18n", () => {
     wrap(<SiteHeader />);
     // Spanish for "Get your plan" is "Obtén tu plan".
     expect(screen.getByRole("link", { name: /obtén tu plan/i })).toBeInTheDocument();
+  });
+});
+
+describe("SiteHeader — theme toggle does NOT touch the Mapbox style", () => {
+  // Bug 2 (feat/light-mode-polish): the map is locked dark in both
+  // themes via `Chapter04TheMap.mount.ts::readStyleUrl` (the light-v11
+  // path was never visually polished — atmosphere overlay washes it out
+  // and the tintStyle paints navy chrome over a light base, producing
+  // bloomy/unreadable street artifacts). The theme toggle MUST NOT call
+  // `window._gw_map.setStyle(...)`. We verify by installing a stub map
+  // surface, mounting the header, and asserting setStyle was never
+  // invoked even after a theme flip.
+  const setStyleSpy = vi.fn();
+
+  beforeEach(() => {
+    setLocale("en");
+    setStyleSpy.mockReset();
+    // Reset html attributes so each test runs against a clean theme.
+    document.documentElement.removeAttribute("data-theme");
+    document.documentElement.classList.remove("dark");
+    // Install a stub Mapbox bridge — if the header calls setStyle, this
+    // spy fires and the test fails.
+    (window as unknown as { _gw_map?: { setStyle: (s: string) => void } })._gw_map = {
+      setStyle: setStyleSpy,
+    };
+    window.localStorage.setItem("gowork-theme", "dark");
+  });
+
+  it("does not invoke window._gw_map.setStyle on initial mount", () => {
+    wrap(<SiteHeader />);
+    expect(setStyleSpy).not.toHaveBeenCalled();
+  });
+
+  it("does not invoke setStyle after the user clicks the theme toggle", () => {
+    wrap(<SiteHeader />);
+    const themeBtn = screen.getByRole("button", {
+      name: /toggle light or dark theme/i,
+    });
+    // Flip dark → light.
+    act(() => {
+      themeBtn.click();
+    });
+    expect(setStyleSpy).not.toHaveBeenCalled();
+    // Flip back to dark.
+    act(() => {
+      themeBtn.click();
+    });
+    expect(setStyleSpy).not.toHaveBeenCalled();
   });
 });
