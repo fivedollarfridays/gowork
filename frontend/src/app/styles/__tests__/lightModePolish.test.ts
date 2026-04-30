@@ -57,6 +57,17 @@ describe("light-mode polish — Ch05 plan cards locked-light text", () => {
       /\[data-theme="light"\][^{]*\.ch05-card[^{]*\.pc-foot[^{]*\{[^}]*color:\s*#8696A8/i,
     );
   });
+
+  it("declares a [data-theme='light'] override for the hover-flip back-face bullets", () => {
+    // T24 hover-flip reveals a `<ul class="ch05-card__back">` with three
+    // `<li>` bullets per card. Base rule colors them with var(--fg-primary)
+    // (cream in dark mode) — but in light mode that token flips to navy
+    // ink and the bullets become invisible on the always-dark card. Lock
+    // to cream literal alongside the front-face title pattern.
+    expect(homeChaptersCss).toMatch(
+      /\[data-theme="light"\][^{]*\.ch05-card[^{]*\.ch05-card__back\s+li[^{]*\{[^}]*color:\s*#F5F3EE/i,
+    );
+  });
 });
 
 describe("light-mode polish — Ch05 expanded-card overlay locked-light text", () => {
