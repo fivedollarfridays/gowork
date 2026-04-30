@@ -1565,11 +1565,18 @@ body:not([data-map-cursor-active="true"]) .chapter {
  * See feat/light-mode-polish PR for the per-bug audit trail.
  */
 
-/* Ch05 plan cards — dark editorial surface, locked-light text. */
+/* Ch05 plan cards — dark editorial surface, locked-light text.
+ *
+ * The hover-flip back face (T24 — `.ch05-card__back li`, 3 bullets per card)
+ * was missed by PR #93's initial light-mode sweep — its `color:
+ * var(--fg-primary)` flipped to navy ink in light mode = invisible on the
+ * dark card surface. Locked to cream alongside the front-face title pattern.
+ */
 :root[data-theme="light"] .ch05-card h3 { color: #F5F3EE; }
 :root[data-theme="light"] .ch05-card p { color: #A4B3C7; }
 :root[data-theme="light"] .ch05-card .pc-num { color: #8696A8; }
 :root[data-theme="light"] .ch05-card .pc-foot { color: #8696A8; }
+:root[data-theme="light"] .ch05-card .ch05-card__back li { color: #F5F3EE; }
 
 /* Ch04 map chips — perma-dark Mapbox canvas underneath. */
 :root[data-theme="light"] .ch04-legend { color: #A4B3C7; }
