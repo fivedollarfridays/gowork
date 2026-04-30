@@ -152,3 +152,31 @@ describe("Chapter03MeetCarlos — T18 fact-grid lift + count-up", () => {
     expect(nums.length).toBe(4);
   });
 });
+
+describe("Chapter03MeetCarlos — light-mode polish (caption pill always-dark surface)", () => {
+  // The caption pill is an editorial dark glass overlay sitting OVER the
+  // Carlos photo. Its background is locked to navy (rgba(10,14,26,0.86))
+  // regardless of theme so it doesn't fight the photograph. Therefore its
+  // text MUST be locked-cream — using `var(--fg-primary)` flipped the
+  // body line to navy ink in light mode and made the quote invisible on
+  // the dark pill. The eyebrow stays amber (accent works in both themes).
+  it("caption body line uses locked-cream color, not theme-flipping token", () => {
+    const { container } = renderEn();
+    const line = container.querySelector(".ch03-caption .cap-line");
+    expect(line).not.toBeNull();
+    const inline = (line as HTMLElement).style.color;
+    // Must be locked cream — NOT a theme-flipping CSS variable. Accept any
+    // case-form of #F5F3EE (browsers may normalize to rgb(245, 243, 238)).
+    expect(inline).toMatch(/#f5f3ee|245,\s*243,\s*238/i);
+    expect(inline).not.toMatch(/var\(--fg/);
+  });
+
+  it("caption block bg is locked dark (always-dark editorial overlay)", () => {
+    const { container } = renderEn();
+    const cap = container.querySelector(".ch03-caption");
+    expect(cap).not.toBeNull();
+    const bg = (cap as HTMLElement).style.background;
+    // rgba navy backdrop — same value in light + dark themes.
+    expect(bg).toMatch(/rgba\(10,\s*14,\s*26/);
+  });
+});

@@ -182,3 +182,30 @@ describe("Chapter08FindYourPath — T35 CTA view-transition morph", () => {
     expect(clicked).toBe(true);
   });
 });
+
+describe("Chapter08FindYourPath — light-mode polish (Bug 7: wordmark always-cream)", () => {
+  // The wordmark renders over the bright amber-rose-cyan brand gradient.
+  // An inline `style={{ color: "var(--fg-primary)" }}` would flip to navy
+  // ink in light mode and render the lockup as massive black-on-bright
+  // (overpowering). The fix removed the inline color so the locked-cream
+  // CSS rule (#F5F3EE base + :root[data-theme="light"] override) wins in
+  // both themes.
+  it("wordmark root has NO inline color override (locked-cream via CSS)", () => {
+    const { container } = renderEn();
+    const wordmark = container.querySelector(".ch08-wordmark") as HTMLElement;
+    expect(wordmark).not.toBeNull();
+    // No inline color — CSS rule is the source of truth.
+    expect(wordmark.style.color).toBe("");
+  });
+
+  it("wordmark hover tooltip body color is locked-cream literal (not theme-flipping)", () => {
+    const { container } = renderEn();
+    const row1 = container.querySelector(".ch08-wordmark .wm-row-1") as HTMLElement;
+    fireEvent.pointerEnter(row1);
+    const tip = container.querySelector(".ch08-wordmark__tooltip") as HTMLElement | null;
+    expect(tip).not.toBeNull();
+    const inline = tip!.style.color;
+    expect(inline).toMatch(/#f5f3ee|245,\s*243,\s*238/i);
+    expect(inline).not.toMatch(/var\(--fg/);
+  });
+});

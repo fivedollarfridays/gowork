@@ -766,10 +766,15 @@ export function Chapter08FindYourPath({
        *  scaled to hero. Each piece slides in from the RIGHT in
        *  sequence: icon → cyan line draws (marker slow) → Go → Work
        *  joins to form GoWork → CTA arrives below. */}
+      {/* Wordmark color is locked-cream via CSS so it stays cream in both
+       *  themes. An inline `color: var(--fg-primary)` would flip to navy
+       *  ink in light mode and render the lockup as massive black-on-
+       *  bright-gradient (Bug 7 / feat/light-mode-polish). Cream reads on
+       *  every gradient stop and is the correct editorial color over the
+       *  amber-rose-cyan backdrop in BOTH themes. */}
       <div
         className="ch08-wordmark ch08-mic-drop"
         data-ch08-wordmark
-        style={{ color: "var(--fg-primary)" }}
       >
         <div className="ch08-mic-drop__brand">
           <svg
@@ -870,7 +875,11 @@ export function Chapter08FindYourPath({
                     background: "rgba(10,14,26,0.92)",
                     border:
                       "1px solid color-mix(in oklch, var(--accent-cyan), transparent 60%)",
-                    color: "var(--fg-primary)",
+                    // Locked-cream over the navy tooltip surface in BOTH
+                    // themes (Bug 7 / feat/light-mode-polish). The
+                    // canonical fg-primary token flips to navy ink in
+                    // light = invisible on the dark tooltip backdrop.
+                    color: "#F5F3EE",
                     fontSize: "13px",
                     fontFamily: "var(--font-mono-data)",
                     whiteSpace: "nowrap",

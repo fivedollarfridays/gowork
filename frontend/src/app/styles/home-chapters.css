@@ -1538,3 +1538,87 @@ body:not([data-map-cursor-active="true"]) .chapter {
   color: var(--accent-rose, #fb7185);
   border-color: color-mix(in oklch, var(--accent-rose, #fb7185), transparent 65%);
 }
+
+/* ────────────────────────────────────────────────────────────────────────
+ * LIGHT-MODE POLISH — locked editorial surfaces
+ * ────────────────────────────────────────────────────────────────────────
+ * Several editorial surfaces in the homepage are intentionally rendered
+ * with a navy gradient backdrop in BOTH themes:
+ *
+ *   - Ch05 plan cards (`.ch05-card`)            — dark gradient surface
+ *   - Ch04 map chips (legend / compass / chips) — sit OVER a perma-dark
+ *                                                 Mapbox canvas (the map
+ *                                                 itself is locked to
+ *                                                 dark-v11 in
+ *                                                 Chapter04TheMap.mount.ts)
+ *   - Ch07 cliff controls panel (`.ch07-controls`) — inline dark glass
+ *
+ * When the global theme flips to light, the canonical fg tokens
+ * (`var(--fg-primary)` etc.) flip to navy ink and these surfaces become
+ * dark-on-dark — invisible. The fix locks each surface's text to literal
+ * cream / muted-cream hex values via a `:root[data-theme="light"]`
+ * cascade so they stay legible regardless of the global toggle.
+ *
+ * Cream literals match the dark-mode token defaults from tokens/colors.css
+ * (--fg-primary #F5F3EE, --fg-secondary #A4B3C7, --fg-muted #8696A8).
+ *
+ * See feat/light-mode-polish PR for the per-bug audit trail.
+ */
+
+/* Ch05 plan cards — dark editorial surface, locked-light text. */
+:root[data-theme="light"] .ch05-card h3 { color: #F5F3EE; }
+:root[data-theme="light"] .ch05-card p { color: #A4B3C7; }
+:root[data-theme="light"] .ch05-card .pc-num { color: #8696A8; }
+:root[data-theme="light"] .ch05-card .pc-foot { color: #8696A8; }
+
+/* Ch04 map chips — perma-dark Mapbox canvas underneath. */
+:root[data-theme="light"] .ch04-legend { color: #A4B3C7; }
+:root[data-theme="light"] .ch04-legend__heading { color: #8696A8; }
+:root[data-theme="light"] .ch04-legend .legend-time { color: #F5F3EE; }
+:root[data-theme="light"] .ch04-compass { color: #A4B3C7; }
+:root[data-theme="light"] .ch04-compass__lab { color: #8696A8; }
+:root[data-theme="light"] .ch04-compass__val { color: #F5F3EE; }
+/* Stat values are always tone-tinted (every stat carries
+ * `.ch04-stat--amber/cyan/rose`) — those accents work on the perma-dark
+ * map in BOTH themes, so no value-color override is needed. The
+ * SECONDARY surfaces (unit + label) flip to mid-ink in light mode and
+ * become unreadable on the dark map backdrop; lock those to muted-cream
+ * literals so they stay legible. Wrap-rule `:where(.ch04-stat__v)`
+ * fallback for any future neutral variant — uses `:where()` so it
+ * carries 0 specificity weight and never dominates the tone rules. */
+:root[data-theme="light"] :where(.ch04-stat__v) { color: #F5F3EE; }
+:root[data-theme="light"] .ch04-stat__unit { color: #8696A8; }
+:root[data-theme="light"] .ch04-stat__l { color: #8696A8; }
+:root[data-theme="light"] .ch04-attrib { color: #8696A8; }
+:root[data-theme="light"] .ch04-attrib__link { color: #A4B3C7; }
+
+/* Ch07 cliff controls — inline-styled dark glass panel. The labels +
+ * values use INLINE-STYLE `color: var(--fg-muted)` etc. (see
+ * `_internal/CliffControls.tsx`). Inline styles win over class rules,
+ * so we can't override `color:` directly with `:root[data-theme="light"]`
+ * cascades. Instead we scope the FG token VARIABLES inside the panel
+ * to their dark-mode values — `var(--fg-muted)` resolves to muted-cream
+ * inside `.ch07-controls` regardless of the global theme.
+ *
+ * Strategy: redefine the consumed tokens locally on the panel root.
+ * Both selector forms targeted (the inline color refs + the className
+ * hooks `.r-k`, `.r-v`, etc.) so the panel reads cream-on-navy in
+ * BOTH themes without modifying the component file. */
+:root[data-theme="light"] .ch07-controls,
+:root[data-theme="light"] .ch07-household {
+  /* Dark-mode FG token literals — keep the panel's text legible over its
+   * locked navy gradient surface. */
+  --fg-primary: #F5F3EE;
+  --fg-secondary: #A4B3C7;
+  --fg-muted: #8696A8;
+}
+/* Defensive class-targeted overrides for any future caller that drops
+ * the inline style — these are no-ops today but documented for the
+ * next session. */
+:root[data-theme="light"] .ch07-controls .r-k { color: #8696A8; }
+:root[data-theme="light"] .ch07-controls .r-row.r-total .r-k { color: #F5F3EE; }
+:root[data-theme="light"] .ch07-controls .r-v { color: #F5F3EE; }
+:root[data-theme="light"] .ch07-controls .ctrl-k { color: #8696A8; }
+:root[data-theme="light"] .ch07-controls .ctrl-v { color: #F5F3EE; }
+:root[data-theme="light"] .ch07-household > span { color: #8696A8; }
+

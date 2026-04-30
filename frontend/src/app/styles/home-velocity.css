@@ -738,6 +738,12 @@ body[data-idle="true"] [data-ch04-marker] {
 .ch08-wordmark {
   margin-top: 0 !important;
   padding-top: 0 !important;
+  /* Locked-cream so the wordmark reads on the amber-rose-cyan brand
+   * gradient in BOTH themes. var(--fg-primary) flips to navy ink in
+   * light mode and renders as massive black-on-bright (Bug 7 /
+   * feat/light-mode-polish). The light-mode override below restates
+   * the same value defensively if any future cascade touches it. */
+  color: #F5F3EE;
 }
 .ch08-wordmark .wm-row {
   font-size: clamp(4.5rem, 3rem + 12vw, 18rem) !important;
@@ -754,7 +760,10 @@ body[data-idle="true"] [data-ch04-marker] {
   display: block;
   width: clamp(160px, 18vw, 320px);
   height: clamp(160px, 18vw, 320px);
-  color: var(--fg-primary);
+  /* Locked-cream — the icon shares the wordmark's brand cohort and
+   * sits over the same amber-rose-cyan gradient (Bug 7 /
+   * feat/light-mode-polish). */
+  color: #F5F3EE;
   flex: 0 0 auto;
   will-change: transform, opacity;
   /* Multi-layer NAVY drop-shadow only — no cyan halo (read as
@@ -887,13 +896,24 @@ body[data-idle="true"] [data-ch04-marker] {
  * The conic-gradient outer ring was killed — it bloomed past the
  * pill's silhouette and read as a "glowing blob" rather than a
  * brand element. */
+/* The Ch08 mic-drop CTA pill sits over a bright amber-rose-cyan brand
+ * gradient. In dark theme, `var(--fg-primary)` resolved to cream and
+ * gave a tasteful cream pill; in light theme it flipped to navy ink and
+ * the pill turned into a near-black silhouette with no visible text
+ * (the user's bug 6). Lock the bg to a cream literal so the pill stays
+ * cream regardless of the global theme — works on every gradient stop.
+ * The dark text + cyan glow ring + hover-to-#FFFCF5 stay theme-agnostic
+ * because they were already literals.
+ *
+ * Cross-ref: Bug 6 in feat/light-mode-polish.
+ */
 .ch08-mic-drop__cta a.cta-primary {
   display: inline-flex;
   align-items: center;
   gap: 16px;
   padding: 22px 38px;
   border-radius: 999px;
-  background: var(--fg-primary);
+  background: #F5F3EE;
   color: #0A0E1A;
   font-weight: 700;
   font-size: 18px;
@@ -1443,3 +1463,32 @@ body[data-idle="true"] [data-ch04-marker] {
   font-size: 12px;
   font-weight: 600;
 }
+
+/* ────────────────────────────────────────────────────────────────────────
+ * LIGHT-MODE POLISH — locked editorial surfaces (velocity layer)
+ * ────────────────────────────────────────────────────────────────────────
+ * Mirrors the locked-light overrides in home-chapters.css. These surfaces
+ * are intentionally always-dark or always-bright-gradient — their inner
+ * text needs to stay cream regardless of the global theme.
+ *
+ * Cross-ref: feat/light-mode-polish PR.
+ */
+
+/* Ch05 expanded-card overlay — dark editorial surface, portaled to body. */
+:root[data-theme="light"] .ch05-overlay__card h3 { color: #F5F3EE; }
+:root[data-theme="light"] .ch05-overlay__card p { color: #A4B3C7; }
+:root[data-theme="light"] .ch05-overlay__card .pc-num { color: #8696A8; }
+:root[data-theme="light"] .ch05-overlay__card .pc-foot { color: #8696A8; }
+:root[data-theme="light"] .ch05-overlay__bullets li { color: #F5F3EE; }
+:root[data-theme="light"] .ch05-overlay__hint { color: #8696A8; }
+
+/* Ch08 mic-drop wordmark — sits over the bright amber-rose-cyan brand
+ * gradient. Cream reads on every gradient stop in BOTH themes; navy ink
+ * (the light-mode `--fg-primary`) overpowers the gradient as a massive
+ * black wordmark. Lock to cream literal. The drop-shadow extrusion stack
+ * is already `rgba(10,14,26,...)` literals — theme-agnostic. */
+:root[data-theme="light"] .ch08-wordmark { color: #F5F3EE; }
+:root[data-theme="light"] .ch08-brand-icon { color: #F5F3EE; }
+:root[data-theme="light"] .ch08-brand-icon .ch08-brand-icon__arc { stroke: #F5F3EE; }
+:root[data-theme="light"] .ch08-aberration { color: #F5F3EE; }
+
