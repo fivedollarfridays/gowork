@@ -69,12 +69,15 @@ describe("T1.10 — OKLCH base palette tokens", () => {
     expect(css).toContain("--background: 43 26% 95%;");
   });
 
-  it("colors.css line count <300 (architecture budget; T1.11 + T1.12 grow this)", () => {
+  it("colors.css line count <350 (architecture budget; T1.11 + T1.12 + city-aware-jobs grow this)", () => {
     // T1.10 AC said <100 pre-T1.11, but T1.11 (accents + 15 shade variants
     // + @supports-not fallback block) legitimately grows the file. The
-    // architecture limit (<400) and T1.11's own <200 AC bound the overall
-    // ceiling. We assert <300 here as a comfortable shared budget.
+    // architecture limit (<400) bounds the overall ceiling. The
+    // feat/city-aware-jobs sweep added a parallel :root[data-theme="light"]
+    // shadcn HSL block (race-safety for dark→light toggle); the existing
+    // .dark block was joined to :root[data-theme="dark"] in a selector
+    // list. Net +30 lines, raising the soft budget from 300 → 350.
     const lines = css.split("\n").length;
-    expect(lines).toBeLessThan(300);
+    expect(lines).toBeLessThan(350);
   });
 });

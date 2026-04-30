@@ -8,6 +8,7 @@ from pathlib import Path
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import get_settings
 from app.core.queries_jobs import insert_job_listings
 
 logger = logging.getLogger(__name__)
@@ -16,9 +17,24 @@ _DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 _SEED_FILE = "honestjobs_listings.json"
 
 
+def _resolve_seed_path() -> Path:
+    """Resolve the seed JSON path for the active CITY.
+
+    Layer 1 of the city-aware jobs pipeline. Looks first under
+    ``data/cities/<city>/honestjobs_listings.json``, then falls back to
+    the legacy ``data/honestjobs_listings.json`` so unknown CITY values
+    fail safe to "no jobs" rather than crashing.
+    """
+    settings = get_settings()
+    city_path = _DATA_DIR / "cities" / settings.city / _SEED_FILE
+    if city_path.exists():
+        return city_path
+    return _DATA_DIR / _SEED_FILE
+
+
 async def seed_honestjobs_listings(session: AsyncSession) -> int:
     """Idempotent seed of Honest Jobs listings. Returns count inserted."""
-    filepath = _DATA_DIR / _SEED_FILE
+    filepath = _resolve_seed_path()
     if not filepath.exists():
         logger.warning("Honest Jobs seed file missing: %s", filepath)
         return 0

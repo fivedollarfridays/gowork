@@ -3,6 +3,7 @@
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.cities.config import get_city_config
 from app.core.queries_jobs import get_all_job_listings
 from app.modules.criminal.job_filter import filter_jobs_by_record
 from app.modules.criminal.queries import get_all_employer_policies
@@ -12,6 +13,23 @@ from app.modules.benefits.types import BenefitsProfile
 from app.modules.matching.pvs_scorer import rank_all_jobs
 from app.modules.matching.transit_schedule import build_transit_info, schedule_hours_for
 from app.modules.matching.types import AvailableHours, ScoredJobMatch, ScoringContext, TransitWarning, UserProfile
+
+
+def _filter_by_state(jobs: list[dict]) -> list[dict]:
+    """Drop listings whose location is not in the active city's state.
+
+    Layer 2 (defense-in-depth) of the city-aware jobs pipeline. Even if
+    the seed data is wrong, this filter keeps cross-state listings from
+    surfacing. State suffix (e.g. ``, TX``) is checked case-insensitively
+    so Arlington / Hurst metro entries pass alongside Fort Worth proper.
+    Listings with no location are dropped — we cannot verify them.
+    """
+    state = get_city_config().state.upper()
+    suffix = f", {state}".lower()
+    return [
+        job for job in jobs
+        if (job.get("location") or "").lower().rstrip().endswith(suffix)
+    ]
 
 
 async def _get_stops_with_routes(db_session: AsyncSession) -> list[dict]:
@@ -122,6 +140,13 @@ async def match_jobs(
 ) -> list[ScoredJobMatch]:
     """Run the full filter→score→rank pipeline. Returns flat PVS-ranked list."""
     listings = await get_all_job_listings(db_session)
+    if not listings:
+        return []
+
+    # Layer 2 — defense-in-depth state filter. Drops listings whose
+    # location is outside the active city's state before any of the
+    # downstream industry/schedule/transit filters run.
+    listings = _filter_by_state(listings)
     if not listings:
         return []
 

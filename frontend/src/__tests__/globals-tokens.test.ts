@@ -44,7 +44,12 @@ describe("T1.7 — globals.css token partials exist", () => {
 
   it("colors.css declares the canonical GoWork .dark override block", () => {
     const colors = read(path.resolve(TOKENS_DIR, "colors.css"));
-    expect(colors).toMatch(/\.dark\s*\{/);
+    // Selector list `.dark, :root[data-theme="dark"]` is acceptable
+    // (city-aware-jobs branch added the data-theme parallel for race
+    // safety; both selectors point at the same rule body). Match either
+    // a bare `.dark {` or a comma-then-`.dark` (any whitespace before
+    // the comma is fine).
+    expect(colors).toMatch(/\.dark[\s,{]/);
     expect(colors).toContain("--background: 225 44% 7%;");   // navy canvas in dark
   });
 

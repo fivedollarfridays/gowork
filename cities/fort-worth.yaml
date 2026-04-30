@@ -6,6 +6,11 @@ zip_ranges:
 job_adapters:
   - twc
   - usajobs
+  # city-aware-jobs branch — feeds backend/data/cities/fort-worth/honestjobs_listings.json
+  # through the JobAggregator path (alongside Texas Workforce Commission +
+  # USAJobs). Without this entry the FW seed file would only surface in
+  # the matcher path, not in the aggregator/list endpoint.
+  - honestjobs
 data_dir: data/cities/fort-worth
 
 # T12.8 — appointment_services: per-service booking windows consumed by

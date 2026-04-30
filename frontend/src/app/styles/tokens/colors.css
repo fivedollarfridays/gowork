@@ -135,8 +135,16 @@
     --warning-foreground: 225 44% 7%;
     --radius: 0.5rem;
   }
-  .dark {
-    /* .dark = DARK theme (canonical GoWork — navy canvas + warm paper). */
+  .dark,
+  :root[data-theme="dark"] {
+    /* .dark = DARK theme (canonical GoWork — navy canvas + warm paper).
+     * Selector list includes :root[data-theme="dark"] so the data-theme
+     * attribute alone is sufficient. Hydration race-safety: the inline
+     * boot script in layout.tsx sets BOTH the attribute AND the .dark
+     * class, but if a third-party script or React mid-hydration drops
+     * the class, the attribute keeps the shadcn HSL palette dark — no
+     * cream-card-on-dark-page Frankenstein. Mirrored under :root
+     * [data-theme="light"] for the light-mode parallel below. */
     --background: 225 44% 7%;            /* #0A0E1A canvas */
     --foreground: 43 26% 95%;            /* #F5F3EE warm paper */
     --card: 222 46% 11%;                 /* #0F1729 surface */
@@ -155,6 +163,42 @@
     --destructive-foreground: 225 44% 7%;
     --border: 222 37% 22%;               /* subtle navy border */
     --input: 222 37% 22%;
+    --ring: 187 86% 53%;                 /* cyan focus ring */
+    --chart-1: 187 86% 53%;
+    --chart-2: 38 92% 50%;
+    --chart-3: 351 95% 71%;
+    --chart-4: 158 64% 52%;
+    --chart-5: 43 96% 56%;
+    --success: 158 64% 52%;
+    --success-foreground: 225 44% 7%;
+    --warning: 43 96% 56%;
+    --warning-foreground: 225 44% 7%;
+  }
+
+  /* Light-theme parallel — :root[data-theme="light"] mirrors the :root
+   * defaults explicitly so flipping the toggle is symmetric and
+   * race-safe. Without this, going dark→light would briefly fall back
+   * to the user-agent stylesheet between the time the attribute flips
+   * and the JS class toggle catches up. */
+  :root[data-theme="light"] {
+    --background: 43 26% 95%;            /* #F5F3EE warm paper */
+    --foreground: 225 44% 7%;            /* #0A0E1A navy ink */
+    --card: 38 24% 89%;                  /* #ECE7DC paper-1 */
+    --card-foreground: 225 44% 7%;
+    --popover: 38 24% 89%;
+    --popover-foreground: 225 44% 7%;
+    --primary: 187 86% 53%;              /* #22D3EE cyan — the path */
+    --primary-foreground: 225 44% 7%;
+    --secondary: 38 22% 83%;             /* #E2DBCB paper-2 */
+    --secondary-foreground: 225 44% 7%;
+    --muted: 38 22% 83%;
+    --muted-foreground: 215 18% 43%;     /* #5A6B82 mid ink */
+    --accent: 38 92% 50%;                /* #F59E0B amber */
+    --accent-foreground: 225 44% 7%;
+    --destructive: 351 95% 71%;          /* #FB7185 rose */
+    --destructive-foreground: 225 44% 7%;
+    --border: 38 15% 80%;                /* warm paper border */
+    --input: 38 15% 80%;
     --ring: 187 86% 53%;                 /* cyan focus ring */
     --chart-1: 187 86% 53%;
     --chart-2: 38 92% 50%;
