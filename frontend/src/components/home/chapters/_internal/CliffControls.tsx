@@ -66,6 +66,24 @@ function householdLabelFor(h: HouseholdSize, labels: ControlLabels): string {
   return labels.householdSize4;
 }
 
+/** Slider upper bound per household. Cliff edges live at $19, $21,
+ *  $24, $27 (matches `cliffEdgeForHousehold` in cliffMath.ts). Each
+ *  household gets +$5 of slider room past its cliff so the user can
+ *  drag fully into the lapse zone and see the rose halo trigger. */
+function sliderMaxForHousehold(h: HouseholdSize): number {
+  switch (h) {
+    case 1:
+      return 24;
+    case 2:
+      return 26;
+    case 3:
+      return 29;
+    case 4:
+    default:
+      return 32;
+  }
+}
+
 export function CliffControls({
   wage,
   onWageChange,
@@ -80,12 +98,33 @@ export function CliffControls({
   return (
     <div
       className="ch07-controls"
+      data-cliff-active={outputs.medicaid === "lapses" ? "true" : "false"}
       style={{
         marginTop: "16px",
         padding: "28px",
-        background: "rgba(10,14,26,0.5)",
-        border: "1px solid color-mix(in oklch, var(--accent-rose), transparent 70%)",
-        borderRadius: "16px",
+        // Match the right card's glass treatment: layered gradient
+        // base + backdrop-filter for premium card chrome. Without
+        // this, the controls panel read FLAT next to the rich
+        // money-tower card on the right.
+        background:
+          "linear-gradient(160deg, rgba(15, 23, 41, 0.65) 0%, rgba(10, 14, 26, 0.55) 100%)",
+        backdropFilter: "blur(14px) saturate(135%)",
+        WebkitBackdropFilter: "blur(14px) saturate(135%)",
+        border:
+          "1px solid color-mix(in oklch, var(--fg-primary), transparent 84%)",
+        borderRadius: "20px",
+        overflow: "hidden",
+        // Threshold-aware shadow mirrors the right card so both
+        // panels feel like a matched pair.
+        boxShadow:
+          outputs.medicaid === "lapses"
+            ? "0 28px 56px rgba(251, 113, 133, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 0 0 1px color-mix(in oklch, var(--accent-rose), transparent 60%)"
+            : outputs.medicaid === "at risk"
+              ? "0 24px 48px rgba(245, 158, 11, 0.20), inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 0 0 1px color-mix(in oklch, var(--accent-amber), transparent 70%)"
+              : "0 20px 40px rgba(10, 14, 26, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06)",
+        transition:
+          "box-shadow 540ms cubic-bezier(0.16, 1, 0.3, 1), border-color 540ms cubic-bezier(0.16, 1, 0.3, 1)",
+        position: "relative",
       }}
     >
       <label
@@ -113,12 +152,19 @@ export function CliffControls({
         </span>
       </label>
 
+      {/* Slider max scales with household: cliff edge is at $19/$21/
+       *  $24/$27 for households 1/2/3/4. Each household needs ~$5
+       *  of slider range above its cliff edge so the user can
+       *  actually drag past the threshold and see the lapse fire.
+       *  Was: hardcoded max=28, which gave family-of-4 only $1 of
+       *  range past their $27 cliff (slider couldn't reach the
+       *  rose halo state for that household). */}
       <input
         className="wage-slider"
         type="range"
         id="wage-slider"
         min="14"
-        max="28"
+        max={sliderMaxForHousehold(household)}
         step="0.25"
         value={wage}
         onChange={(e) => onWageChange(parseFloat(e.target.value))}

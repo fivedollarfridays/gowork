@@ -30,7 +30,7 @@ export function LoadingState({ lines = 3 }: LoadingStateProps): JSX.Element {
       data-edge-state="loading"
       className="mx-auto flex max-w-xl flex-col gap-3 px-6 py-8"
     >
-      <p className="mb-1 text-xs uppercase tracking-widest text-cyan-400">
+      <p className="mb-1 text-xs uppercase tracking-widest text-[color:var(--accent-cyan)]">
         {t("edge.loading.label")}
       </p>
       {rows.map((width, idx) => (

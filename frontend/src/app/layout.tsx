@@ -4,7 +4,7 @@ import { Providers } from "@/lib/providers";
 import { MotionProvider } from "@/lib/motion";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { ScrollProgress } from "@/components/ScrollProgress";
-import { Header } from "@/components/layout/Header";
+import { SiteHeader } from "@/components/home/SiteHeader";
 import { Footer } from "@/components/layout/Footer";
 import { ChromeFrame } from "@/components/layout/ChromeFrame";
 import { TranslationProvider } from "@/hooks/useTranslation";
@@ -114,10 +114,15 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
+                  // polish-3 round-3 — DARK is the canonical brand mode.
+                  // Light is opt-in via the SiteHeader toggle ONLY (writes
+                  // localStorage). We don't follow prefers-color-scheme any
+                  // more because the editorial color story (warm-paper text
+                  // on dark navy + cyan / amber path) only resolves in dark.
+                  // A user whose OS is on light mode would otherwise land
+                  // on a cream version of the page that looks broken.
                   var stored = window.localStorage.getItem('gowork-theme');
-                  var theme = stored === 'light' || stored === 'dark'
-                    ? stored
-                    : (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+                  var theme = stored === 'light' ? 'light' : 'dark';
                   var html = document.documentElement;
                   html.setAttribute('data-theme', theme);
                   if (theme === 'dark') html.classList.add('dark');
@@ -145,8 +150,20 @@ export default function RootLayout({
                 <ViewTransitionsProvider>
                   <TranslationProvider>
                     <SkipToContent />
+                    {/* Universal site header — was previously the
+                     *  legacy `<Header />` from `components/layout/Header`,
+                     *  which still showed the legacy /
+                     *  workforce-companion nav on every subpage even
+                     *  though the home page rendered the new
+                     *  facelift `<SiteHeader />`. ChromeFrame still
+                     *  suppresses the layout chrome on `/` so the
+                     *  HomePage's own internal `<SiteHeader />` stays
+                     *  the only header on the home route — every other
+                     *  route now also gets the same SiteHeader, so
+                     *  the chrome is consistent across the entire
+                     *  app. */}
                     <ChromeFrame>
-                      <Header />
+                      <SiteHeader />
                     </ChromeFrame>
                     <ErrorBoundary>
                       <main

@@ -859,26 +859,21 @@ body:not([data-map-cursor-active="true"]) .chapter {
   0%, 100% { transform: scale(0.92); opacity: 0.55; }
   50%      { transform: scale(1.06); opacity: 0.18; }
 }
+/* Isochrone ring HIDDEN — the original intent was a "60-min walk+
+ * bus reach radius around Carlos's home (ZIP 76104)" rendered as a
+ * pulsing dotted circle. But the SVG was screen-anchored (centered
+ * via inset:0 + viewBox 600 600 with circle at cx=300 cy=300), not
+ * anchored to a map coordinate via the project() helper — so as
+ * the user pans / the camera flies between waypoints, the ring
+ * stayed PINNED to the centre of the screen and hovered over
+ * empty street space.
+ *
+ * To re-enable correctly we'd need to anchor the circle's centre
+ * via `window._gw_map_overlay.project([HOME_LNG, HOME_LAT])` and
+ * resubscribe on every map move event. Hidden for now until that
+ * wiring lands. */
 [data-isochrone] {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 800ms ease;
-}
-[data-map-alive="true"] [data-isochrone] {
-  opacity: 1;
-}
-[data-isochrone] circle {
-  transform-origin: center;
-  transform-box: fill-box;
-  animation: ch04IsoPulse 4s ease-in-out infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  [data-isochrone] circle {
-    animation: none;
-  }
+  display: none !important;
 }
 
 /* polish-2 driver-B: T22 — Ch4 legend chip (bottom-left) */

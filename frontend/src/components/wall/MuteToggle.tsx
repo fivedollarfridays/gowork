@@ -54,7 +54,7 @@ export function MuteToggle(): JSX.Element {
       aria-label={t("header.muteToggle.aria")}
       onClick={toggle}
       data-mute-toggle
-      className="inline-flex h-9 w-9 items-center justify-center rounded-full text-foreground/80 transition hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300"
+      className="inline-flex h-9 w-9 items-center justify-center rounded-full text-foreground/80 transition hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <svg
         viewBox="0 0 24 24"

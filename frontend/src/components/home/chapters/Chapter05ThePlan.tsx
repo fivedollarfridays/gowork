@@ -15,7 +15,8 @@
  *     home-chapters.css).
  */
 
-import { useRef, useState, useCallback, type ReactElement } from "react";
+import { useEffect, useRef, useState, useCallback, type ReactElement } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "@/hooks/useTranslation";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { useCh05FanOut, type CardTransform } from "./Chapter05ThePlan.fanout";
@@ -95,7 +96,11 @@ interface ResolvedCardCopy {
   back3: string;
 }
 
-/** One plan card with hover-flip preview (T24). */
+/** One plan card. Renders the in-deck collapsed state ONLY. The
+ *  expanded state is rendered separately via React portal at the
+ *  document root (see ExpandedCardOverlay) so it escapes the
+ *  `.ch05-fan` perspective + transform contexts that were causing
+ *  the previous CSS-only attempt to render blurred. */
 function PlanCard({
   spec,
   xform,
@@ -103,6 +108,7 @@ function PlanCard({
   flipped,
   onEnter,
   onLeave,
+  onToggleExpand,
 }: {
   spec: PlanCardSpec;
   xform: CardTransform;
@@ -110,6 +116,7 @@ function PlanCard({
   flipped: boolean;
   onEnter: () => void;
   onLeave: () => void;
+  onToggleExpand: () => void;
 }): ReactElement {
   const { testId, tone } = spec;
   return (
@@ -118,10 +125,18 @@ function PlanCard({
       data-tone={tone}
       data-flipped={flipped ? "true" : "false"}
       className="ch05-card"
+      tabIndex={0}
       onPointerEnter={onEnter}
       onPointerLeave={onLeave}
       onFocus={onEnter}
       onBlur={onLeave}
+      onClick={onToggleExpand}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onToggleExpand();
+        }
+      }}
       style={{
         transform: `translate(${xform.x}px, ${xform.y}px) rotate(${xform.angle}deg) scale(${xform.scale})`,
         opacity: xform.opacity,
@@ -150,6 +165,65 @@ function PlanCard({
   );
 }
 
+/** Expanded-card overlay — portaled to document.body so it escapes
+ *  the ancestor perspective + transform contexts. Renders the full
+ *  card content at center-screen with backdrop-blur behind it.
+ *  Click on backdrop OR Escape closes. */
+function ExpandedCardOverlay({
+  spec,
+  resolved,
+  onClose,
+}: {
+  spec: PlanCardSpec;
+  resolved: ResolvedCardCopy;
+  onClose: () => void;
+}): ReactElement | null {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    // Lock body scroll while overlay is open.
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [onClose]);
+  if (!mounted || typeof document === "undefined") return null;
+  return createPortal(
+    <div className="ch05-overlay" role="dialog" aria-modal="true">
+      <button
+        type="button"
+        className="ch05-overlay__backdrop"
+        aria-label="Close expanded card"
+        onClick={onClose}
+      />
+      <article
+        className="ch05-overlay__card"
+        data-tone={spec.tone}
+        onClick={onClose}
+      >
+        <span className="pc-num">{resolved.num}</span>
+        <span className="pc-tag">{resolved.tag}</span>
+        <h3>{resolved.title}</h3>
+        <p>{resolved.body}</p>
+        <span className="pc-foot">{resolved.foot}</span>
+        <ul className="ch05-overlay__bullets">
+          <li>{resolved.back1}</li>
+          <li>{resolved.back2}</li>
+          <li>{resolved.back3}</li>
+        </ul>
+        <span className="ch05-overlay__hint">Click anywhere or press Esc to close</span>
+      </article>
+    </div>,
+    document.body,
+  );
+}
+
 /** Decorated h2 — splits the eyebrow + plan/em + tail into spans. */
 function Ch05Heading(): ReactElement {
   const { t } = useTranslation();
@@ -167,6 +241,7 @@ export function Chapter05ThePlan(): ReactElement {
   const sectionRef = useRef<HTMLElement | null>(null);
   const [progress, setProgress] = useState<number>(reduced ? 1 : 0);
   const [flippedIdx, setFlippedIdx] = useState<number | null>(null);
+  const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
   useCh05FanOut({ sectionRef, onProgress: setProgress, reduced });
 
@@ -174,6 +249,14 @@ export function Chapter05ThePlan(): ReactElement {
 
   const onEnter = useCallback((idx: number) => () => setFlippedIdx(idx), []);
   const onLeave = useCallback(() => setFlippedIdx(null), []);
+  const onToggleExpand = useCallback(
+    (idx: number) => () => {
+      setExpandedIdx((current) => (current === idx ? null : idx));
+      setFlippedIdx(null); // close any hover-flip when expanding
+    },
+    [],
+  );
+  const onBackdropClick = useCallback(() => setExpandedIdx(null), []);
 
   return (
     <section
@@ -212,10 +295,30 @@ export function Chapter05ThePlan(): ReactElement {
               flipped={flippedIdx === i}
               onEnter={onEnter(i)}
               onLeave={onLeave}
+              onToggleExpand={onToggleExpand(i)}
             />
           ))}
         </div>
       </div>
+      {/* Expanded card portal — renders into document.body so it
+       *  escapes `.ch05-fan` perspective + transform contexts that
+       *  were blurring the previous CSS-only attempt. */}
+      {expandedIdx !== null ? (
+        <ExpandedCardOverlay
+          spec={CARD_KEYS[expandedIdx]}
+          resolved={{
+            num: t(CARD_KEYS[expandedIdx].num),
+            tag: t(CARD_KEYS[expandedIdx].tag),
+            title: t(CARD_KEYS[expandedIdx].title),
+            body: t(CARD_KEYS[expandedIdx].body),
+            foot: t(CARD_KEYS[expandedIdx].foot),
+            back1: t(CARD_KEYS[expandedIdx].back1),
+            back2: t(CARD_KEYS[expandedIdx].back2),
+            back3: t(CARD_KEYS[expandedIdx].back3),
+          }}
+          onClose={onBackdropClick}
+        />
+      ) : null}
     </section>
   );
 }

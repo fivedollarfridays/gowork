@@ -31,6 +31,7 @@ import {
 } from "./Chapter04TheMap.layers";
 import { registerEnrichedLayers } from "./Chapter04TheMap.mountLayers";
 import { createOverlayBridge } from "./Chapter04TheMap.overlayBridge";
+import { WAYPOINTS } from "./Chapter04TheMap.geo";
 
 /** Map event the SVG overlay subscribes to so it can re-project markers. */
 type MapMoveEvent = "move" | "zoom" | "rotate" | "pitch";
@@ -184,37 +185,319 @@ function add3DBuildings(map: GwMap): void {
   }
 }
 
-/** Build the 4 marker DOM elements (home + 3 employers) and attach. */
-function addMarkers(mapboxgl: typeof import("mapbox-gl"), map: GwMap): void {
+/** Add waypoint markers as a NATIVE Mapbox symbol layer (circle +
+ *  text-field). Renders directly on the WebGL canvas — no DOM
+ *  marker wrapper to mis-position, no overflow gotchas, no z-index
+ *  conflicts with the SVG overlay above. Text labels are first-
+ *  class GIS data with proper halo + anti-collision built in.
+ *
+ *  Reads from WAYPOINTS in Chapter04TheMap.geo (single source of
+ *  truth — same data the route lines are built from), so each
+ *  labeled stop is exactly where the routes connect. */
+function addWaypointMarkers(map: GwMap): void {
   try {
-    const Marker = mapboxgl.Marker;
-    if (!Marker) return;
-    // Home (amber).
-    const homeEl = makeMarkerEl("#F59E0B");
-    new Marker(homeEl).setLngLat(HOME_LNG_LAT).addTo(
-      map as unknown as mapboxgl.Map,
-    );
-    // Three employers (cyan).
-    for (const emp of HOME_EMPLOYERS) {
-      const el = makeMarkerEl("#22D3EE");
-      new Marker(el)
-        .setLngLat([emp.longitude, emp.latitude])
-        .addTo(map as unknown as mapboxgl.Map);
-    }
+    if (map.getSource?.("ch04-waypoints")) return;
+    const features = Object.values(WAYPOINTS).map((w) => ({
+      type: "Feature" as const,
+      geometry: {
+        type: "Point" as const,
+        coordinates: [w.lng, w.lat] as [number, number],
+      },
+      properties: {
+        label: w.label,
+        sub: w.sub,
+        color: w.color,
+      },
+    }));
+    map.addSource?.("ch04-waypoints", {
+      type: "geojson",
+      data: { type: "FeatureCollection", features },
+    });
+    // Outer halo circle — soft glow ring so each stop reads even
+    // against the dense tract overlay below it.
+    map.addLayer?.({
+      id: "ch04-waypoints-halo",
+      type: "circle",
+      source: "ch04-waypoints",
+      paint: {
+        "circle-radius": 18,
+        "circle-color": [
+          "match",
+          ["get", "color"],
+          "amber", "#F59E0B",
+          "cyan", "#22D3EE",
+          "rose", "#FB7185",
+          "#F5F3EE",
+        ],
+        "circle-opacity": 0.18,
+        "circle-blur": 0.8,
+      },
+    });
+    // Filled dot — solid colour ring with dark inner border for
+    // readability against any tract / road colour combination.
+    map.addLayer?.({
+      id: "ch04-waypoints-dot",
+      type: "circle",
+      source: "ch04-waypoints",
+      paint: {
+        "circle-radius": 8,
+        "circle-color": [
+          "match",
+          ["get", "color"],
+          "amber", "#F59E0B",
+          "cyan", "#22D3EE",
+          "rose", "#FB7185",
+          "#F5F3EE",
+        ],
+        "circle-stroke-color": "#0A0E1A",
+        "circle-stroke-width": 2.5,
+      },
+    });
+    // Text labels — Mapbox native text-field. Renders the
+    // `label` property of each waypoint with a dark halo so
+    // letterforms read on any backdrop. Anchored top with offset
+    // so the label sits BELOW the dot, never covering it.
+    map.addLayer?.({
+      id: "ch04-waypoints-label",
+      type: "symbol",
+      source: "ch04-waypoints",
+      layout: {
+        "text-field": ["get", "label"],
+        "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+        "text-size": 12,
+        "text-letter-spacing": 0.08,
+        "text-offset": [0, 1.6],
+        "text-anchor": "top",
+        "text-allow-overlap": true,
+        "text-ignore-placement": true,
+      },
+      paint: {
+        "text-color": "#F5F3EE",
+        "text-halo-color": "#0A0E1A",
+        "text-halo-width": 2,
+        "text-halo-blur": 1,
+      },
+    });
+    // Sub-label (time + activity) — slightly smaller and dimmer,
+    // sits BELOW the main label.
+    map.addLayer?.({
+      id: "ch04-waypoints-sublabel",
+      type: "symbol",
+      source: "ch04-waypoints",
+      layout: {
+        "text-field": ["get", "sub"],
+        "text-font": ["Open Sans Regular", "Arial Unicode MS Regular"],
+        "text-size": 9.5,
+        "text-letter-spacing": 0.04,
+        "text-offset": [0, 3.0],
+        "text-anchor": "top",
+        "text-allow-overlap": true,
+        "text-ignore-placement": true,
+      },
+      paint: {
+        "text-color": "#A4B3C7",
+        "text-halo-color": "#0A0E1A",
+        "text-halo-width": 1.6,
+        "text-halo-blur": 0.5,
+      },
+    });
   } catch {
-    /* if Marker API unavailable, the path arcs alone still tell the story */
+    /* fail silent — markers are decoration, the routes still tell the story */
+  }
+  // BARRIER ANNOTATIONS — second symbol layer with editorial labels
+  // that name each invisible barrier at its real Fort Worth location.
+  // Gives the map narrative weight: the user sees not just stops but
+  // OBSTACLES — court, childcare, bus headway, background check, etc.
+  addBarrierLabels(map);
+}
+
+/** Editorial "invisible barrier" annotations — places the seven
+ *  invisible barriers from Ch01 marquee at their real Fort Worth
+ *  locations as map labels. Gives the map narrative weight: the
+ *  user can see WHERE each obstacle lives in the city. */
+function addBarrierLabels(map: GwMap): void {
+  try {
+    if (map.getSource?.("ch04-barriers")) return;
+    const barriers = [
+      // Suspended license — at DPS area
+      { lng: -97.305, lat: 32.733, label: "SUSPENDED LICENSE", sub: "·  90 min at DPS unblocks 4 jobs", color: "amber" },
+      // Open court date — at the courthouse
+      { lng: -97.337, lat: 32.762, label: "OPEN COURT DATE", sub: "·  status hearing 4:00p Tue", color: "rose" },
+      // Childcare pickup gap — at Como Elementary area
+      { lng: -97.398, lat: 32.760, label: "CHILDCARE PICKUP GAP", sub: "·  Lily off bus 2:00p", color: "amber" },
+      // 47-min bus headway — Bus 4 stop area
+      { lng: -97.350, lat: 32.720, label: "47-MIN BUS HEADWAY", sub: "·  miss one, miss the shift", color: "cyan" },
+      // Background-check stigma — at Workforce Solutions area
+      { lng: -97.315, lat: 32.745, label: "BACKGROUND CHECK", sub: "·  1 in 3 records non-disqualifying", color: "cyan" },
+      // Wage-cliff math — at the employer Alcon area
+      { lng: -97.348, lat: 32.840, label: "WAGE-CLIFF MATH", sub: "·  $2 raise = -$400 lost benefits", color: "rose" },
+      // No human to call — between districts
+      { lng: -97.330, lat: 32.700, label: "NO HUMAN TO CALL", sub: "·  GoWork = navigator + plan", color: "amber" },
+    ] as const;
+    const features = barriers.map((b) => ({
+      type: "Feature" as const,
+      geometry: {
+        type: "Point" as const,
+        coordinates: [b.lng, b.lat] as [number, number],
+      },
+      properties: {
+        label: b.label,
+        sub: b.sub,
+        color: b.color,
+      },
+    }));
+    map.addSource?.("ch04-barriers", {
+      type: "geojson",
+      data: { type: "FeatureCollection", features },
+    });
+    // Small marker dot for each barrier — colour-coded.
+    map.addLayer?.({
+      id: "ch04-barriers-dot",
+      type: "circle",
+      source: "ch04-barriers",
+      paint: {
+        "circle-radius": 4,
+        "circle-color": [
+          "match",
+          ["get", "color"],
+          "amber", "#F59E0B",
+          "cyan", "#22D3EE",
+          "rose", "#FB7185",
+          "#F5F3EE",
+        ],
+        "circle-opacity": 0.85,
+        "circle-stroke-color": "#0A0E1A",
+        "circle-stroke-width": 1.5,
+      },
+    });
+    // Barrier title — uppercase mono, smaller than waypoints so
+    // the visual hierarchy reads waypoints > barriers > city
+    // labels.
+    map.addLayer?.({
+      id: "ch04-barriers-label",
+      type: "symbol",
+      source: "ch04-barriers",
+      layout: {
+        "text-field": ["get", "label"],
+        "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+        "text-size": 10,
+        "text-letter-spacing": 0.12,
+        "text-offset": [0, 1.0],
+        "text-anchor": "top",
+        "text-allow-overlap": false,
+        "text-ignore-placement": false,
+      },
+      paint: {
+        "text-color": [
+          "match",
+          ["get", "color"],
+          "amber", "#FCDFB1",
+          "cyan", "#C5F0F7",
+          "rose", "#FED1D8",
+          "#F5F3EE",
+        ],
+        "text-halo-color": "#0A0E1A",
+        "text-halo-width": 1.8,
+        "text-halo-blur": 0.6,
+      },
+    });
+    // Sub-text barrier explanation.
+    map.addLayer?.({
+      id: "ch04-barriers-sub",
+      type: "symbol",
+      source: "ch04-barriers",
+      layout: {
+        "text-field": ["get", "sub"],
+        "text-font": ["Open Sans Italic", "Arial Unicode MS Regular"],
+        "text-size": 8.5,
+        "text-letter-spacing": 0.02,
+        "text-offset": [0, 2.0],
+        "text-anchor": "top",
+        "text-allow-overlap": false,
+      },
+      paint: {
+        "text-color": "#A4B3C7",
+        "text-halo-color": "#0A0E1A",
+        "text-halo-width": 1.4,
+      },
+    });
+  } catch {
+    /* ignore — narrative layer, optional */
   }
 }
 
-function makeMarkerEl(color: string): HTMLDivElement {
-  const el = document.createElement("div");
-  el.style.width = "18px";
-  el.style.height = "18px";
-  el.style.borderRadius = "50%";
-  el.style.background = color;
-  el.style.border = "2px solid #0A0E1A";
-  el.style.boxShadow = `0 0 0 4px ${color}33, 0 0 16px ${color}aa`;
-  return el;
+interface MarkerOpts {
+  color: string;
+  label: string;
+  iconType: "home" | "employer";
+}
+
+function makeMarkerEl({ color, label, iconType }: MarkerOpts): HTMLDivElement {
+  const wrap = document.createElement("div");
+  wrap.className = "ch04-map-marker";
+  wrap.style.position = "relative";
+  wrap.style.display = "flex";
+  wrap.style.flexDirection = "column";
+  wrap.style.alignItems = "center";
+  wrap.style.cursor = "pointer";
+  wrap.style.pointerEvents = "auto";
+
+  // Coloured dot with embedded icon.
+  const dot = document.createElement("div");
+  dot.style.width = "32px";
+  dot.style.height = "32px";
+  dot.style.borderRadius = "50%";
+  dot.style.background = color;
+  dot.style.border = "2.4px solid #0A0E1A";
+  dot.style.boxShadow = `0 0 0 4px ${color}33, 0 0 18px ${color}cc, 0 4px 8px rgba(10, 14, 26, 0.5)`;
+  dot.style.display = "flex";
+  dot.style.alignItems = "center";
+  dot.style.justifyContent = "center";
+  dot.style.transition =
+    "transform 280ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 280ms cubic-bezier(0.16, 1, 0.3, 1)";
+  dot.innerHTML =
+    iconType === "home"
+      ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0A0E1A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12L12 4L21 12V20C21 20.5523 20.5523 21 20 21H15V14H9V21H4C3.44772 21 3 20.5523 3 20V12Z"/></svg>`
+      : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0A0E1A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="9" width="12" height="12" rx="1"/><path d="M9 9V5h6v4"/><path d="M6 14h12"/></svg>`;
+
+  // Floating pill label below.
+  const labelEl = document.createElement("div");
+  labelEl.style.position = "absolute";
+  labelEl.style.top = "calc(100% + 8px)";
+  labelEl.style.left = "50%";
+  labelEl.style.transform = "translateX(-50%)";
+  labelEl.style.padding = "4px 10px";
+  labelEl.style.background = "rgba(10, 14, 26, 0.92)";
+  labelEl.style.border = `1px solid color-mix(in oklch, ${color}, transparent 55%)`;
+  labelEl.style.borderRadius = "999px";
+  labelEl.style.fontFamily = "var(--font-mono-data, monospace)";
+  labelEl.style.fontSize = "10px";
+  labelEl.style.fontWeight = "600";
+  labelEl.style.letterSpacing = "0.08em";
+  labelEl.style.textTransform = "uppercase";
+  labelEl.style.color = "#F5F3EE";
+  labelEl.style.whiteSpace = "nowrap";
+  labelEl.style.pointerEvents = "none";
+  labelEl.style.opacity = "0.88";
+  labelEl.style.transition = "opacity 240ms cubic-bezier(0.16, 1, 0.3, 1)";
+  labelEl.textContent = label;
+
+  wrap.appendChild(dot);
+  wrap.appendChild(labelEl);
+
+  // Hover affordance — dot scales up, label brightens.
+  wrap.addEventListener("pointerenter", () => {
+    dot.style.transform = "scale(1.2)";
+    dot.style.boxShadow = `0 0 0 6px ${color}44, 0 0 32px ${color}ee, 0 6px 14px rgba(10, 14, 26, 0.6)`;
+    labelEl.style.opacity = "1";
+  });
+  wrap.addEventListener("pointerleave", () => {
+    dot.style.transform = "scale(1)";
+    dot.style.boxShadow = `0 0 0 4px ${color}33, 0 0 18px ${color}cc, 0 4px 8px rgba(10, 14, 26, 0.5)`;
+    labelEl.style.opacity = "0.88";
+  });
+
+  return wrap;
 }
 
 export interface UseMapboxMountOptions {
@@ -280,8 +563,19 @@ export function useMapboxMount({
           bearing: CH04_INITIAL_VIEW.bearing,
           antialias: true,
           attributionControl: false,
-          interactive: false,
-          dragRotate: false,
+          // User can drag to pan, drag-rotate, double-click zoom, and
+          // pinch on touch — but NOT scroll-zoom (would steal the
+          // page scroll that drives the chapter pin choreography).
+          // The choreography flyTo on step change still overrides
+          // user pan when the user crosses a step boundary.
+          interactive: true,
+          scrollZoom: false,
+          boxZoom: false,
+          dragPan: true,
+          dragRotate: true,
+          doubleClickZoom: true,
+          touchZoomRotate: true,
+          touchPitch: true,
         }) as unknown as GwMap;
 
         // Subscribers registered by the SVG overlay — fired on every
@@ -291,11 +585,16 @@ export function useMapboxMount({
         map.on?.("load", () => {
           if (!map) return;
           tintStyle(map);
-          addPathArcs(map);
+          // polish-3 fix — `addPathArcs` paints the legacy 3 cyan home→
+          // employer arcs. The v1 enrichment (`registerEnrichedLayers`)
+          // owns routes now (amber morning + cyan afternoon + ghost),
+          // and rendering both made the canvas read as 5 overlapping
+          // lines stretched across half the city. Disabled.
+          // addPathArcs(map);
           add3DBuildings(map);
           // v1 enriched stack — tracts + catchment + transit + 3 routes.
           registerEnrichedLayers(map);
-          addMarkers(mapboxgl, map);
+          addWaypointMarkers(map);
           onAliveRef.current(true);
           onMapReadyRef.current?.(map);
           // Fire once after load so the overlay can paint with first
@@ -317,9 +616,12 @@ export function useMapboxMount({
               map.once?.("style.load", () => {
                 if (map) {
                   tintStyle(map);
-                  addPathArcs(map);
                   add3DBuildings(map);
                   registerEnrichedLayers(map);
+                  // Re-add waypoint markers — setStyle clears all
+                  // sources, so the labelled stops would vanish on
+                  // a theme toggle without this.
+                  addWaypointMarkers(map);
                 }
               });
             } catch {

@@ -176,11 +176,15 @@ export function Chapter01TheWall({ id = "chapter-01" }: Chapter01TheWallProps) {
       style={{
         position: "relative",
         minHeight: "100vh",
-        padding: "130px 80px 0",
+        // Top padding tightened from 130px → 56px so the eyebrow
+        // ("HACKFW 2026 · Fort Worth, TX · live in production") sits
+        // closer to the SiteHeader instead of leaving a giant void
+        // above it. Bottom stays 0 (the marquee anchors the bottom).
+        padding: "56px 80px 0",
         overflow: "hidden",
         display: "grid",
         gridTemplateRows: "auto 1fr auto auto",
-        gap: "32px",
+        gap: "24px",
       }}
     >
       <Chapter01Background velocityActive={velocityActive} />

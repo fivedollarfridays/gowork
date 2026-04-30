@@ -59,7 +59,7 @@ export function CookieBanner(): JSX.Element | null {
       <button
         type="button"
         onClick={onDismiss}
-        className="rounded-full bg-foreground px-3 py-1 text-xs font-semibold text-background transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300"
+        className="rounded-full bg-foreground px-3 py-1 text-xs font-semibold text-background transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         Got it
       </button>

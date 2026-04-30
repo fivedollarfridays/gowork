@@ -74,8 +74,8 @@ describe("T1.11 — graceful degradation for non-color-mix browsers", () => {
 });
 
 describe("T1.11 — colors.css size budget", () => {
-  it("colors.css <220 lines (AC; bumped polish-2 for chrome-accent + drop-cap-color + tod-sky tokens)", () => {
+  it("colors.css <320 lines (AC; bumped 2026-04-30 for narrative-reset rebrand of shadcn HSL palette + light/dark theme overrides + comments)", () => {
     const lines = read().split("\n").length;
-    expect(lines).toBeLessThan(220);
+    expect(lines).toBeLessThan(320);
   });
 });

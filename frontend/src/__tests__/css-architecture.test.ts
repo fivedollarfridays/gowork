@@ -59,7 +59,8 @@ describe("T1.9 — CSS architecture regression", () => {
 
   it("token chain still resolves --background (key shadcn dep)", () => {
     const colors = read("src/app/styles/tokens/colors.css");
-    expect(colors).toMatch(/--background:\s*60 20% 95%/);
+    // Post-rebrand light theme = warm paper canvas (#F5F3EE).
+    expect(colors).toMatch(/--background:\s*43 26% 95%/);
   });
 
   it("layout chain still defines .text-balance utility", () => {
@@ -67,9 +68,12 @@ describe("T1.9 — CSS architecture regression", () => {
     expect(layout).toContain(".text-balance");
   });
 
-  it("layout chain still applies bg-background + text-foreground to body", () => {
+  it("layout chain still applies brand canvas + foreground tokens to body", () => {
+    // polish-2: body now reads `var(--bg-base)` / `var(--fg-primary)` directly
+    // instead of going through Tailwind's `bg-background` / `text-foreground`
+    // shadcn HSL chain, so the canvas tracks the OKLCH theme tokens straight.
     const layout = read("src/app/styles/tokens/layout.css");
-    expect(layout).toContain("bg-background");
-    expect(layout).toContain("text-foreground");
+    expect(layout).toContain("var(--bg-base)");
+    expect(layout).toContain("var(--fg-primary)");
   });
 });

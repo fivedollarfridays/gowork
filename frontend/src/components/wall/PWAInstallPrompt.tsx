@@ -152,7 +152,7 @@ export function PWAInstallPrompt(): JSX.Element | null {
       <button
         type="button"
         onClick={onInstall}
-        className="rounded-full bg-cyan-400 px-3 py-1 text-xs font-semibold text-slate-900 transition hover:bg-cyan-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300"
+        className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         Install
       </button>

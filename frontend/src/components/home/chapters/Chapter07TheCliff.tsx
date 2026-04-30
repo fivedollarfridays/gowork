@@ -29,10 +29,9 @@ import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { useGsapScrollTrigger } from "@/lib/home/gsap";
 import { useHaptic } from "@/hooks/useHaptic";
 import { computeCliff, type HouseholdSize } from "./_internal/cliffMath";
-import { CliffChart } from "./_internal/CliffChart";
+import { CliffMoneyTower } from "./_internal/CliffMoneyTower";
 import { CliffControls } from "./_internal/CliffControls";
 import { DropCap } from "../typography/DropCap";
-import { TextReveal } from "@/components/home/_internal/TextReveal";
 
 const DEFAULT_WAGE = 18.5;
 const PULSE_THRESHOLD_WAGE = 17;
@@ -86,6 +85,15 @@ export function Chapter07TheCliff({ id = "chapter-07" }: Chapter07TheCliffProps)
     setWage(next);
   };
 
+  // When the user toggles household, clamp the current wage to the
+  // new household's slider max ($24/$26/$29/$32 for HH 1/2/3/4) so
+  // the slider thumb never sits beyond its visible range.
+  const handleHouseholdChange = (next: HouseholdSize) => {
+    setHousehold(next);
+    const max = next === 1 ? 24 : next === 2 ? 26 : next === 3 ? 29 : 32;
+    if (wage > max) setWage(max);
+  };
+
   const sectionRef = useGsapScrollTrigger<HTMLElement>(({ el, gsap, reduced: r }) => {
     if (r) return;
     gsap.from(el.querySelectorAll(".ch07-h2"), {
@@ -111,6 +119,41 @@ export function Chapter07TheCliff({ id = "chapter-07" }: Chapter07TheCliffProps)
         toggleActions: "play none none reverse",
       },
     });
+
+    // EXIT TRANSITION — TIGHTENED. As the user scrolls past Ch7
+    // toward Ch8, the grid + eyebrow scrub UPWARD and fade fast so
+    // there's no dead scroll between the cliff visualization and
+    // the closing mic-drop. Window halved from previous (75%→35%
+    // → was 85%→15%) — completes in ~40% of the section's bottom
+    // overlap with the viewport.
+    const grid = el.querySelector(".ch07-grid");
+    const eb = el.querySelector(".ch07-eb");
+    if (grid) {
+      gsap.to(grid, {
+        yPercent: -55,
+        opacity: 0,
+        ease: "none",
+        scrollTrigger: {
+          trigger: el,
+          start: "bottom 75%",
+          end: "bottom 35%",
+          scrub: 0.4,
+        },
+      });
+    }
+    if (eb) {
+      gsap.to(eb, {
+        yPercent: -80,
+        opacity: 0,
+        ease: "none",
+        scrollTrigger: {
+          trigger: el,
+          start: "bottom 75%",
+          end: "bottom 45%",
+          scrub: 0.4,
+        },
+      });
+    }
   });
 
   return (
@@ -124,7 +167,7 @@ export function Chapter07TheCliff({ id = "chapter-07" }: Chapter07TheCliffProps)
       className="chapter ch07"
       style={{
         minHeight: "100vh",
-        padding: "160px 80px",
+        padding: "140px 80px 80px",
         background:
           "linear-gradient(180deg, rgba(251,113,133,0.04) 0%, rgba(251,113,133,0.10) 100%)",
       }}
@@ -150,7 +193,7 @@ export function Chapter07TheCliff({ id = "chapter-07" }: Chapter07TheCliffProps)
             wage={wage}
             onWageChange={handleWageChange}
             household={household}
-            onHouseholdChange={setHousehold}
+            onHouseholdChange={handleHouseholdChange}
             outputs={outputs}
             labels={{
               controlsLabel: t("home.ch7.controlsLabel"),
@@ -174,21 +217,41 @@ export function Chapter07TheCliff({ id = "chapter-07" }: Chapter07TheCliffProps)
         <div
           className="ch07-chart"
           id="ch07-chart"
+          data-cliff-active={outputs.medicaid === "lapses" ? "true" : "false"}
           style={{
             position: "relative",
-            borderRadius: "16px",
-            background: "rgba(10,14,26,0.4)",
-            border: "1px solid color-mix(in oklch, var(--fg-primary), transparent 88%)",
-            padding: "24px",
+            borderRadius: "20px",
+            // Layered glass: dark base + diagonal gradient lift +
+            // inset highlight for premium card chrome.
+            background:
+              "linear-gradient(160deg, rgba(15, 23, 41, 0.65) 0%, rgba(10, 14, 26, 0.55) 100%)",
+            backdropFilter: "blur(14px) saturate(135%)",
+            WebkitBackdropFilter: "blur(14px) saturate(135%)",
+            border:
+              "1px solid color-mix(in oklch, var(--fg-primary), transparent 84%)",
+            padding: "28px",
+            // overflow: hidden CLIPS the slab track's outer rose
+            // glow at the card's edge — was bleeding past the right
+            // boundary, now contained.
+            overflow: "hidden",
+            // Threshold-aware drop-shadow: cyan-safe → amber-warning
+            // → rose-cliff. Uses CSS filter so the shadow respects
+            // the rounded corners cleanly.
+            boxShadow:
+              outputs.medicaid === "lapses"
+                ? "0 32px 64px rgba(251, 113, 133, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 0 0 1px color-mix(in oklch, var(--accent-rose), transparent 55%)"
+                : outputs.medicaid === "at risk"
+                  ? "0 28px 56px rgba(245, 158, 11, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 0 0 1px color-mix(in oklch, var(--accent-amber), transparent 65%)"
+                  : "0 24px 48px rgba(10, 14, 26, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06)",
+            transition:
+              "box-shadow 540ms cubic-bezier(0.16, 1, 0.3, 1), border-color 540ms cubic-bezier(0.16, 1, 0.3, 1)",
           }}
         >
-          <CliffChart
-            markerX={outputs.markerX}
-            markerY={outputs.markerY}
+          <CliffMoneyTower
+            outputs={outputs}
+            household={household}
             ariaLabel={t("home.ch7.chartAria")}
             cliffZoneLabel={t("home.ch7.cliffZone")}
-            tooltipCliff={t("home.ch7.cliff.tooltipEdge")}
-            tooltipDestination={t("home.ch7.cliff.tooltipDestination")}
           />
         </div>
       </div>
@@ -276,15 +339,15 @@ function Paragraphs({ t }: { t: (k: string) => string }) {
   const [p2A, p2B] = p2Raw.split("{{real}}");
 
   return (
-    <div data-reveal-stagger style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      <TextReveal direction="left" as="p" className="ch07-p" style={pStyle()}>
+    <>
+      <p className="ch07-p" style={pStyle()}>
         <DropCap chapter="7">{p1A}</DropCap>
         <b style={{ color: "var(--fg-primary)", fontWeight: 600 }}>{p1Wage}</b>
         {p1B}
         <em style={{ color: "var(--accent-rose)", fontStyle: "normal" }}>{p1Loss}</em>
         {p1C ?? ""}
-      </TextReveal>
-      <TextReveal direction="left" as="p" className="ch07-p" style={pStyle()}>
+      </p>
+      <p className="ch07-p" style={pStyle()}>
         {p2A}
         <a
           className="editorial-link"
@@ -302,8 +365,8 @@ function Paragraphs({ t }: { t: (k: string) => string }) {
           {p2Real}
         </a>
         {p2B ?? ""}
-      </TextReveal>
-    </div>
+      </p>
+    </>
   );
 }
 

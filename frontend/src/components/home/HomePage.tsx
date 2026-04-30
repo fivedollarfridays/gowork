@@ -30,7 +30,21 @@ import { EyebrowActiveBridge } from "@/components/home/EyebrowActiveBridge";
 import { FpsOverlayGate } from "@/components/home/FpsOverlayGate";
 import { useEffect, useState } from "react";
 import { useScrollProgress } from "@/hooks/useScrollProgress";
+import { useActiveSection } from "@/hooks/useActiveSection";
 import { installSoundTriggers } from "@/lib/home/soundTriggers";
+
+// Section anchors in narrative order — leading-zero ids match the
+// chapter sections rendered in the JSX below.
+const CHAPTER_SECTION_IDS = [
+  "chapter-01",
+  "chapter-02",
+  "chapter-03",
+  "chapter-04",
+  "chapter-05",
+  "chapter-06",
+  "chapter-07",
+  "chapter-08",
+] as const;
 
 const TOTAL_CHAPTERS = 8;
 const HOME_CITY = "Fort Worth, TX";
@@ -108,9 +122,15 @@ const Chapter08FindYourPath = dynamic(
 );
 
 export default function HomePage(): JSX.Element {
-  const { chapter, totalProgress } = useScrollProgress(TOTAL_CHAPTERS);
+  const { totalProgress } = useScrollProgress(TOTAL_CHAPTERS);
   const hour = useCurrentHour();
-  const activeChapter = Math.min(TOTAL_CHAPTERS, Math.max(1, chapter + 1));
+  // polish-3 fix — replace the bucket-math active chapter (which drifted
+  // when sections aren't equal heights, e.g. Ch08 sticky pin = 220vh)
+  // with an IntersectionObserver per-section detector. The rail now
+  // marks "Ch4 / The map" while the user is reading the map, not Ch5.
+  const activeChapter = useActiveSection({
+    sectionIds: CHAPTER_SECTION_IDS,
+  });
 
   // Cross-driver sound-trigger listener (T50) — chapters fire DOM events,
   // this hook plays the matching sound.

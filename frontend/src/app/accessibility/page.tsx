@@ -26,10 +26,10 @@ export default function AccessibilityPage(): JSX.Element {
       role="main"
       className="mx-auto max-w-3xl px-6 py-12 sm:py-16"
     >
-      <p className="mb-2 text-xs uppercase tracking-[0.4em] text-cyan-400">
+      <p className="mb-2 text-xs uppercase tracking-[0.4em] text-[color:var(--accent-cyan)]">
         GoWork
       </p>
-      <h1 className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl">
+      <h1 className="mb-6 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
         Accessibility statement
       </h1>
       <p className="mb-6 text-lg leading-relaxed text-muted-foreground">
@@ -39,7 +39,7 @@ export default function AccessibilityPage(): JSX.Element {
         marketing claim, but a target we measure ourselves against.
       </p>
 
-      <h2 className="mt-10 mb-3 text-2xl font-semibold tracking-tight">
+      <h2 className="mt-10 mb-3 text-2xl font-semibold tracking-tight text-foreground">
         What we have shipped
       </h2>
       <ul className="ml-5 list-disc space-y-2 text-muted-foreground">
@@ -67,7 +67,7 @@ export default function AccessibilityPage(): JSX.Element {
         <li>Tabular-nums on counters so the chapter readout never jitters.</li>
       </ul>
 
-      <h2 className="mt-10 mb-3 text-2xl font-semibold tracking-tight">
+      <h2 className="mt-10 mb-3 text-2xl font-semibold tracking-tight text-foreground">
         What we are still working on
       </h2>
       <ul className="ml-5 list-disc space-y-2 text-muted-foreground">
@@ -83,7 +83,7 @@ export default function AccessibilityPage(): JSX.Element {
         </li>
       </ul>
 
-      <h2 className="mt-10 mb-3 text-2xl font-semibold tracking-tight">
+      <h2 className="mt-10 mb-3 text-2xl font-semibold tracking-tight text-foreground">
         Tell us when we miss
       </h2>
       <p className="mb-8 text-muted-foreground">
@@ -95,7 +95,7 @@ export default function AccessibilityPage(): JSX.Element {
 
       <Link
         href="/"
-        className="inline-flex items-center gap-2 rounded-full bg-cyan-400 px-5 py-2 text-sm font-semibold text-slate-900 transition hover:bg-cyan-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+        className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         Back to the wall <span aria-hidden="true">→</span>
       </Link>

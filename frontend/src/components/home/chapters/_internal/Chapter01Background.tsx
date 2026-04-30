@@ -83,6 +83,13 @@ export function Chapter01Background({
           animation: "glow-drift 18s ease-in-out infinite alternate -9s",
         }}
       />
+      {/* polish-3 round-2 — cinematic mesh gradient. Three large radial
+       * gradients drift on a 22s alternate keyframe. CSS-driven so the
+       * GPU compositor handles the transform; no JS / no rerender. The
+       * mesh sits BEHIND the grid + the static glow blobs, adding a
+       * breathing color field that distinguishes our hero from a flat
+       * noise background. */}
+      <div className="ch01-mesh" aria-hidden="true" />
       <div
         className="bg-noise"
         data-velocity-active={velocityActive ? "true" : "false"}
@@ -96,6 +103,20 @@ export function Chapter01Background({
             "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E\")",
         }}
       />
+      {/* polish — horizontal scan beam. A thin cyan light line
+       *  sweeps slowly down the hero every 18s, ducking beneath
+       *  the typography via mix-blend-mode. Dribbble-grade ambient
+       *  detail; the eye reads it as "the page is alive". */}
+      <div className="ch01-scan" aria-hidden="true" />
+      {/* polish — vignette mask. Soft dark feathering at the four
+       *  corners so the central typography sits in a "spotlight"
+       *  pool of color, not just on a flat panel. */}
+      <div className="ch01-vignette" aria-hidden="true" />
+      {/* polish — constellation dots. 12 small static cyan/amber
+       *  pinpoints scattered across the field with individual
+       *  twinkle phases, so the bg breathes even when the user
+       *  isn't moving. */}
+      <div className="ch01-stars" aria-hidden="true" />
     </div>
   );
 }

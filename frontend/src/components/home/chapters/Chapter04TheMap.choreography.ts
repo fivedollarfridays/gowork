@@ -14,16 +14,42 @@
 
 import { useEffect, type RefObject } from "react";
 
+/**
+ * Camera keyframes — one per scene card. Coordinates pulled DIRECTLY
+ * from the WAYPOINTS table in `Chapter04TheMap.geo.ts` so each step
+ * centers on the exact waypoint the scene card describes:
+ *
+ *   step 0 → 06:42 AM · HOME · ZIP 76104           (Hemphill & Berry)
+ *   step 1 → 10:00 AM · DPS · driver license       (south Fort Worth DPS)
+ *   step 2 → 12:30 PM · WORKFORCE SOLUTIONS        (downtown navigator)
+ *   step 3 → 03:27 PM · ALCON · shift start        (job destination)
+ *
+ * The previous coordinates were drifted ~2-5km away from each
+ * waypoint, so the camera was flying to "empty" areas of the map
+ * instead of following the labeled path the user could see drawn
+ * across the canvas.
+ *
+ * Bearing per step is set so the NEXT route segment points roughly
+ * "up" on screen — the user's eye reads the journey forward.
+ * Pitch decreases as the camera zooms out at the destination so
+ * the final overview has more horizon visible. */
 const KEYFRAMES: ReadonlyArray<{
   center: [number, number];
   zoom: number;
   pitch: number;
   bearing: number;
 }> = [
-  { center: [-97.338, 32.734], zoom: 13.4, pitch: 50, bearing: -10 },
-  { center: [-97.33, 32.756], zoom: 12.6, pitch: 40, bearing: 8 },
-  { center: [-97.325, 32.75], zoom: 12.2, pitch: 30, bearing: 0 },
-  { center: [-97.295, 32.8], zoom: 11.9, pitch: 38, bearing: -16 },
+  // Step 0 — HOME. Bearing +20° (next stop DPS is northeast). Tight
+  // zoom + high pitch for the "morning departure" close-up.
+  { center: [-97.3327, 32.705], zoom: 13.6, pitch: 52, bearing: 20 },
+  // Step 1 — DPS. Bearing -25° (next stop Workforce is northwest).
+  { center: [-97.311, 32.7395], zoom: 13.5, pitch: 48, bearing: -25 },
+  // Step 2 — WORKFORCE SOLUTIONS. Bearing +5° (next is northbound
+  // toward Alcon job). Slight zoom-out to show the route line.
+  { center: [-97.3208, 32.7488], zoom: 13.0, pitch: 42, bearing: 5 },
+  // Step 3 — ALCON · shift start (destination). Lower pitch + wider
+  // zoom for the "arrival" overview shot.
+  { center: [-97.3447, 32.835], zoom: 12.4, pitch: 36, bearing: -8 },
 ];
 
 interface MapWithFly {
@@ -114,8 +140,23 @@ export function useCh04Choreography({
         let lastStep = -1;
         stInst = ScrollTrigger.create({
           trigger: el,
-          start: "top 80%",
-          end: "bottom top",
+          // PIN: true — locks the section in place at the top of
+          // the viewport while the user scrolls. The 4-step
+          // choreography fires across +=56% of additional scroll
+          // (≈14vh per step), THEN the section unpins and the
+          // page below resumes normal scrolling. Without pin, the
+          // map was sliding up and out of view while the camera
+          // animations were still firing — by step 4 the user
+          // could only see the bottom edge of the map.
+          //
+          // Pin adds 56vh to total page scroll (the user has to
+          // scroll that distance through the pin region) but it's
+          // the price of cinematic camera + steady viewport.
+          start: "top top",
+          end: "+=56%",
+          pin: true,
+          pinSpacing: true,
+          anticipatePin: 1,
           scrub: 0.6,
           onUpdate: (self: { progress: number }) => {
             const p = self.progress;

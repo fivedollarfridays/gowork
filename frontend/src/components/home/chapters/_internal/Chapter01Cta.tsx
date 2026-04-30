@@ -2,25 +2,46 @@
 
 /**
  * Chapter 01 CTA row — primary "Get your plan → /assess" + ghost
- * "See how it works ↓ #chapter-04". Pulled out of Chapter01TheWall.tsx so
- * the parent stays under arch limits.
+ * "See how it works ↓ #chapter-04".
  *
- * polish-2 Driver C T37 — mounts `useMagneticHover` on the primary CTA
- * and toggles `data-idle-orbit` based on `useIdleState(4000)`. Driver B
- * owns this file; this is the agreed minimal Driver-C touch.
+ * Both CTAs converted to Next.js `<Link>` for client-side navigation
+ * (no full page reload on /assess). Ghost CTA also gets a smooth-
+ * scroll click handler so the anchor jump animates instead of
+ * hard-snapping to the chapter-04 section.
  */
 
+import Link from "next/link";
 import { useMagneticHover } from "@/hooks/useMagneticHover";
 import { useIdleState } from "@/hooks/useIdleState";
+import type { MouseEvent } from "react";
 
 interface Chapter01CtaProps {
   primaryLabel: string;
   ghostLabel: string;
 }
 
+function smoothScrollToHash(hash: string): void {
+  if (typeof document === "undefined") return;
+  const id = hash.startsWith("#") ? hash.slice(1) : hash;
+  const target = document.getElementById(id);
+  if (!target) return;
+  target.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 export function Chapter01Cta({ primaryLabel, ghostLabel }: Chapter01CtaProps) {
   const primaryRef = useMagneticHover<HTMLAnchorElement>();
   const idle = useIdleState(4_000);
+  const onGhostClick = (e: MouseEvent<HTMLAnchorElement>) => {
+    // Let modifier-clicks (cmd/ctrl/shift) fall through to default
+    // browser behaviour (open in new tab, etc.).
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+    e.preventDefault();
+    smoothScrollToHash("#chapter-04");
+    // Update URL hash so the back button + share-link still work.
+    if (typeof history !== "undefined") {
+      history.replaceState(null, "", "#chapter-04");
+    }
+  };
   return (
     <div
       className="ch01-cta-row"
@@ -33,7 +54,7 @@ export function Chapter01Cta({ primaryLabel, ghostLabel }: Chapter01CtaProps) {
         flexWrap: "wrap",
       }}
     >
-      <a
+      <Link
         ref={primaryRef}
         className="cta cta-primary"
         href="/assess"
@@ -42,8 +63,13 @@ export function Chapter01Cta({ primaryLabel, ghostLabel }: Chapter01CtaProps) {
       >
         <span>{primaryLabel}</span>
         <span className="cta-arr">→</span>
-      </a>
-      <a className="cta cta-ghost" href="#chapter-04" style={ghostStyle()}>
+      </Link>
+      <a
+        className="cta cta-ghost"
+        href="#chapter-04"
+        onClick={onGhostClick}
+        style={ghostStyle()}
+      >
         <span>{ghostLabel}</span>
         <span className="cta-arr">↓</span>
       </a>

@@ -16,7 +16,6 @@
 
 import type { CSSProperties } from "react";
 import Image from "next/image";
-import { TextReveal } from "@/components/home/_internal/TextReveal";
 
 interface PortraitProps {
   captionEyebrow: string;
@@ -146,18 +145,18 @@ export function Ch03Paragraphs({ t }: ParagraphsProps) {
   const [p1a, p1b] = p1.split("{{zip}}");
   const [p2a, p2b] = p2.split("{{bold}}");
   return (
-    <div data-reveal-stagger style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      <TextReveal direction="left" as="p" className="ch03-p" style={pStyle()}>
+    <>
+      <p className="ch03-p" style={pStyle()}>
         {p1a}
         <b style={{ color: "var(--fg-primary)", fontWeight: 600 }}>{p1Zip}</b>
         {p1b ?? ""}
-      </TextReveal>
-      <TextReveal direction="left" as="p" className="ch03-p" style={pStyle()}>
+      </p>
+      <p className="ch03-p" style={pStyle()}>
         {p2a}
         <b style={{ color: "var(--fg-primary)", fontWeight: 600 }}>{p2Bold}</b>
         {p2b ?? ""}
-      </TextReveal>
-    </div>
+      </p>
+    </>
   );
 }
 

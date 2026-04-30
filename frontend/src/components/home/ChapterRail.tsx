@@ -36,15 +36,19 @@ interface ChapterRailEntry {
   thumbnail: string;
 }
 
+// polish-3 fix — anchors use the actual section ids (`chapter-01`,
+// not `chapter-1`). The leading-zero format matches the JSX in each
+// chapter component; the prior single-digit format silently broke the
+// click-to-scroll behavior.
 const CHAPTERS: ReadonlyArray<ChapterRailEntry> = [
-  { id: 1, labelKey: "chapterRail.ch1", anchor: "#chapter-1", thumbnail: "01-hero.jpg" },
-  { id: 2, labelKey: "chapterRail.ch2", anchor: "#chapter-2", thumbnail: "02-the-numbers.jpg" },
-  { id: 3, labelKey: "chapterRail.ch3", anchor: "#chapter-3", thumbnail: "03-meet-carlos.jpg" },
-  { id: 4, labelKey: "chapterRail.ch4", anchor: "#chapter-4", thumbnail: "04-mapbox-detailed-v2.jpg" },
-  { id: 5, labelKey: "chapterRail.ch5", anchor: "#chapter-5", thumbnail: "05-the-plan.jpg" },
-  { id: 6, labelKey: "chapterRail.ch6", anchor: "#chapter-6", thumbnail: "06-open-jobs.jpg" },
-  { id: 7, labelKey: "chapterRail.ch7", anchor: "#chapter-7", thumbnail: "07-wage-cliff.jpg" },
-  { id: 8, labelKey: "chapterRail.ch8", anchor: "#chapter-8", thumbnail: "08-manifesto.jpg" },
+  { id: 1, labelKey: "chapterRail.ch1", anchor: "#chapter-01", thumbnail: "01-hero.jpg" },
+  { id: 2, labelKey: "chapterRail.ch2", anchor: "#chapter-02", thumbnail: "02-the-numbers.jpg" },
+  { id: 3, labelKey: "chapterRail.ch3", anchor: "#chapter-03", thumbnail: "03-meet-carlos.jpg" },
+  { id: 4, labelKey: "chapterRail.ch4", anchor: "#chapter-04", thumbnail: "04-mapbox-detailed-v2.jpg" },
+  { id: 5, labelKey: "chapterRail.ch5", anchor: "#chapter-05", thumbnail: "05-the-plan.jpg" },
+  { id: 6, labelKey: "chapterRail.ch6", anchor: "#chapter-06", thumbnail: "06-open-jobs.jpg" },
+  { id: 7, labelKey: "chapterRail.ch7", anchor: "#chapter-07", thumbnail: "07-wage-cliff.jpg" },
+  { id: 8, labelKey: "chapterRail.ch8", anchor: "#chapter-08", thumbnail: "08-manifesto.jpg" },
 ];
 
 function pad2(n: number): string {

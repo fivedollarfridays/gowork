@@ -33,18 +33,19 @@ describe("T1.7 — globals.css token partials exist", () => {
     expect(fs.existsSync(filePath)).toBe(true);
   });
 
-  it("colors.css preserves existing :root HSL block byte-for-byte", () => {
+  it("colors.css declares the canonical GoWork :root HSL palette (warm paper + cyan)", () => {
     const colors = read(path.resolve(TOKENS_DIR, "colors.css"));
-    expect(colors).toContain("--background: 60 20% 95%;");
-    expect(colors).toContain("--foreground: 195 9% 19%;");
-    expect(colors).toContain("--primary: 218 46% 20%;");
-    expect(colors).toContain("--success: 152 39% 52%;");
+    // Light theme = warm paper canvas + navy ink + cyan primary.
+    expect(colors).toContain("--background: 43 26% 95%;");   // #F5F3EE warm paper
+    expect(colors).toContain("--foreground: 225 44% 7%;");   // #0A0E1A navy ink
+    expect(colors).toContain("--primary: 187 86% 53%;");     // #22D3EE cyan
+    expect(colors).toContain("--success: 158 64% 52%;");     // #34D399 emerald
   });
 
-  it("colors.css preserves existing .dark override block", () => {
+  it("colors.css declares the canonical GoWork .dark override block", () => {
     const colors = read(path.resolve(TOKENS_DIR, "colors.css"));
     expect(colors).toMatch(/\.dark\s*\{/);
-    expect(colors).toContain("--background: 195 9% 12%;");
+    expect(colors).toContain("--background: 225 44% 7%;");   // navy canvas in dark
   });
 
   it("layout.css preserves .text-balance utility (root scope post-8b04ae8)", () => {
@@ -57,8 +58,11 @@ describe("T1.7 — globals.css token partials exist", () => {
     const layout = read(path.resolve(TOKENS_DIR, "layout.css"));
     expect(layout).toContain("border-border");
     expect(layout).toContain("overscroll-behavior: none");
-    expect(layout).toContain("bg-background");
-    expect(layout).toContain("text-foreground");
+    // polish-2 swapped `bg-background` / `text-foreground` Tailwind classes for
+    // direct `var(--bg-base)` / `var(--fg-primary)` so the body unconditionally
+    // tracks the OKLCH theme canvas regardless of shadcn HSL inheritance.
+    expect(layout).toContain("var(--bg-base)");
+    expect(layout).toContain("var(--fg-primary)");
   });
 
   it("typography.css exists with placeholder header for T1.15-T1.17", () => {

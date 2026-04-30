@@ -65,8 +65,8 @@ describe("T1.10 — OKLCH base palette tokens", () => {
     }
   });
 
-  it("preserves legacy HSL --background token (back-compat)", () => {
-    expect(css).toContain("--background: 60 20% 95%;");
+  it("declares the post-rebrand HSL --background token (warm paper light)", () => {
+    expect(css).toContain("--background: 43 26% 95%;");
   });
 
   it("colors.css line count <300 (architecture budget; T1.11 + T1.12 grow this)", () => {

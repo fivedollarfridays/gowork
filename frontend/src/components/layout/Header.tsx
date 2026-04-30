@@ -43,7 +43,7 @@ function HeaderInner({ wallChapter }: HeaderProps) {
           <Link
             href="/"
             aria-label={t("header.brand.label")}
-            className="flex items-center gap-2 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300"
+            className="flex items-center gap-2 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <BrandMark size={24} />
             <span className="text-lg font-extrabold tracking-tight text-foreground">
@@ -72,7 +72,7 @@ function HeaderInner({ wallChapter }: HeaderProps) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={t("header.github.aria")}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full text-foreground/80 transition hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full text-foreground/80 transition hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <GitHubIcon />
             </Link>

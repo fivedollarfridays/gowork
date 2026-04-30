@@ -79,7 +79,7 @@ export function TitleSequence({
       className="pointer-events-none fixed inset-0 flex flex-col items-center justify-center text-center"
     >
       <p
-        className={`text-xs uppercase tracking-[0.4em] text-cyan-400 transition-opacity duration-700 ${
+        className={`text-xs uppercase tracking-[0.4em] text-[color:var(--accent-cyan)] transition-opacity duration-700 ${
           stage >= 0 ? "opacity-100" : "opacity-0"
         }`}
       >

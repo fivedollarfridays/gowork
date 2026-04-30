@@ -132,11 +132,8 @@ export function Chapter03MeetCarlos({ id = "chapter-03" }: Chapter03MeetCarlosPr
 
           <h2
             id="ch03-h2"
-            className="ch03-h2"
+            className="ch03-h2 ch03-h2--rainbow"
             style={{
-              // polish-2 fix — letter-spacing eased from -0.035em (≈-2.8px at clamp
-              // display) to -0.018em (≈-1.4px) for legibility without losing the
-              // editorial "tight" feel.
               fontSize: "clamp(2.5rem, 1.5rem + 3vw, 5rem)",
               fontWeight: 800,
               letterSpacing: "-0.018em",
@@ -148,9 +145,25 @@ export function Chapter03MeetCarlos({ id = "chapter-03" }: Chapter03MeetCarlosPr
                 key={i}
                 className={i >= ITALIC_FROM ? "word italic-axis" : "word"}
                 style={{
+                  // Rainbow gradient applied PER-WORD, not on the parent.
+                  // background-clip:text on a parent does NOT flow into
+                  // inline-block descendants — that's why the headline
+                  // was rendering invisible. Each word now carries its
+                  // own clipped gradient with a phase-shifted start.
                   display: "inline-block",
                   margin: "0 0.04em 0.04em 0",
                   fontStyle: i >= ITALIC_FROM ? "oblique -10deg" : "normal",
+                  backgroundImage:
+                    "linear-gradient(95deg, var(--accent-amber) 0%, var(--accent-rose) 45%, var(--fg-primary) 70%, var(--accent-cyan) 100%)",
+                  backgroundSize: "400% 100%",
+                  backgroundPosition: `${(i / Math.max(1, words.length - 1)) * 100}% 50%`,
+                  WebkitBackgroundClip: "text",
+                  backgroundClip: "text",
+                  color: "transparent",
+                  WebkitTextFillColor: "transparent",
+                  animation:
+                    "ch03-rainbow-shift 12s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+                  animationDelay: `${i * -0.4}s`,
                 }}
               >
                 {/* Append a real space character INSIDE the span so the

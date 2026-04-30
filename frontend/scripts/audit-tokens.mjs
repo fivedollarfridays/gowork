@@ -83,6 +83,21 @@ const EXTERNAL_VARS = new Set([
   "--cursor-y",
   // next/font injects these.
   "--font-inter",
+  // narrative-reset Ch08 — chromatic aberration offsets set inline by GSAP
+  // proxy in Chapter08FindYourPath.tsx during the mic-drop timeline.
+  "--abr-x",
+  "--abr-y",
+  // narrative-reset Ch08 — brand-lockup line scale set inline by GSAP proxy
+  // for the cyan path-line scroll-tied draw across the GoWork wordmark.
+  "--lockup-line-scale",
+  // narrative-reset Ch01 — mesh-gradient drift offsets set inline by the
+  // cursor-parallax bridge for the warm/rose/cyan glow blobs.
+  "--mesh-amber-x",
+  "--mesh-amber-y",
+  "--mesh-cyan-x",
+  "--mesh-cyan-y",
+  "--mesh-rose-x",
+  "--mesh-rose-y",
 ]);
 
 // 2. Scan the rest of the codebase for var(--name) usages.

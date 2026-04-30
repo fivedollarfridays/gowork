@@ -32,8 +32,14 @@ export {
   getBenefitsFallbackUrl,
 } from "./city-constants";
 
-/** @deprecated Use isValidCityZip instead */
-export { isValidCityZip as isValidMontgomeryZip } from "./city-constants";
+/** @deprecated Use isValidCityZip(zip, "AL") instead. Pinned to AL so that
+ *  the legacy name keeps validating Montgomery ZIPs regardless of the
+ *  reference deployment default (which is now Fort Worth). Old call sites
+ *  that still import this still get the AL-specific check they expect. */
+import { isValidCityZip as _isValidCityZip } from "./city-constants";
+export function isValidMontgomeryZip(zip: string): boolean {
+  return _isValidCityZip(zip, "AL");
+}
 
 export function barrierCountToSeverity(count: number): BarrierSeverity {
   if (count >= 3) return "high";
@@ -100,8 +106,11 @@ export function daysToMonths(days: number): string {
   return `~${months} month${months === 1 ? "" : "s"}`;
 }
 
-/** @deprecated Use getCareerCenter instead */
-export { CAREER_CENTER_AL as CAREER_CENTER } from "./city-constants";
+/** @deprecated Use getCareerCenter instead. The legacy `CAREER_CENTER`
+ *  symbol now points at Fort Worth's Workforce Solutions to match the
+ *  active reference deployment — old call sites that import it
+ *  unprefixed will render TX info, not Montgomery. */
+export { CAREER_CENTER_TX as CAREER_CENTER } from "./city-constants";
 
 export const INDUSTRY_OPTIONS = [
   { value: "healthcare", label: "Healthcare" },
@@ -126,8 +135,11 @@ export const READINESS_BAND_STYLES: Record<string, { bg: string; text: string; b
   strong: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20" },
 };
 
-/** @deprecated Use getProgramLabels instead */
-export { PROGRAM_LABELS_AL as PROGRAM_LABELS } from "./city-constants";
+/** @deprecated Use getProgramLabels instead. Legacy alias now points
+ *  at Texas program labels (CHIP / CEAP) to match the reference
+ *  deployment — Alabama's ALL Kids / LIHEAP labels remain available
+ *  via PROGRAM_LABELS_AL but are no longer the unprefixed default. */
+export { PROGRAM_LABELS_TX as PROGRAM_LABELS } from "./city-constants";
 
 export function formatDateRange(assessmentDate: string, startDay: number, endDay: number): string {
   const base = new Date(assessmentDate + "T00:00:00");

@@ -71,7 +71,7 @@ export function PathLineHeader({
     >
       <div
         data-path-line-fill
-        className="h-full bg-cyan-400 transition-[width] duration-150 ease-out"
+        className="h-full bg-[color:var(--accent-cyan)] transition-[width] duration-150 ease-out"
         style={{ width: `${widthPct}%` }}
       />
     </div>

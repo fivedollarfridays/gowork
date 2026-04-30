@@ -82,10 +82,10 @@ export default function ArchivedHome() {
         </ScrollReveal>
         <ScrollReveal delay={0.4}>
           <div className="mt-8 flex gap-4">
-            <Button size="lg" asChild className="transition-shadow duration-300 hover:shadow-[0_0_20px_rgba(45,149,150,0.4)]">
+            <Button size="lg" asChild className="transition-shadow duration-300 hover:shadow-[0_0_20px_rgba(34,211,238,0.4)]">
               <Link href="/assess">{t("home.ctaPlan")}</Link>
             </Button>
-            <Button size="lg" variant="outline" asChild className="transition-shadow duration-300 hover:shadow-[0_0_16px_rgba(45,149,150,0.25)]">
+            <Button size="lg" variant="outline" asChild className="transition-shadow duration-300 hover:shadow-[0_0_16px_rgba(34,211,238,0.25)]">
               <Link href="/credit">{t("home.ctaCredit")}</Link>
             </Button>
           </div>
@@ -103,7 +103,7 @@ export default function ArchivedHome() {
               const Icon = step.icon;
               return (
                 <StaggerItem key={FLOW_STEP_KEYS[i]}>
-                  <Card className="group text-center hover:shadow-[0_0_24px_rgba(45,149,150,0.3)] hover:border-secondary/40 hover:-translate-y-1">
+                  <Card className="group text-center hover:shadow-[0_0_24px_rgba(34,211,238,0.3)] hover:border-secondary/40 hover:-translate-y-1">
                     <CardContent className="pt-6 space-y-3">
                       <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-secondary/10 transition-colors duration-300 group-hover:bg-secondary/20">
                         <Icon className="h-6 w-6 text-secondary transition-transform duration-300 group-hover:scale-110" />
@@ -135,7 +135,7 @@ export default function ArchivedHome() {
             {STATS.map((stat) => (
               <div
                 key={stat.label}
-                className="space-y-1 rounded-xl border border-white/20 bg-white/60 dark:bg-white/5 backdrop-blur-md p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(45,149,150,0.25)] hover:border-secondary/30"
+                className="space-y-1 rounded-xl border border-white/20 bg-white/60 dark:bg-white/5 backdrop-blur-md p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(34,211,238,0.25)] hover:border-secondary/30"
               >
                 <div className="text-3xl font-bold text-secondary">
                   <AnimatedCounter to={stat.value} suffix={stat.suffix} decimals={stat.decimals} />

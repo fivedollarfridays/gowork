@@ -4,20 +4,18 @@ import { useEffect, useRef, useState } from "react";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
 /**
- * Home CursorFlashlight — sprint/gowork-facelift Driver A.
+ * Home CursorFlashlight — soft cream glow that follows the cursor.
  *
- * Soft 480x480 amber glow that follows the cursor across the WHOLE
- * viewport (not just the Mapbox canvas — that's the existing
- * `wall/MapCursorFlashlight`). Uses `mix-blend-mode: screen` so the
- * glow brightens the chapter content beneath it without darkening it.
+ * Was amber; per design feedback the warm tint pulled the eye away
+ * from the editorial type, so it's now `--fg-primary` cream. Reads
+ * as a soft "stage light" rather than a coloured highlight.
  *
  * Eased with rAF lerp (0.12) so the glow trails the cursor with a
- * cinematic lag instead of snapping. Activates when the document has
- * `body.cursor-active` (toggled on first pointermove); deactivates on
- * pointerleave.
+ * cinematic lag instead of snapping. `mix-blend-mode: screen` keeps
+ * it brightening (never darkening) the content below.
  *
- * Disabled on prefers-reduced-motion + coarse pointer + when explicitly
- * forced off via `forceDisabled` (used by Driver D in tests).
+ * Disabled on prefers-reduced-motion + coarse pointer + when
+ * explicitly forced off via `forceDisabled`.
  */
 
 interface CursorFlashlightProps {
@@ -110,7 +108,7 @@ export function CursorFlashlight({ forceDisabled }: CursorFlashlightProps = {}):
         zIndex: 5,
         opacity: active ? 1 : 0,
         background:
-          "radial-gradient(circle, color-mix(in oklch, var(--accent-amber), transparent 40%) 0%, transparent 65%)",
+          "radial-gradient(circle, color-mix(in oklch, var(--fg-primary), transparent 55%) 0%, transparent 65%)",
         filter: "blur(40px)",
         transition: "opacity 240ms ease",
         willChange: "transform",

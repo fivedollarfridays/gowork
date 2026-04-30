@@ -4,10 +4,16 @@
  * Bottom-of-hero scroll cue: a small monospace label with a mouse-icon SVG
  * whose interior dot bobs.
  *
- * polish-3 fix — was previously `bottom: 130px` which planted the cue
- * directly on top of the "Get your plan" CTA row. Moved to `bottom: 24px`
- * (under the marquee, at the section's true bottom edge) so it never
- * collides with the CTAs.
+ * Position progression:
+ *   bottom: 130px → collided with CTA row
+ *   bottom: 24px  → INSIDE marquee, overlapped "OPEN COURT DATE"
+ *   bottom: 110px → too high, clipped CTA row from the bottom
+ *   bottom: 86px  → CURRENT. Sits in the gap between CTA row and
+ *                   marquee strip. Marquee total height ≈ 70px
+ *                   (24px padding × 2 + ~22px content) + 32px
+ *                   margin-top above it. 86px clears the marquee
+ *                   top edge with ~16px breathing room and stays
+ *                   below the CTA row.
  */
 
 export interface ChapterScrollCueProps {
@@ -21,9 +27,9 @@ export function ChapterScrollCue({ label }: ChapterScrollCueProps) {
       aria-hidden="true"
       style={{
         position: "absolute",
-        bottom: "24px",
+        bottom: "86px",
         left: "50%",
-        transform: "translateX(-50%)",
+        transform: "translate(-50%, 0)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",

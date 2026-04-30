@@ -40,7 +40,7 @@ function humanizeId(id: string): string {
 }
 
 function StepCard({ step, isLast }: { step: SequenceStep; isLast: boolean }) {
-  const colorClass = CATEGORY_COLORS[step.category] ?? "bg-gray-100 text-gray-800";
+  const colorClass = CATEGORY_COLORS[step.category] ?? "bg-muted text-muted-foreground";
 
   return (
     <div

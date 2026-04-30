@@ -85,10 +85,11 @@ describe("Chapter08FindYourPath — manifesto closer", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders the giant wordmark with two rows GO + WORK", () => {
+  it("renders the giant wordmark with two rows Go + Work", () => {
     const { container } = renderEn();
-    expect(container.querySelector(".ch08-wordmark .wm-row-1")?.textContent).toBe("GO");
-    expect(container.querySelector(".ch08-wordmark .wm-row-2")?.textContent).toBe("WORK");
+    // Mixed case matches the official brand mark spec ("GoWork").
+    expect(container.querySelector(".ch08-wordmark .wm-row-1")?.textContent).toBe("Go");
+    expect(container.querySelector(".ch08-wordmark .wm-row-2")?.textContent).toBe("Work");
   });
 
   it("does NOT render the deprecated stat band (narrative-reset)", () => {

@@ -20,6 +20,8 @@
 
 import { useEffect, useState, type CSSProperties } from "react";
 import { useHeroFontWeight } from "@/hooks/useHeroFontWeight";
+import { useCursorParallax } from "@/hooks/useCursorParallax";
+import { MaskReveal } from "@/components/home/_internal/MaskReveal";
 
 export interface Chapter01HeroProps {
   morphWord: string;
@@ -94,9 +96,14 @@ export function Chapter01Hero({
   const longest = pickWidestWord(morphWords) || "background";
   const scrollProgress = useScrollProgress();
   const fontWeightAxis = useHeroFontWeight(scrollProgress);
+  // polish-3 round-2 — cursor parallax. The hero composition drifts up
+  // to ±10px X / ±6px Y based on cursor distance from the viewport
+  // center. Lerp-eased so the lag feels cinematic, not literal.
+  const parallaxRef = useCursorParallax<HTMLHeadingElement>({ maxX: 10, maxY: 6 });
 
   return (
     <h1
+      ref={parallaxRef}
       className="ch01-h1"
       id="ch01-h1"
       aria-label={ariaLabel}
@@ -113,11 +120,15 @@ export function Chapter01Hero({
         flexDirection: "column",
         alignItems: "center",
         gap: "18px",
+        willChange: "transform",
       }}
     >
-      <span
+      {/* Line 1 — kinetic morph word. Wrap in MaskReveal so the giant
+       *  word rises from below the line on first paint, not just fades. */}
+      <MaskReveal
+        as="span"
         className="line line-1"
-        style={{ ...line1Style(), fontVariationSettings: fontWeightAxis }}
+        innerStyle={{ ...line1Style(), fontVariationSettings: fontWeightAxis }}
       >
         <span className="morph-anchor-wrap" style={anchorWrapStyle()}>
           <span
@@ -139,24 +150,40 @@ export function Chapter01Hero({
             {morphWord}
           </span>
         </span>
-      </span>
+      </MaskReveal>
 
-      <span className="line line-2" style={line2Style()}>
+      {/* Line 2 — declarative statement. Mask reveal with 220ms delay
+       *  so it lands AFTER the morph word has settled. The "wall"
+       *  emphasis word gets an animated strike line drawn across it
+       *  via a CSS pseudo-element (ch01-strike class) — the line
+       *  scales from 0 → 1 starting at 1.2s, AFTER the line has
+       *  fully revealed, so the user reads "wall" then watches it
+       *  get crossed out. The brick-wall metaphor literalised. */}
+      <MaskReveal as="span" className="line line-2" innerStyle={line2Style()} delayMs={220}>
         There is a{" "}
-        <em style={emStyle()}>{line2Wall}</em>
+        <em className="ch01-strike" style={emStyle()}>
+          {line2Wall}
+        </em>
         {" "}between you and{" "}
         <span className="morph-target" style={morphTargetStyle()}>
           {line2Job}
         </span>
-      </span>
+      </MaskReveal>
 
-      <span className="line line-3 italic-axis" style={line3Style()}>
+      {/* Line 3 — italic-axis closer. Reveal at 440ms so the cascade
+       *  reads top→bottom 0 → 220 → 440 ms. */}
+      <MaskReveal
+        as="span"
+        className="line line-3 italic-axis"
+        innerStyle={line3Style()}
+        delayMs={440}
+      >
         We tear it{" "}
         <span className="morph-action" style={morphActionStyle()}>
           {line3Down}
         </span>
         {" "}— brick by brick.
-      </span>
+      </MaskReveal>
     </h1>
   );
 }
@@ -229,17 +256,24 @@ function line2Style(): CSSProperties {
 }
 
 function emStyle(): CSSProperties {
+  // No CSS line-through here — the strike line is drawn by the
+  // .ch01-strike pseudo-element (CSS animated scaleX) so the user
+  // watches it cross out the word, rather than seeing a static
+  // line at first paint.
   return {
     fontStyle: "oblique -8deg",
     color: "var(--accent-amber)",
-    textDecoration: "line-through",
-    textDecorationColor:
-      "color-mix(in oklch, var(--accent-amber), transparent 50%)",
-    textDecorationThickness: "4px",
+    position: "relative",
+    display: "inline-block",
   };
 }
 
 function morphTargetStyle(): CSSProperties {
+  // `white-space: nowrap` keeps the "a job." phrase together as a
+  // single unbreakable unit. Without this the browser wraps the
+  // INTERNAL space ("a" on line N, "job." on line N+1) which reads
+  // as a typographic mistake. Now the phrase moves as a unit if
+  // the line is too narrow — much cleaner editorial flow.
   return {
     background:
       "linear-gradient(90deg, var(--accent-cyan), var(--accent-cyan-300))",
@@ -247,6 +281,7 @@ function morphTargetStyle(): CSSProperties {
     backgroundClip: "text",
     color: "transparent",
     fontWeight: 800,
+    whiteSpace: "nowrap",
   };
 }
 
