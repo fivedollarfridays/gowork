@@ -237,12 +237,14 @@ export function SiteFooter({ version }: SiteFooterProps = {}): JSX.Element {
         color: "var(--fg-secondary)",
       }}
     >
+      {/* polish-3 fix — kept the four-column footer (brand + workers +
+       *  navigators + cities). The reverse-scroll GOWORK wordmark that
+       *  used to sit BELOW the legal+credit row is removed: it duplicated
+       *  the Ch08 closer + bloated the bottom of the page. The columns
+       *  are the actual nav, they stay. */}
       <ColumnsGrid t={t} />
       <LegalNav t={t} />
       <CreditRow t={t} resolvedVersion={resolvedVersion} />
-      <div className="mx-auto max-w-screen-2xl">
-        <ReverseWordmark />
-      </div>
     </footer>
   );
 }

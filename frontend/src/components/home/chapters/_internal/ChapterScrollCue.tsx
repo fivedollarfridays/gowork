@@ -4,8 +4,10 @@
  * Bottom-of-hero scroll cue: a small monospace label with a mouse-icon SVG
  * whose interior dot bobs.
  *
- * Positioned absolutely at bottom: 130px so it floats above the marquee but
- * inside the chapter section.
+ * polish-3 fix — was previously `bottom: 130px` which planted the cue
+ * directly on top of the "Get your plan" CTA row. Moved to `bottom: 24px`
+ * (under the marquee, at the section's true bottom edge) so it never
+ * collides with the CTAs.
  */
 
 export interface ChapterScrollCueProps {
@@ -19,7 +21,7 @@ export function ChapterScrollCue({ label }: ChapterScrollCueProps) {
       aria-hidden="true"
       style={{
         position: "absolute",
-        bottom: "130px",
+        bottom: "24px",
         left: "50%",
         transform: "translateX(-50%)",
         display: "flex",

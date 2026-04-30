@@ -201,8 +201,13 @@ function morphStyle(): CSSProperties {
     color: "transparent",
     fontStyle: "oblique -10deg",
     willChange: "transform, opacity",
-    padding: "0 5px 0 0",
-    textAlign: "left",
+    // polish-3 fix — was `text-align: left` + `padding: 0 5px 0 0`,
+    // which left-anchored shorter words ("wall", "pickup") inside the
+    // bounding box of the longest anchor word ("background"). They
+    // looked drifted-left vs the actual hero centerline. Center-align
+    // every cycled word so they share the same visual midline.
+    padding: 0,
+    textAlign: "center",
   };
 }
 
@@ -215,6 +220,11 @@ function line2Style(): CSSProperties {
     letterSpacing: "-0.02em",
     color: "var(--fg-secondary)",
     maxWidth: "30ch",
+    // polish-2 round-3 fix — flex-column parent only centers BLOCK
+    // alignment; text inside still hangs left because the line itself
+    // has no text-align. Force center so the constrained 30ch width
+    // doesn't shift visually toward the left edge.
+    textAlign: "center",
   };
 }
 
@@ -249,6 +259,7 @@ function line3Style(): CSSProperties {
     letterSpacing: "-0.015em",
     color: "var(--fg-primary)",
     marginTop: "4px",
+    textAlign: "center",
   };
 }
 

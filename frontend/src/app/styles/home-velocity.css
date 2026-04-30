@@ -105,3 +105,271 @@ body[data-idle="true"] [data-ch04-marker] {
     display: none !important;
   }
 }
+
+/* ════════════════════════════════════════════════════════════════════════════
+ * polish-2 post-merge fixes (integrator)
+ *
+ * Visual bugs surfaced after Drivers A/B/C/D/E landed: rail overlap on 6/8
+ * sections, PageMeta clipping on tablets, Ch08 wordmark crop, Ch04/Ch07
+ * light-cream seams (root-cause body bg fixed upstream in tokens/layout.css;
+ * defensive per-section dark canvas here for HMR / theme-swap FOUC).
+ * ════════════════════════════════════════════════════════════════════════════ */
+
+/* Chapter rail gutter — when the rail is visible (≥1100px) every section
+ * needs a left gutter wide enough to clear the rail (32px left + 28px tick
+ * + 18px gap ≈ 96px minimum). Below 1100px the rail is hidden and the
+ * gutter collapses naturally. */
+@media (min-width: 1100px) {
+  body .chapter,
+  body .ch04-pin,
+  body .ch05-pin,
+  body .ch02-pin {
+    padding-left: max(96px, 6vw) !important;
+  }
+}
+
+/* PageMeta — keep clear of the right viewport edge on tablets so the
+ * SCROLL row doesn't clip. */
+@media (min-width: 720px) and (max-width: 1280px) {
+  [data-page-meta] {
+    right: 16px !important;
+    bottom: 16px !important;
+    font-size: 10px;
+  }
+}
+
+/* Ch08 GO WORK wordmark — give the row enough vertical air that "GO"
+ * isn't cropped by the section padding when the user lands at the
+ * default scroll position. */
+.ch08-wordmark {
+  margin-top: clamp(2rem, 6vh, 6rem) !important;
+  padding-top: clamp(1rem, 3vh, 3rem);
+}
+.ch08-wordmark .wm-row {
+  font-size: clamp(6rem, 4rem + 16vw, 22rem) !important;
+  line-height: 0.95 !important;
+}
+
+/* Ch07 chart container — defensive dark fill so the cliff SVG never
+ * inherits a light-cream backdrop from a stray theme cascade. */
+.ch07-chart,
+#ch07-chart {
+  background: color-mix(
+    in oklch,
+    var(--bg-base, #0A0E1A),
+    transparent 20%
+  ) !important;
+}
+
+/* Section seams — explicit theme canvas on chapters that don't bake in
+ * their own background. `--bg-base` flips automatically via the
+ * `[data-theme="light|dark"]` overrides in tokens/colors.css, so this
+ * rule tracks the toggle without hard-coding either palette. The
+ * transition matches the body so the section + body flip together. */
+.ch01,
+.ch02,
+.ch03,
+.ch07,
+.ch08 {
+  background: var(--bg-base);
+  transition: background-color 320ms var(--ease-linear-sig, cubic-bezier(0.32, 0.72, 0, 1));
+}
+
+/* Ch04 / Ch05 / Ch06 paint their own gradient backdrops — leave those
+ * alone but ensure their tokens still flip when the theme swaps so
+ * inner cards / glass panes don't strand on the wrong palette. */
+.ch04, .ch04-pin,
+.ch05, .ch05-pin,
+.ch06 {
+  transition: background-color 320ms var(--ease-linear-sig, cubic-bezier(0.32, 0.72, 0, 1));
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+ * polish-2 round-2 fixes — Mapbox section
+ * ════════════════════════════════════════════════════════════════════════════ */
+
+/* Bug 2 — atmosphere overlay washed out the entire map. Driver B's T23
+ * shipped the radial gradients at 60%/50% size with mix-blend-mode: screen
+ * and 0.4 opacity. That meant orange + cyan gradients covered ~75% of the
+ * canvas at full intensity, hiding routes / markers / 3D buildings.
+ * Drop opacity to 0.18, shrink the gradients to corner accents (~25%/22%),
+ * and switch to multiply so the map TINTS with the time-of-day color
+ * instead of being brightened to oblivion. */
+.ch04-atmosphere {
+  opacity: 0.08 !important;
+  mix-blend-mode: multiply !important;
+  background:
+    radial-gradient(28% 22% at 12% 12%, rgba(245, 158, 11, 0.55), transparent 70%),
+    radial-gradient(28% 22% at 88% 78%, rgba(34, 211, 238, 0.55), transparent 70%),
+    radial-gradient(60% 50% at 50% 100%, rgba(10, 14, 26, 0.65), transparent 60%) !important;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+ * polish-2 round-3 fixes — Ch04 + Ch07
+ * ════════════════════════════════════════════════════════════════════════════ */
+
+/* REVERTED — earlier round attempted `min-height: 300vh + overflow: clip`
+ * on the section + `position: sticky` on `.ch04-pin` to give the
+ * choreography ~3 viewports of scroll. That combo broke Mapbox: every
+ * scroll event fired the section's containing-block resize, the canvas
+ * resize-observer re-fired, and the canvas re-painted on every frame.
+ * That is the "flashing/shifting" Shawn reported. We're back to Driver
+ * C's original 100vh slot — choreography is scrub:0.6 over the section's
+ * top→bottom range, which is enough for the 4 card swaps without
+ * fighting Mapbox. If a longer pin is wanted later, do it via a
+ * dedicated wrapper element so #map stays in a stable containing-block. */
+
+/* Bug 5 — Ch07 cliff chart was rendering ~1192px tall (SVG aspect-ratio
+ * filling the right column). Clamp it so the section fits in one
+ * viewport. The 2-col grid stays; right column now caps at 480px. */
+.ch07-chart,
+#ch07-chart {
+  max-height: 480px !important;
+  height: auto !important;
+}
+.ch07-chart svg,
+#ch07-chart svg {
+  max-height: 432px !important;
+  height: auto !important;
+  width: 100% !important;
+}
+.ch07-grid {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  gap: 32px !important;
+  align-items: start !important;
+}
+@media (max-width: 900px) {
+  .ch07-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Bug 7 — Ch08 manifesto + GO WORK rhythm. */
+#chapter-08.ch08 {
+  gap: 24px !important;
+  padding: 120px 80px 40px !important;
+  overflow: clip;
+}
+#chapter-08 .ch08-wordmark {
+  margin-top: 0 !important;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+ * polish-3 — premium-Webflow text-reveal pattern
+ *
+ * Lithosquare / NYT Snow Fall / Linear-grade scroll reveal. Any element
+ * tagged `[data-reveal="up|down|left|right"]` starts at opacity 0 +
+ * translated and animates to its rest state when its IntersectionObserver
+ * flips `data-revealed="true"`.
+ * ════════════════════════════════════════════════════════════════════════════ */
+[data-reveal] {
+  transition:
+    opacity 720ms var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)),
+    transform 720ms var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  will-change: opacity, transform;
+}
+[data-reveal][data-revealed="false"] {
+  opacity: 0;
+}
+[data-reveal="up"][data-revealed="false"]    { transform: translateY(28px); }
+[data-reveal="down"][data-revealed="false"]  { transform: translateY(-28px); }
+[data-reveal="left"][data-revealed="false"]  { transform: translateX(-48px); }
+[data-reveal="right"][data-revealed="false"] { transform: translateX(48px); }
+[data-reveal][data-revealed="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Stagger — drop a `[data-reveal-stagger]` parent and the children
+ * cascade with a 90ms offset (max 8 children gracefully). Visible on
+ * paragraph blocks, list groups, and manifesto stanzas. */
+[data-reveal-stagger] > [data-reveal]:nth-child(1) { transition-delay: 0ms; }
+[data-reveal-stagger] > [data-reveal]:nth-child(2) { transition-delay: 90ms; }
+[data-reveal-stagger] > [data-reveal]:nth-child(3) { transition-delay: 180ms; }
+[data-reveal-stagger] > [data-reveal]:nth-child(4) { transition-delay: 270ms; }
+[data-reveal-stagger] > [data-reveal]:nth-child(5) { transition-delay: 360ms; }
+[data-reveal-stagger] > [data-reveal]:nth-child(6) { transition-delay: 450ms; }
+[data-reveal-stagger] > [data-reveal]:nth-child(7) { transition-delay: 540ms; }
+[data-reveal-stagger] > [data-reveal]:nth-child(8) { transition-delay: 630ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+ * polish-3 — Ch08 manifesto-into-wordmark pinned cascade
+ *
+ * The section becomes 220vh tall. The inner `.ch08-content` pins to the
+ * top; manifesto lines reveal one by one as the section scrolls. The
+ * `.ch08-wordmark` pins below and rolls up into view as the manifesto
+ * exits — premium-Webflow "the closer slides in under the closer".
+ * ════════════════════════════════════════════════════════════════════════════ */
+#chapter-08.ch08 {
+  min-height: 220vh !important;
+  display: block !important;
+  padding: 0 !important;
+  position: relative;
+}
+#chapter-08 .ch08-content {
+  position: sticky;
+  top: 12vh;
+  padding: 80px 80px 0 !important;
+  max-width: 70rem !important;
+  z-index: 2;
+}
+#chapter-08 .ch08-wordmark {
+  position: sticky;
+  bottom: 0;
+  margin-top: 80vh !important;
+  z-index: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  #chapter-08.ch08 {
+    min-height: auto !important;
+  }
+  #chapter-08 .ch08-content,
+  #chapter-08 .ch08-wordmark {
+    position: static !important;
+  }
+}
+
+/* Bug 5 — defensive: cards rendering at non-active steps must collapse
+ * fully out of layout flow. The component already gates opacity on
+ * `data-active`, but in-flight scroll choreography can leave a stale
+ * card mid-fade. `visibility: hidden + pointer-events: none` ensures
+ * inactive cards never bleed through visually or capture clicks. */
+.ch04-cards .ch04-card[data-active="false"] {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+.ch04-cards .ch04-card[data-active="true"] {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Bug 6 — HUD label/value spacing. Driver C used `display: contents` on
+ * `.ch04-hud__row` which strips the row container — no whitespace
+ * between dt and dd. Switch to flex with a real gap. */
+.ch04-hud__row {
+  display: flex !important;
+  gap: 12px !important;
+  align-items: baseline;
+}
+.ch04-hud__lbl {
+  font-family: var(--font-mono-data, ui-monospace, monospace);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.ch04-hud__val {
+  font-family: var(--font-mono-data, ui-monospace, monospace);
+  font-size: 12px;
+  font-weight: 600;
+}

@@ -134,9 +134,12 @@ export function Chapter03MeetCarlos({ id = "chapter-03" }: Chapter03MeetCarlosPr
             id="ch03-h2"
             className="ch03-h2"
             style={{
+              // polish-2 fix — letter-spacing eased from -0.035em (≈-2.8px at clamp
+              // display) to -0.018em (≈-1.4px) for legibility without losing the
+              // editorial "tight" feel.
               fontSize: "clamp(2.5rem, 1.5rem + 3vw, 5rem)",
               fontWeight: 800,
-              letterSpacing: "-0.035em",
+              letterSpacing: "-0.018em",
               lineHeight: 1,
             }}
           >
@@ -150,7 +153,12 @@ export function Chapter03MeetCarlos({ id = "chapter-03" }: Chapter03MeetCarlosPr
                   fontStyle: i >= ITALIC_FROM ? "oblique -10deg" : "normal",
                 }}
               >
+                {/* Append a real space character INSIDE the span so the
+                 * textContent reads "A father. A welder…" with semantic
+                 * separators (screen-readers + clipboard copy + SEO).
+                 * inline-block margin still controls the visual gap. */}
                 {w}
+                {i < words.length - 1 ? " " : ""}
               </span>
             ))}
           </h2>

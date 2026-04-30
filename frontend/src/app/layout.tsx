@@ -101,6 +101,33 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* SSR-safe theme boot. Reads localStorage["gowork-theme"] and
+         * writes data-theme on <html> BEFORE React hydrates so the first
+         * paint matches the user's saved preference and there's no flash
+         * from dark→light (or vice versa) when SiteHeader hydrates and
+         * runs its own theme mirror effect. Falls back to the system's
+         * prefers-color-scheme on first visit. */}
+        <script
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var stored = window.localStorage.getItem('gowork-theme');
+                  var theme = stored === 'light' || stored === 'dark'
+                    ? stored
+                    : (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+                  var html = document.documentElement;
+                  html.setAttribute('data-theme', theme);
+                  if (theme === 'dark') html.classList.add('dark');
+                  else html.classList.remove('dark');
+                } catch (e) { /* localStorage blocked — leave default */ }
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className={`${inter.variable} font-sans antialiased`}>
         {/* polish-2 T45 — inline above-the-fold critical CSS. Sits at
             the top of <body> so the first paint already has Ch1 hero +

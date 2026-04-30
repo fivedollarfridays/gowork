@@ -130,9 +130,16 @@ export function PageMeta({
         </div>
         <div className="flex gap-2" data-page-meta-live>
           <dt className="opacity-70">{t("pageMeta.live")}</dt>
+          {/* polish-2 fix — suppressHydrationWarning: live values polled
+           * via /api/now after mount inherently mismatch SSR (which sees
+           * the placeholder) vs. the first client render (which has the
+           * fetched value). The mismatch is correct + intentional, so
+           * suppress the dev-overlay warning rather than gate the value
+           * behind a useEffect (that would flash zero on every load). */}
           <dd
             className="m-0"
             style={{ color: "var(--status-positive, var(--accent-cyan))" }}
+            suppressHydrationWarning
           >
             {liveSessions} · {liveCalibrated}
           </dd>

@@ -37,6 +37,62 @@
   }
 }
 
+/* ─── DAY MODE — :root[data-theme="light"] OKLCH override ──────────────────
+ * SiteHeader writes data-theme="light" onto <html> when the toggle flips.
+ * Without these overrides the shadcn `.dark` selector cascade only swapped
+ * the legacy HSL palette while every modern surface (body, sections, OG
+ * cards, map chrome) kept reading the dark `--bg-base`. Result: flipping
+ * the toggle did nothing visually for the editorial layer.
+ *
+ * Light palette — warm-paper cream + navy ink. Inverse of the dark
+ * defaults at the top of this file. Hex fallback first; OKLCH branch
+ * inside @supports (modern only). */
+:root[data-theme="light"] {
+  --bg-base: #F5F3EE;        /* warm paper canvas (NOT pure white) */
+  --bg-surface: #ECE7DC;     /* paper shade */
+  --bg-elevated: #E2DBCB;    /* card on paper */
+  --bg-glass: rgba(10, 14, 26, 0.04);
+  --fg-primary: #0A0E1A;     /* navy ink (NOT pure black) */
+  --fg-secondary: #2E3A52;   /* mid ink */
+  --fg-muted: #5A6B82;       /* muted ink */
+}
+
+@supports (color: oklch(50% 0 0)) {
+  :root[data-theme="light"] {
+    --bg-base: oklch(96.0% 0.008 70);
+    --bg-surface: oklch(92.0% 0.012 70);
+    --bg-elevated: oklch(88.0% 0.018 70);
+    --bg-glass: color-mix(in oklch, oklch(15.6% 0.025 260), transparent 96%);
+    --fg-primary: oklch(15.6% 0.025 260);
+    --fg-secondary: oklch(28.0% 0.025 260);
+    --fg-muted: oklch(45.0% 0.020 260);
+  }
+}
+
+/* Belt-and-braces — explicit data-theme="dark" anchor so any future
+ * consumer that opts into the toggle by writing data-theme="dark"
+ * (instead of relying on the :root default) gets the same tokens. */
+:root[data-theme="dark"] {
+  --bg-base: #0A0E1A;
+  --bg-surface: #0F1729;
+  --bg-elevated: #1A2338;
+  --bg-glass: rgba(255, 255, 255, 0.04);
+  --fg-primary: #F5F3EE;
+  --fg-secondary: #A4B3C7;
+  --fg-muted: #8696A8;
+}
+@supports (color: oklch(50% 0 0)) {
+  :root[data-theme="dark"] {
+    --bg-base: oklch(15.6% 0.025 260);
+    --bg-surface: oklch(20.0% 0.030 260);
+    --bg-elevated: oklch(25.0% 0.030 260);
+    --bg-glass: color-mix(in oklch, oklch(100% 0 0), transparent 96%);
+    --fg-primary: oklch(96.0% 0.008 70);
+    --fg-secondary: oklch(73.0% 0.030 240);
+    --fg-muted: oklch(53.0% 0.030 240);
+  }
+}
+
 /* shadcn back-compat palette. NOT wrapped in @layer base — Tailwind's PostCSS
  * plugin processes each @import partial independently and rejects @layer
  * directives without a same-file @tailwind directive (the postcss-import

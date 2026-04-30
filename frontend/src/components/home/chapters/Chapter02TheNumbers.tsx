@@ -87,7 +87,13 @@ export function Chapter02TheNumbers({ id = "chapter-02" }: Chapter02TheNumbersPr
         scrollTrigger: {
           trigger: stat,
           start: "top 85%",
-          toggleActions: "play none none reverse",
+          // polish-2 fix — was "play none none reverse" which kicked the
+          // tween BACKWARD when the user scrolled away, leaving the
+          // counter mid-animation (e.g. 588k instead of 600k). "once: true"
+          // semantic: fire forward exactly once, never reverse, never
+          // replay; onComplete locks the exact target value.
+          toggleActions: "play none none none",
+          once: true,
         },
         onUpdate: () => {
           numEl.textContent = fmt(obj.v);

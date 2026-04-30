@@ -23,9 +23,23 @@
 html, body {
   overscroll-behavior: none;
 }
+/* polish-2 — body unconditionally reads our OKLCH theme canvas. The
+ * shadcn HSL `bg-background` chain was bleeding the legacy cream default
+ * onto every section that wasn't a darkened chapter. `--bg-base` is now
+ * driven by `[data-theme="light|dark"]` overrides in tokens/colors.css,
+ * so the body color tracks the toggle automatically. The 320ms
+ * transition smooths the day↔night flip; reduced-motion users see an
+ * instant swap (per the universal !important override in motion.css). */
 body {
-  @apply bg-background text-foreground;
+  background: var(--bg-base);
+  color: var(--fg-primary);
+  transition:
+    background-color 320ms var(--ease-linear-sig, cubic-bezier(0.32, 0.72, 0, 1)),
+    color 320ms var(--ease-linear-sig, cubic-bezier(0.32, 0.72, 0, 1));
 }
+/* `.dark` from next-themes / shadcn is now redundant for body color but
+ * remains a no-op so existing utility classes (e.g. `dark:bg-...`)
+ * still cascade correctly for component-level dark-mode opt-ins. */
 
 /* ─── T1.65 — Focus rings + text selection ───────────────────────────────────
  * 2px cyan focus outline with animated entry (outline-offset 0 → 2px) so

@@ -5,10 +5,18 @@
  *
  * Pulled out of Chapter03MeetCarlos.tsx to keep the parent file under arch
  * limits (< 400 lines, < 15 functions).
+ *
+ * polish-3 — replaced the synthetic SVG portrait with a real photograph
+ * (`/home/carlos.jpg`). The photo is loaded through next/image with
+ * priority + sizes hints so it doesn't block the LCP for non-Ch3
+ * scrollers. A dark bottom-vignette + rim glow keep the caption legible
+ * over the photo's bright greenhouse highlights and sit naturally on
+ * either dark or paper-light theme.
  */
 
 import type { CSSProperties } from "react";
-import { CarlosPortraitSvg } from "./CarlosPortraitSvg";
+import Image from "next/image";
+import { TextReveal } from "@/components/home/_internal/TextReveal";
 
 interface PortraitProps {
   captionEyebrow: string;
@@ -27,7 +35,22 @@ export function Ch03Portrait({
       data-gradient-border="on"
       style={portraitWrapStyle()}
     >
-      <CarlosPortraitSvg alt={portraitAlt} />
+      <Image
+        src="/home/carlos.jpg"
+        alt={portraitAlt}
+        fill
+        sizes="(min-width: 1024px) 480px, 80vw"
+        style={{
+          objectFit: "cover",
+          objectPosition: "center 30%",
+        }}
+        priority={false}
+      />
+      {/* Bottom-up vignette + rim — keeps the caption readable + frames
+       *  the portrait like an editorial press shot. Sits OVER the photo,
+       *  UNDER the caption card. */}
+      <div aria-hidden="true" style={portraitVignetteStyle()} />
+      <div aria-hidden="true" style={portraitRimGlowStyle()} />
       <div className="ch03-caption" style={captionStyle()}>
         <span className="cap-eb" style={captionEbStyle()}>
           {captionEyebrow}
@@ -46,7 +69,30 @@ function portraitWrapStyle(): CSSProperties {
     aspectRatio: "4 / 5",
     borderRadius: "24px",
     overflow: "hidden",
-    boxShadow: "0 40px 100px rgba(5,8,18,0.55)",
+    boxShadow:
+      "0 40px 100px rgba(5,8,18,0.55), inset 0 1px 0 rgba(255,255,255,0.06)",
+    border: "1px solid color-mix(in oklch, var(--fg-primary), transparent 88%)",
+  };
+}
+
+function portraitVignetteStyle(): CSSProperties {
+  return {
+    position: "absolute",
+    inset: 0,
+    background:
+      "linear-gradient(180deg, rgba(10,14,26,0.0) 35%, rgba(10,14,26,0.45) 78%, rgba(10,14,26,0.85) 100%)",
+    pointerEvents: "none",
+  };
+}
+
+function portraitRimGlowStyle(): CSSProperties {
+  return {
+    position: "absolute",
+    inset: 0,
+    background:
+      "radial-gradient(120% 80% at 75% 18%, rgba(245,158,11,0.10), transparent 55%), radial-gradient(80% 60% at 12% 90%, rgba(34,211,238,0.09), transparent 60%)",
+    mixBlendMode: "screen",
+    pointerEvents: "none",
   };
 }
 
@@ -100,18 +146,18 @@ export function Ch03Paragraphs({ t }: ParagraphsProps) {
   const [p1a, p1b] = p1.split("{{zip}}");
   const [p2a, p2b] = p2.split("{{bold}}");
   return (
-    <>
-      <p className="ch03-p" style={pStyle()}>
+    <div data-reveal-stagger style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+      <TextReveal direction="left" as="p" className="ch03-p" style={pStyle()}>
         {p1a}
         <b style={{ color: "var(--fg-primary)", fontWeight: 600 }}>{p1Zip}</b>
         {p1b ?? ""}
-      </p>
-      <p className="ch03-p" style={pStyle()}>
+      </TextReveal>
+      <TextReveal direction="left" as="p" className="ch03-p" style={pStyle()}>
         {p2a}
         <b style={{ color: "var(--fg-primary)", fontWeight: 600 }}>{p2Bold}</b>
         {p2b ?? ""}
-      </p>
-    </>
+      </TextReveal>
+    </div>
   );
 }
 

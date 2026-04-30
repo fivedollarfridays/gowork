@@ -267,26 +267,31 @@ function Manifesto({ t, reduced }: { t: (k: string) => string; reduced: boolean 
         lineHeight: 1.05,
       }}
     >
+      {/* polish-2 fix — append a trailing space to each line so the
+       * concatenated textContent reads as proper prose ("…the wall.
+       * We'll just keep…") for clipboard/SEO/screen readers. The
+       * `display: block` on each span handles the visual line-break;
+       * the trailing space is invisible but semantically correct. */}
       <span
         className="line"
         data-revealed={revealedAll ? "true" : "false"}
         style={{ display: "block" }}
       >
-        <DropCap chapter="8">{t("home.ch8.line1")}</DropCap>
+        <DropCap chapter="8">{t("home.ch8.line1")}{" "}</DropCap>
       </span>
       <span
         className="line italic-axis"
         data-revealed={revealedAll ? "true" : "false"}
         style={{ display: "block", fontStyle: "oblique -10deg" }}
       >
-        {t("home.ch8.line2")}
+        {t("home.ch8.line2")}{" "}
       </span>
       <span
         className="line"
         data-revealed={revealedAll ? "true" : "false"}
         style={{ display: "block" }}
       >
-        {t("home.ch8.line3")}
+        {t("home.ch8.line3")}{" "}
       </span>
       <span
         className="line"

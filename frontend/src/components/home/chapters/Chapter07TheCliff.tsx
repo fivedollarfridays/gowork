@@ -32,6 +32,7 @@ import { computeCliff, type HouseholdSize } from "./_internal/cliffMath";
 import { CliffChart } from "./_internal/CliffChart";
 import { CliffControls } from "./_internal/CliffControls";
 import { DropCap } from "../typography/DropCap";
+import { TextReveal } from "@/components/home/_internal/TextReveal";
 
 const DEFAULT_WAGE = 18.5;
 const PULSE_THRESHOLD_WAGE = 17;
@@ -275,15 +276,15 @@ function Paragraphs({ t }: { t: (k: string) => string }) {
   const [p2A, p2B] = p2Raw.split("{{real}}");
 
   return (
-    <>
-      <p className="ch07-p" style={pStyle()}>
+    <div data-reveal-stagger style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+      <TextReveal direction="left" as="p" className="ch07-p" style={pStyle()}>
         <DropCap chapter="7">{p1A}</DropCap>
         <b style={{ color: "var(--fg-primary)", fontWeight: 600 }}>{p1Wage}</b>
         {p1B}
         <em style={{ color: "var(--accent-rose)", fontStyle: "normal" }}>{p1Loss}</em>
         {p1C ?? ""}
-      </p>
-      <p className="ch07-p" style={pStyle()}>
+      </TextReveal>
+      <TextReveal direction="left" as="p" className="ch07-p" style={pStyle()}>
         {p2A}
         <a
           className="editorial-link"
@@ -301,8 +302,8 @@ function Paragraphs({ t }: { t: (k: string) => string }) {
           {p2Real}
         </a>
         {p2B ?? ""}
-      </p>
-    </>
+      </TextReveal>
+    </div>
   );
 }
 
