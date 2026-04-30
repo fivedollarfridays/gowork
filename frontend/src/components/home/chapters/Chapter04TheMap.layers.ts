@@ -2,27 +2,62 @@
  * Driver C — Ch04 Mapbox source/layer/path payload helpers.
  *
  * Pure-data module (no Mapbox import) so it runs cleanly in jsdom and
- * stays test-friendly. Imported by `Chapter04TheMap.mount.ts`.
+ * stays test-friendly. Imported by `Chapter04TheMap.mount.ts` and the
+ * SVG overlay component.
+ *
+ * # Architecture (Ch04-enrich)
+ *
+ * The original module shipped only home-employer arcs. The v1 reference
+ * (the-path-mapbox-v1.html) layers SIX waypoints, two color-coded day
+ * routes (amber morning + cyan afternoon), a ghost route, choropleth
+ * tracts, a school catchment polygon, transit lines, and editorial
+ * callout annotations. Those data factories live in the sibling
+ * `Chapter04TheMap.geo.ts` module and are re-exported here so consumers
+ * have a single import surface.
  */
 
 import { HOME_EMPLOYERS } from "@/lib/home/employers";
 
+export {
+  WAYPOINTS,
+  DAY_ROUTE_AMBER,
+  DAY_ROUTE_CYAN,
+  GHOST_ROUTE,
+  buildAmberRouteSource,
+  buildCyanRouteSource,
+  buildGhostRouteSource,
+  buildTractFeatures,
+  buildCatchmentFeature,
+  buildTransitFeatures,
+  buildAnnotations,
+} from "./Chapter04TheMap.geo";
+export type {
+  Waypoint,
+  TractFeature,
+  TransitFeature,
+  Annotation,
+} from "./Chapter04TheMap.geo";
+
 /** Carlos's home centroid in ZIP 76104. */
 export const HOME_LNG_LAT: [number, number] = [-97.338, 32.734];
 
-/** Initial map view — Tuesday 6:42a frame. */
+/** Initial map view — Tuesday 6:42a frame.
+ *  polish-2 fix — zoom 11.6 → 12.5, center tightened toward Carlos's
+ *  76104 ↔ downtown corridor. The wider DFW-metro framing was burying
+ *  the path arcs and markers in negative space. */
 export const CH04_INITIAL_VIEW = {
-  center: [-97.345, 32.772] as [number, number],
-  zoom: 11.6,
-  pitch: 48,
-  bearing: -16,
+  center: [-97.330, 32.755] as [number, number],
+  zoom: 12.5,
+  pitch: 45,
+  bearing: -15,
 };
 
 /** Minimal Mapbox-Map shape this module + the mount helper consume. We
  *  type narrowly so the chapter renders fine even when mapbox-gl typings
  *  are not loaded (tests, server-side analyze). */
 export interface GwMap {
-  on?: (event: string, fn: () => void) => void;
+  on?: (event: string, fn: (...args: unknown[]) => void) => void;
+  off?: (event: string, fn: (...args: unknown[]) => void) => void;
   once?: (event: string, fn: () => void) => void;
   remove?: () => void;
   setStyle?: (style: string) => void;
@@ -37,6 +72,12 @@ export interface GwMap {
   getSource?: (id: string) => unknown;
   flyTo?: (opts: Record<string, unknown>) => void;
   jumpTo?: (opts: Record<string, unknown>) => void;
+  project?: (lngLat: [number, number]) => { x: number; y: number };
+  getCenter?: () => { lng: number; lat: number };
+  getZoom?: () => number;
+  getBearing?: () => number;
+  getPitch?: () => number;
+  getCanvas?: () => HTMLCanvasElement | null;
 }
 
 /** Curve helper — given two points, return a 3-point arc (start → mid
@@ -50,7 +91,6 @@ function arc(
   const my = (a[1] + b[1]) / 2;
   const dx = b[0] - a[0];
   const dy = b[1] - a[1];
-  // Perpendicular vector, normalized then scaled by ~0.18 of segment length.
   const len = Math.hypot(dx, dy) || 1;
   const px = -dy / len;
   const py = dx / len;
@@ -60,7 +100,8 @@ function arc(
   return [a, [cx, cy], b];
 }
 
-/** Build the 3 path-arc LineString features for the paths source. */
+/** Build the 3 path-arc LineString features for the legacy paths source.
+ *  Kept for backward compat — the new v1 stack uses the day-route sources. */
 export function buildPathArcs(): Array<{
   type: "Feature";
   properties: { id: string };

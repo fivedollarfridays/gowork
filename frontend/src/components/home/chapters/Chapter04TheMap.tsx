@@ -30,6 +30,11 @@
  *   `home-chapters.css` swap the radial gradient stops per phase.
  */
 
+// Mapbox GL JS ships its own stylesheet; without this the canvas + marker
+// positioning + attribution break (canvas often renders 0×0 invisible).
+// Imported in the only consumer so non-home routes don't pay the cost.
+import "mapbox-gl/dist/mapbox-gl.css";
+
 import {
   useEffect,
   useRef,
@@ -47,14 +52,12 @@ import {
 import { useMapboxMount } from "./Chapter04TheMap.mount";
 import { useCh04Choreography } from "./Chapter04TheMap.choreography";
 import { Ch04Legend } from "./_internal/Ch04Legend";
+import { Ch04SvgOverlay } from "./_internal/Ch04SvgOverlay";
+import { Ch04Compass } from "./_internal/Ch04Compass";
+import { Ch04StatRow } from "./_internal/Ch04StatRow";
+import { Ch04Attribution } from "./_internal/Ch04Attribution";
+import { Ch04Cards } from "./_internal/Ch04Cards";
 import { typewrite } from "@/lib/home/typewriter";
-
-const CARD_KEYS = [
-  { time: "home.ch4.cards.card1Time", body: "home.ch4.cards.card1Body" },
-  { time: "home.ch4.cards.card2Time", body: "home.ch4.cards.card2Body" },
-  { time: "home.ch4.cards.card3Time", body: "home.ch4.cards.card3Body" },
-  { time: "home.ch4.cards.card4Time", body: "home.ch4.cards.card4Body" },
-] as const;
 
 const CLEARED_BY_STEP = ["1", "2", "3", "7"] as const;
 
@@ -178,34 +181,6 @@ function Ch04Hud({
           {clearedCount}
         </span>
       </div>
-    </div>
-  );
-}
-
-/** Right-side commentary cards stack — sliced by progress. */
-function Ch04Cards({ activeStep }: { activeStep: number }): ReactElement {
-  const { t } = useTranslation();
-  return (
-    <div className="ch04-cards" aria-live="polite">
-      {CARD_KEYS.map((keys, i) => {
-        const active = i === activeStep;
-        return (
-          <article
-            key={i}
-            data-testid={`ch04-card-${i + 1}`}
-            data-active={active ? "true" : "false"}
-            className="ch04-card"
-            style={{
-              opacity: active ? 1 : 0.0,
-              transform: `translateY(${active ? 0 : (i < activeStep ? -40 : 40)}px)`,
-              pointerEvents: active ? "auto" : "none",
-            }}
-          >
-            <div className="ch04-card__time">{t(keys.time)}</div>
-            <p className="ch04-card__body">{t(keys.body)}</p>
-          </article>
-        );
-      })}
     </div>
   );
 }
@@ -362,7 +337,10 @@ export function Chapter04TheMap(): ReactElement {
         <div id="map" ref={mapDivRef} aria-hidden="true" />
         <div className="ch04-atmosphere" aria-hidden="true" />
         <Ch04Isochrone />
+        <Ch04SvgOverlay />
         <Ch04Fallback />
+        <Ch04Attribution />
+        <Ch04Compass />
         <Ch04Hud
           sceneText={t(`home.ch4.scene${activeStep + 1}`)}
           focusText={t("home.ch4.eyebrow")}
@@ -372,6 +350,8 @@ export function Chapter04TheMap(): ReactElement {
         />
         <Ch04Cards activeStep={activeStep} />
         <Ch04Legend />
+        <Ch04StatRow />
+        <div data-ch04-grain="" aria-hidden="true" className="ch04-grain" />
       </div>
     </section>
   );

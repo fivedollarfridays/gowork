@@ -128,24 +128,32 @@ describe("Chapter04TheMap — T20 cursor-flashlight dim mode", () => {
   });
 });
 
-describe("Chapter04TheMap — T22 legend chip", () => {
+describe("Chapter04TheMap — T22 legend chip (Ch04-enrich · 6 rows)", () => {
   it("renders the legend chip when section is mounted", () => {
     renderEN(<Chapter04TheMap />);
     const legend = document.querySelector("[data-ch04-legend]");
     expect(legend).not.toBeNull();
   });
 
-  it("legend carries 3 swatch rows (amber path / cyan transit / rose dot)", () => {
+  it("legend carries 6 swatch rows (3 routes + 3 waypoint colors)", () => {
     renderEN(<Chapter04TheMap />);
     const legend = document.querySelector("[data-ch04-legend]");
     const rows = legend?.querySelectorAll("[data-legend-row]");
-    expect(rows?.length).toBe(3);
+    expect(rows?.length).toBe(6);
+  });
+
+  it("legend exposes a heading row (LEGEND)", () => {
+    renderEN(<Chapter04TheMap />);
+    const heading = document.querySelector("[data-ch04-legend-heading]");
+    expect(heading).not.toBeNull();
+    expect(heading?.textContent ?? "").toMatch(/LEGEND/i);
   });
 
   it("legend renders Spanish labels when locale=es", () => {
     renderES(<Chapter04TheMap />);
     const legend = document.querySelector("[data-ch04-legend]");
-    expect(legend?.textContent ?? "").toMatch(/CARLOS/i);
+    // Carlos's name is preserved (proper noun) AND the heading translates.
+    expect(legend?.textContent ?? "").toMatch(/Carlos|LEYENDA/i);
   });
 });
 
@@ -163,6 +171,55 @@ describe("Chapter04TheMap — T21 isochrone ring overlay", () => {
     expect(circle).not.toBeNull();
     const r = parseFloat(circle?.getAttribute("r") ?? "0");
     expect(r).toBeGreaterThan(0);
+  });
+});
+
+describe("Chapter04TheMap — Ch04-enrich compass HUD (top-right)", () => {
+  it("renders a [data-ch04-compass] block with 4 value rows", () => {
+    renderEN(<Chapter04TheMap />);
+    const c = document.querySelector("[data-ch04-compass]");
+    expect(c).not.toBeNull();
+    const rows = c?.querySelectorAll("[data-ch04-compass-row]");
+    expect(rows?.length).toBe(4);
+  });
+
+  it("renders a pulsing cyan dot inside the compass", () => {
+    renderEN(<Chapter04TheMap />);
+    expect(document.querySelector("[data-ch04-compass-dot]")).not.toBeNull();
+  });
+});
+
+describe("Chapter04TheMap — Ch04-enrich stat row (bottom-center)", () => {
+  it("renders 4 stats (wage / headway / commute / records)", () => {
+    renderEN(<Chapter04TheMap />);
+    const row = document.querySelector("[data-ch04-stat-row]");
+    expect(row).not.toBeNull();
+    const stats = row?.querySelectorAll("[data-ch04-stat]");
+    expect(stats?.length).toBe(4);
+  });
+});
+
+describe("Chapter04TheMap — Ch04-enrich attribution chip", () => {
+  it("renders the branded Mapbox attribution chip with both copyright links", () => {
+    renderEN(<Chapter04TheMap />);
+    const chip = document.querySelector("[data-ch04-attrib]");
+    expect(chip).not.toBeNull();
+    expect(chip?.textContent ?? "").toMatch(/Mapbox/);
+    expect(chip?.textContent ?? "").toMatch(/OpenStreetMap/);
+  });
+});
+
+describe("Chapter04TheMap — Ch04-enrich film grain", () => {
+  it("renders a [data-ch04-grain] overlay element", () => {
+    renderEN(<Chapter04TheMap />);
+    expect(document.querySelector("[data-ch04-grain]")).not.toBeNull();
+  });
+});
+
+describe("Chapter04TheMap — Ch04-enrich SVG overlay", () => {
+  it("renders the [data-ch04-svg-overlay] inside the pinned map frame", () => {
+    renderEN(<Chapter04TheMap />);
+    expect(document.querySelector("[data-ch04-svg-overlay]")).not.toBeNull();
   });
 });
 

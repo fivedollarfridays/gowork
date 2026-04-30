@@ -19,7 +19,7 @@
  * editorial fallback layer behind the (failed) map div.
  */
 
-import { useEffect, type RefObject } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 import { MAPBOX_COLORS } from "@/lib/wall/colors";
 import { HOME_EMPLOYERS } from "@/lib/home/employers";
 import {
@@ -29,10 +29,36 @@ import {
   CH04_INITIAL_VIEW,
   type GwMap,
 } from "./Chapter04TheMap.layers";
+import { registerEnrichedLayers } from "./Chapter04TheMap.mountLayers";
+import { createOverlayBridge } from "./Chapter04TheMap.overlayBridge";
+
+/** Map event the SVG overlay subscribes to so it can re-project markers. */
+type MapMoveEvent = "move" | "zoom" | "rotate" | "pitch";
 
 declare global {
   interface Window {
     _gw_map?: { setStyle: (style: string) => void };
+    /** Companion accessor for choreography flyTo / jumpTo + the SVG overlay
+     *  subscribe + project bridge. The choreography + overlay files declare
+     *  matching shapes — TS merges Window augmentations across modules. */
+    _gw_map_fly?: {
+      flyTo?: (opts: Record<string, unknown>) => void;
+      jumpTo?: (opts: Record<string, unknown>) => void;
+    };
+    /** Pure-data accessor for the SVG overlay. The overlay registers a
+     *  listener via `subscribe()`; mount calls back on every map move so
+     *  the overlay can reproject anchors. `project()` is the live
+     *  lng/lat → screen-pixel projector. */
+    _gw_map_overlay?: {
+      subscribe: (fn: () => void) => () => void;
+      project: (
+        lngLat: [number, number],
+      ) => { x: number; y: number } | null;
+      getCenter: () => { lng: number; lat: number } | null;
+      getZoom: () => number | null;
+      getBearing: () => number | null;
+      getPitch: () => number | null;
+    };
   }
 }
 
@@ -48,12 +74,16 @@ function readToken(): string {
   return process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "";
 }
 
+/**
+ * Always return the dark style. The home page design is dark-first; the
+ * light branch was never visually polished (atmosphere overlay washes it
+ * out, paint colors fight the bg). Stale `localStorage["gowork-theme"] =
+ * "light"` from a stray toggle was loading light-v11 + nuking the
+ * cinematic look. SiteHeader's theme toggle still flips the rest of the
+ * site; the map specifically locks dark.
+ */
 function readStyleUrl(): string {
-  if (typeof document === "undefined") return "mapbox://styles/mapbox/dark-v11";
-  const theme = document.documentElement.dataset.theme;
-  return theme === "light"
-    ? "mapbox://styles/mapbox/light-v11"
-    : "mapbox://styles/mapbox/dark-v11";
+  return "mapbox://styles/mapbox/dark-v11";
 }
 
 /** Apply Mapbox-safe (hex) tinting to the loaded style. Wrapped in try
@@ -130,11 +160,25 @@ function addPathArcs(map: GwMap): void {
   }
 }
 
-/** 3D buildings layer inserted before road-label. */
+/** 3D buildings layer inserted before road-label IF that layer exists in
+ *  the active style. dark-v11 / light-v11 / streets-v12 each ship slightly
+ *  different label-layer ids — passing a beforeId Mapbox can't resolve
+ *  throws "Layer with id 'road-label' does not exist on this map" 100+
+ *  times per session. Probe and fall back to "no beforeId" (renders on
+ *  top, still readable). */
 function add3DBuildings(map: GwMap): void {
   try {
     if (map.getLayer?.("ch04-3d-buildings")) return;
-    map.addLayer?.(buildBuildingsLayer(), "road-label");
+    // Probe for a label layer to insert under; fall back to undefined so
+    // Mapbox appends the buildings on top (still rendered, no throw).
+    const labelCandidates = [
+      "road-label",
+      "road-label-simple",
+      "settlement-label",
+      "settlement-major-label",
+    ] as const;
+    const beforeId = labelCandidates.find((id) => map.getLayer?.(id));
+    map.addLayer?.(buildBuildingsLayer(), beforeId);
   } catch {
     /* not all styles include the composite source */
   }
@@ -183,12 +227,32 @@ export interface UseMapboxMountOptions {
 }
 
 /** Mount the Mapbox map imperatively, wire layers + markers, swap style
- *  on theme change, publish window._gw_map for the SiteHeader bridge. */
+ *  on theme change, publish window._gw_map for the SiteHeader bridge.
+ *
+ *  CRITICAL — latest-ref pattern. The `onAlive` and `onMapReady`
+ *  callbacks come from the parent as inline arrow functions, which
+ *  means a new reference every render. If we put them in the effect's
+ *  dep array the effect tears down + rebuilds the Mapbox map on every
+ *  parent re-render (and the parent re-renders constantly during scroll
+ *  because setActiveStep / setLiveMap / useTimeOfDay all fire). That
+ *  was the visible "flash" — Mapbox was being remounted ~60 times per
+ *  second. The fix: stash the callbacks in refs and depend ONLY on
+ *  the (stable) mapDivRef. The map mounts exactly once, callbacks
+ *  always invoke the latest version. */
 export function useMapboxMount({
   mapDivRef,
   onAlive,
   onMapReady,
 }: UseMapboxMountOptions): void {
+  const onAliveRef = useRef(onAlive);
+  const onMapReadyRef = useRef(onMapReady);
+  useEffect(() => {
+    onAliveRef.current = onAlive;
+  }, [onAlive]);
+  useEffect(() => {
+    onMapReadyRef.current = onMapReady;
+  }, [onMapReady]);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     const container = mapDivRef.current;
@@ -200,15 +264,10 @@ export function useMapboxMount({
     (async () => {
       try {
         const mod = await import("mapbox-gl");
-        // mapbox-gl v3 exports types via a default export; we need both
-        // the constructor and Marker. Cast through `unknown` because the
-        // ambient `typeof import('mapbox-gl')` differs from the runtime
-        // shape under v3's module re-export.
         const mapboxgl = (mod.default ?? mod) as unknown as typeof import(
           "mapbox-gl"
         );
         if (cancelled) return;
-        // Token assignment is required on mapbox-gl v3.
         (mapboxgl as unknown as { accessToken: string }).accessToken =
           readToken();
 
@@ -225,30 +284,42 @@ export function useMapboxMount({
           dragRotate: false,
         }) as unknown as GwMap;
 
+        // Subscribers registered by the SVG overlay — fired on every
+        // map move/zoom/rotate/pitch event so anchors can reproject.
+        const { fire: fireOverlay, bridge } = createOverlayBridge(() => map);
+
         map.on?.("load", () => {
           if (!map) return;
           tintStyle(map);
           addPathArcs(map);
           add3DBuildings(map);
+          // v1 enriched stack — tracts + catchment + transit + 3 routes.
+          registerEnrichedLayers(map);
           addMarkers(mapboxgl, map);
-          onAlive(true);
-          // T23 — surface the live map to the chapter so the
-          // useMapboxSkyForTimeOfDay hook can paint the sky once style is in.
-          onMapReady?.(map);
+          onAliveRef.current(true);
+          onMapReadyRef.current?.(map);
+          // Fire once after load so the overlay can paint with first
+          // valid projection.
+          fireOverlay();
         });
 
-        // Bridge for SiteHeader theme toggle.
+        const moveEvents: MapMoveEvent[] = ["move", "zoom", "rotate", "pitch"];
+        for (const ev of moveEvents) {
+          map.on?.(ev, fireOverlay);
+        }
+
+        // Bridge for SiteHeader theme toggle + Driver C choreography flyTo.
         window._gw_map = {
           setStyle: (style: string) => {
             if (!map) return;
             try {
               map.setStyle?.(style);
-              // Re-tint after the style swap completes.
               map.once?.("style.load", () => {
                 if (map) {
                   tintStyle(map);
                   addPathArcs(map);
                   add3DBuildings(map);
+                  registerEnrichedLayers(map);
                 }
               });
             } catch {
@@ -256,9 +327,30 @@ export function useMapboxMount({
             }
           },
         };
+        // SVG overlay bridge — subscribe + project anchors without
+        // holding a direct reference to the live Mapbox instance.
+        window._gw_map_overlay = bridge;
+
+        // Surface flyTo so the choreography hook can drive the camera
+        // without holding a reference to the live map instance.
+        window._gw_map_fly = {
+          flyTo: (opts: Record<string, unknown>) => {
+            try {
+              map?.flyTo?.(opts);
+            } catch {
+              /* ignore */
+            }
+          },
+          jumpTo: (opts: Record<string, unknown>) => {
+            try {
+              map?.jumpTo?.(opts);
+            } catch {
+              /* ignore */
+            }
+          },
+        };
       } catch {
-        // Mapbox unavailable — fallback layer carries the page.
-        onAlive(false);
+        onAliveRef.current(false);
       }
     })();
 
@@ -267,12 +359,15 @@ export function useMapboxMount({
       try {
         if (typeof window !== "undefined") {
           delete window._gw_map;
+          delete window._gw_map_fly;
+          delete window._gw_map_overlay;
         }
         map?.remove?.();
-        onMapReady?.(null);
+        onMapReadyRef.current?.(null);
       } catch {
         /* ignore */
       }
     };
-  }, [mapDivRef, onAlive, onMapReady]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapDivRef]);
 }
