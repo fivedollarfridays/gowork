@@ -154,3 +154,25 @@ describe("JobMatchCard — commute estimate", () => {
     expect(screen.getByLabelText("40 minute walk")).toBeInTheDocument();
   });
 });
+
+describe("JobMatchCard — match-percentage badge", () => {
+  it("renders the match badge in brand cyan (--primary), not gray (--secondary)", () => {
+    // Pre-fix bug: badge was bg-secondary/10 text-secondary border-secondary/30,
+    // which in dark mode resolved to #1A2338 (elevated navy) on a navy card —
+    // washed-out gray-on-gray. Brand cyan is the path color and what the design
+    // calls for. Source: docs/visual-rebirth-plan.md "Color → Accents".
+    const job = makeJob({ relevance_score: 0.34 });
+    render(<JobMatchCard job={job} />);
+    const badge = screen.getByText(/34% Match/);
+    const cls = badge.className;
+    expect(cls).toMatch(/text-primary|text-cyan|bg-primary/);
+    expect(cls).not.toMatch(/text-secondary\b/);
+    expect(cls).not.toMatch(/bg-secondary\/10/);
+  });
+
+  it("hides match badge when relevance_score is 0", () => {
+    const job = makeJob({ relevance_score: 0 });
+    render(<JobMatchCard job={job} />);
+    expect(screen.queryByText(/% Match/)).not.toBeInTheDocument();
+  });
+});

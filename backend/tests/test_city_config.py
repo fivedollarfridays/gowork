@@ -213,7 +213,10 @@ class TestFortWorthYaml:
 
     def test_has_expected_adapters(self):
         cfg = load_city_config("fort-worth")
-        assert cfg.job_adapters == ["twc", "usajobs"]
+        # city-aware-jobs branch added "honestjobs" so the FW seed file
+        # (data/cities/fort-worth/honestjobs_listings.json) flows through
+        # the JobAggregator the same way the AL seed does.
+        assert cfg.job_adapters == ["twc", "usajobs", "honestjobs"]
 
     def test_has_zip_ranges(self):
         cfg = load_city_config("fort-worth")

@@ -45,7 +45,10 @@ export function JobMatchCard({ job, creditResult }: JobMatchCardProps) {
             {job.company}{source ? ` · ${source}` : ""}
           </p>
           {scored && job.relevance_score > 0 && (
-            <Badge className="bg-secondary/10 text-secondary border-secondary/30 text-[10px]" variant="outline">
+            <Badge
+              className="bg-primary/10 text-primary border-primary/40 text-[10px]"
+              variant="outline"
+            >
               {Math.round(job.relevance_score * 100)}% Match
             </Badge>
           )}
