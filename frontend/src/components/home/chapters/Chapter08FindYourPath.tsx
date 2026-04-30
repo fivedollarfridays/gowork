@@ -689,6 +689,7 @@ export function Chapter08FindYourPath({
         >
           <span
             data-ch08-line="1"
+            data-revealed="false"
             className="line"
             style={{ display: "block", willChange: "transform, opacity" }}
           >
@@ -696,6 +697,7 @@ export function Chapter08FindYourPath({
           </span>
           <span
             data-ch08-line="2"
+            data-revealed="false"
             className="line italic-axis"
             style={{
               display: "block",
@@ -707,6 +709,7 @@ export function Chapter08FindYourPath({
           </span>
           <span
             data-ch08-line="3"
+            data-revealed="false"
             className="line"
             style={{ display: "block", willChange: "transform, opacity" }}
           >
@@ -714,6 +717,7 @@ export function Chapter08FindYourPath({
           </span>
           <span
             data-ch08-line="4"
+            data-revealed="false"
             className="line"
             style={{ display: "block", willChange: "transform, opacity" }}
           >

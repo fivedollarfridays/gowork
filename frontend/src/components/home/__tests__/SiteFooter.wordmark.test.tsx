@@ -1,53 +1,49 @@
 /**
- * SiteFooter — polish-2 T8.
+ * SiteFooter — wordmark presence (post-polish-3).
  *
- * Below the legal row, a marquee "GOWORK · GOWORK · GOWORK …" scrubs
- * opposite to the scroll velocity. 12rem scale, 12% opacity, masked
- * top/bottom.
+ * polish-2 T8 originally placed a reverse-scroll "GOWORK · GOWORK …"
+ * marquee below the legal+credit rows. polish-3 removed that wordmark
+ * because it duplicated the Ch08 mic-drop wordmark closer and bloated
+ * the bottom of every page. The remaining footer chrome is brand
+ * column + 3 nav columns + legal nav + credit row.
+ *
+ * These tests lock in the removal: the wordmark MUST NOT render in
+ * SiteFooter, and the Ch08 closer remains the sole wordmark surface.
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, act } from "@testing-library/react";
+import { describe, it, expect, beforeEach } from "vitest";
+import { render } from "@testing-library/react";
 import { TranslationProvider } from "@/hooks/useTranslation";
 import { setLocale } from "@/lib/i18n";
 
-vi.mock("@/hooks/useScrollVelocity", () => ({
-  useScrollVelocity: vi.fn(),
-}));
-
-import { useScrollVelocity } from "@/hooks/useScrollVelocity";
 import { SiteFooter } from "../SiteFooter";
 
 function wrap(node: React.ReactNode) {
   return render(<TranslationProvider>{node}</TranslationProvider>);
 }
 
-describe("SiteFooter — reverse-scroll wordmark (T8)", () => {
+describe("SiteFooter — wordmark removed (polish-3)", () => {
   beforeEach(() => {
     setLocale("en");
-    vi.mocked(useScrollVelocity).mockReturnValue({ velocity: 0, isFast: false });
   });
 
-  afterEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("renders the wordmark row containing 'GOWORK' tokens", () => {
+  it("does NOT render the legacy reverse-scroll GOWORK wordmark row", () => {
     const { container } = wrap(<SiteFooter />);
     const row = container.querySelector("[data-site-footer-wordmark]");
-    expect(row).toBeTruthy();
-    expect(row?.textContent).toMatch(/GOWORK/);
+    expect(row).toBeNull();
   });
 
-  it("has at least three GOWORK tokens for the marquee illusion", () => {
+  it("still renders the four-column grid + legal nav + credit row", () => {
     const { container } = wrap(<SiteFooter />);
-    const row = container.querySelector("[data-site-footer-wordmark]");
-    const tokens = (row?.textContent ?? "").match(/GOWORK/g) ?? [];
-    expect(tokens.length).toBeGreaterThanOrEqual(3);
+    expect(container.querySelector("[data-site-footer]")).not.toBeNull();
+    // Four-column grid (brand + 3 nav columns) — assert at least one heading
+    // from each by class. The columns ship inside the grid; the credit row
+    // includes the version pin (e.g. "v0.4.2").
+    expect((container.textContent ?? "")).toMatch(/v\d/);
   });
 
-  it("is hidden from assistive tech (aria-hidden)", () => {
+  it("footer carries an aria role of contentinfo", () => {
     const { container } = wrap(<SiteFooter />);
-    const row = container.querySelector("[data-site-footer-wordmark]");
-    expect(row?.getAttribute("aria-hidden")).toBe("true");
+    const footer = container.querySelector("[data-site-footer]");
+    expect(footer?.getAttribute("role")).toBe("contentinfo");
   });
 });

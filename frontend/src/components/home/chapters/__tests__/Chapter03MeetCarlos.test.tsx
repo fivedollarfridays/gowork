@@ -57,9 +57,17 @@ describe("Chapter03MeetCarlos — split portrait + parallax text", () => {
     expect(h2?.tagName.toLowerCase()).toBe("h2");
   });
 
-  it("renders the stylized portrait svg", () => {
+  it("renders the Carlos portrait image inside the framed portrait wrapper", () => {
+    // polish-3 swap: the synthetic SVG portrait was replaced with a real
+    // photograph (`/home/carlos.jpg`) loaded through next/image. Locate the
+    // portrait wrapper + its <img> child instead of the legacy `.carlos-svg`.
     const { container } = renderEn();
-    expect(container.querySelector(".carlos-svg")).not.toBeNull();
+    const portrait = container.querySelector(".ch03-portrait");
+    expect(portrait).not.toBeNull();
+    const img = portrait?.querySelector("img");
+    expect(img).not.toBeNull();
+    expect(img?.getAttribute("src") ?? "").toMatch(/carlos\.jpg/);
+    expect(img?.getAttribute("alt") ?? "").not.toBe("");
   });
 
   it("caption block names Carlos R. and the bus quote", () => {
@@ -91,23 +99,26 @@ describe("Chapter03MeetCarlos — split portrait + parallax text", () => {
   });
 });
 
-describe("Chapter03MeetCarlos — T16 portrait depth z-layers", () => {
-  it("portrait SVG splits into 3 parallax z-layers", () => {
+describe("Chapter03MeetCarlos — T16 portrait depth (vignette + rim)", () => {
+  // polish-3 replaced the SVG-with-3-parallax-z-layers portrait with a real
+  // photograph layered with a vignette + rim-glow overlay. Depth is now
+  // achieved via overlay layers on top of the <img>, not via SVG <g>
+  // parallax. These tests assert the new depth chrome instead.
+  it("portrait wrapper layers the photo + vignette + rim overlays", () => {
     const { container } = renderEn();
-    const layers = container.querySelectorAll('.carlos-svg [data-parallax-z]');
-    // Background blob, mid-tone shadow, foreground silhouette.
-    expect(layers.length).toBe(3);
+    const portrait = container.querySelector(".ch03-portrait");
+    expect(portrait).not.toBeNull();
+    // Photo + 2 aria-hidden overlay divs (vignette + rim) + the caption block.
+    const img = portrait?.querySelector("img");
+    expect(img).not.toBeNull();
+    const overlays = portrait?.querySelectorAll('div[aria-hidden="true"]');
+    expect((overlays?.length ?? 0)).toBeGreaterThanOrEqual(2);
   });
 
-  it("each parallax z-layer carries a unique depth value", () => {
+  it("portrait wrapper opts into the gradient-border treatment", () => {
     const { container } = renderEn();
-    const layers = container.querySelectorAll('.carlos-svg [data-parallax-z]');
-    const depths = Array.from(layers).map(
-      (g) => g.getAttribute("data-parallax-z") ?? "",
-    );
-    // Three distinct depth ids (1, 2, 3).
-    expect(new Set(depths).size).toBe(3);
-    expect(depths).toEqual(["1", "2", "3"]);
+    const portrait = container.querySelector(".ch03-portrait");
+    expect(portrait?.getAttribute("data-gradient-border")).toBe("on");
   });
 });
 

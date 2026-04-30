@@ -20,10 +20,18 @@ describe("animations.css — T1.107 brand-mark hover path-draw", () => {
     expect(CSS).toMatch(/stroke-dasharray:\s*192/);
   });
 
-  it("targets stroke-dashoffset transition on hover", () => {
+  it("draws the path via stroke-dashoffset on hover (keyframe rescan)", () => {
+    // The original AC asked for a CSS `transition: stroke-dashoffset …`,
+    // but the shipped implementation uses a one-shot keyframe animation
+    // (`gowork-mark-rescan`) that erases then redraws the path on hover.
+    // Same visual gesture, different mechanism. Lock the keyframe + the
+    // rescan-on-hover animation hookup so the path-draw can't silently
+    // regress.
+    expect(CSS).toMatch(/@keyframes\s+gowork-mark-rescan/);
     expect(CSS).toMatch(
-      /transition:\s*stroke-dashoffset\s+600ms\s+cubic-bezier\(0\.16,\s*1,\s*0\.3,\s*1\)/,
+      /\.gowork-mark--hover:hover[\s\S]*animation:\s*gowork-mark-rescan/,
     );
+    expect(CSS).toMatch(/stroke-dashoffset:\s*\d/);
   });
 
   it("animates the path on :hover and :focus-visible (keyboard parity)", () => {

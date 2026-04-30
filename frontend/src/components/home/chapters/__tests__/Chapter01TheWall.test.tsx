@@ -79,14 +79,19 @@ describe("Chapter01TheWall — kinetic hero", () => {
     expect(container.querySelector("#morph-word")).not.toBeNull();
   });
 
-  it("subhead names the seven barriers and the first-system promise", () => {
-    renderEn();
-    expect(
-      screen.getByText(/seven invisible barriers/i),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/first system that sees all seven/i),
-    ).toBeInTheDocument();
+  it("subhead names the seven barriers and the GoWork-sees-all-seven promise", () => {
+    // Subhead now uses WordReveal, which splits each phrase into per-word
+    // spans for the entrance animation — phrases are NOT a single text
+    // node anymore. Match against the subhead element's textContent so
+    // we still verify the editorial copy without coupling to the
+    // animation wrapper structure.
+    const { container } = renderEn();
+    const sub = container.querySelector(".ch01-sub");
+    expect(sub).not.toBeNull();
+    const text = sub?.textContent ?? "";
+    expect(text).toMatch(/seven invisible barriers/i);
+    // Post-narrative-reset copy: "GoWork sees all seven at once."
+    expect(text).toMatch(/sees all seven/i);
   });
 
   it("renders primary CTA pointing at /assess and ghost CTA pointing at #chapter-04", () => {
@@ -112,11 +117,12 @@ describe("Chapter01TheWall — kinetic hero", () => {
   });
 
   it("Spanish toggle swaps eyebrow + subhead", () => {
-    renderEs();
+    const { container } = renderEs();
     expect(screen.getByText(/en producción/i)).toBeInTheDocument();
-    expect(
-      screen.getByText(/siete barreras invisibles/i),
-    ).toBeInTheDocument();
+    // Subhead is WordReveal-split; assert against textContent.
+    const sub = container.querySelector(".ch01-sub");
+    expect(sub).not.toBeNull();
+    expect(sub?.textContent ?? "").toMatch(/siete barreras invisibles/i);
   });
 });
 
@@ -156,11 +162,17 @@ describe("Chapter01TheWall — T11 height-stable morph word", () => {
 
 describe("Chapter01TheWall — T12 hero variable-font weight axis", () => {
   it("line-1 carries a fontVariationSettings axis when scrolled", () => {
+    // post-narrative-reset: line-1 is wrapped in a <MaskReveal> whose
+    // outer span carries the `.line-1` class (with the clip-mask styles
+    // only) and whose inner span (data-mask-inner) carries the actual
+    // typography styles, including the variable-font axis. Query the
+    // inner layer.
     const { container } = renderEn();
     const line1 = container.querySelector(".ch01-h1 .line-1") as HTMLElement | null;
     expect(line1).not.toBeNull();
-    // Style attribute must carry "wght" — the axis name driven by useHeroFontWeight.
-    expect(line1?.getAttribute("style") ?? "").toMatch(/wght/);
+    const inner = line1?.querySelector("[data-mask-inner]") as HTMLElement | null;
+    expect(inner).not.toBeNull();
+    expect(inner?.getAttribute("style") ?? "").toMatch(/wght/);
   });
 });
 
