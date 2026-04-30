@@ -28,6 +28,7 @@ import { TitleSequenceGate } from "@/components/home/TitleSequenceGate";
 import { ScrollVelocityBridge } from "@/components/home/ScrollVelocityBridge";
 import { EyebrowActiveBridge } from "@/components/home/EyebrowActiveBridge";
 import { FpsOverlayGate } from "@/components/home/FpsOverlayGate";
+import { ChapterSlot } from "@/components/home/_internal/ChapterSlot";
 import { useEffect, useState } from "react";
 import { useScrollProgress } from "@/hooks/useScrollProgress";
 import { useActiveSection } from "@/hooks/useActiveSection";
@@ -155,14 +156,23 @@ export default function HomePage(): JSX.Element {
         hour={hour}
       />
       <main id="home-main" data-home-main="true">
-        <Chapter01TheWall />
-        <Chapter02TheNumbers />
-        <Chapter03MeetCarlos />
-        <Chapter04TheMap />
-        <Chapter05ThePlan />
-        <Chapter06LiveJobs />
-        <Chapter07TheCliff />
-        <Chapter08FindYourPath />
+        {/* Each chapter is wrapped in a <ChapterSlot> so SSR reserves
+         *  100vh of vertical space per chapter before its
+         *  dynamic({ ssr: false }) body hydrates. Without the slot the
+         *  SiteFooter shifts ~800vh on initial hydration as the 8
+         *  chapters mount in sequence — Lighthouse measured the footer
+         *  shift at 0.422 CLS (the entire perf-score deficit on PR #87).
+         *  The slot is a transparent <div> with min-height: 100vh and
+         *  no other styling, so the chapter looks identical once
+         *  hydrated. See ChapterSlot.tsx for full rationale. */}
+        <ChapterSlot><Chapter01TheWall /></ChapterSlot>
+        <ChapterSlot><Chapter02TheNumbers /></ChapterSlot>
+        <ChapterSlot><Chapter03MeetCarlos /></ChapterSlot>
+        <ChapterSlot><Chapter04TheMap /></ChapterSlot>
+        <ChapterSlot><Chapter05ThePlan /></ChapterSlot>
+        <ChapterSlot><Chapter06LiveJobs /></ChapterSlot>
+        <ChapterSlot><Chapter07TheCliff /></ChapterSlot>
+        <ChapterSlot><Chapter08FindYourPath /></ChapterSlot>
       </main>
       <SiteFooter />
       <FpsOverlayGate chapter={activeChapter} />
