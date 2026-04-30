@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { CareerCenterExport } from "../CareerCenterExport";
 
@@ -105,6 +105,8 @@ describe("CareerCenterExport", () => {
     expect(button).toBeDisabled();
 
     resolveSave();
+    await savePromise;
+    await new Promise((r) => setTimeout(r, 0));
     vi.doUnmock("html2pdf.js");
   });
 
@@ -161,6 +163,8 @@ describe("CareerCenterExport", () => {
     });
 
     resolveSave();
+    await savePromise;
+    await new Promise((r) => setTimeout(r, 0));
     vi.doUnmock("html2pdf.js");
   });
 
@@ -174,12 +178,15 @@ describe("CareerCenterExport", () => {
       }),
     }));
 
-    render(<CareerCenterExport sessionId="sess-1" />);
+    const { container } = render(<CareerCenterExport sessionId="sess-1" />);
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: /career center pdf/i }));
 
+    // Scope the query to THIS render's container so a residual print
+    // layout from a previous test (Linux CI parallel-pressure flake)
+    // can't shadow this test's own render.
     await waitFor(() => {
-      expect(screen.getByText(/Montgomery Career Center/)).toBeInTheDocument();
+      expect(within(container).getByText(/Montgomery Career Center/)).toBeInTheDocument();
     });
 
     vi.doUnmock("html2pdf.js");

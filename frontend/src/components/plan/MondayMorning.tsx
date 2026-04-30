@@ -85,7 +85,7 @@ export function MondayMorning({ plan, profile, firstStepAction }: MondayMorningP
 function CareerCenterStep({ action }: { action?: ReactNode }) {
   const cc = getCareerCenter(useCityConfig().state);
   return (
-    <Card className="h-full flex flex-col hover:shadow-[0_0_20px_rgba(45,149,150,0.2)] hover:border-secondary/30 hover:-translate-y-0.5">
+    <Card className="h-full flex flex-col hover:shadow-[0_0_20px_rgba(34,211,238,0.2)] hover:border-secondary/30 hover:-translate-y-0.5">
       <CardContent className="p-4 flex flex-col gap-3 flex-1">
         <div className="flex items-start gap-2">
           <span className={stepNumber}>1</span>
@@ -137,7 +137,7 @@ function JobsStep({ jobs }: { jobs: ScoredJobMatch[] }) {
   };
 
   return (
-    <Card className="h-full flex flex-col hover:shadow-[0_0_20px_rgba(45,149,150,0.2)] hover:border-secondary/30 hover:-translate-y-0.5">
+    <Card className="h-full flex flex-col hover:shadow-[0_0_20px_rgba(34,211,238,0.2)] hover:border-secondary/30 hover:-translate-y-0.5">
       <CardContent className="p-4 flex flex-col gap-3 flex-1">
         <div className="flex items-start gap-2">
           <span className={stepNumber}>2</span>
@@ -187,7 +187,7 @@ function JobsStep({ jobs }: { jobs: ScoredJobMatch[] }) {
 function BarrierStep({ barriers }: { barriers: BarrierCard[] }) {
   if (barriers.length === 0) {
     return (
-      <Card className="h-full flex flex-col hover:shadow-[0_0_20px_rgba(45,149,150,0.2)] hover:border-secondary/30 hover:-translate-y-0.5">
+      <Card className="h-full flex flex-col hover:shadow-[0_0_20px_rgba(34,211,238,0.2)] hover:border-secondary/30 hover:-translate-y-0.5">
         <CardContent className="p-4 flex flex-col gap-3 flex-1">
           <div className="flex items-start gap-2">
             <span className={stepNumber}>3</span>
@@ -207,7 +207,7 @@ function BarrierStep({ barriers }: { barriers: BarrierCard[] }) {
   const additional = barriers.slice(1);
 
   return (
-    <Card className="h-full flex flex-col hover:shadow-[0_0_20px_rgba(45,149,150,0.2)] hover:border-secondary/30 hover:-translate-y-0.5">
+    <Card className="h-full flex flex-col hover:shadow-[0_0_20px_rgba(34,211,238,0.2)] hover:border-secondary/30 hover:-translate-y-0.5">
       <CardContent className="p-4 flex flex-col gap-3 flex-1">
         <div className="flex items-start gap-2">
           <span className={stepNumber}>3</span>

@@ -1,0 +1,267 @@
+/* W1 layout tokens + base utilities — preserved from globals.css (T1.7),
+ * extended by T1.65 (focus rings + selection), T1.106 (branded scrollbar),
+ * T1.107 (brand mark hover path-draw).
+ *
+ * @layer utilities holds composable utility classes; @layer base holds the
+ * universal selector resets that previously lived in globals.css.
+ */
+
+/* NOTE: @layer wrappers removed — Tailwind's PostCSS plugin processes each
+ * imported partial independently and rejects @layer directives without a
+ * same-file @tailwind directive. postcss-import resolution proved brittle
+ * in dev hot-reload; rules at root scope compose into Tailwind's cascade
+ * via the @tailwind directives in globals.css. @apply still works because
+ * the file is processed by the same PostCSS pipeline. */
+.text-balance {
+  text-wrap: balance;
+}
+
+* {
+  @apply border-border;
+  transition: background-color 150ms ease-in-out, border-color 150ms ease-in-out, color 150ms ease-in-out;
+}
+html, body {
+  overscroll-behavior: none;
+}
+/* polish-2 — body unconditionally reads our OKLCH theme canvas. The
+ * shadcn HSL `bg-background` chain was bleeding the legacy cream default
+ * onto every section that wasn't a darkened chapter. `--bg-base` is now
+ * driven by `[data-theme="light|dark"]` overrides in tokens/colors.css,
+ * so the body color tracks the toggle automatically. The 320ms
+ * transition smooths the day↔night flip; reduced-motion users see an
+ * instant swap (per the universal !important override in motion.css). */
+body {
+  background: var(--bg-base);
+  color: var(--fg-primary);
+  transition:
+    background-color 320ms var(--ease-linear-sig, cubic-bezier(0.32, 0.72, 0, 1)),
+    color 320ms var(--ease-linear-sig, cubic-bezier(0.32, 0.72, 0, 1));
+}
+/* `.dark` from next-themes / shadcn is now redundant for body color but
+ * remains a no-op so existing utility classes (e.g. `dark:bg-...`)
+ * still cascade correctly for component-level dark-mode opt-ins. */
+
+/* ─── T1.65 — Focus rings + text selection ───────────────────────────────────
+ * 2px cyan focus outline with animated entry (outline-offset 0 → 2px) so
+ * keyboard users get a clear "here you are" signal that doesn't feel jarring.
+ * Reduced-motion users get the static offset thanks to the universal
+ * transition-duration override in motion.css (T1.22).
+ *
+ * ::selection tints the highlight with a 40%-mixed cyan glass — the brand
+ * accent shows even in selected-text states. WCAG: cyan-on-base ≥3:1
+ * (verified by T1.13 contrast script).
+ */
+*:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+  transition: outline-offset 150ms var(--ease-linear-sig);
+}
+
+::selection {
+  background-color: color-mix(in oklch, var(--accent-cyan), transparent 60%);
+  color: var(--fg-primary);
+}
+
+::-moz-selection {
+  background-color: color-mix(in oklch, var(--accent-cyan), transparent 60%);
+  color: var(--fg-primary);
+}
+
+/* ─── T1.106 — Branded scrollbar ─────────────────────────────────────────────
+ * Default OS scrollbar shouts "this is a webpage." Brand-tinted track + a
+ * cyan-mixed thumb carries identity into the chrome. Webkit covers Chrome /
+ * Safari / Edge; scrollbar-color + scrollbar-width cover Firefox. Older
+ * browsers ignore both branches without error.
+ */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in oklch, var(--accent-cyan), var(--bg-elevated) 60%);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-cyan);
+}
+
+html {
+  scrollbar-color: var(--accent-cyan) var(--bg-surface);
+  scrollbar-width: thin;
+}
+
+/* ─── Wave-2 — Z-stack hierarchy tokens ──────────────────────────────────────
+ * One source of truth for stacking-order across overlays. Discovered during
+ * W1 maximization that two overlays (CookieBanner + PWAInstallPrompt) shipped
+ * at literal `z-[55]` and would collide whenever both surfaced (a reduced-
+ * motion + first-visit + Chromium user). This token system sets the canonical
+ * order; consumers use `var(--z-*)` (or Tailwind's `z-[var(...)]` arbitrary
+ * value) instead of literal numbers.
+ *
+ *   --z-skip-link:        100 — keyboard users land here first; never occluded
+ *   --z-modal:             80 — modal dialogs (W2/W3 reserved)
+ *   --z-toast:             70 — transient announcements
+ *   --z-header:            50 — sticky header chrome
+ *   --z-banner:            40 — stall-alert banner UNDER header chrome
+ *   --z-pwa-prompt:        30 — install prompt
+ *   --z-cookie:            30 — cookie disclosure (sibling layer to PWA)
+ *   --z-cursor-flashlight:  5 — overlay above content, below chrome
+ *   --z-content:            1 — default page content
+ *
+ * Hierarchy intent: keyboard a11y > modal > toast > chrome > banner > prompts
+ *                   > cursor effects > content. Never invert without arch
+ *                   review.
+ */
+:root {
+  --z-skip-link: 100;
+  --z-modal: 80;
+  --z-toast: 70;
+  --z-header: 50;
+  --z-banner: 40;
+  --z-pwa-prompt: 30;
+  --z-cookie: 30;
+  --z-cursor-flashlight: 5;
+  --z-content: 1;
+}
+
+/* ─── Wave-2 — Skip-to-content link (z-skip-link consumer) ───────────────────
+ * Visible-on-focus, NEVER visually-hidden. Per visual-rebirth-plan.md "Skip
+ * link is proudly visible on focus, not a screen-reader-only hack." Lifts to
+ * `--z-skip-link` (100) so it cannot be occluded by any chrome/banner.
+ */
+.skip-to-content {
+  position: fixed;
+  top: -100px;
+  left: 1rem;
+  z-index: var(--z-skip-link, 100);
+  padding: 0.5rem 1rem;
+  background: var(--accent-cyan);
+  color: var(--bg-base);
+  border-radius: 6px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: top 150ms var(--ease-linear-sig, ease-in-out);
+}
+
+.skip-to-content:focus {
+  top: 1rem;
+  outline: none;
+}
+
+/* ─── sprint/gowork-facelift Driver D — chapter alias tokens ───────────────
+ * `--bg-elev-1` is consumed by `home-chapters.css` as the elevation-level-1
+ * surface. Aliased here (NOT in colors.css) so colors.css stays under its
+ * <200-line size budget (T1.11). Same value as `--bg-elevated`.
+ */
+:root {
+  --bg-elev-1: var(--bg-elevated);
+}
+
+/* ─── sprint/gowork-facelift Driver A — Site chrome layout ──────────────────
+ * The home chrome (SiteHeader / ChapterRail / PageMeta / SiteFooter /
+ * CursorFlashlight) lives outside chapter content rectangles and renders on
+ * every screen of the GoWork story. Tokens-only, breakpoint-gated.
+ */
+
+/* ChapterRail — hidden below 1100px viewport per the design handoff. We use
+ * Tailwind's `xl:` (1280px) inside the component for the *desktop* show, but
+ * still want the rail visible on the 1100..1280 window where Tailwind's xl
+ * doesn't yet kick in. This rule covers that gap precisely. */
+@media (min-width: 1100px) {
+  [data-chapter-rail] {
+    display: flex !important;
+  }
+}
+@media (max-width: 1099px) {
+  [data-chapter-rail] {
+    display: none !important;
+  }
+}
+
+/* PageMeta — hidden below 720px viewport per the design handoff. */
+@media (max-width: 719px) {
+  [data-page-meta] {
+    display: none !important;
+  }
+}
+
+/* Site-nav underline-on-hover — cyan→amber gradient. Lives on the SiteHeader's
+ * `.site-nav__link` anchors. The link itself stays a bare neutral; the ::after
+ * draws the gradient bar that scales 0→1 from the left on hover/focus. */
+.site-nav__link {
+  position: relative;
+}
+.site-nav__link::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 4px;
+  height: 2px;
+  background: linear-gradient(to right, var(--accent-cyan), var(--accent-amber));
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 220ms var(--ease-linear-sig, ease-in-out);
+  border-radius: 2px;
+}
+.site-nav__link:hover::after,
+.site-nav__link:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* Footer link styling — match the underline-on-hover affordance at a smaller
+ * scale so hover state is consistent with the header. */
+.footer-link {
+  color: var(--fg-secondary);
+  transition: color 180ms var(--ease-linear-sig, ease-in-out);
+}
+.footer-link:hover,
+.footer-link:focus-visible {
+  color: var(--accent-cyan);
+}
+
+/* Time-of-day → background tint. Chapter sections set `data-bg` (`dark` /
+ * `warm` / `rose`) and the body picks up the matching gradient/wash. The
+ * 1.4s transition keeps the cross-chapter mood swap from feeling jarring. */
+body {
+  transition: background 1400ms ease-out;
+}
+body[data-bg="dark"] {
+  background: var(--bg-base);
+}
+body[data-bg="warm"] {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--bg-base), var(--accent-amber) 4%) 0%,
+    var(--bg-base) 100%
+  );
+}
+body[data-bg="rose"] {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--bg-base), var(--accent-rose) 5%) 0%,
+    var(--bg-base) 100%
+  );
+}
+
+/* CursorFlashlight — fade in via body.cursor-active. The data-attribute
+ * version (used by the React component) controls opacity inline; the body
+ * class hook here is a parallel signal so other layers (e.g. chapter
+ * vignettes) can react to "cursor is engaged" without subscribing to the
+ * pointermove stream themselves. */
+@media (prefers-reduced-motion: reduce) {
+  [data-home-cursor-flashlight] {
+    display: none !important;
+  }
+}
+@media (pointer: coarse) {
+  [data-home-cursor-flashlight] {
+    display: none !important;
+  }
+}

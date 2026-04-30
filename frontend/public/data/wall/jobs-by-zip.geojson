@@ -1,0 +1,620 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "name": "Fort Worth-area employer markers",
+    "source": "Generated from frontend/src/lib/wall/layers/jobsByZipData.ts (single source of truth)",
+    "buildScript": "buildJobsByZipGeoJSON()",
+    "honestUncertainty": "Fair-chance flags are educated approximations from public hiring statements; W4 follow-up curates from primary sources.",
+    "lastVerified": "2026-04-27"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "amazon-dfw5",
+        "name": "Amazon Fulfillment Center DFW5",
+        "category": "warehouse",
+        "fairChance": true,
+        "creditCheck": false,
+        "longitude": -97.3198,
+        "latitude": 32.9922
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.3198,
+          32.9922
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "fedex-fw-distribution",
+        "name": "FedEx Ground — Fort Worth Distribution",
+        "category": "logistics",
+        "fairChance": true,
+        "creditCheck": false,
+        "longitude": -97.265,
+        "latitude": 32.795
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.265,
+          32.795
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "ups-fw-hub",
+        "name": "UPS Fort Worth Hub",
+        "category": "logistics",
+        "fairChance": true,
+        "creditCheck": false,
+        "longitude": -97.286,
+        "latitude": 32.812
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.286,
+          32.812
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "xpo-logistics-fw",
+        "name": "XPO Logistics — Fort Worth",
+        "category": "logistics",
+        "fairChance": false,
+        "creditCheck": false,
+        "longitude": -97.341,
+        "latitude": 32.78
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.341,
+          32.78
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "saia-freight-fw",
+        "name": "Saia Freight — Fort Worth Terminal",
+        "category": "logistics",
+        "fairChance": false,
+        "creditCheck": false,
+        "longitude": -97.298,
+        "latitude": 32.808
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.298,
+          32.808
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "lockheed-martin-fw",
+        "name": "Lockheed Martin Aeronautics — Fort Worth",
+        "category": "manufacturing",
+        "fairChance": false,
+        "creditCheck": true,
+        "longitude": -97.4396,
+        "latitude": 32.7707
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.4396,
+          32.7707
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "bell-textron-fw",
+        "name": "Bell Textron — Fort Worth",
+        "category": "manufacturing",
+        "fairChance": false,
+        "creditCheck": true,
+        "longitude": -97.358,
+        "latitude": 32.84
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.358,
+          32.84
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "hilton-foods-fw",
+        "name": "Hilton Foods Group — Fort Worth Plant",
+        "category": "manufacturing",
+        "fairChance": true,
+        "creditCheck": false,
+        "longitude": -97.31,
+        "latitude": 32.69
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.31,
+          32.69
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "walmart-dc-grand-prairie",
+        "name": "Walmart Distribution Center — Grand Prairie",
+        "category": "warehouse",
+        "fairChance": true,
+        "creditCheck": false,
+        "longitude": -97.21,
+        "latitude": 32.736
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.21,
+          32.736
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "target-dc-fw",
+        "name": "Target Distribution — Fort Worth",
+        "category": "warehouse",
+        "fairChance": true,
+        "creditCheck": false,
+        "longitude": -97.25,
+        "latitude": 32.84
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.25,
+          32.84
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "home-depot-fw",
+        "name": "Home Depot — Fort Worth",
+        "category": "retail",
+        "fairChance": true,
+        "creditCheck": false,
+        "longitude": -97.36,
+        "latitude": 32.71
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.36,
+          32.71
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "lowes-fw",
+        "name": "Lowe's — Fort Worth",
+        "category": "retail",
+        "fairChance": true,
+        "creditCheck": false,
+        "longitude": -97.4,
+        "latitude": 32.77
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.4,
+          32.77
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "kroger-fw-east",
+        "name": "Kroger — East Fort Worth",
+        "category": "retail",
+        "fairChance": true,
+        "creditCheck": false,
+        "longitude": -97.27,
+        "latitude": 32.745
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.27,
+          32.745
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "albertsons-fw",
+        "name": "Albertsons — Fort Worth",
+        "category": "retail",
+        "fairChance": false,
+        "creditCheck": false,
+        "longitude": -97.42,
+        "latitude": 32.72
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.42,
+          32.72
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "texas-health-fw",
+        "name": "Texas Health Harris Methodist — Fort Worth",
+        "category": "healthcare",
+        "fairChance": false,
+        "creditCheck": true,
+        "longitude": -97.336,
+        "latitude": 32.752
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.336,
+          32.752
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "jps-health-network",
+        "name": "JPS Health Network",
+        "category": "healthcare",
+        "fairChance": true,
+        "creditCheck": false,
+        "longitude": -97.339,
+        "latitude": 32.745
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.339,
+          32.745
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "cooks-childrens",
+        "name": "Cook Children's Medical Center",
+        "category": "healthcare",
+        "fairChance": false,
+        "creditCheck": true,
+        "longitude": -97.348,
+        "latitude": 32.74
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.348,
+          32.74
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "baylor-scott-white-fw",
+        "name": "Baylor Scott & White — Fort Worth",
+        "category": "healthcare",
+        "fairChance": false,
+        "creditCheck": true,
+        "longitude": -97.385,
+        "latitude": 32.756
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.385,
+          32.756
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "marriott-fw-downtown",
+        "name": "Fort Worth Marriott Downtown",
+        "category": "service",
+        "fairChance": true,
+        "creditCheck": false,
+        "longitude": -97.327,
+        "latitude": 32.749
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.327,
+          32.749
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "hilton-fw",
+        "name": "Hilton Fort Worth",
+        "category": "service",
+        "fairChance": false,
+        "creditCheck": false,
+        "longitude": -97.334,
+        "latitude": 32.751
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.334,
+          32.751
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "omni-fw-hotel",
+        "name": "Omni Fort Worth Hotel",
+        "category": "service",
+        "fairChance": false,
+        "creditCheck": true,
+        "longitude": -97.338,
+        "latitude": 32.749
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.338,
+          32.749
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "starbucks-fw-roastery",
+        "name": "Starbucks Roastery — Fort Worth",
+        "category": "service",
+        "fairChance": true,
+        "creditCheck": false,
+        "longitude": -97.343,
+        "latitude": 32.732
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.343,
+          32.732
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "chipotle-fw-east",
+        "name": "Chipotle — East Fort Worth",
+        "category": "service",
+        "fairChance": true,
+        "creditCheck": false,
+        "longitude": -97.295,
+        "latitude": 32.728
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.295,
+          32.728
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "mcdonalds-berry",
+        "name": "McDonald's — E Berry St",
+        "category": "service",
+        "fairChance": true,
+        "creditCheck": false,
+        "longitude": -97.288,
+        "latitude": 32.715
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.288,
+          32.715
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "performance-foodservice",
+        "name": "Performance Foodservice — Fort Worth",
+        "category": "logistics",
+        "fairChance": true,
+        "creditCheck": false,
+        "longitude": -97.302,
+        "latitude": 32.79
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.302,
+          32.79
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "sysco-fw",
+        "name": "Sysco Fort Worth",
+        "category": "logistics",
+        "fairChance": true,
+        "creditCheck": false,
+        "longitude": -97.27,
+        "latitude": 32.83
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.27,
+          32.83
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "tyson-foods-fw",
+        "name": "Tyson Foods — Fort Worth Plant",
+        "category": "manufacturing",
+        "fairChance": true,
+        "creditCheck": false,
+        "longitude": -97.305,
+        "latitude": 32.685
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.305,
+          32.685
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "frito-lay-fw",
+        "name": "Frito-Lay — Fort Worth",
+        "category": "manufacturing",
+        "fairChance": false,
+        "creditCheck": false,
+        "longitude": -97.41,
+        "latitude": 32.81
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.41,
+          32.81
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "alcon-fw",
+        "name": "Alcon Laboratories — Fort Worth",
+        "category": "manufacturing",
+        "fairChance": false,
+        "creditCheck": true,
+        "longitude": -97.305,
+        "latitude": 32.79
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.305,
+          32.79
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "amerisourcebergen-fw",
+        "name": "AmerisourceBergen — Fort Worth",
+        "category": "logistics",
+        "fairChance": true,
+        "creditCheck": false,
+        "longitude": -97.31,
+        "latitude": 32.778
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.31,
+          32.778
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "americold-fw",
+        "name": "Americold Logistics — Fort Worth",
+        "category": "warehouse",
+        "fairChance": true,
+        "creditCheck": false,
+        "longitude": -97.28,
+        "latitude": 32.77
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.28,
+          32.77
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "geodis-fw",
+        "name": "GEODIS Logistics — Fort Worth",
+        "category": "logistics",
+        "fairChance": false,
+        "creditCheck": false,
+        "longitude": -97.27,
+        "latitude": 32.808
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.27,
+          32.808
+        ]
+      }
+    }
+  ]
+}

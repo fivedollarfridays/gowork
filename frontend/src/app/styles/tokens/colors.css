@@ -1,0 +1,270 @@
+/* W1 color tokens. Populated by T1.7 (split), T1.10 (OKLCH base),
+ * T1.11 (accents), T1.12 (temperature), T1.97 (prefers-contrast: more).
+ * Pre-W1 HSL palette preserved verbatim for shadcn back-compat; OKLCH
+ * tokens are additive. CONFIDENCE: C2 — color-mix is evergreen-only;
+ * @supports gives graceful degradation. See docs/visual-rebirth-plan.md.
+ */
+
+:root {
+  /* W1 OKLCH BASE — canvas surfaces (LOCKED from docs/visual-rebirth-plan.md) */
+  --bg-base: #0A0E1A;        /* paper-dark navy, base canvas */
+  --bg-surface: #0F1729;     /* raised surface */
+  --bg-elevated: #1A2338;    /* cards on surface */
+  --bg-glass: rgba(255, 255, 255, 0.04);  /* used with backdrop-blur(12px) */
+
+  /* W1 OKLCH BASE — foreground (warm paper, never pure white).
+   * Spotlight: --fg-secondary lifted from plan's #94A3B8 → #A4B3C7 and
+   * --fg-muted from #64748B → #8696A8 to clear WCAG AAA on all three
+   * surface tokens. Plan values were 6.97 / 4.05 (just under AAA); these
+   * clear 7.34 / 4.85 minimum. Hue + saturation preserved (only luminance
+   * lifted). Documented in delivery report. */
+  --fg-primary: #F5F3EE;     /* warm paper white — NOT pure white */
+  --fg-secondary: #A4B3C7;   /* AAA on bg-base/surface/elevated */
+  --fg-muted: #8696A8;       /* AAA-large on bg-base/surface/elevated */
+}
+
+/* P3-capable browsers: re-declare with OKLCH for wider gamut + perceptual
+ * uniformity. Hex fallbacks above remain authoritative for older browsers. */
+@supports (color: oklch(50% 0 0)) {
+  :root {
+    --bg-base: oklch(15.6% 0.025 260);      /* paper-dark navy */
+    --bg-surface: oklch(20.0% 0.030 260);   /* raised surface */
+    --bg-elevated: oklch(25.0% 0.030 260);  /* cards on surface */
+    --bg-glass: color-mix(in oklch, oklch(100% 0 0), transparent 96%);
+    --fg-primary: oklch(96.0% 0.008 70);    /* warm paper white */
+    --fg-secondary: oklch(73.0% 0.030 240);
+    --fg-muted: oklch(53.0% 0.030 240);
+  }
+}
+
+/* ─── DAY MODE — :root[data-theme="light"] OKLCH override ──────────────────
+ * SiteHeader writes data-theme="light" onto <html> when the toggle flips.
+ * Without these overrides the shadcn `.dark` selector cascade only swapped
+ * the legacy HSL palette while every modern surface (body, sections, OG
+ * cards, map chrome) kept reading the dark `--bg-base`. Result: flipping
+ * the toggle did nothing visually for the editorial layer.
+ *
+ * Light palette — warm-paper cream + navy ink. Inverse of the dark
+ * defaults at the top of this file. Hex fallback first; OKLCH branch
+ * inside @supports (modern only). */
+:root[data-theme="light"] {
+  --bg-base: #F5F3EE;        /* warm paper canvas (NOT pure white) */
+  --bg-surface: #ECE7DC;     /* paper shade */
+  --bg-elevated: #E2DBCB;    /* card on paper */
+  --bg-glass: rgba(10, 14, 26, 0.04);
+  --fg-primary: #0A0E1A;     /* navy ink (NOT pure black) */
+  --fg-secondary: #2E3A52;   /* mid ink */
+  --fg-muted: #5A6B82;       /* muted ink */
+}
+
+@supports (color: oklch(50% 0 0)) {
+  :root[data-theme="light"] {
+    --bg-base: oklch(96.0% 0.008 70);
+    --bg-surface: oklch(92.0% 0.012 70);
+    --bg-elevated: oklch(88.0% 0.018 70);
+    --bg-glass: color-mix(in oklch, oklch(15.6% 0.025 260), transparent 96%);
+    --fg-primary: oklch(15.6% 0.025 260);
+    --fg-secondary: oklch(28.0% 0.025 260);
+    --fg-muted: oklch(45.0% 0.020 260);
+  }
+}
+
+/* Belt-and-braces — explicit data-theme="dark" anchor so any future
+ * consumer that opts into the toggle by writing data-theme="dark"
+ * (instead of relying on the :root default) gets the same tokens. */
+:root[data-theme="dark"] {
+  --bg-base: #0A0E1A;
+  --bg-surface: #0F1729;
+  --bg-elevated: #1A2338;
+  --bg-glass: rgba(255, 255, 255, 0.04);
+  --fg-primary: #F5F3EE;
+  --fg-secondary: #A4B3C7;
+  --fg-muted: #8696A8;
+}
+@supports (color: oklch(50% 0 0)) {
+  :root[data-theme="dark"] {
+    --bg-base: oklch(15.6% 0.025 260);
+    --bg-surface: oklch(20.0% 0.030 260);
+    --bg-elevated: oklch(25.0% 0.030 260);
+    --bg-glass: color-mix(in oklch, oklch(100% 0 0), transparent 96%);
+    --fg-primary: oklch(96.0% 0.008 70);
+    --fg-secondary: oklch(73.0% 0.030 240);
+    --fg-muted: oklch(53.0% 0.030 240);
+  }
+}
+
+/* shadcn HSL palette — REBRANDED 2026-04-30 to match the canonical GoWork
+ * design system (cyan = the path, amber = warmth/Carlos, rose = cliff,
+ * green = success, navy canvas + warm paper foreground). All subpages that
+ * reach for `text-primary`, `bg-card`, `border-border`, etc. inherit the new
+ * brand automatically. The pre-rebrand palette (Navy/Teal/Coral) was the
+ * shadcn-era legacy holdover; replaced as part of the homepage-parity
+ * sweep. NOT wrapped in @layer base — Tailwind's PostCSS plugin processes
+ * each @import partial independently and rejects @layer directives without
+ * a same-file @tailwind directive. Globals.css declares the layer at the
+ * top of cascade so these :root vars compose into the base layer naturally. */
+:root {
+    /* :root = LIGHT theme defaults (warm paper canvas + navy ink). */
+    --background: 43 26% 95%;            /* #F5F3EE warm paper */
+    --foreground: 225 44% 7%;            /* #0A0E1A navy ink */
+    --card: 38 24% 89%;                  /* #ECE7DC paper-1 */
+    --card-foreground: 225 44% 7%;
+    --popover: 38 24% 89%;
+    --popover-foreground: 225 44% 7%;
+    --primary: 187 86% 53%;              /* #22D3EE cyan — the path */
+    --primary-foreground: 225 44% 7%;
+    --secondary: 38 22% 83%;             /* #E2DBCB paper-2 */
+    --secondary-foreground: 225 44% 7%;
+    --muted: 38 22% 83%;                 /* #E2DBCB paper-2 */
+    --muted-foreground: 215 18% 43%;     /* #5A6B82 mid ink */
+    --accent: 38 92% 50%;                /* #F59E0B amber — warmth */
+    --accent-foreground: 225 44% 7%;
+    --destructive: 351 95% 71%;          /* #FB7185 rose — cliff */
+    --destructive-foreground: 225 44% 7%;
+    --border: 38 15% 80%;                /* warm paper border */
+    --input: 38 15% 80%;
+    --ring: 187 86% 53%;                 /* cyan — focus ring */
+    --chart-1: 187 86% 53%;              /* cyan */
+    --chart-2: 38 92% 50%;               /* amber */
+    --chart-3: 351 95% 71%;              /* rose */
+    --chart-4: 158 64% 52%;              /* emerald */
+    --chart-5: 43 96% 56%;               /* warning yellow */
+    --success: 158 64% 52%;              /* #34D399 emerald */
+    --success-foreground: 225 44% 7%;
+    --warning: 43 96% 56%;               /* #FBBF24 warning yellow */
+    --warning-foreground: 225 44% 7%;
+    --radius: 0.5rem;
+  }
+  .dark {
+    /* .dark = DARK theme (canonical GoWork — navy canvas + warm paper). */
+    --background: 225 44% 7%;            /* #0A0E1A canvas */
+    --foreground: 43 26% 95%;            /* #F5F3EE warm paper */
+    --card: 222 46% 11%;                 /* #0F1729 surface */
+    --card-foreground: 43 26% 95%;
+    --popover: 222 46% 11%;
+    --popover-foreground: 43 26% 95%;
+    --primary: 187 86% 53%;              /* #22D3EE cyan — the path */
+    --primary-foreground: 225 44% 7%;
+    --secondary: 222 37% 16%;            /* #1A2338 elevated */
+    --secondary-foreground: 43 26% 95%;
+    --muted: 222 37% 16%;                /* #1A2338 elevated */
+    --muted-foreground: 212 18% 59%;     /* #8696A8 muted ink */
+    --accent: 38 92% 50%;                /* #F59E0B amber */
+    --accent-foreground: 225 44% 7%;
+    --destructive: 351 95% 71%;          /* #FB7185 rose */
+    --destructive-foreground: 225 44% 7%;
+    --border: 222 37% 22%;               /* subtle navy border */
+    --input: 222 37% 22%;
+    --ring: 187 86% 53%;                 /* cyan focus ring */
+    --chart-1: 187 86% 53%;
+    --chart-2: 38 92% 50%;
+    --chart-3: 351 95% 71%;
+    --chart-4: 158 64% 52%;
+    --chart-5: 43 96% 56%;
+    --success: 158 64% 52%;
+    --success-foreground: 225 44% 7%;
+    --warning: 43 96% 56%;
+    --warning-foreground: 225 44% 7%;
+  }
+
+/* ─── Accent + status (T1.11) ────────────────────────────────────────────────
+ * Three accents (cyan = the path/intelligence; amber = Carlos/hope/progress;
+ * rose = cliff/barrier severity, Ch 5/6 only) + 3 status tokens (positive,
+ * warning, negative). --accent-current is the live-shifting alias W2 swaps
+ * per chapter; T1.12 adds the temperature-multiplier formula that drives it.
+ * Five shade variants per accent (100/300/500/700/900) via color-mix() in
+ * oklch space — modern browsers get perceptually uniform mixing; older
+ * browsers fall back to the hex defaults declared in the @supports-not block.
+ */
+
+:root {
+  --accent-cyan: #22D3EE;     /* electric — the path / intelligence */
+  --accent-amber: #F59E0B;    /* warm gold — Carlos / hope / progress */
+  --accent-rose: #FB7185;     /* cliff / barrier severity (Ch 5/6 only) */
+  --status-positive: #34D399;
+  --status-warning: #FBBF24;
+  --status-negative: #FB7185;
+
+  /* polish-2 — chrome accent bridge (T4) + drop cap (T15/T36).
+   * --chrome-accent is mutated at runtime by ChromeAccentBridge as the user
+   * scrolls between chapters. --drop-cap-color overridden per-chapter on the
+   * <DropCap> component. --tod-sky-* default fallbacks for the Ch4
+   * atmosphere overlay; useMapboxSkyForTimeOfDay overrides at runtime. */
+  --chrome-accent: var(--accent-cyan);
+  --drop-cap-color: var(--accent-amber);
+  --tod-sky-1: var(--accent-amber);
+  --tod-sky-2: var(--accent-cyan);
+  --tod-sky-3: rgba(10, 14, 26, 0.6);
+
+  /* T1.12 — temperature multiplier. Contract:
+   *   1.0 = neutral (--accent-current stays cyan).
+   *   >1.0 = warmer/rose shift (each +0.01 = +1% rose blend; W3 Ch 6 sets
+   *           1.5 when wage-slider enters benefits-cliff zone).
+   *   <1.0 = cooler/cyan shift (reserved; clamps at 0).
+   * Per-chapter override: set as an inline style or scoped class so that
+   * --accent-current automatically tracks chapter mood without explicit
+   * recoloring. See docs/visual-rebirth-plan.md "Design system → Color".
+   */
+  --temperature-multiplier: 1.0;
+  --accent-current: color-mix(in oklch, var(--accent-cyan), var(--accent-rose) calc((var(--temperature-multiplier) - 1) * 100%));
+
+  /* color-mix() shade variants — modern path. 100 = lightest (more fg-primary
+   * mixed in); 900 = darkest (more bg-base mixed in). 500 = base color. */
+  --accent-cyan-100: color-mix(in oklch, var(--accent-cyan), var(--fg-primary) 75%);
+  --accent-cyan-300: color-mix(in oklch, var(--accent-cyan), var(--fg-primary) 35%);
+  --accent-cyan-500: var(--accent-cyan);
+  --accent-cyan-700: color-mix(in oklch, var(--accent-cyan), var(--bg-base) 35%);
+  --accent-cyan-900: color-mix(in oklch, var(--accent-cyan), var(--bg-base) 75%);
+
+  --accent-amber-100: color-mix(in oklch, var(--accent-amber), var(--fg-primary) 75%);
+  --accent-amber-300: color-mix(in oklch, var(--accent-amber), var(--fg-primary) 35%);
+  --accent-amber-500: var(--accent-amber);
+  --accent-amber-700: color-mix(in oklch, var(--accent-amber), var(--bg-base) 35%);
+  --accent-amber-900: color-mix(in oklch, var(--accent-amber), var(--bg-base) 75%);
+
+  --accent-rose-100: color-mix(in oklch, var(--accent-rose), var(--fg-primary) 75%);
+  --accent-rose-300: color-mix(in oklch, var(--accent-rose), var(--fg-primary) 35%);
+  --accent-rose-500: var(--accent-rose);
+  --accent-rose-700: color-mix(in oklch, var(--accent-rose), var(--bg-base) 35%);
+  --accent-rose-900: color-mix(in oklch, var(--accent-rose), var(--bg-base) 75%);
+}
+
+/* ─── T1.97 — prefers-contrast: more variant overrides ───────────────────────
+ * For users who explicitly request more contrast (Windows Settings, macOS
+ * Reduce Transparency + Increase Contrast). Lifts muted tones, brightens
+ * the cyan accent. CONFIDENCE: C1 — well-supported across evergreen browsers.
+ * Lifted values still clear AAA (verified via T1.13 contrast script).
+ */
+@media (prefers-contrast: more) {
+  :root {
+    --fg-secondary: var(--fg-primary);
+    --fg-muted: #B0B8C5;       /* lifted from #8696A8 — clears AAA-normal */
+    --accent-cyan: #5EEEFF;    /* brighter than #22D3EE */
+    --accent-current: #5EEEFF;
+  }
+}
+
+/* Browsers without color-mix() support: explicit hex shade fallbacks.
+ * Computed once via OKLCH mix offline; values represent 25/40/55/70/85% mixes.
+ * CONFIDENCE: C2 — Safari <16.4, Chrome <111, Firefox <113 hit this branch. */
+@supports not (color: color-mix(in oklch, white, black)) {
+  :root {
+    --accent-cyan-100: #C5F0F7;
+    --accent-cyan-300: #71E1F0;
+    --accent-cyan-500: #22D3EE;
+    --accent-cyan-700: #198FA0;
+    --accent-cyan-900: #0C4B54;
+
+    --accent-amber-100: #FCDFB1;
+    --accent-amber-300: #F8BD58;
+    --accent-amber-500: #F59E0B;
+    --accent-amber-700: #A06A07;
+    --accent-amber-900: #4D3504;
+
+    --accent-rose-100: #FED1D8;
+    --accent-rose-300: #FCA0AD;
+    --accent-rose-500: #FB7185;
+    --accent-rose-700: #A24A57;
+    --accent-rose-900: #4F2229;
+  }
+}

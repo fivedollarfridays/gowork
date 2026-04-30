@@ -1,0 +1,138 @@
+/* W1 typography tokens — populated by T1.15 (Inter Variable + opsz),
+ * T1.16 (fluid type scale), T1.17 (tabular nums), T1.102 (axis tokens),
+ * T1.103 (drop cap).
+ *
+ * Tokens here drive font-variation-settings, fluid clamp() type scale,
+ * and editorial typography (drop caps, pull quotes). Consumed by W4's
+ * useVariableFontWeight hook for scroll-driven weight axis interpolation.
+ */
+
+/* ─── T1.15 — Inter Variable + optical-size axis ─────────────────────────────
+ * Driver C handoff: layout.tsx wires `next/font/google` Inter with
+ *   { subsets: ['latin'], variable: '--font-inter', weight: 'variable',
+ *     axes: ['opsz'], adjustFontFallback: true }
+ * to expose --font-inter as a CSS variable AND ship metric-tuned fallback
+ * metrics (kills the FOUT/CLS budget). Driver A's job is the token surface
+ * below — every consumer in W2/W3/W4 references --font-inter-stack, never
+ * a raw font-family string.
+ *
+ * Honest uncertainty (C4): if Next 15's `next/font/google` does not expose
+ * the `axes` parameter, Driver C falls back to `@fontsource-variable/inter`
+ * self-hosted. Either path satisfies these tokens (--font-inter is set
+ * either by `next/font` or by a self-hosted @font-face declaration).
+ */
+
+:root {
+  --font-inter-var: var(--font-inter);
+  --font-inter-stack: var(--font-inter-var), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  /* gowork-facelift Driver D — token form of the .font-mono-data class
+   * stack so chapters can apply the mono face via fontFamily inline. */
+  --font-mono-data: ui-monospace, "SF Mono", Menlo, monospace;
+  /* polish-2 — Tailwind-style sans alias so consumers writing
+   * `var(--font-display, var(--font-sans))` resolve cleanly without
+   * tripping audit:tokens. Maps to the Inter stack. */
+  --font-sans: var(--font-inter-stack);
+  /* Display alias — chapters use var(--font-display) inline; we point
+   * it at the same Inter Variable stack as headings so the alias has
+   * a canonical declaration. */
+  --font-display: var(--font-inter-stack);
+}
+
+/* ─── T1.16 — Fluid type scale (clamp) ───────────────────────────────────────
+ * Plan-locked formulas. Each clamp follows: clamp(<floor>, <preferred>, <max>)
+ * where preferred = base-rem + viewport-percentage. At 320px the floor binds;
+ * at 1920px the max binds. Display caps at 6.5rem so hero never engulfs the
+ * page on ultrawide. Tracking + leading helpers cover editorial typography
+ * (drop caps, pull quotes) where Tailwind's defaults are too generic.
+ */
+
+:root {
+  --type-display: clamp(3rem, 2rem + 5vw, 6.5rem);     /* hero */
+  --type-h1: clamp(2rem, 1.4rem + 3vw, 4rem);
+  --type-h2: clamp(1.5rem, 1.2rem + 1.5vw, 2.5rem);
+  --type-h3: clamp(1.25rem, 1rem + 1vw, 1.75rem);
+  --type-body: clamp(1rem, 0.9rem + 0.5vw, 1.25rem);
+  --type-small: clamp(0.875rem, 0.85rem + 0.25vw, 1rem);
+
+  --type-tight-tracking: -0.04em;   /* display headlines */
+  --type-body-tracking: -0.01em;    /* body text */
+  --type-leading-loose: 1.7;        /* editorial body leading */
+}
+
+/* ─── T1.17 — Tabular nums + mono data utilities ─────────────────────────────
+ * .tabular-nums: aligns digit advance widths so columns of numbers don't
+ *   jitter as values change (W3 Ch6 stat displays + W4 Live Now timestamps).
+ * .font-mono-data: a UI-monospace stack for raw IDs, code-like values, and
+ *   any place where rhythm > readability.
+ */
+
+.tabular-nums {
+  font-feature-settings: "tnum" 1;
+  font-variant-numeric: tabular-nums;
+}
+.font-mono-data {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-weight: 500;
+}
+
+/* ─── T1.102 — Variable font axis tokens ─────────────────────────────────────
+ * Mirrors FONT_AXES in tokens.ts. Display rendering reaches for
+ * opszDisplay (32) so Inter Variable picks heavier, more architectural
+ * letterforms; body stays at opszBody (14). slntItalic = -10deg uses the
+ * slant axis for true editorial italic without a separate font file.
+ */
+:root {
+  --font-axis-wght-display: 900;
+  --font-axis-wght-body: 400;
+  --font-axis-opsz-display: 32;
+  --font-axis-opsz-body: 14;
+  --font-axis-slnt-italic: -10;
+}
+
+.italic-axis {
+  font-style: oblique -10deg;
+}
+
+/* ─── T1.103 — Drop cap utility ──────────────────────────────────────────────
+ * 500-year-old editorial convention. Used at the start of each chapter's
+ * first paragraph; signals "this is a magazine essay, not a webpage."
+ * Print stylesheet (T1.45) overrides color to black for legibility on
+ * paper.
+ *
+ * `.dropcap` is the legacy class (cyan-accented per T1.103); the Wave-3
+ * `.editorial-dropcap` alias swaps to `--accent-amber` for chapter starts
+ * where the cyan is reserved for the path-line metaphor.
+ */
+.dropcap::first-letter {
+  float: left;
+  font-size: 5em;
+  line-height: 0.85;
+  padding: 0.05em 0.1em 0 0;
+  font-variation-settings: "wght" 800, "opsz" 60;
+  color: var(--accent-cyan);
+}
+
+.editorial-dropcap::first-letter {
+  float: left;
+  font-size: clamp(3.5em, 4em + 1vw, 5.5em);
+  line-height: 0.85;
+  padding: 0.05em 0.1em 0 0;
+  font-variation-settings: "wght" 800, "opsz" 60;
+  color: var(--accent-amber);
+}
+
+/* ─── Wave-3 — Pull-quote ────────────────────────────────────────────────────
+ * Magazine-grade pull-quote. Large italic Inter Variable, generous block
+ * margin, accent-amber left border. Reaches for the slant axis (slntItalic
+ * = -10°) instead of swapping fonts so weight transitions stay smooth.
+ */
+.editorial-pullquote {
+  font-style: oblique -10deg;
+  font-size: clamp(1.25rem, 1rem + 1.2vw, 1.875rem);
+  line-height: 1.4;
+  margin: 2em 0 2em 1.5em;
+  padding-left: 1.25rem;
+  border-left: 4px solid var(--accent-amber);
+  color: var(--fg-secondary);
+  font-variation-settings: "wght" 600, "opsz" 28;
+}

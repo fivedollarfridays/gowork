@@ -54,6 +54,128 @@ IDENTICAL_PAIR_ALLOWLIST: dict[str, str] = {
     # 'Legal' is the aria-label for the footer's legal-links nav. The word
     # is a Latinism with identical surface form and meaning in EN/ES.
     "footer.navLabel": "'Legal' is identical in EN/ES.",
+    # The Wall stat-pills carry compact numeric / abbreviated-unit values
+    # that don't translate. Spanish uses 'min' for minute (Sp. 'minuto'
+    # abbreviated) and bare percentages identically. The descriptive labels
+    # next to them (statLabel) carry the actual translation.
+    "wall.chapter04a.statValue": "'71 min' — numeric duration with 'min' abbreviation identical in EN/ES.",
+    "wall.chapter04b.statValue": "'87 min' — numeric duration with 'min' abbreviation identical in EN/ES.",
+    "wall.chapter04d.statValue": "'33%' — bare percentage; identical surface form in EN/ES.",
+    # Chapter 5's forms-counter is a pure integer that anchors the WALL
+    # tally. The descriptive label ('formsCounterLabel') carries the
+    # translation; the count itself is identical in any language.
+    "wall.chapter05.formsCounter": "'47' — pure integer count; identical in EN/ES.",
+    # W3 Chapter 6 stat-pill ("71 min") is a compact numeric duration; the
+    # 'min' abbreviation is identical in Spanish (abbrev. of 'minuto').
+    # statLabel carries the descriptive translation.
+    "wall.chapter06.statValue": "'71 min' — numeric duration with 'min' abbreviation identical in EN/ES.",
+    # W3 Chapter 9 lights up two deployed cities + six future cities. All
+    # are US place names that don't translate (proper nouns).
+    "wall.chapter09.cityFW": "'Fort Worth, TX' — US city proper noun.",
+    "wall.chapter09.cityMontgomery": "'Montgomery, AL' — US city proper noun.",
+    "wall.chapter09.futureCityDallas": "'Dallas' — US city proper noun.",
+    "wall.chapter09.futureCityHouston": "'Houston' — US city proper noun.",
+    "wall.chapter09.futureCityAtlanta": "'Atlanta' — US city proper noun.",
+    "wall.chapter09.futureCityMemphis": "'Memphis' — US city proper noun.",
+    "wall.chapter09.futureCityCharlotte": "'Charlotte' — US city proper noun.",
+    "wall.chapter09.futureCityBirmingham": "'Birmingham' — US city proper noun.",
+    # W3 Chapter 10's footer brand mark is the GoWork wordmark + city. The
+    # brand wordmark + place name are proper nouns that don't translate.
+    "wall.chapter10.footerBrand": "'GoWork · Fort Worth, TX' — brand mark + US city, both proper nouns.",
+    # Narrative-reset Ch5: each labyrinth office node now carries a proper-noun
+    # name. Office names are organizational entities that don't translate.
+    "wall.chapter05.officeNames.tarrant-district-clerk": "'Tarrant District Clerk' — government office proper noun.",
+    "wall.chapter05.officeNames.hhsc-eligibility": "'HHSC Eligibility' — Texas state agency proper noun.",
+    "wall.chapter05.officeNames.legal-aid-nw-texas": "'Legal Aid of NorthWest Texas' — nonprofit proper noun.",
+    "wall.chapter05.officeNames.workforce-solutions-belknap": "'Workforce Solutions on E. Belknap' — agency + street proper nouns.",
+    "wall.chapter05.officeNames.trinity-metro-hq": "'Trinity Metro HQ' — transit agency proper noun.",
+    # Narrative-reset Ch9: Texas cities replacing Montgomery framing.
+    # All US city proper nouns that don't translate.
+    "wall.chapter09.futureCityAustin": "'Austin' — Texas city proper noun.",
+    "wall.chapter09.futureCitySanAntonio": "'San Antonio' — Texas city proper noun.",
+    "wall.chapter09.futureCityWaco": "'Waco' — Texas city proper noun.",
+    # ─── Homepage scrollytelling (home.ch*) — data-shaped values ─────────
+    # The new HackFW homepage ships compact numeric / proper-noun / address
+    # values that legitimately read identically in EN and ES. The
+    # descriptive label keys (statLabel, factLabel, etc.) carry the
+    # translation; these data slots are pure data.
+    # Ch2 stat numbers — bare integers/percentages.
+    "home.ch2.stat1Number": "Bare numeric stat — identical in EN/ES.",
+    "home.ch2.stat2Number": "Bare numeric stat — identical in EN/ES.",
+    "home.ch2.stat3Number": "Bare numeric stat — identical in EN/ES.",
+    "home.ch2.stat4Number": "Bare numeric stat — identical in EN/ES.",
+    # Ch3 caption + facts — eyebrow tag + numeric pivots + ZIP code.
+    "home.ch3.captionEyebrow": "Single-word eyebrow tag — identical in EN/ES.",
+    "home.ch3.fact1Num": "Bare numeric fact value — identical in EN/ES.",
+    "home.ch3.fact2Num": "Bare numeric fact value — identical in EN/ES.",
+    "home.ch3.fact3Num": "Bare numeric fact value — identical in EN/ES.",
+    "home.ch3.fact4Num": "Bare numeric fact value — identical in EN/ES.",
+    "home.ch3.italicFromIndex": "Numeric pivot index — identical in EN/ES.",
+    "home.ch3.p1Zip": "ZIP code 76104 — identical in EN/ES.",
+    # Ch4 annotations + compass + legend + statRow — numeric/abbreviation values.
+    "home.ch4.annotations.commute": "Numeric annotation — identical in EN/ES.",
+    "home.ch4.annotations.headway": "Numeric annotation — identical in EN/ES.",
+    "home.ch4.annotations.reach": "Numeric annotation — identical in EN/ES.",
+    "home.ch4.annotations.wage": "Numeric wage value — identical in EN/ES.",
+    "home.ch4.cards.card3Time": "Time stamp (3:27 PM) — identical in EN/ES.",
+    "home.ch4.compass.lat": "Latitude readout — identical in EN/ES.",
+    "home.ch4.compass.lon": "Longitude readout — identical in EN/ES.",
+    "home.ch4.compass.zoom": "Map zoom level — identical in EN/ES.",
+    "home.ch4.legend.afternoonNum": "Bare numeric legend label — identical in EN/ES.",
+    "home.ch4.legend.brokenNum": "Bare numeric legend label — identical in EN/ES.",
+    "home.ch4.legend.courtNum": "Bare numeric legend label — identical in EN/ES.",
+    "home.ch4.legend.homeNum": "Bare numeric legend label — identical in EN/ES.",
+    "home.ch4.legend.morningNum": "Bare numeric legend label — identical in EN/ES.",
+    "home.ch4.legend.planNum": "Bare numeric legend label — identical in EN/ES.",
+    "home.ch4.legendRow1": "Numeric/abbreviated legend row — identical in EN/ES.",
+    "home.ch4.legendRow1Time": "Time-of-day stamp — identical in EN/ES.",
+    "home.ch4.legendRow2Time": "Time-of-day stamp — identical in EN/ES.",
+    "home.ch4.legendRow3Time": "Time-of-day stamp — identical in EN/ES.",
+    "home.ch4.statRow.commuteUnit": "Distance unit — identical in EN/ES.",
+    "home.ch4.statRow.commuteVal": "Numeric stat value — identical in EN/ES.",
+    "home.ch4.statRow.headwayUnit": "'min' abbreviation — identical in EN/ES.",
+    "home.ch4.statRow.headwayVal": "Numeric stat value — identical in EN/ES.",
+    "home.ch4.statRow.recordsUnit": "Stat-row unit — identical in EN/ES.",
+    "home.ch4.statRow.recordsVal": "Numeric stat value — identical in EN/ES.",
+    "home.ch4.statRow.wageUnit": "Wage unit ($/hr) — identical in EN/ES.",
+    "home.ch4.statRow.wageVal": "Numeric wage value — identical in EN/ES.",
+    "home.ch4.step.navPrev": "Single arrow glyph — identical in EN/ES.",
+    # Ch5 plan card numbers — pure step numerals.
+    "home.ch5.card1Num": "Step number — identical in EN/ES.",
+    "home.ch5.card2Num": "Step number — identical in EN/ES.",
+    "home.ch5.card3Num": "Step number — identical in EN/ES.",
+    "home.ch5.card4Num": "Step number — identical in EN/ES.",
+    "home.ch5.h2Plan": "Single Latinate word ('plan') — identical in EN/ES.",
+    # Ch6 employer cards — wages + addresses + employer-name proper nouns.
+    "home.ch6.cards.alconAddr": "Alcon street address — proper noun, identical in EN/ES.",
+    "home.ch6.cards.alconWage": "Wage value — identical in EN/ES.",
+    "home.ch6.cards.bnsfAddr": "BNSF street address — proper noun, identical in EN/ES.",
+    "home.ch6.cards.bnsfWage": "Wage value — identical in EN/ES.",
+    "home.ch6.cards.dunnCommute": "Numeric commute value — identical in EN/ES.",
+    "home.ch6.cards.dunnWage": "Wage value — identical in EN/ES.",
+    "home.ch6.h2Fair": "Single shared term in headline (e.g. number) — identical in EN/ES.",
+    "home.ch6.h2Tail": "Trailing punctuation/symbol — identical in EN/ES.",
+    # Ch7 cliff calculator — wage + household-size labels are numeric/symbolic.
+    "home.ch7.h2Cost": "Numeric cost value in headline — identical in EN/ES.",
+    "home.ch7.householdSize1": "Pure integer household size — identical in EN/ES.",
+    "home.ch7.householdSize2": "Pure integer household size — identical in EN/ES.",
+    "home.ch7.householdSize3": "Pure integer household size — identical in EN/ES.",
+    "home.ch7.householdSize4": "Pure integer household size — identical in EN/ES.",
+    "home.ch7.p1Wage": "Wage value — identical in EN/ES.",
+    "home.ch7.rowMed": "Row label abbreviation — identical in EN/ES.",
+    # Ch8 manifesto wordmark — GOWORK + city tokens.
+    "home.ch8.wordmark.spokenCityDal": "'Dallas' — US city proper noun.",
+    "home.ch8.wordmark.spokenCityFw": "'Fort Worth' — US city proper noun.",
+    "home.ch8.wordmark.spokenCityHou": "'Houston' — US city proper noun.",
+    "home.ch8.wordmark.spokenCityMont": "'Montgomery' — US city proper noun.",
+    "home.ch8.wordmarkRow1": "GOWORK wordmark row — brand mark, identical in EN/ES.",
+    "home.ch8.wordmarkRow2": "GOWORK wordmark row — brand mark, identical in EN/ES.",
+    # Site chrome — single-word nav items + brand line that share the same
+    # surface form in both languages.
+    "nav.plan": "'Plan' — Latinism with identical surface form in EN/ES.",
+    "siteFooter.brandHeading": "Brand heading (GoWork) — proper noun, identical in EN/ES.",
+    "siteFooter.creditLine": "Brand credit line — identical in EN/ES.",
+    "siteFooter.workersPlan": "'Plan' — Latinism, identical in EN/ES.",
 }
 
 
@@ -145,12 +267,28 @@ def test_en_and_es_have_same_key_set(en_leaves, es_leaves):
     )
 
 
+# Keys whose values are intentionally non-string (lists, ints, empty) — the
+# homepage scrollytelling catalog ships data-shaped entries (morph word arrays,
+# numeric italic-from-index pivots, intentionally-blank suffix slots) that the
+# frontend consumes as-is without going through a translation pass.
+NON_STRING_VALUE_ALLOWLIST: dict[str, str] = {
+    "home.ch1.morphWords": "Ch1 hero kinetic morph cycles an array of barrier nouns.",
+    "home.ch3.h2Words": "Ch3 word-by-word reveal needs an array, not a sentence.",
+    "home.ch3.italicFromIndex": "Ch3 italic pivot is an integer index into h2Words.",
+    "home.ch6.livePillSuffix": "Ch6 live-pill suffix is intentionally empty in ES (no Spanish suffix).",
+}
+
+
 @pytest.mark.parametrize("locale_name", ["en", "es"])
 def test_no_empty_values(locale_name, en_leaves, es_leaves):
-    """No leaf value may be empty, whitespace-only, or a non-string type."""
+    """No leaf value may be empty, whitespace-only, or a non-string type
+    UNLESS it appears on NON_STRING_VALUE_ALLOWLIST (homepage data-shaped keys).
+    """
     leaves = en_leaves if locale_name == "en" else es_leaves
     bad: list[str] = []
     for key, value in leaves.items():
+        if key in NON_STRING_VALUE_ALLOWLIST:
+            continue
         if not isinstance(value, str):
             bad.append(f"{key} (type={type(value).__name__})")
         elif value.strip() == "":

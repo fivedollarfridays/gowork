@@ -1,5 +1,5 @@
 /**
- * Typed API client for the MontGoWork daily digest preview endpoint (T12.21a).
+ * Typed API client for the GoWork daily digest preview endpoint (T12.21a).
  *
  * Accepts a `token` query parameter for auth. Backend validates the token
  * against the session referenced by `session_id`.

@@ -37,8 +37,8 @@ describe("Root layout metadata", () => {
   it("declares title with template + default", () => {
     expect(rootMetadata.title).toBeDefined();
     const title = rootMetadata.title as { default: string; template: string };
-    expect(title.default).toBe("MontGoWork");
-    expect(title.template).toContain("MontGoWork");
+    expect(title.default).toBe("GoWork");
+    expect(title.template).toContain("GoWork");
   });
 
   it("declares description", () => {
@@ -77,7 +77,7 @@ describe("Root layout metadata", () => {
     };
     expect(og).toBeDefined();
     expect(og.type).toBe("website");
-    expect(og.siteName).toBe("MontGoWork");
+    expect(og.siteName).toBe("GoWork");
     expect(og.title).toBeTruthy();
     expect(og.description).toBeTruthy();
     expect(og.images).toBeDefined();
@@ -176,7 +176,7 @@ describe("PWA manifest.json", () => {
 
   it("declares name, short_name, description, start_url, display", () => {
     const m = readManifest();
-    expect(m.name).toBe("MontGoWork");
+    expect(m.name).toBe("GoWork");
     expect(m.short_name).toBeTruthy();
     expect(m.description).toBeTruthy();
     expect(m.start_url).toBe("/");

@@ -26,7 +26,10 @@ vi.mock("@/lib/api/digest", async () => {
 });
 
 import DailyPage from "@/app/daily/page";
-import HomePage from "@/app/page";
+// polish-2 T51 split: app/page.tsx is now an async server component;
+// the redirect logic moved to the client island app/page-client.tsx.
+// These conditional-redirect tests target the client behavior.
+import HomePage from "@/app/page-client";
 import * as digestApi from "@/lib/api/digest";
 
 const api = digestApi as unknown as {

@@ -1,5 +1,5 @@
 // COUNSEL REVIEW REQUIRED BEFORE PROD — this is a hackathon-grade placeholder
-// authored fresh for the MontGoWork submission, NOT legally-vetted. Production
+// authored fresh for the GoWork submission, NOT legally-vetted. Production
 // rollout requires actual privacy-counsel review (GDPR Art. 13-14, CCPA § 1798,
 // COPPA, plus the relevant state privacy statutes).
 "use client";
@@ -182,7 +182,7 @@ function EnglishBody({ t }: { t: (key: string) => string }) {
 
       <Section heading={t("privacy.children.heading")}>
         <p>
-          MontGoWork is built for adult workers. We do not knowingly collect
+          GoWork is built for adult workers. We do not knowingly collect
           data from anyone under 13. If you believe a child has used the
           service, contact us and we will delete the session.
         </p>
@@ -229,10 +229,10 @@ function EnglishBody({ t }: { t: (key: string) => string }) {
         <p>
           Questions, requests, or complaints:{" "}
           <a
-            href="mailto:privacy@montgowork.example"
+            href="mailto:privacy@gowork.example"
             className="underline hover:text-primary"
           >
-            privacy@montgowork.example
+            privacy@gowork.example
           </a>
           . A production rollout will list a physical postal address per
           CAN-SPAM &sect; 5(a)(5) and applicable state privacy statutes.

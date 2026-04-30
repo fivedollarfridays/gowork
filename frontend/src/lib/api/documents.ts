@@ -1,5 +1,5 @@
 /**
- * Typed API client for the MontGoWork Documents feature (T12.17).
+ * Typed API client for the GoWork Documents feature (T12.17).
  *
  * Wraps the seven backend endpoints under ``/api/documents``:
  *  - POST /resume                 (generate resume)

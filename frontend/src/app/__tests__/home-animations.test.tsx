@@ -21,10 +21,13 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
-// Dynamically import Home so mocks are applied
-const { default: Home } = await import("../page");
+// W2 (T2.46): the legacy hero/flow/stats landing now lives at /archive.
+// `../page` renders WallContainer; the legacy content (which this test
+// guards) is preserved verbatim at `../archive/page`. Test the archive
+// route so the legacy contract still holds and rollback insurance works.
+const { default: Home } = await import("../archive/page");
 
-describe("Home page animations", () => {
+describe("Archived home page animations (preserved at /archive after W2 T2.46)", () => {
   it("renders hero heading text", () => {
     render(<Home />);
     expect(
@@ -32,18 +35,18 @@ describe("Home page animations", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders subtitle about MontGoWork", () => {
+  it("renders subtitle about GoWork", () => {
     render(<Home />);
     expect(
-      screen.getByText(/MontGoWork is a workforce navigator/),
+      screen.getByText(/GoWork is a workforce navigator/),
     ).toBeInTheDocument();
   });
 
-  it("renders stat values 20.9, 57.4, and 36K+", () => {
+  it("renders Fort Worth stat values (default reference deployment)", () => {
     const { container } = render(<Home />);
-    expect(container.textContent).toContain("20.9");
-    expect(container.textContent).toContain("57.4");
-    expect(container.textContent).toContain("36");
+    expect(container.textContent).toContain("15.3");
+    expect(container.textContent).toContain("64");
+    expect(container.textContent).toContain("950");
   });
 
   it("renders How It Works step titles", () => {

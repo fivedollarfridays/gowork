@@ -1,6 +1,6 @@
-# MontGoWork Demo Script
+# GoWork Demo Script (HackFW 2026)
 
-> 3-minute live demo + 2-minute Q&A. Two city personas: **Carlos (Fort Worth)** for HackFW 2026, **Maria (Montgomery)** as alternate.
+> 3-minute live demo + 2-minute Q&A. Single persona for the hackathon submission: **Carlos (Fort Worth)**. The legacy Montgomery, AL persona (Maria) is available for non-HackFW demos but is NOT part of the HackFW 2026 narrative.
 
 ---
 
@@ -226,21 +226,11 @@
 
 ---
 
-## Alternate Persona: Maria (Montgomery)
+## Legacy Persona Reference (NOT for HackFW 2026 demos)
 
-For demos in Montgomery or non-HackFW contexts, set `CITY=montgomery`.
+The Montgomery, AL deployment is preserved as the legacy reference city in the multi-city template architecture. It is NOT part of the HackFW 2026 wall narrative or live demo. The persona below is documented only so contributors maintaining the city-template layer have a regression reference.
 
-| Field | Value |
-|-------|-------|
-| Name | Maria |
-| Age | 34 |
-| Location | Montgomery, AL (ZIP 36104) |
-| Barriers | Credit, Transportation, Childcare, Criminal Record |
-| Criminal Record | Misdemeanor theft, 4 years ago, sentence complete |
-| Credit score | ~580 |
-| Work history | 3 years retail and food service |
-
-Key differences: Alabama Act 2021-507 (not Texas nondisclosure), M-Transit (not Trinity Metro), DHR (not HHSC), Alabama Career Center on Ripley Street.
+For non-HackFW demos in Montgomery, set `CITY=montgomery`. For HackFW judges, this section can be ignored -- the live URL ships Fort Worth-only.
 
 ---
 
@@ -250,10 +240,10 @@ Key differences: Alabama Act 2021-507 (not Texas nondisclosure), M-Transit (not 
 > No. Self-reported assessment. No SSN, no hard pull. We match job credit requirements and estimate repair timelines.
 
 **Q: Where do the jobs come from?**
-> City-specific adapters. Fort Worth uses Texas Workforce Commission (TWC) and USAJobs APIs. Montgomery uses BrightData web scraping and Honest Jobs fair-chance listings. Jobs refresh regularly.
+> Fort Worth uses Texas Workforce Commission (TWC) and USAJobs APIs. Jobs refresh regularly. The architecture is city-agnostic, so other cities plug in via their own adapters.
 
 **Q: How does the criminal record screening work?**
-> State-specific. Texas checks both Article 55 expunction AND Government Code Chapter 411 nondisclosure (the dual-pathway system). Alabama checks Act 2021-507. We also match employer fair-chance policies. No legal advice -- we point to Legal Aid.
+> State-specific. Texas checks both Article 55 expunction AND Government Code Chapter 411 nondisclosure (the dual-pathway system). We also match employer fair-chance policies. No legal advice -- we point to Legal Aid of NW Texas.
 
 **Q: Could this work for other cities?**
 > Yes. The architecture is city-agnostic. Each city is a YAML config + seed data. Swap the data for a new city and everything adapts: benefits programs, criminal record laws, transit, employer data, AI prompts.

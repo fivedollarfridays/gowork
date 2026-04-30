@@ -154,13 +154,16 @@ class TestLoadCityConfig:
 
 
 class TestCitySettingInConfig:
-    def test_default_city_is_montgomery(self, monkeypatch):
+    def test_default_city_is_fort_worth(self, monkeypatch):
+        # Reference deployment is Fort Worth (HackFW). The bare default
+        # (no CITY env var, no _env_file) returns "fort-worth"; legacy
+        # Montgomery deployments must set CITY=montgomery explicitly.
         monkeypatch.delenv("CITY", raising=False)
         s = Settings(
             _env_file=None,
             anthropic_api_key="test",
         )
-        assert s.city == "montgomery"
+        assert s.city == "fort-worth"
 
     def test_city_can_be_overridden(self):
         s = Settings(
@@ -264,11 +267,14 @@ class TestLoadCityConfigTraversalGuard:
 
 class TestGetCityConfig:
     def test_returns_config_for_default_city(self, monkeypatch):
+        # Bare default (no CITY env var) is now Fort Worth — the active
+        # reference deployment. Legacy Montgomery loads remain available
+        # via explicit CITY=montgomery.
         monkeypatch.delenv("CITY", raising=False)
         get_settings.cache_clear()
         try:
             cfg = get_city_config()
-            assert cfg.name == "Montgomery"
+            assert cfg.name == "Fort Worth"
         finally:
             get_settings.cache_clear()
 

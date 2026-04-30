@@ -1,0 +1,1445 @@
+/**
+ * Driver E — polish-2 T56 / T57 / T59 spotlight CSS.
+ *
+ * Body-attribute-driven rules wired to `ScrollVelocityBridge`:
+ *
+ *   - body[data-scroll-velocity="fast"] → soft motion-blur on chapter
+ *     content (T56). Uses `backdrop-filter: blur(2px)` so the GPU
+ *     compositor handles the work; falls back to no-blur on browsers
+ *     without backdrop-filter support.
+ *
+ *   - body[data-battery-low] → disables expensive cursor / marquee /
+ *     particle effects (T57). The user is in battery-saver and we owe
+ *     them a quiet page.
+ *
+ *   - body[data-idle="true"] .ch04-marker → 1px y-orbit ambient drift
+ *     (T59). The city stays alive while the user is idle.
+ *
+ * Reduced-motion override: every animation here yields to
+ * `prefers-reduced-motion: reduce` — the data-attr may be set but the
+ * animation does not play.
+ */
+
+/* ─── Ch07 — cliff badge pulse + slab shimmer + threshold flash.
+ *
+ * Multi-layer animation system on the CliffMoneyTower visual:
+ *
+ *   1. cliff-pulse        Opacity pulse on the "MEDICAID LAPSES"
+ *                         badge — draws the eye to the threshold.
+ *   2. slab-shimmer       A horizontal highlight band sweeps
+ *                         across each slab fill every 4.5s
+ *                         (phase-shifted per slab via animation-
+ *                         delay) — gives the bars liquid life.
+ *   3. tower-cliff-flash  When the user crosses the threshold the
+ *                         tower wrapper gets a brief rose-tinted
+ *                         viewport flash via [data-cliff-active]. */
+@keyframes ch07-cliff-pulse {
+  0%, 100% { opacity: 0.85; }
+  50%      { opacity: 0.55; }
+}
+@keyframes ch07-slab-shimmer {
+  /* Translate the highlight band's BACKGROUND-POSITION across the
+   * track. Was a transform on the pseudo-element, but that
+   * required a positioned ancestor to anchor the absolute pseudo,
+   * which the slab row didn't have — the pseudo escaped to the
+   * body and the band swept the whole page. Background-position
+   * keeps the highlight inside the track's `overflow: hidden`. */
+  0%   { background-position: -120% 50%; }
+  100% { background-position: 220% 50%; }
+}
+@keyframes ch07-cliff-flash {
+  0%   { box-shadow: 0 0 0 0 color-mix(in oklch, var(--accent-rose), transparent 0%); }
+  40%  { box-shadow: 0 0 0 60px color-mix(in oklch, var(--accent-rose), transparent 80%); }
+  100% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--accent-rose), transparent 100%); }
+}
+
+/* Shimmer pseudo INSIDE each slab's bar track. The track has
+ * `position: relative + overflow: hidden` set inline by
+ * `slabBarTrackStyle()` in CliffMoneyTower.tsx, which means:
+ *
+ *   - `position: absolute; inset: 0` on the pseudo anchors to the
+ *     track (positioned ancestor) — won't escape to body
+ *   - `overflow: hidden` clips the shimmer band to the track box
+ *
+ * Using `::after` (not `::before`) so the shimmer renders ON TOP
+ * of the bar fill div in stacking order. `mix-blend-mode: screen`
+ * brightens the fill underneath as the band sweeps through.
+ *
+ * The track's inline `background:` shorthand was overriding any
+ * background-image we tried to set on the track ITSELF — that's
+ * why the previous "background on the track" attempt was invisible.
+ *
+ * Animation: 9s linear, staggered per slab so the four bars don't
+ * pulse in lockstep. */
+.ch07-tower__stack .ch07-slab__track::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in oklch, #FFFCF5, transparent 75%) 45%,
+    color-mix(in oklch, #FFFCF5, transparent 50%) 50%,
+    color-mix(in oklch, #FFFCF5, transparent 75%) 55%,
+    transparent 100%
+  );
+  background-size: 50% 100%;
+  background-repeat: no-repeat;
+  background-position: -120% 50%;
+  border-radius: inherit;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  opacity: 0.85;
+  animation: ch07-slab-shimmer 9s linear infinite;
+}
+.ch07-tower__stack .ch07-slab:nth-child(1) .ch07-slab__track::after { animation-delay: 0s; }
+.ch07-tower__stack .ch07-slab:nth-child(2) .ch07-slab__track::after { animation-delay: -2.2s; }
+.ch07-tower__stack .ch07-slab:nth-child(3) .ch07-slab__track::after { animation-delay: -4.5s; }
+.ch07-tower__stack .ch07-slab:nth-child(4) .ch07-slab__track::after { animation-delay: -6.7s; }
+
+/* When the user crosses the cliff threshold the entire tower
+ * wrapper gets a rose flash that pulses outward, then fades. */
+.ch07-tower[data-cliff-active="true"] {
+  animation: ch07-cliff-flash 1.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ch07-tower__stack > div::after,
+  .ch07-tower[data-cliff-active="true"] {
+    animation: none !important;
+  }
+  .ch07-tower [data-cliff-active="true"] {
+    animation: none !important;
+  }
+}
+
+/* ─── Ch02 numbers — premium depth + slow drift.
+ *
+ * The four giant stat numbers were rendering as flat gradient text.
+ * Adding a subtle drop-shadow glow that picks up each ordinal's own
+ * accent + a slow vertical breathing animation gives them dimensional
+ * weight without disrupting the count-up tween that runs once on
+ * scroll-in. The breath is keyframed in floating-point seconds so
+ * each stat phase-shifts independently — no synchronised pulse. */
+.ch02-stat .stat-num {
+  filter:
+    drop-shadow(0 6px 18px rgba(10, 14, 26, 0.55))
+    drop-shadow(0 0 32px currentColor);
+  animation: ch02-stat-breath 7.5s ease-in-out infinite;
+}
+.ch02-stat-1 .stat-num { animation-delay: 0s; }
+.ch02-stat-2 .stat-num { animation-delay: -1.2s; }
+.ch02-stat-3 .stat-num { animation-delay: -2.5s; }
+.ch02-stat-4 .stat-num { animation-delay: -3.8s; }
+
+@keyframes ch02-stat-breath {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ch02-stat .stat-num {
+    animation: none;
+  }
+}
+
+/* ─── Ch05 expanded-card OVERLAY — portal-rendered to body.
+ *
+ * Previous attempt (CSS-only with `position: fixed` on the in-deck
+ * card) was rendering blurred because `.ch05-fan` has
+ * `perspective: 1200px`. CSS perspective creates a containing
+ * block for `position: fixed` children — the card was anchored to
+ * `.ch05-fan`, not the viewport, AND was being passed through the
+ * 3D pipeline that backface-culled the front face at scale.
+ *
+ * The fix: React portal renders the expanded view directly into
+ * `document.body`. No perspective ancestors, no 3D pipeline, no
+ * filter-inheritance issues. The original card stays in the deck
+ * unchanged. */
+.ch05-card {
+  cursor: pointer;
+}
+.ch05-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  animation: ch05-overlay-fade-in 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ch05-overlay__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 14, 26, 0.7);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border: 0;
+  cursor: pointer;
+  z-index: 0;
+}
+.ch05-overlay__card {
+  position: relative;
+  z-index: 1;
+  width: clamp(320px, 56vw, 620px);
+  padding: 40px 44px;
+  border-radius: 22px;
+  border: 1px solid color-mix(in oklch, var(--fg-primary), transparent 78%);
+  background: var(--bg-elev-1, #15203a);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow:
+    0 60px 120px rgba(10, 14, 26, 0.85),
+    0 0 0 1px color-mix(in oklch, var(--accent-cyan), transparent 60%),
+    0 0 80px color-mix(in oklch, var(--accent-cyan), transparent 75%),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  animation: ch05-overlay-pop 460ms cubic-bezier(0.16, 1, 0.3, 1);
+  /* Tone backgrounds match the in-deck card colours. */
+}
+.ch05-overlay__card[data-tone="amber"] {
+  background: linear-gradient(160deg, #2a1d09 0%, #15203a 100%);
+}
+.ch05-overlay__card[data-tone="cyan"] {
+  background: linear-gradient(160deg, #0c2733 0%, #15203a 100%);
+}
+.ch05-overlay__card[data-tone="green"] {
+  background: linear-gradient(160deg, #0d2519 0%, #15203a 100%);
+}
+.ch05-overlay__card[data-tone="rose"] {
+  background: linear-gradient(160deg, #2a0e16 0%, #15203a 100%);
+}
+.ch05-overlay__card .pc-num {
+  font-family: var(--font-mono-data, monospace);
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  color: var(--fg-muted);
+}
+.ch05-overlay__card .pc-tag {
+  display: inline-block;
+  align-self: flex-start;
+  font-family: var(--font-mono-data, monospace);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-cyan);
+  padding: 4px 10px;
+  border-radius: 100px;
+  border: 1px solid color-mix(in oklch, var(--accent-cyan), transparent 70%);
+}
+.ch05-overlay__card h3 {
+  font-size: clamp(1.6rem, 1.2rem + 0.8vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--fg-primary);
+  margin: 0;
+  line-height: 1.15;
+}
+.ch05-overlay__card p {
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--fg-secondary);
+  margin: 0;
+}
+.ch05-overlay__card .pc-foot {
+  font-family: var(--font-mono-data, monospace);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+.ch05-overlay__bullets {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 18px 0 0;
+  border-top: 1px solid color-mix(in oklch, var(--fg-primary), transparent 80%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ch05-overlay__bullets li {
+  position: relative;
+  padding-left: 22px;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--fg-primary);
+}
+.ch05-overlay__bullets li::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: var(--accent-cyan);
+  font-weight: 600;
+}
+.ch05-overlay__hint {
+  font-family: var(--font-mono-data, monospace);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  text-align: center;
+  margin-top: 8px;
+}
+@keyframes ch05-overlay-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes ch05-overlay-pop {
+  0%   { transform: scale(0.92); opacity: 0; }
+  60%  { transform: scale(1.02); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ch05-overlay,
+  .ch05-overlay__card {
+    animation: none !important;
+  }
+}
+
+/* ─── Ch03 — animated brand-rainbow gradient flowing across the
+ * "A father. A welder. Not a case number." wordmark. The 200%
+ * background-size + background-position shift creates a slow
+ * left↔right colour wash so the typography breathes instead of
+ * sitting flat on the page. */
+@keyframes ch03-rainbow-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ch03-h2--rainbow {
+    animation: none !important;
+  }
+}
+
+/* ─── Ch01 hero — eyebrow pill (HackFW 2026 · Fort Worth · live).
+ *
+ * Multi-layer effect stack on the live indicator:
+ *   `.ch01-eyebrow-pill__live`   the wrapper holding all three rings
+ *   `.ch01-eyebrow-pill__dot`    the solid amber core dot (always visible)
+ *   `.ch01-eyebrow-pill__ring--outer`  scales 1 → 2.6 (radar wave, 1.8s)
+ *   `.ch01-eyebrow-pill__ring--mid`    scales 1 → 1.9 with 0.5s delay (second wave)
+ *
+ * The whole pill also gets a slow ambient cyan glow halo via a
+ * ::before pseudo, breathing in sync with the radar pulse so the
+ * "live" claim reads as motion at multiple radii.
+ *
+ * All reduced-motion: dot stays solid, rings hidden, glow static. */
+.ch01-eyebrow-pill {
+  position: relative;
+  isolation: isolate;
+}
+.ch01-eyebrow-pill::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 999px;
+  background: linear-gradient(
+    100deg,
+    color-mix(in oklch, var(--accent-amber), transparent 70%),
+    color-mix(in oklch, var(--accent-cyan), transparent 70%)
+  );
+  z-index: -1;
+  filter: blur(6px);
+  opacity: 0.6;
+  animation: ch01-eyebrow-glow 3.6s ease-in-out infinite;
+}
+@keyframes ch01-eyebrow-glow {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 0.85; }
+}
+
+.ch01-eyebrow-pill__live {
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+}
+.ch01-eyebrow-pill__dot {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: var(--accent-amber);
+  box-shadow:
+    0 0 0 2px color-mix(in oklch, var(--accent-amber), transparent 70%),
+    0 0 12px var(--accent-amber);
+  animation: ch01-eyebrow-dot-pulse 1.8s ease-in-out infinite;
+}
+@keyframes ch01-eyebrow-dot-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.18); }
+}
+.ch01-eyebrow-pill__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  border: 1.5px solid var(--accent-amber);
+  pointer-events: none;
+  opacity: 0;
+}
+.ch01-eyebrow-pill__ring--outer {
+  animation: ch01-eyebrow-radar 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+.ch01-eyebrow-pill__ring--mid {
+  animation: ch01-eyebrow-radar 1.8s cubic-bezier(0, 0, 0.2, 1) infinite 0.5s;
+}
+@keyframes ch01-eyebrow-radar {
+  0%   { transform: scale(1);   opacity: 0.7; }
+  80%  { transform: scale(2.6); opacity: 0; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ch01-eyebrow-pill::before,
+  .ch01-eyebrow-pill__dot,
+  .ch01-eyebrow-pill__ring { animation: none !important; }
+  .ch01-eyebrow-pill__ring { display: none; }
+}
+
+/* ─── Ch01 hero — extra polish layers (scan beam + vignette +
+ * constellation). Sit BEHIND the typography (z-index 0 inside the
+ * .ch01-bg container) so they add ambient depth without distracting
+ * from the headline. All three respect prefers-reduced-motion. */
+
+/* Horizontal cyan scan beam — slow downward sweep every 18s.
+ * Reads as a "data line" passing through the field; the eye picks
+ * up motion at the periphery without consciously noticing it. */
+.ch01-scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    transparent calc(50% - 1.5px),
+    color-mix(in oklch, var(--accent-cyan), transparent 35%) 50%,
+    transparent calc(50% + 1.5px),
+    transparent 100%
+  );
+  background-size: 100% 220%;
+  background-position: 50% -110%;
+  mix-blend-mode: screen;
+  opacity: 0.6;
+  animation: ch01-scan-sweep 18s linear infinite;
+}
+@keyframes ch01-scan-sweep {
+  0%   { background-position: 50% -110%; }
+  100% { background-position: 50% 220%; }
+}
+
+/* Corner vignette mask — soft dark feathering at corners so the
+ * central typography sits in a spotlight pool of colour. Sells the
+ * "set lit for the closer" stage feel. */
+.ch01-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 80% 60% at 50% 50%,
+    transparent 35%,
+    rgba(10, 14, 26, 0.45) 80%,
+    rgba(10, 14, 26, 0.7) 100%
+  );
+  mix-blend-mode: multiply;
+}
+
+/* Constellation — 12 pinpoint dots scattered across the field via
+ * radial-gradient stops. Each dot is 1.5px and glows ±cyan/amber.
+ * The whole layer pulses opacity gently 4s/cycle so the dots
+ * twinkle out of sync with everything else. */
+.ch01-stars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.65;
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 18%, var(--accent-cyan) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 87% 22%, var(--accent-amber) 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 22% 78%, color-mix(in oklch, var(--accent-cyan), #FFFCF5 40%) 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 76% 84%, var(--accent-amber) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 48% 12%, color-mix(in oklch, var(--accent-cyan), #FFFCF5 30%) 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 62% 90%, var(--accent-cyan) 50%, transparent 51%),
+    radial-gradient(1px   1px   at 33% 35%, var(--accent-amber) 50%, transparent 51%),
+    radial-gradient(1px   1px   at 70% 48%, var(--accent-cyan) 50%, transparent 51%),
+    radial-gradient(1px   1px   at 18% 55%, var(--accent-amber) 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 92% 60%, color-mix(in oklch, var(--accent-cyan), #FFFCF5 50%) 50%, transparent 51%),
+    radial-gradient(1px   1px   at 5%  72%, var(--accent-cyan) 50%, transparent 51%),
+    radial-gradient(1px   1px   at 55% 65%, var(--accent-amber) 50%, transparent 51%);
+  animation: ch01-stars-twinkle 4.6s ease-in-out infinite;
+  filter: drop-shadow(0 0 4px color-mix(in oklch, var(--accent-cyan), transparent 50%));
+}
+@keyframes ch01-stars-twinkle {
+  0%, 100% { opacity: 0.45; }
+  50%      { opacity: 0.85; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ch01-scan, .ch01-stars { animation: none !important; }
+}
+
+/* ─── Ch01 marquee scroll — keyframe was MISSING. The track had
+ * `animation: mq-scroll 38s linear infinite` referenced but no
+ * @keyframes mq-scroll defined anywhere, so the marquee was
+ * static. Defines the seamless half-translate loop that pairs
+ * with the duplicated content (`{...items, ...items}`). */
+@keyframes mq-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mq-track { animation: none !important; }
+}
+
+/* ─── Ch01 hero — animated wall strike-through.
+ *
+ * The "wall" emphasis word inside the line "There is a wall between
+ * you and a job" gets a brand-amber strike line drawn across it via
+ * a ::after pseudo-element scaling from 0 → 1 over 0.7s, beginning
+ * at 1.2s after first paint (after the line has revealed via
+ * MaskReveal at 220ms + the line settle ~720ms). Reads as: user
+ * sees "wall" land, then watches it get crossed out — the metaphor
+ * literalised. */
+.ch01-strike {
+  position: relative;
+  display: inline-block;
+}
+.ch01-strike::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 0.18em;
+  background: linear-gradient(
+    90deg,
+    var(--accent-amber) 0%,
+    color-mix(in oklch, var(--accent-amber), var(--accent-rose) 50%) 100%
+  );
+  transform: translateY(-50%) scaleX(0);
+  transform-origin: left center;
+  border-radius: 999px;
+  box-shadow: 0 0 14px color-mix(in oklch, var(--accent-amber), transparent 40%);
+  animation: ch01-strike-draw 720ms cubic-bezier(0.16, 1, 0.3, 1) 1.2s forwards;
+}
+@keyframes ch01-strike-draw {
+  0% { transform: translateY(-50%) scaleX(0); }
+  100% { transform: translateY(-50%) scaleX(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ch01-strike::after {
+    animation: none;
+    transform: translateY(-50%) scaleX(1);
+  }
+}
+
+/* T56 — fast-scroll motion blur on chapter content. */
+@supports (backdrop-filter: blur(2px)) {
+  body[data-scroll-velocity="fast"] .chapter {
+    backdrop-filter: blur(2px);
+    transition: backdrop-filter 180ms ease-out;
+  }
+}
+body[data-scroll-velocity="fast"] .chapter {
+  transition: filter 180ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  body[data-scroll-velocity="fast"] .chapter {
+    backdrop-filter: none !important;
+    filter: none !important;
+    transition: none !important;
+  }
+}
+
+/* T57 — battery-saver degradation. */
+body[data-battery-low] .cursor-flashlight,
+body[data-battery-low] [data-testid="cursor-trail-dot"],
+body[data-battery-low] [data-trail],
+body[data-battery-low] .ch01-marquee,
+body[data-battery-low] [data-marquee],
+body[data-battery-low] [data-particle] {
+  display: none !important;
+  animation: none !important;
+}
+
+body[data-battery-low] .chapter {
+  /* Quiet the page — kill any decorative animation. */
+  animation: none !important;
+}
+
+/* T59 — idle ambient orbit on Ch4 markers. */
+@keyframes goworkIdleOrbit {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50%      { transform: translate3d(0, -1px, 0); }
+}
+body[data-idle="true"] .ch04-marker,
+body[data-idle="true"] [data-ch04-marker] {
+  animation: goworkIdleOrbit 4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  body[data-idle="true"] .ch04-marker,
+  body[data-idle="true"] [data-ch04-marker] {
+    animation: none !important;
+  }
+}
+
+/* T55 — variable-font axis interpolation on chapter eyebrows.
+ * `data-eyebrow-active="true"` is written by HomePage's IntersectionObserver
+ * onto the chapter section. The rule sets the eyebrow numeric to weight 700. */
+[data-eyebrow-active="true"] .eyebrow .num,
+[data-eyebrow-active="true"] [data-eyebrow-num] {
+  font-variation-settings: "wght" 700;
+  transition: font-variation-settings 320ms ease-out;
+}
+.chapter .eyebrow .num,
+.chapter [data-eyebrow-num] {
+  font-variation-settings: "wght" 400;
+  transition: font-variation-settings 320ms ease-out;
+}
+
+/* T48 — Ch1 cursor trail particles. */
+.ch01 [data-trail] {
+  position: fixed;
+  pointer-events: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-amber, #fbbf24);
+  mix-blend-mode: screen;
+  opacity: 0.85;
+  transition: opacity 600ms ease-out, transform 600ms ease-out;
+  will-change: opacity, transform;
+}
+.ch01 [data-trail][data-decay="true"] {
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ch01 [data-trail] {
+    display: none !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+ * polish-2 post-merge fixes (integrator)
+ *
+ * Visual bugs surfaced after Drivers A/B/C/D/E landed: rail overlap on 6/8
+ * sections, PageMeta clipping on tablets, Ch08 wordmark crop, Ch04/Ch07
+ * light-cream seams (root-cause body bg fixed upstream in tokens/layout.css;
+ * defensive per-section dark canvas here for HMR / theme-swap FOUC).
+ * ════════════════════════════════════════════════════════════════════════════ */
+
+/* Chapter rail gutter — when the rail is visible (≥1100px) every section
+ * needs a left gutter wide enough to clear the rail (32px left + 28px tick
+ * + 18px gap ≈ 96px minimum). Below 1100px the rail is hidden and the
+ * gutter collapses naturally. */
+@media (min-width: 1100px) {
+  body .chapter,
+  body .ch04-pin,
+  body .ch05-pin,
+  body .ch02-pin {
+    padding-left: max(96px, 6vw) !important;
+  }
+}
+
+/* PageMeta — keep clear of the right viewport edge on tablets so the
+ * SCROLL row doesn't clip. */
+@media (min-width: 720px) and (max-width: 1280px) {
+  [data-page-meta] {
+    right: 16px !important;
+    bottom: 16px !important;
+    font-size: 10px;
+  }
+}
+
+/* ─── Ch08 ambient overlay layers REMOVED.
+ *
+ * The gradient effect now lives INSIDE the pixel grid itself —
+ * each square's background colour is mixed from the brand palette
+ * (amber → rose → cyan) based on its (col, row) position, computed
+ * in Chapter08FindYourPath.tsx via mixGradientStop(). When the
+ * pixelize stage fills the grid the result IS a brand gradient —
+ * no separate overlay layers needed. Section bg stays clean navy
+ * before the pixels arrive. */
+
+/* ─── GoWork wordmark — chromatic-aberration ONLY, no glow.
+ *
+ * The cream glow halo was moved to the cyan path-line under the
+ * lockup (see `.ch08-mic-drop__lockup::after` below) so the glow
+ * effect stays focused on the brand-accent line — the wordmark
+ * itself sits as clean solid cream with just the navy registration
+ * offset. Cleaner separation of roles: typography = solid; brand
+ * line = luminous accent. */
+.ch08-aberration {
+  text-shadow:
+    calc(var(--abr-x) * -1) var(--abr-y) 0 #0A0E1A;
+}
+
+/* ─── Cyan brand path-line under the FULL GoWork lockup.
+ *
+ * Drawn on the lockup wrapper as a `::after` pseudo so it spans
+ * the natural width of "Go" + "Work" combined. Initial scaleX 0
+ * (hidden); GSAP scrubs `--lockup-line-scale` from 0 → 1 once
+ * both rows have landed (timeline pos 10.6s). Reduced-motion +
+ * the catch fallback both set the scale to 1 so the line is
+ * visible even if the timeline doesn't run. Gradient-fades on
+ * either end so it reads as a brand-mark accent, not a hard
+ * underline. */
+.ch08-mic-drop__lockup {
+  position: relative;
+  --lockup-line-scale: 0;
+}
+.ch08-mic-drop__lockup::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* Pixel offsets — `em` units on the lockup pseudo were resolving
+   * against the lockup wrapper's inherited body font-size (~16px),
+   * not the giant wordmark inside, so `0.1em = ~1.6px` was
+   * effectively invisible. Clamp px instead. */
+  bottom: clamp(-32px, -2.5vw, -16px);
+  height: clamp(6px, 0.55vw, 10px);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--accent-cyan) 10%,
+    color-mix(in oklch, var(--accent-cyan), #FFFCF5 25%) 50%,
+    var(--accent-cyan) 90%,
+    transparent 100%
+  );
+  border-radius: 999px;
+  transform: scaleX(var(--lockup-line-scale));
+  transform-origin: left center;
+  /* The glow that USED to live on the GoWork text now lives here —
+   * a six-layer cyan halo stack. Tight inner rings (6px / 14px) +
+   * mid radiance (32px / 64px) + wide ambient (120px / 200px).
+   * The wordmark itself stays as crisp solid cream; the line is
+   * the only thing that's lit up. */
+  box-shadow:
+    0 0 6px   var(--accent-cyan),
+    0 0 14px  color-mix(in oklch, var(--accent-cyan), transparent 20%),
+    0 0 32px  color-mix(in oklch, var(--accent-cyan), transparent 40%),
+    0 0 64px  color-mix(in oklch, var(--accent-cyan), transparent 60%),
+    0 0 120px color-mix(in oklch, var(--accent-cyan), transparent 75%),
+    0 0 200px color-mix(in oklch, var(--accent-cyan), transparent 85%);
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ch08-mic-drop__lockup { --lockup-line-scale: 1 !important; }
+}
+
+/* Ch08 mic-drop composition — exactly mirrors the website chrome
+ * brand mark scaled to hero: [icon][GoWork] inline, with the CTA
+ * below. "Go" and "Work" sit as a single lockup with NO space
+ * between them so the wordmark reads as the brand asset "GoWork".
+ * The whole composition fits inside a single viewport. */
+.ch08-wordmark {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+.ch08-wordmark .wm-row {
+  font-size: clamp(4.5rem, 3rem + 12vw, 18rem) !important;
+  line-height: 0.9 !important;
+}
+
+/* ─── Brand icon (G arc + cyan path-line) — scaled to match the
+ * wordmark cap-height. Cream G arc on amber. Cyan path-line
+ * draws in via marker animation with a true Gaussian-blur glow
+ * (SVG filter, not CSS drop-shadow — drop-shadow on a thin line
+ * paints the line's bounding rect, which reads as a "box"; SVG
+ * feGaussianBlur paints a true halo around the line shape). */
+.ch08-brand-icon {
+  display: block;
+  width: clamp(160px, 18vw, 320px);
+  height: clamp(160px, 18vw, 320px);
+  color: var(--fg-primary);
+  flex: 0 0 auto;
+  will-change: transform, opacity;
+  /* Multi-layer NAVY drop-shadow only — no cyan halo (read as
+   * "playful" by the brand). Three short offsets for extruded
+   * thickness + one soft blur to ground the icon on amber. */
+  filter:
+    drop-shadow(0 4px 0 rgba(10, 14, 26, 0.42))
+    drop-shadow(0 10px 0 rgba(10, 14, 26, 0.22))
+    drop-shadow(0 22px 28px rgba(10, 14, 26, 0.50));
+}
+.ch08-brand-icon .ch08-brand-icon__arc {
+  stroke: var(--fg-primary);
+  stroke-width: 2.6;
+}
+.ch08-brand-icon .ch08-brand-icon__line {
+  stroke: var(--accent-cyan);
+  stroke-dasharray: 192;
+  stroke-dashoffset: 192;
+}
+/* Three lines stacked: WIDE halo (back), MID halo (middle), CORE
+ * (front). Stroke widths increase outward, opacity decreases —
+ * paints a true round halo around the line shape (drop-shadow on
+ * a thin line would paint its bounding rect = boxy halo). */
+.ch08-brand-icon .ch08-brand-icon__line--halo-wide {
+  stroke-width: 5.5;
+  opacity: 0.18;
+}
+.ch08-brand-icon .ch08-brand-icon__line--halo-mid {
+  stroke-width: 3.6;
+  opacity: 0.45;
+}
+.ch08-brand-icon .ch08-brand-icon__line--core {
+  stroke-width: 2.6;
+  opacity: 1;
+}
+
+/* ─── Chromatic aberration BASE — sets up CSS custom properties
+ * + the multi-layer drop-shadow extrusion that grounds each glyph
+ * on the amber surface. The glow text-shadow stack is defined
+ * SEPARATELY in the rule above so the two effects can be tuned
+ * independently. */
+.ch08-aberration {
+  --abr-x: 3px;
+  --abr-y: 0;
+  color: var(--fg-primary);
+  filter:
+    drop-shadow(0 4px 0 rgba(10, 14, 26, 0.55))
+    drop-shadow(0 9px 0 rgba(10, 14, 26, 0.35))
+    drop-shadow(0 18px 0 rgba(10, 14, 26, 0.18))
+    drop-shadow(0 32px 38px rgba(10, 14, 26, 0.55));
+  will-change: text-shadow, transform, filter;
+}
+
+/* The mic-drop wrapper — VERTICAL composition mirroring the
+ * website chrome brand mark scaled to hero. Two stacked children:
+ *   __brand  (icon + GoWork inline lockup) on top
+ *   __cta    (Get your plan + meta) below
+ * Both centered horizontally so the composition reads as a single
+ * unified mark. Single viewport-fitting layout. */
+.ch08-mic-drop {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(24px, 4vh, 56px);
+  padding: clamp(40px, 6vh, 100px) clamp(40px, 5vw, 120px);
+  pointer-events: none;
+  /* overflow: hidden REMOVED — was clipping the cyan path-line's
+   * glow halo (box-shadow + drop-shadow extend outward by up to
+   * 160px, all of which got chopped). The section element above
+   * already carries `overflow: hidden`, so off-screen slide-in
+   * positions (xPercent 140) are still clipped at the section
+   * boundary — we don't lose that protection by going visible
+   * one level deeper. */
+  overflow: visible;
+}
+
+/* Brand cluster — [icon] inline with [GoWork lockup]. Reads as
+ * the brand mark scaled up, exactly like the chrome but ~12×
+ * bigger. align-items: center locks the icon to the wordmark's
+ * visual middle. The lockup itself has no whitespace between Go
+ * and Work so the rendered text is the brand asset "GoWork". */
+.ch08-mic-drop__brand {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: clamp(16px, 2.4vw, 56px);
+  flex: 0 0 auto;
+}
+
+/* Lockup — Go and Work as inline siblings forming "GoWork". No
+ * gap. Each row slides in via its own GSAP transform; the lockup
+ * wrapper is just a layout container. baseline alignment keeps
+ * the cap-heights matched even with row 2's italic axis. */
+.ch08-mic-drop__lockup {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 0;
+  white-space: nowrap;
+}
+
+/* CTA cluster — sits BELOW the brand row, left-aligned to the
+ * brand cluster centre. Slides in from the right after the
+ * wordmark has landed, completing the mic-drop. */
+.ch08-mic-drop__cta {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+  flex: 0 0 auto;
+  pointer-events: auto;
+  will-change: transform, opacity;
+}
+/* ─── CTA pill — refined.
+ *
+ * Clean cream pill with:
+ *   1. Tight cyan ring border (1px, no outer halo)
+ *   2. Soft cyan underglow (drop-shadow only, not box-shadow blur
+ *      — keeps the pill's silhouette crisp and the glow focused
+ *      below it instead of bloating in every direction)
+ *   3. INNER sweep — a soft white highlight sweeps INSIDE the
+ *      pill every 4s (NOT outside), masked to the pill's
+ *      rounded-rect border-box via overflow:hidden
+ *   4. Hover lift + bg shift to brighter cream
+ *
+ * The conic-gradient outer ring was killed — it bloomed past the
+ * pill's silhouette and read as a "glowing blob" rather than a
+ * brand element. */
+.ch08-mic-drop__cta a.cta-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  padding: 22px 38px;
+  border-radius: 999px;
+  background: var(--fg-primary);
+  color: #0A0E1A;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+  /* Tight cyan ring + soft drop-shadow underglow. The drop-shadow
+   * filter clips to the rounded silhouette, unlike box-shadow
+   * which would bloat outward. */
+  box-shadow:
+    0 0 0 1.5px color-mix(in oklch, var(--accent-cyan), transparent 35%),
+    0 14px 28px rgba(10, 14, 26, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  filter:
+    drop-shadow(0 0 18px color-mix(in oklch, var(--accent-cyan), transparent 60%))
+    drop-shadow(0 6px 12px rgba(10, 14, 26, 0.3));
+  position: relative;
+  text-decoration: none;
+  isolation: isolate;
+  overflow: hidden; /* clip the inner shimmer to the pill silhouette */
+  transition:
+    transform 360ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 280ms cubic-bezier(0.16, 1, 0.3, 1),
+    filter 360ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+/* INNER sweep — sits inside the pill via `overflow: hidden` clip.
+ * A soft cyan highlight band sweeps left→right every 4s. Reads as
+ * a polished glass surface lit from the side. */
+.ch08-mic-drop__cta a.cta-primary::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    color-mix(in oklch, var(--accent-cyan), transparent 70%) 45%,
+    color-mix(in oklch, var(--accent-cyan), transparent 50%) 50%,
+    color-mix(in oklch, var(--accent-cyan), transparent 70%) 55%,
+    transparent 100%
+  );
+  pointer-events: none;
+  animation: ch08-cta-inner-sweep 4s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+  animation-delay: 1.4s;
+}
+@keyframes ch08-cta-inner-sweep {
+  0%   { left: -60%; }
+  60%  { left: 110%; }
+  100% { left: 110%; }
+}
+.ch08-mic-drop__cta a.cta-primary:hover {
+  transform: translateY(-3px) scale(1.02);
+  background: #FFFCF5;
+  filter:
+    drop-shadow(0 0 32px color-mix(in oklch, var(--accent-cyan), transparent 40%))
+    drop-shadow(0 10px 20px rgba(10, 14, 26, 0.4));
+}
+@media (prefers-reduced-motion: reduce) {
+  .ch08-mic-drop__cta a.cta-primary::before {
+    animation: none !important;
+  }
+}
+
+/* ─── Meta text under CTA ("~3 MIN · WEB OR TEXT · IN ENGLISH OR
+ * SPANISH") — was reading as weak grey tracking text. Upgraded to
+ * a chip-style indicator: cream pill background, cyan dot, more
+ * confident type weight + letter-spacing. */
+.ch08-mic-drop__cta .ch08-meta {
+  font-family: var(--font-mono-data);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #FFFCF5;
+  margin: 0;
+  padding: 6px 14px;
+  background: rgba(10, 14, 26, 0.42);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid color-mix(in oklch, var(--accent-cyan), transparent 65%);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: center;
+  box-shadow: 0 4px 16px rgba(10, 14, 26, 0.3);
+}
+.ch08-mic-drop__cta .ch08-meta::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--accent-cyan);
+  box-shadow: 0 0 8px var(--accent-cyan);
+  animation: ch08-meta-dot 1.6s ease-in-out infinite;
+}
+@keyframes ch08-meta-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.6; transform: scale(0.85); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ch08-mic-drop__cta .ch08-meta::before {
+    animation: none !important;
+  }
+}
+.ch08-mic-drop__cta .ch08-meta {
+  font-family: var(--font-mono-data);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(10, 14, 26, 0.82);
+  margin-left: 4px;
+  line-height: 1.5;
+}
+
+/* Mobile / narrow viewports — already vertical; just shrink the
+ * brand cluster gap so the icon fits comfortably next to the
+ * giant lockup without crowding the wordmark. */
+@media (max-width: 900px) {
+  .ch08-mic-drop__brand {
+    gap: 12px;
+  }
+  .ch08-brand-icon {
+    width: clamp(120px, 24vw, 200px);
+    height: clamp(120px, 24vw, 200px);
+  }
+}
+
+/* Reduced-motion overrides — paint final state, no animation. */
+@media (prefers-reduced-motion: reduce) {
+  .ch08-aberration {
+    text-shadow: none;
+  }
+  .ch08-brand-icon .ch08-brand-icon__line {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Ch07 chart container — defensive dark fill so the cliff SVG never
+ * inherits a light-cream backdrop from a stray theme cascade. */
+.ch07-chart,
+#ch07-chart {
+  background: color-mix(
+    in oklch,
+    var(--bg-base, #0A0E1A),
+    transparent 20%
+  ) !important;
+}
+
+/* Section seams — explicit theme canvas on chapters that don't bake in
+ * their own background. `--bg-base` flips automatically via the
+ * `[data-theme="light|dark"]` overrides in tokens/colors.css, so this
+ * rule tracks the toggle without hard-coding either palette. The
+ * transition matches the body so the section + body flip together. */
+.ch01,
+.ch02,
+.ch03,
+.ch07,
+.ch08 {
+  background: var(--bg-base);
+  transition: background-color 320ms var(--ease-linear-sig, cubic-bezier(0.32, 0.72, 0, 1));
+}
+
+/* Ch04 / Ch05 / Ch06 paint their own gradient backdrops — leave those
+ * alone but ensure their tokens still flip when the theme swaps so
+ * inner cards / glass panes don't strand on the wrong palette. */
+.ch04, .ch04-pin,
+.ch05, .ch05-pin,
+.ch06 {
+  transition: background-color 320ms var(--ease-linear-sig, cubic-bezier(0.32, 0.72, 0, 1));
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+ * polish-2 round-2 fixes — Mapbox section
+ * ════════════════════════════════════════════════════════════════════════════ */
+
+/* Bug 2 — atmosphere overlay washed out the entire map. Driver B's T23
+ * shipped the radial gradients at 60%/50% size with mix-blend-mode: screen
+ * and 0.4 opacity. That meant orange + cyan gradients covered ~75% of the
+ * canvas at full intensity, hiding routes / markers / 3D buildings.
+ * Drop opacity to 0.18, shrink the gradients to corner accents (~25%/22%),
+ * and switch to multiply so the map TINTS with the time-of-day color
+ * instead of being brightened to oblivion. */
+.ch04-atmosphere {
+  opacity: 0.06 !important;
+  mix-blend-mode: multiply !important;
+  background:
+    radial-gradient(28% 22% at 12% 12%, rgba(245, 158, 11, 0.55), transparent 70%),
+    radial-gradient(28% 22% at 88% 78%, rgba(34, 211, 238, 0.55), transparent 70%),
+    radial-gradient(60% 50% at 50% 100%, rgba(10, 14, 26, 0.65), transparent 60%) !important;
+}
+
+/* polish-3 — make the SVG overlay waypoint labels actually READ over
+ * the dark map. The v1 reference paints them with a background pill +
+ * 1px stroke; our overlay text has no halo so it gets lost in the
+ * basemap's ambient detail. Add a dark text-shadow halo so each label
+ * + time stays crisp regardless of what's beneath it. */
+[data-ch04-overlay-svg] .ch04-wp-label,
+[data-ch04-overlay-svg] .ch04-wp-time {
+  paint-order: stroke fill;
+  stroke: rgba(10, 14, 26, 0.92);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+/* Annotation chips ("47 min · headway", "$22.50/hr") should sit on
+ * a dark glass pill so the price/headway never clashes with the map. */
+[data-ch04-overlay-svg] [data-ch04-annotation] text {
+  paint-order: stroke fill;
+  stroke: rgba(10, 14, 26, 0.85);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+/* polish-3 — Ch04 visual breathing. The pin was 100vh which felt
+ * oversized vs 100vh editorial chapters; tighten to 88vh + add 6vh
+ * top/bottom margin so the section doesn't dominate. The map canvas
+ * fills its parent, so this just changes the visible frame, not the
+ * geographic bounds. */
+#chapter-04 {
+  margin: 6vh 0 !important;
+}
+#chapter-04 .ch04-pin {
+  height: 88vh !important;
+  border-radius: 18px;
+  box-shadow:
+    0 40px 100px rgba(5, 8, 18, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+ * polish-2 round-3 fixes — Ch04 + Ch07
+ * ════════════════════════════════════════════════════════════════════════════ */
+
+/* REVERTED — earlier round attempted `min-height: 300vh + overflow: clip`
+ * on the section + `position: sticky` on `.ch04-pin` to give the
+ * choreography ~3 viewports of scroll. That combo broke Mapbox: every
+ * scroll event fired the section's containing-block resize, the canvas
+ * resize-observer re-fired, and the canvas re-painted on every frame.
+ * That is the "flashing/shifting" Shawn reported. We're back to Driver
+ * C's original 100vh slot — choreography is scrub:0.6 over the section's
+ * top→bottom range, which is enough for the 4 card swaps without
+ * fighting Mapbox. If a longer pin is wanted later, do it via a
+ * dedicated wrapper element so #map stays in a stable containing-block. */
+
+/* Ch07 chart card — height clamp REMOVED.
+ *
+ * Was: `max-height: 480px !important` — added in the old SVG line-
+ * chart era when the SVG filled vertically by its aspect-ratio and
+ * could grow past 1000px tall. The new `CliffMoneyTower` is a
+ * stacked-slab visual whose natural height is ~580px (giant net
+ * amount + total-lost badge + 4 slabs × 50px + paddings). The
+ * 480px cap was clipping the bottom slab (MEDICAID) entirely now
+ * that the card has `overflow: hidden`.
+ *
+ * The .ch07-chart svg max-height is also removed — there's no SVG
+ * inside the new tower component, so the rule was dead code that
+ * could collide with any future inline SVG indicator. */
+.ch07-chart,
+#ch07-chart {
+  height: auto !important;
+}
+.ch07-grid {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  gap: 32px !important;
+  align-items: start !important;
+}
+@media (max-width: 900px) {
+  .ch07-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* (Ch08 layout owned by the component now — no overrides needed.) */
+
+/* ════════════════════════════════════════════════════════════════════════════
+ * polish-3 — premium-Webflow text-reveal pattern
+ *
+ * Lithosquare / NYT Snow Fall / Linear-grade scroll reveal. Any element
+ * tagged `[data-reveal="up|down|left|right"]` starts at opacity 0 +
+ * translated and animates to its rest state when its IntersectionObserver
+ * flips `data-revealed="true"`.
+ * ════════════════════════════════════════════════════════════════════════════ */
+[data-reveal] {
+  transition:
+    opacity 720ms var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)),
+    transform 720ms var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  will-change: opacity, transform;
+}
+[data-reveal][data-revealed="false"] {
+  opacity: 0;
+}
+[data-reveal="up"][data-revealed="false"]    { transform: translateY(28px); }
+[data-reveal="down"][data-revealed="false"]  { transform: translateY(-28px); }
+[data-reveal="left"][data-revealed="false"]  { transform: translateX(-48px); }
+[data-reveal="right"][data-revealed="false"] { transform: translateX(48px); }
+[data-reveal][data-revealed="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Stagger — drop a `[data-reveal-stagger]` parent and the children
+ * cascade with a 90ms offset (max 8 children gracefully). Visible on
+ * paragraph blocks, list groups, and manifesto stanzas. */
+[data-reveal-stagger] > [data-reveal]:nth-child(1) { transition-delay: 0ms; }
+[data-reveal-stagger] > [data-reveal]:nth-child(2) { transition-delay: 90ms; }
+[data-reveal-stagger] > [data-reveal]:nth-child(3) { transition-delay: 180ms; }
+[data-reveal-stagger] > [data-reveal]:nth-child(4) { transition-delay: 270ms; }
+[data-reveal-stagger] > [data-reveal]:nth-child(5) { transition-delay: 360ms; }
+[data-reveal-stagger] > [data-reveal]:nth-child(6) { transition-delay: 450ms; }
+[data-reveal-stagger] > [data-reveal]:nth-child(7) { transition-delay: 540ms; }
+[data-reveal-stagger] > [data-reveal]:nth-child(8) { transition-delay: 630ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+ * polish-3 round-2 — premium-Webflow MOTION ENGINE
+ *
+ * Mask-line reveal + per-word stagger reveal patterns. Used by the
+ * MaskReveal / WordReveal components for the Ch01 hero + Ch08 manifesto
+ * rebuilds and any future text that wants the "rise into existence" feel.
+ * ════════════════════════════════════════════════════════════════════════════ */
+
+/* MaskReveal — line-mask. The wrapper sets overflow:hidden; the inner
+ * <span data-mask-inner> starts translated 110% down and rises to 0%. */
+[data-mask-reveal][data-revealed="true"] [data-mask-inner] {
+  transform: translateY(0%) !important;
+}
+
+/* WordReveal — when the parent hits "revealed", every per-word inner
+ * translates up. Each word's stagger lives on the inline transition-delay
+ * the component sets. */
+[data-word-reveal][data-revealed="true"] [data-word-inner] {
+  transform: translateY(0%) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-mask-reveal] [data-mask-inner],
+  [data-word-reveal] [data-word-inner] {
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+ * polish-3 round-2 — Ch01 hero CINEMATIC LAYER
+ *
+ * Animated mesh-gradient breathes behind the hero (premium-Webflow
+ * signature). Marquee gets a 3D rotateX perspective for cinematic depth.
+ * Hero scales down + fades as user enters Ch02 (sticky-on-screen feel
+ * without an actual sticky pin).
+ * ════════════════════════════════════════════════════════════════════════════ */
+
+/* Mesh-gradient backdrop. Two huge radial gradients drift on independent
+ * keyframes; sits at z-index 0 inside .ch01-bg. */
+.ch01-mesh {
+  position: absolute;
+  inset: -10vh;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.55;
+  filter: blur(80px);
+  background:
+    radial-gradient(48% 38% at var(--mesh-amber-x, 18%) var(--mesh-amber-y, 22%), rgba(245, 158, 11, 0.55), transparent 70%),
+    radial-gradient(40% 30% at var(--mesh-cyan-x, 78%) var(--mesh-cyan-y, 70%), rgba(34, 211, 238, 0.50), transparent 70%),
+    radial-gradient(36% 28% at var(--mesh-rose-x, 65%) var(--mesh-rose-y, 18%), rgba(251, 113, 133, 0.32), transparent 75%);
+  animation: ch01-mesh-drift 22s var(--ease-linear-sig, cubic-bezier(0.32, 0.72, 0, 1)) infinite alternate;
+  will-change: transform, opacity;
+}
+@keyframes ch01-mesh-drift {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(28px, -22px, 0) scale(1.06); }
+  100% { transform: translate3d(-18px, 30px, 0) scale(1.02); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ch01-mesh { animation: none; }
+}
+
+/* Marquee 3D perspective tilt. Pulls the eye into the page — premium
+ * Webflow signature on full-bleed marquees. */
+.ch01-marquee {
+  perspective: 1200px !important;
+}
+.ch01-marquee .ch01-marquee__track,
+.ch01-marquee [data-marquee-track] {
+  transform: rotateX(8deg) translateZ(-12px);
+  transform-origin: 50% 50%;
+  transform-style: preserve-3d;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ch01-marquee .ch01-marquee__track,
+  .ch01-marquee [data-marquee-track] {
+    transform: none;
+  }
+}
+
+/* Hero scroll-fade — as the user scrolls into Ch02, the Ch01 hero block
+ * scales 1.0 → 0.92 + opacity 1 → 0.6. Subtle but it sells the "the page
+ * keeps moving while you read" feel. Driven by GSAP scrub already in
+ * Chapter01TheWall.tsx; this just adds the visual contract. */
+
+/* ════════════════════════════════════════════════════════════════════════════
+ * polish-3 round-2 — Ch08 manifesto BUILD
+ *
+ * Each manifesto line is a separate `[data-mask-reveal]`. The line-by-
+ * line cascade is the *closer* of the page — every word should land
+ * with intention. The wordmark below builds letter-by-letter as user
+ * scrolls past.
+ * ════════════════════════════════════════════════════════════════════════════ */
+
+/* (Letter-by-letter wordmark reveal is now driven by the GSAP timeline
+ * in Chapter08FindYourPath.tsx; no CSS rule needed for the per-letter
+ * masks since GSAP sets the transforms directly.) */
+
+/* CTA path-line draw on hover — a 1.5px cyan→amber line draws under the
+ * pill on hover, signaling "the path completes here." */
+.ch08-cta a.cta-primary {
+  position: relative;
+}
+.ch08-cta a.cta-primary::after {
+  content: "";
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: -6px;
+  height: 1.5px;
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-amber));
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ch08-cta a.cta-primary:hover::after,
+.ch08-cta a.cta-primary:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+ * Ch08 — REMOVED prior sticky-pin CSS. Replaced with GSAP ScrollTrigger
+ * pin + scrub timeline driven from Chapter08FindYourPath.tsx. The section
+ * itself is plain 100vh with grid layout; GSAP handles pinning + scrub.
+ * Reduced-motion users get a static section (no pin, no scrub).
+ * ════════════════════════════════════════════════════════════════════════════ */
+
+/* ════════════════════════════════════════════════════════════════════════════
+ * Ch08 — Pixel-digitize manifesto exit (Lithosquare-style).
+ *
+ * A single 30×17 = 510-square grid overlays the MANIFESTO stage. It
+ * fades in over the "Find your path" lines (pixelating them as a
+ * digital screen-wipe), then slides UPWARD as a single unit with the
+ * manifesto stage, exiting the viewport. Once it's gone, the GO WORK
+ * wordmark below cascades into place — uncovered, untouched. GO WORK
+ * is the final image; no pixel grid ever covers it.
+ *
+ * Square fill is the section background color so fully-opaque squares
+ * read as a uniform dark plane that completely hides the underlying
+ * manifesto. The fade-in is driven by GSAP ScrollTrigger in
+ * Chapter08FindYourPath.tsx with bottom-biased + sine-wave + per-square
+ * random priority sorting. Reverses cleanly on scroll-up.
+ *
+ * Z-stacking inside the section:
+ *   wordmark text       z-index: 1   ← uncovered final image
+ *   manifesto stage     z-index: 3   ← on top during phase 1
+ *   pixel grid          z-index: 4   ← over manifesto, slides up with it
+ *
+ * Reduced-motion: the grid is `display: none`, leaving the manifesto +
+ * wordmark fully visible at first paint (no pixel animation runs).
+ * ════════════════════════════════════════════════════════════════════════════ */
+.ch08-pixel-grid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(30, 1fr);
+  grid-template-rows: repeat(17, 1fr);
+  gap: 0;
+  pointer-events: none;
+  z-index: 4;
+  width: 100%;
+  height: 100%;
+  /* Grid container animates yPercent (slide-up with manifesto) — only
+   * the children animate opacity, so the per-square fade-in pattern
+   * stays locked while the whole grid translates upward. */
+  will-change: transform;
+}
+
+.ch08-pixel-grid .ch08-square {
+  /* AMBER (#F59E0B) — brand "hope/progress" accent. Chosen because:
+   *   1. The previous bg-base fill was invisible on bg-base canvas.
+   *   2. Amber is the brand's "campaign full-bleed" surface (see
+   *      brand-on-surfaces.html → swatch.amber) so the wave reads
+   *      visually as the brand colour wash that *introduces* GO WORK.
+   *   3. Highest legibility on #0A0E1A in the brand palette. */
+  background: var(--accent-amber);
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  /* Force GPU compositing for the per-square opacity tweens — without
+   * this, scrubbing 510 squares sees layout/paint thrash on lower-end
+   * machines. */
+  will-change: opacity;
+  transform: translateZ(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ch08-pixel-grid {
+    display: none !important;
+  }
+}
+
+/* Bug 5 — defensive: cards rendering at non-active steps must collapse
+ * fully out of layout flow. The component already gates opacity on
+ * `data-active`, but in-flight scroll choreography can leave a stale
+ * card mid-fade. `visibility: hidden + pointer-events: none` ensures
+ * inactive cards never bleed through visually or capture clicks. */
+.ch04-cards .ch04-card[data-active="false"] {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+.ch04-cards .ch04-card[data-active="true"] {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Bug 6 — HUD label/value spacing. Driver C used `display: contents` on
+ * `.ch04-hud__row` which strips the row container — no whitespace
+ * between dt and dd. Switch to flex with a real gap. */
+.ch04-hud__row {
+  display: flex !important;
+  gap: 12px !important;
+  align-items: baseline;
+}
+.ch04-hud__lbl {
+  font-family: var(--font-mono-data, ui-monospace, monospace);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.ch04-hud__val {
+  font-family: var(--font-mono-data, ui-monospace, monospace);
+  font-size: 12px;
+  font-weight: 600;
+}

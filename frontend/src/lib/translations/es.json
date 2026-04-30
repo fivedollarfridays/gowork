@@ -6,7 +6,70 @@
     "jobs": "Empleos",
     "documents": "Documentos",
     "daily": "Resumen diario",
-    "caseManager": "Gestor de casos"
+    "caseManager": "Gestor de casos",
+    "plan": "Plan",
+    "ctaPlan": "Obtén tu plan",
+    "themeToggleAria": "Cambiar entre tema claro y oscuro",
+    "themeLight": "Claro",
+    "themeDark": "Oscuro",
+    "muteToggle": {
+      "aria": "Activar o silenciar el sonido ambiente",
+      "ariaMuted": "Sonido silenciado — activar",
+      "ariaUnmuted": "Sonido activado — silenciar"
+    }
+  },
+  "chapterRail": {
+    "label": "Navegación por capítulos",
+    "ch1": "El muro",
+    "ch2": "Los números",
+    "ch3": "Conoce a Carlos",
+    "ch4": "El mapa",
+    "ch5": "El plan",
+    "ch6": "Empleos en vivo",
+    "ch7": "El precipicio",
+    "ch8": "Encuentra tu camino",
+    "progressLabel": "Progreso de lectura",
+    "tooltip": {
+      "altPrefix": "Vista previa de"
+    }
+  },
+  "pageMeta": {
+    "city": "CIUDAD",
+    "chapter": "CAPÍTULO",
+    "scroll": "AVANCE",
+    "light": "LUZ",
+    "live": "EN VIVO",
+    "liveSessions": "{count} sesiones",
+    "liveCalibrated": "última calibración {when}",
+    "batterySaver": "AHORRO DE BATERÍA",
+    "lightDawn": "amanecer",
+    "lightMorning": "mañana",
+    "lightMidday": "mediodía",
+    "lightAfternoon": "tarde",
+    "lightGolden": "dorada",
+    "lightDusk": "ocaso",
+    "lightNight": "noche"
+  },
+  "siteFooter": {
+    "brandHeading": "GoWork",
+    "brandTagline": "Infraestructura laboral para cualquier ciudad estadounidense.",
+    "workersHeading": "Para trabajadores",
+    "workersPlan": "Plan",
+    "workersNavigator": "Encuentra un navegador",
+    "workersDaily": "Resumen diario",
+    "workersDocuments": "Documentos",
+    "navigatorsHeading": "Para navegadores",
+    "navigatorsCaseload": "Vista de casos",
+    "navigatorsOutcomes": "Panel de resultados",
+    "navigatorsTraining": "Capacitación",
+    "citiesHeading": "Para ciudades",
+    "citiesDeploy": "Despliega GoWork",
+    "citiesPress": "Kit de prensa",
+    "citiesOpenSource": "Código abierto · MIT",
+    "creditLine": "HackFW 2026 · Fort Worth, TX",
+    "shippedLine": "Hecho en Texas. Enviado a cualquier parte.",
+    "legalNavLabel": "Legal y accesibilidad",
+    "legalAccessibility": "Accesibilidad"
   },
   "banner": {
     "stallTitle": "Vamos a destrabar tu proceso",
@@ -33,13 +96,13 @@
   },
   "hero": {
     "title": "Que te impide conseguir un trabajo?",
-    "subtitle": "MontGoWork es un navegador laboral que te ayuda a superar barreras y encontrar tu camino al empleo.",
+    "subtitle": "GoWork es un navegador laboral que te ayuda a superar barreras y encontrar tu camino al empleo.",
     "cta": "Obtener Tu Plan",
     "creditCta": "Verificar Credito"
   },
   "home": {
     "heroQuestion": "¿Qué te impide conseguir un trabajo?",
-    "heroBlurb": "MontGoWork es un navegador laboral que te ayuda a superar barreras y encontrar tu camino al empleo.",
+    "heroBlurb": "GoWork es un navegador laboral que te ayuda a superar barreras y encontrar tu camino al empleo.",
     "ctaPlan": "Obtener tu plan",
     "ctaCredit": "Revisar tu crédito",
     "howHeading": "Cómo funciona",
@@ -56,7 +119,333 @@
     "statLabor": "Participación laboral",
     "bottomCtaTitle": "¿Listo para empezar?",
     "bottomCtaBody": "Toma unos 2 minutos. No necesitas crear cuenta.",
-    "bottomCtaButton": "Empezar tu evaluación"
+    "bottomCtaButton": "Empezar tu evaluación",
+    "ch1": {
+      "eyebrow": "HackFW 2026 · Fort Worth, TX · en producción",
+      "morphLine1Aria": "muro",
+      "line2": "Hay un {{wall}} entre tú y {{job}}",
+      "line2Wall": "muro",
+      "line2Job": "un trabajo.",
+      "line3": "Lo derribamos {{down}} — ladrillo por ladrillo.",
+      "line3Down": "ahora",
+      "ariaLabel": "Hay un muro entre tú y un trabajo. Lo derribamos, ladrillo por ladrillo.",
+      "subhead": "{{seven}} entre la mayoría de los trabajadores y un cheque. {{system}}",
+      "subheadSeven": "Siete barreras invisibles",
+      "subheadSystem": "GoWork las ve todas a la vez.",
+      "ctaPrimary": "Obtén tu plan",
+      "ctaGhost": "Mira cómo funciona",
+      "scrollCue": "desliza",
+      "marquee": {
+        "license": "Licencia suspendida",
+        "court": "Cita en corte",
+        "pickup": "Recoger a los niños",
+        "bus": "Autobús cada 47 minutos",
+        "background": "Antecedentes",
+        "cliff": "Acantilado de salario",
+        "nobody": "Nadie a quién llamar"
+      },
+      "morphWords": [
+        "muro",
+        "licencia",
+        "cita en corte",
+        "los niños",
+        "autobús 47-min",
+        "antecedentes",
+        "acantilado"
+      ],
+      "idle": {
+        "orbitAria": "El mapa está vivo — los marcadores se mueven suavemente"
+      }
+    },
+    "titleSequence": {
+      "presenter": "GoWork presenta",
+      "title": "El Muro",
+      "subtitle": "Un mapa interactivo de Fort Worth, Texas"
+    },
+    "ch2": {
+      "eyebrow": "Los números",
+      "stat1Number": "600,000+",
+      "stat1Cap": "tejanos chocan este año contra una barrera que les cuesta un empleo que podrían haber mantenido.",
+      "stat2Number": "87 min",
+      "stat2Cap": "Trayecto promedio que Carlos enfrenta entre su turno y la salida de su hija a las 2 p.m., hasta que ordenamos el día.",
+      "stat3Number": "7",
+      "stat3Cap": "Barreras distintas en una sola semana de trabajo. Ninguna es su ética laboral. Todas están conectadas.",
+      "stat4Number": "$22.50/hr",
+      "stat4Cap": "Salario del empleo de segunda oportunidad a 4.2 millas, el destino alrededor del cual gira el mapa entero.",
+      "pull": "No son frases. Son {{tuesday}}.",
+      "pullTuesday": "el martes",
+      "ariaLabel": "Los números detrás del muro"
+    },
+    "ch3": {
+      "eyebrow": "Conoce a Carlos",
+      "portraitAlt": "Retrato estilizado de Carlos, soldador de Fort Worth",
+      "captionEyebrow": "CARLOS R. · 34 · ZIP 76104",
+      "captionQuote": "Trabajo de noche en una bodega. Recojo a mi hija de la escuela a las 2. El autobús pasa cada 47 minutos. Saca la cuenta.",
+      "h2Words": [
+        "Un",
+        "papá.",
+        "Un",
+        "soldador.",
+        "No",
+        "un",
+        "número",
+        "de caso."
+      ],
+      "italicFromIndex": 4,
+      "p1": "Carlos vive en {{zip}}, un código postal de Fort Worth donde uno de cada tres adultos tiene un expediente abierto: una orden que no sabía que existía, una licencia que no pudo pagar para arreglar, o una cita en corte a la que no pudo faltar al trabajo para asistir.",
+      "p1Zip": "76104",
+      "p2": "Tiene historial laboral. Tiene referencias. Tiene una hija a la que hay que recoger en la escuela primaria Como a las 2:00. {{bold}}, hasta ahora.",
+      "p2Bold": "Lo que no tiene es un sistema que pueda sostener todo eso en la cabeza al mismo tiempo",
+      "fact1Num": "2:30",
+      "fact1Cap": "fin de turno",
+      "fact2Num": "2:00",
+      "fact2Cap": "salida de escuela",
+      "fact3Num": "47",
+      "fact3Cap": "autobús · min",
+      "fact4Num": "4:00",
+      "fact4Cap": "cita en corte",
+      "ariaLabel": "Conoce a Carlos: un papá, un soldador, no un número de caso"
+    },
+    "ch4": {
+      "eyebrow": "04 / El mapa",
+      "ariaLabel": "El mapa — un martes en Fort Worth, cuatro paradas, un día despejado",
+      "scene1": "Martes · 6:42a · casa",
+      "scene2": "Martes · 10:00a · DPS",
+      "scene3": "Martes · 12:30p · Workforce Solutions",
+      "scene4": "Martes · 3:27p · Alcon",
+      "hudScene": "ESCENA",
+      "hudFocus": "ENFOQUE",
+      "hudCleared": "DESPEJADO",
+      "fallbackTitle": "Martes · Fort Worth · un día despejado",
+      "fallbackBody": "DPS a las diez. Workforce Solutions a las doce y media. Turno en Alcon a las tres y veintisiete. Todo el día, en orden.",
+      "cards": {
+        "card1Time": "06:42 AM · Casa · CP 76104",
+        "card1Body": "El día empieza con tres citas imposibles. DPS a las 10. Corte a las 4. Recoger a la niña a las 2. Reordenamos para que entren todas.",
+        "card2Time": "10:00 AM · DPS · licencia",
+        "card2Body": "Cae un ladrillo. Se desbloquean cuatro empleos. La licencia que piden los empleadores de CDL estaba a 90 minutos.",
+        "card3Time": "12:30 PM · Workforce Solutions",
+        "card3Body": "Tres opciones fair-chance. Ya filtradas. La trabajadora le entrega un plan impreso, no un montón de folletos.",
+        "card4Time": "03:27 PM · Alcon · inicio de turno",
+        "card4Body": "El destino. $22.50 la hora, con seguro. La pre-aprendizaje paga durante el entrenamiento. El día termina con él en la planta."
+      },
+      "legendAria": "Leyenda del mapa — seis capas, un día despejado",
+      "legendRow1": "CARLOS",
+      "legendRow1Time": "23 mi",
+      "legendRow2": "TRÁNSITO",
+      "legendRow2Time": "47 min",
+      "legendRow3": "ABISMO",
+      "legendRow3Time": "$2/hr",
+      "legend": {
+        "heading": "LEYENDA",
+        "morning": "Bus de Carlos · mañana",
+        "morningNum": "47m",
+        "afternoon": "Ruta del turno · tarde",
+        "afternoonNum": "71m",
+        "broken": "Camino roto · sin carro",
+        "brokenNum": "∞",
+        "home": "Casa + paradas familiares",
+        "homeNum": "2",
+        "plan": "Paradas del plan + destino",
+        "planNum": "3",
+        "court": "Severidad · audiencia",
+        "courtNum": "1"
+      },
+      "compass": {
+        "city": "CIUDAD",
+        "lat": "LAT",
+        "lon": "LON",
+        "bearing": "RUMBO",
+        "zoom": "ZOOM"
+      },
+      "statRow": {
+        "wageVal": "$22.50",
+        "wageUnit": "/hr",
+        "wageLabel": "Salario en Alcon · con seguro",
+        "headwayVal": "47",
+        "headwayUnit": "min",
+        "headwayLabel": "Frecuencia Bus 4 · centro",
+        "commuteVal": "4.8",
+        "commuteUnit": "mi",
+        "commuteLabel": "Casa → Alcon",
+        "recordsVal": "1",
+        "recordsUnit": "/3",
+        "recordsLabel": "Antecedentes abiertos · 76104"
+      },
+      "attrib": {
+        "aria": "Atribución del mapa",
+        "liveLabel": "En vivo",
+        "timestamp": "12:30p · Mar"
+      },
+      "annotations": {
+        "headway": "47 min",
+        "headwaySub": "frecuencia del bus",
+        "wage": "$22.50/hr",
+        "wageSub": "Alcon · con seguro",
+        "childcare": "$1,200/mes",
+        "childcareSub": "guardería HHSC",
+        "records": "1 de 3",
+        "recordsSub": "registros abiertos",
+        "commute": "4.8 mi",
+        "commuteSub": "casa → Alcon",
+        "reach": "60 min",
+        "reachSub": "alcance a pie + bus"
+      },
+      "step": {
+        "eyebrowSuffix": "martes por la mañana",
+        "tsLabel": "mapbox en vivo",
+        "h1Pre": "Tres citas imposibles antes del",
+        "h1Em": "mediodía",
+        "h1Strike": "Hasta el martes.",
+        "dropcap": "Carlos sale del trabajo a las 3:27. La salida en Como es a las 2:00. DPS abre hasta las 4:30. El Bus 4 pasa cada 47 minutos. El cálculo no cuadra — hasta que ordenas el día. Reconstruimos su martes alrededor de tres restricciones: la frecuencia del bus, la campana de la escuela y una audiencia que no se puede mover. El camino que emergió no es más rápido. Es vivible.",
+        "pull": "Cada barrera se conecta. Nosotros encontramos el orden.",
+        "tlEvent1": "Bus 4 → centro. Parada Hemphill & Berry. Pase del día $2 — guarda el recibo.",
+        "tlEvent2": "DPS · reemplazar licencia. Cita reservada. Trae acta de nacimiento + tarjeta SS + contrato.",
+        "tlEvent3": "Workforce Solutions · revisión con Tanya R. Ella tiene tu lista de barreras.",
+        "tlEvent4": "Como Elementary · recoger a Lily. Plan B: tía Rosa.",
+        "tlEvent5": "Alcon · inicio de turno. Pre-aprendizaje pagado. El día termina con él en la planta.",
+        "tag1": "a tiempo",
+        "tag2": "desbloquea 4 empleos",
+        "tag3": "3 opciones fair-chance",
+        "tag4": "no movible",
+        "navPrev": "01 · Carlos",
+        "navNext": "Siguiente: 05 · El plan"
+      }
+    },
+    "ch5": {
+      "eyebrow": "05 / El plan",
+      "ariaLabel": "El plan — un plan, cuatro movidas, en orden para tu semana",
+      "h2Pre": "Un",
+      "h2Plan": "plan.",
+      "h2Mid": "Cuatro movidas.",
+      "h2Tail": "En orden para tu semana.",
+      "intro": "Casi todos los planes te dan una lista. Nosotros te damos un orden — el lunes despejas las barreras, el martes ordenas el día, el miércoles haces match con empleos fair-chance, el jueves corres las cuentas reales del salario. Para el viernes tienes un plan escrito, en tu idioma, que un case manager puede firmar el Día 1.",
+      "card1Num": "01",
+      "card1Tag": "Lunes",
+      "card1Title": "Saca tus barreras.",
+      "card1Body": "Siete barreras, ordenadas por las que desbloquean más empleos primero. Licencia antes que corte. Corte antes que cuidado infantil. El orden importa.",
+      "card1Foot": "~10 minutos · teléfono o web",
+      "card2Num": "02",
+      "card2Tag": "Martes",
+      "card2Title": "Ordena el día.",
+      "card2Body": "DPS a las 10, Workforce Solutions a las 12:30, turno en Alcon a las 3:27. Te damos la ruta, el tiempo de transporte y un plan B para cada parada.",
+      "card2Foot": "Imprimible · con horarios de transporte",
+      "card3Num": "03",
+      "card3Tag": "Miércoles",
+      "card3Title": "Empleos fair-chance.",
+      "card3Body": "Tres empleadores a menos de seis millas que contratan por referencia, revisan antecedentes uno por uno y pagan durante el entrenamiento.",
+      "card3Foot": "Actualizado semanalmente · 38 empleadores verificados",
+      "card4Num": "04",
+      "card4Tag": "Jueves",
+      "card4Title": "Corre las cuentas.",
+      "card4Body": "$22.50 deja más en la mano que $18.50 en Tarrant County — pero sólo después del acantilado. Te mostramos el sueldo real antes de firmar.",
+      "card4Foot": "Cuentas honestas · antes de la oferta",
+      "card1": {
+        "back1": "Saca DPS, antecedentes en corte y cualquier orden abierta — en ese orden.",
+        "back2": "Conecta cada barrera con el empleo que desbloquea (licencia = CDL, corte = empleadores con fianza).",
+        "back3": "Marca las dos que podemos resolver esta semana. Las demás esperan."
+      },
+      "card2": {
+        "back1": "Agrupa diligencias por corredor de transporte: DPS → Workforce Solutions → visita al sitio.",
+        "back2": "Arma un plan B para el bus que pasa cada 35 minutos.",
+        "back3": "Imprime el día. Pégalo al refrigerador. Enséñaselo al case manager."
+      },
+      "card3": {
+        "back1": "Tres empleadores fair-chance a menos de seis millas, contratando esta semana.",
+        "back2": "Cada uno ajustado a tu tipo de récord y a tu turno disponible.",
+        "back3": "Los tres pagan durante el entrenamiento — sin pre-aprendizaje sin paga."
+      },
+      "card4": {
+        "back1": "Calculamos cambios en SNAP, cuidado infantil y Medicaid al salario ofrecido.",
+        "back2": "Te mostramos el sueldo real — después del acantilado — antes de firmar.",
+        "back3": "Si un aumento de $2 cuesta $400, te lo decimos. Honesto. En papel."
+      }
+    },
+    "ch6": {
+      "eyebrow": "06 / Empleos en vivo",
+      "ariaLabel": "Empleos en vivo — tres empleadores fair-chance a menos de seis millas",
+      "livePillPrefix": "En vivo · actualizado hace",
+      "livePillSuffix": "",
+      "h2Pre": "Tres empleadores",
+      "h2Fair": "fair-chance",
+      "h2Mid": "a menos de",
+      "h2SixMiles": "seis millas.",
+      "h2Tail": ".",
+      "marqueeAria": "Marquesina de salarios en vivo",
+      "skeletonLabel": "Cargando empleo…",
+      "cards": {
+        "alconName": "Alcon — Técnico de Producción II",
+        "alconAddr": "Alcon Drive · Fort Worth · 76134",
+        "alconWage": "$22.50/hr",
+        "alconCommute": "42m · Ruta 7",
+        "alconShift": "3:30p–11:30p · L-V",
+        "alconBlurb": "Contrata por referencia de navigator. Antecedentes revisados uno por uno — sin descalificación automática. La pre-aprendizaje paga durante el entrenamiento.",
+        "bnsfName": "BNSF — Aprendiz de CDL",
+        "bnsfAddr": "Lancaster Ave · Fort Worth · 76104",
+        "bnsfWage": "$26.10/hr",
+        "bnsfCommute": "18m · Ruta 2",
+        "bnsfShift": "4 días sí / 3 no",
+        "bnsfBlurb": "La licencia se desbloquea en 90 minutos en DPS. El programa paga desde el día uno. Antecedentes revisados por panel — felonías de más de cinco años son aprobadas con frecuencia.",
+        "dunnName": "JE Dunn — Aprendiz de Electricista",
+        "dunnAddr": "Corredor I-35W · Fort Worth · 76106",
+        "dunnWage": "$19.75/hr",
+        "dunnCommute": "36m · I-35W",
+        "dunnShift": "4 años pagados · journeyman en 4 años",
+        "dunnBlurb": "La pre-aprendizaje es pagada. Te dan herramientas. Sube a $38/hr al llegar a journeyman. JE Dunn trabaja con navigators fair-chance de Tarrant directamente.",
+        "applyCta": "Aplicar con tu plan →"
+      }
+    },
+    "ch7": {
+      "eyebrow": "El acantilado",
+      "h2": "Un {{raise}} que cuesta {{cost}} no es un aumento.",
+      "h2Raise": "aumento de $2",
+      "h2Cost": "$400",
+      "p1": "A {{wage}}, Carlos cruza un acantilado de beneficios. SNAP baja $312. El subsidio de cuidado infantil se acaba. Medicaid se cae. El aumento le deja una {{loss}} de $400 al mes, y no la ve hasta el primer cheque después de aceptar la oferta.",
+      "p1Wage": "$18.50/hr",
+      "p1Loss": "pérdida",
+      "p2": "Hacemos esta cuenta para cada oferta. Sin trampas. Antes de la firma. Para que el siguiente paso sea uno {{real}}.",
+      "p2Real": "de verdad",
+      "controlsLabel": "Salario por hora",
+      "rowGross": "Bruto / mes",
+      "rowSnap": "Cambio en SNAP",
+      "rowCc": "Cuidado infantil",
+      "rowMed": "Medicaid",
+      "rowTotal": "Δ real / mes",
+      "medSafe": "seguro",
+      "medAtRisk": "en riesgo",
+      "medLapses": "se cae",
+      "chartAria": "Gráfica del acantilado salarial: ingreso real por salario por hora",
+      "cliffZone": "zona de acantilado",
+      "ariaLabel": "El acantilado de beneficios: un aumento de $2 que cuesta $400",
+      "householdLabel": "Hogar",
+      "householdSize1": "1",
+      "householdSize2": "2",
+      "householdSize3": "3",
+      "householdSize4": "4",
+      "cliff": {
+        "tooltipEdge": "el filo del acantilado — SNAP baja a $48/mes, el bono de cuidado infantil se cae",
+        "tooltipDestination": "salario de técnico de producción en Alcon — empleo destino"
+      }
+    },
+    "ch8": {
+      "eyebrow": "Encuentra tu camino",
+      "line1": "No vamos a arreglar el muro.",
+      "line2": "Lo seguiremos derribando,",
+      "line3": "ladrillo por ladrillo por ladrillo,",
+      "line4": "hasta que tengas a dónde {{tuesday}}",
+      "line4Tuesday": "ir el martes.",
+      "ctaPrimary": "Obtén tu plan",
+      "ctaMeta": "~3 min · web o texto · en inglés o español",
+      "wordmarkRow1": "GO",
+      "wordmarkRow2": "WORK",
+      "ariaLabel": "Encuentra tu camino: obtén tu plan",
+      "wordmark": {
+        "spokenCityFw": "Fort Worth, TX",
+        "spokenCityComing": "Próximamente:",
+        "spokenCityMont": "Montgomery, AL",
+        "spokenCityDal": "Dallas, TX",
+        "spokenCityHou": "Houston, TX"
+      }
+    }
   },
   "howItWorks": {
     "heading": "Como Funciona",
@@ -255,7 +644,7 @@
   },
   "dashboard": {
     "heading": "Panel del Gestor de Casos",
-    "description": "Metricas agregadas de las evaluaciones de MontGoWork",
+    "description": "Metricas agregadas de las evaluaciones de GoWork",
     "totalAssessments": "Total de Evaluaciones",
     "barrierInstances": "Instancias de Barreras",
     "avgBarriers": "Barreras Promedio/Persona",
@@ -437,16 +826,256 @@
     "noteGenericError": "No se pudo enviar la nota. Inténtalo de nuevo."
   },
   "footer": {
-    "entity": "MontGoWork (proyecto de hackatón)",
+    "entity": "GoWork (proyecto de hackatón)",
     "tagline": "Navegador laboral",
     "navLabel": "Legal",
     "privacy": "Privacidad",
-    "terms": "Términos"
+    "terms": "Términos",
+    "brand": {
+      "label": "GoWork — infraestructura laboral para cualquier ciudad estadounidense"
+    },
+    "github": "Código abierto en GitHub",
+    "license": "Licencia MIT",
+    "lastCalibration": "Última calibración"
+  },
+  "header": {
+    "brand": {
+      "label": "GoWork — volver al muro"
+    },
+    "muteToggle": {
+      "aria": "Activar o silenciar el sonido ambiente"
+    },
+    "languageToggle": {
+      "aria": "Cambiar entre inglés y español"
+    },
+    "github": {
+      "aria": "Ver el código fuente en GitHub"
+    },
+    "chapterCounter": {
+      "aria": "Capítulo actual, de diez"
+    }
+  },
+  "wall": {
+    "startNowCta": {
+      "label": "Empezar ahora",
+      "ariaLabel": "Comenzar tu evaluación ahora"
+    },
+    "titleSequence": {
+      "presenter": "GoWork presenta",
+      "title": "El Muro",
+      "subtitle": "Un mapa interactivo de Fort Worth, Texas · abril de 2026"
+    },
+    "chapter01": {
+      "title": "Capítulo 1 — Continental",
+      "heroQuestion": "¿Qué se interpone entre tú y un empleo?",
+      "hero": "¿Qué te separa de un trabajo?",
+      "subhero": "No deberías tener que descifrar el muro tú solo. Nosotros hacemos las cuentas, ordenamos el camino y te entregamos el plan.",
+      "editorial": "Estados Unidos visto desde arriba. Un punto en la oscuridad — Fort Worth, Texas.",
+      "carlosLead": "Vamos a conocer a un trabajador llamado Carlos.",
+      "pullquote": "No deberías tener que descubrir solo cómo cruzar el muro.",
+      "aria": "Capítulo 1: Continental — vista cenital de Estados Unidos"
+    },
+    "chapter02": {
+      "title": "Capítulo 2 — Llegada a la ciudad",
+      "body": "Aquí vive Carlos. Código postal 76119. Al este del centro — pasando Sundance Square, pasando los juzgados.",
+      "editorial": "Aquí vive Carlos. Código postal 76119. Al este del centro.",
+      "detail": "Las rutas de Trinity Metro atraviesan la ciudad en cian. La mitad no llegan a las bodegas.",
+      "aria": "Capítulo 2: Fort Worth desde altura. Rutas de Trinity Metro trazadas en cian."
+    },
+    "chapter03": {
+      "title": "Capítulo 3 — El barrio",
+      "body": "Carlos tiene 29 años. Código postal 76119. Padre soltero de una hija de cuatro años. Recién regresó a casa — con la sentencia cumplida hace tres años. Trae $300 en efectivo, no tiene vehículo y cuenta con cuatro años de experiencia en bodega y manejo de montacargas. Está listo para trabajar. Cuatro barreras se interponen entre él y un sueldo.",
+      "carlosIntro": "Carlos tiene 29 años. Es padre de una niña de cuatro. Hace tres años, un cargo menor por robo. Sentencia cumplida. Cuatro años de experiencia en bodegas y un certificado de montacargas en mano. Ahora está en casa, intentando volver a trabajar.",
+      "neighborhoodLabel": "Código postal 76119 — Este de Fort Worth",
+      "aria": "Capítulo 3: una cuadra del barrio 76119. Conocemos a Carlos."
+    },
+    "chapter04": {
+      "title": "El Muro",
+      "lede": "La mayoría de los sitios laborales hace como si las barreras no importaran. Nosotros hacemos las cuentas para demostrar que sí importan.",
+      "aria": "Capítulo 4: El Muro. Cuatro barreras, nombradas una por una."
+    },
+    "chapter04a": {
+      "title": "Antecedentes penales",
+      "detail": "4.8 millas. Autobús 4 + Autobús 6 = 71 minutos.",
+      "statValue": "71 min",
+      "statLabel": "hasta la Oficina del Secretario de Distrito",
+      "pullquote": "Volví a casa con 300 dólares y una hija, y el sistema me mandó a cinco oficinas.",
+      "aria": "Barrera uno: antecedentes penales. La Oficina del Secretario de Distrito del Condado de Tarrant queda a 4.8 millas. Autobús 4 más Autobús 6 suman 71 minutos."
+    },
+    "chapter04b": {
+      "title": "Sin transporte",
+      "detail": "Vive en el 76119. El Autobús 4 al centro toma 45 minutos. Más un transbordo. Más la espera.",
+      "statValue": "87 min",
+      "statLabel": "trayecto al centro",
+      "pullquote": "Cuarenta y cinco minutos es el horario. Ochenta y siete es el día.",
+      "aria": "Barrera dos: sin transporte. El trayecto al centro en el Autobús 4, con transbordo, suma 87 minutos."
+    },
+    "chapter04c": {
+      "title": "Sin cuidado infantil",
+      "detail": "Su hija tiene 4 años. La guardería cuesta 1,200 dólares al mes que él no tiene.",
+      "statValue": "$1,200/mes",
+      "statLabel": "sin subsidio",
+      "pullquote": "No puedo aceptar un turno que empiece antes de que abra la guardería.",
+      "aria": "Barrera tres: sin cuidado infantil. El precio de mercado es de 1,200 dólares al mes sin subsidio."
+    },
+    "chapter04d": {
+      "title": "Mal crédito",
+      "detail": "540. Pagos atrasados. Una cuenta en cobranza. La mitad de los apartamentos no lo aceptan — y uno de cada tres empleos hace revisión de crédito.",
+      "statValue": "33%",
+      "statLabel": "de los empleos quedan fuera",
+      "pullquote": "Un puntaje que no veo me está cerrando puertas a las que nunca toqué.",
+      "aria": "Barrera cuatro: mal crédito. Aproximadamente uno de cada tres empleos hace una revisión de crédito que Carlos no aprobaría."
+    },
+    "chapter05": {
+      "title": "El Laberinto",
+      "editorial": "5 oficinas. 47 formularios. Cada una te manda a la siguiente.",
+      "lede": "Sin GoWork, este es el camino. Le pusimos nombre para poder reemplazarlo.",
+      "formsCounter": "47",
+      "formsCounterLabel": "formularios por llenar",
+      "officesLabel": "oficinas por visitar",
+      "pullquote": "Cada oficina me dio un formulario y otra dirección.",
+      "aria": "Capítulo 5: el Laberinto. Cinco oficinas y cuarenta y siete formularios — el caos antes de que GoWork ordene el camino.",
+      "convergenceCaption": "47 formularios. 5 oficinas. Nosotros los ordenamos. Tú caminas una vez.",
+      "barrierLabels": {
+        "criminalRecord": "Antecedentes penales → Tarrant District Clerk",
+        "transit": "Sin transporte → Trinity Metro HQ",
+        "childcare": "Sin cuidado infantil → HHSC Eligibility",
+        "credit": "Mal crédito → Legal Aid NW Texas",
+        "id": "Falta ID → Workforce Solutions"
+      },
+      "officeNames": {
+        "tarrant-district-clerk": "Tarrant District Clerk",
+        "hhsc-eligibility": "HHSC Eligibility",
+        "trinity-metro-hq": "Trinity Metro HQ",
+        "legal-aid-nw-texas": "Legal Aid of NW Texas",
+        "workforce-solutions-belknap": "Workforce Solutions (Belknap)"
+      }
+    },
+    "chapter06": {
+      "title": "Las Cuentas",
+      "hero": "Cuando ganar más significa tener menos.",
+      "subhero": "Hacemos las cuentas del precipicio para que la decisión sea honesta. Mueve el control — mira cómo cae.",
+      "body": "Carlos surte estantes en el centro de Amazon DFW5 — a 71 minutos de su casa en el Bus 4. Un aumento de $2 por hora suena bien. El precipicio de beneficios dice otra cosa: el subsidio de cuidado infantil termina a $14/hr, los cupones SNAP terminan a $17/hr. La gráfica es el recibo.",
+      "statValue": "71 min",
+      "statLabel": "de la casa de Carlos a DFW5 en el Bus 4",
+      "wageSliderLabel": "Salario por hora",
+      "wageSliderHint": "Arrastra para ver el precipicio moverse con el salario.",
+      "wageSliderMinLabel": "$7.25 — mínimo federal",
+      "wageSliderMaxLabel": "$25.00 — pasado el precipicio",
+      "wageSliderValueLabel": "Salario actual",
+      "cliffChartLabel": "Ingreso neto mensual vs. salario por hora",
+      "cliffChartCaption": "Proyección de demostración — perfil de Carlos (padre soltero, 1 dependiente, 76119, sin pensión alimenticia).",
+      "aria": "Capítulo 6: Las Cuentas. La cámara aterriza en el centro de distribución Amazon DFW5. Un control de salario mueve la gráfica del precipicio en tiempo real para ver cómo un aumento se convierte en pérdida."
+    },
+    "chapter07": {
+      "title": "Tu expediente. Hoy.",
+      "hero": "No camines doce semanas. Entra una vez. Con todo en la mano.",
+      "subhero": "GoWork te entrega un expediente el mismo día. Lo llevas a un asesor. Sacas trabajos. Aplicas. Te vas a trabajar.",
+      "body": "Armamos tus barreras, tu elegibilidad, tus opciones de transporte y tus coincidencias de empleo en un solo PDF. Carlos no anda dando vueltas por cinco oficinas — toma los autobuses 4 y 6 de Trinity Metro una vez, le entrega el expediente a Workforce Solutions, y empieza a trabajar esa misma semana.",
+      "aria": "Capítulo 7: Tu expediente. Hoy. El plan del mismo día de Carlos recorre una sola parada con todo en la mano.",
+      "weekLabel1": "Hoy — Expediente",
+      "weekLabel2": "Mañana — Asesor",
+      "weekLabel3": "Día 3 — Aplicar",
+      "weekLabel4": "Esta semana — Trabajando",
+      "legActive": "Tramo activo"
+    },
+    "chapter08": {
+      "title": "Capítulo 8 — El Grafo",
+      "hero": "El muro no es una lista. Es un grafo.",
+      "subhero": "Cada barrera se conecta con otras dos. Resuelves una y otras tres se acercan. Las mapeamos para poder rodearlas.",
+      "body": "Treinta y tres nodos. Siete categorías. La constelación respira sobre la ciudad — cada arista es una dependencia, cada nodo es una barrera con nombre.",
+      "aria": "Capítulo 8: El Grafo. Una constelación tridimensional de barreras flota sobre el centro de Fort Worth.",
+      "fallbackAlt": "Imagen estática de la constelación de 33 nodos de barreras",
+      "barrierLabels": {
+        "crMisdemeanor": "Antecedente menor",
+        "crFelony": "Delito mayor",
+        "crExpunction": "Expurgación",
+        "crArticle55": "Petición Artículo 55",
+        "crFairChance": "Contratación justa",
+        "crLicense": "Suspensión de licencia",
+        "trNoVehicle": "Sin vehículo",
+        "trBus4": "Autobús 4 Trinity Metro",
+        "trBus6": "Autobús 6 Trinity Metro",
+        "trTransfer": "Tiempo de transbordo",
+        "trNightShift": "Transporte turno nocturno",
+        "ccCost": "Costo de guardería",
+        "ccSubsidy": "Trámite de subsidio",
+        "ccHours": "Horarios de guardería",
+        "ccWaitlist": "Lista de espera",
+        "ccTransit": "Traslado a guardería",
+        "cdLowScore": "Puntaje de crédito bajo",
+        "cdCollections": "Cuenta en cobranza",
+        "cdEmployerCheck": "Revisión laboral de crédito",
+        "cdRentalCheck": "Revisión de crédito al rentar",
+        "cdUtility": "Depósito de servicios",
+        "hsStableAddress": "Domicilio estable",
+        "hsDeposit": "Depósito de vivienda",
+        "hsEviction": "Antecedente de desalojo",
+        "hsShelter": "Refugio de emergencia",
+        "hlMedicaid": "Elegibilidad Medicaid",
+        "hlDental": "Acceso dental",
+        "hlMental": "Apoyo de salud mental",
+        "hlPhysical": "Barrera de salud física",
+        "tnForklift": "Certificación montacargas",
+        "tnCdl": "Capacitación CDL",
+        "tnGed": "Obtener GED",
+        "tnResume": "Pulir currículum"
+      }
+    },
+    "chapter09": {
+      "title": "Cualquier Ciudad",
+      "hero": "Funciona en Fort Worth. Va a funcionar donde tú estés.",
+      "subhero": "Una ciudad encendida. Cinco dibujadas en puntos. Las cuentas, el camino, el plan — donde esté el trabajo.",
+      "body": "GoWork se entrega como plantilla de ciudad. Fort Worth es el despliegue de referencia. Cinco ciudades más de Texas están en camino — mismo motor, mismo plan, datos locales.",
+      "statValue": "Hecho en Fort Worth. Sin costo.",
+      "statLabel": "Donde esté el trabajo, allí vamos contigo.",
+      "tourTexasButton": "Recorrer Texas",
+      "returnToFortWorthButton": "Volver a Fort Worth",
+      "cityFW": "Fort Worth, TX",
+      "futureCitiesLabel": "Próximas",
+      "futureCityDallas": "Dallas",
+      "futureCityHouston": "Houston",
+      "futureCityAustin": "Austin",
+      "futureCitySanAntonio": "San Antonio",
+      "futureCityWaco": "Waco",
+      "aria": "Capítulo 9: Cualquier Ciudad. La cámara regresa a una vista del estado de Texas. Fort Worth brilla como el despliegue de referencia; cinco ciudades de Texas — Dallas, Houston, Austin, San Antonio y Waco — aparecen en puntos como próximas. Un botón recorre la región de Texas; otro vuelve a Fort Worth."
+    },
+    "chapter10": {
+      "title": "Encuentra tu camino",
+      "hero": "Encuentra tu camino.",
+      "subhero": "Nosotros hacemos las cuentas. Ordenamos la ruta. Tú das el primer paso.",
+      "body": "Ya viste el muro. Ya viste el laberinto. Ahora sáltatelos — empieza tu evaluación y te entregamos tu expediente el mismo día. Lo llevas a un asesor. Aplicas. Vas a trabajar.",
+      "aria": "Capítulo 10: Encuentra tu camino. Comienza tu evaluación para recibir un plan personalizado.",
+      "ctaPrimary": "Comienza tu evaluación",
+      "footerBrand": "GoWork · Fort Worth, TX"
+    }
+  },
+  "edge": {
+    "404": {
+      "title": "No hay un camino hacia esta dirección",
+      "body": "Pero sí hay uno a través del muro. Cada barrera se conecta con la siguiente — vamos a regresarte a la ruta.",
+      "cta": "Volver al muro"
+    },
+    "500": {
+      "title": "Algo se detuvo",
+      "body": "Estamos recalibrando. La página tropezó con un error, nuestro equipo fue notificado y la solicitud quedó registrada. Inténtalo de nuevo, o regresa al inicio.",
+      "cta": "Intentar de nuevo"
+    },
+    "empty": {
+      "title": "Aún no hay nada que trazar",
+      "body": "En cuanto lleguen los datos, el camino se dibujará solo."
+    },
+    "loading": {
+      "label": "Calibrando el camino"
+    }
+  },
+  "a11y": {
+    "skipToContent": "Saltar al contenido principal"
   },
   "privacy": {
     "heading": "Política de Privacidad",
     "lastUpdated": "Última actualización",
-    "counselNotice": "Marcador de posición a nivel de hackatón: esta política fue redactada para la entrega de MontGoWork y no ha sido revisada por un abogado. El lanzamiento a producción requiere revisión legal.",
+    "counselNotice": "Marcador de posición a nivel de hackatón: esta política fue redactada para la entrega de GoWork y no ha sido revisada por un abogado. El lanzamiento a producción requiere revisión legal.",
     "seeAlso": "Consulta también nuestros",
     "termsLink": "Términos del Servicio",
     "esPlaceholder": "Esta política de privacidad está disponible en inglés. La traducción al español está en desarrollo y se publicará antes del lanzamiento a producción. Mientras tanto, puedes contactarnos para obtener un resumen en español de tus derechos sobre tus datos.",
@@ -487,7 +1116,7 @@
   "terms": {
     "heading": "Términos del Servicio",
     "lastUpdated": "Última actualización",
-    "counselNotice": "Marcador de posición a nivel de hackatón: estos términos fueron redactados para la entrega de MontGoWork y no han sido revisados por un abogado. El lanzamiento a producción requiere revisión legal.",
+    "counselNotice": "Marcador de posición a nivel de hackatón: estos términos fueron redactados para la entrega de GoWork y no han sido revisados por un abogado. El lanzamiento a producción requiere revisión legal.",
     "seeAlso": "Consulta también nuestra",
     "privacyLink": "Política de Privacidad",
     "esPlaceholder": "Estos términos del servicio están disponibles en inglés. La traducción al español está en desarrollo y se publicará antes del lanzamiento a producción.",

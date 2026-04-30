@@ -1,8 +1,10 @@
-# MontGoWork -- Workforce Navigator for Montgomery, Alabama
+# GoWork -- Workforce Navigator for Fort Worth, Texas
 
 > Helping residents overcome the real barriers between them and employment.
 
-MontGoWork is a full-stack workforce navigation platform built for Montgomery, Alabama. A resident completes a barrier assessment (credit, transportation, childcare, housing, health, training, criminal record), and the system generates a personalized re-entry plan: jobs ranked by a Practical Value Score, benefits eligibility screening across 7 Alabama programs, criminal record routing with expungement guidance, AI-powered barrier intelligence chat, and a printable Career Center Ready Package. The result is a comprehensive plan the resident takes to the Montgomery Career Center on Monday morning.
+GoWork is a full-stack workforce navigation platform built for Fort Worth, Texas (HackFW 2026 submission). A resident completes a barrier assessment (credit, transportation, childcare, housing, health, training, criminal record), and the system generates a personalized re-entry plan the same day: jobs ranked by a Practical Value Score, benefits eligibility screening across Texas programs, criminal record routing with expungement guidance, AI-powered barrier intelligence chat, and a printable Career Center Ready Package. The result is a comprehensive case file the resident hands to a case worker -- and starts work that week.
+
+The legacy MontGoWork (Montgomery, AL) deployment is preserved as the original reference city (the multi-city template architecture remains intact under `cities/`, `lib/findhelp.ts`, and the city-config layer). The HackFW 2026 wall narrative is Fort Worth-only.
 
 ---
 

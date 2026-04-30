@@ -2,7 +2,8 @@
  * findhelp.org capability URL generation.
  *
  * Maps barrier types to findhelp.org category paths so users can
- * discover additional Montgomery-area programs.
+ * discover Fort Worth-area programs (and any other ZIP — findhelp
+ * resolves locality from the postal query param the caller passes).
  */
 
 import type { BarrierType } from "@/lib/types";

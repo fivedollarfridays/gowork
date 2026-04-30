@@ -20,9 +20,10 @@ describe("getCityStats", () => {
     expect(stats.cityName).toBe("Fort Worth");
   });
 
-  it("defaults to Montgomery for unknown state", () => {
+  it("defaults to Fort Worth for unknown state", () => {
+    // Reference deployment is Fort Worth; unknown-state callers fall back to TX.
     const stats = getCityStats("XX");
-    expect(stats.cityName).toBe("Montgomery");
+    expect(stats.cityName).toBe("Fort Worth");
   });
 
   it("includes career center count", () => {

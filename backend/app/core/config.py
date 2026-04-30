@@ -50,7 +50,11 @@ class Settings(BaseSettings):
     usajobs_email: str = ""
 
     # City
-    city: str = "montgomery"
+    # Default flipped from "montgomery" → "fort-worth" since the
+    # active reference deployment is Fort Worth (HackFW 2026). Both
+    # configs still ship under cities/*.yaml — set CITY=montgomery
+    # in the env to fall back to the legacy AL deployment.
+    city: str = "fort-worth"
 
     # Data
     data_dir: str = ""

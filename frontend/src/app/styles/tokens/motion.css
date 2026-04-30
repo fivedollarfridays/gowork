@@ -1,0 +1,98 @@
+/* W1 motion tokens — populated by T1.19 (spring presets), T1.20 (easing+duration),
+ * T1.21 (stagger timing), T1.22 (prefers-reduced-motion disable), T1.23 (idle pulse).
+ *
+ * CSS-side mirrors of TS exports in frontend/src/lib/wall/tokens.ts.
+ * No magic numbers in animation utilities — every duration/stiffness/damping
+ * value resolves through a token here.
+ */
+
+/* ─── T1.19 — Spring stiffness + damping mirrors ─────────────────────────────
+ * Numeric values match SPRING_SOFT/SNAPPY/ELASTIC in tokens.ts. CSS @keyframes
+ * cannot consume these directly (CSS lacks framer-motion's spring solver), but
+ * sibling motion utilities (W4 path-line breath, T1.23 idle pulse) read them
+ * via custom properties to stay in sync.
+ */
+:root {
+  --spring-soft-stiff: 100;
+  --spring-soft-damp: 20;
+  --spring-snappy-stiff: 200;
+  --spring-snappy-damp: 25;
+  --spring-elastic-stiff: 300;
+  --spring-elastic-damp: 18;
+}
+
+/* ─── T1.20 — Easing + duration ──────────────────────────────────────────────
+ * Mirrors EASE_LINEAR_SIG / EASE_OUT / DURATION_BASELINE_MS in tokens.ts so
+ * CSS transitions (focus-ring offset animation in T1.65, idle pulse in T1.23)
+ * stay synced with framer-motion sites.
+ */
+:root {
+  --ease-linear-sig: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);     /* polish-2 — alias for entrance ease used by magnetic + flip + tooltip */
+  --duration-baseline: 280ms;
+}
+
+/* ─── polish-2 — magnetic-hover + grain + chrome-accent tokens ───────────────
+ * Drivers A/C consume --magnetic-* on CTA pulls; Driver B consumes
+ * --grain-intensity for Ch1 hover-ramp; ChromeAccentBridge writes
+ * --chrome-accent at runtime.
+ */
+:root {
+  --magnetic-pull-distance: 80px;
+  --magnetic-pull-max: 10px;
+  --grain-intensity: 0.06;
+}
+
+/* ─── T1.21 — Stagger timing ─────────────────────────────────────────────────
+ * Per-child offset and default y-translation for entrance staggers. CSS uses
+ * these in @keyframes references; framer-motion sites import the TS constants
+ * from tokens.ts directly.
+ */
+:root {
+  --stagger-child-offset: 0.05s;
+  --stagger-default-y: 20px;
+}
+
+/* ─── T1.22 — prefers-reduced-motion variable disable ────────────────────────
+ * Token-level kill switch consumed by every motion site. JS hooks read
+ * --motion-disabled from getComputedStyle for SSR-safe fallback when
+ * window.matchMedia is unavailable. The @media block also collapses
+ * --duration-baseline to "effectively instant" (0.01ms) and !important-
+ * disables every animation/transition globally.
+ */
+:root {
+  --motion-disabled: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-disabled: 1;
+    --duration-baseline: 0.01ms;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─── T1.23 — Idle pulse scaffold ───────────────────────────────────────────
+ * Subtle 4s breathing animation for idle-state visual cues (W4 path-line
+ * ambient pulse + barrier-graph idle nudge). Reduced-motion respected via
+ * the universal !important rule above + an explicit class override below
+ * (defense in depth).
+ */
+@keyframes idle-pulse {
+  0%, 100% { opacity: 0.6; transform: translateY(0); }
+  50%      { opacity: 1.0; transform: translateY(-2px); }
+}
+
+.animate-idle-pulse {
+  animation: idle-pulse 4s var(--ease-linear-sig) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-idle-pulse { animation: none; }
+}

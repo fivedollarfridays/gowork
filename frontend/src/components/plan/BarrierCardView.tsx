@@ -159,7 +159,7 @@ export function BarrierCardView({ barrier, sessionId, token, zipCode }: BarrierC
               <p className="text-xs text-muted-foreground italic">
                 This is not legal advice. Consult{" "}
                 <a href={getLegalServicesUrl(city.state)} target="_blank" rel="noopener noreferrer" className="underline">
-                  {city.state === "TX" ? "Legal Aid of NorthWest Texas" : "Legal Services Alabama"}
+                  {city.state === "AL" ? "Legal Services Alabama" : "Legal Aid of NorthWest Texas"}
                 </a>{" "}
                 for a formal assessment.
               </p>

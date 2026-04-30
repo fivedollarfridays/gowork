@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { validateFeedbackToken, submitVisitFeedback } from "@/lib/api";
+import { useCityConfig } from "@/hooks/useCityConfig";
+import { getCareerCenter } from "@/lib/city-constants";
 
 const Q1_OPTIONS = [
   { value: 2, label: "Yes" },
@@ -106,6 +108,8 @@ function CheckboxGroup({ options, selected, onChange }: CheckboxGroupProps) {
 }
 
 export function FeedbackForm({ token }: { token: string }) {
+  const city = useCityConfig();
+  const careerCenter = getCareerCenter(city.state);
   const { data, isLoading, error } = useQuery({
     queryKey: ["validateToken", token],
     queryFn: () => validateFeedbackToken(token),
@@ -201,7 +205,7 @@ export function FeedbackForm({ token }: { token: string }) {
           <CardContent className="pt-6 space-y-3">
             <p className="text-lg font-semibold">Thank you!</p>
             <p className="text-sm text-muted-foreground">
-              Your feedback helps us improve MontGoWork for everyone in Montgomery.
+              Your feedback helps us improve GoWork for everyone in {city.name}.
             </p>
           </CardContent>
         </Card>
@@ -223,7 +227,7 @@ export function FeedbackForm({ token }: { token: string }) {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base">
-              Did you make it to the Montgomery Career Center?
+              Did you make it to the {careerCenter.name}?
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -251,7 +255,7 @@ export function FeedbackForm({ token }: { token: string }) {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base">
-              Did MontGoWork&apos;s plan prepare you well?
+              Did GoWork&apos;s plan prepare you well?
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">

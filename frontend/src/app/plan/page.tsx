@@ -39,7 +39,7 @@ const BARRIER_TYPE_VALUES = new Set<string>(Object.values(BarrierType));
 
 function fireConfetti(count: number, y: number) {
   import("canvas-confetti").then((mod) => {
-    mod.default({ particleCount: count, spread: 70, origin: { y }, ticks: 300, gravity: 0.8, disableForReducedMotion: true, colors: ["#1e3a5f", "#2d9596", "#d4a843"] });
+    mod.default({ particleCount: count, spread: 70, origin: { y }, ticks: 300, gravity: 0.8, disableForReducedMotion: true, colors: ["#22D3EE", "#F59E0B", "#FB7185"] });
   }).catch(() => {});
 }
 

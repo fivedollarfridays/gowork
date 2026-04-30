@@ -25,19 +25,19 @@
 
 > **Read aloud, do not show slides.**
 
-A job board tells you what jobs exist. **MontGoWork tells you why you
+A job board tells you what jobs exist. **GoWork tells you why you
 can't get one** — and then helps you fix it.
 
-In Montgomery, Alabama and Fort Worth, Texas, the people who need work
+In Fort Worth, Texas, the people who need work
 the most are stuck behind a wall of barriers a job board can't see:
 no transportation, a record from ten years ago, a credit score that
 disqualifies them from the apartment they need to keep the job, a
 benefits cliff that makes a $2/hr raise cost them $400 in SNAP.
 
-MontGoWork is a worker companion that maps those barriers, builds a
-personalized plan around them, and keeps the worker moving with a daily
-digest, a stall detector, and a case manager looking over their
-shoulder. Today we'll show you a worker arriving with nothing, walking
+GoWork is a worker companion that maps those barriers, builds a
+personalized same-day case file around them, and keeps the worker
+moving with a daily digest, a stall detector, and a case manager
+looking over their shoulder. Today we'll show you a worker arriving with nothing, walking
 through their personal plan, generating a tailored resume, tracking
 applications, and the case manager intervening when the worker stalls.
 We'll also show you the compliance gate — the same one a city contract
@@ -60,15 +60,14 @@ sprint to make this submission-ready, not hackathon-ready.
 
 What you do:
 
-1. Land on home. Read the hero question + city stats aloud
-   ("Montgomery poverty 21.4%. Labor participation 58.2%. We build
-   for the 30% the market leaves behind.").
-2. Click **Get Your Plan** → `/assess`.
-3. Walk the assessment for a `medium` Montgomery session (barriers
+1. Land on the wall. Let Ch1's hero question breathe — "What's standing
+   between you and a job?" — over the cinematic Mapbox view of Fort Worth.
+   Click **Start now** (top-right floating CTA) → `/assess`.
+2. Walk the assessment for a `medium` Fort Worth session (barriers
    *transportation, credit, fair-chance*). The demo session is
    pre-seeded; click through defaults — `/plan` reads from the
    seeded session.
-4. Open `/plan` (NavBar → Plan).
+3. Open `/plan` (NavBar → Plan).
 
 What the judges see:
 
@@ -160,9 +159,9 @@ What you do:
 
 What the judges see:
 
-- City-aware sourcing — the seeded jobs come from BrightData scrapes
-  for Montgomery / Fort Worth specifically; no Alabama-resident is
-  ever shown a Dallas warehouse job.
+- City-aware sourcing — the seeded jobs come from Texas Workforce
+  Commission + USAJobs for Fort Worth specifically; no Fort Worth
+  resident is shown a Dallas warehouse job they can't reach.
 - The funnel — applications → interviews → offers, with the
   conversion rate computed live.
 
@@ -246,7 +245,7 @@ a procurement officer will ask in July. Tell us what's missing.
 |----------------|---------|
 | Frontend cold-start >5s on first hit | Pre-warm at T-2 minutes (§5). If still slow live, narrate over the loading state — "Fly.io is rotating the machine; staging runs on a single shared host." |
 | Backend cold-start (`/health/live` 503) | Wait 30s and retry. Cold start measured at ~28s on dry-run (2026-04-25). Skip Beat 5's curl pane and verbally describe the compliance gate. |
-| `medium` Montgomery session has stale data | Switch to `medium` Fort Worth (UUID in §A). All 5 stall states are seeded for both cities — pick another. |
+| `medium` Fort Worth session has stale data | Re-run `qc_reset.py` (§0) to re-seed. All 5 stall states regenerate deterministically; pick another. |
 | Resume generation fails on Beat 3 | Click into an existing version in the history list and download its PDF. The version row is pre-seeded by the demo factory. |
 | Drag fails on Beat 4 | Use the **Move** button on the application card (the `MoveMenu` modal lists every column). Same mutation, different UI affordance. |
 | Advisor token rejected on Beat 6 | Re-run `qc_reset.py` (§0). The advisor token is regenerated deterministically by the seed. |

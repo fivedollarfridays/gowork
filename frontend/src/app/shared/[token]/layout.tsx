@@ -16,13 +16,13 @@ import type { Metadata } from 'next';
  */
 
 const SHARED_DESCRIPTION =
-  'A shared plan from MontGoWork — view the action plan without creating an account.';
+  'A shared plan from GoWork — view the action plan without creating an account.';
 
 const SHARED_OG_IMAGE = {
   url: '/og-image.png',
   width: 1200,
   height: 630,
-  alt: 'MontGoWork — Shared Plan',
+  alt: 'GoWork — Shared Plan',
 } as const;
 
 interface SharedLayoutMetadataArgs {
@@ -47,15 +47,15 @@ export async function generateMetadata(
     },
     openGraph: {
       type: 'website',
-      siteName: 'MontGoWork',
-      title: 'Shared Plan | MontGoWork',
+      siteName: 'GoWork',
+      title: 'Shared Plan | GoWork',
       description: SHARED_DESCRIPTION,
       images: [SHARED_OG_IMAGE],
       locale: 'en_US',
     },
     twitter: {
       card: 'summary_large_image',
-      title: 'Shared Plan | MontGoWork',
+      title: 'Shared Plan | GoWork',
       description: SHARED_DESCRIPTION,
       images: [SHARED_OG_IMAGE.url],
     },

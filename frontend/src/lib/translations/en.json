@@ -6,7 +6,70 @@
     "jobs": "Jobs",
     "documents": "Documents",
     "daily": "Daily",
-    "caseManager": "Case Manager"
+    "caseManager": "Case Manager",
+    "plan": "Plan",
+    "ctaPlan": "Get your plan",
+    "themeToggleAria": "Toggle light or dark theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "muteToggle": {
+      "aria": "Toggle ambient sound",
+      "ariaMuted": "Sound is muted — turn on",
+      "ariaUnmuted": "Sound is on — mute"
+    }
+  },
+  "chapterRail": {
+    "label": "Chapter navigation",
+    "ch1": "The wall",
+    "ch2": "The numbers",
+    "ch3": "Meet Carlos",
+    "ch4": "The map",
+    "ch5": "The plan",
+    "ch6": "Live jobs",
+    "ch7": "The cliff",
+    "ch8": "Find your path",
+    "progressLabel": "Reading progress",
+    "tooltip": {
+      "altPrefix": "Preview of"
+    }
+  },
+  "pageMeta": {
+    "city": "CITY",
+    "chapter": "CHAPTER",
+    "scroll": "SCROLL",
+    "light": "LIGHT",
+    "live": "LIVE",
+    "liveSessions": "{count} sessions",
+    "liveCalibrated": "last calibrated {when}",
+    "batterySaver": "BATTERY SAVER",
+    "lightDawn": "dawn",
+    "lightMorning": "morning",
+    "lightMidday": "midday",
+    "lightAfternoon": "afternoon",
+    "lightGolden": "golden",
+    "lightDusk": "dusk",
+    "lightNight": "night"
+  },
+  "siteFooter": {
+    "brandHeading": "GoWork",
+    "brandTagline": "Workforce infrastructure for any American city.",
+    "workersHeading": "For workers",
+    "workersPlan": "Plan",
+    "workersNavigator": "Find a navigator",
+    "workersDaily": "Daily check-in",
+    "workersDocuments": "Documents",
+    "navigatorsHeading": "For navigators",
+    "navigatorsCaseload": "Caseload view",
+    "navigatorsOutcomes": "Outcomes dashboard",
+    "navigatorsTraining": "Training",
+    "citiesHeading": "For cities",
+    "citiesDeploy": "Deploy GoWork",
+    "citiesPress": "Press kit",
+    "citiesOpenSource": "Open source · MIT",
+    "creditLine": "HackFW 2026 · Fort Worth, TX",
+    "shippedLine": "Built in Texas. Shipped to anywhere.",
+    "legalNavLabel": "Legal and accessibility",
+    "legalAccessibility": "Accessibility"
   },
   "banner": {
     "stallTitle": "Let's get you unstuck",
@@ -33,13 +96,13 @@
   },
   "hero": {
     "title": "What's standing between you and a job?",
-    "subtitle": "MontGoWork is a workforce navigator that helps you overcome barriers and find your path to employment.",
+    "subtitle": "GoWork is a workforce navigator that helps you overcome barriers and find your path to employment.",
     "cta": "Get Your Plan",
     "creditCta": "Check Credit"
   },
   "home": {
     "heroQuestion": "What's standing between you and a job?",
-    "heroBlurb": "MontGoWork is a workforce navigator that helps you overcome barriers and find your path to employment.",
+    "heroBlurb": "GoWork is a workforce navigator that helps you overcome barriers and find your path to employment.",
     "ctaPlan": "Get Your Plan",
     "ctaCredit": "Check Credit",
     "howHeading": "How It Works",
@@ -56,7 +119,333 @@
     "statLabor": "Labor Participation",
     "bottomCtaTitle": "Ready to get started?",
     "bottomCtaBody": "It takes about 2 minutes. No account needed.",
-    "bottomCtaButton": "Start Your Assessment"
+    "bottomCtaButton": "Start Your Assessment",
+    "ch1": {
+      "eyebrow": "HackFW 2026 · Fort Worth, TX · live in production",
+      "morphLine1Aria": "wall",
+      "line2": "There is a {{wall}} between you and {{job}}.",
+      "line2Wall": "wall",
+      "line2Job": "a job.",
+      "line3": "We tear it {{down}} — brick by brick.",
+      "line3Down": "down",
+      "ariaLabel": "There is a wall between you and a job. We tear it down, brick by brick.",
+      "subhead": "{{seven}} stand between most workers and a paycheck. {{system}}",
+      "subheadSeven": "Seven invisible barriers",
+      "subheadSystem": "GoWork sees all seven at once.",
+      "ctaPrimary": "Get your plan",
+      "ctaGhost": "See how it works",
+      "scrollCue": "scroll",
+      "marquee": {
+        "license": "Suspended license",
+        "court": "Open court date",
+        "pickup": "Childcare pickup gap",
+        "bus": "47-minute bus headway",
+        "background": "Background-check stigma",
+        "cliff": "Wage-cliff math",
+        "nobody": "No human to call"
+      },
+      "morphWords": [
+        "wall",
+        "license",
+        "court date",
+        "pickup",
+        "47-min bus",
+        "background",
+        "wage cliff"
+      ],
+      "idle": {
+        "orbitAria": "The map is alive — markers are drifting"
+      }
+    },
+    "titleSequence": {
+      "presenter": "GoWork presents",
+      "title": "The Wall",
+      "subtitle": "An interactive map of Fort Worth, Texas"
+    },
+    "ch2": {
+      "eyebrow": "The numbers",
+      "stat1Number": "600,000+",
+      "stat1Cap": "Texans hit a barrier this year that costs them a job they could have held.",
+      "stat2Number": "87 min",
+      "stat2Cap": "Average commute Carlos faces between his shift and his daughter's 2 p.m. dismissal — until we sequence the day.",
+      "stat3Number": "7",
+      "stat3Cap": "Distinct barriers in a single working week. None of them his work ethic. All of them connected.",
+      "stat4Number": "$22.50/hr",
+      "stat4Cap": "Wage of the fair-chance job 4.2 miles away — the destination the whole map orbits around.",
+      "pull": "These aren't talking points. They're {{tuesday}}.",
+      "pullTuesday": "Tuesday",
+      "ariaLabel": "The numbers behind the wall"
+    },
+    "ch3": {
+      "eyebrow": "Meet Carlos",
+      "portraitAlt": "Stylized portrait of Carlos, a Fort Worth welder",
+      "captionEyebrow": "CARLOS R. · 34 · ZIP 76104",
+      "captionQuote": "I work nights at a warehouse. School pickup at 2. The bus runs every 47 minutes. You do the math.",
+      "h2Words": [
+        "A",
+        "father.",
+        "A",
+        "welder.",
+        "Not",
+        "a",
+        "case",
+        "number."
+      ],
+      "italicFromIndex": 4,
+      "p1": "Carlos lives in {{zip}} — a Fort Worth ZIP where one in three adults has an open record from a warrant they didn't know about, a license they couldn't afford to clear, or a court date they couldn't take off work to attend.",
+      "p1Zip": "76104",
+      "p2": "He has work history. He has references. He has a daughter who needs to be picked up from Como Elementary at 2:00. {{bold}} — until now.",
+      "p2Bold": "What he doesn't have is a system that can hold all of those things in its head at once",
+      "fact1Num": "2:30",
+      "fact1Cap": "clock-out",
+      "fact2Num": "2:00",
+      "fact2Cap": "school dismissal",
+      "fact3Num": "47",
+      "fact3Cap": "bus headway · min",
+      "fact4Num": "4:00",
+      "fact4Cap": "court date",
+      "ariaLabel": "Meet Carlos — a father, a welder, not a case number"
+    },
+    "ch4": {
+      "eyebrow": "04 / The map",
+      "ariaLabel": "The map — Tuesday in Fort Worth, four stops, one cleared day",
+      "scene1": "Tuesday · 6:42a · home",
+      "scene2": "Tuesday · 10:00a · DPS",
+      "scene3": "Tuesday · 12:30p · Workforce Solutions",
+      "scene4": "Tuesday · 3:27p · Alcon",
+      "hudScene": "SCENE",
+      "hudFocus": "FOCUS",
+      "hudCleared": "CLEARED",
+      "fallbackTitle": "Tuesday · Fort Worth · one cleared day",
+      "fallbackBody": "DPS by ten. Workforce Solutions by twelve-thirty. Alcon shift at three-twenty-seven. The whole day, sequenced.",
+      "cards": {
+        "card1Time": "06:42 AM · Home · ZIP 76104",
+        "card1Body": "The day starts with three impossible appointments. DPS by 10. Court by 4. Pickup at 2. We rebuild the order so they fit.",
+        "card2Time": "10:00 AM · DPS · driver license",
+        "card2Body": "One brick falls. Four jobs unblock. The license CDL employers need was 90 minutes away the whole time.",
+        "card3Time": "12:30 PM · Workforce Solutions",
+        "card3Body": "Three fair-chance matches. Already filtered. The case worker hands him a printed plan, not a stack of brochures.",
+        "card4Time": "03:27 PM · Alcon · shift start",
+        "card4Body": "The destination. $22.50 an hour, with insurance. Pre-apprenticeship pays through training. The day ends with him on the floor."
+      },
+      "legendAria": "Map legend — six layers, one cleared day",
+      "legendRow1": "CARLOS",
+      "legendRow1Time": "23 mi",
+      "legendRow2": "TRANSIT",
+      "legendRow2Time": "47 min",
+      "legendRow3": "CLIFF",
+      "legendRow3Time": "$2/hr",
+      "legend": {
+        "heading": "LEGEND",
+        "morning": "Carlos's morning bus",
+        "morningNum": "47m",
+        "afternoon": "Afternoon shift route",
+        "afternoonNum": "71m",
+        "broken": "Broken path · no car",
+        "brokenNum": "∞",
+        "home": "Home + family stops",
+        "homeNum": "2",
+        "plan": "Plan stops + destination",
+        "planNum": "3",
+        "court": "Court-date severity",
+        "courtNum": "1"
+      },
+      "compass": {
+        "city": "CITY",
+        "lat": "LAT",
+        "lon": "LON",
+        "bearing": "BEARING",
+        "zoom": "ZOOM"
+      },
+      "statRow": {
+        "wageVal": "$22.50",
+        "wageUnit": "/hr",
+        "wageLabel": "Alcon wage · with insurance",
+        "headwayVal": "47",
+        "headwayUnit": "min",
+        "headwayLabel": "Bus 4 headway · downtown",
+        "commuteVal": "4.8",
+        "commuteUnit": "mi",
+        "commuteLabel": "Home → Alcon commute",
+        "recordsVal": "1",
+        "recordsUnit": "/3",
+        "recordsLabel": "Records open · 76104"
+      },
+      "attrib": {
+        "aria": "Map attribution",
+        "liveLabel": "Live",
+        "timestamp": "12:30p · Tue"
+      },
+      "annotations": {
+        "headway": "47 min",
+        "headwaySub": "bus headway",
+        "wage": "$22.50/hr",
+        "wageSub": "Alcon · w/ insurance",
+        "childcare": "$1,200/mo",
+        "childcareSub": "HHSC childcare",
+        "records": "1 in 3",
+        "recordsSub": "records open",
+        "commute": "4.8 mi",
+        "commuteSub": "home → Alcon",
+        "reach": "60 min",
+        "reachSub": "walk + bus reach"
+      },
+      "step": {
+        "eyebrowSuffix": "Tuesday morning",
+        "tsLabel": "live mapbox",
+        "h1Pre": "Three impossible appointments before",
+        "h1Em": "noon",
+        "h1Strike": "Until Tuesday.",
+        "dropcap": "Carlos clocks out at 3:27. Pickup at Como is at 2:00. DPS opens until 4:30. Bus 4 runs every 47 minutes. The math doesn't work — until you sequence around it. We rebuild his Tuesday around three hard constraints: the bus headway, the school bell, and a court date he can't move. The path that emerged isn't faster. It's survivable.",
+        "pull": "Every barrier connects. We find the order.",
+        "tlEvent1": "Bus 4 → downtown. Hemphill & Berry stop. $2 day pass — keep receipt.",
+        "tlEvent2": "DPS · replace driver license. Slot held. Bring birth cert + SS card + lease.",
+        "tlEvent3": "Workforce Solutions · check-in with Tanya R. She has your barrier list.",
+        "tlEvent4": "Como Elementary · pick up Lily. Backup driver: auntie Rosa.",
+        "tlEvent5": "Alcon · shift start. Pre-apprenticeship paid. The day ends with him on the floor.",
+        "tag1": "on time",
+        "tag2": "unblocks 4 jobs",
+        "tag3": "3 fair-chance matches",
+        "tag4": "non-movable",
+        "navPrev": "01 · Carlos",
+        "navNext": "Next: 05 · The plan"
+      }
+    },
+    "ch5": {
+      "eyebrow": "05 / The plan",
+      "ariaLabel": "The plan — one plan, four moves, sequenced for your week",
+      "h2Pre": "One",
+      "h2Plan": "plan.",
+      "h2Mid": "Four moves.",
+      "h2Tail": "Sequenced for your week.",
+      "intro": "Most plans hand you a list. We hand you an order — Monday clears the barriers, Tuesday sequences the day, Wednesday matches fair-chance jobs, Thursday runs the wage math. By Friday you have a written plan, in your language, that a case manager can sign on Day 1.",
+      "card1Num": "01",
+      "card1Tag": "Monday",
+      "card1Title": "Pull your barriers.",
+      "card1Body": "Seven barriers, ranked by which ones unlock the most jobs first. License before court. Court before childcare. Order matters.",
+      "card1Foot": "~10 minutes · phone or web",
+      "card2Num": "02",
+      "card2Tag": "Tuesday",
+      "card2Title": "Sequence the day.",
+      "card2Body": "DPS at 10, Workforce Solutions at 12:30, Alcon shift at 3:27. We hand you a route, a transit time, and a fallback for every stop.",
+      "card2Foot": "Printable · transit-aware",
+      "card3Num": "03",
+      "card3Tag": "Wednesday",
+      "card3Title": "Match fair-chance jobs.",
+      "card3Body": "Three employers within six miles that hire through navigators, review records individually, and pay through training.",
+      "card3Foot": "Updated weekly · 38 verified employers",
+      "card4Num": "04",
+      "card4Tag": "Thursday",
+      "card4Title": "Run the wage math.",
+      "card4Body": "$22.50 nets more than $18.50 in Tarrant County — but only after the cliff math. We show the real take-home before you sign.",
+      "card4Foot": "Honest math · before the offer",
+      "card1": {
+        "back1": "Pull DPS records, court records, and any open warrants — in that order.",
+        "back2": "Map each barrier to the job it unlocks (license = CDL, court = bondable employers).",
+        "back3": "Flag the two we can clear this week. Park the rest."
+      },
+      "card2": {
+        "back1": "Stack errands by transit corridor: DPS → Workforce Solutions → site visit.",
+        "back2": "Build a fallback for the bus that runs every 35 minutes.",
+        "back3": "Print the day. Tape it to the fridge. Show it to the case manager."
+      },
+      "card3": {
+        "back1": "Three fair-chance employers within six miles, hiring this week.",
+        "back2": "Each one matched to your record type and shift availability.",
+        "back3": "All three pay through training — no unpaid pre-apprenticeship."
+      },
+      "card4": {
+        "back1": "We compute SNAP, childcare, and Medicaid changes at the offered wage.",
+        "back2": "We show the real take-home — after the cliff — before you sign.",
+        "back3": "If a $2 raise costs $400, we tell you. Honest. On paper."
+      }
+    },
+    "ch6": {
+      "eyebrow": "06 / Live jobs",
+      "ariaLabel": "Live jobs — three fair-chance employers within six miles",
+      "livePillPrefix": "Live · refreshed",
+      "livePillSuffix": "ago",
+      "h2Pre": "Three",
+      "h2Fair": "fair-chance",
+      "h2Mid": "employers within",
+      "h2SixMiles": "six miles.",
+      "h2Tail": ".",
+      "marqueeAria": "Live wage marquee",
+      "skeletonLabel": "Loading job…",
+      "cards": {
+        "alconName": "Alcon — Production Tech II",
+        "alconAddr": "Alcon Drive · Fort Worth · 76134",
+        "alconWage": "$22.50/hr",
+        "alconCommute": "42m · Route 7",
+        "alconShift": "3:30p–11:30p · M-F",
+        "alconBlurb": "Hires through navigator referral. Background reviewed individually — no auto-disqualify. Pre-apprenticeship pays through training.",
+        "bnsfName": "BNSF — CDL Driver Trainee",
+        "bnsfAddr": "Lancaster Ave · Fort Worth · 76104",
+        "bnsfWage": "$26.10/hr",
+        "bnsfCommute": "18m · Route 2",
+        "bnsfShift": "4-on / 3-off",
+        "bnsfBlurb": "License unblocks this in 90 minutes at DPS. Trainee program pays from day one. Background reviewed by panel — felonies older than five years frequently approved.",
+        "dunnName": "JE Dunn — Apprentice Electrician",
+        "dunnAddr": "I-35W Corridor · Fort Worth · 76106",
+        "dunnWage": "$19.75/hr",
+        "dunnCommute": "36m · I-35W",
+        "dunnShift": "4-yr paid · journeyman in 4y",
+        "dunnBlurb": "Pre-apprenticeship is paid. Tools provided. Scales to $38/hr at journeyman. JE Dunn partners with Tarrant fair-chance navigators directly.",
+        "applyCta": "Apply with your plan →"
+      }
+    },
+    "ch7": {
+      "eyebrow": "The cliff",
+      "h2": "A {{raise}} that costs {{cost}} is not a raise.",
+      "h2Raise": "$2 raise",
+      "h2Cost": "$400",
+      "p1": "At {{wage}}, Carlos crosses a benefits cliff. SNAP drops $312. Childcare subsidy phases out. Medicaid lapses. The raise nets a $400/month {{loss}} — and he can't see it until the first paycheck after the offer.",
+      "p1Wage": "$18.50/hr",
+      "p1Loss": "loss",
+      "p2": "We do this math for every offer. Honestly. Before the signature. So the next move is a {{real}}.",
+      "p2Real": "real one",
+      "controlsLabel": "Hourly wage",
+      "rowGross": "Gross / mo",
+      "rowSnap": "SNAP change",
+      "rowCc": "Childcare",
+      "rowMed": "Medicaid",
+      "rowTotal": "Real Δ / mo",
+      "medSafe": "safe",
+      "medAtRisk": "at risk",
+      "medLapses": "lapses",
+      "chartAria": "Wage cliff chart — real take-home by hourly wage",
+      "cliffZone": "cliff zone",
+      "ariaLabel": "The benefits cliff — a $2 raise that costs $400",
+      "householdLabel": "Household",
+      "householdSize1": "1",
+      "householdSize2": "2",
+      "householdSize3": "3",
+      "householdSize4": "4",
+      "cliff": {
+        "tooltipEdge": "the cliff edge — SNAP cuts to $48/mo, childcare voucher lapses",
+        "tooltipDestination": "Alcon production tech wage — destination job"
+      }
+    },
+    "ch8": {
+      "eyebrow": "Find your path",
+      "line1": "We won't fix the wall.",
+      "line2": "We'll just keep tearing it down,",
+      "line3": "brick by brick by brick,",
+      "line4": "until you have somewhere to {{tuesday}}",
+      "line4Tuesday": "be on Tuesday.",
+      "ctaPrimary": "Get your plan",
+      "ctaMeta": "~3 min · web or text · in English or Spanish",
+      "wordmarkRow1": "GO",
+      "wordmarkRow2": "WORK",
+      "ariaLabel": "Find your path — get your plan",
+      "wordmark": {
+        "spokenCityFw": "Fort Worth, TX",
+        "spokenCityComing": "Coming soon:",
+        "spokenCityMont": "Montgomery, AL",
+        "spokenCityDal": "Dallas, TX",
+        "spokenCityHou": "Houston, TX"
+      }
+    }
   },
   "howItWorks": {
     "heading": "How It Works",
@@ -255,7 +644,7 @@
   },
   "dashboard": {
     "heading": "Case Manager Dashboard",
-    "description": "Aggregate metrics from MontGoWork assessments",
+    "description": "Aggregate metrics from GoWork assessments",
     "totalAssessments": "Total Assessments",
     "barrierInstances": "Barrier Instances",
     "avgBarriers": "Avg Barriers/Person",
@@ -437,16 +826,256 @@
     "noteGenericError": "We could not send that note. Please try again."
   },
   "footer": {
-    "entity": "MontGoWork (hackathon project)",
+    "entity": "GoWork (hackathon project)",
     "tagline": "Workforce Navigator",
     "navLabel": "Legal",
     "privacy": "Privacy",
-    "terms": "Terms"
+    "terms": "Terms",
+    "brand": {
+      "label": "GoWork — workforce infrastructure for any American city"
+    },
+    "github": "Open source on GitHub",
+    "license": "MIT licensed",
+    "lastCalibration": "Last calibrated"
+  },
+  "header": {
+    "brand": {
+      "label": "GoWork — back to the wall"
+    },
+    "muteToggle": {
+      "aria": "Toggle ambient sound"
+    },
+    "languageToggle": {
+      "aria": "Switch between English and Spanish"
+    },
+    "github": {
+      "aria": "View the source code on GitHub"
+    },
+    "chapterCounter": {
+      "aria": "Current chapter, of ten"
+    }
+  },
+  "wall": {
+    "titleSequence": {
+      "presenter": "GoWork presents",
+      "title": "The Wall",
+      "subtitle": "An interactive map of Fort Worth, Texas · April 2026"
+    },
+    "startNowCta": {
+      "label": "Start now",
+      "ariaLabel": "Start your assessment now"
+    },
+    "chapter01": {
+      "title": "Chapter 1 — Continental",
+      "heroQuestion": "What's standing between you and a job?",
+      "hero": "What's standing between you and a job?",
+      "subhero": "You shouldn't have to figure out the wall. We do the math, sequence the path, and hand you the plan.",
+      "editorial": "America from above. One pin in the dark — Fort Worth, Texas.",
+      "carlosLead": "We'll meet a worker named Carlos.",
+      "pullquote": "You shouldn't have to figure out the wall.",
+      "aria": "Chapter 1: Continental — top-down view of America"
+    },
+    "chapter02": {
+      "title": "Chapter 2 — City Arrival",
+      "body": "Carlos lives here. ZIP 76119. East of downtown — past Sundance Square, past the courthouse.",
+      "editorial": "Carlos lives here. ZIP 76119. East of downtown.",
+      "detail": "Trinity Metro routes thread the city in cyan. Half of them don't reach the warehouses.",
+      "aria": "Chapter 2: Fort Worth at altitude. Trinity Metro routes drawn in cyan."
+    },
+    "chapter03": {
+      "title": "Chapter 3 — The Neighborhood",
+      "body": "Carlos is 29. ZIP 76119. Single father of one daughter, four years old. Recently released — sentence complete, three years past. He has $300 in cash, no vehicle, and four years of warehouse and forklift experience. He is ready to work. Four barriers stand between him and a paycheck.",
+      "carlosIntro": "Carlos is 29. A father of one — his daughter is four. Three years ago, a misdemeanor theft charge. Sentence complete. Four years of warehouse work behind him; a forklift cert in his pocket. Now he's home, trying to go back to work.",
+      "neighborhoodLabel": "ZIP 76119 — East Fort Worth",
+      "aria": "Chapter 3: a neighborhood block in 76119. Carlos is introduced."
+    },
+    "chapter04": {
+      "title": "The Wall",
+      "lede": "Most workforce sites pretend barriers don't matter. We do the math to prove they do.",
+      "aria": "Chapter 4: The Wall. Four barriers, named one at a time."
+    },
+    "chapter04a": {
+      "title": "Criminal record",
+      "detail": "4.8 miles. Bus 4 + Bus 6 = 71 minutes.",
+      "statValue": "71 min",
+      "statLabel": "to the District Clerk",
+      "pullquote": "I came home with $300 and a daughter, and the system told me to go to five offices.",
+      "aria": "Barrier one: criminal record. Tarrant County District Clerk is 4.8 miles away. Bus 4 plus Bus 6 totals 71 minutes."
+    },
+    "chapter04b": {
+      "title": "No transit",
+      "detail": "He lives in 76119. Bus 4 to downtown is 45 minutes. Plus a transfer. Plus a wait.",
+      "statValue": "87 min",
+      "statLabel": "downtown commute",
+      "pullquote": "Forty-five minutes is the schedule. Eighty-seven is the day.",
+      "aria": "Barrier two: no transit. The downtown commute on Bus 4 with a transfer is 87 minutes."
+    },
+    "chapter04c": {
+      "title": "No childcare",
+      "detail": "His daughter is 4. Childcare is $1,200 a month he doesn't have.",
+      "statValue": "$1,200/mo",
+      "statLabel": "without subsidy",
+      "pullquote": "I can't take a job that starts before her daycare opens.",
+      "aria": "Barrier three: no childcare. Market rate is $1,200 a month without a subsidy."
+    },
+    "chapter04d": {
+      "title": "Bad credit",
+      "detail": "540. Late payments. One collection account. Half the apartments won't take him — and one in three jobs runs a credit check.",
+      "statValue": "33%",
+      "statLabel": "of jobs unreachable",
+      "pullquote": "A score I can't see is closing doors I never knocked on.",
+      "aria": "Barrier four: bad credit. Roughly one in three job listings runs a credit check Carlos would not pass."
+    },
+    "chapter05": {
+      "title": "The Labyrinth",
+      "editorial": "5 offices. 47 forms. Each one says go to the next one.",
+      "lede": "Without GoWork, this is the path. We named it so we could replace it.",
+      "formsCounter": "47",
+      "formsCounterLabel": "forms to fill out",
+      "officesLabel": "offices to visit",
+      "pullquote": "Every office gave me one form and another address.",
+      "aria": "Chapter 5: the Labyrinth. Five offices and forty-seven forms — the chaos before GoWork sequences the path.",
+      "convergenceCaption": "47 forms. 5 offices. We sequence them. You walk once.",
+      "barrierLabels": {
+        "criminalRecord": "Criminal record → Tarrant District Clerk",
+        "transit": "No transit → Trinity Metro HQ",
+        "childcare": "Childcare gap → HHSC Eligibility",
+        "credit": "Bad credit → Legal Aid NW Texas",
+        "id": "Missing ID → Workforce Solutions"
+      },
+      "officeNames": {
+        "tarrant-district-clerk": "Tarrant District Clerk",
+        "hhsc-eligibility": "HHSC Eligibility",
+        "trinity-metro-hq": "Trinity Metro HQ",
+        "legal-aid-nw-texas": "Legal Aid of NW Texas",
+        "workforce-solutions-belknap": "Workforce Solutions (Belknap)"
+      }
+    },
+    "chapter06": {
+      "title": "The Math",
+      "hero": "When more pay means less money.",
+      "subhero": "We do the cliff math so the choice is honest. Move the slider — watch the cliff.",
+      "body": "Carlos stocks shelves at Amazon FC DFW5 — 71 minutes from home on Bus 4. A $2/hour raise sounds like a win. The benefits cliff says otherwise: childcare subsidy gone at $14/hr, SNAP gone at $17/hr. The chart is the receipt.",
+      "statValue": "71 min",
+      "statLabel": "from Carlos's home to DFW5 via Bus 4",
+      "wageSliderLabel": "Hourly wage",
+      "wageSliderHint": "Drag to see the cliff move with the wage.",
+      "wageSliderMinLabel": "$7.25 — federal minimum",
+      "wageSliderMaxLabel": "$25.00 — past the cliff",
+      "wageSliderValueLabel": "Current wage",
+      "cliffChartLabel": "Net monthly income vs. hourly wage",
+      "cliffChartCaption": "Demo cliff projection — Carlos's profile (single father, 1 dependent, 76119, no child support).",
+      "aria": "Chapter 6: The Math. Camera lands on Amazon Fulfillment Center DFW5. A wage slider drives the benefits cliff chart in real time so you can see how a raise turns into a loss."
+    },
+    "chapter07": {
+      "title": "Your case file. Today.",
+      "hero": "Don't walk for twelve weeks. Walk in once. With everything.",
+      "subhero": "GoWork hands you a case file the same day. You take it to a case worker. You pull jobs. You apply. You go to work.",
+      "body": "We assemble your barriers, your eligibility, your transit options, your job matches into one PDF. Carlos doesn't bounce between five offices — he rides Trinity Metro Bus 4 and Bus 6 once, hands the case file to Workforce Solutions, and starts work that week.",
+      "aria": "Chapter 7: Your case file. Today. Carlos's same-day plan walks one stop with everything in hand.",
+      "weekLabel1": "Today — Case file",
+      "weekLabel2": "Tomorrow — Case worker",
+      "weekLabel3": "Day 3 — Apply",
+      "weekLabel4": "This week — Working",
+      "legActive": "Active leg"
+    },
+    "chapter08": {
+      "title": "Chapter 8 — The Graph",
+      "hero": "The wall isn't a list. It's a graph.",
+      "subhero": "Every barrier connects to two more. Resolve one and three others move within reach. We mapped them so we could route around them.",
+      "body": "Thirty-three nodes. Seven categories. The constellation breathes above the city — every edge a dependency, every node a barrier we know how to name.",
+      "aria": "Chapter 8: The Graph. A three-dimensional barrier constellation hovers above downtown Fort Worth.",
+      "fallbackAlt": "Static rendering of the 33-node barrier constellation",
+      "barrierLabels": {
+        "crMisdemeanor": "Misdemeanor record",
+        "crFelony": "Felony record",
+        "crExpunction": "Expunction filing",
+        "crArticle55": "Article 55 petition",
+        "crFairChance": "Fair-chance hiring",
+        "crLicense": "License suspension",
+        "trNoVehicle": "No vehicle",
+        "trBus4": "Trinity Metro Bus 4",
+        "trBus6": "Trinity Metro Bus 6",
+        "trTransfer": "Transfer wait time",
+        "trNightShift": "Night-shift transit",
+        "ccCost": "Childcare cost",
+        "ccSubsidy": "Subsidy intake",
+        "ccHours": "Childcare hours",
+        "ccWaitlist": "Subsidy waitlist",
+        "ccTransit": "Childcare commute",
+        "cdLowScore": "Low credit score",
+        "cdCollections": "Collection account",
+        "cdEmployerCheck": "Employer credit check",
+        "cdRentalCheck": "Rental credit check",
+        "cdUtility": "Utility deposit",
+        "hsStableAddress": "Stable address",
+        "hsDeposit": "Housing deposit",
+        "hsEviction": "Eviction record",
+        "hsShelter": "Emergency shelter",
+        "hlMedicaid": "Medicaid eligibility",
+        "hlDental": "Dental access",
+        "hlMental": "Mental health support",
+        "hlPhysical": "Physical health barrier",
+        "tnForklift": "Forklift certification",
+        "tnCdl": "CDL training",
+        "tnGed": "GED completion",
+        "tnResume": "Resume polish"
+      }
+    },
+    "chapter09": {
+      "title": "Any City",
+      "hero": "It works in Fort Worth. It will work where you are.",
+      "subhero": "One city lit. Five dotted in. The math, the path, the plan — wherever the work is.",
+      "body": "GoWork ships as a city template. Fort Worth is the reference deployment. Five more Texas cities are on deck — same engine, same playbook, local data.",
+      "statValue": "Built in Fort Worth. Free to use.",
+      "statLabel": "Wherever the work is — we go where you go.",
+      "tourTexasButton": "Tour Texas",
+      "returnToFortWorthButton": "Return to Fort Worth",
+      "cityFW": "Fort Worth, TX",
+      "futureCitiesLabel": "On deck",
+      "futureCityDallas": "Dallas",
+      "futureCityHouston": "Houston",
+      "futureCityAustin": "Austin",
+      "futureCitySanAntonio": "San Antonio",
+      "futureCityWaco": "Waco",
+      "aria": "Chapter 9: Any City. The camera returns to a Texas-wide view. Fort Worth glows as the reference deployment; five Texas cities — Dallas, Houston, Austin, San Antonio, and Waco — are dotted on deck. A button tours the Texas region; another returns to Fort Worth."
+    },
+    "chapter10": {
+      "title": "Find your path",
+      "hero": "Find your path.",
+      "subhero": "We do the math. We sequence the route. You take the first step.",
+      "body": "You've seen the wall. You've seen the labyrinth. Now skip both — start your assessment and we'll hand you a case file the same day. You take it to a case worker. You apply. You go to work.",
+      "aria": "Chapter 10: Find your path. Begin your assessment to receive a personalized plan.",
+      "ctaPrimary": "Start your assessment",
+      "footerBrand": "GoWork · Fort Worth, TX"
+    }
+  },
+  "edge": {
+    "404": {
+      "title": "There is no path to this URL",
+      "body": "But there is one through the wall. Every barrier connects — let's get you back on the route.",
+      "cta": "Back to the wall"
+    },
+    "500": {
+      "title": "Something stalled",
+      "body": "We're calibrating. The page hit a snag, our team has been notified, and the request was logged. Try again, or step back to the home view.",
+      "cta": "Try again"
+    },
+    "empty": {
+      "title": "Nothing to chart yet",
+      "body": "Once data lands here, the path will draw itself."
+    },
+    "loading": {
+      "label": "Calibrating the path"
+    }
+  },
+  "a11y": {
+    "skipToContent": "Skip to main content"
   },
   "privacy": {
     "heading": "Privacy Policy",
     "lastUpdated": "Last updated",
-    "counselNotice": "Hackathon-grade placeholder — this policy was authored fresh for the MontGoWork submission and has not been reviewed by counsel. Production rollout requires legal review.",
+    "counselNotice": "Hackathon-grade placeholder — this policy was authored fresh for the GoWork submission and has not been reviewed by counsel. Production rollout requires legal review.",
     "seeAlso": "See also our",
     "termsLink": "Terms of Service",
     "esPlaceholder": "(Spanish-only placeholder string; never rendered when locale is English.)",
@@ -487,7 +1116,7 @@
   "terms": {
     "heading": "Terms of Service",
     "lastUpdated": "Last updated",
-    "counselNotice": "Hackathon-grade placeholder — these terms were authored fresh for the MontGoWork submission and have not been reviewed by counsel. Production rollout requires legal review.",
+    "counselNotice": "Hackathon-grade placeholder — these terms were authored fresh for the GoWork submission and have not been reviewed by counsel. Production rollout requires legal review.",
     "seeAlso": "See also our",
     "privacyLink": "Privacy Policy",
     "esPlaceholder": "(Spanish-only placeholder string; never rendered when locale is English.)",

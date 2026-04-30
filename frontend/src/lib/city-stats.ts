@@ -41,7 +41,9 @@ const STATS_BY_STATE: Record<string, CityStats> = {
   TX: FORT_WORTH,
 };
 
-/** Get city statistics by state code. Defaults to Montgomery. */
+/** Get city statistics by state code. Defaults to Fort Worth (TX) —
+ *  the active reference deployment. Pass `state="AL"` for legacy
+ *  Montgomery numbers. */
 export function getCityStats(state: string): CityStats {
-  return STATS_BY_STATE[state] ?? MONTGOMERY;
+  return STATS_BY_STATE[state] ?? FORT_WORTH;
 }

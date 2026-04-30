@@ -15,12 +15,12 @@
  *     indexed either.
  *
  * The site URL is read from `NEXT_PUBLIC_SITE_URL` (matches
- * `app/layout.tsx`'s default of `https://montgowork.com`).
+ * `app/layout.tsx`'s default of `https://gowork.example`).
  */
 import type { MetadataRoute } from "next";
 
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://montgowork.com";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://gowork.example";
 
 export default function robots(): MetadataRoute.Robots {
   return {

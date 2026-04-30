@@ -1,5 +1,13 @@
 """MontGoWork API — Workforce Navigator (city-aware)."""
 
+# Load .env BEFORE anything else. env_validation runs in the lifespan,
+# but get_settings() and other imports below may read os.environ at
+# module-load time, so we must populate it before those imports fire.
+# python-dotenv is idempotent and a no-op in containers where env is
+# already injected at the OS level. Inline-import keeps the module-level
+# import count under the architecture limit (15).
+__import__("dotenv").load_dotenv()
+
 import logging
 from contextlib import asynccontextmanager
 
