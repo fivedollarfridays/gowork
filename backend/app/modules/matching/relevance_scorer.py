@@ -193,8 +193,27 @@ def score_resume_match(
     Returns (score, signals) where signals are short human-readable
     strings naming what matched (used in match_reason text).
     """
+    score, signals, _ = score_resume_match_breakdown(job, profile)
+    return score, signals
+
+
+def score_resume_match_breakdown(
+    job: dict, profile: ResumeProfile,
+) -> tuple[float, list[str], dict]:
+    """Compute resume<->job match plus a per-factor breakdown.
+
+    Returns ``(score, signals, breakdown)`` where ``breakdown`` is a
+    dict of ``{factor_name: 0..1 score}`` for ``skills``, ``title_family``,
+    ``industry``, ``years``, ``education``, ``certifications``, plus an
+    ``industry_aligned`` boolean.  Useful for surfacing the "why" panel
+    in the UI without re-running the scorer.
+    """
     if not profile.skills and not profile.industries and not profile.job_families:
-        return 0.30, []
+        return 0.30, [], {
+            "skills": 0.0, "title_family": 0.0, "industry": 0.0,
+            "years": 0.0, "education": 0.0, "certifications": 0.0,
+            "industry_aligned": False,
+        }
 
     text = job_text(job)
     j_industries = job_industries(job)
@@ -228,7 +247,16 @@ def score_resume_match(
         score *= INDUSTRY_MISMATCH_MULTIPLIER
 
     signals = skill_sigs + family_sigs + industry_sigs + years_sigs + cert_sigs
-    return round(min(max(score, 0.0), 1.0), 3), signals
+    breakdown = {
+        "skills": round(skills, 3),
+        "title_family": round(family, 3),
+        "industry": round(industry, 3),
+        "years": round(years, 3),
+        "education": round(edu, 3),
+        "certifications": round(cert, 3),
+        "industry_aligned": industry_aligned,
+    }
+    return round(min(max(score, 0.0), 1.0), 3), signals, breakdown
 
 
 def resume_keywords_for_context(profile: ResumeProfile) -> list[str]:
