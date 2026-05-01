@@ -63,7 +63,18 @@ def haversine_miles(lat1: float, lng1: float, lat2: float, lng2: float) -> float
 
 
 def _score_barrier_alignment(resource: Resource, profile: UserProfile) -> float:
-    """Score 0-1 based on how well resource category matches user barriers."""
+    """Score 0-1 based on how well a resource matches the user's barriers.
+
+    Stage-2 priority order:
+    1. Explicit ``barrier_affinity`` tag overlap with the user's
+       barriers -> 1.0 (this is the high-confidence path).
+    2. Category map fallback -> 1.0 (legacy).
+    3. No alignment -> 0.1 base.
+    """
+    explicit = set(getattr(resource, "barrier_affinity", []) or [])
+    user_tags = {b.value for b in profile.primary_barriers}
+    if explicit & user_tags:
+        return 1.0
     for barrier in profile.primary_barriers:
         matching_categories = BARRIER_CATEGORY_MAP.get(barrier, set())
         if resource.category in matching_categories:
