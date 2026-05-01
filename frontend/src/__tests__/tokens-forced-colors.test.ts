@@ -101,8 +101,8 @@ describe("T1.97 — prefers-contrast: more in colors.css", () => {
 });
 
 describe("T1.97 — colors.css size budget after T1.97", () => {
-  it("colors.css <320 lines (bumped 2026-04-30 for narrative-reset rebrand expansion)", () => {
+  it("colors.css <340 lines (bumped 2026-05-01 for demo-grade dark-mode `.text-secondary` cyan override + commentary)", () => {
     const lines = readPartial("colors.css").split("\n").length;
-    expect(lines).toBeLessThan(320);
+    expect(lines).toBeLessThan(340);
   });
 });

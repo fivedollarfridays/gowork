@@ -63,7 +63,18 @@ class TestSeedHonestJobsListings:
 
     @pytest.mark.anyio
     async def test_all_seeded_have_fair_chance_flag(self, db_session):
-        """All Honest Jobs listings should have fair_chance = 1."""
+        """At least 70% of Honest Jobs listings should be fair_chance=1.
+
+        The seed feed used to be 100% fair_chance=1 because every
+        record was hand-curated as such.  With the Fort Worth real-
+        employer expansion the feed now mixes confirmed fair-chance
+        employers (Goodwill, Trinity Metro, BNSF, Workforce Solutions,
+        Compass at JPS, Aramark, etc.) with mainstream entry-level
+        roles whose fair-chance posture is unconfirmed (American
+        Airlines, Charles Schwab, Bell Textron, etc.).  We still want
+        the feed dominated by fair-chance employers, hence the 70%
+        floor — anything less means the data drifted.
+        """
         await seed_honestjobs_listings(db_session)
         result = await db_session.execute(
             text(
@@ -72,7 +83,9 @@ class TestSeedHonestJobsListings:
             )
         )
         flags = [row[0] for row in result]
-        assert all(f == 1 for f in flags)
+        assert flags, "no honestjobs listings seeded"
+        ratio = sum(1 for f in flags if f == 1) / len(flags)
+        assert ratio >= 0.70, f"fair-chance ratio {ratio:.2f} below 70%"
 
     @pytest.mark.anyio
     async def test_idempotent_seeding(self, db_session):

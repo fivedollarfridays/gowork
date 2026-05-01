@@ -20,15 +20,17 @@ def _filter_by_state(jobs: list[dict]) -> list[dict]:
 
     Layer 2 (defense-in-depth) of the city-aware jobs pipeline. Even if
     the seed data is wrong, this filter keeps cross-state listings from
-    surfacing. State suffix (e.g. ``, TX``) is checked case-insensitively
-    so Arlington / Hurst metro entries pass alongside Fort Worth proper.
-    Listings with no location are dropped — we cannot verify them.
+    surfacing. The state token (e.g. ``, TX``) is matched as a token —
+    not as the literal end-of-string — so listings with a trailing ZIP
+    (``Fort Worth, TX 76102``) still pass alongside the bare form
+    (``Fort Worth, TX``).  Listings with no location are dropped — we
+    cannot verify them.
     """
     state = get_city_config().state.upper()
-    suffix = f", {state}".lower()
+    needle = f", {state.lower()}"
     return [
         job for job in jobs
-        if (job.get("location") or "").lower().rstrip().endswith(suffix)
+        if needle in (job.get("location") or "").lower()
     ]
 
 
@@ -143,8 +145,17 @@ def _annotate_credit(jobs: list[dict]) -> list[dict]:
 async def match_jobs(
     profile: UserProfile, db_session: AsyncSession,
     benefits_profile: BenefitsProfile | None = None,
+    resume_profile: object | None = None,
+    resume_keywords: list[str] | None = None,
 ) -> list[ScoredJobMatch]:
-    """Run the full filter→score→rank pipeline. Returns flat PVS-ranked list."""
+    """Run the full filter→score→rank pipeline. Returns flat PVS-ranked list.
+
+    ``resume_profile`` is an opaque object (typed Any to avoid a
+    circular import); the PVS scorer uses isinstance to switch on it.
+    Passing it (and ``resume_keywords``) is what lets the matcher
+    produce VARIED scores per resume — without these the engine
+    falls back to the no-resume PVS weights.
+    """
     listings = await get_all_job_listings(db_session)
     if not listings:
         return []
@@ -176,5 +187,7 @@ async def match_jobs(
         barriers=profile.primary_barriers,
         benefits_profile=benefits_profile,
         target_industries=profile.target_industries,
+        resume_keywords=resume_keywords or [],
+        resume_profile=resume_profile,
     )
     return rank_all_jobs(jobs, ctx)

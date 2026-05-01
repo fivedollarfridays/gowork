@@ -19,7 +19,6 @@
  */
 import dynamic from "next/dynamic";
 import { ChapterRail } from "@/components/home/ChapterRail";
-import { CursorFlashlight } from "@/components/home/CursorFlashlight";
 import { PageMeta } from "@/components/home/PageMeta";
 import { SiteFooter } from "@/components/home/SiteFooter";
 import { SiteHeader } from "@/components/home/SiteHeader";
@@ -142,7 +141,6 @@ export default function HomePage(): JSX.Element {
   return (
     <>
       <TitleSequenceGate />
-      <CursorFlashlight />
       <Ch01CursorTrail />
       <ScrollVelocityBridge />
       <EyebrowActiveBridge />

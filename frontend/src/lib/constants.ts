@@ -86,7 +86,7 @@ export const BARRIER_ICONS: Record<BarrierType, LucideIcon> = {
 
 export const STATUS_BADGE_STYLES = {
   positive: "bg-success/10 text-success border-success/20",
-  warning: "bg-warning/10 text-warning-foreground border-warning/20",
+  warning: "bg-warning/10 text-warning border-warning/20",
   negative: "bg-destructive/10 text-destructive border-destructive/20",
 } as const;
 

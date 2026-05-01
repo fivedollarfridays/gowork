@@ -1,30 +1,121 @@
 [
   {
-    "title": "Production Technician",
-    "company": "Alcon",
-    "location": "Fort Worth, TX",
-    "description": "Operate precision manufacturing equipment in cleanroom environment producing surgical instruments. Day shift available. Hands-on training provided. Fair-chance hiring partner with Tarrant County Workforce Solutions.",
-    "url": "https://www.alcon.com/careers",
+    "title": "Patient Care Technician",
+    "company": "JPS Health Network",
+    "location": "Fort Worth, TX 76104",
+    "description": "Provide direct nursing assistance to patients on med-surg unit at John Peter Smith Hospital. Take vitals, assist nurses, document EHR entries. CNA preferred, BLS required. Day and evening shifts. Pay: $17.50/hr. Fair-chance employer; hospital security clearance still required. Hospital ward, full-time.",
+    "url": "https://jpshealthnet.org/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
     "fair_chance": 1
   },
   {
-    "title": "Yard Helper",
-    "company": "BNSF Railway",
-    "location": "Fort Worth, TX",
-    "description": "Couple and uncouple rail cars, throw switches, and maintain yard safety. Outdoor work, all weather. Background-friendly second-chance program. CDL not required.",
-    "url": "https://www.bnsf.com/careers",
+    "title": "Registered Nurse - Med Surg",
+    "company": "JPS Health Network",
+    "location": "Fort Worth, TX 76104",
+    "description": "RN for medical-surgical unit, JPS Hospital. BSN preferred, BLS and ACLS required. Manage patient assignments, IV therapy, EHR (Epic) charting. Day shift, 12-hour rotations. Pay: $34.00/hr. Hospital. Background check post-offer.",
+    "url": "https://jpshealthnet.org/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 0
+  },
+  {
+    "title": "Certified Nursing Assistant (CNA)",
+    "company": "Methodist Mansfield Medical Center",
+    "location": "Mansfield, TX 76063",
+    "description": "CNA on long-term care unit. Provide direct patient care, vitals, assist with ADLs. CNA cert required. Pay: $16.00/hr. Day shift. Healthcare hospital environment. Background check post-offer.",
+    "url": "https://www.methodisthealthsystem.org/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
     "fair_chance": 1
   },
   {
-    "title": "Construction Apprentice",
-    "company": "JE Dunn Construction",
-    "location": "Fort Worth, TX",
-    "description": "Entry-level apprenticeship on commercial build sites across DFW. Learn carpentry, concrete, and site safety. Tools provided. Reentry-friendly employer.",
-    "url": "https://www.jedunn.com/careers",
+    "title": "Pharmacy Technician",
+    "company": "Cook Children's Medical Center",
+    "location": "Fort Worth, TX 76104",
+    "description": "Pediatric hospital pharmacy. Fill prescriptions, sterile compounding under IV hood, inventory. Pharmacy Tech license required. Pay: $19.00/hr. Hospital. Day shift. Background check.",
+    "url": "https://www.cookchildrens.org/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 0
+  },
+  {
+    "title": "Phlebotomist",
+    "company": "Texas Health Resources",
+    "location": "Fort Worth, TX 76107",
+    "description": "Outpatient lab phlebotomy. Draw blood, label samples, EHR entry. Phlebotomy certification required. Pay: $16.50/hr. Day shift. Hospital outpatient clinic.",
+    "url": "https://jobs.texashealth.org",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Medical Assistant",
+    "company": "Baylor Scott & White All Saints",
+    "location": "Fort Worth, TX 76104",
+    "description": "Front and back office MA. Vitals, EHR (Epic), patient intake, sterilize instruments. MA cert + BLS required. Pay: $17.00/hr. Healthcare clinic, day shift.",
+    "url": "https://careers.bswhealth.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 0
+  },
+  {
+    "title": "Hospital Food Service Worker",
+    "company": "Compass Group at JPS Hospital",
+    "location": "Fort Worth, TX 76104",
+    "description": "Cafeteria and patient meal prep at John Peter Smith Hospital. Day and evening shifts. Uniforms provided. Second-chance hiring program. Pay: $13.50/hr. Healthcare environment.",
+    "url": "https://www.compass-usa.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Home Health Aide",
+    "company": "Texas Home Health",
+    "location": "Fort Worth, TX 76112",
+    "description": "In-home patient care across Tarrant County. ADLs, light housekeeping, meal prep. CNA preferred. Mileage reimbursed. Pay: $15.00/hr. Day shift. Caregiver role.",
+    "url": "https://www.texashomehealth.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Dietary Aide",
+    "company": "Aramark at JPS Hospital",
+    "location": "Fort Worth, TX 76104",
+    "description": "Tray assembly and patient dietary delivery. Health-care food handling, ServSafe certification a plus. Pay: $13.00/hr. Day and evening shifts. Hospital.",
+    "url": "https://careers.aramark.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+
+  {
+    "title": "Warehouse Associate",
+    "company": "Hillwood at AllianceTexas",
+    "location": "Fort Worth, TX 76177",
+    "description": "Pick, pack, and ship at the AllianceTexas distribution hub. Forklift certification provided. Multiple shifts including overnight. Pay: $18.00/hr. Background-friendly.",
+    "url": "https://www.hillwood.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Forklift Operator",
+    "company": "Hillwood at AllianceTexas",
+    "location": "Fort Worth, TX 76177",
+    "description": "Reach truck, sit-down forklift operator at AllianceTexas warehouse. OSHA-10 a plus. Forklift certified preferred. Pay: $19.50/hr. Day and night shifts available. Industrial warehouse.",
+    "url": "https://www.hillwood.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Picker / Packer",
+    "company": "Amazon DFW Air Hub",
+    "location": "Fort Worth, TX 76155",
+    "description": "Sort and pack packages at the Amazon Air Hub. Picker, packer, stocker roles. Pay: $17.50/hr. Day and overnight shifts. Background check post-offer.",
+    "url": "https://www.amazon.jobs",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
     "fair_chance": 1
@@ -32,49 +123,50 @@
   {
     "title": "Warehouse Associate",
     "company": "Goodwill North Central Texas",
-    "location": "Fort Worth, TX",
-    "description": "Sort, price, and stock donated goods. Operate pallet jacks. Full-time with benefits after 90 days. Fair-chance hiring core to mission.",
+    "location": "Fort Worth, TX 76110",
+    "description": "Sort, price, and stock donated goods. Operate pallet jacks. Full-time with benefits after 90 days. Pay: $14.00/hr. Fair-chance hiring core to mission.",
     "url": "https://www.goodwillnct.org/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
     "fair_chance": 1
   },
   {
-    "title": "Production Assembly Worker",
-    "company": "Lockheed Martin Aeronautics",
-    "location": "Fort Worth, TX",
-    "description": "Assembly line work on F-35 fighter program. Repetitive standing, hand tool use, light lifting. Rotating shifts. Background-check-friendly for non-classified roles.",
-    "url": "https://www.lockheedmartinjobs.com",
+    "title": "Yard Helper",
+    "company": "BNSF Railway",
+    "location": "Fort Worth, TX 76131",
+    "description": "Couple and uncouple rail cars, throw switches, and maintain yard safety at the BNSF intermodal facility. Outdoor work, all weather. Pay: $26.00/hr. Background-friendly second-chance program. CDL not required.",
+    "url": "https://www.bnsf.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
     "fair_chance": 1
   },
   {
-    "title": "Food Service Worker",
-    "company": "Compass Group at JPS Hospital",
-    "location": "Fort Worth, TX",
-    "description": "Cafeteria and patient meal prep at John Peter Smith Hospital. Day and evening shifts. Uniforms provided. Second-chance hiring program.",
-    "url": "https://www.compass-usa.com/careers",
+    "title": "Package Handler",
+    "company": "FedEx Ground",
+    "location": "Fort Worth, TX 76155",
+    "description": "Load and unload trailers, scan packages, sort by zone. Multiple shifts including 4am sunrise sort. Pay: $17.00/hr. Forklift cert provided. Background check.",
+    "url": "https://careers.fedex.com",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
     "fair_chance": 1
   },
   {
-    "title": "Vehicle Maintenance Technician",
-    "company": "Trinity Metro",
-    "location": "Fort Worth, TX",
-    "description": "Service and repair Trinity Metro buses and TEXRail vehicles. CDL training provided to qualifying candidates. Public-sector benefits package. Fair-chance friendly.",
-    "url": "https://ridetrinitymetro.org/careers",
+    "title": "Inventory Specialist",
+    "company": "UPS Mesquite Hub",
+    "location": "Fort Worth, TX 76155",
+    "description": "Inventory tracking, cycle counts, pallet jack operation at UPS distribution center. Forklift cert preferred. Pay: $18.50/hr. Day shift, Monday-Friday.",
+    "url": "https://www.jobs-ups.com",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
     "fair_chance": 1
   },
+
   {
-    "title": "Warehouse Associate",
-    "company": "Hillwood at AllianceTexas",
-    "location": "Fort Worth, TX",
-    "description": "Pick, pack, and ship at the AllianceTexas distribution hub. Forklift certification provided. Multiple shifts including overnight. Background-friendly.",
-    "url": "https://www.hillwood.com/careers",
+    "title": "Construction Apprentice",
+    "company": "JE Dunn Construction",
+    "location": "Fort Worth, TX 76102",
+    "description": "Entry-level apprenticeship on commercial build sites across DFW. Learn carpentry, concrete, and site safety. OSHA-10 within 30 days. Tools provided. Pay: $19.00/hr. Reentry-friendly employer. Construction labor.",
+    "url": "https://www.jedunn.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
     "fair_chance": 1
@@ -82,9 +174,141 @@
   {
     "title": "General Laborer",
     "company": "Sundt Construction",
-    "location": "Arlington, TX",
-    "description": "Site cleanup, material handling, and demolition support across DFW commercial projects. Tools and PPE provided. Fair-chance hiring partner.",
+    "location": "Arlington, TX 76011",
+    "description": "Site cleanup, material handling, and demolition support across DFW commercial projects. Tools and PPE provided. Pay: $17.00/hr. Construction. Fair-chance hiring partner.",
     "url": "https://www.sundt.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Welder",
+    "company": "Bell Textron",
+    "location": "Fort Worth, TX 76101",
+    "description": "MIG and TIG welding on rotorcraft components. AS9100 environment. OSHA-30 preferred. Pay: $24.50/hr. Welding, manufacturing. Day and second shift.",
+    "url": "https://careers.bellflight.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Electrician Apprentice",
+    "company": "IBEW Local 220 Fort Worth",
+    "location": "Fort Worth, TX 76164",
+    "description": "Electrical apprenticeship on commercial construction. Day class, evening field work. Pay: $18.50/hr starting, scheduled raises. OSHA-10 within first month.",
+    "url": "https://www.ibew220.org",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Plumber Apprentice",
+    "company": "UA Local 100",
+    "location": "Fort Worth, TX 76110",
+    "description": "Plumbing and pipefitting apprenticeship across DFW commercial projects. Earn while you learn. Pay: $18.00/hr starting. Construction trade.",
+    "url": "https://www.ualocal100.org",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "HVAC Apprentice",
+    "company": "Trane Technologies",
+    "location": "Fort Worth, TX 76112",
+    "description": "Commercial HVAC service and install. Hands-on training, EPA 608 cert provided. Pay: $19.00/hr. Construction trade. Day shift, with on-call rotation.",
+    "url": "https://www.tranetechnologies.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 0
+  },
+  {
+    "title": "Carpenter",
+    "company": "Manhattan Construction",
+    "location": "Fort Worth, TX 76102",
+    "description": "Commercial framing carpenter. Read blueprints, frame walls, install doors. OSHA-30 required within 60 days. Pay: $22.00/hr. Construction.",
+    "url": "https://www.manhattanconstruction.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 0
+  },
+  {
+    "title": "Concrete Laborer",
+    "company": "Austin Bridge & Road",
+    "location": "Fort Worth, TX 76140",
+    "description": "Concrete formwork, pouring, and finishing on highway and bridge projects. Heavy lifting. Pay: $18.00/hr. Construction. Outdoor, all weather.",
+    "url": "https://www.austin-ind.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+
+  {
+    "title": "Production Technician",
+    "company": "Alcon",
+    "location": "Fort Worth, TX 76134",
+    "description": "Operate precision manufacturing equipment in cleanroom environment producing surgical instruments. GMP environment. Day shift. Pay: $20.50/hr. Manufacturing assembly. Fair-chance hiring partner with Tarrant County Workforce Solutions.",
+    "url": "https://www.alcon.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Production Assembly Worker",
+    "company": "Lockheed Martin Aeronautics",
+    "location": "Fort Worth, TX 76108",
+    "description": "Assembly line work on F-35 fighter program. Repetitive standing, hand tool use, light lifting. Quality control. Rotating shifts. Pay: $22.00/hr. Manufacturing. Background-check-friendly for non-classified roles.",
+    "url": "https://www.lockheedmartinjobs.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Aircraft Assembler",
+    "company": "Bell Textron",
+    "location": "Fort Worth, TX 76101",
+    "description": "Helicopter assembly. Read blueprints, install components, torque to spec. AS9100 quality system. Pay: $21.50/hr. Manufacturing. Day shift.",
+    "url": "https://careers.bellflight.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Machine Operator",
+    "company": "Triumph Aerostructures",
+    "location": "Fort Worth, TX 76155",
+    "description": "CNC machine operator on aerospace components. Read GD&T, perform first-article inspection. Pay: $20.00/hr. Manufacturing. Second shift premium.",
+    "url": "https://www.triumphgroup.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 0
+  },
+  {
+    "title": "Quality Control Inspector",
+    "company": "Peterbilt Motors",
+    "location": "Denton, TX 76205",
+    "description": "Final-line QC on Class 8 trucks. Visual inspection, measurement, documentation. Pay: $19.50/hr. Manufacturing. Day shift.",
+    "url": "https://careers.peterbilt.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+
+  {
+    "title": "Cook",
+    "company": "Whataburger DFW",
+    "location": "Fort Worth, TX 76103",
+    "description": "Grill and prep cook at high-volume Whataburger location. ServSafe a plus. Pay: $14.50/hr. Day and evening shifts. Restaurant fast food, kitchen.",
+    "url": "https://whataburger.com/Careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Server",
+    "company": "Trinity Forest Golf Club",
+    "location": "Fort Worth, TX 76123",
+    "description": "Country club server, evening events. Restaurant front-of-house. Tips averaging $200/shift. Pay: $11.00/hr + tips. Hospitality.",
+    "url": "https://www.trinityforestgc.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
     "fair_chance": 1
@@ -92,18 +316,193 @@
   {
     "title": "Dishwasher / Kitchen Utility",
     "company": "Aramark at NAS-JRB Fort Worth",
-    "location": "Fort Worth, TX",
-    "description": "Dish room and kitchen sanitation at Naval Air Station Joint Reserve Base. Day and evening shifts. Background check required (base access); fair-chance friendly for many records.",
+    "location": "Fort Worth, TX 76127",
+    "description": "Dish room and kitchen sanitation at Naval Air Station Joint Reserve Base. Day and evening shifts. Pay: $13.50/hr. Background check required (base access); fair-chance friendly for many records. Restaurant kitchen.",
     "url": "https://careers.aramark.com",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
     "fair_chance": 1
   },
   {
+    "title": "Catering Prep Cook",
+    "company": "Ben E. Keith",
+    "location": "Fort Worth, TX 76110",
+    "description": "Prep cook for institutional catering kitchen. ServSafe required within 30 days. Pay: $15.50/hr. Kitchen. Day shift, Monday-Friday.",
+    "url": "https://www.benekeith.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Banquet Server",
+    "company": "Omni Fort Worth Hotel",
+    "location": "Fort Worth, TX 76102",
+    "description": "Hotel banquet server, evening events and weddings. Hospitality, restaurant. Pay: $12.00/hr + service charge. Evening and weekend shifts.",
+    "url": "https://www.omnihotels.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Barista",
+    "company": "Local Coffee Co",
+    "location": "Fort Worth, TX 76107",
+    "description": "Independent coffee shop barista. Espresso, pour-overs, customer service. ServSafe a plus. Pay: $13.00/hr + tips. Daytime, Tue-Sun.",
+    "url": "https://www.indeed.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+
+  {
+    "title": "Vehicle Maintenance Technician",
+    "company": "Trinity Metro",
+    "location": "Fort Worth, TX 76164",
+    "description": "Service and repair Trinity Metro buses and TEXRail vehicles. CDL training provided to qualifying candidates. Public-sector benefits package. Pay: $24.00/hr. Mechanic. Manufacturing maintenance. Fair-chance friendly.",
+    "url": "https://ridetrinitymetro.org/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Bus Operator",
+    "company": "Trinity Metro",
+    "location": "Fort Worth, TX 76164",
+    "description": "Trinity Metro bus driver. CDL-B with passenger endorsement (CDL training provided). Pay: $20.00/hr. Transportation, driver. Day and evening shifts. Fair-chance friendly.",
+    "url": "https://ridetrinitymetro.org/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Tarrant County Sheriff Detention Officer",
+    "company": "Tarrant County",
+    "location": "Fort Worth, TX 76196",
+    "description": "Detention officer at Tarrant County Jail. State certification provided after hire. Pay: $22.00/hr. Government, day and night shifts. Background check post-offer.",
+    "url": "https://www.tarrantcounty.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "City of Fort Worth Code Compliance Officer",
+    "company": "City of Fort Worth",
+    "location": "Fort Worth, TX 76102",
+    "description": "Field code compliance inspector. Government civil service. Pay: $20.50/hr. Day shift. Drive city vehicle (CDL not required).",
+    "url": "https://www.fortworthtexas.gov/jobs",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 0
+  },
+  {
+    "title": "Custodial Worker - Fort Worth ISD",
+    "company": "Fort Worth ISD",
+    "location": "Fort Worth, TX 76110",
+    "description": "School custodian, evening shift. Public sector benefits. Pay: $13.00/hr. Government. Custodian / janitor. Background check required.",
+    "url": "https://www.fwisd.org/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Tarrant County College Custodian",
+    "company": "Tarrant County College",
+    "location": "Hurst, TX 76054",
+    "description": "TCC campus custodian. Day and evening shifts. Public sector benefits. Pay: $13.50/hr. Custodian. Government.",
+    "url": "https://www.tccd.edu/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Teaching Assistant - Special Education",
+    "company": "Fort Worth ISD",
+    "location": "Fort Worth, TX 76112",
+    "description": "Special education classroom paraprofessional. Associate degree or 48 college hours preferred. Pay: $15.00/hr. Government, education. Day shift.",
+    "url": "https://www.fwisd.org/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 0
+  },
+
+  {
+    "title": "Customer Service Representative",
+    "company": "American Airlines DFW",
+    "location": "Fort Worth, TX 76155",
+    "description": "Gate agent / customer service at DFW. Help passengers with check-in, boarding, rebooking. Pay: $17.50/hr. Day, evening, overnight shifts. Customer service. Background check required (airport security).",
+    "url": "https://jobs.aa.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 0
+  },
+  {
+    "title": "Ramp Agent",
+    "company": "American Airlines DFW",
+    "location": "Fort Worth, TX 76155",
+    "description": "Ramp agent loading and unloading aircraft, baggage handling. Pay: $18.00/hr. Day, evening, overnight shifts. Outdoor, all weather. Airport security clearance required.",
+    "url": "https://jobs.aa.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 0
+  },
+  {
+    "title": "Customer Service Representative",
+    "company": "Charles Schwab",
+    "location": "Westlake, TX 76262",
+    "description": "Inbound call center, brokerage customer service. Series 7 sponsored after hire. Pay: $20.00/hr base + bonus. Day shift. Office, customer service. Credit check required.",
+    "url": "https://www.schwabjobs.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 0,
+    "credit_check": "required"
+  },
+  {
+    "title": "Call Center Agent",
+    "company": "AT&T Customer Service",
+    "location": "Fort Worth, TX 76102",
+    "description": "Inbound customer service for residential customers. Pay: $16.50/hr + monthly bonus. Day and evening shifts. Customer service.",
+    "url": "https://www.att.jobs",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Loan Servicing Representative",
+    "company": "GM Financial",
+    "location": "Fort Worth, TX 76102",
+    "description": "Auto loan servicing call center. Customer service experience required. Pay: $18.00/hr + monthly bonus. Day shift. Office. Credit check required.",
+    "url": "https://www.gmfinancial.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 0,
+    "credit_check": "required"
+  },
+  {
+    "title": "Office Clerk",
+    "company": "BNSF Railway",
+    "location": "Fort Worth, TX 76102",
+    "description": "BNSF clerical, data entry, receptionist duties at corporate HQ. Pay: $18.00/hr. Day shift. Government and administration. Office, customer service.",
+    "url": "https://www.bnsf.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Administrative Assistant",
+    "company": "Tarrant County",
+    "location": "Fort Worth, TX 76196",
+    "description": "County office administrative assistant. Front-desk reception, filing, government records. Pay: $17.00/hr. Day shift, Monday-Friday. Office.",
+    "url": "https://www.tarrantcounty.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 0
+  },
+
+  {
     "title": "Light Industrial Staffer",
     "company": "Workforce Solutions for Tarrant County",
-    "location": "Hurst, TX",
-    "description": "Temp-to-hire placements at Tarrant County manufacturers and warehouses. Same-day onboarding. Reentry navigators on site. Multiple shifts.",
+    "location": "Hurst, TX 76054",
+    "description": "Temp-to-hire placements at Tarrant County manufacturers and warehouses. Same-day onboarding. Reentry navigators on site. Multiple shifts. Pay: $14-18/hr depending on role. Manufacturing, warehouse.",
     "url": "https://www.workforcesolutions.net/job-seekers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
@@ -112,11 +511,141 @@
   {
     "title": "Custodial Technician",
     "company": "ABM Industries",
-    "location": "Fort Worth, TX",
-    "description": "Clean and maintain commercial office buildings in downtown Fort Worth. Evening shift 6pm-2am. Supplies and equipment provided. Nationwide fair-chance employer.",
+    "location": "Fort Worth, TX 76102",
+    "description": "Clean and maintain commercial office buildings in downtown Fort Worth. Evening shift 6pm-2am. Pay: $14.00/hr. Custodian, supplies and equipment provided. Nationwide fair-chance employer.",
     "url": "https://www.abm.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
     "fair_chance": 1
+  },
+  {
+    "title": "Security Officer",
+    "company": "Allied Universal",
+    "location": "Fort Worth, TX 76104",
+    "description": "Hospital and commercial site security. State security cert provided. Pay: $15.50/hr. Day, evening, overnight shifts. Security guard.",
+    "url": "https://www.aus.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Housekeeper",
+    "company": "Omni Fort Worth Hotel",
+    "location": "Fort Worth, TX 76102",
+    "description": "Hotel housekeeper. Clean guest rooms, restock supplies. Pay: $14.00/hr. Day shift. Hospitality.",
+    "url": "https://www.omnihotels.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "CDL-A Driver",
+    "company": "Werner Enterprises",
+    "location": "Fort Worth, TX 76140",
+    "description": "OTR or regional CDL-A driver. Class A CDL required. Pay: $0.55/mile. Driver. Sign-on bonus $5,000. Background check required.",
+    "url": "https://drivewerner.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Local Delivery Driver",
+    "company": "Frito-Lay",
+    "location": "Fort Worth, TX 76110",
+    "description": "Local route delivery driver. CDL-B with airbrake. Pay: $25.00/hr. Day shift. Driver, delivery, transportation.",
+    "url": "https://www.fritolayemployment.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 0
+  },
+  {
+    "title": "Stocker",
+    "company": "Walmart Distribution Center",
+    "location": "Fort Worth, TX 76140",
+    "description": "Distribution center stocker, picker, packer. Forklift cert provided. Pay: $19.00/hr. Day, evening, overnight shifts. Warehouse.",
+    "url": "https://careers.walmart.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Retail Sales Associate",
+    "company": "Home Depot",
+    "location": "Fort Worth, TX 76112",
+    "description": "Retail sales associate, hardware department. Customer service, product knowledge, light lifting. Pay: $15.50/hr. Day and evening shifts. Retail customer service.",
+    "url": "https://careers.homedepot.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Cashier",
+    "company": "H-E-B Grocery",
+    "location": "Fort Worth, TX 76107",
+    "description": "Grocery store cashier. Customer service, cash handling, light lifting. Pay: $14.00/hr. Day and evening shifts. Retail.",
+    "url": "https://careers.heb.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Mary Kay Manufacturing Operator",
+    "company": "Mary Kay Cosmetics",
+    "location": "Lewisville, TX 75067",
+    "description": "Cosmetics manufacturing line operator. GMP environment. Manufacturing, assembly, machine operator. Pay: $19.00/hr. Rotating shifts.",
+    "url": "https://www.marykay.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 0
+  },
+  {
+    "title": "Janitor - Office Buildings",
+    "company": "Service Master Clean",
+    "location": "Fort Worth, TX 76112",
+    "description": "Commercial janitor on rotating downtown buildings. Evening shift 6pm-2am. Pay: $13.50/hr. Custodian, janitor.",
+    "url": "https://www.servicemastercleancommercial.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Receptionist",
+    "company": "MHMR of Tarrant County",
+    "location": "Fort Worth, TX 76110",
+    "description": "Mental health clinic receptionist. Front desk, scheduling, EHR data entry. Pay: $15.00/hr. Day shift. Office customer service. Mental health environment.",
+    "url": "https://www.mhmrtarrant.org/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Pharmacy Tech - Retail",
+    "company": "CVS Health",
+    "location": "Fort Worth, TX 76116",
+    "description": "Retail pharmacy technician. Texas Pharmacy Technician registration required. Pay: $18.00/hr. Day and evening shifts. Healthcare retail.",
+    "url": "https://jobs.cvshealth.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 0
+  },
+  {
+    "title": "EMT-Basic",
+    "company": "MedStar Mobile Healthcare",
+    "location": "Fort Worth, TX 76104",
+    "description": "EMT-Basic on Tarrant County 911 ambulance. Texas EMT cert required. BLS required. Pay: $18.50/hr. 24-hour shifts. Healthcare emergency.",
+    "url": "https://www.medstar911.org/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 0
+  },
+  {
+    "title": "Daycare Teacher",
+    "company": "Camp Fire First Texas",
+    "location": "Fort Worth, TX 76104",
+    "description": "Lead childcare teacher, infant or preschool classroom. CDA or 1+ year experience required. Pay: $14.00/hr. Day shift, Monday-Friday. Childcare.",
+    "url": "https://www.campfirefw.org/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-04-30T00:00:00Z",
+    "fair_chance": 0
   }
 ]
