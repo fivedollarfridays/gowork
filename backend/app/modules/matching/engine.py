@@ -25,6 +25,32 @@ from app.modules.matching.types import (
 )
 
 
+def _safe_json_list(raw: object) -> list | None:
+    """Hydrate a stored JSON list defensively.
+
+    SQLite stores ``services`` and ``barrier_affinity`` as TEXT.  If a row
+    ships malformed JSON (stale seed, manual touch-up, drift between the
+    seed file and the DB), we MUST NOT 500 the assessment — degrade to
+    an empty list and keep serving the rest of the resources.
+
+    ``None`` is preserved as-is (the column is nullable on services);
+    callers that need an empty-list contract (``barrier_affinity``)
+    should normalise None -> [] at the call site.  Returning [] here
+    is the safe default for unparseable / non-list strings.
+    """
+    if raw is None:
+        return None
+    if isinstance(raw, list):
+        return raw
+    if isinstance(raw, str):
+        try:
+            decoded = json.loads(raw)
+        except (ValueError, TypeError):
+            return []
+        return decoded if isinstance(decoded, list) else []
+    return []
+
+
 async def query_resources_for_barriers(
     barriers: list[BarrierType], db_session: AsyncSession,
 ) -> list[Resource]:
@@ -54,14 +80,10 @@ async def query_resources_for_barriers(
                 continue
             seen_ids.add(row["id"])
             fields = {k: row[k] for k in Resource.model_fields if k in row}
-            if isinstance(fields.get("services"), str):
-                fields["services"] = json.loads(fields["services"])
-            if isinstance(fields.get("barrier_affinity"), str):
-                fields["barrier_affinity"] = json.loads(
-                    fields["barrier_affinity"],
-                )
-            elif fields.get("barrier_affinity") is None:
-                fields["barrier_affinity"] = []
+            fields["services"] = _safe_json_list(fields.get("services"))
+            fields["barrier_affinity"] = (
+                _safe_json_list(fields.get("barrier_affinity")) or []
+            )
             results.append(Resource(**fields))
 
     return results
