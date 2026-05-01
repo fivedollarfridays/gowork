@@ -112,13 +112,20 @@ class AssessmentRequest(BaseModel):
     @field_validator("zip_code")
     @classmethod
     def validate_zip_for_city(cls, v: str) -> str:
-        """Validate ZIP code against the active city's zip_ranges."""
-        from app.cities.config import get_city_config
-        from app.modules.matching.zip_validation import is_valid_zip_for_city
+        """Validate ZIP against ANY configured city.
 
-        city_config = get_city_config()
-        if not is_valid_zip_for_city(v, city_config):
-            raise ValueError(f"ZIP {v} is not valid for {city_config.name}")
+        Agnostic: a user entering 36104 (Montgomery, AL) or 76102
+        (Fort Worth, TX) both pass validation.  The per-request city
+        context is set separately by the route handler so downstream
+        routers (criminal, benefits, jobs) use the correct state.
+        """
+        from app.modules.matching.zip_validation import is_valid_zip_for_any_city
+
+        if not is_valid_zip_for_any_city(v):
+            raise ValueError(
+                f"ZIP {v} is not in a supported service area. "
+                "Currently supported: Montgomery AL, Fort Worth TX."
+            )
         return v
 
     @field_validator("target_industries", "certifications")

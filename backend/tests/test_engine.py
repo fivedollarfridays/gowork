@@ -79,7 +79,7 @@ class TestQueryResourcesForBarriers:
         mock_session = AsyncMock()
         all_resources = [career, childcare, training]
 
-        async def mock_get_by_categories(session, categories):
+        async def mock_get_by_categories(session, categories, city=None):
             return [r for r in all_resources if r["category"] in categories]
 
         with patch(_CATS_PATCH, side_effect=mock_get_by_categories):
@@ -96,7 +96,7 @@ class TestQueryResourcesForBarriers:
 
         mock_session = AsyncMock()
 
-        async def mock_get_by_categories(session, categories):
+        async def mock_get_by_categories(session, categories, city=None):
             if "career_center" in categories:
                 return [career]
             return []
@@ -120,7 +120,7 @@ class TestQueryResourcesForBarriers:
         )
         mock_session = AsyncMock()
 
-        async def mock_get_by_categories(session, categories):
+        async def mock_get_by_categories(session, categories, city=None):
             return [resource] if "career_center" in categories else []
 
         with patch(_CATS_PATCH, side_effect=mock_get_by_categories):

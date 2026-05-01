@@ -1,7 +1,10 @@
-"""Tests for city-aware ZIP validation in AssessmentRequest."""
+"""Tests for agnostic ZIP validation in AssessmentRequest.
+
+The system accepts ZIPs from ANY configured city (Montgomery AL,
+Fort Worth TX) regardless of the server's default CITY setting.
+"""
 
 import pytest
-from pydantic import ValidationError
 
 
 @pytest.fixture
@@ -58,27 +61,27 @@ class TestAssessmentRequestZip:
         assert req.zip_code == "36104"
 
     @pytest.mark.usefixtures("_fort_worth_city")
-    def test_montgomery_zip_rejected_in_fort_worth(self):
-        """Montgomery ZIP 36104 should be rejected when CITY=fort-worth."""
+    def test_montgomery_zip_accepted_in_fort_worth(self):
+        """Montgomery ZIP 36104 should be accepted (agnostic validation)."""
         from app.modules.matching.types import AssessmentRequest
 
-        with pytest.raises(ValidationError):
-            AssessmentRequest(
-                zip_code="36104",
-                employment_status="unemployed",
-                barriers={"credit": True},
-                work_history="Warehouse worker for 3 years",
-            )
+        req = AssessmentRequest(
+            zip_code="36104",
+            employment_status="unemployed",
+            barriers={"credit": True},
+            work_history="Warehouse worker for 3 years",
+        )
+        assert req.zip_code == "36104"
 
     @pytest.mark.usefixtures("_montgomery_city")
-    def test_fort_worth_zip_rejected_in_montgomery(self):
-        """Fort Worth ZIP 76102 should be rejected when CITY=montgomery."""
+    def test_fort_worth_zip_accepted_in_montgomery(self):
+        """Fort Worth ZIP 76102 should be accepted (agnostic validation)."""
         from app.modules.matching.types import AssessmentRequest
 
-        with pytest.raises(ValidationError):
-            AssessmentRequest(
-                zip_code="76102",
-                employment_status="unemployed",
-                barriers={"credit": True},
-                work_history="Warehouse worker for 3 years",
-            )
+        req = AssessmentRequest(
+            zip_code="76102",
+            employment_status="unemployed",
+            barriers={"credit": True},
+            work_history="Warehouse worker for 3 years",
+        )
+        assert req.zip_code == "76102"

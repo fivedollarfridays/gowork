@@ -1,14 +1,15 @@
 """City-aware ZIP code validation.
 
-Parses zip_ranges from CityConfig and validates ZIP codes dynamically
-based on the active city, replacing the hardcoded ^361\\d{2}$ regex.
+Parses zip_ranges from CityConfig and validates ZIP codes dynamically.
+Supports both single-city validation and agnostic mode that accepts
+ZIPs from ANY configured city.
 """
 
 from __future__ import annotations
 
 import re
 from functools import lru_cache
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from app.cities.config import CityConfig
@@ -72,3 +73,43 @@ def get_zip_regex_for_city(city_config: CityConfig) -> str:
         return f"^{re.escape(prefix)}\\d{{{remaining}}}$"
 
     return r"^\d{5}$"
+
+
+# ── Agnostic helpers (accept ZIPs from any configured city) ────────
+
+
+@lru_cache(maxsize=1)
+def _all_city_zip_maps() -> dict[str, frozenset[str]]:
+    """Load all city configs and build slug → valid-ZIPs mapping.
+
+    Scanned once and cached for the lifetime of the process.
+    """
+    from app.cities.config import CITIES_DIR, load_city_config
+
+    result: dict[str, frozenset[str]] = {}
+    cities_dir = CITIES_DIR.resolve()
+    if not cities_dir.exists():
+        return result
+    for yaml_path in sorted(cities_dir.glob("*.yaml")):
+        slug = yaml_path.stem
+        try:
+            cfg = load_city_config(slug)
+            result[slug] = frozenset(parse_zip_ranges(cfg.zip_ranges))
+        except Exception:
+            continue
+    return result
+
+
+def resolve_city_for_zip(zip_code: str) -> Optional[str]:
+    """Return the city slug whose zip_ranges contain *zip_code*, or None."""
+    if not _ZIP_RE.match(zip_code):
+        return None
+    for slug, zips in _all_city_zip_maps().items():
+        if zip_code in zips:
+            return slug
+    return None
+
+
+def is_valid_zip_for_any_city(zip_code: str) -> bool:
+    """Return True if *zip_code* belongs to ANY configured city."""
+    return resolve_city_for_zip(zip_code) is not None

@@ -1,8 +1,9 @@
 """End-to-end integration tests: CITY=fort-worth and CITY=montgomery full flow.
 
 Verifies the complete assessment -> cliff analysis -> benefits screening
--> barrier sequencing -> prompt routing chain for both cities, ensuring
-zero Alabama bypasses when CITY=fort-worth and vice versa.
+-> barrier sequencing -> prompt routing chain for both cities.  ZIP
+validation is agnostic (accepts ZIPs from any configured city); city-
+specific routing is tested via city-context fixtures.
 """
 
 import pytest
@@ -317,15 +318,14 @@ class TestMontgomeryEndToEnd:
         assert -86.5 < lng < -86.0
 
     @pytest.mark.usefixtures("_montgomery_city")
-    def test_fort_worth_zip_rejected(self):
-        """Fort Worth ZIP should be rejected when CITY=montgomery."""
+    def test_fort_worth_zip_accepted_agnostic(self):
+        """Fort Worth ZIP should be accepted (agnostic validation)."""
         from app.modules.matching.types import AssessmentRequest
-        from pydantic import ValidationError
 
-        with pytest.raises(ValidationError):
-            AssessmentRequest(
-                zip_code="76102",
-                employment_status="unemployed",
-                barriers={"credit": True},
-                work_history="Warehouse work",
-            )
+        req = AssessmentRequest(
+            zip_code="76102",
+            employment_status="unemployed",
+            barriers={"credit": True},
+            work_history="Warehouse work",
+        )
+        assert req.zip_code == "76102"

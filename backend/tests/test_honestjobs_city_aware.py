@@ -1,10 +1,14 @@
 """Tests for city-aware Honest Jobs seed loader.
 
-Layer 1 of the city-aware jobs pipeline: the seed loader must resolve to
-``data/cities/<CITY>/honestjobs_listings.json`` so Fort Worth and Montgomery
-deployments each surface their own fair-chance listings. Falls back to the
-legacy ``data/honestjobs_listings.json`` only when no city-specific file
-exists (back-compat for unknown CITY values).
+Updated for the agnostic pipeline (m008+): the seeder loads listings
+from EVERY ``data/cities/*/honestjobs_listings.json`` into the same
+DB.  Per-request city boundary is enforced at query time by
+``_filter_by_state`` in :mod:`app.modules.matching.job_matcher`.
+
+The legacy single-file resolver (``_resolve_seed_path``) is retained
+for callers that want the active-CITY's path (e.g. inspection, dev
+tooling); the production seed loop uses the multi-city walker
+internally.
 """
 
 import json
@@ -71,12 +75,12 @@ class TestResolveSeedPath:
         assert path.name == "honestjobs_listings.json"
 
 
-class TestCityAwareSeed:
-    """End-to-end seed behavior under different CITY values."""
+class TestMultiCitySeed:
+    """End-to-end seed behaviour: every configured city loaded once."""
 
     @pytest.mark.anyio
-    async def test_montgomery_city_seeds_alabama_jobs(self, db_session, monkeypatch):
-        """CITY=montgomery seeds Montgomery, AL listings."""
+    async def test_seed_loads_alabama_listings(self, db_session, monkeypatch):
+        """Montgomery, AL listings present in DB after seeding."""
         monkeypatch.setenv("CITY", "montgomery")
         get_settings.cache_clear()
         count = await seed_honestjobs_listings(db_session)
@@ -85,13 +89,13 @@ class TestCityAwareSeed:
             text("SELECT location FROM job_listings WHERE source = 'honestjobs'")
         )
         locations = [row[0] for row in result]
-        assert all(", AL" in loc for loc in locations), (
-            f"Expected all AL locations, got: {locations}"
+        assert any(", AL" in (loc or "") for loc in locations), (
+            f"Expected at least one AL location, got: {locations}"
         )
 
     @pytest.mark.anyio
-    async def test_fort_worth_city_seeds_texas_jobs(self, db_session, monkeypatch):
-        """CITY=fort-worth seeds Fort Worth-area, TX listings."""
+    async def test_seed_loads_texas_listings(self, db_session, monkeypatch):
+        """Fort Worth, TX listings present in DB after seeding."""
         monkeypatch.setenv("CITY", "fort-worth")
         get_settings.cache_clear()
         count = await seed_honestjobs_listings(db_session)
@@ -100,20 +104,27 @@ class TestCityAwareSeed:
             text("SELECT location FROM job_listings WHERE source = 'honestjobs'")
         )
         locations = [row[0] for row in result]
-        assert all(", TX" in loc for loc in locations), (
-            f"Expected all TX locations, got: {locations}"
+        assert any(", TX" in (loc or "") for loc in locations), (
+            f"Expected at least one TX location, got: {locations}"
         )
 
     @pytest.mark.anyio
-    async def test_seed_data_does_not_cross_city_boundary(self, db_session, monkeypatch):
-        """Switching CITY between runs does not bleed AL jobs into FW (or vice versa)."""
-        # Seed FW first
+    async def test_seed_loads_BOTH_cities_in_one_run(self, db_session, monkeypatch):
+        """A single seed run loads every city's listings — boundary at query.
+
+        Replaces the older ``test_seed_data_does_not_cross_city_boundary``
+        contract: under the agnostic pipeline, listings from every city
+        co-exist in the DB and ``_filter_by_state`` enforces the
+        boundary at query time.
+        """
         monkeypatch.setenv("CITY", "fort-worth")
         get_settings.cache_clear()
         await seed_honestjobs_listings(db_session)
         result = await db_session.execute(
             text("SELECT location FROM job_listings WHERE source = 'honestjobs'")
         )
-        fw_locations = [row[0] for row in result]
-        assert all(", TX" in loc for loc in fw_locations)
-        assert not any(", AL" in loc for loc in fw_locations)
+        locations = [row[0] for row in result]
+        assert any(", TX" in (loc or "") for loc in locations), \
+            f"missing TX listings; got: {locations}"
+        assert any(", AL" in (loc or "") for loc in locations), \
+            f"missing AL listings; got: {locations}"

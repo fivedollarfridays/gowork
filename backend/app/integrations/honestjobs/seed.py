@@ -32,39 +32,75 @@ def _resolve_seed_path() -> Path:
     return _DATA_DIR / _SEED_FILE
 
 
+def _all_seed_paths() -> list[Path]:
+    """Return the seed file path for every configured city (existing only).
+
+    Walks ``data/cities/*/honestjobs_listings.json`` so a single startup
+    seeds Fort Worth + Montgomery + any future city.  ``_filter_by_state``
+    in :mod:`app.modules.matching.job_matcher` keeps each request's
+    listings scoped to the user's state at query time.
+
+    Falls back to the active-CITY single-file path when no per-city
+    directory exists yet (legacy single-tenant deployments).
+    """
+    cities_root = _DATA_DIR / "cities"
+    paths: list[Path] = []
+    if cities_root.is_dir():
+        for child in sorted(cities_root.iterdir()):
+            candidate = child / _SEED_FILE
+            if candidate.exists():
+                paths.append(candidate)
+    if paths:
+        return paths
+    fallback = _resolve_seed_path()
+    return [fallback] if fallback.exists() else []
+
+
 async def seed_honestjobs_listings(session: AsyncSession) -> int:
-    """Idempotent seed of Honest Jobs listings. Returns count inserted."""
-    filepath = _resolve_seed_path()
-    if not filepath.exists():
-        logger.warning("Honest Jobs seed file missing: %s", filepath)
+    """Idempotent seed of Honest Jobs listings, EVERY city.
+
+    Iterates ``data/cities/*/honestjobs_listings.json`` so the resulting
+    DB carries every city's fair-chance listings.  ``_filter_by_state``
+    keeps each user's response scoped to the right state at query time.
+
+    Returns the count of newly inserted listings (across all cities).
+    """
+    seed_paths = _all_seed_paths()
+    if not seed_paths:
+        logger.warning("Honest Jobs seed files missing under %s", _DATA_DIR)
         return 0
 
-    data = json.loads(filepath.read_text())
-    if not data:
-        return 0
-
-    # Check existing to avoid duplicates (by source + title + company)
+    # Pull existing keys once; every per-city loop re-checks against the
+    # accumulating set so duplicate (title, company) keys across cities
+    # are still de-duped.
     result = await session.execute(
         text("SELECT title, company FROM job_listings WHERE source = 'honestjobs'")
     )
-    existing = {(row[0], row[1]) for row in result}
+    existing: set[tuple[str | None, str | None]] = {
+        (row[0], row[1]) for row in result
+    }
 
     now = datetime.now(timezone.utc).isoformat()
-    listings = []
-    for record in data:
-        key = (record.get("title"), record.get("company"))
-        if key in existing:
+    listings: list[dict] = []
+    for filepath in seed_paths:
+        data = json.loads(filepath.read_text())
+        if not data:
             continue
-        listings.append({
-            "title": record["title"],
-            "company": record.get("company"),
-            "location": record.get("location"),
-            "description": record.get("description"),
-            "url": record.get("url"),
-            "source": "honestjobs",
-            "scraped_at": record.get("scraped_at", now),
-            "fair_chance": 1,
-        })
+        for record in data:
+            key = (record.get("title"), record.get("company"))
+            if key in existing:
+                continue
+            existing.add(key)
+            listings.append({
+                "title": record["title"],
+                "company": record.get("company"),
+                "location": record.get("location"),
+                "description": record.get("description"),
+                "url": record.get("url"),
+                "source": "honestjobs",
+                "scraped_at": record.get("scraped_at", now),
+                "fair_chance": 1,
+            })
 
     if not listings:
         return 0
