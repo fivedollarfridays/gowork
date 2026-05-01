@@ -115,13 +115,19 @@ def _filter_by_transit(
 
 
 def _keyword_transit_check(job: dict) -> tuple[bool, bool]:
-    """Fallback: keyword-based transit check for jobs without coordinates."""
+    """Fallback: keyword-based transit check for jobs without coordinates.
+
+    Uses the active city's name (from ``get_city_config()``) as the keyword
+    so a Fort Worth listing without coords gets matched against
+    "fort worth" rather than the legacy hardcoded "montgomery".
+    """
     desc = (job.get("description") or "").lower()
     title = (job.get("title") or "").lower()
     location = (job.get("location") or "").lower()
     searchable = f"{title} {desc} {location}"
     sunday_flag = any(kw in searchable for kw in SUNDAY_KEYWORDS)
-    accessible = "montgomery" in searchable
+    city_keyword = get_city_config().name.lower()
+    accessible = city_keyword in searchable
     return accessible, sunday_flag
 
 
