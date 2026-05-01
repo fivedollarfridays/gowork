@@ -61,8 +61,14 @@ def is_career_center(resource: Resource) -> bool:
 def get_affinity_barrier(resource: Resource) -> BarrierType | None:
     """Return the designated barrier type for an affinity resource, or None.
 
-    Uses city-aware affinity keywords from the resource router.
+    Stage-2 resolution order:
+    1. Explicit ``barrier_affinity`` field on the Resource (first tag
+       wins, falls back to subsequent tags only via :func:`get_affinity_barriers`).
+    2. City-aware name-keyword heuristic (legacy path).
     """
+    explicit = get_affinity_barriers(resource)
+    if explicit:
+        return explicit[0]
     affinity = get_resource_affinity()
     name_lower = resource.name.lower()
     for keyword, barrier in affinity.items():
@@ -71,18 +77,62 @@ def get_affinity_barrier(resource: Resource) -> BarrierType | None:
     return None
 
 
+def get_affinity_barriers(resource: Resource) -> list[BarrierType]:
+    """Return ALL explicit barrier_affinity tags as BarrierType values.
+
+    Stage-2: a single resource (e.g. Catholic Charities) can serve
+    multiple barriers (transportation + criminal_record + housing), so
+    contextual TWC slicing returns every match instead of the first.
+    """
+    raw = list(getattr(resource, "barrier_affinity", []) or [])
+    out: list[BarrierType] = []
+    for tag in raw:
+        try:
+            out.append(BarrierType(tag))
+        except ValueError:
+            continue  # tolerate unknown / typo'd tags
+    return out
+
+
+def _resource_barriers(resource: Resource) -> set[BarrierType]:
+    """Return every barrier this resource can claim via explicit affinity."""
+    explicit = set(get_affinity_barriers(resource))
+    if explicit:
+        return explicit
+    legacy = get_affinity_barrier(resource)
+    return {legacy} if legacy is not None else set()
+
+
 def assign_resources(
     user_barriers: set[BarrierType], resources: list[Resource],
 ) -> dict[BarrierType, list[Resource]]:
     """Assign resources to barrier cards using affinity routing.
 
-    Phase 1: Affinity resources claimed by their designated barrier.
-    Phase 2: Remaining resources assigned by category match.
+    Phase 1: Resources with explicit ``barrier_affinity`` tags claim
+    every matching card the user has (a Catholic Charities entry tagged
+    [transportation, criminal_record] surfaces on both cards if the
+    user has both barriers).
+    Phase 2: Legacy single-barrier name-keyword affinity (claim once).
+    Phase 3: Remaining resources assigned by category match.
     Career centers are excluded from all cards.
     """
     claimed_ids: set[int] = set()
     card_resources: dict[BarrierType, list[Resource]] = {b: [] for b in user_barriers}
 
+    # Phase 1 — explicit barrier_affinity tags can multi-claim
+    for barrier in BARRIER_PROCESSING_ORDER:
+        if barrier not in user_barriers:
+            continue
+        for r in resources:
+            if is_career_center(r):
+                continue
+            tags = set(get_affinity_barriers(r))
+            if barrier in tags:
+                if r not in card_resources[barrier]:
+                    card_resources[barrier].append(r)
+                claimed_ids.add(r.id)
+
+    # Phase 2 — legacy keyword-based single-barrier claim
     for barrier in BARRIER_PROCESSING_ORDER:
         if barrier not in user_barriers:
             continue
@@ -93,6 +143,7 @@ def assign_resources(
                 card_resources[barrier].append(r)
                 claimed_ids.add(r.id)
 
+    # Phase 3 — category fallback
     for barrier in BARRIER_PROCESSING_ORDER:
         if barrier not in user_barriers:
             continue
