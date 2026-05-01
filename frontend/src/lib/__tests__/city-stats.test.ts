@@ -32,4 +32,14 @@ describe("getCityStats", () => {
     const tx = getCityStats("TX");
     expect(tx.careerCenters).toBeGreaterThan(0);
   });
+
+  it("exposes a latitude per city for solar-elevation calculations", () => {
+    // useTimeOfDay's cosine-shaped sun curve is latitude-attenuated;
+    // every city must publish its own latitude so the W2 Mapbox sky
+    // renders at the right angle without hardcoding.
+    const al = getCityStats("AL");
+    expect(al.latitude).toBeCloseTo(32.38, 1);
+    const tx = getCityStats("TX");
+    expect(tx.latitude).toBeCloseTo(32.7555, 2);
+  });
 });

@@ -8,6 +8,10 @@
 
 export interface CityStats {
   cityName: string;
+  /** Decimal latitude — used by `useTimeOfDay` for the latitude-attenuated
+   *  cosine sun-elevation curve so each city's sky renders at the right
+   *  altitude without hardcoding. */
+  latitude: number;
   povertyRate: number;
   laborParticipation: number;
   populationValue: number;
@@ -18,6 +22,7 @@ export interface CityStats {
 
 const MONTGOMERY: CityStats = {
   cityName: "Montgomery",
+  latitude: 32.3792,
   povertyRate: 20.9,
   laborParticipation: 57.4,
   populationValue: 36,
@@ -28,6 +33,7 @@ const MONTGOMERY: CityStats = {
 
 const FORT_WORTH: CityStats = {
   cityName: "Fort Worth",
+  latitude: 32.7555,
   povertyRate: 15.3,
   laborParticipation: 64.0,
   populationValue: 950,
