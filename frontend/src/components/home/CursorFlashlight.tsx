@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
 /**
- * Home CursorFlashlight — soft cream glow that follows the cursor.
+ * Global CursorFlashlight — soft cream glow that follows the cursor.
  *
  * Was amber; per design feedback the warm tint pulled the eye away
  * from the editorial type, so it's now `--fg-primary` cream. Reads
@@ -14,8 +14,13 @@ import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
  * cinematic lag instead of snapping. `mix-blend-mode: screen` keeps
  * it brightening (never darkening) the content below.
  *
- * Disabled on prefers-reduced-motion + coarse pointer + when
- * explicitly forced off via `forceDisabled`.
+ * Disabled on prefers-reduced-motion + coarse pointer + when the
+ * user has toggled it off via the SiteHeader cursor button (state
+ * persisted in localStorage["gowork-cursor-flashlight"]). Default
+ * is "on" — the toggle is opt-out, not opt-in. Listens for
+ * `storage` events (cross-tab sync) AND a custom
+ * `gowork:cursor-flashlight-changed` event (same-tab instant sync,
+ * since `storage` doesn't fire on the originating tab).
  */
 
 interface CursorFlashlightProps {
@@ -25,6 +30,8 @@ interface CursorFlashlightProps {
 
 const FLASHLIGHT_SIZE = 480;
 const LERP = 0.12;
+export const CURSOR_FLASHLIGHT_STORAGE_KEY = "gowork-cursor-flashlight";
+export const CURSOR_FLASHLIGHT_EVENT = "gowork:cursor-flashlight-changed";
 
 function isCoarsePointer(): boolean {
   if (typeof window === "undefined") return true;
@@ -32,9 +39,19 @@ function isCoarsePointer(): boolean {
   return window.matchMedia("(pointer: coarse)").matches;
 }
 
+function readUserToggle(): boolean {
+  if (typeof window === "undefined") return true;
+  try {
+    return window.localStorage.getItem(CURSOR_FLASHLIGHT_STORAGE_KEY) !== "off";
+  } catch {
+    return true;
+  }
+}
+
 export function CursorFlashlight({ forceDisabled }: CursorFlashlightProps = {}): JSX.Element | null {
   const reducedMotion = usePrefersReducedMotion();
   const [coarse, setCoarse] = useState<boolean>(false);
+  const [userEnabled, setUserEnabled] = useState<boolean>(true);
   const [active, setActive] = useState<boolean>(false);
   const elRef = useRef<HTMLDivElement | null>(null);
   const targetRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -43,9 +60,21 @@ export function CursorFlashlight({ forceDisabled }: CursorFlashlightProps = {}):
 
   useEffect(() => {
     setCoarse(isCoarsePointer());
+    setUserEnabled(readUserToggle());
+
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === CURSOR_FLASHLIGHT_STORAGE_KEY) setUserEnabled(readUserToggle());
+    };
+    const onCustom = () => setUserEnabled(readUserToggle());
+    window.addEventListener("storage", onStorage);
+    window.addEventListener(CURSOR_FLASHLIGHT_EVENT, onCustom);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener(CURSOR_FLASHLIGHT_EVENT, onCustom);
+    };
   }, []);
 
-  const disabled = forceDisabled || reducedMotion || coarse;
+  const disabled = forceDisabled || reducedMotion || coarse || !userEnabled;
 
   useEffect(() => {
     if (disabled) return;
