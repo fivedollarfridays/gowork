@@ -65,8 +65,10 @@ class Settings(BaseSettings):
     # Logging
     log_level: str = "INFO"
 
-    # CORS
-    cors_origins: str = "http://localhost:3000,http://localhost:3001"
+    # CORS — Next.js dev server falls back to 3001/3002/3003 when earlier
+    # ports are busy on the dev box. Allow the common range out of the box
+    # so the demo works regardless of which port the dev server picked.
+    cors_origins: str = "http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:3003"
 
     model_config = SettingsConfigDict(env_file=".env")
 
