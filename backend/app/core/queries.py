@@ -35,16 +35,30 @@ async def get_resources_by_category(session: AsyncSession, category: str) -> lis
     return [dict(row._mapping) for row in result]
 
 
-async def get_resources_by_categories(session: AsyncSession, categories: set[str]) -> list[dict]:
-    """Fetch resources matching any of the given categories in a single query."""
+async def get_resources_by_categories(
+    session: AsyncSession,
+    categories: set[str],
+    city: str | None = None,
+) -> list[dict]:
+    """Fetch resources matching any of the given categories.
+
+    When *city* is provided, the query is restricted to rows whose
+    ``city`` column matches.  ``city IS NULL`` rows always slip
+    through so legacy un-tagged seeds (or migration-skipped DBs) keep
+    working — the caller decides whether to trust them.
+
+    Without *city*, every row is returned (single-city deployments
+    pre-m008).
+    """
     if not categories:
         return []
     placeholders = ", ".join(f":c{i}" for i in range(len(categories)))
     params = {f"c{i}": cat for i, cat in enumerate(sorted(categories))}
-    result = await session.execute(
-        text(f"SELECT * FROM resources WHERE category IN ({placeholders})"),
-        params,
-    )
+    sql = f"SELECT * FROM resources WHERE category IN ({placeholders})"
+    if city is not None:
+        sql += " AND (city = :city OR city IS NULL)"
+        params["city"] = city
+    result = await session.execute(text(sql), params)
     return [dict(row._mapping) for row in result]
 
 

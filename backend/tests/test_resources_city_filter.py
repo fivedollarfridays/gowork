@@ -149,6 +149,84 @@ async def test_seeder_loads_montgomery_resources_tagged_with_city():
         os.unlink(db_path)
 
 
+# ── Cycle 3: query filters by per-request city context ───────────
+
+
+@pytest.mark.asyncio
+async def test_query_resources_filters_by_fort_worth_context():
+    """When city context = fort-worth, query returns only FW rows."""
+    db_url, db_path = _fresh_async_db_url()
+    try:
+        from sqlalchemy.ext.asyncio import async_sessionmaker
+        from app.cities.config import clear_city_context, set_city_context
+        from app.core.database import init_db
+        from app.modules.matching.engine import query_resources_for_barriers
+        from app.modules.matching.types import BarrierType
+
+        engine = create_async_engine(db_url, echo=False)
+        await init_db(engine)
+        sm = async_sessionmaker(engine, expire_on_commit=False)
+        try:
+            set_city_context("fort-worth")
+            async with sm() as session:
+                rs = await query_resources_for_barriers(
+                    [BarrierType.TRANSPORTATION, BarrierType.CHILDCARE],
+                    session,
+                )
+            names = [r.name for r in rs]
+            # Fort Worth specific present
+            assert any("Trinity Metro" in n for n in names), names
+            # No Montgomery / Alabama leaks
+            for n in names:
+                lower = n.lower()
+                assert "montgomery" not in lower, f"AL leak: {n}"
+                assert "alabama" not in lower, f"AL leak: {n}"
+                assert "mats" not in lower, f"AL leak: {n}"
+                assert "dhr" not in lower, f"AL leak: {n}"
+        finally:
+            clear_city_context()
+            await engine.dispose()
+    finally:
+        os.unlink(db_path)
+
+
+@pytest.mark.asyncio
+async def test_query_resources_filters_by_montgomery_context():
+    """When city context = montgomery, query returns only AL rows."""
+    db_url, db_path = _fresh_async_db_url()
+    try:
+        from sqlalchemy.ext.asyncio import async_sessionmaker
+        from app.cities.config import clear_city_context, set_city_context
+        from app.core.database import init_db
+        from app.modules.matching.engine import query_resources_for_barriers
+        from app.modules.matching.types import BarrierType
+
+        engine = create_async_engine(db_url, echo=False)
+        await init_db(engine)
+        sm = async_sessionmaker(engine, expire_on_commit=False)
+        try:
+            set_city_context("montgomery")
+            async with sm() as session:
+                rs = await query_resources_for_barriers(
+                    [BarrierType.TRANSPORTATION, BarrierType.CHILDCARE],
+                    session,
+                )
+            names = [r.name for r in rs]
+            assert any("MATS" in n or "Montgomery" in n for n in names), names
+            # No Fort Worth / Texas leaks.
+            for n in names:
+                lower = n.lower()
+                assert "trinity metro" not in lower, f"TX leak: {n}"
+                assert "tarrant" not in lower, f"TX leak: {n}"
+                assert "fort worth" not in lower, f"TX leak: {n}"
+                assert "texas" not in lower, f"TX leak: {n}"
+        finally:
+            clear_city_context()
+            await engine.dispose()
+    finally:
+        os.unlink(db_path)
+
+
 @pytest.mark.asyncio
 async def test_seeder_loads_BOTH_cities_into_same_db():
     """A single startup should seed every city's resources.json into one DB.

@@ -24,12 +24,22 @@ from app.modules.matching.types import (
 async def query_resources_for_barriers(
     barriers: list[BarrierType], db_session: AsyncSession,
 ) -> list[Resource]:
-    """Query Montgomery data for resources matching the user's barrier types."""
+    """Query resources matching the user's barrier types, scoped by city.
+
+    The ``city`` filter is the per-request context set from the user's
+    ZIP — it returns ONLY rows tagged with the user's city (or rows
+    that pre-date the m008 migration where ``city IS NULL``).  Without
+    this filter, a Fort Worth assessment receives every Montgomery row
+    seeded into the same DB and vice versa.
+    """
+    from app.cities.config import _city_context
+
     categories: set[str] = set()
     for barrier in barriers:
         categories.update(scoring.BARRIER_CATEGORY_MAP.get(barrier, set()))
 
-    rows = await get_resources_by_categories(db_session, categories)
+    city = _city_context.get()
+    rows = await get_resources_by_categories(db_session, categories, city=city)
 
     seen_ids: set[int] = set()
     results: list[Resource] = []
