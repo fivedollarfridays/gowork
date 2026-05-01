@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  GoWork brand mark — transparent background, square 1080x1080.
+  Drop on any color (decks, light/dark backgrounds, photos) since
+  the mark + wordmark colors hold against most backdrops. Stroke
+  uses the warm-paper cream + cyan path-line — the path-line stays
+  cyan (brand signature) regardless of bg.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" role="img" aria-label="GoWork">
+  <title>GoWork</title>
+
+  <!-- Brand mark, centered, oversized for standalone use -->
+  <g transform="translate(540, 420)">
+    <g fill="none" stroke="#F5F3EE" stroke-width="32" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M 150 0 A 150 150 0 1 0 0 150"/>
+    </g>
+    <line x1="0" y1="0" x2="250" y2="0" stroke="#22D3EE" stroke-width="32" stroke-linecap="round"/>
+  </g>
+
+  <!-- Wordmark below -->
+  <text x="540" y="800" text-anchor="middle" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif" font-size="200" font-weight="800" letter-spacing="-7" fill="#F5F3EE">GoWork</text>
+</svg>
