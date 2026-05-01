@@ -185,6 +185,20 @@ async def generate_plan(
     # Build the resume signal projection ONCE so the job matcher and
     # the readiness estimator both use the same view.
     resume_profile = build_resume_profile(resume_text) if resume_text else None
+
+    # Wizard-selected target_industries should also feed the relevance
+    # scorer so users without a resume still get an industry signal.
+    # We splice them into the resume profile's industries list.
+    if profile.target_industries:
+        from app.modules.matching.relevance_scorer import ResumeProfile
+        if resume_profile is None:
+            resume_profile = ResumeProfile(industries=list(profile.target_industries))
+        else:
+            existing = set(resume_profile.industries)
+            for ind in profile.target_industries:
+                if ind not in existing:
+                    resume_profile.industries.append(ind)
+
     resume_keywords = (
         resume_keywords_for_context(resume_profile) if resume_profile else []
     )
