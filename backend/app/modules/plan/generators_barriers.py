@@ -28,15 +28,27 @@ def generate_criminal_actions(barriers: list[BarrierCard]) -> list[tuple[str, Ac
     return results
 
 
+_LEGAL_AID_BY_STATE: dict[str, tuple[str, str]] = {
+    "AL": ("Legal Services Alabama", "1-866-456-4995"),
+    "TX": ("Legal Aid of NorthWest Texas", "817-336-3943"),
+}
+
+_DEFAULT_LEGAL_AID = ("Legal Services Alabama", "1-866-456-4995")
+
+
 def _legal_aid_action() -> tuple[str, ActionItem]:
+    from app.cities.config import get_city_config
+
+    city_config = get_city_config()
+    name, phone = _LEGAL_AID_BY_STATE.get(city_config.state, _DEFAULT_LEGAL_AID)
     return ("week_1_2", ActionItem(
         category=ActionCategory.CRIMINAL_RECORD,
-        title="Contact Legal Services Alabama for record review",
-        detail="Free consultation: 1-866-456-4995",
+        title=f"Contact {name} for record review",
+        detail=f"Free consultation: {phone}",
         priority=0,
         source_module="criminal_record",
-        resource_name="Legal Services Alabama",
-        resource_phone="1-866-456-4995",
+        resource_name=name,
+        resource_phone=phone,
     ))
 
 

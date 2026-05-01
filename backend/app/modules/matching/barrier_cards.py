@@ -1,7 +1,11 @@
 """Barrier card construction — builds BarrierCards with eligibility annotations."""
 
+from __future__ import annotations
+
 from app.modules.benefits.types import BenefitsProfile
+from app.modules.criminal.expungement import ExpungementEligibility, ExpungementResult
 from app.modules.criminal.router import check_record_clearing
+from app.modules.criminal.texas_expunction import TexasRecordClearingResult
 from app.modules.matching.affinity import assign_resources
 from app.modules.matching.barrier_priority import prioritize_barriers
 from app.modules.matching.filters import get_certification_renewal
@@ -24,6 +28,37 @@ BARRIER_TITLES: dict[BarrierType, str] = {
     BarrierType.TRAINING: "Training & Certification",
     BarrierType.CRIMINAL_RECORD: "Record & Legal Support",
 }
+
+
+def normalize_expungement(
+    result: ExpungementResult | TexasRecordClearingResult | None,
+) -> ExpungementResult | None:
+    """Normalize any record-clearing result to a single ExpungementResult.
+
+    Texas returns a ``TexasRecordClearingResult`` wrapping two inner
+    ``ExpungementResult`` objects (expunction + nondisclosure). We pick
+    the most actionable one so downstream consumers (action-plan
+    generator, frontend card view) see a uniform shape.
+
+    Priority: expunction-eligible-now > nondisclosure-eligible-now
+    > expunction-eligible-future > nondisclosure-eligible-future
+    > expunction (as fallback).
+    """
+    if result is None:
+        return None
+    if isinstance(result, ExpungementResult):
+        return result
+    # TexasRecordClearingResult — pick the best inner result.
+    exp = result.expunction_result
+    nond = result.nondisclosure_result
+    for candidate in (exp, nond):
+        if candidate.eligibility == ExpungementEligibility.ELIGIBLE_NOW:
+            return candidate
+    for candidate in (exp, nond):
+        if candidate.eligibility == ExpungementEligibility.ELIGIBLE_FUTURE:
+            return candidate
+    return exp  # fallback: always return expunction result
+
 
 # DEPRECATED: Montgomery-specific barrier actions. Used only by resource_router
 # for the Alabama code path. Fort Worth equivalent is in fort_worth_resources.py.
@@ -117,7 +152,8 @@ def _build_cards(
                 )
 
         if barrier == BarrierType.CRIMINAL_RECORD:
-            expungement = check_record_clearing(profile.record_profile)
+            raw_result = check_record_clearing(profile.record_profile)
+            expungement = normalize_expungement(raw_result)
 
         cards.append(BarrierCard(
             type=barrier,

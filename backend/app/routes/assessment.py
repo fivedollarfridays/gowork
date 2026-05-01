@@ -6,6 +6,7 @@ import uuid
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.cities.config import clear_city_context, set_city_context
 from app.core.audit import audit_log, get_client_ip
 from app.core.database import get_db
 from app.core.queries import create_session, insert_record_profile, update_session_plan
@@ -13,6 +14,7 @@ from app.core.queries_feedback import create_feedback_token
 from app.core.rate_limit import RateLimiter, require_rate_limit
 from app.modules.benefits.types import BenefitsProfile
 from app.modules.matching.engine import generate_plan
+from app.modules.matching.zip_validation import resolve_city_for_zip
 from app.modules.matching.types import (
     AssessmentRequest,
     BarrierType,
@@ -79,30 +81,46 @@ async def create_assessment(
     db: AsyncSession = Depends(get_db),
     _: None = Depends(_check_rate),
 ) -> dict:
-    """Receive barrier form, create session, run matching, return results."""
-    session_id = str(uuid.uuid4())
-    profile = _build_profile(session_id, request)
+    """Receive barrier form, create session, run matching, return results.
 
-    await create_session(db, _session_data(profile, request), session_id=session_id)
+    The ZIP validator (in AssessmentRequest) resolves the user's city from
+    their ZIP code and sets the per-request city context.  All downstream
+    routers (criminal, benefits, jobs) automatically pick up the correct
+    state.  We clear the context at the end to avoid leaking into later
+    requests on the same asyncio task.
+    """
+    try:
+        # Resolve the user's city from their ZIP and set the per-request
+        # context so all downstream routers use the correct state config.
+        resolved_city = resolve_city_for_zip(request.zip_code)
+        if resolved_city:
+            set_city_context(resolved_city)
 
-    if request.record_profile:
-        await insert_record_profile(db, session_id, request.record_profile)
+        session_id = str(uuid.uuid4())
+        profile = _build_profile(session_id, request)
 
-    plan = await generate_plan(
-        profile, db,
-        resume_text=request.resume_text,
-        credit_result=request.credit_result.model_dump() if request.credit_result else None,
-        benefits_profile=_to_benefits_profile(request),
-    )
-    await update_session_plan(db, session_id, json.dumps(plan.model_dump()))
-    feedback_token = await create_feedback_token(db, session_id)
+        await create_session(db, _session_data(profile, request), session_id=session_id)
 
-    audit_log("session_created", session_id=session_id, client_ip=get_client_ip(raw_request),
-              barriers=len(profile.primary_barriers))
+        if request.record_profile:
+            await insert_record_profile(db, session_id, request.record_profile)
 
-    return {
-        "session_id": session_id,
-        "profile": profile.model_dump(exclude={"record_profile"}),
-        "plan": plan.model_dump(),
-        "feedback_token": feedback_token,
-    }
+        plan = await generate_plan(
+            profile, db,
+            resume_text=request.resume_text,
+            credit_result=request.credit_result.model_dump() if request.credit_result else None,
+            benefits_profile=_to_benefits_profile(request),
+        )
+        await update_session_plan(db, session_id, json.dumps(plan.model_dump()))
+        feedback_token = await create_feedback_token(db, session_id)
+
+        audit_log("session_created", session_id=session_id, client_ip=get_client_ip(raw_request),
+                  barriers=len(profile.primary_barriers))
+
+        return {
+            "session_id": session_id,
+            "profile": profile.model_dump(exclude={"record_profile"}),
+            "plan": plan.model_dump(),
+            "feedback_token": feedback_token,
+        }
+    finally:
+        clear_city_context()
