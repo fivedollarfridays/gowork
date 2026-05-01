@@ -60,6 +60,28 @@ class TestBarrierProcessingOrder:
         assert child_idx < credit_idx
         assert train_idx < credit_idx
 
+    def test_childcare_and_training_run_before_transportation(self):
+        """CHILDCARE and TRAINING should claim their social_service category
+        match before TRANSPORTATION sweeps everything.
+
+        Both CHILDCARE and TRANSPORTATION map to {childcare|training,
+        social_service} in BARRIER_CATEGORY_MAP. If TRANSPORTATION processes
+        first it claims every social_service resource, leaving CHILDCARE
+        with only explicit `childcare`-category items. Reordering so
+        CHILDCARE/TRAINING come first keeps the specialized cards rich.
+        """
+        order = BARRIER_PROCESSING_ORDER
+        trans_idx = order.index(BarrierType.TRANSPORTATION)
+        child_idx = order.index(BarrierType.CHILDCARE)
+        train_idx = order.index(BarrierType.TRAINING)
+        assert child_idx < trans_idx, (
+            "CHILDCARE must process before TRANSPORTATION so it can claim "
+            "social_service resources before they're swept."
+        )
+        assert train_idx < trans_idx, (
+            "TRAINING must process before TRANSPORTATION for the same reason."
+        )
+
     def test_order_contains_all_barrier_types(self):
         """Processing order should cover all BarrierType values."""
         for bt in BarrierType:

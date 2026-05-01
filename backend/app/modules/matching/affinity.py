@@ -9,11 +9,20 @@ from app.modules.matching.resource_router import get_resource_affinity
 from app.modules.matching.scoring import BARRIER_CATEGORY_MAP
 from app.modules.matching.types import BarrierType, Resource
 
-# Process specialized barriers first so their affinity resources get claimed
+# Process the most-specialized barriers first so their category-fallback
+# routing (Phase 2 in assign_resources) claims social_service resources
+# before the broader barriers can sweep them.
+#
+# CHILDCARE and TRAINING come BEFORE TRANSPORTATION because all three map
+# to {social_service, ...} in BARRIER_CATEGORY_MAP — if TRANSPORTATION
+# processes first it claims every social_service resource and the
+# childcare/training cards end up with only their explicit category
+# matches. Putting the narrower categories first keeps the specialized
+# cards rich.
 BARRIER_PROCESSING_ORDER: list[BarrierType] = [
-    BarrierType.TRANSPORTATION,
     BarrierType.CHILDCARE,
     BarrierType.TRAINING,
+    BarrierType.TRANSPORTATION,
     BarrierType.HEALTH,
     BarrierType.HOUSING,
     BarrierType.CREDIT,
