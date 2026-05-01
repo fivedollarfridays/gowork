@@ -72,6 +72,8 @@ class ScheduleConstraints(BaseModel):
 class ScoringContext(BaseModel):
     """Bundles user-level scoring parameters passed to PVS computation."""
 
+    model_config = {"arbitrary_types_allowed": True}
+
     user_zip: str
     transit_dependent: bool
     schedule_type: AvailableHours
@@ -79,6 +81,13 @@ class ScoringContext(BaseModel):
     benefits_profile: Optional[BenefitsProfile] = None
     target_industries: list[str] = []
     resume_keywords: list[str] = []
+    # Optional projection of the resume into matchable signals.  When
+    # set, the PVS scorer adds a resume_match term that drives the
+    # ranking toward jobs whose skills/family/industry align with the
+    # resume — fixing the "0.363 for everyone" symptom.
+    # Typed as ``object`` to avoid a circular import: relevance_scorer is
+    # the source of truth for ResumeProfile and depends on job_keywords.
+    resume_profile: Optional[object] = None
 
 
 class BenefitsFormData(BaseModel):

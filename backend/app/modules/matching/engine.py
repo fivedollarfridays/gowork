@@ -11,6 +11,10 @@ from app.modules.matching import scoring, wioa_screener
 from app.modules.matching.barrier_cards import build_barrier_cards_and_steps
 from app.modules.matching.job_matcher import match_jobs
 from app.modules.matching.job_readiness import assess_job_readiness
+from app.modules.matching.relevance_scorer import (
+    build_resume_profile,
+    resume_keywords_for_context,
+)
 from app.modules.matching.resume_parser import parse_resume
 from app.modules.matching.types import (
     BarrierType,
@@ -178,7 +182,19 @@ async def generate_plan(
     resources = await query_resources_for_barriers(profile.primary_barriers, db_session)
     resources = await _rank_with_transit(profile, resources, db_session)
 
-    ranked_jobs = await match_jobs(profile, db_session, benefits_profile=benefits_profile)
+    # Build the resume signal projection ONCE so the job matcher and
+    # the readiness estimator both use the same view.
+    resume_profile = build_resume_profile(resume_text) if resume_text else None
+    resume_keywords = (
+        resume_keywords_for_context(resume_profile) if resume_profile else []
+    )
+
+    ranked_jobs = await match_jobs(
+        profile, db_session,
+        benefits_profile=benefits_profile,
+        resume_profile=resume_profile,
+        resume_keywords=resume_keywords,
+    )
     strong, after_repair = _split_legacy_buckets(ranked_jobs)
     barrier_cards, next_steps = build_barrier_cards_and_steps(
         profile, resources, benefits_profile,

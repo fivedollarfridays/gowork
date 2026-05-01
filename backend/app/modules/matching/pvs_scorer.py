@@ -1,7 +1,14 @@
 """PVS (Practical Value Score) composite scorer.
 
-Replaces 3-bucket system with a single ranked list scored by:
-  PVS = 0.35 * net_income + 0.25 * proximity + 0.20 * time_fit + 0.20 * barrier_compat
+Replaces 3-bucket system with a single ranked list.  Default weights
+when no resume profile is present:
+  PVS = 0.35 net_income + 0.25 proximity + 0.20 time_fit + 0.20 barrier_compat
+
+When a resume profile IS present (the assessment carried resume_text
+through to ScoringContext.resume_profile), a fifth term is added and
+the others are rebalanced:
+  PVS = 0.20 net_income + 0.15 proximity + 0.15 time_fit + 0.15 barrier_compat
+       + 0.35 resume_match
 """
 
 from collections.abc import Sequence
@@ -12,6 +19,11 @@ from app.modules.benefits.thresholds import HOURS_PER_YEAR, MONTHS_PER_YEAR
 from app.modules.benefits.types import BenefitsProfile
 from app.modules.matching.commute_estimator import estimate_commute
 from app.modules.matching.proximity_scorer import score_proximity
+from app.modules.matching.relevance_scorer import (
+    ResumeProfile,
+    matched_signal_summary,
+    score_resume_match,
+)
 from app.modules.matching.salary_parser import (
     EARNINGS_BENCHMARK,
     SalaryInfo,
@@ -27,11 +39,18 @@ from app.modules.matching.types import (
     ScoringContext,
 )
 
-# PVS component weights
+# PVS component weights — no-resume path
 W_NET_INCOME = 0.35
 W_PROXIMITY = 0.25
 W_TIME_FIT = 0.20
 W_BARRIER_COMPAT = 0.20
+
+# PVS component weights — with-resume path (drives ranking by fit)
+WR_NET_INCOME = 0.20
+WR_PROXIMITY = 0.15
+WR_TIME_FIT = 0.15
+WR_BARRIER_COMPAT = 0.15
+WR_RESUME_MATCH = 0.35
 
 # No-pay penalty: jobs without disclosed salary are scaled down but still
 # differentiate on proximity, time fit, and barrier compatibility
@@ -130,6 +149,16 @@ def _format_pay_range(salary: SalaryInfo | None) -> str | None:
     return f"${salary.hourly_rate:.2f}/hr"
 
 
+def _compute_resume_match(
+    job: dict, ctx: ScoringContext,
+) -> tuple[float, list[str]]:
+    """Project the resume profile (if any) into a job-match score."""
+    profile = ctx.resume_profile
+    if not isinstance(profile, ResumeProfile):
+        return 0.0, []
+    return score_resume_match(job, profile)
+
+
 def compute_pvs(
     job: dict,
     ctx: ScoringContext,
@@ -139,7 +168,13 @@ def compute_pvs(
 
     Uses net income (wages + benefits - taxes) when benefits_profile is
     available with enrolled programs.  Falls back to gross earnings otherwise.
-    No-pay jobs are capped at NO_PAY_CEILING regardless of other factors.
+    No-pay jobs are penalised by NO_PAY_MULTIPLIER.
+
+    When ``ctx.resume_profile`` is set, a fifth term (resume_match) is
+    blended in with WR_* weights so jobs that line up with the user's
+    skills/family/industry rank higher.  This is the fix for the
+    "every job scores 0.363" symptom that affected every same-city
+    listing without resume signal.
     """
     if salary is _NOT_PARSED:
         salary = extract_salary(job.get("description"))
@@ -154,12 +189,23 @@ def compute_pvs(
     time_fit = score_time_fit(job, ctx.schedule_type, ctx.barriers)
     barrier_compat = _score_barrier_compat(job, ctx.barriers)
 
-    pvs = (
-        W_NET_INCOME * income_score
-        + W_PROXIMITY * proximity
-        + W_TIME_FIT * time_fit
-        + W_BARRIER_COMPAT * barrier_compat
-    )
+    has_resume = isinstance(ctx.resume_profile, ResumeProfile)
+    if has_resume:
+        resume_score, _ = _compute_resume_match(job, ctx)
+        pvs = (
+            WR_NET_INCOME * income_score
+            + WR_PROXIMITY * proximity
+            + WR_TIME_FIT * time_fit
+            + WR_BARRIER_COMPAT * barrier_compat
+            + WR_RESUME_MATCH * resume_score
+        )
+    else:
+        pvs = (
+            W_NET_INCOME * income_score
+            + W_PROXIMITY * proximity
+            + W_TIME_FIT * time_fit
+            + W_BARRIER_COMPAT * barrier_compat
+        )
     pvs = max(0.0, min(1.0, pvs))
 
     if salary is None:
@@ -172,16 +218,30 @@ def _build_pvs_reason(
     job: dict, salary: SalaryInfo | None,
     target_industries: Sequence[str] = (),
     resume_keywords: Sequence[str] = (),
+    resume_signals: Sequence[str] = (),
 ) -> str:
-    """Generate match reason for PVS-ranked job."""
+    """Generate a match reason for a PVS-ranked job.
+
+    Priority order for the headline phrase:
+      1. Resume signals (skills + family + cert) — most specific.
+      2. Target industries selected in the wizard.
+      3. Pre-existing resume_keyword hits (legacy path).
+      4. Disclosed pay band.
+      5. Generic "entry-level opportunity" fallback.
+    """
     parts: list[str] = []
     searchable = f"{job.get('title', '')} {job.get('description', '')}".lower()
+
+    if resume_signals:
+        summary = matched_signal_summary(resume_signals)
+        if summary:
+            parts.append(f"Matches your {summary}")
     if job.get("industry_match") and target_industries:
         matched = next((i for i in target_industries if i.lower() in searchable), None)
         parts.append(f"Matches your target: {matched}" if matched else "Matches your target industry")
-    elif job.get("industry_match"):
+    elif job.get("industry_match") and not parts:
         parts.append("Matches your target industry")
-    if resume_keywords:
+    if resume_keywords and not resume_signals:
         matched_kw = next((kw for kw in resume_keywords if kw.lower() in searchable), None)
         if matched_kw:
             parts.append(f"Matches your {matched_kw} experience")
@@ -213,6 +273,7 @@ def _build_match(
     target_industries: Sequence[str] = (),
     resume_keywords: Sequence[str] = (),
     user_zip: str = "",
+    resume_signals: Sequence[str] = (),
 ) -> ScoredJobMatch:
     """Build a ScoredJobMatch from a raw job dict."""
     transit_info = job.get("transit_info")
@@ -229,7 +290,9 @@ def _build_match(
         background_check_timing=job.get("background_check_timing"),
         record_note=job.get("record_note"),
         relevance_score=pvs,
-        match_reason=_build_pvs_reason(job, salary, target_industries, resume_keywords),
+        match_reason=_build_pvs_reason(
+            job, salary, target_industries, resume_keywords, resume_signals,
+        ),
         pay_range=_format_pay_range(salary),
         bucket=MatchBucket.AFTER_REPAIR if job.get("credit_blocked") else MatchBucket.STRONG,
         cliff_impact=_cliff_for_job(salary, benefits_profile, current_benefits, current_net_monthly),
@@ -256,11 +319,13 @@ def rank_all_jobs(
     for job in jobs:
         salary = extract_salary(job.get("description"))
         pvs = compute_pvs(job, ctx, salary=salary)
+        _, resume_signals = _compute_resume_match(job, ctx)
         results.append(_build_match(
             job, salary, pvs, bp, cur_benefits, cur_net,
             target_industries=ctx.target_industries,
             resume_keywords=ctx.resume_keywords,
             user_zip=ctx.user_zip,
+            resume_signals=resume_signals,
         ))
     results.sort(key=lambda m: m.relevance_score, reverse=True)
     return results
