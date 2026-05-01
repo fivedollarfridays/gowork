@@ -99,7 +99,14 @@ async def seed_honestjobs_listings(session: AsyncSession) -> int:
                 "url": record.get("url"),
                 "source": "honestjobs",
                 "scraped_at": record.get("scraped_at", now),
-                "fair_chance": 1,
+                # Honour explicit per-record fair_chance (default 1 to
+                # match the legacy assumption that honestjobs source is
+                # fair-chance friendly).
+                "fair_chance": record.get("fair_chance", 1),
+                # Pass through credit_check so seed records can mark
+                # roles like Charles Schwab CSR / GM Financial as
+                # "required" — drives the credit-blocked filter.
+                "credit_check": record.get("credit_check", "unknown"),
             })
 
     if not listings:

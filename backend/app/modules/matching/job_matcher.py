@@ -20,15 +20,17 @@ def _filter_by_state(jobs: list[dict]) -> list[dict]:
 
     Layer 2 (defense-in-depth) of the city-aware jobs pipeline. Even if
     the seed data is wrong, this filter keeps cross-state listings from
-    surfacing. State suffix (e.g. ``, TX``) is checked case-insensitively
-    so Arlington / Hurst metro entries pass alongside Fort Worth proper.
-    Listings with no location are dropped — we cannot verify them.
+    surfacing. The state token (e.g. ``, TX``) is matched as a token —
+    not as the literal end-of-string — so listings with a trailing ZIP
+    (``Fort Worth, TX 76102``) still pass alongside the bare form
+    (``Fort Worth, TX``).  Listings with no location are dropped — we
+    cannot verify them.
     """
     state = get_city_config().state.upper()
-    suffix = f", {state}".lower()
+    needle = f", {state.lower()}"
     return [
         job for job in jobs
-        if (job.get("location") or "").lower().rstrip().endswith(suffix)
+        if needle in (job.get("location") or "").lower()
     ]
 
 

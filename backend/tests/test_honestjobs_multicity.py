@@ -49,12 +49,13 @@ async def test_seed_loads_listings_from_every_city():
             ))
             locations = [row[0] for row in res.fetchall()]
         await engine.dispose()
-        # Both cities present.  ``_filter_by_state`` does state-suffix
-        # matching, so just ensure each state suffix appears at least
-        # once.
-        assert any((loc or "").lower().endswith(", tx") for loc in locations), \
+        # Both cities present.  ``_filter_by_state`` matches a ", TX"
+        # token anywhere in the string (not just at the end), so a
+        # listing with a trailing ZIP ("Fort Worth, TX 76102") still
+        # counts.  Mirror that here.
+        assert any(", tx" in (loc or "").lower() for loc in locations), \
             f"no Texas listings; locs={locations}"
-        assert any((loc or "").lower().endswith(", al") for loc in locations), \
+        assert any(", al" in (loc or "").lower() for loc in locations), \
             f"no Alabama listings; locs={locations}"
     finally:
         os.unlink(db_path)
