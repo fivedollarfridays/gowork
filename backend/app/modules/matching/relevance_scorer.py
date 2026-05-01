@@ -39,14 +39,23 @@ from app.modules.matching.relevance_taxonomy import (
 )
 
 # Score weights inside score_resume_match.  These sum to 1.0:
-#   skills (0.40) + family (0.20) + industry (0.15) + years (0.10)
-#   + education (0.10) + cert overlap (0.05)
-_W_SKILLS = 0.40
-_W_FAMILY = 0.20
-_W_INDUSTRY = 0.15
-_W_YEARS = 0.10
-_W_EDU = 0.10
+#   skills (0.35) + family (0.25) + industry (0.20) + years (0.08)
+#   + education (0.07) + cert overlap (0.05)
+# Stage-2 retune: title-family weight up (was 0.20), industry weight up
+# (was 0.15), years weight down (was 0.10).  Rewards true industry +
+# title alignment far above incidental experience overlap.
+_W_SKILLS = 0.35
+_W_FAMILY = 0.25
+_W_INDUSTRY = 0.20
+_W_YEARS = 0.08
+_W_EDU = 0.07
 _W_CERT = 0.05
+
+# Multiplier applied to the final score when the resume's inferred
+# industries do not overlap the job's inferred industries.  Wrong-
+# industry jobs can still surface, but they will never tie with
+# right-industry jobs of comparable signal strength.
+INDUSTRY_MISMATCH_MULTIPLIER = 0.55
 
 
 class ResumeProfile(BaseModel):
@@ -89,14 +98,20 @@ def _extract_certifications(text: str) -> list[str]:
 
 
 def _extract_titles_and_families(text: str) -> tuple[list[str], list[str]]:
-    """Match resume text against the title taxonomy."""
+    """Match resume text against the title taxonomy with word boundaries.
+
+    Substring matching used to leak short tokens (``rn``, ``cna``) inside
+    unrelated words (``leaRN``, ``CNAvy``).  Stage-2 fix anchors each
+    keyword with ``\\b`` on both sides.
+    """
     if not text.strip():
         return [], []
     lower = text.lower()
     titles: list[str] = []
     families: list[str] = []
     for title_kw, family in TITLE_FAMILY.items():
-        if title_kw in lower:
+        pattern = rf"\b{re.escape(title_kw.strip())}\b"
+        if re.search(pattern, lower):
             if title_kw not in titles:
                 titles.append(title_kw)
             if family not in families:
@@ -185,12 +200,16 @@ def score_resume_match(
     j_industries = job_industries(job)
     j_families = job_families(job)
 
+    industry_aligned = bool(set(profile.industries) & set(j_industries))
+
     skills, skill_sigs = factor_skills(profile.skills, text)
     family, family_sigs = factor_family(
         profile.job_families, profile.industries, j_families, j_industries,
     )
     industry, industry_sigs = factor_industry(profile.industries, j_industries)
-    years, years_sigs = factor_years(profile.years_experience, job)
+    years, years_sigs = factor_years(
+        profile.years_experience, job, industry_aligned=industry_aligned,
+    )
     edu, _ = factor_education(profile.education_level, job)
     cert, cert_sigs = factor_certs(profile.certifications, text)
 
@@ -202,6 +221,12 @@ def score_resume_match(
         + _W_EDU * edu
         + _W_CERT * cert
     )
+    # Stage-2 industry-mismatch dampener: kept resume-aware (only
+    # applied when the user actually has signal; an empty-industry
+    # resume hits the early-return above with score=0.30).
+    if profile.industries and j_industries and not industry_aligned:
+        score *= INDUSTRY_MISMATCH_MULTIPLIER
+
     signals = skill_sigs + family_sigs + industry_sigs + years_sigs + cert_sigs
     return round(min(max(score, 0.0), 1.0), 3), signals
 
