@@ -172,7 +172,13 @@ def format_city_local(value: str | datetime, city: str) -> str:
     ampm = "am" if local_dt.hour < 12 else "pm"
     minute = f":{local_dt.minute:02d}"
     label = _tz_abbrev_for(tz_name)
-    return local_dt.strftime(f"%A %B %-d at {hour}{minute}{ampm} {label}")
+    # Build the date prefix with a portable day-of-month (no leading zero).
+    # `%-d` is POSIX-only — Windows strftime raises on it. Computing the
+    # day ourselves keeps the same "Friday April 10" output across OSes
+    # without an extra dependency.
+    weekday = local_dt.strftime("%A")
+    month = local_dt.strftime("%B")
+    return f"{weekday} {month} {local_dt.day} at {hour}{minute}{ampm} {label}"
 
 
 def local_date_in_city(dt: datetime, city: str) -> _date:
