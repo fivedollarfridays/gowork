@@ -20,7 +20,7 @@ class TestPrecrawlCityAware:
 
     def test_no_hardcoded_montgomery_location(self):
         """precrawl.py must not have _LOCATION = 'Montgomery, AL'."""
-        source = Path("app/integrations/brightdata/precrawl.py").read_text()
+        source = Path("app/integrations/brightdata/precrawl.py").read_text(encoding="utf-8")
         tree = ast.parse(source)
         for node in ast.walk(tree):
             if isinstance(node, ast.Assign):
@@ -33,7 +33,7 @@ class TestPrecrawlCityAware:
 
     def test_function_not_named_precrawl_montgomery(self):
         """Function should be named precrawl_jobs, not precrawl_montgomery_jobs."""
-        source = Path("app/integrations/brightdata/precrawl.py").read_text()
+        source = Path("app/integrations/brightdata/precrawl.py").read_text(encoding="utf-8")
         tree = ast.parse(source)
         for node in ast.walk(tree):
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):

@@ -66,7 +66,7 @@ class TestGetAdapter:
         import importlib.util
 
         spec = importlib.util.find_spec("app.integrations.adapters.base")
-        src = pathlib.Path(spec.origin).read_text()
+        src = pathlib.Path(spec.origin).read_text(encoding="utf-8")
 
         import_lines = [
             line.strip()

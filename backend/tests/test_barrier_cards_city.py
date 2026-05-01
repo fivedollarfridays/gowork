@@ -9,7 +9,7 @@ class TestBarrierCardsUsesRouter:
 
     def test_no_direct_expungement_import(self):
         """barrier_cards must not import check_expungement_eligibility from expungement."""
-        source = Path("app/modules/matching/barrier_cards.py").read_text()
+        source = Path("app/modules/matching/barrier_cards.py").read_text(encoding="utf-8")
         tree = ast.parse(source)
         for node in ast.walk(tree):
             if isinstance(node, ast.ImportFrom) and node.module:
@@ -22,7 +22,7 @@ class TestBarrierCardsUsesRouter:
 
     def test_imports_from_criminal_router(self):
         """barrier_cards must import check_record_clearing from criminal.router."""
-        source = Path("app/modules/matching/barrier_cards.py").read_text()
+        source = Path("app/modules/matching/barrier_cards.py").read_text(encoding="utf-8")
         tree = ast.parse(source)
         found = False
         for node in ast.walk(tree):

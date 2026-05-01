@@ -217,7 +217,7 @@ def test_no_hardcoded_secrets_in_s12b_production_files() -> None:
     for path in _all_production_files():
         if not path.exists():
             continue
-        content = path.read_text()
+        content = path.read_text(encoding="utf-8")
         for match in _FORBIDDEN_PATTERN.finditer(content):
             var_name = match.group(1)
             literal = match.group(2)
@@ -252,7 +252,7 @@ def test_no_real_looking_keys_in_s12b_test_files() -> None:
     for path in test_files:
         if not path.exists():
             continue
-        content = path.read_text()
+        content = path.read_text(encoding="utf-8")
         for match in _LONG_HEX_OR_BASE64_PATTERN.finditer(content):
             literal = match.group(1)
             if _is_test_placeholder(literal):

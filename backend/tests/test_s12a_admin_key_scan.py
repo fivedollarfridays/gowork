@@ -54,7 +54,7 @@ def test_no_hardcoded_secrets_in_new_route_files() -> None:
     violations: list[str] = []
     for fname in _NEW_ROUTE_FILES:
         path = _ROUTES_DIR / fname
-        content = path.read_text()
+        content = path.read_text(encoding="utf-8")
         for match in _FORBIDDEN_PATTERN.finditer(content):
             var_name = match.group(1)
             literal = match.group(2)

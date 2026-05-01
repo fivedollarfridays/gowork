@@ -21,7 +21,7 @@ class TestProximityScorerCityAware:
         import ast
         from pathlib import Path
 
-        source = Path("app/modules/matching/proximity_scorer.py").read_text()
+        source = Path("app/modules/matching/proximity_scorer.py").read_text(encoding="utf-8")
         tree = ast.parse(source)
         for node in ast.walk(tree):
             if isinstance(node, ast.ImportFrom) and node.module:
