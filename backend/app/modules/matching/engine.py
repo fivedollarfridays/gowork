@@ -56,6 +56,12 @@ async def query_resources_for_barriers(
             fields = {k: row[k] for k in Resource.model_fields if k in row}
             if isinstance(fields.get("services"), str):
                 fields["services"] = json.loads(fields["services"])
+            if isinstance(fields.get("barrier_affinity"), str):
+                fields["barrier_affinity"] = json.loads(
+                    fields["barrier_affinity"],
+                )
+            elif fields.get("barrier_affinity") is None:
+                fields["barrier_affinity"] = []
             results.append(Resource(**fields))
 
     return results
