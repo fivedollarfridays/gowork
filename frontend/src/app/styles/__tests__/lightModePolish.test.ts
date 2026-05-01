@@ -117,34 +117,25 @@ describe("light-mode polish — Ch04 map chip text (perma-dark backdrop)", () =>
   });
 });
 
-describe("light-mode polish — Ch07 cliff controls panel (perma-dark glass)", () => {
+describe("light-mode polish — Ch07 cliff controls panel (cream surface)", () => {
   // The CliffControls component renders an inline-styled dark glass
   // panel (`linear-gradient(160deg, rgba(15, 23, 41, 0.65) 0%,
-  // rgba(10, 14, 26, 0.55) 100%)`). The labels MUST stay cream/muted in
-  // light mode for the same reason as the ch05 cards.
-  it("declares a [data-theme='light'] override for the cliff controls labels", () => {
+  // rgba(10, 14, 26, 0.55) 100%)`). In light mode that gradient
+  // tints the cream body navy and reads as a dark blob — the design
+  // intent is for the panel to flip to cream surface so it matches
+  // the rest of the light-mode page. We override `background:` with
+  // `!important` because inline styles otherwise win the cascade.
+  // Text colors auto-cascade from the global `--fg-*` tokens (navy
+  // ink) — no per-element color overrides needed.
+  it("flips .ch07-controls background to cream literal in light mode (!important to beat inline style)", () => {
     expect(homeChaptersCss).toMatch(
-      /\[data-theme="light"\][^{]*\.ch07-controls[^{]*\.r-k[^{]*\{[^}]*color:\s*#8696A8/i,
+      /\[data-theme="light"\][^{]*\.ch07-controls\s*\{[^}]*background:\s*#F5F3EE\s*!important/i,
     );
   });
 
-  it("declares a [data-theme='light'] override for the cliff controls value (gross/total)", () => {
+  it("drops the backdrop-filter blur on .ch07-controls in light mode (no dark layer behind it)", () => {
     expect(homeChaptersCss).toMatch(
-      /\[data-theme="light"\][^{]*\.ch07-controls[^{]*\.r-v[^{]*\{[^}]*color:\s*#F5F3EE/i,
-    );
-  });
-
-  it("scopes --fg-* tokens inside .ch07-controls to dark-mode literals (defeats inline-style cascade)", () => {
-    // CliffControls.tsx renders inline `color: var(--fg-muted)` etc. on
-    // r-k / ctrl-k / segmented-control labels. Inline styles win over
-    // class rules — the only way to override their color in light mode
-    // is to redefine the underlying CSS variable inside the panel
-    // scope. This test asserts that scoped redefinition exists.
-    expect(homeChaptersCss).toMatch(
-      /\[data-theme="light"\][^{]*\.ch07-controls[^{]*\{[^}]*--fg-muted:\s*#8696A8/i,
-    );
-    expect(homeChaptersCss).toMatch(
-      /\[data-theme="light"\][^{]*\.ch07-controls[^{]*\{[^}]*--fg-primary:\s*#F5F3EE/i,
+      /\[data-theme="light"\][^{]*\.ch07-controls\s*\{[^}]*backdrop-filter:\s*none\s*!important/i,
     );
   });
 });

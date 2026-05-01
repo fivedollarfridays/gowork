@@ -118,9 +118,11 @@ export function Chapter07TheCliff({ id = "chapter-07" }: Chapter07TheCliffProps)
     // LEFT card (controls + readout) follows ~280ms later from x:-200.
     // Net: the user sees the data card land, then the input panel arrives
     // beside it — beat-by-beat instead of both fading up together.
-    // toggleActions: "play none none none" — one-shot. Don't reverse on
-    // scroll-up; once revealed, the cards stay revealed (re-triggering on
-    // every scroll-back is annoying).
+    // toggleActions: "play none none reverse" — premium reverse-scroll
+    // behaviour. Scroll DOWN into Ch07 → cards fly in. Scroll UP past
+    // the trigger → cards slide back off the way they came (Webflow-
+    // style "every scroll has motion" feel). The exit-scrub below
+    // handles the OTHER direction (scrolling further DOWN into Ch08).
     gsap.from(el.querySelectorAll(".ch07-chart"), {
       x: 200,
       opacity: 0,
@@ -129,7 +131,7 @@ export function Chapter07TheCliff({ id = "chapter-07" }: Chapter07TheCliffProps)
       scrollTrigger: {
         trigger: el.querySelector(".ch07-grid"),
         start: "top 75%",
-        toggleActions: "play none none none",
+        toggleActions: "play none none reverse",
       },
     });
     gsap.from(el.querySelectorAll(".ch07-controls"), {
@@ -141,7 +143,7 @@ export function Chapter07TheCliff({ id = "chapter-07" }: Chapter07TheCliffProps)
       scrollTrigger: {
         trigger: el.querySelector(".ch07-grid"),
         start: "top 75%",
-        toggleActions: "play none none none",
+        toggleActions: "play none none reverse",
       },
     });
 
