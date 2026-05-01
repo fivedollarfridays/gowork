@@ -1599,33 +1599,27 @@ body:not([data-map-cursor-active="true"]) .chapter {
 :root[data-theme="light"] .ch04-attrib { color: #8696A8; }
 :root[data-theme="light"] .ch04-attrib__link { color: #A4B3C7; }
 
-/* Ch07 cliff controls — inline-styled dark glass panel. The labels +
- * values use INLINE-STYLE `color: var(--fg-muted)` etc. (see
- * `_internal/CliffControls.tsx`). Inline styles win over class rules,
- * so we can't override `color:` directly with `:root[data-theme="light"]`
- * cascades. Instead we scope the FG token VARIABLES inside the panel
- * to their dark-mode values — `var(--fg-muted)` resolves to muted-cream
- * inside `.ch07-controls` regardless of the global theme.
+/* Ch07 cliff controls — flip dark-glass to cream surface in light mode.
  *
- * Strategy: redefine the consumed tokens locally on the panel root.
- * Both selector forms targeted (the inline color refs + the className
- * hooks `.r-k`, `.r-v`, etc.) so the panel reads cream-on-navy in
- * BOTH themes without modifying the component file. */
-:root[data-theme="light"] .ch07-controls,
-:root[data-theme="light"] .ch07-household {
-  /* Dark-mode FG token literals — keep the panel's text legible over its
-   * locked navy gradient surface. */
-  --fg-primary: #F5F3EE;
-  --fg-secondary: #A4B3C7;
-  --fg-muted: #8696A8;
+ * Original treatment (still active in dark mode): an inline-styled
+ * `linear-gradient(rgba(15,23,41,...))` glass panel. On a cream body
+ * that gradient renders as a dark blob — visually inconsistent with
+ * the rest of the light-mode page.
+ *
+ * Light mode now flips the surface to cream and drops the backdrop
+ * blur (no dark layer to lift behind it). Text colors auto-cascade
+ * from the global `--fg-*` tokens (navy ink) — the inline styles in
+ * `CliffControls.tsx` reference `var(--fg-primary/secondary/muted)`
+ * which already resolve correctly under `[data-theme="light"]`, so
+ * we don't need to pin literals here. `!important` is required
+ * because the inline `background:` would otherwise win the cascade.
+ *
+ * The wage-state glow (boxShadow on the panel) keeps reading because
+ * the cyan/amber/rose tokens work on both surfaces.
+ */
+:root[data-theme="light"] .ch07-controls {
+  background: #F5F3EE !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
-/* Defensive class-targeted overrides for any future caller that drops
- * the inline style — these are no-ops today but documented for the
- * next session. */
-:root[data-theme="light"] .ch07-controls .r-k { color: #8696A8; }
-:root[data-theme="light"] .ch07-controls .r-row.r-total .r-k { color: #F5F3EE; }
-:root[data-theme="light"] .ch07-controls .r-v { color: #F5F3EE; }
-:root[data-theme="light"] .ch07-controls .ctrl-k { color: #8696A8; }
-:root[data-theme="light"] .ch07-controls .ctrl-v { color: #F5F3EE; }
-:root[data-theme="light"] .ch07-household > span { color: #8696A8; }
 
