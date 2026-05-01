@@ -144,6 +144,9 @@ def assign_resources(
                 claimed_ids.add(r.id)
 
     # Phase 3 — category fallback
+    # Resources with EXPLICIT barrier_affinity tags only land on the
+    # barriers they declared.  Untagged resources still fall through to
+    # the category map so the legacy data stays routable.
     for barrier in BARRIER_PROCESSING_ORDER:
         if barrier not in user_barriers:
             continue
@@ -151,6 +154,8 @@ def assign_resources(
         for r in resources:
             if r.id in claimed_ids or is_career_center(r):
                 continue
+            if get_affinity_barriers(r):
+                continue  # explicit-tag resources stay surgical
             if r.category in matching_categories:
                 card_resources[barrier].append(r)
                 claimed_ids.add(r.id)

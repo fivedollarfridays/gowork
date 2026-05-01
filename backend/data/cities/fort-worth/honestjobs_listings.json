@@ -669,7 +669,7 @@
     "url": "https://www.txu.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 1
   },
   {
     "title": "Gas Service Technician",
@@ -679,7 +679,7 @@
     "url": "https://www.atmosenergy.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 1
   },
   {
     "title": "Wastewater Operator Trainee",
@@ -739,7 +739,7 @@
     "url": "https://www.fortworthfoundry.com",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 1
   },
   {
     "title": "Substitute Teacher",
@@ -749,7 +749,7 @@
     "url": "https://www.fwisd.org/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 1
   },
   {
     "title": "Paraprofessional - Special Education",
@@ -759,7 +759,7 @@
     "url": "https://www.fwisd.org/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 1
   },
   {
     "title": "Custodian - Fort Worth ISD",
@@ -789,7 +789,7 @@
     "url": "https://www.emsisd.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 1
   },
   {
     "title": "Medical Assistant",
@@ -819,7 +819,7 @@
     "url": "https://careers.labcorp.com",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 1
   },
   {
     "title": "Sterile Processing Technician",
@@ -839,7 +839,7 @@
     "url": "https://jobs.texashealth.org",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 1
   },
   {
     "title": "Automotive Service Technician",
@@ -849,7 +849,7 @@
     "url": "https://www.autonationcareers.com",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 1
   },
   {
     "title": "Body Shop Technician",
@@ -869,7 +869,7 @@
     "url": "https://www.cocacolasouthwestbeverages.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 1
   },
   {
     "title": "HVAC Technician",
@@ -919,7 +919,7 @@
     "url": "https://fortworthtexas.gov/jobs",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 1
   },
   {
     "title": "Court Clerk",
@@ -1039,7 +1039,7 @@
     "url": "https://www.tvc.texas.gov/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 1
   },
   {
     "title": "Reentry Job Coach",
