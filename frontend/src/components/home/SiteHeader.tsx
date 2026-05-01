@@ -2,9 +2,13 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Menu, X, Moon, Sun } from "lucide-react";
+import { Menu, X, Moon, Sun, Flashlight, FlashlightOff } from "lucide-react";
 import { BrandMark } from "@/components/wall/BrandMark";
 import { LanguageToggle } from "@/components/wall/LanguageToggle";
+import {
+  CURSOR_FLASHLIGHT_EVENT,
+  CURSOR_FLASHLIGHT_STORAGE_KEY,
+} from "@/components/home/CursorFlashlight";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 
@@ -205,6 +209,60 @@ function ThemeButton({ t, theme, toggleTheme }: ThemeBtnProps): JSX.Element {
   );
 }
 
+/**
+ * CursorButton — toggles the global CursorFlashlight on/off. State
+ * persisted in localStorage; CursorFlashlight subscribes to a custom
+ * event so the toggle takes effect immediately within the same tab.
+ * Defaults to "on" — opt-out, not opt-in.
+ */
+function CursorButton(): JSX.Element {
+  const [enabled, setEnabled] = useState<boolean>(true);
+
+  useEffect(() => {
+    try {
+      setEnabled(window.localStorage.getItem(CURSOR_FLASHLIGHT_STORAGE_KEY) !== "off");
+    } catch {
+      setEnabled(true);
+    }
+  }, []);
+
+  const toggle = useCallback(() => {
+    setEnabled((prev) => {
+      const next = !prev;
+      try {
+        window.localStorage.setItem(CURSOR_FLASHLIGHT_STORAGE_KEY, next ? "on" : "off");
+      } catch {
+        /* localStorage blocked — UI state still flips */
+      }
+      window.dispatchEvent(new Event(CURSOR_FLASHLIGHT_EVENT));
+      return next;
+    });
+  }, []);
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      aria-label={enabled ? "Turn off cursor flashlight" : "Turn on cursor flashlight"}
+      aria-pressed={enabled}
+      title={enabled ? "Cursor flashlight: on" : "Cursor flashlight: off"}
+      className="inline-flex items-center justify-center rounded-full border h-9 w-9 transition-colors"
+      style={{
+        borderColor: "color-mix(in oklch, var(--fg-primary), transparent 85%)",
+        color: enabled ? "var(--accent-cyan)" : "var(--fg-muted)",
+      }}
+      data-cursor-toggle
+      data-cursor-enabled={enabled}
+    >
+      {enabled ? (
+        <Flashlight className="h-4 w-4" aria-hidden="true" />
+      ) : (
+        <FlashlightOff className="h-4 w-4" aria-hidden="true" />
+      )}
+    </button>
+  );
+}
+
 function CtaPill({ t }: { t: (key: string) => string }): JSX.Element {
   return (
     <Link
@@ -228,6 +286,7 @@ function ChromeControls(props: ChromeControlsProps): JSX.Element {
   const { t, theme, toggleTheme, mobileOpen, setMobileOpen } = props;
   return (
     <div className="flex items-center gap-2 shrink-0">
+      <CursorButton />
       <ThemeButton t={t} theme={theme} toggleTheme={toggleTheme} />
       <div className="hidden sm:block">
         <LanguageToggle />

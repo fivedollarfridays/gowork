@@ -65,11 +65,23 @@ export function ChapterRail({ activeChapter, progress }: ChapterRailProps): JSX.
   const { t } = useTranslation();
   const fillPct = `${(clamp01(progress) * 100).toFixed(2)}%`;
   const [hoveredChapter, setHoveredChapter] = useState<number | null>(null);
+  // Per Kevin's polish ask — the rail used to permanently stick out with
+  // the full chapter labels. Now it defaults to a tucked-edge view (just
+  // the tick markers + active-chapter hint) and expands the numbers +
+  // labels on rail-hover. `railHovered` is independent of `hoveredChapter`
+  // so the rail stays expanded while the user is moving between ticks.
+  const [railHovered, setRailHovered] = useState<boolean>(false);
 
   return (
     <nav
       aria-label={t("chapterRail.label")}
       data-chapter-rail
+      data-rail-expanded={railHovered}
+      onMouseEnter={() => setRailHovered(true)}
+      onMouseLeave={() => {
+        setRailHovered(false);
+        setHoveredChapter(null);
+      }}
       className="chapter-rail fixed left-8 top-1/2 -translate-y-1/2 z-[95] hidden xl:flex flex-col gap-4 items-start"
       style={{ pointerEvents: "auto" }}
     >
@@ -113,11 +125,21 @@ export function ChapterRail({ activeChapter, progress }: ChapterRailProps): JSX.
                 />
                 <span
                   data-chapter-number
-                  className="font-mono text-[11px] tracking-wider"
+                  className="font-mono text-[11px] tracking-wider transition-opacity duration-200"
+                  style={{
+                    opacity: railHovered || isActive ? 1 : 0,
+                    pointerEvents: railHovered || isActive ? "auto" : "none",
+                  }}
                 >
                   {pad2(c.id)}
                 </span>
-                <span className="text-xs font-medium whitespace-nowrap">
+                <span
+                  className="text-xs font-medium whitespace-nowrap transition-opacity duration-200"
+                  style={{
+                    opacity: railHovered ? 1 : 0,
+                    pointerEvents: railHovered ? "auto" : "none",
+                  }}
+                >
                   {t(c.labelKey)}
                 </span>
               </a>
