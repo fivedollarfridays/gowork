@@ -312,3 +312,20 @@
     --accent-rose-900: #4F2229;
   }
 }
+
+/* Demo-grade dark-mode contrast fix — `text-secondary` inherits
+ * `--secondary` (#1A2338, a SURFACE color in dark mode), rendering
+ * nearly invisible when used as text. Plan-page components use
+ * `text-secondary` for link text (addresses, phones, "Website",
+ * job titles, "View all matches"). Tailwind's utility lives in
+ * @layer utilities which cascades after unlayered author CSS, so
+ * `!important` is required to win. Selector list: explicit
+ * data-theme="dark", legacy `.dark` shadcn class, and html.dark.
+ * Light mode keeps `--secondary` mapping (paper-2 reads fine on
+ * cream). `.bg-secondary` and `.text-secondary-foreground` left
+ * untouched so shadcn button/badge surface contract still works. */
+:root[data-theme="dark"] .text-secondary,
+.dark .text-secondary,
+html.dark .text-secondary {
+  color: #22D3EE !important;
+}

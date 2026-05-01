@@ -73,10 +73,9 @@ function wrap(node: React.ReactElement) {
 }
 
 describe("HomePage — composition", () => {
-  it("mounts CursorFlashlight, SiteHeader, ChapterRail, PageMeta, SiteFooter", async () => {
+  it("mounts SiteHeader, ChapterRail, PageMeta, SiteFooter (CursorFlashlight is global, see layout.tsx)", async () => {
     const { default: HomePage } = await import("../HomePage");
     const { getByTestId } = wrap(<HomePage />);
-    expect(getByTestId("stub-cursor-flashlight")).toBeInTheDocument();
     expect(getByTestId("stub-site-header")).toBeInTheDocument();
     expect(getByTestId("stub-chapter-rail")).toBeInTheDocument();
     expect(getByTestId("stub-page-meta")).toBeInTheDocument();

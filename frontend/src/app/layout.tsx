@@ -11,6 +11,7 @@ import { TranslationProvider } from "@/hooks/useTranslation";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ViewTransitionsProvider } from "@/components/ViewTransitionsProvider";
 import { SkipToContent } from "@/components/wall/SkipToContent";
+import { CursorFlashlight } from "@/components/home/CursorFlashlight";
 import {
   AriaLiveProvider,
   AriaLiveRegion,
@@ -150,6 +151,7 @@ export default function RootLayout({
                 <ViewTransitionsProvider>
                   <TranslationProvider>
                     <SkipToContent />
+                    <CursorFlashlight />
                     {/* Universal site header — was previously the
                      *  legacy `<Header />` from `components/layout/Header`,
                      *  which still showed the legacy /
