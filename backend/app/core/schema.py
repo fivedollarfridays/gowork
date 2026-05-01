@@ -17,6 +17,7 @@ ALLOWED_COLUMNS = {
     "resources": {
         "name", "category", "subcategory", "address", "lat", "lng",
         "phone", "url", "eligibility", "services", "hours", "notes",
+        "city",  # m008 — per-row city slug for per-request filtering
     },
     "transit_stops": {"route_id", "stop_name", "lat", "lng", "sequence"},
     "job_listings": {
