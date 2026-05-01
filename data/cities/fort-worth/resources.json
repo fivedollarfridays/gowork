@@ -1,132 +1,1574 @@
 [
   {
-    "id": 1001,
     "name": "Workforce Solutions for Tarrant County",
     "category": "career_center",
-    "subcategory": "employment",
+    "subcategory": "workforce_development",
     "address": "1200 Circle Dr, Fort Worth, TX 76119",
-    "lat": 32.6900,
-    "lng": -97.2700,
-    "phone": "(817) 413-4400",
+    "lat": 32.7065,
+    "lng": -97.2901,
+    "phone": "817-413-4400",
     "url": "https://www.workforcesolutions.net",
-    "services": ["job search", "resume help", "training referrals", "WIOA enrollment"],
-    "notes": "Mon-Fri 8am-5pm. Walk-ins welcome."
+    "eligibility": "Open to all jobseekers; income-eligible for WIOA training vouchers",
+    "services": [
+      "job_search",
+      "resume_help",
+      "WIOA_training_vouchers",
+      "transportation_vouchers",
+      "reentry_navigation"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "TWC anchor for Tarrant County. Always relevant for jobseekers. Reentry navigators on site.",
+    "health_status": "healthy"
   },
   {
-    "id": 1002,
+    "name": "Texas Workforce Commission - Online Portal",
+    "category": "career_center",
+    "subcategory": "state_workforce",
+    "address": "Statewide online services",
+    "lat": 32.7555,
+    "lng": -97.3308,
+    "phone": "800-832-9394",
+    "url": "https://www.twc.texas.gov",
+    "eligibility": "All Texas residents",
+    "services": [
+      "unemployment_claims",
+      "job_search",
+      "skills_training",
+      "vocational_rehab"
+    ],
+    "hours": "24/7 online; phone Mon-Fri 8am-6pm",
+    "notes": "Statewide TWC services. File unemployment, search jobs, find training programs.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "Goodwill Industries Career Services",
+    "category": "career_center",
+    "subcategory": "training",
+    "address": "4005 Campus Dr, Fort Worth, TX 76119",
+    "lat": 32.714,
+    "lng": -97.271,
+    "phone": "817-332-7866",
+    "url": "https://www.goodwillnct.org/services/career-services",
+    "eligibility": "Open to all jobseekers; reentry program for justice-involved",
+    "services": [
+      "job_search",
+      "resume_help",
+      "computer_classes",
+      "reentry_program",
+      "career_training"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "Free career classes, computer training, reentry support. Always relevant.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "Fort Worth Public Library Career Resources",
+    "category": "career_center",
+    "subcategory": "library",
+    "address": "500 W 3rd St, Fort Worth, TX 76102",
+    "lat": 32.7521,
+    "lng": -97.3331,
+    "phone": "817-392-7740",
+    "url": "https://www.fortworthtexas.gov/departments/library/services/career-resources",
+    "eligibility": "Free to public",
+    "services": [
+      "resume_workshops",
+      "computer_access",
+      "online_job_search",
+      "career_databases"
+    ],
+    "hours": "Mon-Thu 9am-9pm, Fri-Sat 9am-6pm, Sun 12-5pm",
+    "notes": "Free WiFi, computer terminals, career database access (LearningExpress, Brainfuse).",
+    "health_status": "healthy"
+  },
+  {
+    "name": "Trinity Metro Reduced Fare Program",
+    "category": "social_service",
+    "subcategory": "transportation",
+    "address": "1600 E Lancaster Ave, Fort Worth, TX 76102",
+    "lat": 32.7506,
+    "lng": -97.311,
+    "phone": "817-215-8600",
+    "url": "https://ridetrinitymetro.org/fares/reduced-fares",
+    "eligibility": "Income-eligible (200% FPL), seniors 65+, persons with disabilities",
+    "services": [
+      "transit_pass",
+      "monthly_pass",
+      "fare_assistance"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "Reduced bus + TEXRail fare program. Apply with proof of income or disability.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "Trinity Railway Express (TRE)",
+    "category": "social_service",
+    "subcategory": "transportation",
+    "address": "1001 Jones St, Fort Worth, TX 76102",
+    "lat": 32.7496,
+    "lng": -97.3296,
+    "phone": "817-215-8600",
+    "url": "https://ridetrinitymetro.org/tre",
+    "eligibility": "Open to all riders",
+    "services": [
+      "commuter_rail",
+      "DFW_to_Fort_Worth_service"
+    ],
+    "hours": "Mon-Fri 5am-11pm; weekend service",
+    "notes": "Commuter rail Fort Worth to Dallas via 10 stations. Transit-friendly for DFW commute.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "Catholic Charities Fort Worth - Car Repair Grants",
+    "category": "social_service",
+    "subcategory": "transportation",
+    "address": "249 W Thornhill Dr, Fort Worth, TX 76115",
+    "lat": 32.7011,
+    "lng": -97.3411,
+    "phone": "817-534-0814",
+    "url": "https://catholiccharitiesfortworth.org",
+    "eligibility": "Income-eligible Tarrant County residents",
+    "services": [
+      "car_repair_grants",
+      "transportation_assistance",
+      "case_management"
+    ],
+    "hours": "Mon-Fri 9am-5pm",
+    "notes": "Up to $1500 for emergency car repairs needed for work. Application via case manager.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "MITS - Mobility Impaired Transportation Service",
+    "category": "social_service",
+    "subcategory": "transportation",
+    "address": "1600 E Lancaster Ave, Fort Worth, TX 76102",
+    "lat": 32.7506,
+    "lng": -97.311,
+    "phone": "817-215-8600",
+    "url": "https://ridetrinitymetro.org/services/access",
+    "eligibility": "ADA-eligible riders unable to use fixed-route bus",
+    "services": [
+      "paratransit",
+      "door_to_door_transit"
+    ],
+    "hours": "Mon-Fri 5am-9pm; weekend service",
+    "notes": "ADA paratransit service for riders unable to use fixed-route bus. Application required.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "TWC Child Care Services - Tarrant County",
+    "category": "childcare",
+    "subcategory": "subsidy",
+    "address": "1200 Circle Dr, Fort Worth, TX 76119",
+    "lat": 32.7065,
+    "lng": -97.2901,
+    "phone": "817-921-4636",
+    "url": "https://www.workforcesolutions.net/childcare-services",
+    "eligibility": "Working/training parents at or below 85% State Median Income",
+    "services": [
+      "childcare_subsidy",
+      "Texas_Rising_Star_referral",
+      "extended_hours_care"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "Income-based childcare subsidy. Pays directly to TRS-rated providers. 12-month enrollment.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "Camp Fire First Texas",
+    "category": "childcare",
+    "subcategory": "early_childhood",
+    "address": "2700 Meacham Blvd, Fort Worth, TX 76137",
+    "lat": 32.8423,
+    "lng": -97.3275,
+    "phone": "817-831-2111",
+    "url": "https://www.campfirefw.org",
+    "eligibility": "Open to all; subsidies accepted",
+    "services": [
+      "preschool",
+      "after_school_program",
+      "summer_camp",
+      "infant_care"
+    ],
+    "hours": "Mon-Fri 6:30am-6:30pm",
+    "notes": "Texas Rising Star 4-star center. Accepts TWC subsidies. Multiple Tarrant locations.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "Boys & Girls Clubs of Greater Fort Worth",
+    "category": "childcare",
+    "subcategory": "after_school",
+    "address": "3218 E Belknap St, Fort Worth, TX 76111",
+    "lat": 32.7632,
+    "lng": -97.2908,
+    "phone": "817-834-4711",
+    "url": "https://www.bgcgfw.org",
+    "eligibility": "Ages 6-18, sliding scale by income",
+    "services": [
+      "after_school_program",
+      "summer_camp",
+      "homework_help",
+      "meals"
+    ],
+    "hours": "After-school hours; Mon-Fri 2pm-7pm",
+    "notes": "After-school care at multiple Fort Worth and Tarrant locations. Sliding-scale fees.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "Head Start of Greater Fort Worth",
+    "category": "childcare",
+    "subcategory": "head_start",
+    "address": "4116 Thomas Pl, Fort Worth, TX 76107",
+    "lat": 32.7361,
+    "lng": -97.3678,
+    "phone": "817-877-3070",
+    "url": "https://www.headstartcc.com",
+    "eligibility": "Income-eligible families with children ages 3-5",
+    "services": [
+      "preschool",
+      "early_education",
+      "family_services",
+      "meals"
+    ],
+    "hours": "Mon-Fri 7:30am-2:30pm",
+    "notes": "Federally-funded preschool for income-eligible families. Free.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "ChildCareGroup",
+    "category": "childcare",
+    "subcategory": "referral_network",
+    "address": "5750 Pineland Dr Suite 100, Dallas, TX 75231",
+    "lat": 32.8729,
+    "lng": -96.7711,
+    "phone": "214-630-7911",
+    "url": "https://www.childcaregroup.org",
+    "eligibility": "Tarrant and Dallas county residents",
+    "services": [
+      "childcare_referral",
+      "subsidy_navigation",
+      "provider_search"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "Texas Rising Star resource center; helps navigate childcare search and subsidy.",
+    "health_status": "healthy"
+  },
+  {
     "name": "Legal Aid of NorthWest Texas",
     "category": "social_service",
-    "subcategory": "legal",
+    "subcategory": "legal_aid",
     "address": "600 E Weatherford St, Fort Worth, TX 76102",
-    "lat": 32.7580,
-    "lng": -97.3260,
-    "phone": "(817) 336-3943",
+    "lat": 32.7548,
+    "lng": -97.3289,
+    "phone": "817-336-3943",
     "url": "https://www.lanwt.org",
-    "services": ["expunction", "nondisclosure", "credit disputes", "housing"],
-    "notes": "Free legal services for income-eligible residents."
+    "eligibility": "Income-eligible (125% FPL); civil legal matters",
+    "services": [
+      "expunction",
+      "nondisclosure",
+      "record_clearing",
+      "criminal_record_legal_aid"
+    ],
+    "hours": "Mon-Fri 9am-5pm",
+    "notes": "Free civil legal services. Record clearing eligibility consults.",
+    "health_status": "healthy"
   },
   {
-    "id": 1003,
-    "name": "Tarrant County United Way 211",
+    "name": "Texas RioGrande Legal Aid - Reentry",
     "category": "social_service",
-    "subcategory": "referral",
+    "subcategory": "legal_aid",
+    "address": "316 W 12th St, Austin, TX 78701",
+    "lat": 30.2747,
+    "lng": -97.746,
+    "phone": "512-374-2700",
+    "url": "https://www.trla.org",
+    "eligibility": "Income-eligible Texas residents with criminal records",
+    "services": [
+      "expunction",
+      "nondisclosure",
+      "record_clearing",
+      "reentry_legal",
+      "occupational_licensing"
+    ],
+    "hours": "Mon-Fri 8:30am-5pm",
+    "notes": "Statewide reentry legal services. Phone consults for Tarrant County residents.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "Cornbread Hustle - Reentry Job Board",
+    "category": "career_center",
+    "subcategory": "reentry",
+    "address": "Online services",
+    "lat": 32.7821,
+    "lng": -96.8005,
+    "phone": "214-225-4646",
+    "url": "https://www.cornbreadhustle.com",
+    "eligibility": "Justice-involved jobseekers (felony OK)",
+    "services": [
+      "reentry_job_board",
+      "fair_chance_employer_directory",
+      "career_coaching"
+    ],
+    "hours": "Online 24/7",
+    "notes": "Reentry-focused job board with vetted fair-chance employers across DFW.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "Tarrant County Reentry Services",
+    "category": "social_service",
+    "subcategory": "reentry",
+    "address": "200 Taylor St 9th Floor, Fort Worth, TX 76196",
+    "lat": 32.7541,
+    "lng": -97.3325,
+    "phone": "817-884-1574",
+    "url": "https://www.tarrantcounty.com/en/criminal-courts/reentry-services.html",
+    "eligibility": "Tarrant County residents with criminal records",
+    "services": [
+      "reentry_navigation",
+      "case_management",
+      "employment_referral",
+      "record_clearing_referral"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "Tarrant County reentry navigators. Free case management for justice-involved.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "Cassata Catholic High School - Adult Education",
+    "category": "training",
+    "subcategory": "ged_reentry",
+    "address": "1400 Hemphill St, Fort Worth, TX 76104",
+    "lat": 32.7261,
+    "lng": -97.3375,
+    "phone": "817-926-1745",
+    "url": "https://www.cassatahs.org",
+    "eligibility": "Open to adults completing high school or GED, including reentry students",
+    "services": [
+      "ged_prep",
+      "high_school_completion",
+      "adult_education",
+      "reentry_friendly"
+    ],
+    "hours": "Mon-Fri 8am-3pm; evening classes available",
+    "notes": "Reentry-friendly accelerated diploma program. Sliding-scale tuition.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "JPS Health Network - Sliding Scale Clinics",
+    "category": "social_service",
+    "subcategory": "healthcare",
+    "address": "1500 S Main St, Fort Worth, TX 76104",
+    "lat": 32.7339,
+    "lng": -97.3303,
+    "phone": "817-927-1000",
+    "url": "https://jpshealthnet.org",
+    "eligibility": "Tarrant County residents; sliding-scale based on income",
+    "services": [
+      "primary_care",
+      "urgent_care",
+      "specialty_care",
+      "behavioral_health"
+    ],
+    "hours": "Mon-Fri 8am-5pm; ER 24/7",
+    "notes": "Tarrant County's public hospital network. Sliding-scale fees, JPS Connection card available.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "MHMR of Tarrant County",
+    "category": "social_service",
+    "subcategory": "mental_health",
+    "address": "3840 Hulen St, Fort Worth, TX 76107",
+    "lat": 32.7296,
+    "lng": -97.3933,
+    "phone": "817-569-4300",
+    "url": "https://www.mhmrtarrant.org",
+    "eligibility": "Tarrant County residents with mental health or IDD needs",
+    "services": [
+      "mental_health_services",
+      "substance_use_treatment",
+      "crisis_services",
+      "case_management"
+    ],
+    "hours": "Mon-Fri 8am-5pm; crisis line 24/7",
+    "notes": "Local Mental Health Authority. Crisis line: 817-335-3022.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "United Way 211 Texas",
+    "category": "social_service",
+    "subcategory": "general_assistance",
     "address": "1500 N Main St, Fort Worth, TX 76164",
-    "lat": 32.7700,
-    "lng": -97.3400,
+    "lat": 32.7657,
+    "lng": -97.332,
     "phone": "211",
-    "url": "https://www.unitedwaytarrant.org",
-    "services": ["resource referral", "benefits screening", "crisis support"],
-    "notes": "24/7 helpline. Dial 211 for community resources."
+    "url": "https://www.211texas.org",
+    "eligibility": "Open to all Texans",
+    "services": [
+      "resource_referral",
+      "emergency_assistance",
+      "food",
+      "housing",
+      "utilities"
+    ],
+    "hours": "24/7",
+    "notes": "Free 211 information and referral line. Always relevant for emergency needs.",
+    "health_status": "healthy"
   },
   {
-    "id": 1004,
-    "name": "Catholic Charities Fort Worth",
+    "name": "Recovery Resource Council",
     "category": "social_service",
-    "subcategory": "comprehensive",
-    "address": "249 W Thornhill Dr, Fort Worth, TX 76115",
-    "lat": 32.6900,
-    "lng": -97.3200,
-    "phone": "(817) 534-0814",
-    "url": "https://www.catholiccharitiesfortworth.org",
-    "services": ["immigration", "workforce development", "financial literacy", "housing"],
-    "notes": "Mon-Fri 8:30am-5pm."
+    "subcategory": "substance_use",
+    "address": "2700 Airport Fwy, Fort Worth, TX 76111",
+    "lat": 32.7656,
+    "lng": -97.3007,
+    "phone": "817-332-6329",
+    "url": "https://recoverycouncil.org",
+    "eligibility": "Tarrant County residents needing substance use support",
+    "services": [
+      "substance_use_treatment",
+      "recovery_support",
+      "case_management",
+      "youth_prevention"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "Outpatient substance use treatment, recovery support, prevention.",
+    "health_status": "healthy"
   },
   {
-    "id": 1005,
-    "name": "ACH Child and Family Services",
-    "category": "childcare",
-    "subcategory": "family_services",
-    "address": "4500 Long Ave, Fort Worth, TX 76115",
-    "lat": 32.6800,
-    "lng": -97.3300,
-    "phone": "(817) 335-4673",
-    "url": "https://www.achservices.org",
-    "services": ["childcare", "foster care", "family counseling", "parenting classes"],
-    "notes": "Serves children and families in Tarrant County."
-  },
-  {
-    "id": 1006,
-    "name": "Community Action Partners of Tarrant County",
-    "category": "social_service",
-    "subcategory": "energy_assistance",
-    "address": "1600 Campus Dr, Fort Worth, TX 76119",
-    "lat": 32.6900,
-    "lng": -97.2700,
-    "phone": "(817) 531-7300",
-    "url": "https://www.capunited.org",
-    "services": ["CEAP energy assistance", "weatherization", "financial coaching"],
-    "notes": "CEAP applications accepted seasonally."
-  },
-  {
-    "id": 1007,
     "name": "Fort Worth Housing Solutions",
     "category": "social_service",
     "subcategory": "housing",
     "address": "1201 E 13th St, Fort Worth, TX 76102",
-    "lat": 32.7500,
-    "lng": -97.3200,
-    "phone": "(817) 333-3400",
-    "url": "https://www.fwhs.org",
-    "services": ["Section 8 vouchers", "public housing", "self-sufficiency program"],
-    "notes": "Waitlist status varies. Check website for openings."
+    "lat": 32.7522,
+    "lng": -97.321,
+    "phone": "817-535-6700",
+    "url": "https://fwhs.org",
+    "eligibility": "Income-eligible Fort Worth residents",
+    "services": [
+      "housing_choice_voucher",
+      "section_8",
+      "public_housing",
+      "homeownership_program"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "Housing Choice Voucher and public housing for Fort Worth.",
+    "health_status": "healthy"
   },
   {
-    "id": 1008,
-    "name": "JPS Health Network",
+    "name": "Tarrant County Homeless Coalition",
     "category": "social_service",
-    "subcategory": "healthcare",
-    "address": "1500 S Main St, Fort Worth, TX 76104",
-    "lat": 32.7300,
-    "lng": -97.3200,
-    "phone": "(817) 921-3431",
-    "url": "https://www.jpshealthnet.org",
-    "services": ["sliding-scale healthcare", "behavioral health", "dental"],
-    "notes": "County hospital. Financial assistance available."
+    "subcategory": "housing",
+    "address": "1701 River Run, Fort Worth, TX 76107",
+    "lat": 32.747,
+    "lng": -97.358,
+    "phone": "817-509-3635",
+    "url": "https://www.ahomewithhope.org",
+    "eligibility": "Persons experiencing homelessness in Tarrant County",
+    "services": [
+      "coordinated_entry",
+      "shelter_referral",
+      "rapid_rehousing",
+      "housing_navigation"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "Coordinated entry to homeless services. Call to access any HUD-funded shelter.",
+    "health_status": "healthy"
   },
   {
-    "id": 1009,
-    "name": "Tarrant County College - South Campus",
+    "name": "Presbyterian Night Shelter",
+    "category": "social_service",
+    "subcategory": "housing",
+    "address": "2400 Cypress St, Fort Worth, TX 76102",
+    "lat": 32.7651,
+    "lng": -97.3225,
+    "phone": "817-632-6620",
+    "url": "https://www.journeyhome.org",
+    "eligibility": "Adults experiencing homelessness",
+    "services": [
+      "emergency_shelter",
+      "transitional_housing",
+      "case_management",
+      "employment_services"
+    ],
+    "hours": "24/7 intake",
+    "notes": "Largest emergency shelter in Tarrant County. Onsite case management and Joining Forces job program.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "Salvation Army Fort Worth",
+    "category": "social_service",
+    "subcategory": "general_assistance",
+    "address": "1855 E Lancaster Ave, Fort Worth, TX 76103",
+    "lat": 32.7515,
+    "lng": -97.3,
+    "phone": "817-344-1800",
+    "url": "https://salvationarmydfw.org/fortworth",
+    "eligibility": "Open to all in need",
+    "services": [
+      "emergency_shelter",
+      "food_pantry",
+      "utility_assistance",
+      "rent_assistance"
+    ],
+    "hours": "Mon-Fri 8am-4pm",
+    "notes": "Emergency shelter (Mabee Center), food, utility/rent assistance.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "Tarrant County College - Workforce Training",
     "category": "training",
-    "subcategory": "education",
-    "address": "5301 Campus Dr, Fort Worth, TX 76119",
-    "lat": 32.6900,
-    "lng": -97.2700,
-    "phone": "(817) 515-4500",
-    "url": "https://www.tccd.edu",
-    "services": ["GED", "workforce training", "CDL", "CNA", "welding"],
-    "notes": "Financial aid available. Evening and weekend classes."
+    "subcategory": "credentials",
+    "address": "300 Trinity Campus Cir, Fort Worth, TX 76102",
+    "lat": 32.7491,
+    "lng": -97.3303,
+    "phone": "817-515-8223",
+    "url": "https://www.tccd.edu/workforce",
+    "eligibility": "Open to adults; financial aid available",
+    "services": [
+      "CDL_training",
+      "welding",
+      "HVAC",
+      "healthcare_certifications",
+      "IT_certifications"
+    ],
+    "hours": "Multiple class schedules; campus hours vary",
+    "notes": "Industry-aligned credentials. Pell-eligible. Five Tarrant campuses.",
+    "health_status": "healthy"
   },
   {
-    "id": 1010,
-    "name": "Trinity Metro",
+    "name": "Workforce Solutions WIOA Training Vouchers",
+    "category": "training",
+    "subcategory": "training_funding",
+    "address": "1200 Circle Dr, Fort Worth, TX 76119",
+    "lat": 32.7065,
+    "lng": -97.2901,
+    "phone": "817-413-4400",
+    "url": "https://www.workforcesolutions.net/wioa",
+    "eligibility": "Income-eligible adults, dislocated workers, youth",
+    "services": [
+      "WIOA_training_vouchers",
+      "ITA",
+      "OJT",
+      "case_management"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "WIOA-funded training vouchers up to $7,500 for industry-recognized credentials.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "Tarleton State University Workforce Programs",
+    "category": "training",
+    "subcategory": "higher_ed",
+    "address": "10850 Texan Rider Dr, Fort Worth, TX 76036",
+    "lat": 32.631,
+    "lng": -97.4,
+    "phone": "817-732-7300",
+    "url": "https://www.tarleton.edu/fortworth",
+    "eligibility": "Open admission for non-credit; admission required for credit",
+    "services": [
+      "bachelor_completion",
+      "master_programs",
+      "professional_development"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "Tarleton's Fort Worth campus offers degree completion and continuing education.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "GreenPath Financial Wellness",
+    "category": "social_service",
+    "subcategory": "financial_counseling",
+    "address": "Online and phone services",
+    "lat": 32.7555,
+    "lng": -97.3308,
+    "phone": "888-776-6738",
+    "url": "https://www.greenpath.com",
+    "eligibility": "Open to all consumers",
+    "services": [
+      "credit_counseling",
+      "debt_management",
+      "credit_report_review",
+      "student_loan_counseling"
+    ],
+    "hours": "Mon-Thu 8am-10pm, Fri 8am-7pm, Sat 9am-3pm",
+    "notes": "Free credit counseling and credit report review. Also offers debt management plans.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "Consumer Credit Counseling Service of Greater DFW",
+    "category": "social_service",
+    "subcategory": "financial_counseling",
+    "address": "9221 Lyndon B Johnson Fwy, Dallas, TX 75243",
+    "lat": 32.91,
+    "lng": -96.735,
+    "phone": "800-249-2227",
+    "url": "https://cccsdfw.org",
+    "eligibility": "Open to consumers in credit distress",
+    "services": [
+      "credit_counseling",
+      "debt_management",
+      "housing_counseling",
+      "bankruptcy_education"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "Nonprofit credit counseling for DFW metro. HUD-approved housing counselor.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "United Way - Earn It Keep It Save It (VITA)",
+    "category": "social_service",
+    "subcategory": "financial_assistance",
+    "address": "1500 N Main St, Fort Worth, TX 76164",
+    "lat": 32.7657,
+    "lng": -97.332,
+    "phone": "817-258-8000",
+    "url": "https://unitedwaytarrant.org/eks",
+    "eligibility": "Households earning under $66,000",
+    "services": [
+      "free_tax_prep",
+      "VITA",
+      "EITC_assistance",
+      "asset_building"
+    ],
+    "hours": "January-April; Mon-Sat by appointment",
+    "notes": "Free IRS-certified tax prep for low-income households. Boosts EITC claims.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "Tarrant Area Food Bank",
+    "category": "social_service",
+    "subcategory": "food_assistance",
+    "address": "2600 Cullen St, Fort Worth, TX 76107",
+    "lat": 32.747,
+    "lng": -97.3697,
+    "phone": "817-857-7100",
+    "url": "https://tafb.org",
+    "eligibility": "Open to all in need",
+    "services": [
+      "food_pantry_referral",
+      "mobile_pantry",
+      "SNAP_outreach",
+      "food_for_kids"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "Distributes food to 400+ partner pantries across Tarrant County. Mobile pantry schedule online.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "Community Food Bank Fort Worth",
+    "category": "social_service",
+    "subcategory": "food_assistance",
+    "address": "3000 Galvez Ave, Fort Worth, TX 76111",
+    "lat": 32.7755,
+    "lng": -97.2982,
+    "phone": "817-857-7777",
+    "url": "https://communityfoodbank.com",
+    "eligibility": "Open to households needing food assistance",
+    "services": [
+      "food_pantry",
+      "fresh_produce",
+      "household_essentials"
+    ],
+    "hours": "Tue, Wed, Fri 9am-1pm; Sat 9am-12pm",
+    "notes": "Walk-in pantry. No appointment needed. Fresh produce and pantry staples.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "Mental Health Connection of Tarrant County",
+    "category": "social_service",
+    "subcategory": "mental_health",
+    "address": "1701 River Run Suite 1010, Fort Worth, TX 76107",
+    "lat": 32.747,
+    "lng": -97.358,
+    "phone": "817-927-5200",
+    "url": "https://www.mhctc.org",
+    "eligibility": "Tarrant County residents",
+    "services": [
+      "mental_health_navigation",
+      "system_advocacy",
+      "training",
+      "resource_referral"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "Mental health system navigation and advocacy. Not direct service — referral and education.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "AARP Senior Community Service Employment",
     "category": "career_center",
-    "subcategory": "transportation",
+    "subcategory": "senior_employment",
+    "address": "1200 Circle Dr Suite 200, Fort Worth, TX 76119",
+    "lat": 32.7065,
+    "lng": -97.2901,
+    "phone": "817-413-4476",
+    "url": "https://www.aarp.org/scsep",
+    "eligibility": "Adults 55+ at or below 125% FPL",
+    "services": [
+      "paid_training_assignment",
+      "job_placement",
+      "skills_training"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "Paid training program for low-income adults 55+. Co-located with Workforce Solutions.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "Workforce Solutions for Tarrant County - General Job Search",
+    "category": "career_center",
+    "subcategory": "workforce_development",
+    "address": "1200 Circle Dr, Fort Worth, TX 76119",
+    "lat": 32.7065,
+    "lng": -97.2901,
+    "phone": "817-413-4400",
+    "url": "https://www.workforcesolutions.net",
+    "eligibility": "Open to all jobseekers",
+    "services": [
+      "job_search",
+      "resume_help",
+      "career_counseling",
+      "job_fairs"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "TWC anchor for Tarrant County. General services for any active jobseeker.",
+    "health_status": "healthy",
+    "barrier_affinity": []
+  },
+  {
+    "name": "TWC Training Programs - Tarrant County (WIOA Vouchers)",
+    "category": "training",
+    "subcategory": "training_funding",
+    "address": "1200 Circle Dr, Fort Worth, TX 76119",
+    "lat": 32.7065,
+    "lng": -97.2901,
+    "phone": "817-413-4400",
+    "url": "https://www.workforcesolutions.net/training",
+    "eligibility": "Income-eligible per WIOA guidelines; in-demand occupation training only",
+    "services": [
+      "WIOA_vouchers",
+      "ITA_funding",
+      "occupational_skills_training",
+      "OJT"
+    ],
+    "hours": "Mon-Fri 8am-5pm; appointment preferred",
+    "notes": "WIOA-funded training vouchers up to $7,500 for in-demand fields (CNA, CDL, welding, IT).",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "training"
+    ]
+  },
+  {
+    "name": "TWC Transportation Vouchers - Tarrant County",
+    "category": "social_service",
+    "subcategory": "vouchers",
+    "address": "1200 Circle Dr, Fort Worth, TX 76119",
+    "lat": 32.7065,
+    "lng": -97.2901,
+    "phone": "817-413-4400",
+    "url": "https://www.workforcesolutions.net/services/transportation",
+    "eligibility": "Active jobseekers in WIOA / Choices / SNAP E&T programs",
+    "services": [
+      "gas_cards",
+      "bus_passes",
+      "Trinity_Metro_pass_subsidy"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "Gas cards or Trinity Metro bus passes for active jobseekers in supported workforce programs.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "transportation"
+    ]
+  },
+  {
+    "name": "TWC Reentry Program - Tarrant County",
+    "category": "career_center",
+    "subcategory": "reentry",
+    "address": "1200 Circle Dr, Fort Worth, TX 76119",
+    "lat": 32.7065,
+    "lng": -97.2901,
+    "phone": "817-413-4400",
+    "url": "https://www.workforcesolutions.net/services/reentry",
+    "eligibility": "Adults with criminal records; recently released or on parole/probation",
+    "services": [
+      "reentry_navigation",
+      "fair_chance_employer_referrals",
+      "background_explanation_coaching",
+      "expunction_referrals"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "Dedicated reentry navigators on site. Connections to fair-chance employers (Goodwill, BNSF, Trinity Metro, JPS dietary).",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "criminal_record"
+    ]
+  },
+  {
+    "name": "TWC Child Care Subsidy - Tarrant County",
+    "category": "childcare",
+    "subcategory": "subsidy",
+    "address": "1200 Circle Dr, Fort Worth, TX 76119",
+    "lat": 32.7065,
+    "lng": -97.2901,
+    "phone": "817-413-4400",
+    "url": "https://www.workforcesolutions.net/services/child-care",
+    "eligibility": "Working / training parents under 85% State Median Income",
+    "services": [
+      "child_care_subsidy",
+      "Texas_Rising_Star_referrals",
+      "after_school_subsidy"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "Child care subsidy for working or training parents. Apply online or in person.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "childcare"
+    ]
+  },
+  {
+    "name": "Trinity Metro Bus - Job Corridor Routes",
+    "category": "social_service",
+    "subcategory": "public_transit",
     "address": "801 E Northside Dr, Fort Worth, TX 76102",
-    "lat": 32.7600,
-    "lng": -97.3200,
-    "phone": "(817) 215-8600",
-    "url": "https://www.ridetrinitymetro.org",
-    "services": ["bus routes", "TEXRail", "reduced fare program", "trip planning"],
-    "notes": "Mon-Sat ~5am-10pm. Limited Sunday service."
+    "lat": 32.7702,
+    "lng": -97.3286,
+    "phone": "817-215-8600",
+    "url": "https://ridetrinitymetro.org/routes",
+    "eligibility": "Open to all riders; reduced fare available",
+    "services": [
+      "bus_routes_2_4_7_11_25_26_36",
+      "transfers_to_TEXRail_TRE",
+      "ZIPZONE_microtransit"
+    ],
+    "hours": "Mon-Sat 5am-11pm; reduced Sunday service",
+    "notes": "Major Fort Worth bus routes covering downtown, hospitals, AllianceTexas, and major employer corridors.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "transportation"
+    ]
+  },
+  {
+    "name": "TEXRail - Fort Worth to DFW Airport",
+    "category": "social_service",
+    "subcategory": "public_transit",
+    "address": "1001 Jones St, Fort Worth, TX 76102",
+    "lat": 32.7496,
+    "lng": -97.3296,
+    "phone": "817-215-8600",
+    "url": "https://ridetrinitymetro.org/texrail",
+    "eligibility": "Open to all riders",
+    "services": [
+      "commuter_rail",
+      "DFW_airport_service",
+      "Grapevine_corridor"
+    ],
+    "hours": "Mon-Fri 4am-12am; weekend service",
+    "notes": "Commuter rail Fort Worth ITC <-> DFW Airport via Grapevine. Connects to TRE for Dallas.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "transportation"
+    ]
+  },
+  {
+    "name": "Trinity Metro ZIPZONE On-Demand Microtransit",
+    "category": "social_service",
+    "subcategory": "public_transit",
+    "address": "801 E Northside Dr, Fort Worth, TX 76102",
+    "lat": 32.7702,
+    "lng": -97.3286,
+    "phone": "817-215-8600",
+    "url": "https://ridetrinitymetro.org/zipzone",
+    "eligibility": "Riders within ZIPZONE service areas",
+    "services": [
+      "on_demand_rides",
+      "Como_zone",
+      "Mercantile_zone",
+      "Alliance_zone",
+      "NE_FW_zone",
+      "South_FW_zone"
+    ],
+    "hours": "Mon-Fri 6am-7pm; varies by zone",
+    "notes": "On-demand shared rides within 5 Fort Worth zones. Same Trinity Metro fare as bus.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "transportation"
+    ]
+  },
+  {
+    "name": "ACCESS Trinity Metro - ADA Paratransit",
+    "category": "social_service",
+    "subcategory": "public_transit",
+    "address": "801 E Northside Dr, Fort Worth, TX 76102",
+    "lat": 32.7702,
+    "lng": -97.3286,
+    "phone": "817-215-8600",
+    "url": "https://ridetrinitymetro.org/access",
+    "eligibility": "ADA-eligible riders unable to use fixed-route bus",
+    "services": [
+      "paratransit",
+      "curb_to_curb",
+      "wheelchair_lift",
+      "complementary_to_fixed_route"
+    ],
+    "hours": "Same as fixed-route service hours",
+    "notes": "Curb-to-curb paratransit service for ADA-eligible riders. Apply with documentation.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "transportation",
+      "health"
+    ]
+  },
+  {
+    "name": "Catholic Charities Fort Worth - Gas Vouchers + Auto Repair",
+    "category": "social_service",
+    "subcategory": "vouchers",
+    "address": "249 W Thornhill Dr, Fort Worth, TX 76115",
+    "lat": 32.7011,
+    "lng": -97.3411,
+    "phone": "817-534-0814",
+    "url": "https://www.catholiccharitiesfortworth.org",
+    "eligibility": "Income-eligible (under 200% FPL); case-managed clients",
+    "services": [
+      "gas_vouchers",
+      "car_repair_grants",
+      "case_management"
+    ],
+    "hours": "Mon-Fri 9am-5pm; appointment required",
+    "notes": "Gas vouchers and one-time car repair grants up to $1,500 for case-managed clients.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "transportation"
+    ]
+  },
+  {
+    "name": "TANF Transportation Assistance",
+    "category": "social_service",
+    "subcategory": "vouchers",
+    "address": "Texas Health and Human Services - Tarrant County",
+    "lat": 32.7555,
+    "lng": -97.3308,
+    "phone": "211",
+    "url": "https://www.hhs.texas.gov/tanf",
+    "eligibility": "TANF recipients with employment / training plans",
+    "services": [
+      "transportation_subsidy",
+      "gas_or_bus_pass",
+      "tied_to_TANF_work_requirement"
+    ],
+    "hours": "Mon-Fri 8am-5pm via 211",
+    "notes": "TANF work-requirement participants can request transportation assistance through their case worker.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "transportation"
+    ]
+  },
+  {
+    "name": "Tarrant County Reentry Bus Pass Program",
+    "category": "social_service",
+    "subcategory": "vouchers",
+    "address": "200 Taylor St, Fort Worth, TX 76196",
+    "lat": 32.7503,
+    "lng": -97.3296,
+    "phone": "817-884-1188",
+    "url": "https://www.tarrantcounty.com/en/community-supervision/reentry-services.html",
+    "eligibility": "Tarrant County residents recently released from incarceration / on community supervision",
+    "services": [
+      "bus_passes_30_day",
+      "reentry_case_management",
+      "ID_restoration_referrals"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "30-day Trinity Metro passes for jobseekers in Tarrant County reentry programs.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "transportation",
+      "criminal_record"
+    ]
+  },
+  {
+    "name": "AirCheck Texas - Drive a Clean Machine",
+    "category": "social_service",
+    "subcategory": "vehicle_repair",
+    "address": "Statewide TCEQ program - Fort Worth field office",
+    "lat": 32.7555,
+    "lng": -97.3308,
+    "phone": "1-800-898-9103",
+    "url": "https://www.airchecktexas.org",
+    "eligibility": "Vehicle failed emissions in Tarrant / Dallas / Collin / Denton / Ellis / Johnson / Kaufman / Parker / Rockwall counties; income-eligible",
+    "services": [
+      "emissions_repair_grants_up_to_600",
+      "vehicle_replacement_up_to_3500"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "TCEQ emissions repair grants up to $600 + replacement assistance up to $3,500 for low-income who fail emissions.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "transportation"
+    ]
+  },
+  {
+    "name": "Cars 4 Christmas Tarrant County",
+    "category": "social_service",
+    "subcategory": "vehicle_repair",
+    "address": "Fort Worth, TX (annual program)",
+    "lat": 32.7555,
+    "lng": -97.3308,
+    "phone": "817-204-3500",
+    "url": "https://cars4christmas.org",
+    "eligibility": "Single parents, working poor, those overcoming hardship; nominated each fall",
+    "services": [
+      "vehicle_giveaway",
+      "vehicle_donations_accepted"
+    ],
+    "hours": "Applications accepted each October; vehicles given Christmas Eve",
+    "notes": "Annual vehicle giveaway program. Apply October each year, vehicles given Christmas Eve.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "transportation"
+    ]
+  },
+  {
+    "name": "Trinity Habitat for Humanity - Vehicle Programs",
+    "category": "social_service",
+    "subcategory": "vehicle_repair",
+    "address": "9333 N Normandale St, Fort Worth, TX 76116",
+    "lat": 32.7619,
+    "lng": -97.4505,
+    "phone": "817-926-9219",
+    "url": "https://www.trinityhabitat.org",
+    "eligibility": "Low-income families; partnership with car repair / donation programs",
+    "services": [
+      "occasional_vehicle_grants",
+      "auto_repair_referrals"
+    ],
+    "hours": "Mon-Fri 9am-5pm",
+    "notes": "Occasional vehicle grant programs through Habitat partnerships. Always confirm current availability.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "transportation"
+    ]
+  },
+  {
+    "name": "ModivCare - Medicaid Non-Emergency Medical Transport",
+    "category": "social_service",
+    "subcategory": "medical_transport",
+    "address": "Statewide Medicaid NEMT contractor",
+    "lat": 32.7555,
+    "lng": -97.3308,
+    "phone": "855-687-4786",
+    "url": "https://www.modivcare.com",
+    "eligibility": "Texas Medicaid recipients with documented medical appointments",
+    "services": [
+      "non_emergency_medical_transport",
+      "wheelchair_van",
+      "advance_scheduling"
+    ],
+    "hours": "Schedule 24-72 hours in advance; service Mon-Sun 24/7",
+    "notes": "Free transportation to medical appointments for Medicaid recipients statewide.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "transportation",
+      "health"
+    ]
+  },
+  {
+    "name": "Texas Health Steps Transportation",
+    "category": "social_service",
+    "subcategory": "medical_transport",
+    "address": "Statewide Medicaid program",
+    "lat": 32.7555,
+    "lng": -97.3308,
+    "phone": "877-541-7905",
+    "url": "https://www.txhealthsteps.com",
+    "eligibility": "Children on Medicaid (under 21) with medical appointments",
+    "services": [
+      "medical_transport_for_kids",
+      "well_child_visits",
+      "specialist_referrals"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "Medical transportation for Medicaid-enrolled children to well-child visits and specialist appointments.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "transportation",
+      "health",
+      "childcare"
+    ]
+  },
+  {
+    "name": "Tarrant Area Agency on Aging - Senior Transportation",
+    "category": "social_service",
+    "subcategory": "medical_transport",
+    "address": "1101 Bristol St, Tarrant County",
+    "lat": 32.744,
+    "lng": -97.3333,
+    "phone": "817-258-8000",
+    "url": "https://www.tarrantaaa.org",
+    "eligibility": "Adults 60+ in Tarrant County",
+    "services": [
+      "medical_appointment_transport",
+      "senior_center_transport",
+      "case_coordination"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "Free / low-cost transportation for Tarrant County seniors to medical and senior services.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "transportation",
+      "health"
+    ]
+  },
+  {
+    "name": "MITS - Mobility Impaired Transportation Service",
+    "category": "social_service",
+    "subcategory": "medical_transport",
+    "address": "Tarrant County",
+    "lat": 32.7555,
+    "lng": -97.3308,
+    "phone": "817-336-8714",
+    "url": "https://mitstexas.org",
+    "eligibility": "Tarrant County residents with mobility impairments",
+    "services": [
+      "wheelchair_van_transport",
+      "medical_appointments",
+      "shopping_trips"
+    ],
+    "hours": "Mon-Fri 8am-5pm; advance scheduling",
+    "notes": "Transportation for Tarrant County residents with mobility impairments. Advance scheduling required.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "transportation",
+      "health"
+    ]
+  },
+  {
+    "name": "Texas DPS Driver License Office - Fort Worth",
+    "category": "social_service",
+    "subcategory": "license_restoration",
+    "address": "1408 W Mitchell St, Fort Worth, TX 76104",
+    "lat": 32.7297,
+    "lng": -97.3406,
+    "phone": "817-924-1133",
+    "url": "https://www.dps.texas.gov/section/driver-license",
+    "eligibility": "Texas residents needing license / ID services",
+    "services": [
+      "driver_license_renewal",
+      "ID_card",
+      "driving_test",
+      "license_reinstatement"
+    ],
+    "hours": "Mon-Fri 8am-5pm; appointments preferred",
+    "notes": "Closest central DPS office. License reinstatement requires resolved holds and applicable fees.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "transportation"
+    ]
+  },
+  {
+    "name": "Operation Reentry Texas - License Reinstatement",
+    "category": "social_service",
+    "subcategory": "license_restoration",
+    "address": "Fort Worth, TX (statewide service)",
+    "lat": 32.7555,
+    "lng": -97.3308,
+    "phone": "713-526-5300",
+    "url": "https://www.operationreentrytexas.org",
+    "eligibility": "Adults with criminal records facing license suspensions tied to court fees / fines",
+    "services": [
+      "license_reinstatement_help",
+      "occupational_license_application",
+      "DRP_navigation"
+    ],
+    "hours": "Mon-Fri 9am-5pm; intake by phone",
+    "notes": "Nonprofit helping ex-offenders navigate driver license reinstatement and Driver Responsibility Program holds.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "transportation",
+      "criminal_record"
+    ]
+  },
+  {
+    "name": "IDignity Fort Worth",
+    "category": "social_service",
+    "subcategory": "license_restoration",
+    "address": "Fort Worth, TX (rotating clinic locations)",
+    "lat": 32.7555,
+    "lng": -97.3308,
+    "phone": "817-263-9900",
+    "url": "https://idignityfortworth.org",
+    "eligibility": "Homeless or very low-income adults needing ID",
+    "services": [
+      "birth_certificate_help",
+      "Texas_ID_card",
+      "social_security_card",
+      "fee_assistance"
+    ],
+    "hours": "Quarterly clinics; check website for next event",
+    "notes": "Quarterly ID restoration clinics for homeless / very low-income jobseekers. Helps gather birth certificate, ID, SSN.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "transportation",
+      "housing"
+    ]
+  },
+  {
+    "name": "Trinity Metro Bike - Fort Worth Bike Share",
+    "category": "social_service",
+    "subcategory": "bike",
+    "address": "Fort Worth, TX (multiple stations)",
+    "lat": 32.7555,
+    "lng": -97.3308,
+    "phone": "817-215-8600",
+    "url": "https://www.ridetrinitymetro.org/bike-share",
+    "eligibility": "Open to all riders; discounted memberships for low-income",
+    "services": [
+      "bike_share_membership",
+      "low_income_discount",
+      "30_minute_rides"
+    ],
+    "hours": "24/7 self-service kiosks",
+    "notes": "Bike share with low-income membership discount. Useful for last-mile commute from Trinity Metro stops.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "transportation"
+    ]
+  },
+  {
+    "name": "Recycle Bicycles for Kids - Fort Worth",
+    "category": "social_service",
+    "subcategory": "bike",
+    "address": "Fort Worth, TX (collection events)",
+    "lat": 32.7555,
+    "lng": -97.3308,
+    "phone": "817-313-4445",
+    "url": "https://recyclebicycles.org",
+    "eligibility": "Low-income families and adults referred by partner agencies",
+    "services": [
+      "refurbished_bike_giveaway",
+      "bike_repair_workshops"
+    ],
+    "hours": "Volunteer-run, varies",
+    "notes": "Refurbished bike giveaway events. Useful for car-free commute or kids who need transport to school.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "transportation"
+    ]
+  },
+  {
+    "name": "211 Texas / United Way 211 Tarrant County - Transportation Referrals",
+    "category": "social_service",
+    "subcategory": "referral",
+    "address": "Tarrant County",
+    "lat": 32.7555,
+    "lng": -97.3308,
+    "phone": "211",
+    "url": "https://www.unitedwaytarrant.org/211",
+    "eligibility": "All Tarrant County residents",
+    "services": [
+      "transportation_referrals",
+      "needs_assessment",
+      "warm_handoff_to_partner_agencies"
+    ],
+    "hours": "24/7 phone service",
+    "notes": "Call 211 for personalized referrals to transportation, food, housing, medical, and crisis resources.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "transportation"
+    ]
+  },
+  {
+    "name": "Texas Veterans Commission - Fort Worth Field Office",
+    "category": "social_service",
+    "subcategory": "veterans",
+    "address": "1300 S Hampton Rd, Dallas, TX 75208 (Fort Worth field staff)",
+    "lat": 32.744,
+    "lng": -96.8311,
+    "phone": "1-800-252-8387",
+    "url": "https://www.tvc.texas.gov",
+    "eligibility": "Texas veterans and their families",
+    "services": [
+      "VA_benefits_claims",
+      "veteran_employment",
+      "education_benefits",
+      "housing_assistance"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "TVC counselors help with VA disability claims, employment, education benefits.",
+    "health_status": "healthy",
+    "barrier_affinity": []
+  },
+  {
+    "name": "U.S. VETS - Fort Worth",
+    "category": "social_service",
+    "subcategory": "veterans",
+    "address": "Fort Worth, TX (call for clinic location)",
+    "lat": 32.7555,
+    "lng": -97.3308,
+    "phone": "817-921-9600",
+    "url": "https://usvets.org/locations/fort-worth",
+    "eligibility": "Veterans experiencing homelessness or at risk",
+    "services": [
+      "transitional_housing",
+      "employment_services",
+      "case_management",
+      "mental_health_referrals"
+    ],
+    "hours": "Mon-Fri 8am-5pm; 24/7 housing services",
+    "notes": "Transitional housing and employment services for at-risk veterans.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "housing"
+    ]
+  },
+  {
+    "name": "SafeHaven of Tarrant County",
+    "category": "social_service",
+    "subcategory": "domestic_violence",
+    "address": "Fort Worth, TX (confidential location)",
+    "lat": 32.7555,
+    "lng": -97.3308,
+    "phone": "877-701-7233",
+    "url": "https://www.safehaventc.org",
+    "eligibility": "Survivors of domestic violence and their children",
+    "services": [
+      "24h_hotline",
+      "emergency_shelter",
+      "legal_advocacy",
+      "counseling",
+      "transitional_housing"
+    ],
+    "hours": "24/7 hotline; shelter access 24/7",
+    "notes": "Largest DV shelter in Tarrant County. 24-hour confidential hotline.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "housing",
+      "health"
+    ]
+  },
+  {
+    "name": "Women's Center of Tarrant County",
+    "category": "social_service",
+    "subcategory": "domestic_violence",
+    "address": "1723 Hemphill St, Fort Worth, TX 76110",
+    "lat": 32.7256,
+    "lng": -97.3296,
+    "phone": "817-927-4006",
+    "url": "https://womenscentertc.org",
+    "eligibility": "Women, children, and families in crisis",
+    "services": [
+      "sexual_assault_services",
+      "rape_crisis_hotline",
+      "counseling",
+      "employment_services"
+    ],
+    "hours": "Mon-Fri 8am-5pm; 24h crisis line",
+    "notes": "Sexual assault and rape crisis services. Counseling and employment support.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "health"
+    ]
+  },
+  {
+    "name": "REACH Resource Center on Independent Living - Fort Worth",
+    "category": "social_service",
+    "subcategory": "disability",
+    "address": "1505 Hemphill St, Fort Worth, TX 76104",
+    "lat": 32.73,
+    "lng": -97.3296,
+    "phone": "817-870-9082",
+    "url": "https://www.reachcils.org",
+    "eligibility": "People with disabilities seeking independent living support",
+    "services": [
+      "independent_living_skills",
+      "advocacy",
+      "peer_support",
+      "transition_services",
+      "ADA_navigation"
+    ],
+    "hours": "Mon-Fri 9am-5pm",
+    "notes": "Centers for Independent Living model. Peer support and advocacy for disability community.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "health"
+    ]
+  },
+  {
+    "name": "Fort Worth Pride Center",
+    "category": "social_service",
+    "subcategory": "lgbtq",
+    "address": "1407 W Magnolia Ave, Fort Worth, TX 76104",
+    "lat": 32.7286,
+    "lng": -97.3331,
+    "phone": "817-484-7273",
+    "url": "https://fortworthpridecenter.org",
+    "eligibility": "LGBTQ+ community members and allies",
+    "services": [
+      "support_groups",
+      "youth_programs",
+      "HIV_testing_referrals",
+      "case_management"
+    ],
+    "hours": "Tue-Sat 12pm-8pm",
+    "notes": "Community center for Fort Worth's LGBTQ+ community. Support groups and case management.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "health"
+    ]
+  },
+  {
+    "name": "Catholic Charities Fort Worth - Refugee Services",
+    "category": "social_service",
+    "subcategory": "refugee",
+    "address": "249 W Thornhill Dr, Fort Worth, TX 76115",
+    "lat": 32.7011,
+    "lng": -97.3411,
+    "phone": "817-534-0814",
+    "url": "https://www.catholiccharitiesfortworth.org/refugee-services",
+    "eligibility": "Refugees, asylees, special immigrant visa holders",
+    "services": [
+      "resettlement_services",
+      "ESL_classes",
+      "employment_services",
+      "case_management",
+      "immigration_legal_services"
+    ],
+    "hours": "Mon-Fri 9am-5pm",
+    "notes": "Federal refugee resettlement contractor. ESL, employment, immigration services.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "training"
+    ]
+  },
+  {
+    "name": "Tarrant Area Agency on Aging - Standalone Aging Services",
+    "category": "social_service",
+    "subcategory": "senior",
+    "address": "1101 Bristol St, Tarrant County",
+    "lat": 32.744,
+    "lng": -97.3333,
+    "phone": "817-258-8000",
+    "url": "https://www.tarrantaaa.org",
+    "eligibility": "Adults 60+ in Tarrant County",
+    "services": [
+      "benefits_counseling",
+      "caregiver_support",
+      "ombudsman_services",
+      "nutrition_programs"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "Federally designated AAA for Tarrant. Benefits counseling, caregiver support, ombudsman.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "health"
+    ]
+  },
+  {
+    "name": "Senior Citizens Services of Greater Tarrant County",
+    "category": "social_service",
+    "subcategory": "senior",
+    "address": "1000 Macon St, Fort Worth, TX 76102",
+    "lat": 32.7555,
+    "lng": -97.3206,
+    "phone": "817-336-2882",
+    "url": "https://senior-services-fw.org",
+    "eligibility": "Adults 60+ in Tarrant County",
+    "services": [
+      "meals_on_wheels",
+      "senior_center_programs",
+      "transportation_referrals"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "Meals on Wheels and senior center programming for Tarrant County seniors.",
+    "health_status": "healthy",
+    "barrier_affinity": []
+  },
+  {
+    "name": "Big Brothers Big Sisters Lone Star",
+    "category": "social_service",
+    "subcategory": "youth",
+    "address": "8920 Stemmons Fwy, Dallas, TX 75247 (serving Fort Worth)",
+    "lat": 32.8333,
+    "lng": -96.8666,
+    "phone": "817-810-9907",
+    "url": "https://www.bigbrothersbigsisters.org",
+    "eligibility": "Children ages 6-18 in single-parent or low-income households",
+    "services": [
+      "mentoring",
+      "school_based_mentoring",
+      "community_based_mentoring"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "1-on-1 youth mentoring for kids in Fort Worth and Tarrant County.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "childcare"
+    ]
+  },
+  {
+    "name": "YMCA of Metropolitan Fort Worth",
+    "category": "social_service",
+    "subcategory": "youth",
+    "address": "512 Lamar St, Fort Worth, TX 76102",
+    "lat": 32.7521,
+    "lng": -97.3331,
+    "phone": "817-332-3281",
+    "url": "https://www.ymcafw.org",
+    "eligibility": "All ages; financial assistance available",
+    "services": [
+      "after_school_programs",
+      "summer_camps",
+      "youth_sports",
+      "child_watch",
+      "fitness"
+    ],
+    "hours": "Mon-Fri 5am-9pm; weekend hours vary",
+    "notes": "Fort Worth YMCAs offer after-school care, summer camps, scholarships available.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "childcare"
+    ]
+  },
+  {
+    "name": "Recovery Resource Council Fort Worth",
+    "category": "social_service",
+    "subcategory": "substance_use",
+    "address": "1601 N Highway 287, Mansfield, TX 76063",
+    "lat": 32.5639,
+    "lng": -97.1417,
+    "phone": "817-332-6329",
+    "url": "https://www.recoverycouncil.org",
+    "eligibility": "Adults and youth seeking substance use recovery; sliding scale",
+    "services": [
+      "counseling",
+      "MAT_referrals",
+      "intensive_outpatient",
+      "youth_prevention"
+    ],
+    "hours": "Mon-Fri 8am-5pm; some evening groups",
+    "notes": "Substance use counseling, MAT referrals, sliding-scale fees.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "health"
+    ]
+  },
+  {
+    "name": "Alcoholics Anonymous - District 70 Fort Worth",
+    "category": "social_service",
+    "subcategory": "substance_use",
+    "address": "Fort Worth, TX (multiple meeting locations)",
+    "lat": 32.7555,
+    "lng": -97.3308,
+    "phone": "817-922-9859",
+    "url": "https://aafortworth.org",
+    "eligibility": "Open to anyone with a desire to stop drinking",
+    "services": [
+      "12_step_meetings",
+      "phone_helpline",
+      "sponsor_program"
+    ],
+    "hours": "Meetings 24/7 across Fort Worth area; helpline 24/7",
+    "notes": "Free 12-step meetings throughout Fort Worth and Tarrant County.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "health"
+    ]
   }
 ]
