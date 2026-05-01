@@ -36,6 +36,8 @@ test("Ch04 enriched stack — full visual snapshot @ch04-enrich", async ({ page 
   await expect(page.locator("[data-ch04-svg-overlay]").first()).toBeVisible();
   await expect(page.locator("[data-ch04-compass]").first()).toBeVisible();
   await expect(page.locator("[data-ch04-stat-row]").first()).toBeVisible();
-  await expect(page.locator("[data-ch04-attrib]").first()).toBeVisible();
+  // Attribution chip intentionally removed for demo; verify absence so
+  // we catch regressions if it's accidentally re-added.
+  await expect(page.locator("[data-ch04-attrib]")).toHaveCount(0);
   await expect(page.locator("[data-ch04-legend]").first()).toBeVisible();
 });

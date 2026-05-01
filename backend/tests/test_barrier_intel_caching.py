@@ -9,7 +9,7 @@ class TestBarrierIntelNoCaching:
 
     def test_prompts_no_module_level_system_prompt(self):
         """barrier_intel/prompts.py must not assign SYSTEM_PROMPT at module level."""
-        source = Path("app/barrier_intel/prompts.py").read_text()
+        source = Path("app/barrier_intel/prompts.py").read_text(encoding="utf-8")
         tree = ast.parse(source)
         for node in ast.iter_child_nodes(tree):
             if isinstance(node, ast.Assign):
@@ -24,7 +24,7 @@ class TestBarrierIntelNoCaching:
 
     def test_guardrails_no_module_level_disclaimer(self):
         """barrier_intel/guardrails.py must not assign HALLUCINATION_DISCLAIMER at module level."""
-        source = Path("app/barrier_intel/guardrails.py").read_text()
+        source = Path("app/barrier_intel/guardrails.py").read_text(encoding="utf-8")
         tree = ast.parse(source)
         for node in ast.iter_child_nodes(tree):
             if isinstance(node, ast.Assign):

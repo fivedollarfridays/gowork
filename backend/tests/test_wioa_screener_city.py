@@ -9,7 +9,7 @@ class TestWIOAScreenerCityAware:
 
     def test_no_direct_cert_db_import_from_filters(self):
         """wioa_screener must not import CERT_DB from filters."""
-        source = Path("app/modules/matching/wioa_screener.py").read_text()
+        source = Path("app/modules/matching/wioa_screener.py").read_text(encoding="utf-8")
         tree = ast.parse(source)
         for node in ast.walk(tree):
             if isinstance(node, ast.ImportFrom) and node.module:
@@ -22,7 +22,7 @@ class TestWIOAScreenerCityAware:
 
     def test_uses_resource_router_for_cert_db(self):
         """wioa_screener should import from resource_router."""
-        source = Path("app/modules/matching/wioa_screener.py").read_text()
+        source = Path("app/modules/matching/wioa_screener.py").read_text(encoding="utf-8")
         tree = ast.parse(source)
         found = False
         for node in ast.walk(tree):

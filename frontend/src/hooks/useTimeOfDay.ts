@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getCityStats } from "@/lib/city-stats";
 import {
   derivePhaseDescriptor,
   type AccentToken,
@@ -30,7 +31,12 @@ export interface TimeOfDayState {
   accentToken: AccentToken;
 }
 
-const FORT_WORTH_LATITUDE = 32.7555;
+/** Default latitude for the hook — wired from `getCityStats(state).latitude`
+ *  so a future city onboards by editing city-stats.ts, not by tracking down
+ *  this constant. Reference deployment is Fort Worth (TX), so we read the
+ *  TX entry here. Callers that already know their city should pass the
+ *  explicit latitude through the hook arg. */
+const DEFAULT_LATITUDE = getCityStats("TX").latitude;
 const MINUTE_MS = 60_000;
 const SSR_DEFAULT: TimeOfDayState = {
   phase: "day",
@@ -109,10 +115,11 @@ function snapshot(latitude: number, now: Date): TimeOfDayState {
  * **W4 fields** are additive — existing W2/W3 callers reading only
  * `phase`, `sunPosition`, `accentShift` are unaffected.
  *
- * @param latitude Optional — defaults to Fort Worth (32.7555°N).
+ * @param latitude Optional — defaults to the active reference city
+ *                 (Fort Worth, TX → 32.7555°N) via `getCityStats("TX").latitude`.
  *                 Used by W2's Mapbox sky setter for cross-city accuracy.
  */
-export function useTimeOfDay(latitude: number = FORT_WORTH_LATITUDE): TimeOfDayState {
+export function useTimeOfDay(latitude: number = DEFAULT_LATITUDE): TimeOfDayState {
   const [state, setState] = useState<TimeOfDayState>(SSR_DEFAULT);
 
   useEffect(() => {

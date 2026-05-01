@@ -117,7 +117,7 @@ class TestSeedDataFile:
         data_dir = Path(__file__).parent.parent / "data"
         filepath = data_dir / "cities" / "montgomery" / "honestjobs_listings.json"
         assert filepath.exists(), f"Seed file missing: {filepath}"
-        data = json.loads(filepath.read_text())
+        data = json.loads(filepath.read_text(encoding="utf-8"))
         assert isinstance(data, list)
         assert len(data) >= 10
 
@@ -126,7 +126,7 @@ class TestSeedDataFile:
         from pathlib import Path
         data_dir = Path(__file__).parent.parent / "data"
         seed_path = data_dir / "cities" / "montgomery" / "honestjobs_listings.json"
-        data = json.loads(seed_path.read_text())
+        data = json.loads(seed_path.read_text(encoding="utf-8"))
         for record in data:
             assert "title" in record
             assert "company" in record

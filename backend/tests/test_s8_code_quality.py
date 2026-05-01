@@ -68,13 +68,15 @@ class TestFileSizeLimits:
     def test_route_files_under_400(self) -> None:
         routes_dir = os.path.join(os.path.dirname(__file__), "..", "app", "routes")
         for fp in self._get_py_files(routes_dir):
-            lines = sum(1 for _ in open(fp))
+            with open(fp, encoding="utf-8") as fh:
+                lines = sum(1 for _ in fh)
             assert lines < 400, f"{fp} has {lines} lines (max 400)"
 
     def test_module_files_under_400(self) -> None:
         modules_dir = os.path.join(os.path.dirname(__file__), "..", "app", "modules")
         for fp in self._get_py_files(modules_dir):
-            lines = sum(1 for _ in open(fp))
+            with open(fp, encoding="utf-8") as fh:
+                lines = sum(1 for _ in fh)
             assert lines < 400, f"{fp} has {lines} lines (max 400)"
 
 
@@ -87,7 +89,7 @@ class TestFunctionCountLimits:
     """Production files must have fewer than 15 functions."""
 
     def _count_functions(self, filepath: str) -> int:
-        with open(filepath) as f:
+        with open(filepath, encoding="utf-8") as f:
             tree = ast.parse(f.read())
         return sum(
             1 for node in ast.walk(tree)
@@ -123,7 +125,7 @@ class TestPublicTypeHints:
 
     def _check_return_hints(self, filepath: str) -> list[str]:
         """Return list of public functions missing return type hints."""
-        with open(filepath) as f:
+        with open(filepath, encoding="utf-8") as f:
             tree = ast.parse(f.read())
         missing = []
         for node in ast.walk(tree):

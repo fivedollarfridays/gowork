@@ -199,13 +199,11 @@ describe("Chapter04TheMap — Ch04-enrich stat row (bottom-center)", () => {
   });
 });
 
-describe("Chapter04TheMap — Ch04-enrich attribution chip", () => {
-  it("renders the branded Mapbox attribution chip with both copyright links", () => {
+describe("Chapter04TheMap — Ch04 attribution chip removed", () => {
+  it("does not render the attribution chip (intentionally removed for demo)", () => {
     renderEN(<Chapter04TheMap />);
     const chip = document.querySelector("[data-ch04-attrib]");
-    expect(chip).not.toBeNull();
-    expect(chip?.textContent ?? "").toMatch(/Mapbox/);
-    expect(chip?.textContent ?? "").toMatch(/OpenStreetMap/);
+    expect(chip).toBeNull();
   });
 });
 

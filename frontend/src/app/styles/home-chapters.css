@@ -1219,38 +1219,6 @@ body:not([data-map-cursor-active="true"]) .chapter {
   .ch04-compass__dot { animation: none; }
 }
 
-/* Branded Mapbox attribution chip — top-left. */
-.ch04-attrib {
-  position: absolute;
-  left: 28px;
-  top: 24px;
-  z-index: 7;
-  font-family: var(--font-mono-data, monospace);
-  font-size: 9.5px;
-  color: var(--fg-muted, #a4b3c7);
-  letter-spacing: 0.04em;
-  background: rgba(10, 14, 26, 0.6);
-  border: 1px solid color-mix(in oklch, var(--fg-primary, #e6ecf5), transparent 88%);
-  backdrop-filter: blur(8px);
-  border-radius: 999px;
-  padding: 6px 12px;
-  display: inline-flex;
-  gap: 8px;
-  align-items: center;
-}
-.ch04-attrib__live {
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: var(--accent-cyan, #22d3ee);
-  box-shadow: 0 0 8px var(--accent-cyan, #22d3ee);
-  animation: ch04CompassPulse 2.4s ease-in-out infinite;
-  display: inline-block;
-}
-.ch04-attrib__sep { opacity: 0.5; }
-.ch04-attrib__link { color: var(--fg-secondary, #a8b2c7); text-decoration: none; }
-.ch04-attrib__link:hover { color: var(--accent-cyan, #22d3ee); }
-
 /* Bottom-center stat row. */
 .ch04-stat-row {
   position: absolute;
@@ -1301,8 +1269,7 @@ body:not([data-map-cursor-active="true"]) .chapter {
   line-height: 1.4;
 }
 [data-map-alive="false"] .ch04-stat-row,
-[data-map-alive="false"] .ch04-compass,
-[data-map-alive="false"] .ch04-attrib {
+[data-map-alive="false"] .ch04-compass {
   opacity: 0.45;
 }
 @media (max-width: 780px) {
@@ -1313,7 +1280,6 @@ body:not([data-map-cursor-active="true"]) .chapter {
     padding: 10px 14px;
   }
   .ch04-compass { top: 12px; right: 12px; padding: 10px; }
-  .ch04-attrib { top: 12px; left: 12px; padding: 4px 10px; }
 }
 
 /* Legend — 6 rows + heading. */
@@ -1578,6 +1544,16 @@ body:not([data-map-cursor-active="true"]) .chapter {
 :root[data-theme="light"] .ch05-card .pc-foot { color: #8696A8; }
 :root[data-theme="light"] .ch05-card .ch05-card__back li { color: #F5F3EE; }
 
+/* Hide Mapbox branding controls site-wide. Text attribution is already
+ * disabled at construction (`attributionControl: false` in
+ * Chapter04TheMap.mount.ts) — this CSS hides the wordmark logo in the
+ * bottom-left corner that Mapbox renders by default. Branding-free
+ * map for the demo presentation. */
+.mapboxgl-ctrl-logo,
+.mapboxgl-ctrl-attrib {
+  display: none !important;
+}
+
 /* Ch04 map chips — perma-dark Mapbox canvas underneath. */
 :root[data-theme="light"] .ch04-legend { color: #A4B3C7; }
 :root[data-theme="light"] .ch04-legend__heading { color: #8696A8; }
@@ -1596,8 +1572,18 @@ body:not([data-map-cursor-active="true"]) .chapter {
 :root[data-theme="light"] :where(.ch04-stat__v) { color: #F5F3EE; }
 :root[data-theme="light"] .ch04-stat__unit { color: #8696A8; }
 :root[data-theme="light"] .ch04-stat__l { color: #8696A8; }
-:root[data-theme="light"] .ch04-attrib { color: #8696A8; }
-:root[data-theme="light"] .ch04-attrib__link { color: #A4B3C7; }
+
+/* Ch04 timeline-card "live mapbox" pill — the chip itself flips to cream
+ * surface in light mode. The pill's base style hardcodes a dark navy
+ * fill (`rgba(10, 14, 26, 0.6)`) that doesn't react to the theme token
+ * flip, so on the now-cream `.ch04-card` body it reads as a black blob.
+ * Override the fill to a subtle navy-tint that registers as a pill
+ * shape against cream without punching. Text color cascades from
+ * `var(--fg-muted)` -> muted-navy in light mode automatically. */
+:root[data-theme="light"] .ch04-card__ts {
+  background: rgba(10, 14, 26, 0.06);
+  border-color: color-mix(in oklch, var(--fg-primary), transparent 88%);
+}
 
 /* Ch07 cliff controls — flip dark-glass to cream surface in light mode.
  *

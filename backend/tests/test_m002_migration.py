@@ -233,7 +233,7 @@ def test_plan_history_cap_comment_present():
         / "migrations"
         / "m002_s12_worker_companion.py"
     )
-    src = module_path.read_text()
+    src = module_path.read_text(encoding="utf-8")
     assert "cap of 20 per session enforced in T12.24" in src, (
         "plan_history cap comment missing"
     )

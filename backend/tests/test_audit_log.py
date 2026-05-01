@@ -57,7 +57,7 @@ class TestLogLlmInteraction:
             response_length=300,
             latency_ms=450.5,
         )
-        lines = log_path.read_text().strip().split("\n")
+        lines = log_path.read_text(encoding="utf-8").strip().split("\n")
         assert len(lines) == 1
         entry = json.loads(lines[0])
         assert "timestamp" in entry
@@ -78,7 +78,7 @@ class TestLogLlmInteraction:
             response_length=200,
             latency_ms=10.0,
         )
-        entry = json.loads(log_path.read_text().strip())
+        entry = json.loads(log_path.read_text(encoding="utf-8").strip())
         # Must NOT contain raw session ID
         assert raw_id not in json.dumps(entry)
         # Must contain salted hashed version
@@ -99,7 +99,7 @@ class TestLogLlmInteraction:
             response_length=1200,
             latency_ms=800.0,
         )
-        raw_text = log_path.read_text()
+        raw_text = log_path.read_text(encoding="utf-8")
         entry = json.loads(raw_text.strip())
         # Only metadata fields allowed
         allowed_keys = {"timestamp", "hashed_session", "provider", "prompt_length", "response_length", "latency_ms"}
@@ -117,7 +117,7 @@ class TestLogLlmInteraction:
                 response_length=200 + i,
                 latency_ms=float(i * 10),
             )
-        lines = log_path.read_text().strip().split("\n")
+        lines = log_path.read_text(encoding="utf-8").strip().split("\n")
         assert len(lines) == 3
         # Each line is valid JSON
         for line in lines:
@@ -160,7 +160,7 @@ class TestLogLlmInteraction:
             response_length=200,
             latency_ms=50.0,
         )
-        entry = json.loads(log_path.read_text().strip())
+        entry = json.loads(log_path.read_text(encoding="utf-8").strip())
         # ISO format contains 'T' separator
         assert "T" in entry["timestamp"]
 

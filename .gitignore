@@ -4,14 +4,20 @@ __pycache__/
 .venv/
 *.db
 .env
+.env.*
+!.env.example
 .coverage
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
 # Node
 node_modules/
 .next/
-.env.local
 tsconfig.tsbuildinfo
 coverage/
+dist/
+build/
 
 # Playwright (T13.129)
 frontend/test-results/
@@ -19,8 +25,16 @@ frontend/playwright-report/
 frontend/blob-report/
 frontend/playwright/.cache/
 
-# Build
+# PairCoder caches & telemetry
 .paircoder/cache/
+.paircoder/telemetry/
+.paircoder/feedback/
+.paircoder/history/
+
+# Local agent state (Claude Code, etc.)
+.claude/worktrees/
+.claude/scheduled_tasks.lock
+.claude/settings.local.json
 
 # IDE
 .vscode/
@@ -40,4 +54,8 @@ docs/internal
 
 # Personal deploy helpers (contain hardcoded local paths)
 deploy.sh
-.claude/worktrees/
+
+# Backend run-time artifacts
+backend/.tmp/
+backend/even-terminal-*.log
+*.log

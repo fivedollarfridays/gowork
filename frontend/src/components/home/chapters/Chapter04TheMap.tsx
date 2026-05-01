@@ -55,7 +55,6 @@ import { Ch04Legend } from "./_internal/Ch04Legend";
 import { Ch04SvgOverlay } from "./_internal/Ch04SvgOverlay";
 import { Ch04Compass } from "./_internal/Ch04Compass";
 import { Ch04StatRow } from "./_internal/Ch04StatRow";
-import { Ch04Attribution } from "./_internal/Ch04Attribution";
 import { Ch04Cards } from "./_internal/Ch04Cards";
 import { typewrite } from "@/lib/home/typewriter";
 
@@ -339,7 +338,6 @@ export function Chapter04TheMap(): ReactElement {
         <Ch04Isochrone />
         <Ch04SvgOverlay />
         <Ch04Fallback />
-        <Ch04Attribution />
         <Ch04Compass />
         <Ch04Hud
           sceneText={t(`home.ch4.scene${activeStep + 1}`)}
