@@ -24,79 +24,11 @@ import re
 
 from app.integrations.llm._cache import spanish_polish_cache
 from app.integrations.llm._haiku_client import HaikuError, call_haiku
+from app.integrations.llm._spanish_dict import SPANISH_ENGLISH, SPANISH_STOPWORDS
 
 logger = logging.getLogger(__name__)
 
 _CACHE_VERSION = "v1"
-
-# Curated Spanish -> English occupational dict.  Keys are lowercase
-# Spanish phrases; values are English equivalents the scorer's
-# INDUSTRY_KEYWORDS / TITLE_FAMILY taxonomies recognize.
-_DICT: dict[str, str] = {
-    # Healthcare
-    "enfermería": "nursing",
-    "enfermera": "nurse",
-    "enfermero": "nurse",
-    "asistente de enfermería": "certified nursing assistant",
-    "auxiliar de enfermería": "certified nursing assistant",
-    "cna certificado": "certified nursing assistant",
-    "técnico médico": "medical technician",
-    "ayudante médico": "medical assistant",
-    # Logistics / warehouse
-    "montacargas": "forklift",
-    "operador de montacargas": "forklift operator",
-    "almacén": "warehouse",
-    "almacenista": "warehouse worker",
-    "bodega": "warehouse",
-    "embalaje": "packing",
-    "envío": "shipping",
-    "recepción": "receiving",
-    # Construction / trades
-    "soldadura": "welding",
-    "soldador": "welder",
-    "carpintería": "carpentry",
-    "carpintero": "carpenter",
-    "albañil": "mason",
-    "plomero": "plumber",
-    "electricista": "electrician",
-    "construcción": "construction",
-    "obrero de construcción": "construction worker",
-    # Customer service / clerical
-    "servicio al cliente": "customer service",
-    "atención al cliente": "customer service",
-    "asistente administrativo": "administrative assistant",
-    "secretaria": "secretary",
-    "recepcionista": "receptionist",
-    "cajera": "cashier",
-    "cajero": "cashier",
-    # Hospitality / food
-    "cocinero": "cook",
-    "ayudante de cocina": "kitchen helper",
-    "lavaplatos": "dishwasher",
-    "mesero": "server",
-    "mesera": "server",
-    "limpieza": "cleaning",
-    "personal de limpieza": "cleaning staff",
-    # Common verbs in resumes
-    "experiencia": "experience",
-    "años": "years",
-    "trabajé": "worked",
-    "trabajo": "work",
-    "responsabilidades": "responsibilities",
-    "habilidades": "skills",
-    "certificación": "certification",
-    "certificado": "certified",
-    "licencia": "license",
-    "diploma": "diploma",
-    "secundaria": "high school",
-    "preparatoria": "high school",
-    "universidad": "university",
-}
-
-_SPANISH_STOPWORDS = {
-    "de", "la", "el", "y", "en", "los", "las", "un", "una", "del",
-    "con", "por", "para", "que", "se", "su", "es", "al", "lo", "como",
-}
 
 
 def _detect_spanish(text: str) -> bool:
@@ -106,20 +38,16 @@ def _detect_spanish(text: str) -> bool:
     words = re.findall(r"[a-záéíóúñ]+", text.lower())
     if not words:
         return False
-    sp_hits = sum(1 for w in words if w in _SPANISH_STOPWORDS)
+    sp_hits = sum(1 for w in words if w in SPANISH_STOPWORDS)
     return (sp_hits / len(words)) > 0.03
 
 
 def _dict_translate(text: str) -> tuple[str, list[str]]:
-    """Apply dict translation. Returns (translated_text, residual_unknowns).
-
-    Residual_unknowns is the list of likely-Spanish tokens (4+ chars,
-    contain Spanish-only chars or fail dict lookup) that survived.
-    """
+    """Apply dict translation. Returns (translated_text, residual_unknowns)."""
     out = text
     # Sort longest first so multi-word phrases match before single words
-    for sp_phrase in sorted(_DICT, key=len, reverse=True):
-        en = _DICT[sp_phrase]
+    for sp_phrase in sorted(SPANISH_ENGLISH, key=len, reverse=True):
+        en = SPANISH_ENGLISH[sp_phrase]
         out = re.sub(
             rf"\b{re.escape(sp_phrase)}\b", en, out, flags=re.IGNORECASE,
         )

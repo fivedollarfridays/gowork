@@ -88,24 +88,15 @@ def _fallback_summary(title: str, description: str) -> dict:
     return {"pitch": first_sentence, "duties": []}
 
 
-async def summarize_job(*, title: str, description: str) -> dict:
-    """Return ``{"pitch": str, "duties": list[str], "source": "haiku"|"fallback", "cached": bool}``.
+def _fallback_response(title: str, description: str) -> dict:
+    out = _fallback_summary(title, description)
+    out["source"] = "fallback"
+    out["cached"] = False
+    return out
 
-    Always returns a dict.  Cache hits return immediately.  Cache key is a
-    hash of the description, so identical postings across sources share
-    the same cache slot.
-    """
-    if not description or len(description.strip()) < 30:
-        out = _fallback_summary(title, description)
-        out["source"] = "fallback"
-        out["cached"] = False
-        return out
 
-    key = _description_hash(description)
-    cached = job_summary_cache.get(key)
-    if cached is not None:
-        return {**cached, "source": "haiku", "cached": True}
-
+async def _try_summarize(title: str, description: str) -> dict | None:
+    """Run Haiku + parse. Return parsed summary or None on any error."""
     try:
         result = await call_haiku(
             _SYSTEM_PROMPT, _build_user_prompt(title, description),
@@ -114,21 +105,36 @@ async def summarize_job(*, title: str, description: str) -> dict:
         summary = _parse_haiku_response(result.text)
     except HaikuError as exc:
         logger.warning("summarizer falling back: %s", exc)
-        out = _fallback_summary(title, description)
-        out["source"] = "fallback"
-        out["cached"] = False
-        return out
+        return None
     except (ValueError, json.JSONDecodeError) as exc:
         logger.warning("summarizer parse failed: %s", exc)
-        out = _fallback_summary(title, description)
-        out["source"] = "fallback"
-        out["cached"] = False
-        return out
-
-    job_summary_cache.set(key, summary)
+        return None
     logger.info(
         "summarizer haiku ok title=%r tokens_in=%d tokens_out=%d cost~$%.4f",
         title[:40], result.input_tokens, result.output_tokens,
         result.estimated_cost_usd,
     )
+    return summary
+
+
+async def summarize_job(*, title: str, description: str) -> dict:
+    """Return ``{"pitch": str, "duties": list[str], "source": "haiku"|"fallback", "cached": bool}``.
+
+    Always returns a dict.  Cache hits return immediately.  Cache key is a
+    hash of the description, so identical postings across sources share
+    the same cache slot.
+    """
+    if not description or len(description.strip()) < 30:
+        return _fallback_response(title, description)
+
+    key = _description_hash(description)
+    cached = job_summary_cache.get(key)
+    if cached is not None:
+        return {**cached, "source": "haiku", "cached": True}
+
+    summary = await _try_summarize(title, description)
+    if summary is None:
+        return _fallback_response(title, description)
+
+    job_summary_cache.set(key, summary)
     return {**summary, "source": "haiku", "cached": False}
