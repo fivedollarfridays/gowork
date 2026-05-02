@@ -1,4 +1,4 @@
-"""Tests for POST /api/plan/{session_id}/match/{job_index}/explain."""
+"""Tests for the Haiku-augmented plan endpoints."""
 
 from __future__ import annotations
 
@@ -16,11 +16,13 @@ _VALIDATE_TOKEN_PATCH = "app.core.auth.validate_token"
 _TOKEN_EXISTS_PATCH = "app.core.auth.token_exists"
 _GET_SESSION_PATCH = "app.routes.plan_haiku.get_session_by_id"
 _EXPLAIN_PATCH = "app.routes.plan_haiku.explain_match"
+_COMPOSE_PATCH = "app.routes.plan_haiku.compose_next_steps"
 
 
 @pytest.fixture(autouse=True)
-def _clear_explainer_cache() -> None:
+def _clear_caches() -> None:
     _cache.match_explanation_cache.clear()
+    _cache.next_step_cache.clear()
 
 
 @pytest.fixture(autouse=True)
@@ -41,7 +43,7 @@ def _mock_token_validation():
         yield
 
 
-def _make_row(*, with_match: bool = True) -> dict:
+def _make_row(*, with_match: bool = True, with_steps: bool = True) -> dict:
     plan = {
         "plan_id": "p1",
         "strong_matches": [
@@ -59,6 +61,10 @@ def _make_row(*, with_match: bool = True) -> dict:
         ] if with_match else [],
         "possible_matches": [],
         "after_repair": [],
+        "immediate_next_steps": [
+            "Visit Workforce Solutions for Tarrant County",
+            "Contact Trinity Metro about a bus pass",
+        ] if with_steps else [],
     }
     return {
         "id": _VALID_UUID,
@@ -100,7 +106,6 @@ class TestExplainMatchRoute:
 
     @pytest.mark.asyncio
     async def test_404_when_session_missing(self) -> None:
-        """No session row -> 404."""
         async def _get(_db, _sid):
             return None
         with patch(_GET_SESSION_PATCH, side_effect=_get):
@@ -113,7 +118,6 @@ class TestExplainMatchRoute:
 
     @pytest.mark.asyncio
     async def test_400_when_no_matches(self) -> None:
-        """Session has no matches -> 400."""
         async def _get(_db, _sid):
             return _make_row(with_match=False)
         with patch(_GET_SESSION_PATCH, side_effect=_get):
@@ -126,13 +130,63 @@ class TestExplainMatchRoute:
 
     @pytest.mark.asyncio
     async def test_404_when_index_out_of_range(self) -> None:
-        """Index past the flat list length -> 404."""
         async def _get(_db, _sid):
             return _make_row()
         with patch(_GET_SESSION_PATCH, side_effect=_get):
             async with _client() as ac:
                 resp = await ac.post(
                     f"/api/plan/{_VALID_UUID}/match/5/explain"
+                    f"?token=test-token-{_VALID_UUID}",
+                )
+        assert resp.status_code == 404
+
+
+class TestComposeNextStepsRoute:
+    @pytest.mark.asyncio
+    async def test_compose_returns_haiku_steps(self) -> None:
+        fake = AsyncMock(return_value={
+            "steps": ["Step 1.", "Step 2.", "Step 3.", "Step 4."],
+            "source": "haiku", "cached": False,
+        })
+        async def _get(_db, _sid):
+            return _make_row()
+        with (
+            patch(_GET_SESSION_PATCH, side_effect=_get),
+            patch(_COMPOSE_PATCH, fake),
+        ):
+            async with _client() as ac:
+                resp = await ac.post(
+                    f"/api/plan/{_VALID_UUID}/next-steps/compose"
+                    f"?token=test-token-{_VALID_UUID}",
+                )
+        assert resp.status_code == 200, resp.text
+        body = resp.json()
+        assert body["source"] == "haiku"
+        assert len(body["steps"]) == 4
+        kwargs = fake.call_args.kwargs
+        assert kwargs["barriers"] == ["TRANSIT", "CHILDCARE"]
+        assert kwargs["deterministic_steps"][0].startswith("Visit Workforce")
+
+    @pytest.mark.asyncio
+    async def test_compose_400_when_no_deterministic_steps(self) -> None:
+        async def _get(_db, _sid):
+            return _make_row(with_steps=False)
+        with patch(_GET_SESSION_PATCH, side_effect=_get):
+            async with _client() as ac:
+                resp = await ac.post(
+                    f"/api/plan/{_VALID_UUID}/next-steps/compose"
+                    f"?token=test-token-{_VALID_UUID}",
+                )
+        assert resp.status_code == 400
+
+    @pytest.mark.asyncio
+    async def test_compose_404_when_session_missing(self) -> None:
+        async def _get(_db, _sid):
+            return None
+        with patch(_GET_SESSION_PATCH, side_effect=_get):
+            async with _client() as ac:
+                resp = await ac.post(
+                    f"/api/plan/{_VALID_UUID}/next-steps/compose"
                     f"?token=test-token-{_VALID_UUID}",
                 )
         assert resp.status_code == 404
