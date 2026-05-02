@@ -232,6 +232,11 @@ class ScoredJobMatch(JobMatch):
     score_breakdown: Optional[dict] = None
     summary: Optional[dict] = None  # {"pitch": str, "duties": list[str]}
     data_source: list[str] = Field(default_factory=list)  # provenance trail
+    # Distance-from-ZIP field, populated when the user has no vehicle
+    # AND their ZIP centroid is in the FW lookup AND the job has
+    # geocoded lat/lng.  None means "no distance signal" — surface
+    # nothing in the UI.
+    distance_miles: Optional[float] = None
 
 
 class BarrierCard(BaseModel):

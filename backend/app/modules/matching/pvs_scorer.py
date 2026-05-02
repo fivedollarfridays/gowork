@@ -17,11 +17,17 @@ from app.modules.benefits.cliff_calculator import calculate_net_at_wage, classif
 from app.modules.benefits.router import get_program_calculators, get_sum_program_benefits
 from app.modules.benefits.thresholds import HOURS_PER_YEAR, MONTHS_PER_YEAR
 from app.modules.benefits.types import BenefitsProfile
+from app.modules.matching._pvs_components import (
+    distance_boost_value,
+    select_income_score,
+    weighted_sum_pvs,
+)
+from app.modules.matching._pvs_reason import build_pvs_reason
 from app.modules.matching.commute_estimator import estimate_commute
+from app.modules.matching.distance import compute_job_distance
 from app.modules.matching.proximity_scorer import score_proximity
 from app.modules.matching.relevance_scorer import (
     ResumeProfile,
-    matched_signal_summary,
     score_resume_match,
     score_resume_match_breakdown,
 )
@@ -52,6 +58,11 @@ WR_PROXIMITY = 0.15
 WR_TIME_FIT = 0.15
 WR_BARRIER_COMPAT = 0.15
 WR_RESUME_MATCH = 0.35
+
+# Distance-from-home boost — see distance.py.  Layered onto PVS only
+# when the user lacks a vehicle AND we have a known ZIP centroid AND
+# the job is geocoded.  Small weight to avoid fighting resume_match.
+W_DISTANCE_BOOST = 0.05
 
 # No-pay penalty: jobs without disclosed salary are scaled down but still
 # differentiate on proximity, time fit, and barrier compatibility
@@ -181,6 +192,13 @@ def _job_data_source(job: dict) -> list[str]:
     return parts
 
 
+_WEIGHTS_NO_RESUME = (W_NET_INCOME, W_PROXIMITY, W_TIME_FIT, W_BARRIER_COMPAT)
+_WEIGHTS_WITH_RESUME = (
+    WR_NET_INCOME, WR_PROXIMITY, WR_TIME_FIT,
+    WR_BARRIER_COMPAT, WR_RESUME_MATCH,
+)
+
+
 def compute_pvs(
     job: dict,
     ctx: ScoringContext,
@@ -188,90 +206,33 @@ def compute_pvs(
 ) -> float:
     """Compute Practical Value Score (0.0-1.0) for a job.
 
-    Uses net income (wages + benefits - taxes) when benefits_profile is
-    available with enrolled programs.  Falls back to gross earnings otherwise.
-    No-pay jobs are penalised by NO_PAY_MULTIPLIER.
-
-    When ``ctx.resume_profile`` is set, a fifth term (resume_match) is
-    blended in with WR_* weights so jobs that line up with the user's
-    skills/family/industry rank higher.  This is the fix for the
-    "every job scores 0.363" symptom that affected every same-city
-    listing without resume signal.
+    Composite of net-income / proximity / time-fit / barrier-compat
+    (and resume_match when a profile is set), plus a small distance-
+    from-ZIP boost when the user lacks a vehicle.  See module
+    docstring for the weight tables.
     """
     if salary is _NOT_PARSED:
         salary = extract_salary(job.get("description"))
-
-    bp = ctx.benefits_profile
-    if salary and bp and bp.enrolled_programs:
-        income_score = _score_net_income(salary, bp)
-    else:
-        income_score = score_earnings(salary)
-
-    proximity = score_proximity(ctx.user_zip, job.get("location", ""), ctx.transit_dependent)
+    income = select_income_score(salary, ctx.benefits_profile, _score_net_income)
+    proximity = score_proximity(
+        ctx.user_zip, job.get("location", ""), ctx.transit_dependent,
+    )
     time_fit = score_time_fit(job, ctx.schedule_type, ctx.barriers)
     barrier_compat = _score_barrier_compat(job, ctx.barriers)
-
     has_resume = isinstance(ctx.resume_profile, ResumeProfile)
-    if has_resume:
-        resume_score, _ = _compute_resume_match(job, ctx)
-        pvs = (
-            WR_NET_INCOME * income_score
-            + WR_PROXIMITY * proximity
-            + WR_TIME_FIT * time_fit
-            + WR_BARRIER_COMPAT * barrier_compat
-            + WR_RESUME_MATCH * resume_score
-        )
-    else:
-        pvs = (
-            W_NET_INCOME * income_score
-            + W_PROXIMITY * proximity
-            + W_TIME_FIT * time_fit
-            + W_BARRIER_COMPAT * barrier_compat
-        )
+    resume = _compute_resume_match(job, ctx)[0] if has_resume else 0.0
+    pvs = weighted_sum_pvs(
+        income, proximity, time_fit, barrier_compat, resume, has_resume,
+        _WEIGHTS_NO_RESUME, _WEIGHTS_WITH_RESUME,
+    )
+    pvs += distance_boost_value(
+        ctx.user_zip, job.get("lat"), job.get("lng"),
+        ctx.transit_dependent, W_DISTANCE_BOOST,
+    )
     pvs = max(0.0, min(1.0, pvs))
-
     if salary is None:
         pvs *= NO_PAY_MULTIPLIER
-
     return round(pvs, 3)
-
-
-def _build_pvs_reason(
-    job: dict, salary: SalaryInfo | None,
-    target_industries: Sequence[str] = (),
-    resume_keywords: Sequence[str] = (),
-    resume_signals: Sequence[str] = (),
-) -> str:
-    """Generate a match reason for a PVS-ranked job.
-
-    Priority order for the headline phrase:
-      1. Resume signals (skills + family + cert) — most specific.
-      2. Target industries selected in the wizard.
-      3. Pre-existing resume_keyword hits (legacy path).
-      4. Disclosed pay band.
-      5. Generic "entry-level opportunity" fallback.
-    """
-    parts: list[str] = []
-    searchable = f"{job.get('title', '')} {job.get('description', '')}".lower()
-
-    if resume_signals:
-        summary = matched_signal_summary(resume_signals)
-        if summary:
-            parts.append(f"Matches your {summary}")
-    if job.get("industry_match") and target_industries:
-        matched = next((i for i in target_industries if i.lower() in searchable), None)
-        parts.append(f"Matches your target: {matched}" if matched else "Matches your target industry")
-    elif job.get("industry_match") and not parts:
-        parts.append("Matches your target industry")
-    if resume_keywords and not resume_signals:
-        matched_kw = next((kw for kw in resume_keywords if kw.lower() in searchable), None)
-        if matched_kw:
-            parts.append(f"Matches your {matched_kw} experience")
-    if salary:
-        parts.append(f"Pays ${salary.hourly_rate:.2f}/hr")
-    if not parts:
-        parts.append("Entry-level opportunity")
-    return "; ".join(parts)
 
 
 def _cliff_for_job(
@@ -300,6 +261,7 @@ def _build_match(
 ) -> ScoredJobMatch:
     """Build a ScoredJobMatch from a raw job dict."""
     transit_info = job.get("transit_info")
+    miles = compute_job_distance(user_zip, job.get("lat"), job.get("lng"))
     return ScoredJobMatch(
         title=job["title"],
         company=job.get("company"),
@@ -313,7 +275,7 @@ def _build_match(
         background_check_timing=job.get("background_check_timing"),
         record_note=job.get("record_note"),
         relevance_score=pvs,
-        match_reason=_build_pvs_reason(
+        match_reason=build_pvs_reason(
             job, salary, target_industries, resume_keywords, resume_signals,
         ),
         pay_range=_format_pay_range(salary),
@@ -323,6 +285,7 @@ def _build_match(
         commute_estimate=estimate_commute(user_zip, job.get("location", ""), transit_info),
         score_breakdown=score_breakdown,
         data_source=_job_data_source(job),
+        distance_miles=round(miles, 1) if miles is not None else None,
     )
 
 
