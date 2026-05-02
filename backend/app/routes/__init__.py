@@ -13,6 +13,8 @@ from app.routes.compliance import router as compliance_router
 from app.routes.credit import router as credit_router
 from app.routes.dashboard import router as dashboard_router
 from app.routes.demo import router as demo_router
+from app.routes.demo_haiku import health_router as demo_health_router
+from app.routes.demo_haiku import router as demo_haiku_router
 from app.routes.documents import router as documents_router
 from app.routes.engagement import router as engagement_router
 from app.routes.engagement_preview import router as engagement_preview_router
@@ -59,6 +61,8 @@ all_routers = [
     city_router,
     insights_router,
     demo_router,
+    demo_haiku_router,
+    demo_health_router,
     documents_router,
     engagement_router,
     engagement_preview_router,
