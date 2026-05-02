@@ -7,7 +7,9 @@
     "url": "https://jpshealthnet.org/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Registered Nurse - Med Surg",
@@ -17,7 +19,9 @@
     "url": "https://jpshealthnet.org/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 0,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Certified Nursing Assistant (CNA)",
@@ -27,7 +31,9 @@
     "url": "https://www.methodisthealthsystem.org/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 37.102298,
+    "lng": -92.557682
   },
   {
     "title": "Pharmacy Technician",
@@ -37,7 +43,9 @@
     "url": "https://www.cookchildrens.org/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 0,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Phlebotomist",
@@ -47,7 +55,9 @@
     "url": "https://jobs.texashealth.org",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Medical Assistant",
@@ -57,7 +67,9 @@
     "url": "https://careers.bswhealth.com",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 0,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Hospital Food Service Worker",
@@ -67,7 +79,9 @@
     "url": "https://www.compass-usa.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Home Health Aide",
@@ -77,7 +91,9 @@
     "url": "https://www.texashomehealth.com",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Dietary Aide",
@@ -87,7 +103,9 @@
     "url": "https://careers.aramark.com",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Warehouse Associate",
@@ -97,7 +115,9 @@
     "url": "https://www.hillwood.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Forklift Operator",
@@ -107,7 +127,9 @@
     "url": "https://www.hillwood.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Picker / Packer",
@@ -117,7 +139,9 @@
     "url": "https://www.amazon.jobs",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Warehouse Associate",
@@ -127,7 +151,9 @@
     "url": "https://www.goodwillnct.org/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Yard Helper",
@@ -137,7 +163,9 @@
     "url": "https://www.bnsf.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Package Handler",
@@ -147,7 +175,9 @@
     "url": "https://careers.fedex.com",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Inventory Specialist",
@@ -157,7 +187,9 @@
     "url": "https://www.jobs-ups.com",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Construction Apprentice",
@@ -167,7 +199,9 @@
     "url": "https://www.jedunn.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "General Laborer",
@@ -177,7 +211,9 @@
     "url": "https://www.sundt.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 40.801254,
+    "lng": -74.134495
   },
   {
     "title": "Welder",
@@ -187,7 +223,9 @@
     "url": "https://careers.bellflight.com",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Electrician Apprentice",
@@ -197,7 +235,9 @@
     "url": "https://www.ibew220.org",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Plumber Apprentice",
@@ -207,7 +247,9 @@
     "url": "https://www.ualocal100.org",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "HVAC Apprentice",
@@ -217,7 +259,9 @@
     "url": "https://www.tranetechnologies.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 0,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Carpenter",
@@ -227,7 +271,9 @@
     "url": "https://www.manhattanconstruction.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 0,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Concrete Laborer",
@@ -237,7 +283,9 @@
     "url": "https://www.austin-ind.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Production Technician",
@@ -247,7 +295,9 @@
     "url": "https://www.alcon.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Production Assembly Worker",
@@ -257,7 +307,9 @@
     "url": "https://www.lockheedmartinjobs.com",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Aircraft Assembler",
@@ -267,7 +319,9 @@
     "url": "https://careers.bellflight.com",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Machine Operator",
@@ -277,7 +331,9 @@
     "url": "https://www.triumphgroup.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 0,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Quality Control Inspector",
@@ -287,7 +343,9 @@
     "url": "https://careers.peterbilt.com",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.992978,
+    "lng": -97.192141
   },
   {
     "title": "Cook",
@@ -297,7 +355,9 @@
     "url": "https://whataburger.com/Careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Server",
@@ -307,7 +367,9 @@
     "url": "https://www.trinityforestgc.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Dishwasher / Kitchen Utility",
@@ -317,7 +379,9 @@
     "url": "https://careers.aramark.com",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Catering Prep Cook",
@@ -327,7 +391,9 @@
     "url": "https://www.benekeith.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Banquet Server",
@@ -337,7 +403,9 @@
     "url": "https://www.omnihotels.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Barista",
@@ -347,7 +415,9 @@
     "url": "https://www.indeed.com",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Vehicle Maintenance Technician",
@@ -357,7 +427,9 @@
     "url": "https://ridetrinitymetro.org/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Bus Operator",
@@ -367,7 +439,9 @@
     "url": "https://ridetrinitymetro.org/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Tarrant County Sheriff Detention Officer",
@@ -377,7 +451,9 @@
     "url": "https://www.tarrantcounty.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "City of Fort Worth Code Compliance Officer",
@@ -387,7 +463,9 @@
     "url": "https://www.fortworthtexas.gov/jobs",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 0,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Custodial Worker - Fort Worth ISD",
@@ -397,7 +475,9 @@
     "url": "https://www.fwisd.org/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Tarrant County College Custodian",
@@ -407,7 +487,9 @@
     "url": "https://www.tccd.edu/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.827815,
+    "lng": -97.15555
   },
   {
     "title": "Teaching Assistant - Special Education",
@@ -417,7 +499,9 @@
     "url": "https://www.fwisd.org/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 0,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Customer Service Representative",
@@ -427,7 +511,9 @@
     "url": "https://jobs.aa.com",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 0,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Ramp Agent",
@@ -437,7 +523,9 @@
     "url": "https://jobs.aa.com",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 0,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Customer Service Representative",
@@ -448,7 +536,9 @@
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
     "fair_chance": 0,
-    "credit_check": "required"
+    "credit_check": "required",
+    "lat": 32.992978,
+    "lng": -97.192142
   },
   {
     "title": "Call Center Agent",
@@ -458,7 +548,9 @@
     "url": "https://www.att.jobs",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Loan Servicing Representative",
@@ -469,7 +561,9 @@
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
     "fair_chance": 0,
-    "credit_check": "required"
+    "credit_check": "required",
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Office Clerk",
@@ -479,7 +573,9 @@
     "url": "https://www.bnsf.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Administrative Assistant",
@@ -489,7 +585,9 @@
     "url": "https://www.tarrantcounty.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 0,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Light Industrial Staffer",
@@ -499,7 +597,9 @@
     "url": "https://www.workforcesolutions.net/job-seekers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.827815,
+    "lng": -97.15555
   },
   {
     "title": "Custodial Technician",
@@ -509,7 +609,9 @@
     "url": "https://www.abm.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Security Officer",
@@ -519,7 +621,9 @@
     "url": "https://www.aus.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Housekeeper",
@@ -529,7 +633,9 @@
     "url": "https://www.omnihotels.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "CDL-A Driver",
@@ -539,7 +645,9 @@
     "url": "https://drivewerner.com",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Local Delivery Driver",
@@ -549,7 +657,9 @@
     "url": "https://www.fritolayemployment.com",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 0,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Stocker",
@@ -559,7 +669,9 @@
     "url": "https://careers.walmart.com",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Retail Sales Associate",
@@ -569,7 +681,9 @@
     "url": "https://careers.homedepot.com",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Cashier",
@@ -579,7 +693,9 @@
     "url": "https://careers.heb.com",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Mary Kay Manufacturing Operator",
@@ -589,7 +705,9 @@
     "url": "https://www.marykay.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 0,
+    "lat": 33.104646,
+    "lng": -96.823164
   },
   {
     "title": "Janitor - Office Buildings",
@@ -599,7 +717,9 @@
     "url": "https://www.servicemastercleancommercial.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Receptionist",
@@ -609,7 +729,9 @@
     "url": "https://www.mhmrtarrant.org/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Pharmacy Tech - Retail",
@@ -619,7 +741,9 @@
     "url": "https://jobs.cvshealth.com",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 0,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "EMT-Basic",
@@ -629,7 +753,9 @@
     "url": "https://www.medstar911.org/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 0,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Daycare Teacher",
@@ -639,7 +765,9 @@
     "url": "https://www.campfirefw.org/careers",
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 0,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Lineworker Apprentice",
@@ -649,7 +777,9 @@
     "url": "https://www.oncor.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Meter Reader",
@@ -659,7 +789,9 @@
     "url": "https://www.oncor.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Customer Care Representative",
@@ -669,7 +801,9 @@
     "url": "https://www.txu.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 42.771441,
+    "lng": -78.865492
   },
   {
     "title": "Gas Service Technician",
@@ -679,7 +813,9 @@
     "url": "https://www.atmosenergy.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Wastewater Operator Trainee",
@@ -689,7 +825,9 @@
     "url": "https://www.trinityra.org/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 40.801254,
+    "lng": -74.134495
   },
   {
     "title": "QA Tester - Entry Level",
@@ -699,7 +837,9 @@
     "url": "https://www.lockheedmartinjobs.com",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 0,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "IT Help Desk Technician",
@@ -709,7 +849,9 @@
     "url": "https://www.benekeith.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 0,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Software Quality Engineer I",
@@ -719,7 +861,9 @@
     "url": "https://www.lockheedmartinjobs.com",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 0,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Help Desk Analyst",
@@ -729,7 +873,9 @@
     "url": "https://www.dickies.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 0,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Foundry Resident - Operations Associate",
@@ -739,7 +885,9 @@
     "url": "https://www.fortworthfoundry.com",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Substitute Teacher",
@@ -749,7 +897,9 @@
     "url": "https://www.fwisd.org/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Paraprofessional - Special Education",
@@ -759,7 +909,9 @@
     "url": "https://www.fwisd.org/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Custodian - Fort Worth ISD",
@@ -769,7 +921,9 @@
     "url": "https://www.fwisd.org/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Library Assistant",
@@ -779,7 +933,9 @@
     "url": "https://www.tccd.edu/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Instructional Aide",
@@ -789,7 +945,9 @@
     "url": "https://www.emsisd.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Medical Assistant",
@@ -799,7 +957,9 @@
     "url": "https://www.medstar911.org/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 0,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Phlebotomist",
@@ -809,7 +969,9 @@
     "url": "https://questdiagnostics.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 0,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Phlebotomy Technician",
@@ -819,7 +981,9 @@
     "url": "https://careers.labcorp.com",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Sterile Processing Technician",
@@ -829,7 +993,9 @@
     "url": "https://jpshealthnet.org/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Medical Billing Specialist",
@@ -839,7 +1005,9 @@
     "url": "https://jobs.texashealth.org",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 40.801254,
+    "lng": -74.134495
   },
   {
     "title": "Automotive Service Technician",
@@ -849,7 +1017,9 @@
     "url": "https://www.autonationcareers.com",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Body Shop Technician",
@@ -859,7 +1029,9 @@
     "url": "https://www.caliber.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Diesel Mechanic",
@@ -869,7 +1041,9 @@
     "url": "https://www.cocacolasouthwestbeverages.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "HVAC Technician",
@@ -879,7 +1053,9 @@
     "url": "https://www.serviceexperts.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 0,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Pest Control Technician",
@@ -889,7 +1065,9 @@
     "url": "https://www.terminix.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Parks Maintenance Worker",
@@ -899,7 +1077,9 @@
     "url": "https://fortworthtexas.gov/jobs",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Sanitation Driver",
@@ -909,7 +1089,9 @@
     "url": "https://fortworthtexas.gov/jobs",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Customer Service Representative - Water",
@@ -919,7 +1101,9 @@
     "url": "https://fortworthtexas.gov/jobs",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Court Clerk",
@@ -929,7 +1113,9 @@
     "url": "https://www.tarrantcounty.com/jobs",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 0,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Records Specialist - Police",
@@ -939,7 +1125,9 @@
     "url": "https://fortworthtexas.gov/jobs",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 0
+    "fair_chance": 0,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Cashier",
@@ -949,7 +1137,9 @@
     "url": "https://careers.heb.com",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.606407,
+    "lng": -97.343622
   },
   {
     "title": "Stocker - Overnight Crew",
@@ -959,7 +1149,9 @@
     "url": "https://careers.heb.com",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870795,
+    "lng": -97.426083
   },
   {
     "title": "Deli Associate",
@@ -969,7 +1161,9 @@
     "url": "https://jobs.kroger.com",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Manager-in-Training",
@@ -979,7 +1173,9 @@
     "url": "https://whataburger.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "General Merchandise Stocker",
@@ -989,7 +1185,9 @@
     "url": "https://careers.walmart.com",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Carpet Cleaning Technician",
@@ -999,7 +1197,9 @@
     "url": "https://www.stanleysteemer.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Restoration Technician",
@@ -1009,7 +1209,9 @@
     "url": "https://www.servprosouthfortworth.com",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Lawn Care Technician",
@@ -1019,7 +1221,9 @@
     "url": "https://www.abchomeandcommercial.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Package Sorter - Sunrise Sort",
@@ -1029,7 +1233,9 @@
     "url": "https://careers.fedex.com",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870794,
+    "lng": -97.426083
   },
   {
     "title": "Veterans Career Navigator",
@@ -1039,7 +1245,9 @@
     "url": "https://www.tvc.texas.gov/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   },
   {
     "title": "Reentry Job Coach",
@@ -1049,6 +1257,8 @@
     "url": "https://cornbreadhustle.com/careers",
     "source": "honestjobs",
     "scraped_at": "2026-05-01T00:00:00Z",
-    "fair_chance": 1
+    "fair_chance": 1,
+    "lat": 32.870793,
+    "lng": -97.426083
   }
 ]

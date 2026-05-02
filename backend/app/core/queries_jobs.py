@@ -21,7 +21,12 @@ async def get_job_listing_by_id(session: AsyncSession, job_id: int) -> dict | No
 
 
 async def insert_job_listings(session: AsyncSession, listings: list[dict]) -> int:
-    """Bulk insert job listings. Returns count inserted."""
+    """Bulk insert job listings. Returns count inserted.
+
+    ``lat`` / ``lng`` (added by m010) are passed through when present
+    in the input dicts; missing -> NULL, which the distance scorer
+    treats as "no distance signal".
+    """
     if not listings:
         return 0
     params = [
@@ -36,13 +41,15 @@ async def insert_job_listings(session: AsyncSession, listings: list[dict]) -> in
             "expires_at": row.get("expires_at"),
             "credit_check": row.get("credit_check", "unknown"),
             "fair_chance": row.get("fair_chance", 0),
+            "lat": row.get("lat"),
+            "lng": row.get("lng"),
         }
         for row in listings
     ]
     await session.execute(
         text(
-            "INSERT INTO job_listings (title, company, location, description, url, source, scraped_at, expires_at, credit_check, fair_chance) "
-            "VALUES (:title, :company, :location, :description, :url, :source, :scraped_at, :expires_at, :credit_check, :fair_chance)"
+            "INSERT INTO job_listings (title, company, location, description, url, source, scraped_at, expires_at, credit_check, fair_chance, lat, lng) "
+            "VALUES (:title, :company, :location, :description, :url, :source, :scraped_at, :expires_at, :credit_check, :fair_chance, :lat, :lng)"
         ),
         params,
     )

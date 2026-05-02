@@ -56,30 +56,45 @@ def _all_seed_paths() -> list[Path]:
     return [fallback] if fallback.exists() else []
 
 
+def _row_from_record(record: dict, now: str) -> dict:
+    """Map a JSON record to the insert_job_listings row shape.
+
+    ``lat`` / ``lng`` (m010) and ``credit_check`` / ``fair_chance``
+    pass through when present; missing -> sensible defaults that
+    keep legacy seed files (no coords, no credit flag) compatible.
+    """
+    return {
+        "title": record["title"],
+        "company": record.get("company"),
+        "location": record.get("location"),
+        "description": record.get("description"),
+        "url": record.get("url"),
+        "source": "honestjobs",
+        "scraped_at": record.get("scraped_at", now),
+        "fair_chance": record.get("fair_chance", 1),
+        "credit_check": record.get("credit_check", "unknown"),
+        "lat": record.get("lat"),
+        "lng": record.get("lng"),
+    }
+
+
 async def seed_honestjobs_listings(session: AsyncSession) -> int:
     """Idempotent seed of Honest Jobs listings, EVERY city.
 
     Iterates ``data/cities/*/honestjobs_listings.json`` so the resulting
     DB carries every city's fair-chance listings.  ``_filter_by_state``
     keeps each user's response scoped to the right state at query time.
-
-    Returns the count of newly inserted listings (across all cities).
     """
     seed_paths = _all_seed_paths()
     if not seed_paths:
         logger.warning("Honest Jobs seed files missing under %s", _DATA_DIR)
         return 0
-
-    # Pull existing keys once; every per-city loop re-checks against the
-    # accumulating set so duplicate (title, company) keys across cities
-    # are still de-duped.
     result = await session.execute(
         text("SELECT title, company FROM job_listings WHERE source = 'honestjobs'")
     )
     existing: set[tuple[str | None, str | None]] = {
         (row[0], row[1]) for row in result
     }
-
     now = datetime.now(timezone.utc).isoformat()
     listings: list[dict] = []
     for filepath in seed_paths:
@@ -91,25 +106,7 @@ async def seed_honestjobs_listings(session: AsyncSession) -> int:
             if key in existing:
                 continue
             existing.add(key)
-            listings.append({
-                "title": record["title"],
-                "company": record.get("company"),
-                "location": record.get("location"),
-                "description": record.get("description"),
-                "url": record.get("url"),
-                "source": "honestjobs",
-                "scraped_at": record.get("scraped_at", now),
-                # Honour explicit per-record fair_chance (default 1 to
-                # match the legacy assumption that honestjobs source is
-                # fair-chance friendly).
-                "fair_chance": record.get("fair_chance", 1),
-                # Pass through credit_check so seed records can mark
-                # roles like Charles Schwab CSR / GM Financial as
-                # "required" — drives the credit-blocked filter.
-                "credit_check": record.get("credit_check", "unknown"),
-            })
-
+            listings.append(_row_from_record(record, now))
     if not listings:
         return 0
-
     return await insert_job_listings(session, listings)
