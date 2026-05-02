@@ -72,6 +72,8 @@ PUBLIC_ENDPOINTS: dict[str, str] = {
         "Health probe — no session context.",
     "GET /health/ready":
         "Health probe — no session context.",
+    "GET /health/demo":
+        "Health probe — demo freshness check, no session context.",
     "GET /api/city":
         "Public city config.",
     "GET /api/jobs/":
@@ -82,6 +84,10 @@ PUBLIC_ENDPOINTS: dict[str, str] = {
         "Anonymous self-assessment; no session_id input.",
     "POST /api/assessment/":
         "Creates a new session; no cross-session input possible.",
+    "GET /api/demo/personas":
+        "Public demo endpoint — lists canonical personas, no session_id.",
+    "GET /api/demo/walkthrough":
+        "Public demo endpoint — canned walkthrough payload, no session_id.",
     "GET /api/dashboard/stats":
         "Aggregate stats; no session_id input.",
     "GET /api/outcomes/aggregate":
