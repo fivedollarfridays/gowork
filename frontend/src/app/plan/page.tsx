@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { MondayMorning } from "@/components/plan/MondayMorning";
+import { WinReceipt } from "@/components/plan/WinReceipt";
 import { BarrierCardView } from "@/components/plan/BarrierCardView";
 import { JobListSection } from "@/components/plan/JobListSection";
 import { ComparisonView } from "@/components/plan/ComparisonView";
@@ -197,6 +198,17 @@ function PlanContent() {
 
   return (
     <div className="space-y-6">
+      {/* WIN RECEIPT — fires once on first paint, the dopamine moment.
+          Sits above MondayMorning so the WIN is the first thing Carlos
+          sees, not buried under 14 sections of dashboard chrome. */}
+      {sessionId && token && (
+        <WinReceipt
+          plan={plan}
+          sessionId={sessionId}
+          token={token}
+        />
+      )}
+
       {/* Monday Morning hero */}
       <ScrollReveal>
         <MondayMorning

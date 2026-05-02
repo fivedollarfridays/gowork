@@ -177,6 +177,12 @@ AUDIT_ALLOWLIST: dict[str, str] = {
         "No-persistence compute — pure read-through simulation.",
     "POST /api/barrier-intel/chat":
         "No-persistence compute — streaming LLM response.",
+    "POST /api/plan/{session_id}/match/{job_index}/explain":
+        "No-persistence compute — Haiku passthrough that returns a "
+        "match-explanation string; result is cached in-memory only.",
+    "POST /api/plan/{session_id}/next-steps/compose":
+        "No-persistence compute — Haiku passthrough that composes a "
+        "Monday-morning next-step string; no DB write.",
     "PATCH /api/plan/{session_id}/actions":
         "Plan mutation — recorded inside plan_history on next refresh.",
 }
