@@ -48,6 +48,51 @@ class HaikuResult:
         )
 
 
+def _resolve_api_key() -> str:
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+    if not api_key:
+        raise HaikuError("ANTHROPIC_API_KEY not configured")
+    return api_key
+
+
+def _import_anthropic():
+    try:
+        import anthropic  # type: ignore
+    except ImportError as exc:  # pragma: no cover - env-dependent
+        raise HaikuError("anthropic SDK not installed") from exc
+    return anthropic
+
+
+def _parse_message(message) -> HaikuResult:
+    """Convert SDK message -> HaikuResult or raise HaikuError on empty text."""
+    text_parts = [
+        block.text for block in message.content
+        if getattr(block, "type", "") == "text"
+    ]
+    text = "".join(text_parts).strip()
+    if not text:
+        raise HaikuError("Haiku returned empty text")
+    usage = getattr(message, "usage", None)
+    in_tok = getattr(usage, "input_tokens", 0) if usage else 0
+    out_tok = getattr(usage, "output_tokens", 0) if usage else 0
+    return HaikuResult(text=text, input_tokens=in_tok, output_tokens=out_tok)
+
+
+def _make_blocking_call(api_key: str, model: str, max_tokens: int,
+                        system: str, user: str):
+    """Build the synchronous SDK call closure run in a thread."""
+    anthropic = _import_anthropic()
+
+    def _call() -> HaikuResult:
+        client = anthropic.Anthropic(api_key=api_key)
+        message = client.messages.create(
+            model=model, max_tokens=max_tokens, system=system,
+            messages=[{"role": "user", "content": user}],
+        )
+        return _parse_message(message)
+    return _call
+
+
 async def call_haiku(
     system: str,
     user: str,
@@ -61,40 +106,12 @@ async def call_haiku(
     Wraps the blocking SDK call in asyncio.to_thread + a hard timeout.
     Raises HaikuError on missing key, timeout, network error, empty text.
     """
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
-    if not api_key:
-        raise HaikuError("ANTHROPIC_API_KEY not configured")
-
-    try:
-        import anthropic  # type: ignore
-    except ImportError as exc:  # pragma: no cover - env-dependent
-        raise HaikuError("anthropic SDK not installed") from exc
-
-    chosen_model = model or _DEFAULT_MODEL
-
-    def _blocking_call() -> HaikuResult:
-        client = anthropic.Anthropic(api_key=api_key)
-        message = client.messages.create(
-            model=chosen_model,
-            max_tokens=max_tokens,
-            system=system,
-            messages=[{"role": "user", "content": user}],
-        )
-        text_parts = [
-            block.text for block in message.content
-            if getattr(block, "type", "") == "text"
-        ]
-        text = "".join(text_parts).strip()
-        if not text:
-            raise HaikuError("Haiku returned empty text")
-        usage = getattr(message, "usage", None)
-        in_tok = getattr(usage, "input_tokens", 0) if usage else 0
-        out_tok = getattr(usage, "output_tokens", 0) if usage else 0
-        return HaikuResult(text=text, input_tokens=in_tok, output_tokens=out_tok)
-
+    blocking = _make_blocking_call(
+        _resolve_api_key(), model or _DEFAULT_MODEL, max_tokens, system, user,
+    )
     try:
         return await asyncio.wait_for(
-            asyncio.to_thread(_blocking_call), timeout=timeout_s,
+            asyncio.to_thread(blocking), timeout=timeout_s,
         )
     except asyncio.TimeoutError as exc:
         raise HaikuError(f"Haiku call timed out after {timeout_s}s") from exc

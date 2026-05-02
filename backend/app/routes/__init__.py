@@ -23,6 +23,7 @@ from app.routes.jobs import router as jobs_router
 from app.routes.jobs_applications import router as jobs_applications_router
 from app.routes.pathway import router as pathway_router
 from app.routes.plan import router as plan_router
+from app.routes.plan_haiku import router as plan_haiku_router
 from app.routes.plan_intelligence import router as plan_intelligence_router
 from app.routes.sendgrid_webhook import router as sendgrid_webhook_router
 from app.routes.sequence import router as sequence_router
@@ -41,6 +42,7 @@ all_routers = [
     appointments_router,
     assessment_router,
     plan_router,
+    plan_haiku_router,
     share_router,
     sequence_router,
     simulate_router,
