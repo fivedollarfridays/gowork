@@ -166,6 +166,7 @@ IDENTICAL_PAIR_ALLOWLIST: dict[str, str] = {
     # Ch8 manifesto wordmark — GOWORK + city tokens.
     "home.ch8.wordmark.spokenCityDal": "'Dallas' — US city proper noun.",
     "home.ch8.wordmark.spokenCityFw": "'Fort Worth' — US city proper noun.",
+    "home.ch8.wordmark.spokenCityFortWorth": "'Fort Worth' — US city proper noun, identical in EN/ES (Tier-1 city rotation flip per HANDOFF-SHAWN.md).",
     "home.ch8.wordmark.spokenCityHou": "'Houston' — US city proper noun.",
     "home.ch8.wordmark.spokenCityMont": "'Montgomery' — US city proper noun.",
     "home.ch8.wordmarkRow1": "GOWORK wordmark row — brand mark, identical in EN/ES.",

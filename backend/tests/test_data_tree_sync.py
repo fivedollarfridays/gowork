@@ -70,6 +70,31 @@ _ROOT_ONLY: set[str] = {
     # Empty-dir placeholders (git can't track empty dirs).
     "fort-worth/.gitkeep",
     "montgomery/.gitkeep",
+    # Per-city seed files moved out of legacy root /data/ into
+    # /data/cities/<slug>/ during the Montgomery-purge hotfix
+    # (HANDOFF-SHAWN.md Tier 1+2). These are consumed by the
+    # ``barrier_sequencer._load_graph()`` JSON-direct path and the
+    # legacy resource-fallback loader, NOT via backend/data/cities/
+    # — so they're legitimately root-only and don't need a backend
+    # twin. See HANDOFF-SHAWN.md "What's already done on this branch"
+    # and Stage-3 deferred item #2 (unify path resolution post-demo).
+    "fort-worth/barrier_graph_seed.json",
+    "fort-worth/career_centers.json",
+    "fort-worth/childcare_providers.json",
+    "fort-worth/community_resources.json",
+    "fort-worth/employer_policies_seed.json",
+    "fort-worth/training_programs.json",
+    "fort-worth/transit_routes.json",
+    "fort-worth/transit_stops.json",
+    "montgomery/barrier_graph_seed.json",
+    "montgomery/career_centers.json",
+    "montgomery/childcare_providers.json",
+    "montgomery/community_resources.json",
+    "montgomery/employer_policies_seed.json",
+    "montgomery/montgomery_businesses.json",
+    "montgomery/training_programs.json",
+    "montgomery/transit_routes.json",
+    "montgomery/transit_stops.json",
 }
 
 # Cities for which the per-city resources.json contract applies.
