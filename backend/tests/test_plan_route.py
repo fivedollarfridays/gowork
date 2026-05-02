@@ -213,6 +213,40 @@ class TestGeneratePlan:
         assert resp.status_code == 500
 
     @pytest.mark.asyncio
+    async def test_fallback_on_anthropic_429(self):
+        """Anthropic rate-limit (httpx 429) MUST fall back to template,
+        not 500.  During the live demo we hit the API enough times to
+        trip 429 and the previous narrow except clause didn't catch
+        ``httpx.HTTPStatusError`` — three of five personas blew up."""
+        import httpx
+
+        row = _seed_session_row(with_plan=True)
+        fallback = PlanNarrative(
+            summary="Based on your assessment, here are your next steps.",
+            key_actions=["Visit the Career Center"],
+        )
+        # Build a realistic 429 response object so the exception's
+        # constructor signature matches the real Anthropic SDK path.
+        request = httpx.Request("POST", "https://api.anthropic.com/v1/messages")
+        response = httpx.Response(status_code=429, request=request)
+        rate_limited = httpx.HTTPStatusError(
+            "429 Too Many Requests", request=request, response=response,
+        )
+        with (
+            patch(_GET_SESSION_PATCH, new_callable=AsyncMock, return_value=row),
+            patch(_GENERATE_PATCH, new_callable=AsyncMock, side_effect=rate_limited),
+            patch(_FALLBACK_PATCH, return_value=fallback),
+            patch(_UPDATE_SESSION_PATCH, new_callable=AsyncMock),
+        ):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.post(
+                    f"/api/plan/{_VALID_UUID}/generate{_token_query(_VALID_UUID)}",
+                )
+        assert resp.status_code == 200, resp.text
+        assert "next steps" in resp.json()["summary"]
+
+    @pytest.mark.asyncio
     async def test_fallback_runs_without_mock(self):
         """When Claude API fails, real fallback code runs and produces narrative."""
         row = _seed_session_row(with_plan=True)

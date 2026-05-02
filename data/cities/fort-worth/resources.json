@@ -912,7 +912,6 @@
     "notes": "Curb-to-curb paratransit service for ADA-eligible riders. Apply with documentation.",
     "health_status": "healthy",
     "barrier_affinity": [
-      "transportation",
       "health"
     ]
   },
@@ -1065,7 +1064,6 @@
     "notes": "Free transportation to medical appointments for Medicaid recipients statewide.",
     "health_status": "healthy",
     "barrier_affinity": [
-      "transportation",
       "health"
     ]
   },
@@ -1088,9 +1086,7 @@
     "notes": "Medical transportation for Medicaid-enrolled children to well-child visits and specialist appointments.",
     "health_status": "healthy",
     "barrier_affinity": [
-      "transportation",
-      "health",
-      "childcare"
+      "health"
     ]
   },
   {
@@ -1112,7 +1108,6 @@
     "notes": "Free / low-cost transportation for Tarrant County seniors to medical and senior services.",
     "health_status": "healthy",
     "barrier_affinity": [
-      "transportation",
       "health"
     ]
   },
@@ -1135,7 +1130,6 @@
     "notes": "Transportation for Tarrant County residents with mobility impairments. Advance scheduling required.",
     "health_status": "healthy",
     "barrier_affinity": [
-      "transportation",
       "health"
     ]
   },

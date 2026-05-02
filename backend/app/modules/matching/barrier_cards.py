@@ -167,6 +167,18 @@ def _build_cards(
     return cards
 
 
+def _next_step_subject(title: str) -> str:
+    """Strip trailing 'support' from a barrier title for use in the next-step
+    template. ``BARRIER_TITLES`` already include the word (e.g. "Childcare
+    Support", "Record & Legal Support") — appending it again produces
+    "for childcare support support". Keep the title-cased prefix only.
+    """
+    lowered = title.lower().rstrip()
+    if lowered.endswith(" support"):
+        return lowered[: -len(" support")]
+    return lowered
+
+
 def _build_next_steps(cards: list[BarrierCard]) -> list[str]:
     """Generate prioritized immediate next steps."""
     steps: list[str] = [get_career_center_step()]
@@ -175,7 +187,8 @@ def _build_next_steps(cards: list[BarrierCard]) -> list[str]:
         if card.resources:
             top = card.resources[0]
             contact = f" ({top.phone})" if top.phone else ""
-            steps.append(f"Contact {top.name}{contact} for {card.title.lower()} support")
+            subject = _next_step_subject(card.title)
+            steps.append(f"Contact {top.name}{contact} for {subject} support")
         elif card.actions:
             steps.append(card.actions[0])
 

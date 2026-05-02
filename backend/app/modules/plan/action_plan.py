@@ -11,6 +11,7 @@ Produces a 5-phase timeline:
 from datetime import date
 
 from app.modules.plan.phase_generators import (
+    generate_barrier_followups,
     generate_benefits_actions,
     generate_career_center_action,
     generate_cliff_actions,
@@ -54,6 +55,8 @@ def _populate_phases(phase_map: dict[str, TimelinePhase], **kwargs) -> None:
     for phase_id, action in generate_criminal_actions(kwargs.get("barriers") or []):
         phase_map[phase_id].actions.append(action)
     for phase_id, action in generate_credit_actions(kwargs.get("credit_result")):
+        phase_map[phase_id].actions.append(action)
+    for phase_id, action in generate_barrier_followups(kwargs.get("barriers") or []):
         phase_map[phase_id].actions.append(action)
     phase_map["month_6_12"].actions.extend(generate_cliff_actions(kwargs.get("cliff_analysis")))
 

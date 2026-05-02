@@ -23,6 +23,21 @@ _DEFAULT_RECORD_FIELDS = {
 }
 
 
+def _passthrough_with_source_fair_chance(enriched: dict) -> dict:
+    """Apply default record fields but PRESERVE the seed-data fair_chance.
+
+    The honestjobs seed loader stores fair_chance as SQLite INTEGER (0/1);
+    spreading the defaults dict last would clobber that signal to ``False``
+    for every user who lacks a RecordProfile (criminal_record barrier
+    checked, optional form blank — i.e. the Carlos demo path).
+    """
+    return {
+        **enriched,
+        **_DEFAULT_RECORD_FIELDS,
+        "fair_chance": bool(enriched.get("fair_chance", False)),
+    }
+
+
 def enrich_job_with_record_status(
     job: dict,
     profile: RecordProfile | None,
@@ -32,12 +47,12 @@ def enrich_job_with_record_status(
     enriched = dict(job)
 
     if profile is None:
-        return {**enriched, **_DEFAULT_RECORD_FIELDS}
+        return _passthrough_with_source_fair_chance(enriched)
 
     policy = _find_policy(job.get("company"), policies)
 
     if policy is None:
-        return {**enriched, **_DEFAULT_RECORD_FIELDS}
+        return _passthrough_with_source_fair_chance(enriched)
 
     eligible = matches_record(policy, profile)
     enriched["fair_chance"] = policy.fair_chance and eligible
