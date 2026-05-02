@@ -158,6 +158,21 @@ export interface CliffImpact {
   affected_programs: string[];
 }
 
+export interface ScoreBreakdown {
+  skills: number;
+  title_family: number;
+  industry: number;
+  years: number;
+  education: number;
+  certifications: number;
+  industry_aligned: boolean;
+}
+
+export interface JobSummary {
+  pitch: string;
+  duties: string[];
+}
+
 export interface ScoredJobMatch extends JobMatch {
   relevance_score: number;
   match_reason: string;
@@ -168,6 +183,9 @@ export interface ScoredJobMatch extends JobMatch {
   employment_type?: string | null;
   transit_info?: TransitInfoDetail | null;
   commute_estimate?: CommuteEstimate | null;
+  score_breakdown?: ScoreBreakdown | null;
+  summary?: JobSummary | null;
+  data_source?: string[];
 }
 
 export interface WageStep {
