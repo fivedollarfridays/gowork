@@ -1,0 +1,282 @@
+[
+  {
+    "employer_name": "Walmart",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": 7,
+    "bg_check_timing": "post_offer",
+    "industry": "retail",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Target",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense", "violence"],
+    "lookback_years": 7,
+    "bg_check_timing": "post_offer",
+    "industry": "retail",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Home Depot",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": 7,
+    "bg_check_timing": "post_offer",
+    "industry": "retail",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Starbucks",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": null,
+    "bg_check_timing": "post_offer",
+    "industry": "food_service",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "McDonald's (Fort Worth franchises)",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense", "violence"],
+    "lookback_years": 5,
+    "bg_check_timing": "post_offer",
+    "industry": "food_service",
+    "source": "franchise_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Lockheed Martin",
+    "fair_chance": false,
+    "excluded_charges": ["violence", "sex_offense", "drug", "fraud"],
+    "lookback_years": 10,
+    "bg_check_timing": "pre_offer",
+    "industry": "aerospace",
+    "source": "federal_requirement",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Bell Textron",
+    "fair_chance": false,
+    "excluded_charges": ["violence", "sex_offense", "drug"],
+    "lookback_years": 10,
+    "bg_check_timing": "pre_offer",
+    "industry": "aerospace",
+    "source": "federal_requirement",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Amazon (Fort Worth Fulfillment Centers)",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": null,
+    "bg_check_timing": "post_offer",
+    "industry": "warehouse",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "FedEx Ground",
+    "fair_chance": true,
+    "excluded_charges": ["violence", "sex_offense", "dui"],
+    "lookback_years": 7,
+    "bg_check_timing": "pre_offer",
+    "industry": "warehouse",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "UPS",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense", "dui"],
+    "lookback_years": 5,
+    "bg_check_timing": "post_offer",
+    "industry": "warehouse",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "BNSF Railway",
+    "fair_chance": true,
+    "excluded_charges": ["violence", "sex_offense", "drug"],
+    "lookback_years": 7,
+    "bg_check_timing": "pre_offer",
+    "industry": "transportation",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "American Airlines",
+    "fair_chance": false,
+    "excluded_charges": ["violence", "sex_offense", "drug", "fraud"],
+    "lookback_years": 10,
+    "bg_check_timing": "pre_offer",
+    "industry": "transportation",
+    "source": "federal_requirement",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Goodwill Industries of Fort Worth",
+    "fair_chance": true,
+    "excluded_charges": [],
+    "lookback_years": null,
+    "bg_check_timing": "post_offer",
+    "industry": "nonprofit",
+    "source": "direct_partnership",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Salvation Army Fort Worth",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": null,
+    "bg_check_timing": "post_offer",
+    "industry": "nonprofit",
+    "source": "direct_partnership",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Dave's Hot Chicken",
+    "fair_chance": true,
+    "excluded_charges": [],
+    "lookback_years": null,
+    "bg_check_timing": "post_offer",
+    "industry": "food_service",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Greystar (apartment maintenance)",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense", "violence"],
+    "lookback_years": 7,
+    "bg_check_timing": "post_offer",
+    "industry": "property_management",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Waste Management",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": 5,
+    "bg_check_timing": "post_offer",
+    "industry": "sanitation",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Lowe's",
+    "fair_chance": false,
+    "excluded_charges": ["violence", "sex_offense", "theft"],
+    "lookback_years": 7,
+    "bg_check_timing": "pre_offer",
+    "industry": "retail",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "JPS Health Network",
+    "fair_chance": true,
+    "excluded_charges": ["violence", "sex_offense", "drug"],
+    "lookback_years": 10,
+    "bg_check_timing": "pre_offer",
+    "industry": "healthcare",
+    "source": "industry_standard",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Texas Health Resources",
+    "fair_chance": true,
+    "excluded_charges": ["violence", "sex_offense", "drug"],
+    "lookback_years": 10,
+    "bg_check_timing": "pre_offer",
+    "industry": "healthcare",
+    "source": "industry_standard",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Cook Children's Health Care System",
+    "fair_chance": false,
+    "excluded_charges": ["violence", "sex_offense", "drug", "theft"],
+    "lookback_years": 10,
+    "bg_check_timing": "pre_offer",
+    "industry": "healthcare",
+    "source": "industry_standard",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Tarrant County Government",
+    "fair_chance": true,
+    "excluded_charges": ["violence", "sex_offense"],
+    "lookback_years": 7,
+    "bg_check_timing": "pre_offer",
+    "industry": "government",
+    "source": "county_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "City of Fort Worth",
+    "fair_chance": true,
+    "excluded_charges": ["violence", "sex_offense"],
+    "lookback_years": 7,
+    "bg_check_timing": "pre_offer",
+    "industry": "government",
+    "source": "municipal_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "TxDOT (Texas Dept of Transportation)",
+    "fair_chance": false,
+    "excluded_charges": ["violence", "sex_offense", "dui"],
+    "lookback_years": 7,
+    "bg_check_timing": "pre_offer",
+    "industry": "government",
+    "source": "state_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Cintas",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": 5,
+    "bg_check_timing": "post_offer",
+    "industry": "services",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Waffle House",
+    "fair_chance": true,
+    "excluded_charges": [],
+    "lookback_years": null,
+    "bg_check_timing": "post_offer",
+    "industry": "food_service",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Turner Industries",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": 7,
+    "bg_check_timing": "post_offer",
+    "industry": "construction",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Bass Pro Shops / Cabela's",
+    "fair_chance": false,
+    "excluded_charges": ["violence", "sex_offense", "theft"],
+    "lookback_years": 7,
+    "bg_check_timing": "pre_offer",
+    "industry": "retail",
+    "source": "company_policy",
+    "montgomery_area": false
+  }
+]

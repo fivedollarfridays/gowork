@@ -1,0 +1,16 @@
+[
+  {"route_number": 1, "route_name": "Vickery", "weekday_start": "05:30", "weekday_end": "21:00", "saturday": true, "sunday": false},
+  {"route_number": 2, "route_name": "Camp Bowie", "weekday_start": "05:30", "weekday_end": "21:00", "saturday": true, "sunday": false},
+  {"route_number": 4, "route_name": "Rosedale", "weekday_start": "05:00", "weekday_end": "22:00", "saturday": true, "sunday": true},
+  {"route_number": 5, "route_name": "Evans / Hemphill", "weekday_start": "05:30", "weekday_end": "21:00", "saturday": true, "sunday": false},
+  {"route_number": 6, "route_name": "Sycamore School Rd", "weekday_start": "05:30", "weekday_end": "21:00", "saturday": true, "sunday": false},
+  {"route_number": 7, "route_name": "West Berry", "weekday_start": "05:30", "weekday_end": "21:00", "saturday": true, "sunday": false},
+  {"route_number": 11, "route_name": "Stop Six", "weekday_start": "05:30", "weekday_end": "21:00", "saturday": true, "sunday": false},
+  {"route_number": 14, "route_name": "Mansfield Hwy", "weekday_start": "05:30", "weekday_end": "21:00", "saturday": true, "sunday": false},
+  {"route_number": 15, "route_name": "Lancaster", "weekday_start": "05:00", "weekday_end": "22:00", "saturday": true, "sunday": true},
+  {"route_number": 21, "route_name": "Las Vegas Trail", "weekday_start": "05:30", "weekday_end": "21:00", "saturday": true, "sunday": false},
+  {"route_number": 22, "route_name": "McCart", "weekday_start": "05:30", "weekday_end": "21:00", "saturday": true, "sunday": false},
+  {"route_number": 24, "route_name": "Hulen", "weekday_start": "05:30", "weekday_end": "21:00", "saturday": true, "sunday": false},
+  {"route_number": 36, "route_name": "Sycamore", "weekday_start": "05:30", "weekday_end": "21:00", "saturday": true, "sunday": false},
+  {"route_number": 89, "route_name": "Spur Express - Alliance", "weekday_start": "05:30", "weekday_end": "20:00", "saturday": false, "sunday": false}
+]

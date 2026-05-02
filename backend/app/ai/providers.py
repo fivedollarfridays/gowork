@@ -31,8 +31,13 @@ class MockProvider:
         city = get_city_config()
         if city.state == "TX":
             center = "Workforce Solutions for Tarrant County"
+        elif city.state == "AL":
+            from app.cities.montgomery.prompts import MONTGOMERY_MOCK_CENTER
+            center = MONTGOMERY_MOCK_CENTER
         else:
-            center = "the Alabama Career Center on Carter Hill Road"
+            raise ValueError(
+                f"No mock provider response configured for state {city.state!r}"
+            )
         return (
             f"I understand you're asking about support resources in {city.name}. "
             "While I'm currently running in offline mode, here are some general steps: "
@@ -68,7 +73,10 @@ def _get_openai_client():
     if _openai_client is None:
         from openai import AsyncOpenAI
         settings = get_settings()
-        _openai_client = AsyncOpenAI(api_key=settings.openai_api_key)
+        kwargs = {"api_key": settings.openai_api_key}
+        if settings.openai_base_url:
+            kwargs["base_url"] = settings.openai_base_url
+        _openai_client = AsyncOpenAI(**kwargs)
     return _openai_client
 
 

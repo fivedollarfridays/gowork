@@ -1,0 +1,54 @@
+[
+  {
+    "name": "Tarrant County College - South Campus",
+    "category": "training",
+    "subcategory": "general",
+    "address": "5301 Campus Dr, Fort Worth, TX 76119",
+    "lat": 32.6900,
+    "lng": -97.2700,
+    "phone": "(817) 515-4500",
+    "url": "https://www.tccd.edu",
+    "eligibility": "Open enrollment",
+    "services": ["GED preparation", "Workforce training", "CDL", "CNA", "Welding", "Automotive technology", "Business administration"],
+    "notes": "Pell Grant eligible. Short-term workforce certificates and evening/weekend classes available."
+  },
+  {
+    "name": "Tarrant County College - Trinity River Campus",
+    "category": "training",
+    "subcategory": "healthcare",
+    "address": "300 Trinity Campus Cir, Fort Worth, TX 76102",
+    "lat": 32.7560,
+    "lng": -97.3260,
+    "phone": "(817) 515-1000",
+    "url": "https://www.tccd.edu/locations/trinity-river/",
+    "eligibility": "Tarrant County residents, some programs require GED/diploma",
+    "services": ["CNA certification", "Nursing", "Surgical technology", "Health information", "EMT/Paramedic"],
+    "notes": "Healthcare-focused TCC campus in downtown Fort Worth. WIOA funding accepted."
+  },
+  {
+    "name": "Tarrant County Workforce Innovation - Vital Link",
+    "category": "training",
+    "subcategory": "manufacturing",
+    "address": "1200 Circle Dr, Fort Worth, TX 76119",
+    "lat": 32.6900,
+    "lng": -97.2700,
+    "phone": "(817) 413-4400",
+    "url": "https://www.workforcesolutions.net/job-seekers/training/",
+    "eligibility": "Tarrant County residents, WIOA eligibility helpful",
+    "services": ["Manufacturing skills", "Industrial maintenance", "Logistics certifications", "Safety certifications"],
+    "notes": "Approximate program description; verify current course catalog through Workforce Solutions for Tarrant County."
+  },
+  {
+    "name": "Cornerstone Assistance Network - Job Readiness",
+    "category": "training",
+    "subcategory": "reentry",
+    "address": "3500 NE Loop 820, Fort Worth, TX 76137",
+    "lat": 32.8230,
+    "lng": -97.2780,
+    "phone": "(817) 632-6000",
+    "url": "https://www.cornerstone-assistance.org",
+    "eligibility": "Returning citizens, justice-involved individuals, low-income job seekers",
+    "services": ["Job readiness", "Life skills", "Mentoring", "Employer connections", "Support services"],
+    "notes": "Approximate program scope; confirm current reentry workforce track directly with Cornerstone."
+  }
+]

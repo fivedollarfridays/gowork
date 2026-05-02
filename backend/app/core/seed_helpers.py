@@ -113,16 +113,26 @@ def city_resource_seed_files(slug: str) -> list[Path]:
     """Return all resource seed files for a city, in priority order.
 
     Looks for ``data/cities/<slug>/resources.json`` first; if absent,
-    falls through to the legacy bundle in ``data/`` (career_centers,
-    training_programs, childcare_providers, community_resources).
+    falls through to the legacy bundle inside the city's OWN directory
+    (career_centers, training_programs, childcare_providers,
+    community_resources).  Crucially, this does NOT fall back to the
+    project-level ``data/`` bundle — that silent cross-city leak is
+    what caused Fort Worth deployments to surface Montgomery, AL data
+    when a city-specific ``resources.json`` was missing.
     """
     city_dir = _PROJECT_ROOT / "data" / "cities" / slug
     primary = city_dir / "resources.json"
     if primary.exists():
         return [primary]
     fallbacks = LEGACY_FALLBACKS.get("resources.json", [])
-    return [_DEFAULT_DATA_DIR / fb for fb in fallbacks
-            if (_DEFAULT_DATA_DIR / fb).exists()]
+    found = [city_dir / fb for fb in fallbacks if (city_dir / fb).exists()]
+    if not found:
+        logger.warning(
+            "No resources seed files found for city %r in %s "
+            "(neither resources.json nor legacy bundle).",
+            slug, city_dir,
+        )
+    return found
 
 
 def all_city_slugs() -> list[str]:

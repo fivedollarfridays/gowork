@@ -22,9 +22,16 @@ def _get_hallucination_disclaimer() -> str:
 
     city = get_city_config()
     if city.state == "TX":
-        center = "Workforce Solutions for Tarrant County at (817) 413-4000"
+        center = "Workforce Solutions for Tarrant County at (817) 413-4400"
+    elif city.state == "AL":
+        from app.cities.montgomery.prompts import (
+            MONTGOMERY_CAREER_CENTER_WITH_PHONE,
+        )
+        center = MONTGOMERY_CAREER_CENTER_WITH_PHONE
     else:
-        center = "the Alabama Career Center at (334) 286-1746"
+        raise ValueError(
+            f"No hallucination disclaimer configured for state {city.state!r}"
+        )
     return (
         "\n\n---\n*Some resources mentioned above could not be verified against our "
         f"database. Please confirm details by contacting {center} before visiting.*"

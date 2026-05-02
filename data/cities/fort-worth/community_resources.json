@@ -1,0 +1,102 @@
+[
+  {
+    "name": "Tarrant County United Way 2-1-1",
+    "category": "social_service",
+    "subcategory": "referral",
+    "address": "1500 N Main St, Fort Worth, TX 76164",
+    "lat": 32.7700,
+    "lng": -97.3400,
+    "phone": "211",
+    "url": "https://www.unitedwaytarrant.org",
+    "services": ["Resource referrals", "Emergency assistance", "Food assistance", "Housing assistance", "Utility assistance"],
+    "notes": "Dial 2-1-1 (24/7) for connection to Tarrant County community resources."
+  },
+  {
+    "name": "Texas Workforce Commission - Choices Program",
+    "category": "social_service",
+    "subcategory": "employment",
+    "address": "1200 Circle Dr, Fort Worth, TX 76119",
+    "lat": 32.6900,
+    "lng": -97.2700,
+    "phone": "(817) 413-4400",
+    "url": "https://www.twc.texas.gov/programs/choices",
+    "eligibility": "TANF recipients",
+    "services": ["Job search assistance", "Transportation assistance", "Work experience placements", "Education support"],
+    "notes": "Mandatory work component for TANF recipients in Texas. Administered locally through Workforce Solutions for Tarrant County."
+  },
+  {
+    "name": "Trinity Metro",
+    "category": "social_service",
+    "subcategory": "transportation",
+    "address": "801 E Northside Dr, Fort Worth, TX 76102",
+    "lat": 32.7600,
+    "lng": -97.3200,
+    "phone": "(817) 215-8600",
+    "url": "https://www.ridetrinitymetro.org",
+    "services": ["Fixed-route bus service", "TEXRail commuter rail", "ZIPZONE on-demand", "Reduced-fare program", "Monthly passes"],
+    "notes": "Bus, TEXRail, and ZIPZONE service across Tarrant County. Use the Trinity Metro app for real-time tracking and mobile passes. Limited Sunday service."
+  },
+  {
+    "name": "Salvation Army Fort Worth",
+    "category": "social_service",
+    "subcategory": "emergency",
+    "address": "1855 E Lancaster Ave, Fort Worth, TX 76103",
+    "lat": 32.7480,
+    "lng": -97.2960,
+    "phone": "(817) 344-1800",
+    "url": "https://www.salvationarmydfw.org",
+    "services": ["Emergency shelter", "Food pantry", "Utility assistance", "Clothing", "Case management"],
+    "notes": "Mabee Center campus on E Lancaster. Walk-in for food pantry. Shelter intake by appointment."
+  },
+  {
+    "name": "Tarrant Area Food Bank",
+    "category": "social_service",
+    "subcategory": "food",
+    "address": "2600 Cullen St, Fort Worth, TX 76107",
+    "lat": 32.7480,
+    "lng": -97.3640,
+    "phone": "(817) 857-7100",
+    "url": "https://www.tafb.org",
+    "services": ["Food distribution", "Mobile pantry", "SNAP application assistance", "Nutrition education"],
+    "notes": "Mobile pantry schedule rotates across Tarrant County — call or check website for distribution times and locations."
+  },
+  {
+    "name": "GreenPath Financial Wellness - Fort Worth",
+    "category": "social_service",
+    "subcategory": "credit_counseling",
+    "address": "Remote / phone-based service available statewide",
+    "lat": 32.7555,
+    "lng": -97.3308,
+    "phone": "800-550-1961",
+    "url": "https://www.greenpath.com",
+    "eligibility": "Open to all, free initial consultation",
+    "services": ["Credit counseling", "Debt management plans", "Budget coaching", "Student loan counseling", "Housing counseling"],
+    "notes": "HUD-approved nonprofit. Free credit report review. Debt management plans can reduce interest rates and consolidate payments."
+  },
+  {
+    "name": "Consumer Credit Counseling Service of Greater Dallas / Fort Worth",
+    "category": "social_service",
+    "subcategory": "credit_counseling",
+    "address": "8737 King George Dr, Dallas, TX 75235 (serves Fort Worth)",
+    "lat": 32.8430,
+    "lng": -96.8530,
+    "phone": "(800) 249-2227",
+    "url": "https://www.cccs.net",
+    "eligibility": "Open to all Texas residents",
+    "services": ["Credit counseling", "Debt management", "Financial education workshops", "Pre-purchase housing counseling", "Bankruptcy counseling"],
+    "notes": "Nonprofit. Sliding-scale fees. Phone and Fort Worth satellite appointments available. Free initial consultation."
+  },
+  {
+    "name": "Legal Aid of NorthWest Texas",
+    "category": "social_service",
+    "subcategory": "legal",
+    "address": "600 E Weatherford St, Fort Worth, TX 76102",
+    "lat": 32.7580,
+    "lng": -97.3260,
+    "phone": "(817) 336-3943",
+    "url": "https://www.lanwt.org",
+    "eligibility": "Income-eligible Texas residents",
+    "services": ["Expunction", "Order of nondisclosure", "Credit disputes", "Housing", "Family law"],
+    "notes": "Free civil legal services for low-income residents of Tarrant County and 113 other NW Texas counties."
+  }
+]
