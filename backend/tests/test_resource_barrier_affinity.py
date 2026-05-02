@@ -150,3 +150,85 @@ class TestScoreResourceBoostFromAffinity:
         # Score is the full PVS — must be > 0.55 (high alignment + nominal proximity)
         score = score_resource(r, profile)
         assert score >= 0.55, f"Score too low for tagged health resource: {score}"
+
+
+class TestFortWorthResourceTagHygiene:
+    """Data-hygiene contract for FW resources.json.
+
+    Medicaid-only / kids-only medical-transport resources MUST NOT be
+    tagged with broad barriers like ``transportation`` or ``childcare``.
+    The Carlos demo persona surfaced "Texas Health Steps Transportation"
+    (a kids' Medicaid medical-shuttle) as the top transportation
+    recommendation because it carried ``transportation`` in
+    ``barrier_affinity`` — the LLM faithfully recommended a service the
+    user is ineligible for.  Lock the tag scope in.
+    """
+
+    @staticmethod
+    def _load_fw_resources() -> list[dict]:
+        import json
+        from pathlib import Path
+
+        repo_root = Path(__file__).resolve().parent.parent.parent
+        path = repo_root / "data" / "cities" / "fort-worth" / "resources.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return data.get("resources", data) if isinstance(data, dict) else data
+
+    def test_medicaid_kids_transport_not_tagged_transportation(self) -> None:
+        for r in self._load_fw_resources():
+            if r.get("name") == "Texas Health Steps Transportation":
+                tags = r.get("barrier_affinity", [])
+                assert "transportation" not in tags, (
+                    "Texas Health Steps Transportation is a Medicaid kids' "
+                    "medical-shuttle — must not surface for adult commute."
+                )
+                assert "childcare" not in tags, (
+                    "Texas Health Steps Transportation is medical transport, "
+                    "not childcare."
+                )
+                return
+        raise AssertionError("Texas Health Steps Transportation not in seed data")
+
+    def test_modivcare_not_tagged_transportation(self) -> None:
+        for r in self._load_fw_resources():
+            if r.get("name", "").startswith("ModivCare"):
+                tags = r.get("barrier_affinity", [])
+                assert "transportation" not in tags, (
+                    "ModivCare is Medicaid-only non-emergency medical "
+                    "transport — must not surface as a generic commute "
+                    "option."
+                )
+                return
+        raise AssertionError("ModivCare not in seed data")
+
+    def test_age_or_disability_gated_transport_not_in_general_pool(self) -> None:
+        """Resources gated on age/disability/Medicaid should not surface as
+        primary transportation options.  Carlos is a 35yo returning citizen
+        without a disability — recommending Senior Transportation, ADA
+        Paratransit, or Mobility-Impaired Service is wrong for his commute.
+        """
+        gated_names = {
+            "Tarrant Area Agency on Aging - Senior Transportation",  # 60+
+            "ACCESS Trinity Metro - ADA Paratransit",                # ADA only
+        }
+        seen: set[str] = set()
+        for r in self._load_fw_resources():
+            name = r.get("name", "")
+            if name in gated_names:
+                tags = r.get("barrier_affinity", []) or []
+                assert "transportation" not in tags, (
+                    f"{name} is age/ADA-gated; it must not surface as a "
+                    f"generic transportation recommendation."
+                )
+                seen.add(name)
+            # MITS appears twice in the seed (legacy + medical_transport
+            # subcategory) — neither variant should claim transportation
+            # for a non-disabled user.
+            if name == "MITS - Mobility Impaired Transportation Service":
+                tags = r.get("barrier_affinity", []) or []
+                assert "transportation" not in tags, (
+                    "MITS is for mobility-impaired riders only; must not "
+                    "be a generic transportation recommendation."
+                )
+        missing = gated_names - seen
+        assert not missing, f"Expected resources missing from seed: {missing}"

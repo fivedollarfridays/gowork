@@ -90,6 +90,27 @@ class TestEnrichJobWithRecordStatus:
         assert result["record_eligible"] is True
         assert result["record_note"] is None
 
+    def test_no_record_preserves_source_fair_chance(self):
+        """Regression: when profile is None we MUST NOT clobber the seed-data
+        fair_chance signal.  The honestjobs seed loader stores fair_chance as
+        SQLite INTEGER (0/1); without preservation, every Carlos-shaped user
+        (criminal_record barrier checked, optional record_profile blank) gets
+        a plan with zero fair-chance employers — silently breaking the demo's
+        most important signal.
+        """
+        job_int = {"title": "Forklift Operator", "company": "Hillwood", "fair_chance": 1}
+        result_int = enrich_job_with_record_status(job_int, None, _POLICIES)
+        assert result_int["fair_chance"] is True
+
+        job_bool = {"title": "Forklift Operator", "company": "Hillwood", "fair_chance": True}
+        result_bool = enrich_job_with_record_status(job_bool, None, _POLICIES)
+        assert result_bool["fair_chance"] is True
+
+        # Negative case still negative
+        job_zero = {"title": "Cashier", "company": "Walmart", "fair_chance": 0}
+        result_zero = enrich_job_with_record_status(job_zero, None, _POLICIES)
+        assert result_zero["fair_chance"] is False
+
 
 class TestFilterJobsByRecord:
     def test_no_record_returns_all_jobs(self):

@@ -405,3 +405,88 @@ class TestEmptyPlan:
         )
         assert isinstance(plan, ActionPlan)
         assert len(plan.phases) == 5
+
+
+class TestBarrierFollowups:
+    """Month-1 follow-up actions for non-credit/non-criminal barriers."""
+
+    @staticmethod
+    def _resource(name: str = "Trinity Metro", phone: str = "817-215-8600"):
+        from app.modules.matching.types import Resource
+
+        return Resource(
+            id=1, name=name, category="social_service",
+            phone=phone, address="100 Main St",
+        )
+
+    @staticmethod
+    def _barrier_card(barrier_type: BarrierType, title: str, resources: list):
+        return BarrierCard(
+            type=barrier_type,
+            severity=BarrierSeverity.MEDIUM,
+            title=title,
+            actions=[],
+            resources=resources,
+        )
+
+    def test_transportation_barrier_emits_month_1_followup(self):
+        card = self._barrier_card(
+            BarrierType.TRANSPORTATION,
+            "Transportation Access",
+            [self._resource("Trinity Metro Reduced Fare Program")],
+        )
+        plan = build_action_plan(barriers=[card], assessment_date=date(2026, 5, 1))
+        month1 = plan.phases[1]
+        titles = [a.title for a in month1.actions]
+        assert any("Trinity Metro" in t for t in titles), titles
+
+    def test_childcare_barrier_emits_month_1_followup(self):
+        card = self._barrier_card(
+            BarrierType.CHILDCARE,
+            "Childcare Support",
+            [self._resource("TWC Child Care Subsidy", "817-413-4400")],
+        )
+        plan = build_action_plan(barriers=[card], assessment_date=date(2026, 5, 1))
+        month1 = plan.phases[1]
+        titles = [a.title for a in month1.actions]
+        assert any("TWC Child Care" in t for t in titles)
+
+    def test_credit_barrier_skips_followup(self):
+        """Credit already has its own generator — must NOT also get a followup."""
+        card = self._barrier_card(
+            BarrierType.CREDIT,
+            "Credit & Financial Health",
+            [self._resource("GreenPath", "1-800-550-1961")],
+        )
+        plan = build_action_plan(barriers=[card], assessment_date=date(2026, 5, 1))
+        month1 = plan.phases[1]
+        followups = [a for a in month1.actions if a.source_module == "barrier_followup"]
+        assert followups == []
+
+    def test_criminal_record_barrier_skips_followup(self):
+        """Criminal record has its own generator — must NOT also get a followup."""
+        card = _barrier_card_criminal(None)
+        plan = build_action_plan(barriers=[card], assessment_date=date(2026, 5, 1))
+        for phase in plan.phases:
+            followups = [a for a in phase.actions if a.source_module == "barrier_followup"]
+            assert followups == [], f"{phase.phase_id}: {followups}"
+
+    def test_barrier_with_no_resources_no_followup(self):
+        card = self._barrier_card(BarrierType.TRANSPORTATION, "Transportation Access", [])
+        plan = build_action_plan(barriers=[card], assessment_date=date(2026, 5, 1))
+        month1 = plan.phases[1]
+        followups = [a for a in month1.actions if a.source_module == "barrier_followup"]
+        assert followups == []
+
+    def test_followup_detail_has_no_doubled_support_word(self):
+        """Same regression as next-steps copy — title.lower() ends in 'support'."""
+        card = self._barrier_card(
+            BarrierType.CHILDCARE,
+            "Childcare Support",
+            [self._resource("TWC")],
+        )
+        plan = build_action_plan(barriers=[card], assessment_date=date(2026, 5, 1))
+        month1 = plan.phases[1]
+        for a in month1.actions:
+            if a.source_module == "barrier_followup":
+                assert a.detail and "support support" not in a.detail.lower()
