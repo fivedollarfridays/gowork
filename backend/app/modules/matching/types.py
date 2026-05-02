@@ -227,6 +227,11 @@ class ScoredJobMatch(JobMatch):
     cliff_impact: Optional[CliffImpact] = None
     transit_info: Optional[TransitInfo] = None
     commute_estimate: Optional[CommuteEstimate] = None
+    # Stage-3 enrichment fields. None means "not yet computed" — the UI
+    # should call the appropriate Haiku endpoint to populate on demand.
+    score_breakdown: Optional[dict] = None
+    summary: Optional[dict] = None  # {"pitch": str, "duties": list[str]}
+    data_source: list[str] = Field(default_factory=list)  # provenance trail
 
 
 class BarrierCard(BaseModel):
