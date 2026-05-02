@@ -1,0 +1,29 @@
+{
+  "id": "welder",
+  "display_name": "Eduardo P.",
+  "city": "fort-worth",
+  "summary": "AWS-certified welder, 4 years construction experience, looking for steady industrial work.",
+  "zip_code": "76103",
+  "employment_status": "underemployed",
+  "barriers": {
+    "training": true,
+    "credit": true,
+    "transportation": false,
+    "childcare": false,
+    "housing": false,
+    "health": false,
+    "criminal_record": false
+  },
+  "primary_barriers": ["training", "credit"],
+  "barrier_severity": "medium",
+  "has_vehicle": true,
+  "transit_dependent": false,
+  "schedule_type": "daytime",
+  "available_days": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
+  "target_industries": ["construction", "manufacturing"],
+  "work_history": "General laborer + welder 2020-2024, multiple residential and commercial sites.",
+  "resume_text": "General laborer with welding certification AWS D1.1. 4 years construction experience steel framing concrete masonry. Forklift operator. OSHA 10 certified. Reliable physical condition.",
+  "certifications": ["AWS D1.1", "OSHA 10", "forklift"],
+  "expected_top_industry": "construction",
+  "demo_notes": "Use to show: trades industry surfacing, no healthcare leak in top-5, AWS cert recognition."
+}

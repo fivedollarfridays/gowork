@@ -1,0 +1,29 @@
+{
+  "id": "forklift",
+  "display_name": "Tomás G.",
+  "city": "fort-worth",
+  "summary": "Forklift operator, 5 years experience, no current vehicle, transit-dependent.",
+  "zip_code": "76106",
+  "employment_status": "unemployed",
+  "barriers": {
+    "transportation": true,
+    "credit": true,
+    "childcare": false,
+    "housing": false,
+    "health": false,
+    "training": false,
+    "criminal_record": false
+  },
+  "primary_barriers": ["transportation", "credit"],
+  "barrier_severity": "medium",
+  "has_vehicle": false,
+  "transit_dependent": true,
+  "schedule_type": "daytime",
+  "available_days": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+  "target_industries": ["manufacturing", "transportation"],
+  "work_history": "Forklift operator 2018-2024, Amazon DFW7. Layoff after warehouse closure.",
+  "resume_text": "Forklift operator certified OSHA 10. 5 years warehouse experience inventory management shipping receiving. Experience with WMS warehouse management systems. Reliable safe operator. Can lift 50 pounds.",
+  "certifications": ["OSHA 10", "forklift"],
+  "expected_top_industry": "manufacturing",
+  "demo_notes": "Use to show: warehouse->supervisor progression hint, Trinity Metro DFW7 route, credit-blocked job filtering."
+}

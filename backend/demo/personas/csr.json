@@ -1,0 +1,29 @@
+{
+  "id": "csr",
+  "display_name": "Patricia L.",
+  "city": "fort-worth",
+  "summary": "Bilingual customer service rep, looking to move from retail-floor to office work.",
+  "zip_code": "76107",
+  "employment_status": "seeking_change",
+  "barriers": {
+    "childcare": true,
+    "transportation": false,
+    "credit": false,
+    "housing": false,
+    "health": false,
+    "training": false,
+    "criminal_record": false
+  },
+  "primary_barriers": ["childcare"],
+  "barrier_severity": "low",
+  "has_vehicle": true,
+  "transit_dependent": false,
+  "schedule_type": "daytime",
+  "available_days": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+  "target_industries": ["retail", "government"],
+  "work_history": "Customer service rep 2021-present, currently underemployed at part-time retail.",
+  "resume_text": "Customer service representative with 3 years experience handling inbound calls. Strong communication skills problem solving. Proficient in Microsoft Office Excel Outlook. Bilingual English Spanish. High school diploma.",
+  "certifications": [],
+  "expected_top_industry": "retail",
+  "demo_notes": "Use to show: bilingual flag, no welding leak in top-5, customer_service->team_lead progression."
+}
