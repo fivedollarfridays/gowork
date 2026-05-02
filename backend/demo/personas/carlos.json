@@ -1,0 +1,29 @@
+{
+  "id": "carlos",
+  "display_name": "Carlos M.",
+  "city": "fort-worth",
+  "summary": "Returning citizen, 5 years out of work, lives in 76105, no car, two kids in childcare, looking for warehouse or trades work.",
+  "zip_code": "76105",
+  "employment_status": "unemployed",
+  "barriers": {
+    "transportation": true,
+    "childcare": true,
+    "criminal_record": true,
+    "credit": false,
+    "housing": false,
+    "health": false,
+    "training": false
+  },
+  "primary_barriers": ["transportation", "childcare", "criminal_record"],
+  "barrier_severity": "high",
+  "has_vehicle": false,
+  "transit_dependent": true,
+  "schedule_type": "daytime",
+  "available_days": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+  "target_industries": ["manufacturing", "transportation"],
+  "work_history": "Warehouse worker 2015-2019, forklift certified, fair-chance friendly history.",
+  "resume_text": "Forklift operator OSHA 10 certified. 4 years warehouse experience inventory management shipping receiving. Reliable. Background: 2019 felony conviction, time served. Looking for fair-chance employer.",
+  "certifications": ["OSHA 10", "forklift"],
+  "expected_top_industry": "manufacturing",
+  "demo_notes": "Hero persona for the HackFW 2026 demo. Use to show: TWC eligibility, fair-chance filtering, Trinity Metro routing, childcare resource surfacing."
+}

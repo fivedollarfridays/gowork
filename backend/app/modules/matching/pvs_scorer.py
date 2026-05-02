@@ -23,6 +23,7 @@ from app.modules.matching.relevance_scorer import (
     ResumeProfile,
     matched_signal_summary,
     score_resume_match,
+    score_resume_match_breakdown,
 )
 from app.modules.matching.salary_parser import (
     EARNINGS_BENCHMARK,
@@ -159,6 +160,27 @@ def _compute_resume_match(
     return score_resume_match(job, profile)
 
 
+def _compute_resume_breakdown(job: dict, ctx: ScoringContext) -> dict | None:
+    """Return the per-factor breakdown when a resume profile is present."""
+    profile = ctx.resume_profile
+    if not isinstance(profile, ResumeProfile):
+        return None
+    _, _, breakdown = score_resume_match_breakdown(job, profile)
+    return breakdown
+
+
+def _job_data_source(job: dict) -> list[str]:
+    """Build provenance list from job dict (Pattern 13)."""
+    parts: list[str] = []
+    src = job.get("source") or "unknown"
+    parts.append(str(src))
+    if job.get("city_tag"):
+        parts.append(f"city:{job['city_tag']}")
+    if job.get("ingested_at"):
+        parts.append(f"ingested:{job['ingested_at']}")
+    return parts
+
+
 def compute_pvs(
     job: dict,
     ctx: ScoringContext,
@@ -274,6 +296,7 @@ def _build_match(
     resume_keywords: Sequence[str] = (),
     user_zip: str = "",
     resume_signals: Sequence[str] = (),
+    score_breakdown: dict | None = None,
 ) -> ScoredJobMatch:
     """Build a ScoredJobMatch from a raw job dict."""
     transit_info = job.get("transit_info")
@@ -298,6 +321,8 @@ def _build_match(
         cliff_impact=_cliff_for_job(salary, benefits_profile, current_benefits, current_net_monthly),
         transit_info=transit_info,
         commute_estimate=estimate_commute(user_zip, job.get("location", ""), transit_info),
+        score_breakdown=score_breakdown,
+        data_source=_job_data_source(job),
     )
 
 
@@ -320,12 +345,14 @@ def rank_all_jobs(
         salary = extract_salary(job.get("description"))
         pvs = compute_pvs(job, ctx, salary=salary)
         _, resume_signals = _compute_resume_match(job, ctx)
+        breakdown = _compute_resume_breakdown(job, ctx)
         results.append(_build_match(
             job, salary, pvs, bp, cur_benefits, cur_net,
             target_industries=ctx.target_industries,
             resume_keywords=ctx.resume_keywords,
             user_zip=ctx.user_zip,
             resume_signals=resume_signals,
+            score_breakdown=breakdown,
         ))
     results.sort(key=lambda m: m.relevance_score, reverse=True)
     return results

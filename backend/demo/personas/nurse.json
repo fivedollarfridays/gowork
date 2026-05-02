@@ -1,0 +1,29 @@
+{
+  "id": "nurse",
+  "display_name": "Maria R.",
+  "city": "fort-worth",
+  "summary": "Experienced ICU nurse re-entering after a 2-year hiatus, has childcare needs and her CNA license needs renewal.",
+  "zip_code": "76104",
+  "employment_status": "seeking_change",
+  "barriers": {
+    "childcare": true,
+    "training": true,
+    "transportation": false,
+    "credit": false,
+    "housing": false,
+    "health": false,
+    "criminal_record": false
+  },
+  "primary_barriers": ["childcare", "training"],
+  "barrier_severity": "medium",
+  "has_vehicle": true,
+  "transit_dependent": false,
+  "schedule_type": "daytime",
+  "available_days": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+  "target_industries": ["healthcare"],
+  "work_history": "Registered Nurse 2014-2022, ICU at Texas Health, took 2 years for family.",
+  "resume_text": "Registered Nurse RN with 10 years critical care ICU experience. BLS ACLS PALS certifications. Skilled in IV insertion patient assessment electronic health records EHR Epic. BSN Bachelor of Science in Nursing.",
+  "certifications": ["RN", "BLS", "ACLS", "PALS"],
+  "expected_top_industry": "healthcare",
+  "demo_notes": "Use to show: high-confidence match (>0.85), CNA->RN progression hint, healthcare resource surfacing."
+}

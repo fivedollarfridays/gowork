@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import type { CreditAssessmentResult, JobMatch, ScoredJobMatch } from "@/lib/types";
 import { STATUS_BADGE_STYLES, safeHref, daysToMonths, mapsUrl } from "@/lib/constants";
 import { CliffBadge } from "./CliffBadge";
+import { ScoreBreakdownPanel } from "./ScoreBreakdownPanel";
 import { TransitInfoDisplay } from "./TransitInfoDisplay";
 
 export function isScoredJob(job: JobMatch): job is ScoredJobMatch {
@@ -110,6 +111,14 @@ export function JobMatchCard({ job, creditResult }: JobMatchCardProps) {
         {/* Match reason for scored jobs */}
         {scored && job.match_reason && (
           <p className="text-xs text-secondary font-medium">{job.match_reason}</p>
+        )}
+
+        {/* Score breakdown panel — Stage 3 enrichment */}
+        {scored && job.score_breakdown && (
+          <ScoreBreakdownPanel
+            breakdown={job.score_breakdown}
+            totalScore={job.relevance_score}
+          />
         )}
 
         {/* Location + route */}

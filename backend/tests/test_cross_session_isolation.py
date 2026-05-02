@@ -157,6 +157,8 @@ def _build_request_args(spec: RouteSpec) -> dict[str, Any]:
     survives schema validation and reaches the ownership check.
     """
     url_path = spec.path.replace("{session_id}", _SESS_A)
+    # Replace other path parameters with valid placeholders
+    url_path = url_path.replace("{job_index}", "0")
     params: dict[str, Any] = {}
     body: dict[str, Any] | None = None
 
