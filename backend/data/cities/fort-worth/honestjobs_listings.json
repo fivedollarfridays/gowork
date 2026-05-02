@@ -89,7 +89,6 @@
     "scraped_at": "2026-04-30T00:00:00Z",
     "fair_chance": 1
   },
-
   {
     "title": "Warehouse Associate",
     "company": "Hillwood at AllianceTexas",
@@ -160,7 +159,6 @@
     "scraped_at": "2026-04-30T00:00:00Z",
     "fair_chance": 1
   },
-
   {
     "title": "Construction Apprentice",
     "company": "JE Dunn Construction",
@@ -241,7 +239,6 @@
     "scraped_at": "2026-04-30T00:00:00Z",
     "fair_chance": 1
   },
-
   {
     "title": "Production Technician",
     "company": "Alcon",
@@ -292,7 +289,6 @@
     "scraped_at": "2026-04-30T00:00:00Z",
     "fair_chance": 1
   },
-
   {
     "title": "Cook",
     "company": "Whataburger DFW",
@@ -353,7 +349,6 @@
     "scraped_at": "2026-04-30T00:00:00Z",
     "fair_chance": 1
   },
-
   {
     "title": "Vehicle Maintenance Technician",
     "company": "Trinity Metro",
@@ -424,7 +419,6 @@
     "scraped_at": "2026-04-30T00:00:00Z",
     "fair_chance": 0
   },
-
   {
     "title": "Customer Service Representative",
     "company": "American Airlines DFW",
@@ -497,7 +491,6 @@
     "scraped_at": "2026-04-30T00:00:00Z",
     "fair_chance": 0
   },
-
   {
     "title": "Light Industrial Staffer",
     "company": "Workforce Solutions for Tarrant County",
@@ -647,5 +640,415 @@
     "source": "honestjobs",
     "scraped_at": "2026-04-30T00:00:00Z",
     "fair_chance": 0
+  },
+  {
+    "title": "Lineworker Apprentice",
+    "company": "Oncor Electric Delivery",
+    "location": "Fort Worth, TX 76137",
+    "description": "Entry-level lineworker apprentice on Oncor's Fort Worth distribution crew. Climb poles, install transformers, restore power outages. CDL Class A obtained within 6 months (paid training). OSHA-10 within 30 days. 4-year apprenticeship to journeyman. Pay: $24.50/hr starting. Day shift, on-call rotation. Construction utility. Background check post-offer.",
+    "url": "https://www.oncor.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Meter Reader",
+    "company": "Oncor Electric Delivery",
+    "location": "Fort Worth, TX 76104",
+    "description": "Walk daily meter reading routes across Fort Worth neighborhoods. Use handheld scanner, log into customer service system. High school diploma or GED. Valid driver license. Pay: $19.00/hr. Day shift, Monday-Friday. Reentry-friendly employer. Reliable physical condition.",
+    "url": "https://www.oncor.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Customer Care Representative",
+    "company": "TXU Energy",
+    "location": "Irving, TX 75038",
+    "description": "Inbound call center representative for TXU residential electricity customers. Answer billing questions, set up new service, troubleshoot outages. High school diploma. 1+ year customer service experience. Bilingual English Spanish a plus. Pay: $18.50/hr. Day, evening, and overnight shifts available. Retail customer service.",
+    "url": "https://www.txu.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Gas Service Technician",
+    "company": "Atmos Energy",
+    "location": "Fort Worth, TX 76140",
+    "description": "Install, maintain, and repair natural gas service lines and meters. CDL Class B preferred (training provided). OSHA-30. Pay: $26.00/hr. Day shift with on-call rotation. Construction utility trade. Background check; clean driving record required.",
+    "url": "https://www.atmosenergy.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Wastewater Operator Trainee",
+    "company": "Trinity River Authority",
+    "location": "Arlington, TX 76011",
+    "description": "Operate pumps, valves, and treatment processes at the Central Regional Wastewater System. High school diploma. TCEQ Class D operator license obtained within 12 months (paid training). OSHA-10. Pay: $20.50/hr. Rotating shifts. Government utility.",
+    "url": "https://www.trinityra.org/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "QA Tester - Entry Level",
+    "company": "Lockheed Martin Aeronautics",
+    "location": "Fort Worth, TX 76108",
+    "description": "Entry-level Quality Assurance tester for F-35 program software. AA degree or 2 years equivalent experience. Test plan execution, defect logging in JIRA. US citizenship required (cleared facility). Pay: $24.00/hr. Day shift. Manufacturing aerospace, day shift technical role.",
+    "url": "https://www.lockheedmartinjobs.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 0
+  },
+  {
+    "title": "IT Help Desk Technician",
+    "company": "Ben E. Keith Foods",
+    "location": "Fort Worth, TX 76155",
+    "description": "Tier-1 IT support for warehouse and corporate users. Resolve hardware/software tickets, password resets, basic networking. CompTIA A+ preferred. Associate degree or equivalent experience. Pay: $20.00/hr. Day shift, Monday-Friday. Customer service technical support.",
+    "url": "https://www.benekeith.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 0
+  },
+  {
+    "title": "Software Quality Engineer I",
+    "company": "Lockheed Martin Aeronautics",
+    "location": "Fort Worth, TX 76108",
+    "description": "Software QA engineer, F-35 program. Bachelor's degree in computer science or related field. Experience with automated testing frameworks. US citizen, ability to obtain Secret clearance. Pay: $36.00/hr. Day shift. Manufacturing technical role.",
+    "url": "https://www.lockheedmartinjobs.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 0
+  },
+  {
+    "title": "Help Desk Analyst",
+    "company": "Williamson-Dickie Manufacturing",
+    "location": "Fort Worth, TX 76104",
+    "description": "Provide tier-1 help desk support to corporate users at Dickies HQ. Reset passwords, image laptops, support Microsoft Office, Outlook, Teams. High school diploma plus relevant experience or AA. Pay: $19.50/hr. Day shift. Customer service IT.",
+    "url": "https://www.dickies.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 0
+  },
+  {
+    "title": "Foundry Resident - Operations Associate",
+    "company": "Fort Worth Foundry",
+    "location": "Fort Worth, TX 76102",
+    "description": "Operations support at Foundry Fort Worth startup accelerator near Sundance Square. Help cohort companies with logistics, scheduling, light technical setup. Bachelor's degree or 3+ years startup operations experience. Pay: $22.00/hr. Day shift, occasional evening events. Customer service hospitality.",
+    "url": "https://www.fortworthfoundry.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Substitute Teacher",
+    "company": "Fort Worth Independent School District",
+    "location": "Fort Worth, TX 76104",
+    "description": "Daily substitute teacher pool for Fort Worth ISD elementary and middle schools. High school diploma minimum, 60 college credit hours preferred. Background check post-offer. Pay: $110/day ($14.50/hr equivalent). Day shift, Monday-Friday school calendar. Government education role.",
+    "url": "https://www.fwisd.org/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Paraprofessional - Special Education",
+    "company": "Fort Worth Independent School District",
+    "location": "Fort Worth, TX 76104",
+    "description": "Special education paraprofessional, elementary classroom. Assist teacher with student needs, behavior support, ADL coaching. High school diploma + 48 college credit hours OR ParaPro test. Pay: $14.50/hr. Day shift, school calendar. Government education.",
+    "url": "https://www.fwisd.org/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Custodian - Fort Worth ISD",
+    "company": "Fort Worth Independent School District",
+    "location": "Fort Worth, TX 76104",
+    "description": "Custodial support at FWISD elementary and high school campuses. Cleaning, light maintenance, event setup. High school diploma or GED. Pay: $13.50/hr. Evening shift, 3pm-11pm. Reentry-friendly employer. Government school setting.",
+    "url": "https://www.fwisd.org/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Library Assistant",
+    "company": "Tarrant County College",
+    "location": "Fort Worth, TX 76102",
+    "description": "Library assistant on Trinity River Campus, downtown Fort Worth. Check out books, help students with databases, shelve materials. AA preferred or 2 years library experience. Pay: $15.00/hr. Day and evening shifts. Government education library.",
+    "url": "https://www.tccd.edu/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Instructional Aide",
+    "company": "Eagle Mountain-Saginaw ISD",
+    "location": "Saginaw, TX 76179",
+    "description": "Classroom instructional aide. Support certified teacher in early childhood through grade 5 settings. High school diploma + 48 college hours or ParaPro test. Pay: $13.75/hr. Day shift, school calendar. Government education.",
+    "url": "https://www.emsisd.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Medical Assistant",
+    "company": "MedStar Family Practice",
+    "location": "Fort Worth, TX 76110",
+    "description": "Front-and-back office medical assistant. Vitals, blood draws, EHR (Athena) charting, scheduling. CMA or RMA cert required. Pay: $18.50/hr. Day shift, Monday-Friday. Healthcare clinic.",
+    "url": "https://www.medstar911.org/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 0
+  },
+  {
+    "title": "Phlebotomist",
+    "company": "Quest Diagnostics",
+    "location": "Fort Worth, TX 76107",
+    "description": "Phlebotomist at the Camp Bowie Patient Service Center. Draw blood from adults and children, label specimens, light lab work. Phlebotomy cert + 1 year experience required. Pay: $17.00/hr. Day shift, occasional Saturdays. Healthcare clinic outpatient.",
+    "url": "https://questdiagnostics.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 0
+  },
+  {
+    "title": "Phlebotomy Technician",
+    "company": "LabCorp",
+    "location": "Fort Worth, TX 76132",
+    "description": "Outpatient phlebotomy at LabCorp Hulen patient service center. Draw blood, urine collection, specimen processing. Phlebotomy certification or equivalent experience. High school diploma. Pay: $16.50/hr. Day shift. Healthcare clinic.",
+    "url": "https://careers.labcorp.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Sterile Processing Technician",
+    "company": "JPS Health Network",
+    "location": "Fort Worth, TX 76104",
+    "description": "Sterile processing technician supporting OR teams at John Peter Smith Hospital. Decontaminate, package, and sterilize surgical instruments. CRCST cert preferred. High school diploma. Pay: $19.00/hr. Day, evening, and overnight shifts. Fair-chance employer. Healthcare hospital.",
+    "url": "https://jpshealthnet.org/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Medical Billing Specialist",
+    "company": "Texas Health Resources",
+    "location": "Arlington, TX 76011",
+    "description": "Medical billing and coding specialist, Texas Health corporate office. Review charts, assign ICD-10 and CPT codes, submit claims. CPC or CCA cert preferred. Pay: $20.00/hr. Day shift, Monday-Friday. Customer service healthcare administration.",
+    "url": "https://jobs.texashealth.org",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Automotive Service Technician",
+    "company": "AutoNation Ford Fort Worth",
+    "location": "Fort Worth, TX 76137",
+    "description": "Service technician at AutoNation Ford on Beach Street. Diagnose engine, electrical, brake, and transmission issues. ASE certification preferred. 2+ years dealer experience preferred. Pay: $24.00/hr or flag-rate. Day shift. Manufacturing automotive trade.",
+    "url": "https://www.autonationcareers.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Body Shop Technician",
+    "company": "Caliber Collision",
+    "location": "Fort Worth, TX 76140",
+    "description": "Auto body repair technician at Caliber Collision Hulen. Sand, paint, frame work. ICAR cert preferred. 1+ year body shop experience. Pay: $25.00/hr or flag-rate. Day shift. Reentry-friendly employer. Manufacturing automotive.",
+    "url": "https://www.caliber.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Diesel Mechanic",
+    "company": "Coca-Cola Southwest Beverages",
+    "location": "Fort Worth, TX 76140",
+    "description": "Maintain and repair Class 8 truck fleet at Coca-Cola Southwest Fort Worth distribution center. ASE or equivalent diesel mechanic certification. CDL preferred. 2+ years experience. Pay: $28.00/hr. Day, evening, overnight shifts. Manufacturing transportation.",
+    "url": "https://www.cocacolasouthwestbeverages.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "HVAC Technician",
+    "company": "Service Experts Heating & Air",
+    "location": "Fort Worth, TX 76104",
+    "description": "Install, service, and repair residential HVAC systems. EPA 608 cert required. NATE preferred. 2+ years HVAC experience. Clean driving record. Pay: $25.00/hr + commission. Day shift, on-call rotation. Construction trade.",
+    "url": "https://www.serviceexperts.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 0
+  },
+  {
+    "title": "Pest Control Technician",
+    "company": "Terminix Fort Worth",
+    "location": "Fort Worth, TX 76104",
+    "description": "Residential pest control technician. Inspect, treat, and document service calls. Texas pest control license obtained within 90 days (paid training). High school diploma. Clean driving record. Pay: $20.00/hr + commission. Day shift. Reentry-friendly employer. Construction service trade.",
+    "url": "https://www.terminix.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Parks Maintenance Worker",
+    "company": "City of Fort Worth Parks & Recreation",
+    "location": "Fort Worth, TX 76102",
+    "description": "Mow, trim, irrigate, and clean Fort Worth municipal parks. Operate riding mowers, trimmers, light equipment. High school diploma or GED. Valid driver license. Pay: $16.50/hr + benefits. Day shift, occasional weekends. Government parks.",
+    "url": "https://fortworthtexas.gov/jobs",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Sanitation Driver",
+    "company": "City of Fort Worth Solid Waste",
+    "location": "Fort Worth, TX 76104",
+    "description": "Residential sanitation truck driver, Fort Worth solid waste collection. CDL Class B required. 2+ years driving experience. Pay: $21.00/hr + benefits. Day shift, 4am-12pm. Reentry-friendly employer (case-by-case). Transportation government.",
+    "url": "https://fortworthtexas.gov/jobs",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Customer Service Representative - Water",
+    "company": "City of Fort Worth Water Department",
+    "location": "Fort Worth, TX 76102",
+    "description": "Inbound call center for Fort Worth water billing and service. Answer customer questions about bills, set up new service, dispatch trouble calls. High school diploma. 1+ year customer service experience. Bilingual English Spanish a plus. Pay: $17.50/hr + benefits. Day shift. Government customer service.",
+    "url": "https://fortworthtexas.gov/jobs",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Court Clerk",
+    "company": "Tarrant County District Clerk",
+    "location": "Fort Worth, TX 76102",
+    "description": "Court clerk at the Tarrant County Courthouse. File court documents, take payments, assist public at counter. High school diploma + 1 year admin experience. Pay: $17.50/hr + benefits. Day shift, Monday-Friday. Government clerical office work.",
+    "url": "https://www.tarrantcounty.com/jobs",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 0
+  },
+  {
+    "title": "Records Specialist - Police",
+    "company": "Fort Worth Police Department",
+    "location": "Fort Worth, TX 76102",
+    "description": "Civilian records specialist at Fort Worth PD HQ. Process police reports, fulfill records requests, data entry into Records Management System. High school diploma. 1+ year admin experience. Pay: $19.00/hr + benefits. Day shift, Monday-Friday. Government clerical.",
+    "url": "https://fortworthtexas.gov/jobs",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 0
+  },
+  {
+    "title": "Cashier",
+    "company": "H-E-B Grocery - Crowley",
+    "location": "Crowley, TX 76036",
+    "description": "Front-end cashier at H-E-B Crowley store. Ring up groceries, handle cash and card payments, bag items. High school diploma or GED preferred. No prior experience required. Pay: $14.50/hr. Day, evening, and weekend shifts. Retail customer service.",
+    "url": "https://careers.heb.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Stocker - Overnight Crew",
+    "company": "H-E-B Grocery - Alliance",
+    "location": "Fort Worth, TX 76244",
+    "description": "Overnight stocking crew at H-E-B Alliance. Unload trucks, restock shelves, rotate dated product. Lift up to 50 pounds. No experience required. Pay: $15.50/hr. Overnight shift, 10pm-6am. Retail warehouse.",
+    "url": "https://careers.heb.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Deli Associate",
+    "company": "Kroger - Hulen Mall",
+    "location": "Fort Worth, TX 76132",
+    "description": "Deli counter associate at Kroger Hulen. Slice meats and cheeses, prepare hot foods, customer service. ServSafe a plus. No prior experience required. Pay: $14.00/hr. Day and evening shifts. Retail food service.",
+    "url": "https://jobs.kroger.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Manager-in-Training",
+    "company": "Whataburger - Hemphill",
+    "location": "Fort Worth, TX 76104",
+    "description": "Restaurant manager-in-training program at Whataburger Hemphill. 12-week training across line, register, drive-thru, and shift leadership. High school diploma + 1 year food service experience. Pay: $17.00/hr + benefits. Day, evening, overnight shifts. Food service customer service.",
+    "url": "https://whataburger.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "General Merchandise Stocker",
+    "company": "Walmart - North Fort Worth",
+    "location": "Fort Worth, TX 76137",
+    "description": "Overnight stocker at Walmart Supercenter. Unload trucks, replenish shelves, zone aisles. No experience required. Pay: $15.50/hr + bonuses. Overnight shift 10pm-7am. Retail warehouse.",
+    "url": "https://careers.walmart.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Carpet Cleaning Technician",
+    "company": "Stanley Steemer Fort Worth",
+    "location": "Fort Worth, TX 76137",
+    "description": "Drive truck-mounted carpet cleaning unit to residential and commercial jobs. Clean carpets, upholstery, tile and grout. Valid driver license, clean record. Paid training. Pay: $18.50/hr + tips. Day shift, occasional Saturdays. Customer service trade.",
+    "url": "https://www.stanleysteemer.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Restoration Technician",
+    "company": "ServPro of South Fort Worth",
+    "location": "Fort Worth, TX 76110",
+    "description": "Water and fire damage restoration technician. Extract water, set drying equipment, demo damaged materials. IICRC cert preferred (paid training). Valid driver license. Pay: $19.50/hr + on-call premium. Day shift with after-hours emergency response. Reentry-friendly employer. Construction restoration.",
+    "url": "https://www.servprosouthfortworth.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Lawn Care Technician",
+    "company": "ABC Home & Commercial Services",
+    "location": "Fort Worth, TX 76134",
+    "description": "Residential lawn care route technician. Mow, fertilize, weed-treat, customer service. Texas pesticide applicator license obtained within 90 days (paid training). Valid driver license. Pay: $18.00/hr + commission. Day shift, Monday-Friday. Construction service trade.",
+    "url": "https://www.abchomeandcommercial.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Package Sorter - Sunrise Sort",
+    "company": "FedEx Ground - Fort Worth",
+    "location": "Fort Worth, TX 76140",
+    "description": "Package sorter at FedEx Ground Fort Worth hub. Unload trailers, sort packages by destination, load delivery vans. Lift up to 75 pounds. No experience required. Pay: $17.50/hr + shift differential. Early morning shift, 3am-8am. Manufacturing warehouse logistics.",
+    "url": "https://careers.fedex.com",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Veterans Career Navigator",
+    "company": "Texas Veterans Commission",
+    "location": "Fort Worth, TX 76102",
+    "description": "Veteran-priority job services counselor. Resume coaching, interview prep, employer connections at the Workforce Solutions Tarrant County center. Bachelor's degree or 4 years equivalent experience. Veteran status preferred. Pay: $22.50/hr + benefits. Day shift. Government veteran services.",
+    "url": "https://www.tvc.texas.gov/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
+  },
+  {
+    "title": "Reentry Job Coach",
+    "company": "Cornbread Hustle",
+    "location": "Fort Worth, TX 76104",
+    "description": "Job coach at Cornbread Hustle reentry employment program. Help justice-involved jobseekers prep resumes, mock interviews, employer placement. Lived experience strongly preferred. High school diploma. Pay: $20.00/hr + benefits. Day shift, occasional evenings. Government social services reentry.",
+    "url": "https://cornbreadhustle.com/careers",
+    "source": "honestjobs",
+    "scraped_at": "2026-05-01T00:00:00Z",
+    "fair_chance": 1
   }
 ]

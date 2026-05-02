@@ -116,7 +116,13 @@ async def test_seeder_loads_fort_worth_resources_tagged_with_city():
         await engine.dispose()
         names = {row[0] for row in rows}
         assert "Workforce Solutions for Tarrant County" in names
-        assert "Trinity Metro" in names
+        # Stage-2 expanded the Trinity Metro entries into specific sub-
+        # services (Bus / TEXRail / TRE / ZIPZONE / Bike Share / paratransit).
+        # Any of these proves the seeder picked up the active city's file.
+        assert any(
+            "Trinity Metro" in n or "TEXRail" in n or "TRE" in n
+            for n in names
+        ), names
         # Every row must carry the city tag.
         for _name, city in rows:
             assert city == "fort-worth"

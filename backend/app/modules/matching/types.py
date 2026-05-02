@@ -179,6 +179,11 @@ class Resource(BaseModel):
     notes: Optional[str] = None
     health_status: ResourceHealth = ResourceHealth.HEALTHY
     eligibility_status: Optional[str] = None
+    # Stage-2: explicit affinity tags so transportation / childcare /
+    # training resources can claim their barrier card without relying on
+    # resource_router name-keyword heuristics.  Values are BarrierType
+    # string values (e.g. ["transportation", "criminal_record"]).
+    barrier_affinity: list[str] = Field(default_factory=list)
 
 
 class MatchBucket(str, Enum):

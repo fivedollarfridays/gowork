@@ -1,30 +1,29 @@
 # GoWork brand thumbnails
 
-Three social-ready brand thumbnails for posts, decks, profiles, and embeds.
+Three social-ready brand thumbnails for posts, decks, profiles, and embeds. Each is shipped as both **SVG** (lossless / scaleable / ~2KB) and **PNG** (rasterized at native viewBox size, accepted by every social platform).
 
-| File | Size | Use for |
-|------|------|---------|
-| `gowork-thumbnail-square.svg` | 1080×1080 | Instagram, LinkedIn square, Twitter cards (cropped), GitHub social preview, slide thumbnails |
-| `gowork-thumbnail-wide.svg` | 1200×630 | Twitter / LinkedIn / Facebook OG cards, Slack unfurls, Discord embeds, blog headers, YouTube thumbnails |
-| `gowork-thumbnail-transparent.svg` | 1080×1080 | Transparent — drop on any background (decks, photos, light/dark surfaces) |
+| Variant | SVG | PNG | Size | Use for |
+|---------|-----|-----|------|---------|
+| Square | `gowork-thumbnail-square.svg` | `gowork-thumbnail-square.png` | 1080×1080 | Instagram, LinkedIn square, Twitter cards (cropped), GitHub social preview, slide thumbnails |
+| Wide | `gowork-thumbnail-wide.svg` | `gowork-thumbnail-wide.png` | 1200×630 | Twitter / LinkedIn / Facebook OG cards, Slack unfurls, Discord embeds, blog headers, YouTube thumbnails |
+| Transparent | `gowork-thumbnail-transparent.svg` | `gowork-thumbnail-transparent.png` | 1080×1080 | Drop on any background (decks, photos, light/dark surfaces) — PNG keeps the alpha channel |
 
-## Convert to PNG / JPG
+## Regenerating PNGs
 
-Most platforms accept SVG directly. If you need a raster:
-
-**Browser** — open the `.svg` in any modern browser → right-click → "Save image as…" picks PNG.
-
-**CLI** — with [`rsvg-convert`](https://wiki.gnome.org/Projects/LibRsvg) or ImageMagick:
+If you edit any SVG, regenerate the matching PNGs with the project script (uses Playwright's bundled Chromium — already a dev dep):
 
 ```bash
-# rsvg-convert
-rsvg-convert -w 1080 -h 1080 gowork-thumbnail-square.svg -o gowork-thumbnail-square.png
-
-# ImageMagick
-magick gowork-thumbnail-square.svg gowork-thumbnail-square.png
+cd frontend
+node scripts/render-brand-pngs.mjs
 ```
 
-**Figma / Sketch / Illustrator** — drag the `.svg` into the canvas, export as PNG/JPG at any DPI.
+Output is written next to each source SVG with the matching basename. Idempotent — safe to re-run.
+
+## Other format conversions
+
+**JPG** — open the PNG in any image tool ("Save as JPG" / `magick foo.png foo.jpg`). PNG is higher quality for these flat-vector graphics; only convert to JPG if a platform specifically demands it.
+
+**Figma / Sketch / Illustrator** — drag the `.svg` into the canvas, export at any DPI.
 
 ## Design language
 

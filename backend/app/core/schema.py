@@ -18,6 +18,7 @@ ALLOWED_COLUMNS = {
         "name", "category", "subcategory", "address", "lat", "lng",
         "phone", "url", "eligibility", "services", "hours", "notes",
         "city",  # m008 — per-row city slug for per-request filtering
+        "barrier_affinity",  # m009 — explicit barrier tags (JSON list)
     },
     "transit_stops": {"route_id", "stop_name", "lat", "lng", "sequence"},
     "job_listings": {
@@ -41,4 +42,4 @@ ALLOWED_COLUMNS = {
     "share_tokens": {"token", "session_id", "created_at", "expires_at"},
 }
 
-JSON_FIELDS = {"services"}
+JSON_FIELDS = {"services", "barrier_affinity"}
