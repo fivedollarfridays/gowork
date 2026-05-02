@@ -1,0 +1,53 @@
+[
+  {
+    "name": "Texas Workforce Commission - Child Care Services (Tarrant County)",
+    "category": "childcare",
+    "subcategory": "subsidy",
+    "address": "1200 Circle Dr, Fort Worth, TX 76119",
+    "lat": 32.6900,
+    "lng": -97.2700,
+    "phone": "(817) 413-4400",
+    "url": "https://www.workforcesolutions.net/job-seekers/child-care/",
+    "eligibility": "Income-eligible families, must be working or in approved training",
+    "services": ["Childcare payment assistance", "Provider referrals", "Child Care Services (CCS) subsidy"],
+    "notes": "Apply through Workforce Solutions for Tarrant County. Processing typically 2-4 weeks. Covers licensed centers and registered homes."
+  },
+  {
+    "name": "Head Start of Greater Tarrant County (Child Care Associates)",
+    "category": "childcare",
+    "subcategory": "head_start",
+    "address": "3000 S Hulen St, Fort Worth, TX 76109",
+    "lat": 32.7050,
+    "lng": -97.3640,
+    "phone": "(817) 794-2515",
+    "url": "https://www.childcareassociates.org",
+    "eligibility": "Families at or below federal poverty level, children ages 0-5",
+    "services": ["Free preschool", "Health screenings", "Nutrition services", "Parent education", "Disability services"],
+    "notes": "Free program. Also serves pregnant women. Apply early, waitlists common."
+  },
+  {
+    "name": "Texas DFPS - Child Care Licensing (Tarrant County)",
+    "category": "childcare",
+    "subcategory": "licensing",
+    "address": "Tarrant County DFPS Office, 6300 John Ryan Dr, Fort Worth, TX 76132",
+    "lat": 32.7060,
+    "lng": -97.4180,
+    "phone": "(800) 862-5252",
+    "url": "https://www.dfps.texas.gov/Child_Care/Search_Texas_Child_Care/",
+    "eligibility": "Open to all parents and providers",
+    "services": ["Licensed-provider search", "Compliance history lookup", "Complaint intake"],
+    "notes": "Use the DFPS public search tool to verify a provider's license status and inspection history before enrollment."
+  },
+  {
+    "name": "ACH Child and Family Services",
+    "category": "childcare",
+    "subcategory": "family_services",
+    "address": "4500 Long Ave, Fort Worth, TX 76115",
+    "lat": 32.6800,
+    "lng": -97.3300,
+    "phone": "(817) 335-4673",
+    "url": "https://www.achservices.org",
+    "services": ["Childcare referrals", "Foster care", "Family counseling", "Parenting classes"],
+    "notes": "Serves children and families across Tarrant County. Sliding-scale fees on some programs."
+  }
+]

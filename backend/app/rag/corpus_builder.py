@@ -1,8 +1,22 @@
-"""Build RAG corpus from database resources and barrier playbooks."""
+"""Build RAG corpus from database resources and barrier playbooks.
+
+City-scoped at build time: ``_build_resource_docs`` filters
+``resources.city`` to ``settings.city`` (the startup-time deployment
+city) so the FAISS index only contains the active deployment's
+resources. This is THE fix for the "Run 2" Montgomery leak — the
+prior corpus pulled all rows from the multi-city seeded DB into a
+single index, causing the LLM to retrieve AL resources for FW
+queries.
+
+Per Kevin's sprint brief item 3 (preferred): rebuild per city. The
+deployment env var ``CITY=fort-worth`` (or ``montgomery``) drives
+the filter. Future cities follow the same pattern automatically.
+"""
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import get_settings
 from app.rag.document_schema import RagDocument
 
 
@@ -15,15 +29,24 @@ async def build_corpus(session: AsyncSession) -> list[RagDocument]:
 
 
 async def _build_resource_docs(session: AsyncSession) -> list[RagDocument]:
-    """Create RagDocuments from resources table joined with barrier_resources."""
+    """Create RagDocuments from resources table joined with barrier_resources.
+
+    Filters ``resources.city`` to the active deployment's city slug
+    (``settings.city``) so the resulting FAISS index contains ONLY
+    that city's resources. AL resources are unreachable in a TX
+    deployment's index and vice versa — no LLM-side cross-city leak.
+    """
+    city_slug = (get_settings().city or "").strip().lower()
     result = await session.execute(
         text(
             "SELECT r.id, r.name, r.category, r.subcategory, r.address, "
             "r.phone, r.url, r.eligibility, r.services, r.hours, r.notes, "
             "r.lat, r.lng, r.health_status "
             "FROM resources r "
-            "WHERE r.health_status != 'hidden'"
-        )
+            "WHERE r.health_status != 'hidden' "
+            "AND r.city = :city"
+        ),
+        {"city": city_slug},
     )
     resources = [dict(row._mapping) for row in result]
 

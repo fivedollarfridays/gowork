@@ -218,7 +218,22 @@ def _profile(**kw) -> BenefitsProfile:
 
 
 class TestEligibilityEdgeCases:
-    """Cover remaining uncovered branches in eligibility engine."""
+    """Cover remaining uncovered branches in eligibility engine.
+
+    "TWC Child Care Services" lives in the Fort Worth (TX) eligibility
+    module per the city-aware refactor (PR #107). The conftest autouse
+    fixture pins CITY=montgomery for legacy test compat, so this class
+    flips to TX so the TX rule path is loaded into the active set.
+    """
+
+    @pytest.fixture(autouse=True)
+    def _city_fort_worth(self, monkeypatch):
+        from app.core.config import get_settings
+
+        monkeypatch.setenv("CITY", "fort-worth")
+        get_settings.cache_clear()
+        yield
+        get_settings.cache_clear()
 
     def test_twc_child_care_low_income_with_kids(self) -> None:
         """TWC Child Care Services with low income + kids -> likely."""

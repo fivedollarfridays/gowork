@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     llm_provider: str = "anthropic"
     openai_api_key: str = ""
     openai_model: str = "gpt-4o"
+    openai_base_url: str = ""
     gemini_api_key: str = ""
     gemini_model: str = "gemini-2.0-flash"
 

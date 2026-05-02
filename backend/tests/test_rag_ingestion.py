@@ -2,6 +2,7 @@
 
 import pytest
 
+from app.core.config import get_settings
 from app.core.database import get_async_session_factory
 from app.rag.corpus_builder import build_corpus
 from app.rag.document_schema import RagDocument
@@ -10,7 +11,30 @@ from app.rag.store import RagStore
 
 
 @pytest.fixture
-async def db_session(test_engine):
+def _city_fort_worth_for_corpus(monkeypatch):
+    """Override the autouse CITY=montgomery pin for corpus tests.
+
+    The corpus builder filters resources by ``settings.city`` (the
+    deployment-time city). The autouse fixture in conftest.py pins
+    CITY=montgomery globally for legacy test compatibility, but the
+    multi-city-seeded test DB has FW resources properly linked to
+    barriers via fort-worth/barrier_graph_seed.json — the MGM
+    barrier_graph_seed.json references legacy resource IDs that no
+    longer align after Stage 1's per-city resource split.
+
+    Pinning corpus tests to FW lines them up with the working
+    barrier-graph→resources contract. Both AL and TX paths exercise
+    the same corpus_builder code; testing under FW is sufficient for
+    the build_corpus / build_index contract.
+    """
+    monkeypatch.setenv("CITY", "fort-worth")
+    get_settings.cache_clear()
+    yield
+    get_settings.cache_clear()
+
+
+@pytest.fixture
+async def db_session(_city_fort_worth_for_corpus, test_engine):
     factory = get_async_session_factory()
     async with factory() as session:
         yield session

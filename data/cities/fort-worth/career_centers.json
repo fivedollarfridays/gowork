@@ -1,0 +1,16 @@
+[
+  {
+    "name": "Workforce Solutions for Tarrant County (Comprehensive)",
+    "category": "career_center",
+    "subcategory": "comprehensive",
+    "address": "1200 Circle Dr, Fort Worth, TX 76119",
+    "lat": 32.6900,
+    "lng": -97.2700,
+    "phone": "(817) 413-4400",
+    "url": "https://www.workforcesolutions.net",
+    "eligibility": "Open to all Tarrant County residents, no appointment needed",
+    "services": ["Job search assistance", "Resume writing", "Interview preparation", "Career counseling", "Workshops", "Computer access", "WIOA enrollment", "Veterans services"],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "Ask for referrals to specialized programs. WIOA funding can cover training costs."
+  }
+]

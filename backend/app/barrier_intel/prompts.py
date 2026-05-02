@@ -29,8 +29,13 @@ def get_barrier_intel_system_prompt() -> str:
     city = get_city_config()
     if city.state == "TX":
         career_center = "Workforce Solutions for Tarrant County"
+    elif city.state == "AL":
+        from app.cities.montgomery.prompts import MONTGOMERY_CAREER_CENTER_NAME
+        career_center = MONTGOMERY_CAREER_CENTER_NAME
     else:
-        career_center = "the Montgomery Career Center"
+        raise ValueError(
+            f"No barrier-intel prompt configured for state {city.state!r}"
+        )
     return _SYSTEM_PROMPT_TEMPLATE.format(
         location=city.location,
         career_center=career_center,

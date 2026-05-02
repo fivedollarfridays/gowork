@@ -8,11 +8,9 @@ are PRE_REQ_FOR other barriers should be resolved first.
 import json
 from collections import defaultdict, deque
 from functools import lru_cache
-from pathlib import Path
 
+from app.core.database import resolve_data_dir
 from app.modules.plan.sequence_types import BarrierSequence, SequenceStep
-
-_GRAPH_PATH = Path(__file__).resolve().parent.parent.parent.parent.parent / "data" / "barrier_graph_seed.json"
 
 # Relationship types that define ordering (source should come before target)
 _ORDERING_RELS = {"CAUSES", "PRE_REQ_FOR", "WORSENS"}
@@ -31,8 +29,15 @@ _WEEKS_PER_BARRIER: dict[str, int] = {
 
 @lru_cache(maxsize=1)
 def _load_graph() -> dict:
-    """Load the barrier graph seed data."""
-    with open(_GRAPH_PATH, encoding="utf-8") as f:
+    """Load the barrier graph seed data for the active city.
+
+    Resolves the file from ``resolve_data_dir()`` (city-aware), so
+    Montgomery and Fort Worth deployments each load their own seed.
+    Cached for the life of the process; tests that switch CITY mid-run
+    must call ``_load_graph.cache_clear()``.
+    """
+    graph_path = resolve_data_dir() / "barrier_graph_seed.json"
+    with open(graph_path, encoding="utf-8") as f:
         return json.load(f)
 
 

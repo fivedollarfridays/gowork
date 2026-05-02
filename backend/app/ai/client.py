@@ -138,12 +138,19 @@ def _fallback_next_step(contacts: list[str]) -> str:
             "how to help."
         )
     if city.state == "TX":
-        return (
-            "Monday morning, head to Workforce Solutions for Tarrant County. "
-            f"The staff there help {city.name} residents just like you every single day."
+        prefix = (
+            "Monday morning, head to Workforce Solutions for Tarrant County "
+            "at 1200 Circle Dr. "
         )
+    elif city.state == "AL":
+        from app.cities.montgomery.prompts import (
+            MONTGOMERY_FALLBACK_NEXT_STEP_PREFIX,
+        )
+        prefix = MONTGOMERY_FALLBACK_NEXT_STEP_PREFIX
+    else:
+        raise ValueError(f"No fallback narrative configured for state {city.state!r}")
     return (
-        "Monday morning, head to the Alabama Career Center on Carter Hill Road. "
+        f"{prefix}"
         f"The staff there help {city.name} residents just like you every single day."
     )
 
@@ -187,10 +194,10 @@ def _build_fallback_actions(actions: list[str]) -> list[str]:
             "Visit Workforce Solutions for Tarrant County in Fort Worth "
             "for personalized guidance"
         ]
-    return [
-        "Visit the Alabama Career Center on Carter Hill Road in Montgomery "
-        "for personalized guidance"
-    ]
+    if city.state == "AL":
+        from app.cities.montgomery.prompts import MONTGOMERY_FALLBACK_ACTION
+        return [MONTGOMERY_FALLBACK_ACTION]
+    raise ValueError(f"No fallback actions configured for state {city.state!r}")
 
 
 def _build_fallback_phase_summaries(action_plan: dict | None) -> list[str]:

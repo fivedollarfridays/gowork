@@ -53,7 +53,7 @@ export interface Chapter08FindYourPathProps {
   id?: string;
 }
 
-const SPOKEN_CITIES = ["Montgomery, AL", "Dallas, TX", "Houston, TX"] as const;
+const SPOKEN_CITIES = ["Fort Worth, TX", "Dallas, TX", "Houston, TX", "San Antonio, TX", "Austin, TX"] as const;
 
 // Pixel-digitize grid dimensions — 30 cols × 17 rows = 510 squares.
 // Matches Lithosquare's reference geometry exactly.

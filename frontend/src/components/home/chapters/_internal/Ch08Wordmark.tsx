@@ -16,7 +16,7 @@
 import { useEffect, useRef, useState, type ReactElement } from "react";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
-const SPOKEN_CITIES = ["Montgomery, AL", "Dallas, TX", "Houston, TX"] as const;
+const SPOKEN_CITIES = ["Fort Worth, TX", "Dallas, TX", "Houston, TX", "San Antonio, TX", "Austin, TX"] as const;
 
 interface WordmarkProps {
   row1: string;
