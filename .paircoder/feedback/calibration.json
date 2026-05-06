@@ -2,19 +2,19 @@
   "task_types": {
     "feature": {
       "task_type": "feature",
-      "sample_count": 32,
-      "avg_tokens": 5496.5625,
-      "std_dev": 8831.198262189211,
-      "p80_tokens": 9208.400000000001,
-      "avg_duration_seconds": 199.3125,
-      "success_rate": 0.75,
+      "sample_count": 33,
+      "avg_tokens": 5558.242424242424,
+      "std_dev": 8703.359623105855,
+      "p80_tokens": 12886.471226897553,
+      "avg_duration_seconds": 222.3939393939394,
+      "success_rate": 0.7575757575757576,
       "recommended_model": "haiku",
       "model": "aggregate",
       "recommended_effort": "high",
-      "_m2_tokens": 2495682007.875,
-      "_m2_duration": 1602276.875,
-      "estimation_mape": null,
-      "estimation_sample_count": 0,
+      "_m2_tokens": 2499699468.060606,
+      "_m2_duration": 2164863.878787879,
+      "estimation_mape": 27.03133297928837,
+      "estimation_sample_count": 1,
       "cx_per_minute": 26.140075289480265
     },
     "refactor": {
@@ -53,19 +53,19 @@
     },
     "feature:claude-opus-4-7": {
       "task_type": "feature",
-      "sample_count": 8,
-      "avg_tokens": 14444.125,
-      "std_dev": 13037.68828663176,
-      "p80_tokens": 22407.800000000003,
-      "avg_duration_seconds": 419.625,
+      "sample_count": 9,
+      "avg_tokens": 13676.111111111111,
+      "std_dev": 12482.518401921983,
+      "p80_tokens": 24186.39160552942,
+      "avg_duration_seconds": 479.77777777777777,
       "success_rate": 1.0,
       "recommended_model": "haiku",
       "model": "claude-opus-4-7",
       "recommended_effort": "high",
-      "_m2_tokens": 1359850526.8749998,
-      "_m2_duration": 484899.87499999994,
-      "estimation_mape": null,
-      "estimation_sample_count": 0,
+      "_m2_tokens": 1402319390.8888886,
+      "_m2_duration": 745421.5555555555,
+      "estimation_mape": 27.03133297928837,
+      "estimation_sample_count": 1,
       "cx_per_minute": null
     },
     "feature:unknown": {
@@ -188,6 +188,6 @@
       "cx_per_minute": 4.325846981826184
     }
   },
-  "last_calibrated": "2026-05-06T22:50:35.683089+00:00",
-  "total_records": 37
+  "last_calibrated": "2026-05-06T23:01:43.087459+00:00",
+  "total_records": 38
 }
