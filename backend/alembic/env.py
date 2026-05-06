@@ -25,6 +25,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from alembic import context
+from app.core.db_url import normalize_async_url
 
 # Alembic Config object — provides access to alembic.ini values.
 config = context.config
@@ -51,32 +52,6 @@ def _resolve_database_url() -> str:
     from app.core.config import get_settings
 
     return get_settings().database_url
-
-
-def _is_sqlite_url(url: str) -> bool:
-    """Return True for sqlite URLs (sync or async drivers)."""
-    return url.startswith("sqlite")
-
-
-def _is_postgres_url(url: str) -> bool:
-    """Return True for postgres URLs (sync or async drivers)."""
-    return url.startswith("postgres") or url.startswith("postgresql")
-
-
-def _normalize_async_url(url: str) -> str:
-    """Coerce a sync URL into its async-driver equivalent.
-
-    Lets callers pass either ``sqlite:///x`` or
-    ``sqlite+aiosqlite:///x`` (likewise ``postgresql://`` →
-    ``postgresql+asyncpg://``) — env.py always runs the async
-    engine path, so we normalize once here.
-    """
-    if _is_sqlite_url(url) and "+aiosqlite" not in url:
-        return url.replace("sqlite://", "sqlite+aiosqlite://", 1)
-    if _is_postgres_url(url) and "+asyncpg" not in url and "+" not in url.split("://", 1)[0]:
-        prefix, rest = url.split("://", 1)
-        return f"{prefix}+asyncpg://{rest}"
-    return url
 
 
 def run_migrations_offline() -> None:
@@ -106,7 +81,7 @@ async def run_async_migrations() -> None:
     NullPool so the engine is fully torn down between alembic
     invocations — avoids dangling connections in CI.
     """
-    url = _normalize_async_url(_resolve_database_url())
+    url = normalize_async_url(_resolve_database_url())
     connectable = create_async_engine(url, poolclass=pool.NullPool)
     async with connectable.connect() as connection:
         await connection.run_sync(_do_run_migrations)

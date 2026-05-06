@@ -46,6 +46,33 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+- **T22.2 done** (auto-updated by hook)
+
+- **T22.2 done** — Postgres driver + dual-DB config
+
+### 2026-05-06 — T22.2 — Postgres driver + dual-DB config
+
+Branch: `engage/backlog-sprint-22-identity-foundation`. Sprint 22, T22.2 — wired postgres alongside sqlite at the runtime engine layer + config layer + test fixture layer. T22.1 stood up the Alembic runner with the same dual-driver shape; T22.2 makes the rest of the app catch up so the app + migrations agree on URL handling.
+
+- **Files touched**
+  - `backend/requirements.txt` — added `asyncpg==0.30.0` and `psycopg[binary]==3.2.13`. asyncpg is the async driver the app + Alembic use at runtime; `psycopg[binary]` is for any sync Alembic ops (offline mode / data ops) that don't go through the async engine.
+  - `backend/app/core/db_url.py` — **new** (54 lines, 4 functions). Public helpers `is_sqlite_url`, `is_postgres_url`, `normalize_async_url`, `infer_dialect`. Single source of truth for "is this URL sqlite or postgres, and what's its async-driver form." Used by both `app.core.database` and `backend/alembic/env.py`.
+  - `backend/app/core/database.py` — `get_engine()` now dispatches: `StaticPool` for sqlite (legacy behaviour, required for in-memory + benign for file-based), `NullPool` for postgres (mirrors env.py, no dangling connections in CI). URL passes through `normalize_async_url` so callers may set `DATABASE_URL=postgresql://...` (sync form) and the runtime auto-coerces to `postgresql+asyncpg://...`. +18 lines, no new functions, still under arch limits (198 lines).
+  - `backend/app/core/config.py` — added `Settings.db_dialect` computed field (returns `"sqlite"` or `"postgresql"` via `infer_dialect`) + a model validator that runs the property at instantiation so unsupported schemes (mysql/oracle/etc.) fail fast as ValidationError instead of a runtime AttributeError. +22 lines.
+  - `backend/alembic/env.py` — refactored to import `normalize_async_url` from `app.core.db_url`; deleted the inline `_is_sqlite_url`/`_is_postgres_url`/`_normalize_async_url` (which T22.1 had stubbed locally). T22.1's behaviour preserved exactly — `alembic current` on the existing sqlite DB exits clean.
+  - `backend/tests/conftest.py` — added module docstring documenting the `GOWORK_TEST_POSTGRES_URL` opt-in env var. Exposed module constant `POSTGRES_TEST_URL_ENV_VAR = "GOWORK_TEST_POSTGRES_URL"`. Added `db_engine` fixture parameterized over `[sqlite]` (default) or `[sqlite, postgres]` when the env var is set. Existing `test_engine` fixture untouched — it remains the legacy sqlite-only fixture; `db_engine` is the new dual-engine entry point for tests that explicitly want parameterization.
+  - **Tests added** — `tests/test_db_url_helpers.py` (15 tests), `tests/test_config_db_dialect.py` (3 tests), `tests/test_database_engine_dispatch.py` (3 tests), `tests/test_db_engine_fixture.py` (2 tests).
+
+- **Verification**
+  - `backend/.venv/bin/python -m pytest backend/tests --tb=line -q` → **16 failed, 4338 passed, 2 skipped** (vs. baseline 16 failed, 4315 passed). The 16 failures are the pre-existing set (test_barrier_*, test_config_llm, test_contract_credit_api, test_montgomery_leaks, test_precrawl_city, test_proximity_scorer_city, test_wioa_screener_city) — `diff` of failure lists shows IDENTICAL. +23 passed accounts for the 23 new tests added.
+  - `bpsai-pair arch check` on each touched file: db_url.py / conftest.py / env.py = no violations; database.py + config.py = soft-warning only (file >150 lines, threshold below project's 200/400 standard) — net delta is small (+18 / +22) and both files were already past the warning threshold pre-T22.2.
+  - `cd backend && .venv/bin/alembic current` exits clean (env.py refactor verified).
+  - asyncpg + psycopg installed and importable in the venv.
+
+- **No callsite changes outside the four files in scope.** All existing test fixtures (`test_engine`, `client`, etc.) keep working unchanged; the new `db_engine` is additive.
+
+- **What's next.** T22.3 ports the m001-m010 DDL chain into versioned Alembic migrations (now that asyncpg is available), then T22.4 wires a Postgres CI service so the postgres axis of `db_engine` actually runs in CI.
+
 - **T22.1 done** (auto-updated by hook)
 
 ### 2026-05-06 — T22.1 — Alembic infrastructure + async env

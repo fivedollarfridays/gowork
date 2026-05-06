@@ -6,8 +6,10 @@ import re
 from functools import lru_cache
 from urllib.parse import urlparse
 
-from pydantic import field_validator, model_validator
+from pydantic import computed_field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from app.core.db_url import infer_dialect
 
 _BLOCKED_NETWORKS = [
     ipaddress.ip_network("127.0.0.0/8"),
@@ -145,6 +147,27 @@ class Settings(BaseSettings):
         return [
             origin.strip() for origin in self.cors_origins.split(",") if origin.strip()
         ]
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def db_dialect(self) -> str:
+        """SQLAlchemy dialect inferred from ``database_url``.
+
+        Returns ``"sqlite"`` or ``"postgresql"``. Used by
+        ``app.core.database`` to pick a pool class and by test
+        fixtures to skip postgres-specific axes when only sqlite is
+        configured. Raises ``ValueError`` for unsupported schemes.
+        """
+        return infer_dialect(self.database_url)
+
+    @model_validator(mode="after")
+    def _validate_db_dialect_supported(self) -> "Settings":
+        """Reject unsupported DATABASE_URL schemes at instantiation."""
+        # Touching the property forces ``infer_dialect`` to run; if
+        # the URL is mysql/oracle/etc, ValueError surfaces as a
+        # Pydantic ValidationError rather than a runtime AttributeError.
+        _ = self.db_dialect
+        return self
 
 
 @lru_cache

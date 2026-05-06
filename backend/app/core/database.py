@@ -1,8 +1,13 @@
-"""Async SQLAlchemy database setup for SQLite with raw DDL and seed data.
+"""Async SQLAlchemy database setup, supporting sqlite and postgres.
 
 Heavy seeding helpers live in :mod:`app.core.seed_helpers` so this
 module stays under the project's max-functions-per-file ceiling.  The
 public entry points (``init_db``, ``seed_database``) stay here.
+
+T22.2 wired in postgres support: the engine factory now dispatches
+between ``sqlite+aiosqlite://`` and ``postgresql+asyncpg://`` URLs.
+URL normalization + dialect detection live in :mod:`app.core.db_url`
+so the runtime path mirrors ``backend/alembic/env.py``.
 """
 
 import logging
@@ -10,10 +15,11 @@ from pathlib import Path
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.pool import StaticPool
+from sqlalchemy.pool import NullPool, StaticPool
 
 from app.cities.config import get_city_config
 from app.core.config import get_settings
+from app.core.db_url import is_sqlite_url, normalize_async_url
 from app.core.schema import ALLOWED_COLUMNS, DDL_SQL
 from app.core.seed_helpers import (
     apply_pending_migrations,
@@ -55,14 +61,26 @@ _async_session_factory = None
 
 
 def get_engine():
-    """Get or create the async engine."""
+    """Get or create the async engine.
+
+    Dispatches by URL prefix:
+    - sqlite (aiosqlite): uses ``StaticPool`` so a single connection
+      is shared across the test/runtime process — required for
+      in-memory SQLite and benign for file-based SQLite.
+    - postgres (asyncpg): uses ``NullPool`` to mirror the
+      Alembic env.py behaviour. Production deployments can switch
+      to a real pool by overriding via env, but NullPool is the
+      safe default — no dangling connections in CI.
+    """
     global _engine
     if _engine is None:
         settings = get_settings()
+        url = normalize_async_url(settings.database_url)
+        poolclass = StaticPool if is_sqlite_url(url) else NullPool
         _engine = create_async_engine(
-            settings.database_url,
+            url,
             echo=False,
-            poolclass=StaticPool,
+            poolclass=poolclass,
         )
     return _engine
 
