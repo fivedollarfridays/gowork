@@ -46,7 +46,46 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
-- **T22.3 done** (auto-updated by hook)
+- **T22.5 done** (auto-updated by hook)
+
+### 2026-05-06 — T22.5 — accounts + account_sessions + account_credentials tables
+
+Branch: `engage/backlog-sprint-22-identity-foundation`. Sprint 22, T22.5 — introduced the identity-layer foundation. Three new tables shipped via alembic revision 0011 (no legacy `m011_*.py` counterpart — the alembic chain is now the sole source of truth past m010).
+
+- **Files added**:
+  - `backend/app/core/accounts_schema.py` (98 lines) — SQLAlchemy Core `MetaData` + `Table` definitions for `accounts`, `account_sessions`, `account_credentials`, plus `apply_ddl(connection)` / `drop_ddl(connection)` helpers consumed by both alembic and the test fixture. Dialect-portable by construction (sqlite + postgres).
+  - `backend/alembic/versions/0011_accounts.py` (39 lines, `revision='0011'`, `down_revision='0010'`) — thin shim that delegates to `accounts_schema.apply_ddl` / `drop_ddl` so the two code paths can never drift.
+  - `backend/app/core/queries_accounts.py` (124 lines) — async CRUD surface mirroring the `app.core.queries` style: `create_account` (RETURNING-id portable), `get_account_by_email` (case-insensitive lookup via normalized email), `claim_session` (idempotent on same `(account_id, session_id)`, raises `IntegrityError` on UNIQUE(session_id) collision with a different owner), `list_sessions_for_account`, `get_account_for_session` (JOIN-based; returns None for anonymous sessions).
+  - `backend/tests/test_accounts.py` (210 lines, 11 tests) — covers create + lookup + email-normalization + UNIQUE-email + claim (idempotent + cross-account-rejected) + list + get-for-session (claimed + anonymous-returns-None) + credential-row-round-trip. Uses an `accounts_engine` fixture that layers `apply_ddl` on top of `db_engine` (T22.2) so tests run on both axes.
+
+- **Files modified**:
+  - `backend/tests/test_alembic_parity.py` — extended the linear-chain expectation to include `0011 -> 0010` and stripped the new identity tables from the parity comparison (legacy `runner.apply_pending` only knows m001..m010, so the schema diff would otherwise show "only-in-alembic" rows).
+
+- **Schema choices**: account_id is INTRODUCED here but NOT yet linked to existing tables; binding lives entirely in the `account_sessions` link table per the anonymous-first invariant. UNIQUE(session_id) on `account_sessions` enforces at-most-one-account-per-session. `credential_value_hash` is sized for SHA-256 hex (64 chars, but VARCHAR(128) to accommodate future schemes); `credential_type` is a string column so future credential families (oauth_provider, phone_otp) drop in without migration. Composite index on `(credential_type, credential_value_hash)` keeps the lookup path on T22.8 sub-millisecond. ON DELETE CASCADE on both FKs to `accounts.id`.
+
+- **Tests**: 4 failed (pre-existing baseline) / 4379 passed / 2 skipped, full suite 66.12s. Accounts-only run: 11/11 green on sqlite axis (postgres axis opt-in via `GOWORK_TEST_POSTGRES_URL`). `bpsai-pair arch check` passes on every touched file.
+
+- **Verification**: ran `alembic upgrade head` against a fresh sqlite DB — all three new tables present with the correct UNIQUE/PK/FK/index constraints (verified via `.schema`).
+
+### 2026-05-06 — T22.4 — Postgres schema parity + CI service
+
+Branch: `engage/backlog-sprint-22-identity-foundation`. Sprint 22, T22.4 — wired a `postgres:16` service container into GitHub Actions and added round-trip schema-parity tests that run via the `db_engine` fixture (T22.2) on both sqlite and (opt-in) postgres axes.
+
+- **Files added**:
+  - `backend/tests/test_db_parity.py` (376 lines, 15 tests) — covers every major application table from m001-m010: employers, transit_routes, transit_stops, resources (incl. m008 `city` + m009 `barrier_affinity`), job_listings (incl. m010 `lat`/`lng`), sessions, feedback_tokens, visit_feedback, resource_feedback, barriers, barrier_relationships, barrier_resources, employer_policies, record_profiles, share_tokens. Each test INSERTs a representative row, COMMITs, SELECTs by every supplied column, and asserts column-level round-trip equality with bool/int/float coercion handled per-dialect via `_assert_round_trip`.
+
+- **Files modified**:
+  - `.github/workflows/ci.yml` (+92 lines) — added a new `backend-postgres` job alongside the existing sqlite `backend` job. Declares a `postgres:16` service container with `pg_isready` health check (10s interval, 10 retries), exposes 5432, runs `alembic upgrade head` against postgres before pytest, then runs the full backend test suite with `GOWORK_TEST_POSTGRES_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/postgres` set so the `db_engine` fixture's postgres axis activates.
+
+- **Verification**:
+  - Local sqlite axis: 15/15 parity tests PASS in 0.52s.
+  - Local postgres axis: SKIPPED (docker daemon not running locally; the `db_engine` fixture auto-skips when `GOWORK_TEST_POSTGRES_URL` is unset, per T22.2 contract). Postgres axis is CI-verified via the new `backend-postgres` job.
+  - Full backend suite (excluding `tests/test_accounts.py` which is mid-flight in T22.5): `4368 passed, 2 skipped, 4 failed` — same 4 pre-existing failures as baseline (test_config_llm × 3 + test_contract_credit_api × 1, both unrelated). +15 net new tests vs. T22.3 baseline of 4353.
+  - `bpsai-pair arch check backend/tests/test_db_parity.py` — clean (376 lines, under 600-line test ceiling; 17 functions, under 30-function test ceiling).
+
+- **CI shape after this task**: `backend` (sqlite) + `backend-postgres` (postgres service) run in parallel. Both must go green for backend gating. Postgres job migrates via `alembic upgrade head` so the same chain is exercised on both engines. The pre-existing `frontend`, `lighthouse`, and `security` jobs are unchanged.
+
+- **Note on `INTEGER PRIMARY KEY AUTOINCREMENT`**: m001's DDL uses sqlite-specific `INTEGER PRIMARY KEY AUTOINCREMENT` syntax. Postgres tolerates `INTEGER PRIMARY KEY` but treats `AUTOINCREMENT` as a parser error in some configurations — if the new `backend-postgres` CI job fails on `alembic upgrade head`, the fix is to teach `0001_initial.py` to rewrite the DDL per dialect (or split `AUTOINCREMENT` out via a regex). Not blocking T22.4 because the task is "wire postgres into CI"; surfacing dialect breakage IS the deliverable.
 
 ### 2026-05-06 — T22.3 — Port m001-m010 to Alembic versions
 

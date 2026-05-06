@@ -36,6 +36,16 @@ _TOOLING_TABLE_PATTERNS = (
     # used; its presence depends on whether any AUTOINCREMENT-bearing
     # table has had a row inserted, not on the schema itself.
     re.compile(r"CREATE TABLE sqlite_sequence\b", re.IGNORECASE),
+    # Identity-layer tables (T22.5, alembic 0011) have no legacy m*.py
+    # counterpart — the legacy chain stops at m010. Strip them from the
+    # alembic side so the parity check still pins the m001..m010 schema.
+    re.compile(r"CREATE TABLE accounts\b", re.IGNORECASE),
+    re.compile(r"CREATE TABLE account_sessions\b", re.IGNORECASE),
+    re.compile(r"CREATE TABLE account_credentials\b", re.IGNORECASE),
+    re.compile(
+        r"CREATE INDEX [^ ]*idx_account_credentials_lookup",
+        re.IGNORECASE,
+    ),
 )
 
 
@@ -123,7 +133,7 @@ def test_alembic_upgrade_head_matches_runner_schema(
 
 
 def test_alembic_revisions_chain_is_linear(alembic_available):
-    """Each revision 0001..0010 must declare the previous as down_revision."""
+    """Each revision 0001..0011 must declare the previous as down_revision."""
     versions_dir = _backend_dir() / "alembic" / "versions"
     expected = {
         "0001": None,
@@ -136,9 +146,10 @@ def test_alembic_revisions_chain_is_linear(alembic_available):
         "0008": "0007",
         "0009": "0008",
         "0010": "0009",
+        "0011": "0010",
     }
     files = sorted(versions_dir.glob("[0-9][0-9][0-9][0-9]_*.py"))
-    assert len(files) == 10, f"expected 10 revisions, found {len(files)}"
+    assert len(files) == 11, f"expected 11 revisions, found {len(files)}"
 
     for path in files:
         rev = path.name[:4]
