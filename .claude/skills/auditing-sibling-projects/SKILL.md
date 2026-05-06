@@ -1,6 +1,7 @@
 ---
 name: auditing-sibling-projects
 description: Runs cross-repo contract detection and impact analysis on sibling projects in a workspace. Detects schema, route, command, and config changes, traces the dependency graph, and produces an impact report with severity and recommended actions.
+disable-model-invocation: true
 ---
 
 # Auditing Sibling Projects

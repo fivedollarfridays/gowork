@@ -2,7 +2,7 @@
 name: finishing-branches
 description: Use when work is complete and ready for integration, merge, or PR creation.
 skills: [finishing-branches]
-agent-roles: [reviewer]
+agent-roles: [nayru]
 ---
 
 # Finish Branch

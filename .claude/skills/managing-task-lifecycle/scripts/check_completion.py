@@ -20,8 +20,9 @@ def _find_task_file(task_id: str) -> Path | None:
     tasks_dir = Path.cwd() / ".paircoder" / "tasks"
     if not tasks_dir.exists():
         return None
-    # Check direct children and subdirectories
-    for f in tasks_dir.rglob(f"{task_id}*.task.md"):
+    # Check direct children and subdirectories. Exact match (no trailing
+    # wildcard) -- prevents prefix collisions like T1→T18.1, T18.1→T18.10.
+    for f in tasks_dir.rglob(f"{task_id}.task.md"):
         return f
     return None
 
@@ -99,7 +100,9 @@ def check_task_file(task_id: str) -> tuple[bool, str]:
     ]
     found = None
     for task_dir in task_dirs:
-        for f in task_dir.glob(f"{task_id}*.task.md"):
+        # Exact match — same prefix-collision class as _find_task_file
+        # above. T1 must not match T18.1; T41.1 must not match T41.10.
+        for f in task_dir.glob(f"{task_id}.task.md"):
             found = f
             break
 

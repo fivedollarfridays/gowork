@@ -2,7 +2,7 @@
 name: architecting-modules
 description: Guides module architecture decisions including file size limits, function boundaries, and modular design patterns to maintain code quality and prevent complexity creep.
 skills: [architecting-modules]
-agent-roles: [driver, reviewer]
+agent-roles: [driver, nayru]
 ---
 
 # Architecting Modules

@@ -15,6 +15,12 @@
 **Branch:** sprint/s13-platform-qc
 **Current Sprint:** S13
 
+## Current Focus
+
+Post-S13 the next major work is **Sprint 22 — Identity Foundation** (Postgres + Alembic migration, account/session model, anonymous-first invariant, integrity charter). This supersedes the in-progress T12.0 (Migration Infrastructure) and T12.1 (Database Schema Migrations) per 2026-05-06 user decision (option b: roll into Sprint 22 scope). Sprint 22 is in ideation; backlog has not yet been drafted.
+
+Out of focus until Sprint 22 backlog lands: S13b deferred items (43 Tier-1 browser suites, 6 Tier-6 cross-module integrity, browser-dependent Tier-4) and the four other stale `in_progress` tasks (T1.7, T12.5, T12.16, T12.21, T12.24) which are noise to be triaged separately.
+
 ## Previous Sprints (summary)
 
 - **Sprint S13** — Platform-Wide QC + Submission Readiness: 55/128 tasks done. QC infrastructure (config + suite template + reset CLI + fake-clock + Playwright + visual baseline + QC dashboard + Lighthouse CI + bundle gate + Dependabot). Backend e2e for orchestrator/scheduler/SSRF/injection/audit/cross-session/compliance/rate-limiter/unsubscribe-race/key-rotation/flag-race/weekly-review/seed-coverage/i18n/module-status. Security audits (token scopes, PII logs, SSRF surface, secret hygiene, XSS, SQLi, CSRF, CAN-SPAM, GDPR, audit trail, CVE). Submission readiness (legal pages with COUNSEL REVIEW caveat, sitemap+robots, demo script, rollback runbook, env validator). 15 production fixes shipped: injection-filter expansion (25 bypasses), 2 PII retention bugs (compliance cascade + retention sweep), advisor PII leak in audit, 3 silent env defaults, scheduler misfire grace, CAN-SPAM idempotency, token downgrade × 3 modules, share-endpoint PII redaction, document/credit rate limits, plan empty-state UX, ES translation gaps, advisor stalled-sessions N+1 (42× query reduction), centralized PII log scrubber. Detail in `.paircoder/archive/state-s13.md`. Deferred to S13b: 43 Tier-1 browser suites (divona-driven), 6 Tier-6 cross-module integrity (vaivora), browser-dependent Tier-4 (a11y AAA, visual baseline, cross-browser, offline). 7 ops tasks cancelled (hackathon scope).

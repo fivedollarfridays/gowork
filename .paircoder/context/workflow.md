@@ -10,6 +10,34 @@
 | `refactor/*` | `refactor/what` | Code improvements |
 | `docs/*` | `docs/what` | Documentation only |
 
+## Branch Policy
+
+PairCoder enforces branch discipline to protect main/dev from
+accidental source code changes.
+
+**Rules:**
+
+| Change Type | Allowed on main/dev? | Enforcement |
+|-------------|---------------------|-------------|
+| Source code (`.py`, `.ts`, `.tsx`, `.js`, `.jsx`) | No | BLOCK -- must use a feature branch |
+| Documentation (`.md`, `.txt`) | Yes | WARN only |
+| Config / state (`.yaml`, `.yml`, `.json`) | Yes | WARN only |
+
+**Configuration:**
+
+Set `workflow.require_feature_branch: true` in `.paircoder/config.yaml`
+to enable BLOCK escalation. When disabled (default for `minimal` preset),
+all protected-branch commits produce a warning only.
+
+```yaml
+workflow:
+  require_feature_branch: true   # enabled by default for most presets
+```
+
+**Admin bypass:** CNS/orchestrator work that must land directly on
+protected branches can use `--force` to bypass the branch check.
+These bypasses are logged for audit.
+
 ## Development Cycle
 
 ### 1. Starting Work
