@@ -73,6 +73,11 @@ class Settings(BaseSettings):
     # so the demo works regardless of which port the dev server picked.
     cors_origins: str = "http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:3003"
 
+    # Public origin used when constructing claim URLs (magic-link, etc.).
+    # Defaults to the primary Next.js dev origin; production deployments
+    # override via FRONTEND_URL env var.
+    frontend_url: str = "http://localhost:3000"
+
     model_config = SettingsConfigDict(env_file=".env")
 
     @field_validator("city")

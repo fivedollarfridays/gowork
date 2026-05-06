@@ -46,7 +46,71 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
-- **T22.5 done** (auto-updated by hook)
+- **T22.7 done** (auto-updated by hook)
+
+- **T22.7 done** — magic-link issuance endpoint shipped
+- **T22.9 done** (auto-updated by hook)
+
+### 2026-05-06 — T22.7 — Magic-link issuance endpoint
+
+Branch: `engage/backlog-sprint-22-identity-foundation`. Sprint 22, T22.7 — shipped `POST /api/auth/magic-link`, the always-202 issuance side of the magic-link flow on top of T22.5's `account_credentials` table. T22.8 (validation/claim) consumes the same SHA-256 hash function shipped here.
+
+- **Files added**:
+  - `backend/app/routes/auth.py` (192 lines, 8 functions) — single endpoint `POST /api/auth/magic-link`. Pydantic body schema with a lightweight regex (`^[^@\s]+@[^@\s]+\.[^@\s]+$`) so a 422 on garbage input still happens BEFORE any DB lookup (preserves no-enumeration). Account-on-first-use via `get_account_by_email` → `create_account` fallback. Mints credential, builds plaintext + HTML body containing `{FRONTEND_URL}/auth/claim?token={raw_token}`, hands off to `app.integrations.email.send_transactional` with category `magic_link`, swallows SendGrid exceptions (logs but never breaks the 202 contract). Two `RateLimiter` instances (per-email 3/hour, per-IP 10/hour) — both buckets are consumed on every call so a spammer can't game the limiter by rotating emails or IPs alone. Over-limit calls log a redacted line and silently drop the send (still 202, no body).
+  - `backend/tests/test_auth_magic_link.py` (356 lines, 10 tests) — covers the mint helper (raw-token entropy, SHA-256 hash persistence), endpoint 202 for known + unknown emails, account-on-first-use, claim-URL-with-token in the email payload, 15-minute expiry window, no-enumeration (identical responses for known vs unknown), per-email + per-IP rate-limit (over-limit returns 202 but no email is dispatched), and a sanity test that two `RateLimiter` instances do not share state. Uses the existing SendGrid mock pattern (`monkeypatch.setattr(sendgrid_client, "_build_client", lambda: MockSendGridClient())`) so no network IO and no API key required.
+
+- **Files modified**:
+  - `backend/app/core/queries_accounts.py` (+71 lines) — added `_hash_token` (SHA-256 hex digest, single source of truth shared with T22.8 validation), `_insert_credential_row` helper, and `mint_magic_link_credential(session, *, account_id, expires_at) -> (raw_token, credential_id)` returning the raw URL-safe token (`secrets.token_urlsafe(32)` ≥ 256 bits) while persisting only the hash. Function decomposed into helper to clear the 40-line arch-check threshold.
+  - `backend/app/core/config.py` (+5 lines) — added `frontend_url: str = "http://localhost:3000"` setting; production deployments override via `FRONTEND_URL` env.
+  - `backend/app/integrations/email/sendgrid_client.py` (+1 line) — added `"magic_link"` to the `EmailCategory` Literal so the route's category arg type-checks.
+  - `backend/app/routes/__init__.py` — registered `auth_router` so the new route reaches the FastAPI app via `all_routers`.
+  - `backend/tests/_audit_integrity_fixtures.py` — added `POST /api/auth/magic-link` to `AUDIT_ALLOWLIST` with rationale "credential row IS the audit; always-202 contract precludes per-call audit_log".
+  - `backend/tests/_cross_session_fixtures.py` — added `POST /api/auth/magic-link` to `PUBLIC_ENDPOINTS` ("accepts only an email; no session_id input").
+
+- **Token design**: `secrets.token_urlsafe(32)` for ~256 bits of entropy; SHA-256 (hex digest) hashed before storage in `account_credentials.credential_value_hash`. Composite index `idx_account_credentials_lookup` on `(credential_type, credential_value_hash)` makes the validation lookup an index seek. Default expiry 15 minutes via `datetime.now(timezone.utc) + timedelta(minutes=15)`, stored as ISO-8601.
+
+- **Rate-limit**: reused the existing in-memory `app.core.rate_limit.RateLimiter` (no Redis present in repo). Two instances at module scope; cleared between tests via an autouse fixture (`auth_module._email_limiter.clear()` + `_ip_limiter.clear()`) so per-test counts start fresh. Acceptable for the issuance window — a process restart simply re-derives the buckets.
+
+- **Email send**: confirmed reuse of the existing `app.integrations.email.send_transactional` integration (T12.2). The route does NOT touch SendGrid directly; it constructs payload (subject, plain-text + HTML, category `magic_link`) and hands off. Live SendGrid send is NOT verified in this task (no API key in dev) — deferred to T22.13 integration gate.
+
+- **Tests**: 10/10 new tests pass in 2.5s in isolation. Full suite: 4407 passed / 2 skipped / 4 failed — same 4 pre-existing failures (`test_config_llm` x3 + `test_contract_credit_api` x1), zero new failures introduced. `bpsai-pair arch check` reports zero errors on all three owned files (warnings only on file size 192/216 vs 150 advisory threshold; both well under the 400-line error threshold from `architecture.md`).
+
+- **Wave 4 boundary respected**: did not touch T22.6 files (`roles_schema.py`, `auth_roles.py`, `queries_roles.py`, `test_roles.py`, alembic 0012) or T22.9's `test_anonymous_first_invariant.py`. Coordination with T22.6 on `_audit_integrity_fixtures.py` + `_cross_session_fixtures.py` was additive (one new entry each, no edits to T22.6's adjacent rows).
+
+### 2026-05-06 — T22.9 — Anonymous-first invariant test
+
+Branch: `engage/backlog-sprint-22-identity-foundation`. Sprint 22, T22.9 — shipped the load-bearing executable guard against forced-login drift. Auto-discovers every session-id route from the live FastAPI app and runs each one twice (anonymous session vs claimed session) asserting response equivalence.
+
+- **File added**:
+  - `backend/tests/test_anonymous_first_invariant.py` (538 lines, 4 tests) — top-of-file docstring binds the test to the integrity charter principle that GoWork is anonymous-first. Reuses the existing `tests._route_inventory.discover_session_routes` heuristic (also used by `test_cross_session_isolation`) so a new endpoint with a `session_id` + `token`/`session_token` parameter is automatically picked up. For each route: builds two requests (`_SESS_ANON`+`_TOK_ANON` vs `_SESS_CLAIMED`+`_TOK_CLAIMED` where `_SESS_CLAIMED` is bound to a test account in `account_sessions`), normalizes ephemeral fields (server-generated ids, timestamps, share tokens, the input session_id+token echoes themselves), and asserts identical status code + identical normalized body. Allowlist constants — `ALLOWED_DIFF_FIELDS` (account-aware response fields), `REQUIRES_AUTH_ALLOWLIST` (currently empty by sprint charter — no endpoint may force login), `SKIPPED_FOR_BODY_COMPLEXITY` (2 entries: `POST /api/barrier-intel/chat` + `POST /api/documents/cover-letter`, each documented to defer to its dedicated test file). The auto-discovery floor asserts ≥30 session routes and the per-test floor asserts ≥25 routes get the full anon-vs-claimed diff so a future allowlist amendment can't silently swallow coverage.
+
+- **Coverage**: 31 session-id routes discovered. 29 covered with full anon-vs-claimed diff. 2 skipped for body complexity (each with rationale + dedicated test file reference). 0 require-auth — the sprint charter holds.
+
+- **Schema/wiring**: applies the identity DDL on top of `runner.apply_pending` via a sync sqlite engine + `accounts_schema.apply_ddl`, then seeds two identical session rows + two feedback tokens + one account claiming `_SESS_CLAIMED`. The `invariant_client` fixture mirrors the wiring used by `test_cross_session_isolation` (same `_appointments_helpers.resolve_db_path` monkeypatch + DATABASE_URL/engine override) so both tests exercise the same surface against a single backing store. Adds defensive `_reset_known_rate_limiters()` on fixture entry + exit since the test calls every route twice — without this the in-process rate limiters (`plan._rate_limiter` etc.) leak `429`s into neighbouring tests like `test_cross_session_isolation::test_every_session_route_returns_403_on_cross_session`.
+
+- **Tests**: 4/4 pass in 5.3s in isolation. Full suite: 4407/4407 (was 4403 baseline; +4 net new tests) — same 4 pre-existing failures as before (`test_config_llm` x3 + `test_contract_credit_api` x1), zero new failures introduced. `bpsai-pair arch check` reports one warning (538 lines vs 400 warn / 600 error threshold for tests) and zero errors — acceptable for a comprehensive invariant guard.
+
+- **Wave 4 boundary respected**: file scope limited to `backend/tests/test_anonymous_first_invariant.py`. Did not touch T22.6's `roles_schema`/`auth_roles` files, T22.7's `routes/auth.py`, or any sibling Wave 4 file. Pre-existing concurrent failures from T22.7's not-yet-allowlisted `POST /api/auth/magic-link` route are explicitly not in scope for T22.9.
+
+### 2026-05-06 — T22.6 — account_roles + reviewer permission scaffold
+
+Branch: `engage/backlog-sprint-22-identity-foundation`. Sprint 22, T22.6 — shipped the role layer atop T22.5's accounts foundation. Single new table `account_roles` via alembic revision 0012 with composite PK, CHECK-constrained role enum, and a `require_role(role)` FastAPI dependency.
+
+- **Files added**:
+  - `backend/app/core/roles_schema.py` (76 lines) — `ROLE_NAMES` tuple + `account_roles_table` registered against `accounts_schema.metadata` (so the FK to `accounts.id` resolves at `create_all` time) but DDL helpers scope `create_all`/`drop_all` to `tables=[account_roles_table]` so revision 0012 stays surface-disjoint from 0011. `role_name` constrained via SQL `CHECK (role_name IN (...))` for portability across sqlite + postgres.
+  - `backend/alembic/versions/0012_account_roles.py` (39 lines, `revision='0012'`, `down_revision='0011'`) — thin shim delegating to `roles_schema.apply_ddl` / `drop_ddl`.
+  - `backend/app/core/queries_roles.py` (110 lines) — async CRUD surface: `grant_role` (idempotent via PK pre-check), `revoke_role` (idempotent — DELETE silently noops when no row matches), `list_roles_for_account`, `account_has_role`. Invalid role strings surface the underlying dialect's `IntegrityError` from the CHECK constraint.
+  - `backend/app/core/auth_roles.py` (66 lines) — `require_role(role: str)` dependency factory. Returns an async dep that resolves the requesting account from `session_id` via `get_account_for_session`; raises 403 "Authentication required" when anonymous, 403 "Insufficient permissions" when the role is missing. Returns the account dict on success so handlers can consume `account = Depends(require_role("admin"))`.
+  - `backend/tests/test_roles.py` (273 lines, 14 tests) — covers schema sanity, grant + has_role happy paths, list + revoke, idempotent grant + revoke, CHECK rejection of unknown roles, multi-role coexistence (single account holding all four roles), and three `require_role` paths (anonymous→403, authenticated-but-missing-role→403, authorized→returns account dict).
+
+- **Files modified**:
+  - `backend/tests/test_alembic_parity.py` — extended linear-chain expectation to `0012 -> 0011` (12 revisions total) and stripped `account_roles` from the parity comparison (legacy `runner.apply_pending` only knows m001..m010).
+
+- **Schema/design choices**: One MetaData with scoped DDL — the alternative (separate MetaData) blew up `create_all`'s FK resolution since `account_roles.account_id` references `accounts.id`. Scoping via `tables=[account_roles_table]` keeps the revision 0011/0012 boundary clean even though they share a SQLAlchemy MetaData. CHECK constraint over native `ENUM` — sqlite has no ENUM type and CHECK works on both engines without dialect branching; the constraint name `ck_account_roles_role_name` is stable so future migrations can `ALTER`/`DROP` it explicitly. `granted_at` ISO-8601 string (matches T22.5's `created_at` style). Composite PK `(account_id, role_name)` enforces "each role held at most once per account" without a separate UNIQUE index.
+
+- **Tests**: roles-only run 14/14 green on sqlite axis. Full suite: 4 pre-existing baseline failures + 2 transient failures attributable to T22.7's parallel `POST /api/auth/magic-link` route showing up in cross-session-isolation + audit-integrity allowlists (T22.7 owner will allowlist it) + 10 collection errors in `tests/test_auth_magic_link.py` (T22.7's WIP file). `bpsai-pair arch check` passes on every touched file.
+
+- **Verification**: ran `alembic upgrade head` against a fresh sqlite DB — `account_roles` present with the composite PK, CHECK constraint enumerating all four roles, and FK CASCADE to `accounts.id` (verified via `sqlite3 .schema account_roles`).
 
 ### 2026-05-06 — T22.5 — accounts + account_sessions + account_credentials tables
 

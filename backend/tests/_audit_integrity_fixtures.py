@@ -128,6 +128,10 @@ AUDIT_ALLOWLIST: dict[str, str] = {
         "Logger-only — emits 'feedback_resource' via app.core.audit.audit_log.",
     "POST /api/feedback/visit":
         "Logger-only — emits 'feedback_visit' via app.core.audit.audit_log.",
+    "POST /api/auth/magic-link":
+        "No-persistence audit — credential row IS the audit "
+        "(account_credentials, hashed token + 15-min expiry); "
+        "always-202 contract precludes per-call audit_log.",
     "POST /api/plan/{session_id}/generate":
         "Logger-only — emits 'plan_generated' via app.core.audit.audit_log.",
     "POST /api/plan/{session_id}/refresh":

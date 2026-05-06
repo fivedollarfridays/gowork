@@ -84,6 +84,9 @@ PUBLIC_ENDPOINTS: dict[str, str] = {
         "Anonymous self-assessment; no session_id input.",
     "POST /api/assessment/":
         "Creates a new session; no cross-session input possible.",
+    "POST /api/auth/magic-link":
+        "Public — accepts only an email; no session_id input. "
+        "Always returns 202 to defeat enumeration (test_auth_magic_link.py).",
     "GET /api/demo/personas":
         "Public demo endpoint — lists canonical personas, no session_id.",
     "GET /api/demo/walkthrough":

@@ -16,6 +16,8 @@ users without any account at all.
 
 from __future__ import annotations
 
+import hashlib
+import secrets
 from datetime import datetime, timezone
 
 from sqlalchemy import text
@@ -30,6 +32,16 @@ def _utcnow_iso() -> str:
 def _normalize_email(email: str) -> str:
     """Lowercase + strip an email so UNIQUE lookups are case-insensitive."""
     return email.strip().lower()
+
+
+def _hash_token(raw_token: str) -> str:
+    """Return SHA-256 hex digest of *raw_token* (the form persisted on disk).
+
+    Single source of truth for credential hashing — both the issuance
+    helper here and the validation helper (T22.8) MUST use this so the
+    on-disk hash is comparable across both paths.
+    """
+    return hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
 
 
 async def create_account(session: AsyncSession, email: str) -> int:
@@ -143,3 +155,62 @@ async def get_account_for_session(
     )
     row = result.first()
     return dict(row._mapping) if row else None
+
+
+# -------------------- Credential issuance (T22.7) --------------------
+
+
+_INSERT_CREDENTIAL_SQL = (
+    "INSERT INTO account_credentials "
+    "(account_id, credential_type, credential_value_hash, expires_at) "
+    "VALUES (:aid, :ct, :hash, :exp) "
+    "RETURNING id"
+)
+
+
+async def _insert_credential_row(
+    session: AsyncSession,
+    *,
+    account_id: int,
+    credential_hash: str,
+    expires_iso: str,
+) -> int:
+    """Insert one ``magic_link`` credential row and return its ``id``."""
+    result = await session.execute(
+        text(_INSERT_CREDENTIAL_SQL),
+        {
+            "aid": account_id,
+            "ct": "magic_link",
+            "hash": credential_hash,
+            "exp": expires_iso,
+        },
+    )
+    row = result.first()
+    await session.commit()
+    assert row is not None  # RETURNING always yields the inserted row
+    return int(row[0])
+
+
+async def mint_magic_link_credential(
+    session: AsyncSession,
+    *,
+    account_id: int,
+    expires_at: datetime,
+) -> tuple[str, int]:
+    """Mint a single-use magic-link token for *account_id*.
+
+    Generates ~256 bits of entropy via :func:`secrets.token_urlsafe`,
+    persists only the SHA-256 hash, and returns the raw token plus the
+    new row's PK. The raw token must NEVER land on disk — the route
+    layer hands it to the email integration and then drops it.
+    """
+    raw_token = secrets.token_urlsafe(32)
+    credential_hash = _hash_token(raw_token)
+    expires_iso = expires_at.astimezone(timezone.utc).isoformat()
+    credential_id = await _insert_credential_row(
+        session,
+        account_id=account_id,
+        credential_hash=credential_hash,
+        expires_iso=expires_iso,
+    )
+    return raw_token, credential_id

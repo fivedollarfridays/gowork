@@ -46,6 +46,9 @@ _TOOLING_TABLE_PATTERNS = (
         r"CREATE INDEX [^ ]*idx_account_credentials_lookup",
         re.IGNORECASE,
     ),
+    # Role-layer table (T22.6, alembic 0012) likewise has no legacy
+    # m*.py counterpart — strip from the alembic side.
+    re.compile(r"CREATE TABLE account_roles\b", re.IGNORECASE),
 )
 
 
@@ -133,7 +136,7 @@ def test_alembic_upgrade_head_matches_runner_schema(
 
 
 def test_alembic_revisions_chain_is_linear(alembic_available):
-    """Each revision 0001..0011 must declare the previous as down_revision."""
+    """Each revision 0001..0012 must declare the previous as down_revision."""
     versions_dir = _backend_dir() / "alembic" / "versions"
     expected = {
         "0001": None,
@@ -147,9 +150,10 @@ def test_alembic_revisions_chain_is_linear(alembic_available):
         "0009": "0008",
         "0010": "0009",
         "0011": "0010",
+        "0012": "0011",
     }
     files = sorted(versions_dir.glob("[0-9][0-9][0-9][0-9]_*.py"))
-    assert len(files) == 11, f"expected 11 revisions, found {len(files)}"
+    assert len(files) == 12, f"expected 12 revisions, found {len(files)}"
 
     for path in files:
         rev = path.name[:4]

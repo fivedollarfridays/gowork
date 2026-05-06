@@ -78,5 +78,17 @@
   "T22.5": {
     "last_cli_update": "2026-05-06T17:14:34.196787",
     "last_status": "done"
+  },
+  "T22.6": {
+    "last_cli_update": "2026-05-06T17:24:46.388488",
+    "last_status": "done"
+  },
+  "T22.7": {
+    "last_cli_update": "2026-05-06T17:33:15.837677",
+    "last_status": "done"
+  },
+  "T22.9": {
+    "last_cli_update": "2026-05-06T17:29:58.935515",
+    "last_status": "done"
   }
 }
