@@ -46,6 +46,20 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+### 2026-05-06 — Sprint 22 (Identity Foundation) — COMPLETE
+
+All 13 tasks landed (T22.1–T22.13). Sprint went from /ideation → /draft-backlog → /pc-plan → /prepare-to-engage → /running-sprint-tasks across 9 dependency-aware waves. 11 driver agents launched (some in parallel within waves; Wave 4 ran 3 agents concurrently). 9 commits on `engage/backlog-sprint-22-identity-foundation`. Path A (autonomous through Wave 7, charter + integration gate at the end with user authorization).
+
+- **Test counts:** Backend 4327 → 4425 (+98 net new) / 4 baseline failures preserved / 2 skipped. Frontend 3501 → 3527 (+26 net new) / 3 skipped / 0 failed.
+- **Identity layer live:** `accounts`, `account_sessions`, `account_credentials`, `account_roles` (alembic 0011 + 0012). Magic-link auth via `POST /api/auth/magic-link` and `GET /api/auth/claim`. Account-aware UI via `useAccount()` hook + `<SaveProgressCTA />` at 3 funnel insertion points.
+- **Anonymous-first invariant enforced:** `backend/tests/test_anonymous_first_invariant.py` auto-discovers session-id routes (31 found, 29 covered with full anon-vs-claimed diff, 2 deferred to dedicated tests). 0 routes in REQUIRES_AUTH_ALLOWLIST — charter holds.
+- **Postgres path live but CI-pending:** Alembic + dual-engine config + 15-test parity suite shipped. CI service container declared; first postgres CI run will surface m001's `INTEGER PRIMARY KEY AUTOINCREMENT` sqlite-specificity. New tables (0011/0012) use SQLAlchemy Core for dialect-aware DDL.
+- **Integrity charter v1 locked:** `docs/integrity-charter.md` (10 binding principles led by "money never moves position"). README CHARTER section added. Amendment process documented.
+- **T12.0 + T12.1 closed** with `superseded_by: plan-2026-05-s22-identity-foundation` per 2026-05-06 user decision.
+- **Forward risk:** Live SendGrid send + first postgres CI dialect surface deferred to post-merge verification.
+
+- **T22.12 done** (auto-updated by hook)
+
 - **T22.11 done** (auto-updated by hook)
 
 ### 2026-05-06 — T22.11 — Account-aware client + session-claim CTAs

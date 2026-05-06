@@ -115,7 +115,7 @@ async def test_transit_routes_round_trip(db_engine):
 async def test_transit_stops_round_trip(db_engine):
     """transit_stops table — round-trip with FK to transit_routes."""
     async with db_engine.begin() as conn:
-        result = await conn.execute(
+        await conn.execute(
             text(
                 "INSERT INTO transit_routes (route_number, route_name) "
                 "VALUES (:n, :name)"

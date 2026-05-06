@@ -8,6 +8,12 @@ The legacy MontGoWork (Montgomery, AL) deployment is preserved as the original r
 
 ---
 
+## Charter
+
+GoWork's matching engine reads **zero** commercial signals. Money never moves position. Verification is earned, not purchased. Revenue is structurally separate from match outcomes — sponsored listings, premium tiers, and pay-for-priority access are permanently out of scope. See [`docs/integrity-charter.md`](docs/integrity-charter.md) for the full ten-principle binding charter and amendment process.
+
+---
+
 ## Features
 
 ### Assessment & Matching

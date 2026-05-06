@@ -1,7 +1,6 @@
 # GoWork Integrity Charter
 
-> **Status:** DRAFT v0.1 — for iteration with Kevin. Not yet committed as the
-> binding charter; that happens after review.
+> **Status:** v1 — locked 2026-05-06. Binding commitment. Amendments only via the documented amendment process.
 
 GoWork is a workforce-navigation platform. The most valuable thing it
 produces is a *trustworthy match between a person and a job*. Anything
@@ -111,6 +110,6 @@ document; it's a binding commitment.
 
 ---
 
-**Authored:** 2026-05-06 (v0.1 draft)
+**Authored:** 2026-05-06 (v1, locked)
 **Maintainer:** Kevin Masterson
 **License:** MIT (this document and the platform it governs)
