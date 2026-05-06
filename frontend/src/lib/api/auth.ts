@@ -1,12 +1,17 @@
 /**
- * Typed API client for the GoWork Identity / magic-link surface (T22.10).
+ * Typed API client for the GoWork Identity / magic-link surface
+ * (T22.10 + T22.11).
  *
- * Two endpoints:
+ * Three endpoints:
  *   - POST /api/auth/magic-link {email}  → 202 Accepted (always — no enumeration)
  *   - GET  /api/auth/claim?token=…       → 200 success, 401 invalid, 409 conflict
+ *   - GET  /api/auth/me                  → 200 {accountId, email} | {null, null}
  *
- * The backend pairs with T22.7 (magic-link request) and T22.8 (claim).
+ * The backend pairs with T22.7 (magic-link request), T22.8 (claim),
+ * and T22.11 (account-binding read for the SaveProgressCTA).
  */
+
+import { useQuery } from "@tanstack/react-query";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -115,4 +120,60 @@ export async function claimMagicLink(token: string): Promise<ClaimSuccess> {
     );
   }
   return (await res.json()) as ClaimSuccess;
+}
+
+/**
+ * Account binding for the current browser, surfaced by ``GET /api/auth/me``.
+ *
+ * Anonymous browsers see ``{accountId: null, email: null}``; claimed
+ * browsers see the row backed by the signed ``gw_account`` cookie. The
+ * route deliberately returns 200 in both cases (and on tampered cookies)
+ * so the response shape itself never reveals the cookie's validity —
+ * see the route docstring for the no-tampering-oracle rationale.
+ */
+export interface AccountMe {
+  accountId: number | null;
+  email: string | null;
+}
+
+interface AccountMeWire {
+  account_id: number | null;
+  email: string | null;
+}
+
+export async function getAccountMe(): Promise<AccountMe> {
+  const res = await _fetchWithTimeout("/api/auth/me", {
+    method: "GET",
+    credentials: "include",
+  });
+  if (!res.ok) {
+    // The endpoint is contractually 200-always; on the off-chance it
+    // returns something else (transient 5xx, network reshape) treat
+    // the browser as anonymous rather than failing the page render.
+    return { accountId: null, email: null };
+  }
+  const wire = (await res.json()) as AccountMeWire;
+  return {
+    accountId: wire.account_id ?? null,
+    email: wire.email ?? null,
+  };
+}
+
+/** React Query key for the /api/auth/me read. Exported for invalidation. */
+export const ACCOUNT_ME_QUERY_KEY = ["auth", "me"] as const;
+
+/**
+ * Hook returning the current account binding (or null when anonymous).
+ *
+ * Caches for 5 minutes — the binding is durable (HMAC cookie + DB row)
+ * and we only need to refresh it after a claim or a logout, both of
+ * which can invalidate the key directly.
+ */
+export function useAccount() {
+  return useQuery<AccountMe>({
+    queryKey: [...ACCOUNT_ME_QUERY_KEY],
+    queryFn: getAccountMe,
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
 }

@@ -27,6 +27,7 @@ import { SharePlanButton } from "@/components/plan/SharePlanButton";
 import { PlanInsights } from "@/components/plan/PlanInsights";
 import { EmptyState } from "@/components/EmptyState";
 import { BarrierIntelChat } from "@/components/barrier-intel/BarrierIntelChat";
+import { SaveProgressCTA } from "@/components/auth/SaveProgressCTA";
 import { PlanTransition } from "@/components/plan/PlanTransition";
 import { PlanSkeleton } from "@/components/plan/PlanSkeleton";
 import { BarrierType, EmploymentStatus, AvailableHours } from "@/lib/types";
@@ -224,6 +225,10 @@ function PlanContent() {
           </div>
         </ScrollReveal>
       )}
+
+      {/* T22.11 — mid-plan account-claim prompt (post-plan-generation,
+          pre-job-matches). Hidden for already-claimed sessions. */}
+      <SaveProgressCTA dismissKey="plan" />
 
       <Separator />
 

@@ -87,6 +87,26 @@ async def get_account_by_email(
     return dict(row._mapping) if row else None
 
 
+async def get_account_by_id(
+    session: AsyncSession, account_id: int
+) -> dict | None:
+    """Fetch the account row matching *account_id*, or None if missing.
+
+    Counterpart to :func:`get_account_by_email` used by
+    ``GET /api/auth/me`` (T22.11) — the route validates the signed
+    ``gw_account`` cookie, then resolves the embedded id back to a row
+    so the frontend can show the bound email. Returns ``None`` for
+    deleted / unknown ids without raising; the route surfaces that as
+    a 200-with-null body to keep the anonymous-first invariant.
+    """
+    result = await session.execute(
+        text("SELECT * FROM accounts WHERE id = :id"),
+        {"id": account_id},
+    )
+    row = result.first()
+    return dict(row._mapping) if row else None
+
+
 async def claim_session(
     session: AsyncSession, account_id: int, session_id: str
 ) -> None:
@@ -164,6 +184,7 @@ async def get_account_for_session(
 __all__ = [
     "create_account",
     "get_account_by_email",
+    "get_account_by_id",
     "claim_session",
     "list_sessions_for_account",
     "get_account_for_session",

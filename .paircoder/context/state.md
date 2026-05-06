@@ -46,6 +46,42 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+- **T22.11 done** (auto-updated by hook)
+
+### 2026-05-06 — T22.11 — Account-aware client + session-claim CTAs
+
+Branch: `engage/backlog-sprint-22-identity-foundation`. Sprint 22, T22.11 — added the read-side of the identity layer (a thin `GET /api/auth/me`) plus a `useAccount()` React Query hook and a `<SaveProgressCTA />` component inserted at three opt-in points in the funnel. The CTA never gates functionality; already-claimed browsers never see it; dismissals live in localStorage with a 24h TTL so they re-surface eventually.
+
+- **Backend additions**:
+  - `backend/app/core/queries_accounts.py` — added `get_account_by_id(session, account_id) -> dict | None`. Mirror of `get_account_by_email`; resolves the id embedded in the signed cookie back to the row so the route can surface the bound email. Re-exported in `__all__`.
+  - `backend/app/routes/_auth_claim_helpers.py` — added `verify_account_cookie(value: str | None) -> int | None`. Validates the `<id>.<hmac>` shape, parses the id half, and `hmac.compare_digest`s the signature against the same `audit_hash_salt` used by `set_account_cookie`. Returns `None` for any of: missing/empty, malformed shape, non-integer id, non-positive id, signature mismatch.
+  - `backend/app/routes/auth.py` — added `GET /api/auth/me`. Reads the `gw_account` cookie, calls `verify_account_cookie`, then `queries_accounts.get_account_by_id`. ALWAYS returns 200 — anonymous (no cookie / malformed / tampered / unknown id) yields `{"account_id": null, "email": null}`; valid yields `{"account_id": int, "email": str}`. The 200-with-null shape on tampering is deliberate: a 401 would create a tampering oracle and would also break the anonymous-first invariant. auth.py now has 10 functions (still under the 15 limit).
+  - `backend/tests/test_auth_me.py` (162 lines, 7 tests) — `_get_with_cookie(client, value)` helper sets the cookie on the httpx client jar (avoiding the per-request `cookies=` deprecation). Covers: round-trip on the new helper; null on unknown id; anonymous (no cookie); valid cookie returns the account; tampered HMAC returns null; malformed cookie returns null; signed cookie pointing at a deleted id returns null.
+  - `backend/tests/_cross_session_fixtures.py` — added `GET /api/auth/me` to `PUBLIC_ENDPOINTS` with rationale (auth via signed `gw_account` cookie, no `session_id` input). The route is NOT in `REQUIRES_AUTH_ALLOWLIST` of the anonymous-first invariant test because its endpoint signature has no `session_id` param so the route inventory never picks it up — it's anonymous-first by construction.
+
+- **Frontend additions**:
+  - `frontend/src/lib/api/auth.ts` (179 lines) — extended T22.10's file with `getAccountMe(): Promise<AccountMe>` (camelCases the wire `{account_id, email}` payload; treats non-200 as anonymous so a transient error never breaks the page) and `useAccount()` (TanStack `useQuery` with `staleTime: 5 * 60 * 1000` and `retry: false`; cache key exported as `ACCOUNT_ME_QUERY_KEY` for future invalidation by the claim flow).
+  - `frontend/src/components/auth/SaveProgressCTA.tsx` (186 lines, 4 helpers + 1 component) — dismissible card. Shows a `Save your progress` headline, short description, email input, `Save my progress` submit. State machine: idle → pending (mutation in flight, button shows `Loader2` + "Sending...") → sent ("Check your inbox" — rendered for both success AND error to mirror the no-enumeration contract). X button dismisses; writes `gw_save_progress_cta_dismissed_<dismissKey>` = `Date.now()` to localStorage; `_isFreshlyDismissed` returns true when the stored timestamp is younger than 24h. `useAccount()` hides the CTA entirely once the browser is claimed (and during `isPending` to avoid a flash-of-CTA for already-claimed users).
+  - `frontend/src/__tests__/auth/save-progress-cta.test.tsx` (162 lines, 8 tests) — vitest + `@testing-library/react` + `userEvent` + `QueryClientProvider`. Covers: renders for anonymous; hides for claimed account (`accountId: 7`); submit calls `requestMagicLink` and shows "check your email"; same success state on rejected mutation (no enumeration); X dismisses + writes localStorage with the page's `dismissKey`; recent dismissal stays hidden across mounts; > 24h dismissal re-shows; submit disabled until email non-empty.
+
+- **Insertion points (3 pages)**:
+  - `frontend/src/app/assess/page.tsx` — `<SaveProgressCTA dismissKey="assess" />` rendered below the `WizardShell` so it's visible at the end of the assessment flow. Never blocks the wizard.
+  - `frontend/src/app/plan/page.tsx` — `<SaveProgressCTA dismissKey="plan" />` rendered between the Action Timeline and the first `Separator`/job-matches section (post-plan-generation, mid-plan).
+  - `frontend/src/app/shared/[token]/page.tsx` — `<SaveProgressCTA dismissKey="shared" />` rendered above the `SharedPlanView` inside a `max-w-2xl` wrapper so it sits in the page header area pre-share-content.
+
+- **Verification (all green)**:
+  - Backend: `tests/test_auth_me.py` 7/7 pass; full backend `4425 passed, 4 baseline failed (pre-existing test_config_llm × 3, test_contract_credit_api × 1)`. Anonymous-first invariant + cross-session isolation both stay green.
+  - Frontend: full `vitest run` 369 files / **3527 passed**, 3 skipped, 0 failed (baseline 3518; +9 from new file + 1 new test elsewhere). New `save-progress-cta.test.tsx` 8/8 pass.
+  - `npx tsc --noEmit`: 0 errors.
+  - `npx next build`: green; `/plan` route 155 kB / 355 kB First Load (within budget); `/shared/[token]` 3.71 kB / 164 kB.
+  - `bpsai-pair arch check` on each new file: clean (no warnings, no errors). `auth.py` is a pre-existing soft warning (298 lines vs 150 soft) but well under the 400 hard limit; `queries_accounts.py` similar.
+
+- **Design decisions**:
+  - `useAccount()` returns the React Query result object (not a raw `AccountMe | null`) so consumers can branch on `isPending` to suppress flash-of-CTA. The CTA component does this via `if (account.isPending || account.data?.accountId) return null`.
+  - Per-page `dismissKey` (rather than a single global flag) so the worker can dismiss on /assess but still see the offer on /plan or /shared — the funnel has multiple "natural moments" to invite a save.
+  - 24h dismissal TTL: long enough that an irritated user gets a real day off, short enough that the offer re-surfaces eventually if they keep using the product.
+  - `200-always` response on /api/auth/me (vs 401 on tampering): preserves the anonymous-first invariant and removes a potential tampering oracle on the cookie HMAC.
+
 - **T22.10 done** (auto-updated by hook)
 
 ### 2026-05-06 — T22.10 — Frontend login surface (magic-link UX)

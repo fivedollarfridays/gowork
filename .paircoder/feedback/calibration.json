@@ -2,19 +2,19 @@
   "task_types": {
     "feature": {
       "task_type": "feature",
-      "sample_count": 33,
-      "avg_tokens": 5558.242424242424,
-      "std_dev": 8703.359623105855,
-      "p80_tokens": 12886.471226897553,
-      "avg_duration_seconds": 222.3939393939394,
-      "success_rate": 0.7575757575757576,
+      "sample_count": 34,
+      "avg_tokens": 5703.235294117647,
+      "std_dev": 8614.773900480579,
+      "p80_tokens": 9572.400000000001,
+      "avg_duration_seconds": 236.55882352941177,
+      "success_rate": 0.7647058823529411,
       "recommended_model": "haiku",
       "model": "aggregate",
       "recommended_effort": "high",
-      "_m2_tokens": 2499699468.060606,
-      "_m2_duration": 2164863.878787879,
-      "estimation_mape": 27.03133297928837,
-      "estimation_sample_count": 1,
+      "_m2_tokens": 2523287198.1176467,
+      "_m2_duration": 2389986.382352941,
+      "estimation_mape": null,
+      "estimation_sample_count": 0,
       "cx_per_minute": 26.140075289480265
     },
     "refactor": {
@@ -53,19 +53,19 @@
     },
     "feature:claude-opus-4-7": {
       "task_type": "feature",
-      "sample_count": 9,
-      "avg_tokens": 13676.111111111111,
-      "std_dev": 12482.518401921983,
-      "p80_tokens": 24186.39160552942,
-      "avg_duration_seconds": 479.77777777777777,
+      "sample_count": 10,
+      "avg_tokens": 13357.3,
+      "std_dev": 11880.517825835708,
+      "p80_tokens": 21268.600000000002,
+      "avg_duration_seconds": 502.2,
       "success_rate": 1.0,
       "recommended_model": "haiku",
       "model": "claude-opus-4-7",
       "recommended_effort": "high",
-      "_m2_tokens": 1402319390.8888886,
-      "_m2_duration": 745421.5555555555,
-      "estimation_mape": 27.03133297928837,
-      "estimation_sample_count": 1,
+      "_m2_tokens": 1411467038.1000004,
+      "_m2_duration": 790669.5999999999,
+      "estimation_mape": null,
+      "estimation_sample_count": 0,
       "cx_per_minute": null
     },
     "feature:unknown": {
@@ -188,6 +188,6 @@
       "cx_per_minute": 4.325846981826184
     }
   },
-  "last_calibrated": "2026-05-06T23:01:43.087459+00:00",
-  "total_records": 38
+  "last_calibrated": "2026-05-06T23:18:11.012864+00:00",
+  "total_records": 39
 }

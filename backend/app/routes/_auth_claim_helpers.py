@@ -52,6 +52,39 @@ def build_account_cookie_value(account_id: int) -> str:
     return f"{account_id}.{_sign_account_id(account_id)}"
 
 
+def verify_account_cookie(value: str | None) -> int | None:
+    """Return the account id encoded in *value* iff the HMAC validates.
+
+    Counterpart to :func:`build_account_cookie_value` used by
+    ``GET /api/auth/me`` (T22.11). Returns ``None`` for any of:
+
+    * value is missing or empty,
+    * value does not have the ``id.hmac`` shape,
+    * id half is not a positive integer,
+    * the HMAC half does not match the expected signature for the id.
+
+    Use :func:`hmac.compare_digest` to keep the comparison
+    constant-time so the validity check cannot be turned into a
+    timing oracle on the secret.
+    """
+    if not value:
+        return None
+    parts = value.split(".", 1)
+    if len(parts) != 2:
+        return None
+    raw_id, signature = parts
+    try:
+        account_id = int(raw_id)
+    except ValueError:
+        return None
+    if account_id <= 0:
+        return None
+    expected = _sign_account_id(account_id)
+    if not hmac.compare_digest(expected, signature):
+        return None
+    return account_id
+
+
 def set_account_cookie(response: Response, account_id: int) -> None:
     """Attach the signed session cookie to *response* with safe defaults.
 

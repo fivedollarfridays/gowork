@@ -22,6 +22,7 @@ import type { AssessmentRequest, CreditAssessmentResult, CreditFormData, Employm
 import { EMPLOYMENT_OPTIONS, isValidCityZip, humanizeLabel, getCityAreaDescription, getZipPlaceholder, getZipErrorMessage } from "@/lib/constants";
 import { useDemoMode } from "@/hooks/useDemoMode";
 import { useCityConfig } from "@/hooks/useCityConfig";
+import { SaveProgressCTA } from "@/components/auth/SaveProgressCTA";
 import { getResumeRecommendations } from "@/lib/resume/recommend";
 import { t } from "@/lib/i18n";
 import { WALL_TO_ASSESS_TRANSITION_NAME } from "@/lib/wall/viewTransitions";
@@ -406,6 +407,9 @@ export default function AssessPage() {
           onComplete={handleSubmit}
           completeLabel={mutation.isPending ? t("assess.analyzing") : t("assess.submitAssessment")}
         />
+
+        {/* T22.11 — opt-in account-claim prompt; never gates the wizard. */}
+        <SaveProgressCTA dismissKey="assess" />
       </div>
     </main>
   );

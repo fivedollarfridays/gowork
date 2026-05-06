@@ -42,10 +42,12 @@ from app.core.database import get_db
 from app.core.rate_limit import RateLimiter
 from app.integrations.email import send_transactional
 from app.routes._auth_claim_helpers import (
+    SESSION_COOKIE_NAME,
     invalid_token_response,
     session_conflict_response,
     set_account_cookie,
     try_claim_session,
+    verify_account_cookie,
 )
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -260,3 +262,37 @@ async def claim_magic_link(
     await queries_accounts.mark_credential_used(db, credential_id)
     set_account_cookie(response, account_id)
     return {"account_id": account_id, "claimed_session_ids": claimed}
+
+
+# -------------------- Read flow (T22.11) --------------------
+
+
+_ANON_ME_BODY = {"account_id": None, "email": None}
+
+
+@router.get("/me")
+async def read_account_me(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Return the account bound to the current ``gw_account`` cookie.
+
+    Always returns ``200``:
+
+    * Anonymous (no cookie / malformed / tampered HMAC / unknown id)
+      yields ``{"account_id": null, "email": null}``.
+    * Valid cookie yields ``{"account_id": int, "email": str}``.
+
+    The 200-with-null shape (rather than a 401 on tampering) keeps the
+    anonymous-first invariant — every browser receives the same shape
+    whether or not it has ever claimed a session — and avoids any
+    tampering oracle on the cookie signature.
+    """
+    raw_cookie = request.cookies.get(SESSION_COOKIE_NAME)
+    account_id = verify_account_cookie(raw_cookie)
+    if account_id is None:
+        return _ANON_ME_BODY
+    row = await queries_accounts.get_account_by_id(db, account_id)
+    if row is None:
+        return _ANON_ME_BODY
+    return {"account_id": int(row["id"]), "email": str(row["email"])}
