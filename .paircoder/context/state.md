@@ -17,9 +17,13 @@
 
 ## Current Focus
 
-Post-S13 the next major work is **Sprint 22 — Identity Foundation** (Postgres + Alembic migration, account/session model, anonymous-first invariant, integrity charter). This supersedes the in-progress T12.0 (Migration Infrastructure) and T12.1 (Database Schema Migrations) per 2026-05-06 user decision (option b: roll into Sprint 22 scope). Sprint 22 is in ideation; backlog has not yet been drafted.
+**Sprint 22 — Identity Foundation** is planned and ready to engage. Plan ID: `plan-2026-05-s22-identity-foundation`. 13 tasks (T22.1–T22.13), 225 Cx total, 12 P0 + 1 P1. Brief at `.paircoder/plans/briefs/brief-sprint-22-identity-foundation.md`; backlog at `plans/backlogs/backlog-sprint-22-identity-foundation.md`. Supersedes in-progress T12.0 (Migration Infrastructure) and T12.1 (Database Schema Migrations) per 2026-05-06 user decision — these will be closed with supersede note in T22.13 (integration gate).
 
-Out of focus until Sprint 22 backlog lands: S13b deferred items (43 Tier-1 browser suites, 6 Tier-6 cross-module integrity, browser-dependent Tier-4) and the four other stale `in_progress` tasks (T1.7, T12.5, T12.16, T12.21, T12.24) which are noise to be triaged separately.
+Scope: Postgres + Alembic migration (T22.1–T22.4), account/session schema + roles (T22.5–T22.6), magic-link auth + anonymous-first invariant (T22.7–T22.9), frontend login + CTAs + integration gate (T22.10–T22.13). Foundation for Sprints 23–30.
+
+Open questions tracked in the brief: Postgres in CI choice, Alembic naming, magic-link email template, email collision policy. Defaulted; revisit during engage if any bites.
+
+Out of focus: S13b deferred items (43 Tier-1 browser suites, 6 Tier-6 cross-module integrity, browser-dependent Tier-4) and the four other stale `in_progress` tasks (T1.7, T12.5, T12.16, T12.21, T12.24) — to be triaged separately.
 
 ## Previous Sprints (summary)
 
@@ -41,6 +45,19 @@ Out of focus until Sprint 22 backlog lands: S13b deferred items (43 Tier-1 brows
 Older sprint task tables and session histories (Sprints 7 — 31) are in `.paircoder/archive/state-pre-s1.md`. S12a per-session entries plus S2 — S11 detail are in `.paircoder/archive/state-s12a.md`. S13 wave-by-wave detail + per-task driver sessions are in `.paircoder/archive/state-s13.md`.
 
 ## What Was Just Done
+
+### 2026-05-06 — Sprint 22 ideation → backlog → plan
+
+User dispatch: strategic planning conversation about the future of the platform — login + identity, gamification, DFW/Dallas expansion, FW DAO bounty integration, Mercor-style two-sided assessments + listing verification. Goal: total workforce solution; verification burden on both sides; bounty revenue path to fund quitting day job.
+
+- **Strategy lock-in.** 6 pillars surfaced (identity, two-sided assessments, anti-fake-listing verification, gamification, DFW unification, FW DAO niche). Ordering established as Sprints 22→30, foundation-first. Time-to-revenue path: bounty claims realistic at end of Sprint 26; vendor relationship pitched in person at FW DAO Roundtable (attended 2026-05-06).
+- **Integrity charter v0.1 drafted** (`docs/integrity-charter.draft.md`) — 10 binding principles led by "money never moves position." Saved to rig Downloads via SSH for review (`C:\Users\kmast\Downloads\integrity-charter.draft.md`).
+- **Wallet path established.** MetaMask install walkthrough delivered; ETH wallet needed for FW DAO membership/voting. Scheduled remote-agent check-in (trig_01J5UmkW7MFmLdBnrSUYx1i4) for 2026-05-06T22:56Z to gather DAO bounty list once Kevin is signed in.
+- **Sprint 22 — Identity Foundation ideated.** Step 0 caught two conflict blockers (T12.0, T12.1 in_progress) — resolved by rolling into Sprint 22 scope (option b). Validation issues fixed (AGENTS.md created; `## Current Focus` section added). Stale changes committed (5473b01: 22 files, 1311+/60-).
+- **Tooling bug filed.** `bpsai-pair query tasks --status in_progress` crashes with `AttributeError: TaskParser.parse_task missing` — reproduced and reported as BPSAI/paircoder#263.
+- **Brief written** — `.paircoder/plans/briefs/brief-sprint-22-identity-foundation.md`. 13 tasks, 225 Cx, dependency graph in 8 waves, file collision matrix clean.
+- **Backlog drafted** — `plans/backlogs/backlog-sprint-22-identity-foundation.md`. Validates clean via `bpsai-pair engage --dry-run` (13 tasks parsed at correct Cx + priorities).
+- **Plan created** — `plan-2026-05-s22-identity-foundation` (auto-scope: story; total Cx 225 within sprint budget 300). 13 task records (T22.1–T22.13) added with full content (objective, files, AC, verification, dependencies). Ready for engage.
 
 ### 2026-04-30 — subpage brand-parity sweep: shadcn HSL rebrand + every subpage on-brand
 
