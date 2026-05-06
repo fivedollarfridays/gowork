@@ -1,5 +1,13 @@
 """Migration runner — discovers m*.py modules, applies pending versions in order.
 
+DEPRECATED (T22.3): The legacy m*.py runner remains callable for backward
+compatibility (50+ tests use it directly), but new callers should use
+``alembic upgrade head`` instead. The Alembic versions in
+``backend/alembic/versions/`` produce a byte-equivalent schema and are the
+authoritative source going forward. ``apply_pending`` emits a
+``DeprecationWarning`` on every invocation; the underlying logic is
+unchanged so existing callsites continue to work without disruption.
+
 Pattern mirrors ops:lib/db.py (`_ensure_schema`, `_current_version`,
 `_apply_migrations`) but adapted to stdlib sqlite3 + glob-based discovery so
 new migrations drop in without editing the runner.
@@ -15,6 +23,7 @@ import importlib
 import os
 import re
 import sqlite3
+import warnings
 from types import ModuleType
 from typing import Iterable
 
@@ -26,6 +35,11 @@ _TRACKING_DDL = (
     "applied_at TEXT NOT NULL"
     ")"
 )
+_DEPRECATION_MESSAGE = (
+    "app.core.migrations.runner.apply_pending is deprecated; use "
+    "`alembic upgrade head` instead. The Alembic versions in "
+    "backend/alembic/versions/ are now the authoritative migration chain."
+)
 
 
 def apply_pending(db_path: str, dry_run: bool = False) -> list[str]:
@@ -33,7 +47,12 @@ def apply_pending(db_path: str, dry_run: bool = False) -> list[str]:
 
     Returns the list of migration module names applied (or that would be
     applied under dry_run). Empty list when DB is already up-to-date.
+
+    .. deprecated:: T22.3
+       Use ``alembic upgrade head`` instead. Behaviour unchanged for
+       backward compatibility; emits ``DeprecationWarning`` on call.
     """
+    warnings.warn(_DEPRECATION_MESSAGE, DeprecationWarning, stacklevel=2)
     migrations = _discover_migrations()
     if dry_run:
         return _dry_run(db_path, migrations)

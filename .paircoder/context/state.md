@@ -46,6 +46,41 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+- **T22.3 done** (auto-updated by hook)
+
+### 2026-05-06 — T22.3 — Port m001-m010 to Alembic versions
+
+Branch: `engage/backlog-sprint-22-identity-foundation`. Sprint 22, T22.3 — replayed all 10 hand-rolled migrations as Alembic revisions in `backend/alembic/versions/` with byte-equivalent sqlite schema parity. Legacy `runner.apply_pending` continues to work for the ~50 tests that depend on it (sync sqlite3 path), but now emits a `DeprecationWarning` pointing callers at `alembic upgrade head`.
+
+- **Files added** (10 alembic revisions, all under 80 lines):
+  - `backend/alembic/versions/0001_initial.py` (46 lines) — re-exports `m001_initial.DDL_SQL` + `_DOWNGRADE_ORDER`; splits the multi-statement blob and replays via `bind.exec_driver_sql` so it works on both sqlite and postgres.
+  - `backend/alembic/versions/0002_s12_worker_companion.py` (45 lines) — re-exports `_TABLE_DDL` + `_INDEX_DDL` + `_DOWNGRADE_ORDER` from m002.
+  - `backend/alembic/versions/0003_appointments_starts_at_nullable.py` (70 lines) — preserves the create-new/copy/drop-old/rename rebuild verbatim from m003. Downgrade is no-op (NOT NULL re-tightening unsafe). Includes dialect-aware `_table_exists` helper.
+  - `backend/alembic/versions/0004_used_tokens.py` (34 lines).
+  - `backend/alembic/versions/0005_sessions_demo_column.py` (52 lines) — idempotent ADD COLUMN; clean DROP COLUMN downgrade.
+  - `backend/alembic/versions/0006_compliance_tombstones.py` (80 lines) — compliance_audit + tombstone columns on 3 tables; dialect-aware column-existence helpers.
+  - `backend/alembic/versions/0007_advisor_tokens.py` (37 lines).
+  - `backend/alembic/versions/0008_resources_city.py` (49 lines) — ADD COLUMN + index; downgrade drops index only.
+  - `backend/alembic/versions/0009_resources_barrier_affinity.py` (48 lines) — ADD COLUMN; no-op downgrade (SQLite < 3.35 limit).
+  - `backend/alembic/versions/0010_geocode_resources_jobs.py` (66 lines) — adds lat/lng on job_listings + composite indexes on both tables.
+  - `backend/tests/test_alembic_parity.py` (180 lines, 3 tests) — schema-equivalence diff, linear-chain check, deprecation-warning check.
+
+- **Files modified**:
+  - `backend/app/core/migrations/runner.py` — emits `DeprecationWarning` from `apply_pending`. Existing logic preserved (sync sqlite3 path; 50+ test callsites unchanged). +18 lines (deprecation message + warnings import + docstring update).
+
+- **Verification**:
+  - Schema parity: `runner.apply_pending` vs `alembic upgrade head` on fresh sqlite DBs produce byte-equivalent application schema. Diff is empty (verified via `test_alembic_upgrade_head_matches_runner_schema` + a manual `sqlite3 .schema` diff). The alembic-internal `alembic_version` table and the runner-internal `schema_migrations` table are filtered from comparison; `sqlite_sequence` (auto-managed) is also filtered.
+  - Linear chain: 0001 has `down_revision=None`; 0002..0010 each declare the previous as `down_revision` (verified by `test_alembic_revisions_chain_is_linear`).
+  - Full backend suite: `4353 passed, 2 skipped, 4 failed` — same 4 pre-existing failures as baseline (test_config_llm × 3 + test_contract_credit_api × 1; LLM env config + missing jwt module, unrelated). +4 net new tests vs. baseline 4349.
+  - `bpsai-pair arch check backend/alembic/versions/` clean.
+  - `bpsai-pair arch check backend/app/core/migrations/runner.py` — only a soft warning (file 183 lines, threshold 150); pre-existing, not introduced by this task.
+
+- **DDL re-export**: `backend/app/core/schema.py` `DDL_SQL` re-export still works (verified — imports cleanly, len 4239).
+
+- **Postgres parity**: NOT verified in this task (deferred to T22.4 once Postgres CI service is wired). Sqlite-only verification is sufficient per task spec. The dialect-aware helpers in 0003/0005/0006/0008/0009/0010 are forward-looking — they handle both sqlite (`PRAGMA table_info`) and postgres (`information_schema.columns`).
+
+- **What's next**: T22.4 — Postgres CI service so the postgres axis of `db_engine` actually exercises every migration.
+
 - **T22.2 done** (auto-updated by hook)
 
 - **T22.2 done** — Postgres driver + dual-DB config
