@@ -46,6 +46,8 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+- **T22.13 done** (auto-updated by hook)
+
 ### 2026-05-06 — Sprint 22 (Identity Foundation) — COMPLETE
 
 All 13 tasks landed (T22.1–T22.13). Sprint went from /ideation → /draft-backlog → /pc-plan → /prepare-to-engage → /running-sprint-tasks across 9 dependency-aware waves. 11 driver agents launched (some in parallel within waves; Wave 4 ran 3 agents concurrently). 9 commits on `engage/backlog-sprint-22-identity-foundation`. Path A (autonomous through Wave 7, charter + integration gate at the end with user authorization).
