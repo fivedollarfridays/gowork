@@ -2,17 +2,17 @@
   "task_types": {
     "feature": {
       "task_type": "feature",
-      "sample_count": 31,
-      "avg_tokens": 5348.645161290323,
-      "std_dev": 8933.405060270337,
-      "p80_tokens": 8450.0,
-      "avg_duration_seconds": 194.67741935483872,
-      "success_rate": 0.7419354838709677,
+      "sample_count": 32,
+      "avg_tokens": 5496.5625,
+      "std_dev": 8831.198262189211,
+      "p80_tokens": 9208.400000000001,
+      "avg_duration_seconds": 199.3125,
+      "success_rate": 0.75,
       "recommended_model": "haiku",
       "model": "aggregate",
       "recommended_effort": "high",
-      "_m2_tokens": 2473977505.0967736,
-      "_m2_duration": 1580964.7741935484,
+      "_m2_tokens": 2495682007.875,
+      "_m2_duration": 1602276.875,
       "estimation_mape": null,
       "estimation_sample_count": 0,
       "cx_per_minute": 26.140075289480265
@@ -53,17 +53,17 @@
     },
     "feature:claude-opus-4-7": {
       "task_type": "feature",
-      "sample_count": 7,
-      "avg_tokens": 15067.285714285714,
-      "std_dev": 13825.980137968889,
-      "p80_tokens": 22977.4,
-      "avg_duration_seconds": 430.57142857142856,
+      "sample_count": 8,
+      "avg_tokens": 14444.125,
+      "std_dev": 13037.68828663176,
+      "p80_tokens": 22407.800000000003,
+      "avg_duration_seconds": 419.625,
       "success_rate": 1.0,
       "recommended_model": "haiku",
       "model": "claude-opus-4-7",
       "recommended_effort": "high",
-      "_m2_tokens": 1338104087.4285715,
-      "_m2_duration": 478189.71428571426,
+      "_m2_tokens": 1359850526.8749998,
+      "_m2_duration": 484899.87499999994,
       "estimation_mape": null,
       "estimation_sample_count": 0,
       "cx_per_minute": null
@@ -188,6 +188,6 @@
       "cx_per_minute": 4.325846981826184
     }
   },
-  "last_calibrated": "2026-05-06T22:34:14.845530+00:00",
-  "total_records": 36
+  "last_calibrated": "2026-05-06T22:50:35.683089+00:00",
+  "total_records": 37
 }

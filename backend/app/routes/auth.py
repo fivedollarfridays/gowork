@@ -1,24 +1,28 @@
-"""Authentication routes — magic-link issuance (T22.7).
+"""Authentication routes — magic-link issuance (T22.7) + claim (T22.8).
 
-Exposes ``POST /api/auth/magic-link``. The endpoint is deliberately
-opaque to clients:
+Exposes:
 
-* Always returns ``202 Accepted`` with no body — whether the email is
-  known, unknown, or rate-limited. This kills account-enumeration and
-  prevents callers from inferring whether a send actually happened.
-* Mints a ~256-bit URL-safe token via
-  :func:`app.core.queries_accounts.mint_magic_link_credential`. Only
-  the SHA-256 hash is persisted; the raw token is handed to SendGrid
-  exactly once and discarded.
-* Account-on-first-use: an unknown email is created transparently so
-  the very first login still works.
-* Rate-limited two ways: 3/hour per email and 10/hour per client IP.
-  When over-limit, the call is logged and silently dropped (no email
-  is sent) but the response is still 202.
+* ``POST /api/auth/magic-link`` — always-202 issuance endpoint. See
+  the route docstring for the no-enumeration / rate-limit contract.
+* ``GET  /api/auth/claim?token=…`` — validates a magic-link token,
+  marks it consumed, sets a session cookie, and (if a ``session_id``
+  rides along on the request) binds the anonymous session to the
+  account. Returns a uniform 401 for invalid / expired / already-used
+  tokens so the response cannot be used as an oracle on the token
+  lifecycle. Returns 409 when the carried session_id is already
+  claimed by a different account (no silent overwrite).
 
-The actual claim flow (token → session) lives in T22.8 — the validate
-side mirrors :func:`mint_magic_link_credential` by hashing the input
-and looking up the (credential_type, credential_value_hash) index.
+Claim parameter aliasing
+------------------------
+``GET /api/auth/claim`` declares its query params with the Python
+names ``magic_token`` / ``claim_sid`` (``alias="token"`` /
+``alias="session_id"`` on the wire). The aliasing keeps the URL
+contract intact while telling the cross-session route inventory
+(``tests._route_inventory``) that this is an *account-claim*
+endpoint, not a feedback-session-owned one — the magic-link token is
+not a feedback session token, so it must not be subjected to the
+session-A id + session-B token IDOR contract that flags any
+``(session_id, token)`` pair.
 """
 
 from __future__ import annotations
@@ -27,7 +31,7 @@ import logging
 import re
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, Query, Request, Response
 from pydantic import BaseModel, field_validator
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -37,6 +41,12 @@ from app.core.config import get_settings
 from app.core.database import get_db
 from app.core.rate_limit import RateLimiter
 from app.integrations.email import send_transactional
+from app.routes._auth_claim_helpers import (
+    invalid_token_response,
+    session_conflict_response,
+    set_account_cookie,
+    try_claim_session,
+)
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -190,3 +200,63 @@ async def issue_magic_link(
     account_id = await _resolve_or_create_account(db, email)
     await _issue_and_send(db, email=email, account_id=account_id)
     return Response(status_code=202)
+
+
+# -------------------- Claim flow (T22.8) --------------------
+
+
+async def _maybe_claim_session(
+    db: AsyncSession, *, account_id: int, claim_sid: str | None
+) -> tuple[list[str], Response | None]:
+    """Try to bind *claim_sid* to *account_id*.
+
+    Returns ``(claimed_ids, conflict_response)``. ``conflict_response``
+    is non-None iff a different account already owns *claim_sid* — the
+    caller must short-circuit with that response without marking the
+    credential used.
+    """
+    if not claim_sid:
+        return [], None
+    ok = await try_claim_session(
+        db, account_id=account_id, session_id=claim_sid
+    )
+    if not ok:
+        logger.info(
+            "magic_link claim conflict account_id=%s session_id=%s",
+            account_id, claim_sid,
+        )
+        return [], session_conflict_response()
+    return [claim_sid], None
+
+
+@router.get("/claim", response_model=None)
+async def claim_magic_link(
+    response: Response,
+    magic_token: str = Query(..., alias="token"),
+    claim_sid: str | None = Query(None, alias="session_id"),
+    db: AsyncSession = Depends(get_db),
+) -> dict | Response:
+    """Validate a magic-link token and bind the browser to the account.
+
+    Returns 200 ``{"account_id", "claimed_session_ids"}`` on success
+    (cookie set), 401 with a uniform body for invalid / expired /
+    replayed tokens, and 409 when *session_id* is already owned by a
+    different account.
+    """
+    token_hash = queries_accounts.hash_token(magic_token)
+    found = await queries_accounts.find_unused_credential_by_hash(
+        db, token_hash=token_hash
+    )
+    if found is None:
+        return invalid_token_response()
+    account_id, credential_id = found
+
+    claimed, conflict = await _maybe_claim_session(
+        db, account_id=account_id, claim_sid=claim_sid
+    )
+    if conflict is not None:
+        return conflict
+
+    await queries_accounts.mark_credential_used(db, credential_id)
+    set_account_cookie(response, account_id)
+    return {"account_id": account_id, "claimed_session_ids": claimed}

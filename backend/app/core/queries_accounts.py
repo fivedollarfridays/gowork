@@ -3,8 +3,12 @@
 Mirrors the style of :mod:`app.core.queries` — thin ``text()``-based
 helpers operating on an :class:`AsyncSession`. The functions here are
 the ONLY callers permitted to write to the ``accounts`` family of
-tables; downstream features (magic-link issuance T22.7, validation
-T22.8, claim flow T22.9) layer on top of these primitives.
+tables; downstream features (magic-link issuance T22.7, claim flow
+T22.8) layer on top of these primitives.
+
+Magic-link credential CRUD lives in :mod:`app.core.queries_credentials`
+and is re-exported from here so existing callers (route layer, tests)
+keep their stable import path.
 
 Anonymous-first invariant
 -------------------------
@@ -16,12 +20,17 @@ users without any account at all.
 
 from __future__ import annotations
 
-import hashlib
-import secrets
 from datetime import datetime, timezone
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.queries_credentials import (
+    find_unused_credential_by_hash,
+    hash_token,
+    mark_credential_used,
+    mint_magic_link_credential,
+)
 
 
 def _utcnow_iso() -> str:
@@ -32,16 +41,6 @@ def _utcnow_iso() -> str:
 def _normalize_email(email: str) -> str:
     """Lowercase + strip an email so UNIQUE lookups are case-insensitive."""
     return email.strip().lower()
-
-
-def _hash_token(raw_token: str) -> str:
-    """Return SHA-256 hex digest of *raw_token* (the form persisted on disk).
-
-    Single source of truth for credential hashing — both the issuance
-    helper here and the validation helper (T22.8) MUST use this so the
-    on-disk hash is comparable across both paths.
-    """
-    return hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
 
 
 async def create_account(session: AsyncSession, email: str) -> int:
@@ -157,60 +156,19 @@ async def get_account_for_session(
     return dict(row._mapping) if row else None
 
 
-# -------------------- Credential issuance (T22.7) --------------------
+# -------------------- Credential CRUD (T22.7 + T22.8) --------------------
+# Re-exported from :mod:`app.core.queries_credentials` so the existing
+# import path ``app.core.queries_accounts.<helper>`` keeps working
+# while the credential-table CRUD lives in its own focused module.
 
-
-_INSERT_CREDENTIAL_SQL = (
-    "INSERT INTO account_credentials "
-    "(account_id, credential_type, credential_value_hash, expires_at) "
-    "VALUES (:aid, :ct, :hash, :exp) "
-    "RETURNING id"
-)
-
-
-async def _insert_credential_row(
-    session: AsyncSession,
-    *,
-    account_id: int,
-    credential_hash: str,
-    expires_iso: str,
-) -> int:
-    """Insert one ``magic_link`` credential row and return its ``id``."""
-    result = await session.execute(
-        text(_INSERT_CREDENTIAL_SQL),
-        {
-            "aid": account_id,
-            "ct": "magic_link",
-            "hash": credential_hash,
-            "exp": expires_iso,
-        },
-    )
-    row = result.first()
-    await session.commit()
-    assert row is not None  # RETURNING always yields the inserted row
-    return int(row[0])
-
-
-async def mint_magic_link_credential(
-    session: AsyncSession,
-    *,
-    account_id: int,
-    expires_at: datetime,
-) -> tuple[str, int]:
-    """Mint a single-use magic-link token for *account_id*.
-
-    Generates ~256 bits of entropy via :func:`secrets.token_urlsafe`,
-    persists only the SHA-256 hash, and returns the raw token plus the
-    new row's PK. The raw token must NEVER land on disk — the route
-    layer hands it to the email integration and then drops it.
-    """
-    raw_token = secrets.token_urlsafe(32)
-    credential_hash = _hash_token(raw_token)
-    expires_iso = expires_at.astimezone(timezone.utc).isoformat()
-    credential_id = await _insert_credential_row(
-        session,
-        account_id=account_id,
-        credential_hash=credential_hash,
-        expires_iso=expires_iso,
-    )
-    return raw_token, credential_id
+__all__ = [
+    "create_account",
+    "get_account_by_email",
+    "claim_session",
+    "list_sessions_for_account",
+    "get_account_for_session",
+    "mint_magic_link_credential",
+    "find_unused_credential_by_hash",
+    "mark_credential_used",
+    "hash_token",
+]
