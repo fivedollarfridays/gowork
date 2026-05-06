@@ -2,17 +2,17 @@
   "task_types": {
     "feature": {
       "task_type": "feature",
-      "sample_count": 22,
-      "avg_tokens": 2742.590909090909,
-      "std_dev": 3490.7681840051782,
-      "p80_tokens": 5949.000000000001,
-      "avg_duration_seconds": 137.3181818181818,
-      "success_rate": 0.6818181818181818,
+      "sample_count": 24,
+      "avg_tokens": 2514.0416666666665,
+      "std_dev": 3427.038024776482,
+      "p80_tokens": 5467.000000000003,
+      "avg_duration_seconds": 125.875,
+      "success_rate": 0.6666666666666666,
       "recommended_model": "haiku",
       "model": "aggregate",
       "recommended_effort": "high",
-      "_m2_tokens": 268080175.3181818,
-      "_m2_duration": 565072.7727272727,
+      "_m2_tokens": 281870150.9583334,
+      "_m2_duration": 599642.6250000001,
       "estimation_mape": null,
       "estimation_sample_count": 0,
       "cx_per_minute": 26.140075289480265
@@ -51,6 +51,23 @@
       "estimation_sample_count": 0,
       "cx_per_minute": 4.325846981826184
     },
+    "feature:unknown": {
+      "task_type": "feature",
+      "sample_count": 5,
+      "avg_tokens": 0.0,
+      "std_dev": 0.0,
+      "p80_tokens": 0.0,
+      "avg_duration_seconds": 64.8,
+      "success_rate": 0.2,
+      "recommended_model": "haiku",
+      "model": "unknown",
+      "recommended_effort": "high",
+      "_m2_tokens": 0.0,
+      "_m2_duration": 34380.799999999996,
+      "estimation_mape": null,
+      "estimation_sample_count": 0,
+      "cx_per_minute": null
+    },
     "feature:claude-opus-4-6[1m]": {
       "task_type": "feature",
       "sample_count": 3,
@@ -84,23 +101,6 @@
       "estimation_mape": null,
       "estimation_sample_count": 0,
       "cx_per_minute": 34.50281814539627
-    },
-    "feature:unknown": {
-      "task_type": "feature",
-      "sample_count": 3,
-      "avg_tokens": 0.0,
-      "std_dev": 0.0,
-      "p80_tokens": 0.0,
-      "avg_duration_seconds": 108.0,
-      "success_rate": 0.0,
-      "recommended_model": "haiku",
-      "model": "unknown",
-      "recommended_effort": "high",
-      "_m2_tokens": 0.0,
-      "_m2_duration": 20384.000000000004,
-      "estimation_mape": null,
-      "estimation_sample_count": 0,
-      "cx_per_minute": null
     },
     "feature:sonnet": {
       "task_type": "feature",
@@ -171,6 +171,6 @@
       "cx_per_minute": 4.325846981826184
     }
   },
-  "last_calibrated": "2026-05-06T21:31:28.271718+00:00",
-  "total_records": 27
+  "last_calibrated": "2026-05-06T21:43:32.596009+00:00",
+  "total_records": 29
 }

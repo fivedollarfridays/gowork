@@ -46,6 +46,19 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+- **T22.1 done** (auto-updated by hook)
+
+### 2026-05-06 — T22.1 — Alembic infrastructure + async env
+
+Branch: `engage/backlog-sprint-22-identity-foundation`. Sprint 22 entry task — stood up the Alembic migration runner at `backend/alembic/` with async-engine support. No schema changes (T22.3 will port the m001-m010 chain into versioned migrations); this task is purely the runner.
+
+- **Files created** — `backend/alembic.ini` (64 lines), `backend/alembic/env.py` (124 lines), `backend/alembic/script.py.mako` (31 lines), `backend/alembic/versions/.gitkeep` (empty).
+- **`alembic.ini`** — `script_location = alembic`, `file_template = %(rev)s_%(slug)s` to enforce `0001_<slug>` numeric ordering (mirrors legacy m00X), `prepend_sys_path = .` so env.py can import `app.core.config` for the Settings fallback. Standard logger config kept verbatim from the alembic async template.
+- **`env.py`** — async-aware, single env.py drives both sqlite (aiosqlite) and postgres (asyncpg). DATABASE_URL resolution priority: CLI `-x dburl=...` → `DATABASE_URL` env → `app.core.config.Settings.database_url`. `_normalize_async_url` coerces sync URLs to their async-driver equivalents (`sqlite://` → `sqlite+aiosqlite://`, `postgresql://` → `postgresql+asyncpg://`). Postgres path is wired but not exercised until T22.2 lands asyncpg in requirements.txt. Uses `pool.NullPool` so engines are torn down between alembic invocations (avoids dangling connections in CI). `target_metadata = None` for now; T22.3 will wire SQLAlchemy models.
+- **`script.py.mako`** — adapted from the alembic async template; adds a comment block documenting the numeric-prefix convention and the `alembic revision --rev-id 0011 -m "slug"` invocation pattern.
+- **Verification** — `cd backend && DATABASE_URL=sqlite+aiosqlite:////tmp/X.db .venv/bin/alembic upgrade head` exits clean (no migrations to apply yet, but the runner cycles through context setup correctly + creates the sqlite DB file). `alembic current` and `alembic history` also clean. Settings-fallback path tested by running with `env -u DATABASE_URL` — falls through to `Settings.database_url = "sqlite+aiosqlite:///./montgowork.db"` and runs clean. Postgres path verified by code inspection only (asyncpg deferred to T22.2). `bpsai-pair arch check backend/alembic/env.py` passes (no violations: 124 lines, 6 functions, all under 50 lines each).
+- **Dependency status** — `alembic==1.18.4` was already in `backend/requirements.txt` (transitive expectation met); no requirements bump needed.
+
 ### 2026-05-06 — Sprint 22 ideation → backlog → plan
 
 User dispatch: strategic planning conversation about the future of the platform — login + identity, gamification, DFW/Dallas expansion, FW DAO bounty integration, Mercor-style two-sided assessments + listing verification. Goal: total workforce solution; verification burden on both sides; bounty revenue path to fund quitting day job.
