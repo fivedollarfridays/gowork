@@ -18,7 +18,7 @@ cachetools==5.5.2
 apscheduler==3.11.2
 sendgrid==6.11.0
 weasyprint==68.0
-fpdf2==2.7.9
+fpdf2==2.8.7
 markdown==3.8.1
 
 # Test-only dependencies (deterministic time control — see tests/_fake_clock.py)
