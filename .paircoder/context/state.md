@@ -50,6 +50,12 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+- **T23.7 done** (auto-updated by hook)
+
+### 2026-05-07 — T23.7 — Frontend reviewer dashboard pages
+
+Shipped the frontend reviewer surface for the assessment authoring pipeline. Three new files plus three vitest test files. New typed API client `frontend/src/lib/api/assessments.ts` (199 lines) exposes `listPendingAssessments()`, `getAssessmentVersion(versionId)`, `reviewAssessment(versionId, action, comment)`, `publishAssessment(versionId)` — mirrors the `_fetchWithTimeout` + `_composeSignal` convention from `lib/api/auth.ts` and surfaces a single `AssessmentsApiError` with `.status` for 403/404/409 branching. List page `frontend/src/app/admin/assessments/page.tsx` (196 lines) renders the pending queue with client-side track / kind / status filter dropdowns and routes row clicks to the detail page. Detail page `frontend/src/app/admin/assessments/[versionId]/page.tsx` (259 lines) shows questions ordered by position, a comment textarea, three review action buttons (approve = `bg-primary` cyan, request_revision = `bg-warning` amber, reject = `bg-destructive` rose), and a publish button gated on `status === "approved"`. Both pages carry a local auth guard tagged `LOCAL_GUARD_T23_7` that redirects to `/auth/login` when `useAccount()` is anonymous — T23.8 will replace it with the role-aware `<RoleGate>` wrapper. 24 new vitest tests (9 API client, 7 list, 8 detail), full vitest suite 3566 passing (was 3527 baseline — net +24, no regressions). `npx tsc --noEmit` clean, `npx next build` green (`/admin/assessments` 5.08 kB, `/admin/assessments/[versionId]` 7.4 kB). `bpsai-pair arch check` clean on all three production files.
+
 - **T23.6 done** (auto-updated by hook)
 
 ### 2026-05-07 — T23.6 — Public assessment-fetch endpoint
