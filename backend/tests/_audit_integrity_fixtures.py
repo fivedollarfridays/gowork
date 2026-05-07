@@ -194,6 +194,9 @@ AUDIT_ALLOWLIST: dict[str, str] = {
     "POST /api/admin/assessments/{version_id}/review":
         "No-persistence audit — assessment_reviews row IS the audit "
         "(reviewer_id, action, comment, created_at).",
+    "POST /api/admin/assessments/{version_id}/publish":
+        "No-persistence audit — assessment_versions row IS the audit "
+        "(approved_by + published_at columns set on publish).",
 }
 
 

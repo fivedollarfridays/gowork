@@ -50,9 +50,17 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+- **T23.5 done** (auto-updated by hook)
+
+- **T23.5 done** (auto-updated by hook)
+
 - **T23.3 done** (auto-updated by hook)
 
 - **T23.4 done** (auto-updated by hook)
+
+### 2026-05-07 — T23.5 — Publish endpoint with provenance lock
+
+Extended `backend/app/routes/assessments_review.py` (146L → 202L, well under the 400L error ceiling) with `POST /api/admin/assessments/{version_id}/publish` — the narrow admin-only state transition that closes the draft → review → publish chain. Gated by `require_role("admin")` (NOT the broader reviewer triplet `any_of_roles`); sme_reviewer / case_manager / dao_reviewer all 403 — publish authority is intentionally narrower than review. The route delegates to `queries_assessments.publish_version` (T23.2) which guards `current_status == "approved"` and raises `ValueError` otherwise; the route translates that ValueError to 409 Conflict for three distinct cases: publishing a non-existent version, publishing a draft that was never approved, and double-publishing an already-published version (state is no longer `approved` after the first publish). Response payload is `{assessment_id, version_id, slug, version_number, published_at, public_url}` with `public_url = f"/api/assessments/{slug}"` — the eventual candidate-side surface. Internal helper `_load_publish_payload` joins `assessment_versions` to `assessments` to surface the slug after the queries layer has committed the publish transition. Added the new route to both test allowlists: `_audit_integrity_fixtures.py:AUDIT_ALLOWLIST` (rationale: assessment_versions row IS the audit via approved_by + published_at columns) and `_cross_session_fixtures.py:PUBLIC_ENDPOINTS` (rationale: admin role auth, not session-scoped). 10 new tests in `backend/tests/test_assessments_publish.py` (320L) covering: approve-then-publish happy path returning the public URL payload, **provenance row inspection** asserting all four columns (`drafted_by`, `reviewed_by`, `approved_by`, `published_at`) non-null on the published row — the load-bearing charter invariant where draft-author + reviewer + admin-publisher + timestamp are all preserved, publish-without-approve → 409, double-publish → 409, unknown-version-id → 409, anonymous → 403, parametrized non-admin-role-403 across all three reviewer roles, and the cross-guard re-asserting that `record_review` on a published version returns 409 (T23.2 invariant pinned from this surface). Backend suite: 4 baseline failed / 4546 passed / 2 skipped — +10 new, baseline preserved. `arch check` on modified files clean (assessments_review.py 202L is at the 150L warning threshold, no errors; new test file fully clean). `auth.py` UNCHANGED at 301 lines.
 
 ### 2026-05-07 — T23.4 — Reviewer queue API
 

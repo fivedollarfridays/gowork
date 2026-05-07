@@ -149,6 +149,8 @@ PUBLIC_ENDPOINTS: dict[str, str] = {
         "Reviewer role auth (any_of_roles), not session-scoped.",
     "POST /api/admin/assessments/{version_id}/review":
         "Reviewer role auth (any_of_roles), not session-scoped.",
+    "POST /api/admin/assessments/{version_id}/publish":
+        "Admin role auth (require_role), not session-scoped.",
 }
 
 

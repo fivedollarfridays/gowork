@@ -1,22 +1,24 @@
-"""Reviewer queue API for the assessment authoring pipeline (T23.4).
+"""Reviewer + publish API for the assessment authoring pipeline (T23.4 / T23.5).
 
-Three endpoints under ``/api/admin/assessments`` mounted in the
-project router registry. All three are gated by ``any_of_roles(
-case_manager, sme_reviewer, dao_reviewer)`` — admins use the
-shared admin tier (T23.5 publish endpoint) rather than this
-reviewer-specific surface.
+Endpoints under ``/api/admin/assessments`` mounted in the project
+router registry. The first three are gated by ``any_of_roles(
+case_manager, sme_reviewer, dao_reviewer)``; the publish endpoint is
+gated by the strictly narrower ``require_role("admin")`` — publish
+authority is intentionally NOT delegated to reviewers.
 
 Routes:
 
 * ``GET    /pending``                 — track-aware reviewer queue.
 * ``GET    /{version_id}``            — full version + questions.
 * ``POST   /{version_id}/review``     — record a review action.
+* ``POST   /{version_id}/publish``    — admin-only publish (T23.5).
 
 State-machine guards live in :mod:`app.core.queries_assessments`
 (via :mod:`app.core._assessments_state`); ``ValueError`` raised by
-``record_review`` (e.g. attempting to review a published or retired
-version) is translated to ``409 Conflict`` so the route never
-swallows or rewrites state-machine semantics.
+``record_review`` or ``publish_version`` (e.g. publishing a
+non-approved version, double-publishing, or reviewing a published
+or retired version) is translated to ``409 Conflict`` so the route
+never swallows or rewrites state-machine semantics.
 
 Reviewer-role inference for the queue filter
 --------------------------------------------
@@ -34,10 +36,11 @@ from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import queries_assessments, queries_roles
-from app.core.auth_roles import any_of_roles
+from app.core.auth_roles import any_of_roles, require_role
 from app.core.database import get_db
 
 
@@ -141,6 +144,59 @@ async def submit_review(
     except ValueError as err:
         raise HTTPException(status_code=409, detail=str(err)) from err
     return {"review_id": review_id}
+
+
+async def _load_publish_payload(
+    db: AsyncSession, version_id: int
+) -> dict:
+    """Return the publish-response payload for *version_id*.
+
+    Joins ``assessment_versions`` to ``assessments`` to surface the
+    slug + version_number + published_at the route returns. Called
+    after the queries layer has committed the publish transition, so
+    every column is guaranteed populated.
+    """
+    result = await db.execute(
+        text(
+            "SELECT v.id AS version_id, v.assessment_id, "
+            "v.version_number, v.published_at, a.slug "
+            "FROM assessment_versions v "
+            "JOIN assessments a ON a.id = v.assessment_id "
+            "WHERE v.id = :id"
+        ),
+        {"id": version_id},
+    )
+    row = result.first()
+    payload = dict(row._mapping)
+    payload["public_url"] = f"/api/assessments/{payload['slug']}"
+    return payload
+
+
+@router.post("/{version_id}/publish")
+async def publish_version_endpoint(
+    version_id: int,
+    db: AsyncSession = Depends(get_db),
+    account: dict = Depends(require_role("admin")),
+) -> dict:
+    """Publish *version_id* — admin-only state transition (T23.5).
+
+    Requires the version to currently be in ``approved`` status.
+    Returns ``{assessment_id, version_id, slug, version_number,
+    published_at, public_url}`` where ``public_url`` is the candidate
+    surface ``/api/assessments/{slug}``.
+
+    State-machine ``ValueError`` (non-existent version, status not
+    ``approved``, double-publish on an already-published version) is
+    translated to 409 Conflict — the publish surface never silently
+    no-ops nor rewrites the state machine.
+    """
+    try:
+        await queries_assessments.publish_version(
+            db, version_id=version_id, approved_by=account["id"],
+        )
+    except ValueError as err:
+        raise HTTPException(status_code=409, detail=str(err)) from err
+    return await _load_publish_payload(db, version_id)
 
 
 __all__ = ["router", "ReviewBody"]
