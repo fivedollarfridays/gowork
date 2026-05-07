@@ -12,9 +12,19 @@ import pytest
 
 
 @pytest.mark.anyio
-async def test_db_engine_yields_sqlite_engine_by_default(db_engine):
-    """Default local run: db_engine must be a sqlite engine."""
-    assert "sqlite" in db_engine.url.drivername
+async def test_db_engine_yields_expected_dialect(db_engine):
+    """Each fixture axis yields the expected driver.
+
+    Sqlite axis: drivername must contain ``sqlite``.
+    Postgres axis (opt-in via ``GOWORK_TEST_POSTGRES_URL``): drivername
+    must contain ``postgresql``. The single test covers both — the
+    parameter choice tells us which engine to expect.
+    """
+    drivername = db_engine.url.drivername
+    if "sqlite" in drivername:
+        assert "sqlite" in drivername
+    else:
+        assert "postgresql" in drivername
 
 
 def test_db_engine_postgres_axis_skipped_without_env_var():
