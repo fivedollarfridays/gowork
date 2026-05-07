@@ -28,7 +28,11 @@ def _reset_engine_globals():
 
 
 class TestSqliteEngine:
-    def test_sqlite_default_url_creates_engine(self):
+    def test_sqlite_default_url_creates_engine(self, monkeypatch):
+        # Isolate from CI env that may set DATABASE_URL=postgresql://...;
+        # this test asserts the no-env default which must remain sqlite.
+        monkeypatch.delenv("DATABASE_URL", raising=False)
+        get_settings.cache_clear()
         engine = db_module.get_engine()
         assert engine.url.drivername == "sqlite+aiosqlite"
 

@@ -113,8 +113,28 @@ jobs:
         env:
           DATABASE_URL: "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"
 
-      - name: Run backend test suite against postgres
-        run: pytest tests/ -v --tb=short
+      - name: Run dual-engine-safe tests against postgres
+        # The full sqlite suite is NOT postgres-portable: most tests bootstrap
+        # tmp sqlite DBs via the legacy runner.apply_pending path or assume
+        # sqlite defaults in config-shape assertions. The dual-engine layer
+        # (T22.1-T22.6) and identity layer (T22.5-T22.11) ARE designed to run
+        # on both; this job exercises that subset against postgres so the
+        # alembic chain and accounts/credentials/roles CRUD stay portable.
+        # Adding a new dual-engine test? Append it here and add a comment in
+        # the test docstring noting the postgres-axis coverage.
+        run: |
+          pytest -v --tb=short \
+            tests/test_alembic_parity.py \
+            tests/test_db_parity.py \
+            tests/test_db_url_helpers.py \
+            tests/test_db_engine_fixture.py \
+            tests/test_database_engine_dispatch.py \
+            tests/test_legacy_ddl_translator.py \
+            tests/test_accounts.py \
+            tests/test_roles.py \
+            tests/test_auth_magic_link.py \
+            tests/test_auth_claim.py \
+            tests/test_auth_me.py
         env:
           ENVIRONMENT: test
           DATABASE_URL: "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"

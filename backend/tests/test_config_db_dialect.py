@@ -12,7 +12,11 @@ from app.core.config import Settings
 
 
 class TestDbDialect:
-    def test_sqlite_default(self):
+    def test_sqlite_default(self, monkeypatch):
+        # Isolate from CI env that may set DATABASE_URL=postgresql://...
+        # to exercise the dual-engine matrix; this test is about the
+        # *no-env* default specifically.
+        monkeypatch.delenv("DATABASE_URL", raising=False)
         settings = Settings()
         assert settings.db_dialect == "sqlite"
 

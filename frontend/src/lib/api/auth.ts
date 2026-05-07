@@ -81,7 +81,7 @@ async function _fetchWithTimeout(
  * aborts the resulting one.
  */
 function _composeSignal(
-  callerSignal: AbortSignal | undefined,
+  callerSignal: AbortSignal | null | undefined,
   timeoutSignal: AbortSignal,
 ): AbortSignal {
   if (!callerSignal) return timeoutSignal;
