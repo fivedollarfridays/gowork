@@ -135,10 +135,73 @@ async def db_engine(request, tmp_path):
     db_module._engine = engine
     db_module._async_session_factory = None
 
-    await init_db(engine)
+    if request.param == "sqlite":
+        # init_db replays the legacy DDL_SQL blob (m001 baseline) +
+        # apply_pending_migrations + seed. Sqlite-only path: the blob
+        # contains AUTOINCREMENT and PRAGMA statements that postgres
+        # rejects, and the legacy chain has no dialect translator.
+        await init_db(engine)
+    else:
+        # Postgres axis: bypass the legacy init_db chain entirely.
+        # Schema is set up via the alembic chain (which IS dialect-aware
+        # via legacy_ddl_translator). Tests on this axis exercise the
+        # tables created by alembic 0001-0012; data seeding is
+        # per-test, not via the JSON seed loader (which assumes sqlite
+        # paths).
+        await _bootstrap_postgres_schema_via_alembic(engine)
     try:
         yield engine
     finally:
+        if request.param == "postgresql":
+            await _teardown_postgres_schema(engine)
         await engine.dispose()
         db_module._engine = old_engine
         db_module._async_session_factory = old_factory
+
+
+async def _bootstrap_postgres_schema_via_alembic(engine) -> None:
+    """Apply the alembic chain to ``engine`` for the postgres test axis.
+
+    Uses ``Config.attributes['connection']`` so alembic reuses the
+    fixture's engine instead of opening its own from the env DATABASE_URL.
+    """
+    from alembic.config import Config
+    from alembic import command
+    from pathlib import Path
+
+    cfg_path = Path(__file__).resolve().parent.parent / "alembic.ini"
+    cfg = Config(str(cfg_path))
+    cfg.set_main_option(
+        "script_location",
+        str(Path(__file__).resolve().parent.parent / "alembic"),
+    )
+    async with engine.begin() as conn:
+        await conn.run_sync(
+            lambda sync_conn: _run_alembic_upgrade(cfg, sync_conn)
+        )
+
+
+def _run_alembic_upgrade(cfg, sync_conn) -> None:
+    """Run ``alembic upgrade head`` against ``sync_conn``.
+
+    Alembic's command API is sync — used inside ``conn.run_sync`` so
+    the async fixture stays driver-agnostic.
+    """
+    from alembic import command
+
+    cfg.attributes["connection"] = sync_conn
+    command.upgrade(cfg, "head")
+
+
+async def _teardown_postgres_schema(engine) -> None:
+    """Drop all tables created by the alembic chain to keep tests isolated.
+
+    Postgres state persists across the test session inside the same
+    container; without teardown, the second db_engine fixture would
+    hit "table already exists" on alembic upgrade. ``DROP SCHEMA
+    public CASCADE; CREATE SCHEMA public;`` is the postgres-native
+    way to wipe the search_path.
+    """
+    async with engine.begin() as conn:
+        await conn.exec_driver_sql("DROP SCHEMA public CASCADE")
+        await conn.exec_driver_sql("CREATE SCHEMA public")

@@ -89,7 +89,18 @@ async def run_async_migrations() -> None:
 
 
 def run_migrations_online() -> None:
-    """Run migrations in 'online' mode via the async engine."""
+    """Run migrations in 'online' mode via the async engine.
+
+    If ``config.attributes['connection']`` is set, reuse that
+    connection instead of opening a new engine. Test fixtures rely
+    on this so the alembic chain runs against the same connection
+    the fixture's engine owns (otherwise alembic's NullPool engine
+    races with the fixture engine on schema state).
+    """
+    injected = config.attributes.get("connection")
+    if injected is not None:
+        _do_run_migrations(injected)
+        return
     asyncio.run(run_async_migrations())
 
 
