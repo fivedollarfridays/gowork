@@ -140,6 +140,15 @@ PUBLIC_ENDPOINTS: dict[str, str] = {
         "Advisor auth, separate trust boundary (test_advisor_auth.py).",
     "POST /api/advisor/sessions/{session_id}/note":
         "Advisor auth, separate trust boundary (test_advisor_auth.py).",
+    # ---------- S23 assessment authoring (role-gated, not session-scoped)
+    "GET /api/admin/assessments/pending":
+        "Reviewer role auth (any_of_roles), not session-scoped.",
+    "GET /api/admin/assessments/{version_id}":
+        "Reviewer role auth (any_of_roles), not session-scoped.",
+    "POST /api/admin/assessments/draft":
+        "Reviewer role auth (any_of_roles), not session-scoped.",
+    "POST /api/admin/assessments/{version_id}/review":
+        "Reviewer role auth (any_of_roles), not session-scoped.",
 }
 
 

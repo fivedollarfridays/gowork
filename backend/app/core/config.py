@@ -30,6 +30,10 @@ class Settings(BaseSettings):
     credit_api_key: str = ""
     anthropic_api_key: str = ""
     claude_model: str = "claude-sonnet-4-20250514"
+    # Model used for drafting assessment questions (T23.3). Configurable
+    # so SMEs can dial up to a stronger model for higher-stakes probes
+    # without touching the rest of the LLM stack.
+    assessment_drafter_model: str = "claude-sonnet-4-6"
 
     # Multi-provider LLM
     llm_provider: str = "anthropic"
