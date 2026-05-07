@@ -187,6 +187,16 @@ AUDIT_ALLOWLIST: dict[str, str] = {
         "No-persistence compute — Haiku-composed action sequence.",
     "PATCH /api/plan/{session_id}/actions":
         "Plan mutation — recorded inside plan_history on next refresh.",
+    # ---------- S23 assessment authoring ----------
+    "POST /api/admin/assessments/draft":
+        "No-persistence audit — assessment_versions + assessment_questions "
+        "rows ARE the audit (drafted_by + created_at columns).",
+    "POST /api/admin/assessments/{version_id}/review":
+        "No-persistence audit — assessment_reviews row IS the audit "
+        "(reviewer_id, action, comment, created_at).",
+    "POST /api/admin/assessments/{version_id}/publish":
+        "No-persistence audit — assessment_versions row IS the audit "
+        "(approved_by + published_at columns set on publish).",
 }
 
 

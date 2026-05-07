@@ -152,20 +152,29 @@ export async function claimMagicLink(token: string): Promise<ClaimSuccess> {
 /**
  * Account binding for the current browser, surfaced by ``GET /api/auth/me``.
  *
- * Anonymous browsers see ``{accountId: null, email: null}``; claimed
- * browsers see the row backed by the signed ``gw_account`` cookie. The
- * route deliberately returns 200 in both cases (and on tampered cookies)
- * so the response shape itself never reveals the cookie's validity —
- * see the route docstring for the no-tampering-oracle rationale.
+ * Anonymous browsers see ``{accountId: null, email: null, roles: []}``;
+ * claimed browsers see the row backed by the signed ``gw_account``
+ * cookie plus their granted roles. The route deliberately returns 200
+ * in all three cases (anonymous, claimed, tampered) so the response
+ * shape itself never reveals the cookie's validity — see the route
+ * docstring for the no-tampering-oracle rationale. ``roles`` follows
+ * the same rule: tampered/anonymous always get ``[]`` so the response
+ * shape provides no oracle on whether an underlying account holds
+ * privileged roles.
+ *
+ * T23.8 added the ``roles`` field; ``<RoleGate>`` and
+ * ``<RoleAwareNav>`` consume it without an extra round-trip.
  */
 export interface AccountMe {
   accountId: number | null;
   email: string | null;
+  roles: string[];
 }
 
 interface AccountMeWire {
   account_id: number | null;
   email: string | null;
+  roles?: string[];
 }
 
 export async function getAccountMe(): Promise<AccountMe> {
@@ -177,12 +186,13 @@ export async function getAccountMe(): Promise<AccountMe> {
     // The endpoint is contractually 200-always; on the off-chance it
     // returns something else (transient 5xx, network reshape) treat
     // the browser as anonymous rather than failing the page render.
-    return { accountId: null, email: null };
+    return { accountId: null, email: null, roles: [] };
   }
   const wire = (await res.json()) as AccountMeWire;
   return {
     accountId: wire.account_id ?? null,
     email: wire.email ?? null,
+    roles: Array.isArray(wire.roles) ? wire.roles : [],
   };
 }
 
@@ -203,4 +213,25 @@ export function useAccount() {
     staleTime: 5 * 60 * 1000,
     retry: false,
   });
+}
+
+/**
+ * Convenience hook returning the roles list for the current browser.
+ *
+ * Returns ``[]`` while the underlying ``useAccount()`` query is still
+ * loading and for anonymous browsers. Components that need to branch
+ * on "loading vs anonymous-with-no-roles" should consume ``useAccount``
+ * directly so they can read ``isLoading``; this hook is for the common
+ * case (``<RoleAwareNav>``, role-gated link visibility) where the only
+ * question is "does the current account hold any of these roles?".
+ *
+ * Source-of-truth note: the roles list comes from the backend
+ * ``/api/auth/me`` response — never from a localStorage cache or a
+ * URL parameter. Client-side gating is a UX layer; the authoritative
+ * enforcement remains the server's ``require_role`` / ``any_of_roles``
+ * dependencies.
+ */
+export function useAccountRoles(): string[] {
+  const { data } = useAccount();
+  return data?.roles ?? [];
 }

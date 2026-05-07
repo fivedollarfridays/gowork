@@ -39,6 +39,7 @@ from app.core import queries_accounts
 from app.core.audit import get_client_ip
 from app.core.config import get_settings
 from app.core.database import get_db
+from app.core.queries_roles import list_roles_for_account
 from app.core.rate_limit import RateLimiter
 from app.integrations.email import send_transactional
 from app.routes._auth_claim_helpers import (
@@ -270,7 +271,7 @@ async def claim_magic_link(
 # -------------------- Read flow (T22.11) --------------------
 
 
-_ANON_ME_BODY = {"account_id": None, "email": None}
+_ANON_ME_BODY = {"account_id": None, "email": None, "roles": []}
 
 
 @router.get("/me")
@@ -283,13 +284,20 @@ async def read_account_me(
     Always returns ``200``:
 
     * Anonymous (no cookie / malformed / tampered HMAC / unknown id)
-      yields ``{"account_id": null, "email": null}``.
-    * Valid cookie yields ``{"account_id": int, "email": str}``.
+      yields ``{"account_id": null, "email": null, "roles": []}``.
+    * Valid cookie yields ``{"account_id": int, "email": str,
+      "roles": list[str]}``.
 
     The 200-with-null shape (rather than a 401 on tampering) keeps the
     anonymous-first invariant — every browser receives the same shape
     whether or not it has ever claimed a session — and avoids any
-    tampering oracle on the cookie signature.
+    tampering oracle on the cookie signature. The ``roles`` field
+    follows the same rule: tampered/anonymous always sees ``[]`` so
+    no privileged-account oracle is created via the response shape.
+
+    T23.8 added ``roles`` so the frontend ``<RoleGate>`` and
+    ``<RoleAwareNav>`` can render reviewer surfaces without an extra
+    round-trip.
     """
     raw_cookie = request.cookies.get(SESSION_COOKIE_NAME)
     account_id = verify_account_cookie(raw_cookie)
@@ -298,4 +306,9 @@ async def read_account_me(
     row = await queries_accounts.get_account_by_id(db, account_id)
     if row is None:
         return _ANON_ME_BODY
-    return {"account_id": int(row["id"]), "email": str(row["email"])}
+    roles = await list_roles_for_account(db, account_id)
+    return {
+        "account_id": int(row["id"]),
+        "email": str(row["email"]),
+        "roles": roles,
+    }

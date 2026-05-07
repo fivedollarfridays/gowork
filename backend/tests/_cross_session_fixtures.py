@@ -80,6 +80,9 @@ PUBLIC_ENDPOINTS: dict[str, str] = {
         "Public job listings.",
     "GET /api/jobs/{job_id}":
         "Public job listing detail.",
+    "GET /api/assessments/{slug}":
+        "Public candidate-facing assessment fetch (T23.6); no session_id "
+        "input, published versions only, rubric_json stripped.",
     "POST /api/credit/assess":
         "Anonymous self-assessment; no session_id input.",
     "POST /api/assessment/":
@@ -140,6 +143,17 @@ PUBLIC_ENDPOINTS: dict[str, str] = {
         "Advisor auth, separate trust boundary (test_advisor_auth.py).",
     "POST /api/advisor/sessions/{session_id}/note":
         "Advisor auth, separate trust boundary (test_advisor_auth.py).",
+    # ---------- S23 assessment authoring (role-gated, not session-scoped)
+    "GET /api/admin/assessments/pending":
+        "Reviewer role auth (any_of_roles), not session-scoped.",
+    "GET /api/admin/assessments/{version_id}":
+        "Reviewer role auth (any_of_roles), not session-scoped.",
+    "POST /api/admin/assessments/draft":
+        "Reviewer role auth (any_of_roles), not session-scoped.",
+    "POST /api/admin/assessments/{version_id}/review":
+        "Reviewer role auth (any_of_roles), not session-scoped.",
+    "POST /api/admin/assessments/{version_id}/publish":
+        "Admin role auth (require_role), not session-scoped.",
 }
 
 

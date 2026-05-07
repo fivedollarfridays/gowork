@@ -40,8 +40,8 @@
     "last_status": "done"
   },
   "T23.1": {
-    "last_cli_update": "2026-03-07T14:36:45.479726",
-    "last_status": "in_progress"
+    "last_cli_update": "2026-05-07T08:42:59.897737",
+    "last_status": "done"
   },
   "T31.2": {
     "last_cli_update": "2026-03-09T04:29:57.965584",
@@ -109,6 +109,42 @@
   },
   "T22.13": {
     "last_cli_update": "2026-05-06T18:38:38.118772",
+    "last_status": "done"
+  },
+  "T23.9": {
+    "last_cli_update": "2026-05-07T08:50:43.591365",
+    "last_status": "done"
+  },
+  "T23.2": {
+    "last_cli_update": "2026-05-07T09:08:04.296187",
+    "last_status": "done"
+  },
+  "T23.3": {
+    "last_cli_update": "2026-05-07T09:25:10.449392",
+    "last_status": "done"
+  },
+  "T23.4": {
+    "last_cli_update": "2026-05-07T09:24:06.334587",
+    "last_status": "done"
+  },
+  "T23.5": {
+    "last_cli_update": "2026-05-07T09:32:45.488509",
+    "last_status": "done"
+  },
+  "T23.6": {
+    "last_cli_update": "2026-05-07T09:41:54.795000",
+    "last_status": "done"
+  },
+  "T23.7": {
+    "last_cli_update": "2026-05-07T09:50:34.968089",
+    "last_status": "done"
+  },
+  "T23.8": {
+    "last_cli_update": "2026-05-07T10:06:12.683576",
+    "last_status": "done"
+  },
+  "T23.10": {
+    "last_cli_update": "2026-05-07T18:00:58.802909",
     "last_status": "done"
   }
 }
