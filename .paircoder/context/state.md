@@ -17,13 +17,17 @@
 
 ## Current Focus
 
-**Sprint 22 — Identity Foundation** is planned and ready to engage. Plan ID: `plan-2026-05-s22-identity-foundation`. 13 tasks (T22.1–T22.13), 225 Cx total, 12 P0 + 1 P1. Brief at `.paircoder/plans/briefs/brief-sprint-22-identity-foundation.md`; backlog at `plans/backlogs/backlog-sprint-22-identity-foundation.md`. Supersedes in-progress T12.0 (Migration Infrastructure) and T12.1 (Database Schema Migrations) per 2026-05-06 user decision — these will be closed with supersede note in T22.13 (integration gate).
+**Sprint 23 — Assessment Authoring Pipeline** is planned and ready to engage. Plan ID: `plan-2026-05-s23-assessment-authoring`. 10 tasks (T23.1–T23.10), 190 Cx total, 9 P0 + 1 P1. Brief at `.paircoder/plans/briefs/brief-sprint-23-assessment-authoring.md`; backlog at `plans/backlogs/backlog-sprint-23-assessment-authoring.md`.
 
-Scope: Postgres + Alembic migration (T22.1–T22.4), account/session schema + roles (T22.5–T22.6), magic-link auth + anonymous-first invariant (T22.7–T22.9), frontend login + CTAs + integration gate (T22.10–T22.13). Foundation for Sprints 23–30.
+Scope: schema + CRUD for assessments/versions/questions/reviews (T23.1, T23.2); backend pipeline draft → review → publish → public-fetch (T23.3–T23.6, all in NEW route modules — auth.py is at the 301-line cap and must not grow); frontend reviewer dashboard + RoleGate + role-aware nav (T23.7, T23.8); postgres test transaction-per-test isolation rebuild closing the deferred S22 follow-up (T23.9); integration gate (T23.10).
 
-Open questions tracked in the brief: Postgres in CI choice, Alembic naming, magic-link email template, email collision policy. Defaulted; revisit during engage if any bites.
+Cross-task constraint: `auth.py` line count must remain unchanged from S23 entry (301 lines). All admin/assessment routes land in their own modules (`assessments_admin.py`, `assessments_review.py`, `assessments_public.py`).
 
-Out of focus: S13b deferred items (43 Tier-1 browser suites, 6 Tier-6 cross-module integrity, browser-dependent Tier-4) and the four other stale `in_progress` tasks (T1.7, T12.5, T12.16, T12.21, T12.24) — to be triaged separately.
+Cuttable scope: T23.9 only — postgres test isolation. Everything else is the load-bearing pipeline chain.
+
+**Sprint 22 — Identity Foundation** shipped 2026-05-07 via PR #123 (merged). 13 tasks landed across 9 dependency-aware waves; +98 backend tests / +26 frontend tests; baseline failures preserved; 6 review-pass bugs caught and fixed before merge.
+
+Out of focus: S13b deferred items (43 Tier-1 browser suites, 6 Tier-6 cross-module integrity, browser-dependent Tier-4) and the five other stale `in_progress` tasks (T1.7, T12.5, T12.16, T12.21, T12.24) — to be triaged separately.
 
 ## Previous Sprints (summary)
 
