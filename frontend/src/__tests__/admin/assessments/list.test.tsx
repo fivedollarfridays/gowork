@@ -20,20 +20,18 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: pushMock, replace: pushMock }),
 }));
 
-// Mock the API client + the auth hook the local guard reads.
+// Mock the API client. The auth/role gate moved to the layout (T23.8),
+// so this page no longer reads ``useAccount`` directly; tests render the
+// inner page component on the assumption that the layout already let
+// the request through.
 vi.mock("@/lib/api/assessments", () => ({
   listPendingAssessments: vi.fn(),
 }));
-vi.mock("@/lib/api/auth", () => ({
-  useAccount: vi.fn(),
-}));
 
 import { listPendingAssessments } from "@/lib/api/assessments";
-import { useAccount } from "@/lib/api/auth";
 import AssessmentsListPage from "@/app/admin/assessments/page";
 
 const mockedList = listPendingAssessments as ReturnType<typeof vi.fn>;
-const mockedUseAccount = useAccount as unknown as ReturnType<typeof vi.fn>;
 
 function renderPage() {
   const client = new QueryClient({
@@ -71,34 +69,13 @@ const SAMPLE_ROWS = [
   },
 ];
 
-function signedIn() {
-  mockedUseAccount.mockReturnValue({
-    data: { accountId: 1, email: "reviewer@example.com" },
-    isLoading: false,
-  });
-}
-
 describe("AssessmentsListPage (/admin/assessments)", () => {
   beforeEach(() => {
     pushMock.mockReset();
     mockedList.mockReset();
-    mockedUseAccount.mockReset();
-  });
-
-  it("redirects to /auth/login when useAccount returns anonymous", async () => {
-    mockedUseAccount.mockReturnValue({
-      data: { accountId: null, email: null },
-      isLoading: false,
-    });
-    mockedList.mockResolvedValueOnce([]);
-    renderPage();
-    await waitFor(() => {
-      expect(pushMock).toHaveBeenCalledWith("/auth/login");
-    });
   });
 
   it("renders pending rows once the query resolves", async () => {
-    signedIn();
     mockedList.mockResolvedValueOnce(SAMPLE_ROWS);
     renderPage();
     await waitFor(() => {
@@ -108,7 +85,6 @@ describe("AssessmentsListPage (/admin/assessments)", () => {
   });
 
   it("filters rows by track", async () => {
-    signedIn();
     mockedList.mockResolvedValueOnce(SAMPLE_ROWS);
     const user = userEvent.setup();
     renderPage();
@@ -124,7 +100,6 @@ describe("AssessmentsListPage (/admin/assessments)", () => {
   });
 
   it("filters rows by kind", async () => {
-    signedIn();
     mockedList.mockResolvedValueOnce(SAMPLE_ROWS);
     const user = userEvent.setup();
     renderPage();
@@ -137,7 +112,6 @@ describe("AssessmentsListPage (/admin/assessments)", () => {
   });
 
   it("filters rows by status", async () => {
-    signedIn();
     mockedList.mockResolvedValueOnce(SAMPLE_ROWS);
     const user = userEvent.setup();
     renderPage();
@@ -150,7 +124,6 @@ describe("AssessmentsListPage (/admin/assessments)", () => {
   });
 
   it("navigates to detail page when a row is clicked", async () => {
-    signedIn();
     mockedList.mockResolvedValueOnce(SAMPLE_ROWS);
     const user = userEvent.setup();
     renderPage();
@@ -164,7 +137,6 @@ describe("AssessmentsListPage (/admin/assessments)", () => {
   });
 
   it("renders an empty-state when the queue is empty", async () => {
-    signedIn();
     mockedList.mockResolvedValueOnce([]);
     renderPage();
     await waitFor(() => {

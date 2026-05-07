@@ -10,27 +10,29 @@
  *
  * Auth guard
  * ----------
- * Local guard for T23.7: redirects to /auth/login when ``useAccount()``
- * resolves to ``{accountId: null}``. T23.8 will replace this with a
- * ``<RoleGate>`` wrapper that also enforces reviewer roles. Search for
- * ``LOCAL_GUARD_T23_7`` to find the swap-out site.
+ * As of T23.8 the reviewer-role gate lives in
+ * :file:`frontend/src/app/admin/layout.tsx` via ``<RoleGate>``; this
+ * page no longer carries its own ``useAccount``-redirect. The layout
+ * gate already blocks anonymous + unprivileged browsers before this
+ * component renders.
  *
  * Publish button visibility
  * -------------------------
- * For T23.7 we don't yet have role-detection on the client. The button
- * is rendered iff the loaded version's ``status === "approved"``; if a
- * non-admin clicks it the backend returns 403 and we surface the error
- * inline. T23.8 will gate the button on the admin role at render time.
+ * The button is rendered iff the loaded version's
+ * ``status === "approved"`` AND the current account holds the
+ * ``admin`` role (T23.8 — reads from ``useAccountRoles``). If a
+ * non-admin somehow reaches this surface the backend still returns
+ * 403 and we surface the error inline.
  */
 
-import { useEffect, useMemo, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
+import { useParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useAccount } from "@/lib/api/auth";
+import { useAccountRoles } from "@/lib/api/auth";
 import {
   AssessmentsApiError,
   type AssessmentVersion,
@@ -44,27 +46,15 @@ const TEXTAREA_CLASS =
   "w-full min-h-[88px] rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring";
 
 export default function AssessmentDetailPage() {
-  const router = useRouter();
   const params = useParams<{ versionId: string }>();
   const versionId = Number(params?.versionId);
-  const account = useAccount();
+  const roles = useAccountRoles();
   const queryClient = useQueryClient();
-
-  // LOCAL_GUARD_T23_7 — T23.8 will replace with <RoleGate> wrapper.
-  useEffect(() => {
-    if (account.isLoading) return;
-    if (!account.data || account.data.accountId == null) {
-      router.push("/auth/login");
-    }
-  }, [account.isLoading, account.data, router]);
 
   const versionQuery = useQuery<AssessmentVersion>({
     queryKey: ["admin", "assessments", versionId],
     queryFn: () => getAssessmentVersion(versionId),
-    enabled:
-      Number.isFinite(versionId) &&
-      !!account.data &&
-      account.data.accountId != null,
+    enabled: Number.isFinite(versionId),
     retry: false,
     staleTime: 30_000,
   });
@@ -116,7 +106,11 @@ export default function AssessmentDetailPage() {
   if (!versionQuery.data) return null;
 
   const version = versionQuery.data;
-  const showPublish = version.status === "approved";
+  // Publish is admin-only on the backend (S22 ``require_role("admin")``).
+  // Hide the button when the current account doesn't hold ``admin`` to
+  // avoid showing a button that will 403 on click.
+  const showPublish =
+    version.status === "approved" && roles.includes("admin");
   const busy = reviewMutation.isPending || publishMutation.isPending;
 
   return (

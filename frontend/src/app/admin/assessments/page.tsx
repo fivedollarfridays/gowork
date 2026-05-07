@@ -9,21 +9,21 @@
  *
  * Auth guard
  * ----------
- * Local guard for T23.7: redirects to /auth/login when ``useAccount()``
- * resolves to ``{accountId: null}``. T23.8 will replace this with a
- * ``<RoleGate>`` wrapper that also enforces reviewer roles
- * (``case_manager`` / ``sme_reviewer`` / ``dao_reviewer``). Search for
- * ``LOCAL_GUARD_T23_7`` to find the swap-out site.
+ * As of T23.8 the reviewer-role gate lives in
+ * :file:`frontend/src/app/admin/layout.tsx` via ``<RoleGate>``; this
+ * page no longer carries its own ``useAccount``-redirect. The layout
+ * gate already blocks anonymous + unprivileged browsers before this
+ * component renders, so the query below can assume an authenticated
+ * reviewer caller.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useAccount } from "@/lib/api/auth";
 import {
   listPendingAssessments,
   type PendingAssessment,
@@ -55,20 +55,10 @@ function _filterRows(
 
 export default function AssessmentsListPage() {
   const router = useRouter();
-  const account = useAccount();
-
-  // LOCAL_GUARD_T23_7 — T23.8 will replace with <RoleGate> wrapper.
-  useEffect(() => {
-    if (account.isLoading) return;
-    if (!account.data || account.data.accountId == null) {
-      router.push("/auth/login");
-    }
-  }, [account.isLoading, account.data, router]);
 
   const query = useQuery<PendingAssessment[]>({
     queryKey: ["admin", "assessments", "pending"],
     queryFn: listPendingAssessments,
-    enabled: !!account.data && account.data.accountId != null,
     staleTime: 30_000,
   });
 

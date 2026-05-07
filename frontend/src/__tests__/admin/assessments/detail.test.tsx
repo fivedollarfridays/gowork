@@ -26,8 +26,11 @@ vi.mock("@/lib/api/assessments", () => ({
   reviewAssessment: vi.fn(),
   publishAssessment: vi.fn(),
 }));
+// The auth/role gate moved to the layout (T23.8). The detail page now
+// reads only ``useAccountRoles`` to decide whether to surface the admin-
+// only Publish button — anonymous handling is the layout's job.
 vi.mock("@/lib/api/auth", () => ({
-  useAccount: vi.fn(),
+  useAccountRoles: vi.fn(),
 }));
 
 import {
@@ -35,13 +38,14 @@ import {
   reviewAssessment,
   publishAssessment,
 } from "@/lib/api/assessments";
-import { useAccount } from "@/lib/api/auth";
+import { useAccountRoles } from "@/lib/api/auth";
 import AssessmentDetailPage from "@/app/admin/assessments/[versionId]/page";
 
 const mockedGet = getAssessmentVersion as ReturnType<typeof vi.fn>;
 const mockedReview = reviewAssessment as ReturnType<typeof vi.fn>;
 const mockedPublish = publishAssessment as ReturnType<typeof vi.fn>;
-const mockedUseAccount = useAccount as unknown as ReturnType<typeof vi.fn>;
+const mockedUseAccountRoles =
+  useAccountRoles as unknown as ReturnType<typeof vi.fn>;
 
 function renderPage() {
   const client = new QueryClient({
@@ -71,11 +75,14 @@ const SAMPLE_VERSION = {
   ],
 };
 
-function signedIn() {
-  mockedUseAccount.mockReturnValue({
-    data: { accountId: 1, email: "reviewer@example.com" },
-    isLoading: false,
-  });
+/** Default reviewer signin — non-admin so publish button is hidden. */
+function signedInReviewer() {
+  mockedUseAccountRoles.mockReturnValue(["sme_reviewer"]);
+}
+
+/** Admin signin — publish button visible when status === "approved". */
+function signedInAdmin() {
+  mockedUseAccountRoles.mockReturnValue(["admin"]);
 }
 
 describe("AssessmentDetailPage (/admin/assessments/[versionId])", () => {
@@ -84,23 +91,12 @@ describe("AssessmentDetailPage (/admin/assessments/[versionId])", () => {
     mockedGet.mockReset();
     mockedReview.mockReset();
     mockedPublish.mockReset();
-    mockedUseAccount.mockReset();
-  });
-
-  it("redirects to /auth/login when useAccount returns anonymous", async () => {
-    mockedUseAccount.mockReturnValue({
-      data: { accountId: null, email: null },
-      isLoading: false,
-    });
-    mockedGet.mockResolvedValueOnce(SAMPLE_VERSION);
-    renderPage();
-    await waitFor(() => {
-      expect(pushMock).toHaveBeenCalledWith("/auth/login");
-    });
+    mockedUseAccountRoles.mockReset();
+    // Default to a non-admin reviewer; tests that need admin override.
+    signedInReviewer();
   });
 
   it("renders questions ordered by position", async () => {
-    signedIn();
     mockedGet.mockResolvedValueOnce(SAMPLE_VERSION);
     renderPage();
     await waitFor(() => {
@@ -113,7 +109,7 @@ describe("AssessmentDetailPage (/admin/assessments/[versionId])", () => {
   });
 
   it("submits an approve review with the comment textarea contents", async () => {
-    signedIn();
+    signedInReviewer();
     mockedGet.mockResolvedValueOnce(SAMPLE_VERSION);
     mockedReview.mockResolvedValueOnce({ review_id: 42 });
     const user = userEvent.setup();
@@ -132,7 +128,7 @@ describe("AssessmentDetailPage (/admin/assessments/[versionId])", () => {
   });
 
   it("submits a reject review", async () => {
-    signedIn();
+    signedInReviewer();
     mockedGet.mockResolvedValueOnce(SAMPLE_VERSION);
     mockedReview.mockResolvedValueOnce({ review_id: 43 });
     const user = userEvent.setup();
@@ -147,7 +143,7 @@ describe("AssessmentDetailPage (/admin/assessments/[versionId])", () => {
   });
 
   it("submits a request_revision review", async () => {
-    signedIn();
+    signedInReviewer();
     mockedGet.mockResolvedValueOnce(SAMPLE_VERSION);
     mockedReview.mockResolvedValueOnce({ review_id: 44 });
     const user = userEvent.setup();
@@ -164,7 +160,7 @@ describe("AssessmentDetailPage (/admin/assessments/[versionId])", () => {
   });
 
   it("does not show publish button when status is in_review", async () => {
-    signedIn();
+    signedInReviewer();
     mockedGet.mockResolvedValueOnce(SAMPLE_VERSION);
     renderPage();
     await waitFor(() => {
@@ -175,8 +171,8 @@ describe("AssessmentDetailPage (/admin/assessments/[versionId])", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("shows publish button when status is approved and calls publishAssessment", async () => {
-    signedIn();
+  it("shows publish button when status is approved AND admin role held; calls publishAssessment", async () => {
+    signedInAdmin();
     mockedGet.mockResolvedValueOnce({ ...SAMPLE_VERSION, status: "approved" });
     mockedPublish.mockResolvedValueOnce({
       assessment_id: 1,
@@ -199,8 +195,22 @@ describe("AssessmentDetailPage (/admin/assessments/[versionId])", () => {
     });
   });
 
+  it("hides publish button when status is approved but caller is non-admin", async () => {
+    // Reviewer (sme_reviewer) on an approved version — backend would 403
+    // a publish attempt, so the button should not render at all (T23.8).
+    signedInReviewer();
+    mockedGet.mockResolvedValueOnce({ ...SAMPLE_VERSION, status: "approved" });
+    renderPage();
+    await waitFor(() => {
+      expect(screen.getByText(/First prompt\?/)).toBeInTheDocument();
+    });
+    expect(
+      screen.queryByRole("button", { name: /^publish/i }),
+    ).not.toBeInTheDocument();
+  });
+
   it("renders error state when fetch fails", async () => {
-    signedIn();
+    signedInReviewer();
     mockedGet.mockRejectedValueOnce(new Error("nope"));
     renderPage();
     await waitFor(() => {
