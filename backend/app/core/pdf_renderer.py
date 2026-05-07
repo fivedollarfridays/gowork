@@ -83,7 +83,33 @@ def render_markdown_to_pdf(
     resolved_dir = _resolve_templates_dir(templates_dir)
     env = _build_jinja_env(resolved_dir)
     html_document = _render_html(env, template_name, markdown_content)
-    return _html_to_pdf(html_document)
+    try:
+        return _html_to_pdf(html_document)
+    except PdfRenderError as exc:
+        # WeasyPrint requires the GTK3 native stack (``libgobject``,
+        # ``libpango``, ``libcairo``) which isn't always present on
+        # Windows-dev or slim CI images. Fall back to the pure-Python
+        # fpdf2 renderer so the endpoint stays functional everywhere;
+        # production Linux still gets the prettier WeasyPrint output.
+        if not _is_native_stack_failure(exc):
+            raise
+        try:
+            from app.core.pdf_fallback import render_markdown_to_pdf_fallback
+
+            return render_markdown_to_pdf_fallback(markdown_content)
+        except Exception as fallback_exc:  # noqa: BLE001
+            raise PdfRenderError(
+                f"PDF rendering failed; fallback also failed: {fallback_exc}"
+            ) from fallback_exc
+
+
+def _is_native_stack_failure(exc: PdfRenderError) -> bool:
+    """Heuristic: true when the WeasyPrint OSError signals missing native deps."""
+    message = str(exc).lower()
+    return any(token in message for token in (
+        "libgobject", "libpango", "libcairo", "libfontconfig",
+        "cannot load library", "dlopen",
+    ))
 
 
 # ---------------------------------------------------------------------------
@@ -162,11 +188,15 @@ def _render_html(
 
 def _html_to_pdf(html_document: str) -> bytes:
     """Render an HTML string to PDF with the deny-all URL fetcher."""
-    # Imported lazily so module import does not fail when the native
-    # WeasyPrint dependencies are unavailable (e.g. static analysis).
-    from weasyprint import HTML
-
     try:
+        # Imported lazily so module import does not fail when the
+        # native WeasyPrint dependencies (libgobject/libpango/libcairo)
+        # are unavailable. The import itself raises ``OSError`` on
+        # Windows-dev when GTK3 isn't installed, so it has to live
+        # inside the try block — otherwise the fallback in
+        # ``render_markdown_to_pdf`` never sees a ``PdfRenderError``.
+        from weasyprint import HTML
+
         pdf_bytes = HTML(
             string=html_document,
             url_fetcher=_deny_all_url_fetcher,

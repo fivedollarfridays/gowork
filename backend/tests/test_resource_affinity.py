@@ -178,6 +178,31 @@ class TestAffinityRouting:
         steps = _build_next_steps(cards)
         assert steps[0] == CAREER_CENTER_STEP
 
+    def test_next_steps_no_doubled_support_word(self):
+        """Regression: barrier titles already end in "Support" (e.g.
+        "Childcare Support", "Record & Legal Support"). The next-steps
+        template must not append "support" again."""
+        profile = _make_profile(
+            primary_barriers=[
+                BarrierType.CHILDCARE,
+                BarrierType.CRIMINAL_RECORD,
+                BarrierType.TRANSPORTATION,
+            ],
+        )
+        resources = [
+            _make_resource(id=1, name="DHR Childcare", category="social_service",
+                           phone="555-1111"),
+            _make_resource(id=2, name="Reentry Legal Aid", category="social_service",
+                           phone="555-2222"),
+            _make_resource(id=3, name="MATS Transit", category="transit",
+                           phone="555-3333"),
+        ]
+        cards = _build_cards(profile, resources)
+        steps = _build_next_steps(cards)
+        for s in steps:
+            assert "support support" not in s.lower(), f"Doubled word in: {s!r}"
+            assert "Support support" not in s, f"Doubled word in: {s!r}"
+
     def test_maria_persona_affinity(self):
         """Maria: credit + transportation + childcare — each resource on correct card."""
         profile = _make_profile(

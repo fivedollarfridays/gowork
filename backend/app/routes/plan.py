@@ -1,10 +1,11 @@
-"""GET/POST /api/plan — session plan lookup, AI narrative, and plan refresh."""
+"""GET/POST /api/plan — session plan lookup, AI narrative, plan refresh, and PDF download."""
 
 import json
 import logging
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
+from fastapi.responses import Response
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,11 +13,13 @@ from app.ai.client import build_fallback_narrative, generate_narrative
 from app.core.audit import audit_log, get_client_ip
 from app.core.auth import require_session_token
 from app.core.database import get_db
+from app.core.pdf_renderer import PdfRenderError, render_markdown_to_pdf
 from app.core.progress_queries import get_action_checklist, store_previous_plan, update_action_checklist
 from app.core.queries import get_session_by_id, update_session_plan
 from app.core.rate_limit import RateLimiter, require_rate_limit
 from app.modules.matching.engine import generate_plan
 from app.modules.matching.types import UserProfile
+from app.modules.plan.plan_pdf_composer import compose_plan_markdown
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +100,16 @@ async def generate_plan_narrative(
             plan_data=plan_data,
             action_plan=action_plan,
         )
-    except (ConnectionError, TimeoutError, OSError, RuntimeError, ValueError):
+    except Exception as exc:  # noqa: BLE001 — broad by design; see comment.
+        # We MUST fall back on every LLM-call failure, not just the few
+        # exception classes the SDK happened to raise yesterday.  The
+        # narrow tuple ``(ConnectionError, TimeoutError, OSError,
+        # RuntimeError, ValueError)`` missed ``httpx.HTTPStatusError``
+        # (Anthropic 429 rate-limit) and broke 3/5 demo personas with
+        # 500s.  ``TypeError``/``KeyError`` from in-process programming
+        # bugs are still re-raised below so we don't silently mask them.
+        if isinstance(exc, (TypeError, KeyError, AttributeError, NameError)):
+            raise
         logger.warning("Claude API unavailable, using fallback", exc_info=True)
         narrative = build_fallback_narrative(
             barriers=barriers,
@@ -110,6 +122,40 @@ async def generate_plan_narrative(
 
     audit_log("plan_generated", session_id=session_id, client_ip=get_client_ip(request))
     return narrative.model_dump()
+
+
+@router.get("/{session_id}/pdf")
+async def download_plan_pdf(
+    session_id: SessionId,
+    request: Request,
+    token: str = Query(...),
+    db: AsyncSession = Depends(get_db),
+) -> Response:
+    """Render the session plan as a downloadable PDF."""
+    row = await _fetch_session(db, session_id, token)
+    if not row["plan"]:
+        raise HTTPException(
+            status_code=400,
+            detail="No plan exists for this session. Run assessment first.",
+        )
+    plan_data = _safe_json(row["plan"], {})
+    profile_data = _safe_json(row.get("profile"), {})
+    markdown = compose_plan_markdown(plan_data, profile_data)
+    try:
+        pdf_bytes = render_markdown_to_pdf(markdown)
+    except PdfRenderError:
+        logger.exception("plan_pdf_render_failed", extra={"session_id": session_id})
+        raise HTTPException(status_code=500, detail="PDF rendering failed") from None
+
+    audit_log("plan_pdf_downloaded", session_id=session_id, client_ip=get_client_ip(request))
+    short = session_id.split("-")[0]
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="gowork-plan-{short}.pdf"',
+        },
+    )
 
 
 class ToggleActionRequest(BaseModel):

@@ -59,3 +59,22 @@ deploy.sh
 backend/.tmp/
 backend/even-terminal-*.log
 *.log
+
+# Smoke / scratch artifacts produced by local Carlos E2E runs and
+# WinReceipt visual capture (Playwright PNGs, intake / plan / narrative
+# JSON, generated PDFs, smoke scripts).  Never check these in.
+_carlos_*.json
+_carlos_plan.pdf
+_intake_*.json
+_narrative_*.json
+_plan_*.json
+_anim_*.png
+_winreceipt*.png
+_winreceipt*.mjs
+_smoke.pdf
+_CLIENT_DELIVERABLE.txt
+gowork-plan-*.pdf
+backend/_smoke.pdf
+frontend/_anim_*.png
+frontend/_winreceipt*.png
+frontend/_winreceipt*.mjs

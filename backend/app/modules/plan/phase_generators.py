@@ -97,6 +97,55 @@ def generate_wioa_actions(wioa: WIOAEligibility | None) -> list[ActionItem]:
     return actions
 
 
+_FOLLOWUP_BARRIERS_SKIP = frozenset({"credit", "criminal_record"})
+
+_FOLLOWUP_CATEGORY_BY_BARRIER: dict[str, ActionCategory] = {
+    "transportation": ActionCategory.CAREER_CENTER,
+    "childcare": ActionCategory.CHILDCARE,
+    "training": ActionCategory.TRAINING,
+    "health": ActionCategory.CAREER_CENTER,
+    "housing": ActionCategory.HOUSING,
+}
+
+
+def generate_barrier_followups(barriers: list) -> list[tuple[str, ActionItem]]:
+    """Month 1 follow-up actions for non-credit/non-criminal barriers.
+
+    The credit + criminal generators already produce timeline actions; the
+    other barrier types (transportation, childcare, training, health,
+    housing) only surface as resource cards, leaving the timeline thin
+    after Week 1-2.  For each remaining primary barrier with a resource
+    on the card, emit one Month-1 follow-up so the user has a concrete
+    check-in scheduled instead of an empty stretch.
+    """
+    out: list[tuple[str, ActionItem]] = []
+    for card in barriers or []:
+        barrier_value = getattr(card.type, "value", str(card.type))
+        if barrier_value in _FOLLOWUP_BARRIERS_SKIP:
+            continue
+        resources = getattr(card, "resources", None) or []
+        if not resources:
+            continue
+        category = _FOLLOWUP_CATEGORY_BY_BARRIER.get(
+            barrier_value, ActionCategory.CAREER_CENTER,
+        )
+        top = resources[0]
+        subject = card.title.lower().rstrip()
+        if subject.endswith(" support"):
+            subject = subject[: -len(" support")]
+        out.append(("month_1", ActionItem(
+            category=category,
+            title=f"Follow up with {top.name}",
+            detail=f"Confirm enrollment / next step for {subject}",
+            priority=len(out),
+            source_module="barrier_followup",
+            resource_name=top.name,
+            resource_phone=getattr(top, "phone", None),
+            resource_address=getattr(top, "address", None),
+        )))
+    return out
+
+
 def generate_cliff_actions(cliff: CliffAnalysis | None) -> list[ActionItem]:
     """Benefits cliff transition plan for Month 6-12."""
     if not cliff or not cliff.cliff_points:
