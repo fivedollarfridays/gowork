@@ -17,15 +17,15 @@
 
 ## Current Focus
 
-**Sprint 23 — Assessment Authoring Pipeline** is planned and ready to engage. Plan ID: `plan-2026-05-s23-assessment-authoring`. 10 tasks (T23.1–T23.10), 190 Cx total, 9 P0 + 1 P1. Brief at `.paircoder/plans/briefs/brief-sprint-23-assessment-authoring.md`; backlog at `plans/backlogs/backlog-sprint-23-assessment-authoring.md`.
+**Sprint 23 — Assessment Authoring Pipeline** complete. 10/10 tasks done across 8 waves. PR ready to push for merge.
 
-Scope: schema + CRUD for assessments/versions/questions/reviews (T23.1, T23.2); backend pipeline draft → review → publish → public-fetch (T23.3–T23.6, all in NEW route modules — auth.py is at the 301-line cap and must not grow); frontend reviewer dashboard + RoleGate + role-aware nav (T23.7, T23.8); postgres test transaction-per-test isolation rebuild closing the deferred S22 follow-up (T23.9); integration gate (T23.10).
+- Backend: 4475 → 4558 passed (+83 net new); 4 baseline failures preserved
+- Frontend: 3527 → 3580 passed (+53 net new); 0 regressions
+- auth.py: 301 → 314 (T23.8 /me roles extension; well under 400 invariant)
+- E2E smoke (test_assessments_e2e) drives draft → review-approve → publish → public-fetch through real HTTP layer; mocks Claude at the get_llm_stream boundary; asserts charter provenance invariant on the published row
+- T23.9 closes the deferred S22 postgres-test-isolation follow-up — identity-layer tests now run on both axes via session-scoped engine + per-test transaction-rollback
 
-Cross-task constraint: `auth.py` line count must remain unchanged from S23 entry (301 lines). All admin/assessment routes land in their own modules (`assessments_admin.py`, `assessments_review.py`, `assessments_public.py`).
-
-Cuttable scope: T23.9 only — postgres test isolation. Everything else is the load-bearing pipeline chain.
-
-**Sprint 22 — Identity Foundation** shipped 2026-05-07 via PR #123 (merged). 13 tasks landed across 9 dependency-aware waves; +98 backend tests / +26 frontend tests; baseline failures preserved; 6 review-pass bugs caught and fixed before merge.
+Sprint 22 — Identity Foundation shipped 2026-05-07 via PR #123 (merged).
 
 Out of focus: S13b deferred items (43 Tier-1 browser suites, 6 Tier-6 cross-module integrity, browser-dependent Tier-4) and the five other stale `in_progress` tasks (T1.7, T12.5, T12.16, T12.21, T12.24) — to be triaged separately.
 
@@ -49,6 +49,22 @@ Out of focus: S13b deferred items (43 Tier-1 browser suites, 6 Tier-6 cross-modu
 Older sprint task tables and session histories (Sprints 7 — 31) are in `.paircoder/archive/state-pre-s1.md`. S12a per-session entries plus S2 — S11 detail are in `.paircoder/archive/state-s12a.md`. S13 wave-by-wave detail + per-task driver sessions are in `.paircoder/archive/state-s13.md`.
 
 ## What Was Just Done
+
+### 2026-05-07 — Sprint 23 (Assessment Authoring Pipeline) — COMPLETE
+
+All 10 tasks landed (T23.1–T23.10). Sprint went /ideation → /draft-backlog → /pc-plan → /prepare-to-engage → /running-sprint-tasks across 8 dependency-aware waves. Path A (autonomous through Wave 6, integration gate at the end with user authorization).
+
+- **Test counts:** Backend 4475 → 4558 (+83 net new) / 4 baseline failed / 2 skipped. Frontend 3527 → 3580 (+53 net new) / 3 skipped / 0 failed.
+- **Schema substrate:** assessments + assessment_versions + assessment_questions + assessment_reviews (alembic 0013) via SQLAlchemy Core sharing accounts_schema.metadata. ENUM constraints via portable CHECK clauses sourced from module-level tuples (ASSESSMENT_KINDS, ASSESSMENT_TRACKS, ASSESSMENT_VERSION_STATUSES, QUESTION_KINDS, REVIEW_ACTIONS).
+- **CRUD:** queries_assessments.py (8 functions) + _assessments_state.py (state machine helpers + role→track mapping). `request_revision` resolved as an action (not a status) — record_review(action=request_revision) sets status back to draft.
+- **Backend pipeline:** Claude-draft endpoint (T23.3) + reviewer queue API (T23.4) + publish endpoint with provenance lock (T23.5) + public fetch with rubric exclusion + Cache-Control (T23.6). `any_of_roles` helper lifted to auth_roles.py for cross-task reuse. Circular-import in auth_roles fixed via lazy import.
+- **Frontend dashboard:** /admin/assessments list + detail pages with filter dropdowns, comment textarea, action buttons (approve cyan / reject rose / request_revision amber), admin-only publish button. Typed assessments.ts API client mirrors auth.ts.
+- **RoleGate + role-aware nav:** /api/auth/me extended with roles list (auth.py 301 → 314). useAccountRoles hook. RoleGate three states (loading/denied/allowed). RoleAwareNav per-role link visibility. /admin/layout.tsx wraps every admin page.
+- **Postgres test isolation (T23.9):** session-scoped engine + per-test transaction-rollback via `_PgFixtureConnection` class swap (slot-compatible AsyncConnection subclass — async_sessionmaker dispatches on isinstance, so the swap routes session.commit() into the outer transaction). Identity tests added back to postgres CI scope. Closed the S22 deferred follow-up.
+- **E2E smoke:** test_assessments_e2e drives draft → approve → publish → public-fetch through HTTPX AsyncClient over ASGITransport. Charter provenance invariant verified at the SQL layer (drafted_by + reviewed_by + approved_by + published_at all non-null on the published row).
+- **Sprint invariant held:** auth.py 301 → 314 (well under 400). All admin/assessment routes in their own modules. Anonymous-first invariant verified for the public route.
+
+Sidebar: /admin/qc is now wrapped by the admin RoleGate; hackathon-grader access (which used the dev/test bypass in access.ts) will require an admin role in browser. Out of S23 scope; flagged for follow-up if QC dashboard demo access matters.
 
 - **T23.8 done** (auto-updated by hook)
 
