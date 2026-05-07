@@ -2,10 +2,26 @@
 name: reviewing-code
 description: Use when reviewing code changes, checking PRs, or evaluating code quality.
 skills: [reviewing-code]
-agent-roles: [reviewer]
+agent-roles: [nayru, laverna, vaivora]
+context: fork
 ---
 
 # Code Review
+
+## Review Pipeline
+
+The review pipeline dispatches three specialized agents:
+- **Nayru** (reviewer): code quality, correctness, best practices
+- **Laverna** (security-auditor): security vulnerabilities, SOC2 compliance
+- **Vaivora** (vaivora): cross-module contracts, dependency impact (large diffs only, >500 lines or >10 files)
+
+Use the review command to get the proper 3-agent pipeline:
+```bash
+bpsai-pair review pr <number>
+bpsai-pair review branch
+```
+
+**IMPORTANT:** Do NOT dispatch generic agents for review. The review command handles agent dispatch with proper mythology names, severity-aware output, and size-scaled Vaivora dispatch. If you are already inside a review command invocation, do not duplicate the dispatch -- the command handles it.
 
 ## Quick Commands
 

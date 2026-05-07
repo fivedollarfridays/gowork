@@ -149,8 +149,11 @@ Skills in `.claude/skills/` are auto-discovered by Claude Code:
 | `finishing-branches` | Branch completion |
 | `managing-task-lifecycle` | Task workflow with Trello |
 | `planning-with-trello` | Planning with Trello integration |
+| `planning-with-pm` | Planning with provider-agnostic PM |
 | `creating-skills` | Skill creation guide |
-| `releasing-versions` | Version release workflow |
+| `architecting-modules` | Module decomposition and file size management |
+| `auditing-sibling-projects` | Cross-repo contract detection and impact analysis |
+| `running-qc` | Browser-based QC testing with Divona |
 
 ## Skill Triggers
 
@@ -162,7 +165,11 @@ When you see these patterns, use the corresponding skill:
 | "fix", "bug", "broken", "error" | `implementing-with-tdd` |
 | "review", "check", "look at" | `reviewing-code` |
 | "done", "finished", "ready to merge" | `finishing-branches` |
-| "start task", "work on TRELLO-" | `managing-task-lifecycle` |
+
+> **Note:** `managing-task-lifecycle`, `planning-with-trello`, `running-qc`,
+> and `auditing-sibling-projects` are slash-only after T44.11b (DMI). Invoke
+> them via `/start-task`, `/pc-plan`, `/run-qc`, and `/pc-audit-sibling`
+> respectively — natural-language triggers will not auto-invoke.
 
 ## After Completing Work
 
@@ -188,7 +195,11 @@ Quick commands available via `/command` in Claude Code:
 |---------|---------|
 | `/pc-plan` | Enter Navigator role, create plan with budget validation |
 | `/start-task <ID>` | Enter Driver role, work on task with verification gates |
-| `/prep-release <ver>` | Enter Release Engineer role, prepare release |
+| `/draft-backlog` | Generate an engage-compatible backlog from description |
+| `/make-it-so` | Intent to shipped PR in one command |
+| `/run-qc` | Dispatch QC test suite |
+| `/pc-audit-sibling` | Run cross-repo contract audit |
+| `/update-skills` | Refresh skills from latest template |
 
 **Usage**: Type `/pc-plan backlog-sprint-28.md` in the chat to run the planning workflow.
 
@@ -233,51 +244,3 @@ bpsai-pair pack
 ```
 
 ---
-
-## Contained Autonomy Mode
-
-You may be running in **Contained Autonomy Mode**. This mode restricts your ability to modify certain files while allowing full autonomous operation in the working area.
-
-### Understanding Your Access Restrictions
-
-In containment mode, files are organized into three tiers:
-
-| Tier | Access | You Can |
-|------|--------|---------|
-| **Blocked** | No read/write | Not access at all |
-| **Read-only** | Read only | Read to understand context |
-| **Read-write** | Full access | Modify freely |
-
-### Protected Paths (Read-only)
-
-You **cannot modify** these paths in containment mode:
-- `.claude/agents/`, `.claude/commands/`, `.claude/skills/`
-- `CLAUDE.md`, `AGENTS.md`
-
-### Blocked Paths (No Access)
-
-You **cannot read or write** these in containment mode:
-- `.env`, `.env.local`, `.env.production`
-- `credentials.json`, `secrets.yaml`
-
-### What You CAN Do
-
-In containment mode, you have full access to:
-- Source code in `src/`, `lib/`, etc.
-- Tests in `tests/`
-- Documentation (except protected files)
-- Task files in `.paircoder/tasks/`
-- State file `.paircoder/context/state.md`
-
-### If You Encounter Restrictions
-
-1. **For legitimate needs**: Ask the user to exit containment mode
-2. **For protected file changes**: The user can make changes manually
-3. **Don't attempt workarounds**: Violations are logged for audit
-
-### Checking Your Mode
-
-If unsure whether you're in containment mode, the user can run:
-```bash
-bpsai-pair containment status
-```

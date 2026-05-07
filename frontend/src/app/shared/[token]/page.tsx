@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { SharedPlanView, type SharedPlanData } from "../SharedPlanView";
 import { TranslationProvider } from "@/hooks/useTranslation";
+import { SaveProgressCTA } from "@/components/auth/SaveProgressCTA";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -62,6 +63,13 @@ export default function SharedPlanPage() {
   return (
     <main>
       <TranslationProvider>
+        {/* T22.11 — pre-share account-claim prompt in the page header.
+            A viewer of a shared plan is unlikely to be logged in; this
+            invites them to start their own anonymous run AND to claim it
+            with a single email. Hidden for already-claimed browsers. */}
+        <div className="max-w-2xl mx-auto px-4 pt-6">
+          <SaveProgressCTA dismissKey="shared" />
+        </div>
         <SharedPlanView plan={error ? null : plan} />
       </TranslationProvider>
     </main>

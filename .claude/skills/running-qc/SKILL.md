@@ -2,7 +2,8 @@
 name: running-qc
 description: Run interactive browser-based QC tests via Chrome extension. Discovers suites, resolves environments, spawns QC agent, collects results.
 skills: [running-qc]
-agent-roles: [qc]
+agent-roles: [divona]
+disable-model-invocation: true
 ---
 
 # Running QC Tests
@@ -23,7 +24,7 @@ agent-roles: [qc]
 
 ## Element Discovery
 
-The QC agent uses the **Element Discovery Protocol** defined in `.claude/agents/qc.md`.
+The QC agent uses the **Element Discovery Protocol** defined in `.claude/agents/divona.md`.
 Key points:
 - Prefer `find` tool over screenshot-based coordinate estimation
 - Use `form_input` for filling form fields

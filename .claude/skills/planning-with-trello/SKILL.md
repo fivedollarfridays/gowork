@@ -3,6 +3,7 @@ name: planning-with-trello
 description: Manages feature planning workflow including budget validation, task creation, and Trello synchronization.
 skills: [planning-with-trello]
 agent-roles: [navigator]
+disable-model-invocation: true
 ---
 
 # Planning with Trello

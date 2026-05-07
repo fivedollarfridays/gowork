@@ -3,6 +3,7 @@ name: managing-task-lifecycle
 description: Manages task lifecycle transitions including starting, completing, and blocking tasks with enforcement gates and Trello synchronization.
 skills: [managing-task-lifecycle]
 agent-roles: [driver]
+disable-model-invocation: true
 ---
 
 # Task Lifecycle Management

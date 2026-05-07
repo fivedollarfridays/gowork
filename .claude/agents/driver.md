@@ -3,6 +3,7 @@ name: driver
 description: Implementation specialist. Use for writing code, running tests, and executing task plans. Operates in full read-write mode within working directories. Follows TDD and architecture constraints.
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: opus
+memory: project
 permissionMode: default
 skills:
   - implementing-with-tdd

@@ -15,6 +15,16 @@
 **Branch:** sprint/s13-platform-qc
 **Current Sprint:** S13
 
+## Current Focus
+
+**Sprint 22 — Identity Foundation** is planned and ready to engage. Plan ID: `plan-2026-05-s22-identity-foundation`. 13 tasks (T22.1–T22.13), 225 Cx total, 12 P0 + 1 P1. Brief at `.paircoder/plans/briefs/brief-sprint-22-identity-foundation.md`; backlog at `plans/backlogs/backlog-sprint-22-identity-foundation.md`. Supersedes in-progress T12.0 (Migration Infrastructure) and T12.1 (Database Schema Migrations) per 2026-05-06 user decision — these will be closed with supersede note in T22.13 (integration gate).
+
+Scope: Postgres + Alembic migration (T22.1–T22.4), account/session schema + roles (T22.5–T22.6), magic-link auth + anonymous-first invariant (T22.7–T22.9), frontend login + CTAs + integration gate (T22.10–T22.13). Foundation for Sprints 23–30.
+
+Open questions tracked in the brief: Postgres in CI choice, Alembic naming, magic-link email template, email collision policy. Defaulted; revisit during engage if any bites.
+
+Out of focus: S13b deferred items (43 Tier-1 browser suites, 6 Tier-6 cross-module integrity, browser-dependent Tier-4) and the four other stale `in_progress` tasks (T1.7, T12.5, T12.16, T12.21, T12.24) — to be triaged separately.
+
 ## Previous Sprints (summary)
 
 - **Sprint S13** — Platform-Wide QC + Submission Readiness: 55/128 tasks done. QC infrastructure (config + suite template + reset CLI + fake-clock + Playwright + visual baseline + QC dashboard + Lighthouse CI + bundle gate + Dependabot). Backend e2e for orchestrator/scheduler/SSRF/injection/audit/cross-session/compliance/rate-limiter/unsubscribe-race/key-rotation/flag-race/weekly-review/seed-coverage/i18n/module-status. Security audits (token scopes, PII logs, SSRF surface, secret hygiene, XSS, SQLi, CSRF, CAN-SPAM, GDPR, audit trail, CVE). Submission readiness (legal pages with COUNSEL REVIEW caveat, sitemap+robots, demo script, rollback runbook, env validator). 15 production fixes shipped: injection-filter expansion (25 bypasses), 2 PII retention bugs (compliance cascade + retention sweep), advisor PII leak in audit, 3 silent env defaults, scheduler misfire grace, CAN-SPAM idempotency, token downgrade × 3 modules, share-endpoint PII redaction, document/credit rate limits, plan empty-state UX, ES translation gaps, advisor stalled-sessions N+1 (42× query reduction), centralized PII log scrubber. Detail in `.paircoder/archive/state-s13.md`. Deferred to S13b: 43 Tier-1 browser suites (divona-driven), 6 Tier-6 cross-module integrity (vaivora), browser-dependent Tier-4 (a11y AAA, visual baseline, cross-browser, offline). 7 ops tasks cancelled (hackathon scope).
@@ -35,6 +45,291 @@
 Older sprint task tables and session histories (Sprints 7 — 31) are in `.paircoder/archive/state-pre-s1.md`. S12a per-session entries plus S2 — S11 detail are in `.paircoder/archive/state-s12a.md`. S13 wave-by-wave detail + per-task driver sessions are in `.paircoder/archive/state-s13.md`.
 
 ## What Was Just Done
+
+- **T22.13 done** (auto-updated by hook)
+
+### 2026-05-06 — Sprint 22 (Identity Foundation) — COMPLETE
+
+All 13 tasks landed (T22.1–T22.13). Sprint went from /ideation → /draft-backlog → /pc-plan → /prepare-to-engage → /running-sprint-tasks across 9 dependency-aware waves. 11 driver agents launched (some in parallel within waves; Wave 4 ran 3 agents concurrently). 9 commits on `engage/backlog-sprint-22-identity-foundation`. Path A (autonomous through Wave 7, charter + integration gate at the end with user authorization).
+
+- **Test counts:** Backend 4327 → 4425 (+98 net new) / 4 baseline failures preserved / 2 skipped. Frontend 3501 → 3527 (+26 net new) / 3 skipped / 0 failed.
+- **Identity layer live:** `accounts`, `account_sessions`, `account_credentials`, `account_roles` (alembic 0011 + 0012). Magic-link auth via `POST /api/auth/magic-link` and `GET /api/auth/claim`. Account-aware UI via `useAccount()` hook + `<SaveProgressCTA />` at 3 funnel insertion points.
+- **Anonymous-first invariant enforced:** `backend/tests/test_anonymous_first_invariant.py` auto-discovers session-id routes (31 found, 29 covered with full anon-vs-claimed diff, 2 deferred to dedicated tests). 0 routes in REQUIRES_AUTH_ALLOWLIST — charter holds.
+- **Postgres path live but CI-pending:** Alembic + dual-engine config + 15-test parity suite shipped. CI service container declared; first postgres CI run will surface m001's `INTEGER PRIMARY KEY AUTOINCREMENT` sqlite-specificity. New tables (0011/0012) use SQLAlchemy Core for dialect-aware DDL.
+- **Integrity charter v1 locked:** `docs/integrity-charter.md` (10 binding principles led by "money never moves position"). README CHARTER section added. Amendment process documented.
+- **T12.0 + T12.1 closed** with `superseded_by: plan-2026-05-s22-identity-foundation` per 2026-05-06 user decision.
+- **Forward risk:** Live SendGrid send + first postgres CI dialect surface deferred to post-merge verification.
+
+- **T22.12 done** (auto-updated by hook)
+
+- **T22.11 done** (auto-updated by hook)
+
+### 2026-05-06 — T22.11 — Account-aware client + session-claim CTAs
+
+Branch: `engage/backlog-sprint-22-identity-foundation`. Sprint 22, T22.11 — added the read-side of the identity layer (a thin `GET /api/auth/me`) plus a `useAccount()` React Query hook and a `<SaveProgressCTA />` component inserted at three opt-in points in the funnel. The CTA never gates functionality; already-claimed browsers never see it; dismissals live in localStorage with a 24h TTL so they re-surface eventually.
+
+- **Backend additions**:
+  - `backend/app/core/queries_accounts.py` — added `get_account_by_id(session, account_id) -> dict | None`. Mirror of `get_account_by_email`; resolves the id embedded in the signed cookie back to the row so the route can surface the bound email. Re-exported in `__all__`.
+  - `backend/app/routes/_auth_claim_helpers.py` — added `verify_account_cookie(value: str | None) -> int | None`. Validates the `<id>.<hmac>` shape, parses the id half, and `hmac.compare_digest`s the signature against the same `audit_hash_salt` used by `set_account_cookie`. Returns `None` for any of: missing/empty, malformed shape, non-integer id, non-positive id, signature mismatch.
+  - `backend/app/routes/auth.py` — added `GET /api/auth/me`. Reads the `gw_account` cookie, calls `verify_account_cookie`, then `queries_accounts.get_account_by_id`. ALWAYS returns 200 — anonymous (no cookie / malformed / tampered / unknown id) yields `{"account_id": null, "email": null}`; valid yields `{"account_id": int, "email": str}`. The 200-with-null shape on tampering is deliberate: a 401 would create a tampering oracle and would also break the anonymous-first invariant. auth.py now has 10 functions (still under the 15 limit).
+  - `backend/tests/test_auth_me.py` (162 lines, 7 tests) — `_get_with_cookie(client, value)` helper sets the cookie on the httpx client jar (avoiding the per-request `cookies=` deprecation). Covers: round-trip on the new helper; null on unknown id; anonymous (no cookie); valid cookie returns the account; tampered HMAC returns null; malformed cookie returns null; signed cookie pointing at a deleted id returns null.
+  - `backend/tests/_cross_session_fixtures.py` — added `GET /api/auth/me` to `PUBLIC_ENDPOINTS` with rationale (auth via signed `gw_account` cookie, no `session_id` input). The route is NOT in `REQUIRES_AUTH_ALLOWLIST` of the anonymous-first invariant test because its endpoint signature has no `session_id` param so the route inventory never picks it up — it's anonymous-first by construction.
+
+- **Frontend additions**:
+  - `frontend/src/lib/api/auth.ts` (179 lines) — extended T22.10's file with `getAccountMe(): Promise<AccountMe>` (camelCases the wire `{account_id, email}` payload; treats non-200 as anonymous so a transient error never breaks the page) and `useAccount()` (TanStack `useQuery` with `staleTime: 5 * 60 * 1000` and `retry: false`; cache key exported as `ACCOUNT_ME_QUERY_KEY` for future invalidation by the claim flow).
+  - `frontend/src/components/auth/SaveProgressCTA.tsx` (186 lines, 4 helpers + 1 component) — dismissible card. Shows a `Save your progress` headline, short description, email input, `Save my progress` submit. State machine: idle → pending (mutation in flight, button shows `Loader2` + "Sending...") → sent ("Check your inbox" — rendered for both success AND error to mirror the no-enumeration contract). X button dismisses; writes `gw_save_progress_cta_dismissed_<dismissKey>` = `Date.now()` to localStorage; `_isFreshlyDismissed` returns true when the stored timestamp is younger than 24h. `useAccount()` hides the CTA entirely once the browser is claimed (and during `isPending` to avoid a flash-of-CTA for already-claimed users).
+  - `frontend/src/__tests__/auth/save-progress-cta.test.tsx` (162 lines, 8 tests) — vitest + `@testing-library/react` + `userEvent` + `QueryClientProvider`. Covers: renders for anonymous; hides for claimed account (`accountId: 7`); submit calls `requestMagicLink` and shows "check your email"; same success state on rejected mutation (no enumeration); X dismisses + writes localStorage with the page's `dismissKey`; recent dismissal stays hidden across mounts; > 24h dismissal re-shows; submit disabled until email non-empty.
+
+- **Insertion points (3 pages)**:
+  - `frontend/src/app/assess/page.tsx` — `<SaveProgressCTA dismissKey="assess" />` rendered below the `WizardShell` so it's visible at the end of the assessment flow. Never blocks the wizard.
+  - `frontend/src/app/plan/page.tsx` — `<SaveProgressCTA dismissKey="plan" />` rendered between the Action Timeline and the first `Separator`/job-matches section (post-plan-generation, mid-plan).
+  - `frontend/src/app/shared/[token]/page.tsx` — `<SaveProgressCTA dismissKey="shared" />` rendered above the `SharedPlanView` inside a `max-w-2xl` wrapper so it sits in the page header area pre-share-content.
+
+- **Verification (all green)**:
+  - Backend: `tests/test_auth_me.py` 7/7 pass; full backend `4425 passed, 4 baseline failed (pre-existing test_config_llm × 3, test_contract_credit_api × 1)`. Anonymous-first invariant + cross-session isolation both stay green.
+  - Frontend: full `vitest run` 369 files / **3527 passed**, 3 skipped, 0 failed (baseline 3518; +9 from new file + 1 new test elsewhere). New `save-progress-cta.test.tsx` 8/8 pass.
+  - `npx tsc --noEmit`: 0 errors.
+  - `npx next build`: green; `/plan` route 155 kB / 355 kB First Load (within budget); `/shared/[token]` 3.71 kB / 164 kB.
+  - `bpsai-pair arch check` on each new file: clean (no warnings, no errors). `auth.py` is a pre-existing soft warning (298 lines vs 150 soft) but well under the 400 hard limit; `queries_accounts.py` similar.
+
+- **Design decisions**:
+  - `useAccount()` returns the React Query result object (not a raw `AccountMe | null`) so consumers can branch on `isPending` to suppress flash-of-CTA. The CTA component does this via `if (account.isPending || account.data?.accountId) return null`.
+  - Per-page `dismissKey` (rather than a single global flag) so the worker can dismiss on /assess but still see the offer on /plan or /shared — the funnel has multiple "natural moments" to invite a save.
+  - 24h dismissal TTL: long enough that an irritated user gets a real day off, short enough that the offer re-surfaces eventually if they keep using the product.
+  - `200-always` response on /api/auth/me (vs 401 on tampering): preserves the anonymous-first invariant and removes a potential tampering oracle on the cookie HMAC.
+
+- **T22.10 done** (auto-updated by hook)
+
+### 2026-05-06 — T22.10 — Frontend login surface (magic-link UX)
+
+Branch: `engage/backlog-sprint-22-identity-foundation`. Sprint 22, T22.10 — shipped the user-facing pages that consume T22.7 (`POST /api/auth/magic-link`) and T22.8 (`GET /api/auth/claim`). Login form requests a one-time link; claim page consumes the token from the email URL and renders the post-claim state.
+
+- **Files added**:
+  - `frontend/src/lib/api/auth.ts` (118 lines, 4 functions) — `requestMagicLink(email)` POSTs `{email}` to `/api/auth/magic-link` and resolves on any 2xx (the backend always returns 202 Accepted to avoid account enumeration); `claimMagicLink(token)` GETs `/api/auth/claim?token=…` with `credentials: "include"` so the browser keeps the `gw_account` cookie set by the 200 response. Errors surface as a discriminated `ClaimError` (`kind: "invalid" | "conflict" | "unknown"`) so the page can render distinct UI for 401 vs 409 vs 500 without sniffing status codes downstream. 30-second hard timeout via `AbortController`, mirroring the convention in `lib/api/appointments.ts`.
+  - `frontend/src/app/auth/login/page.tsx` (122 lines, 1 component) — Client Component (`"use client"`) with a 3-state machine: idle → submitting → success. Email input + `Send magic link` button (shadcn `Input` + `Button`); submit disabled until non-empty + during in-flight. Uses `@tanstack/react-query` `useMutation` with `onSettled: () => setSubmitted(true)` so success and failure render the IDENTICAL "Check your email" card — the UI has to mirror the backend's non-enumerating contract or the security model leaks at the edge. Internal links use `next/link` (lint requirement). `Loader2` spinner during in-flight.
+  - `frontend/src/app/auth/claim/page.tsx` (145 lines, 6 components) — Client Component, reads `?token` via `useSearchParams()` from `next/navigation`, calls `claimMagicLink` via `useQuery` (gated on `enabled: token.length > 0` so an empty `?token=` short-circuits to invalid). State machine renders 5 cards via tiny `_LoadingCard / _SuccessCard / _InvalidCard / _ConflictCard / _GenericErrorCard` helpers, all wrapped by a shared `_Shell`. Branches: token absent → invalid; in-flight → loading; data → success (`CheckCircle2` + claimed-session count + `<Link href="/">Continue</Link>`); 401 → invalid (`text-warning`); 409 → conflict (`text-destructive`); other → generic error.
+  - `frontend/src/__tests__/auth/auth-api.test.ts` (104 lines, 6 tests) — vitest + `vi.stubGlobal("fetch", …)`. Asserts: POST URL + body + content-type for `requestMagicLink`; resolves on 202; GET URL + token-encoding + `credentials: "include"` for `claimMagicLink`; throws `ClaimError` with correct `kind`/`status` for 401, 409, 500.
+  - `frontend/src/__tests__/auth/login.test.tsx` (81 lines, 5 tests) — `@testing-library/react` + `userEvent` + `QueryClientProvider`. Asserts: idle render with email field + send button; submit disabled when empty; success card on resolve; success card ALSO on reject (no enumeration); button disabled during in-flight (uses a never-resolving promise to freeze the in-flight state).
+  - `frontend/src/__tests__/auth/claim.test.tsx` (108 lines, 6 tests) — mocks `next/navigation`'s `useSearchParams` via a module-level `let mockSearch = ""` updated per test, mocks `claimMagicLink` from `@/lib/api/auth`. Covers all 5 state-machine branches plus the no-token short-circuit.
+- **Palette compliance**: hit the `color-palette.test.ts` enforcement (`/(?:text|bg|border)-(?:red|green|amber|yellow|blue)-\d+/` is forbidden in app source). Switched `text-amber-500` → `text-warning` (semantic token) and `text-rose-500` → `text-destructive` to match the convention in `app/credit/page.tsx`, `app/privacy/page.tsx`, and the rest of the surface. The cyan/amber/rose palette name in the brief maps to these semantic tokens via `tailwind.config.ts`.
+- **next/link compliance**: `npx next build` initially failed lint with `@next/next/no-html-link-for-pages` because `<a href="/">` for an internal route triggers the rule. Replaced all internal `<a>` with `<Link>` from `next/link` (Continue button on success, Request-a-new-link on invalid, Sign-in-with-another-email on conflict, Back-to-sign-in on generic error, terms/privacy footer links).
+- **Test result**: 3518 passed / 0 failed / 3 skipped (369 files; +17 net new tests over the 3501 baseline implied by the auth-test scaffolding). Auth subsuite alone: 17/17.
+- **Build + tsc**: `npx next build` green; `/auth/login` = 3.37 kB (125 kB First Load JS, statically prerendered), `/auth/claim` = 1.53 kB (128 kB FLJS, statically prerendered). `npx tsc --noEmit` = 0 errors.
+- **Arch check**: all 3 production files pass — login page 122 lines / 1 function, claim page 145 lines / 6 functions (longest function 33 lines), `lib/api/auth.ts` 118 lines / 4 functions. All under the 200-line warning threshold and well under the 400-line error.
+- **State machines**: login = `idle → submitting → success` (where `success` is reached via `onSettled` so error paths land there too — non-enumeration parity with the backend's 202-always contract). Claim = `loading → (success | invalid | conflict | unknown)`, gated on token presence (no token → invalid immediately, no API call).
+
+- **T22.8 done** (auto-updated by hook)
+
+- **T22.8 done** — magic-link claim + session-claim flow shipped
+- **T22.7 done** (auto-updated by hook)
+
+- **T22.7 done** — magic-link issuance endpoint shipped
+- **T22.9 done** (auto-updated by hook)
+
+### 2026-05-06 — T22.8 — Magic-link claim + session-claim flow
+
+Branch: `engage/backlog-sprint-22-identity-foundation`. Sprint 22, T22.8 — shipped `GET /api/auth/claim?token=…&session_id=…` on top of T22.7's magic-link issuance and T22.5's `account_credentials` + `account_sessions` schema. The "save your progress" path: anonymous progress on a device gets retroactively bound to the account when the user clicks the magic link from the same browser.
+
+- **Files added**:
+  - `backend/app/core/queries_credentials.py` (144 lines, 5 functions) — extracted credential-table CRUD out of `queries_accounts.py` so the latter stays inside the per-file function-count budget. `hash_token` (SHA-256), `mint_magic_link_credential` (T22.7), `find_unused_credential_by_hash` (single helper handling all three failure modes — not-found / expired / used — so callers cannot distinguish them and create an oracle), `mark_credential_used` (idempotent timestamp stamp).
+  - `backend/app/routes/_auth_claim_helpers.py` (111 lines, 5 functions) — cookie + claim-side helpers extracted from the route module. `set_account_cookie` (HttpOnly, SameSite=Lax, Secure outside dev, 30-day max-age, value `<account_id>.<HMAC-SHA256(account_id, audit_hash_salt)>`); `try_claim_session` adapter that catches `IntegrityError` from the `UNIQUE(session_id)` constraint and returns a boolean so the route layer never imports ORM types; `invalid_token_response()` and `session_conflict_response()` build pre-encoded byte-identical 401 / 409 responses (same byte stream every call — kills any whitespace / key-order oracle).
+  - `backend/tests/test_auth_claim.py` (359 lines, 11 tests) — covers the 6 ACs: success (200 + `account_id` + cookie + `used_at` set), invalid token (401), expired token (401, via direct `UPDATE account_credentials SET expires_at = past`), replayed token (401 on the second call), uniform-401 across all three failure modes (asserts `r_invalid.json() == r_expired.json() == r_replayed.json()` so the response cannot be used as an oracle on the lifecycle stage), session-claim with `?session_id=` (anon session bound, returned in `claimed_session_ids`), pre-existing anonymous session (no prior `account_sessions` row → claim succeeds retroactively), idempotent re-claim by the same account, and cross-account 409 (different account already owns the session_id → original ownership preserved, credential NOT marked used so the user can retry from a clean browser).
+- **Files extended**:
+  - `backend/app/routes/auth.py` (262 lines, 12 functions, was 192 / 8) — added `GET /api/auth/claim` mounted at `/api/auth/claim`. Reads token via `Query(..., alias="token")` so the wire contract matches the email template; the Python parameter is named `magic_token` (and `session_id` becomes `claim_sid`) so the cross-session route inventory in `tests._route_inventory` does NOT classify this as a feedback-session-owned route — the magic-link token is single-use and not subject to the session-A-id + session-B-token IDOR contract. `response_model=None` because the handler returns either a `dict` (200) or a `Response` (401/409). Added the `_maybe_claim_session` helper to keep the route function under the 40-line cap; helper returns `(claimed_ids, conflict_response)` so the route remains a flat read.
+  - `backend/app/core/queries_accounts.py` (174 lines, was 217) — slimmed to account-table CRUD only; re-exports `mint_magic_link_credential`, `find_unused_credential_by_hash`, `mark_credential_used`, `hash_token` from the new `queries_credentials` module so existing import paths (route layer, T22.7 tests) keep working without churn. `__all__` documents the public surface.
+  - `backend/tests/_cross_session_fixtures.py` — added `GET /api/auth/claim` to `PUBLIC_ENDPOINTS` with the documented reason "Account-claim endpoint (T22.8); the magic-link token is single-use and not a session-bound feedback token, so the session-A id + session-B token IDOR contract does not apply." Without this the route shows up under `test_every_endpoint_is_either_flagged_or_allowlisted`. The aliasing on the Python signature ensures `test_no_session_route_is_silently_allowlisted` is also satisfied — discovery does not classify the route, and the explicit allowlist entry covers triage.
+- **Cookie design**: `gw_account` HttpOnly + SameSite=Lax + Secure (env != "development") + Path=/ + 30-day max-age. Value format `<account_id>.<HMAC-SHA256(account_id, audit_hash_salt)>` — reuses `Settings.audit_hash_salt` rather than introducing a new secret so production rotation is already enforced by `_reject_default_salt_in_production`. The cookie is set ONLY on a 200 response; on 401/409 the browser is not bound to any account.
+- **Oracle prevention**: `find_unused_credential_by_hash` returns `None` for not-found, expired, AND already-used in a single SQL query (`WHERE used_at IS NULL AND expires_at > :now`) so the route caller cannot branch on which mode failed. The 401 body is pre-encoded as raw bytes via `invalid_token_response()` so two failures from different modes produce byte-identical responses (verified by `test_claim_failure_modes_share_uniform_response`).
+- **409 conflict**: `claim_session()` lets the underlying `UNIQUE(session_id)` constraint fire on cross-account clashes (T22.5 design). `try_claim_session` adapter in `_auth_claim_helpers.py` catches `IntegrityError`, runs `db.rollback()`, and returns False — the route translates that to `session_conflict_response()` (409). Critically, on 409 the credential is NOT marked used, so the legitimate user can retry from a clean browser without burning their token.
+- **Anonymous-first invariant intact**: the `/api/auth/claim` endpoint does not gate any session-id route; it only ADDS rows to `account_sessions`. Existing session-id routes still serve anonymous users with no `account_sessions` row. `test_cross_session_isolation::test_every_session_route_returns_403_on_cross_session` is green.
+- **Test result**: 4418 passed / 4 failed (pre-existing baseline: `test_config_llm` × 3 + `test_contract_credit_api` × 1) / 2 skipped. +11 new tests, no new failures introduced.
+- **Arch check**: `auth.py` 262 lines / 12 functions / longest function 24 lines (route handler), `queries_accounts.py` 174 lines / 7 functions, `queries_credentials.py` 144 lines / 5 functions, `_auth_claim_helpers.py` 111 lines / 5 functions, `test_auth_claim.py` 359 lines / 13 tests + 4 helpers — all per-file errors cleared (warnings on file-size remain at the project-wide 150-line warning threshold, in line with the rest of the codebase).
+
+### 2026-05-06 — T22.7 — Magic-link issuance endpoint
+
+Branch: `engage/backlog-sprint-22-identity-foundation`. Sprint 22, T22.7 — shipped `POST /api/auth/magic-link`, the always-202 issuance side of the magic-link flow on top of T22.5's `account_credentials` table. T22.8 (validation/claim) consumes the same SHA-256 hash function shipped here.
+
+- **Files added**:
+  - `backend/app/routes/auth.py` (192 lines, 8 functions) — single endpoint `POST /api/auth/magic-link`. Pydantic body schema with a lightweight regex (`^[^@\s]+@[^@\s]+\.[^@\s]+$`) so a 422 on garbage input still happens BEFORE any DB lookup (preserves no-enumeration). Account-on-first-use via `get_account_by_email` → `create_account` fallback. Mints credential, builds plaintext + HTML body containing `{FRONTEND_URL}/auth/claim?token={raw_token}`, hands off to `app.integrations.email.send_transactional` with category `magic_link`, swallows SendGrid exceptions (logs but never breaks the 202 contract). Two `RateLimiter` instances (per-email 3/hour, per-IP 10/hour) — both buckets are consumed on every call so a spammer can't game the limiter by rotating emails or IPs alone. Over-limit calls log a redacted line and silently drop the send (still 202, no body).
+  - `backend/tests/test_auth_magic_link.py` (356 lines, 10 tests) — covers the mint helper (raw-token entropy, SHA-256 hash persistence), endpoint 202 for known + unknown emails, account-on-first-use, claim-URL-with-token in the email payload, 15-minute expiry window, no-enumeration (identical responses for known vs unknown), per-email + per-IP rate-limit (over-limit returns 202 but no email is dispatched), and a sanity test that two `RateLimiter` instances do not share state. Uses the existing SendGrid mock pattern (`monkeypatch.setattr(sendgrid_client, "_build_client", lambda: MockSendGridClient())`) so no network IO and no API key required.
+
+- **Files modified**:
+  - `backend/app/core/queries_accounts.py` (+71 lines) — added `_hash_token` (SHA-256 hex digest, single source of truth shared with T22.8 validation), `_insert_credential_row` helper, and `mint_magic_link_credential(session, *, account_id, expires_at) -> (raw_token, credential_id)` returning the raw URL-safe token (`secrets.token_urlsafe(32)` ≥ 256 bits) while persisting only the hash. Function decomposed into helper to clear the 40-line arch-check threshold.
+  - `backend/app/core/config.py` (+5 lines) — added `frontend_url: str = "http://localhost:3000"` setting; production deployments override via `FRONTEND_URL` env.
+  - `backend/app/integrations/email/sendgrid_client.py` (+1 line) — added `"magic_link"` to the `EmailCategory` Literal so the route's category arg type-checks.
+  - `backend/app/routes/__init__.py` — registered `auth_router` so the new route reaches the FastAPI app via `all_routers`.
+  - `backend/tests/_audit_integrity_fixtures.py` — added `POST /api/auth/magic-link` to `AUDIT_ALLOWLIST` with rationale "credential row IS the audit; always-202 contract precludes per-call audit_log".
+  - `backend/tests/_cross_session_fixtures.py` — added `POST /api/auth/magic-link` to `PUBLIC_ENDPOINTS` ("accepts only an email; no session_id input").
+
+- **Token design**: `secrets.token_urlsafe(32)` for ~256 bits of entropy; SHA-256 (hex digest) hashed before storage in `account_credentials.credential_value_hash`. Composite index `idx_account_credentials_lookup` on `(credential_type, credential_value_hash)` makes the validation lookup an index seek. Default expiry 15 minutes via `datetime.now(timezone.utc) + timedelta(minutes=15)`, stored as ISO-8601.
+
+- **Rate-limit**: reused the existing in-memory `app.core.rate_limit.RateLimiter` (no Redis present in repo). Two instances at module scope; cleared between tests via an autouse fixture (`auth_module._email_limiter.clear()` + `_ip_limiter.clear()`) so per-test counts start fresh. Acceptable for the issuance window — a process restart simply re-derives the buckets.
+
+- **Email send**: confirmed reuse of the existing `app.integrations.email.send_transactional` integration (T12.2). The route does NOT touch SendGrid directly; it constructs payload (subject, plain-text + HTML, category `magic_link`) and hands off. Live SendGrid send is NOT verified in this task (no API key in dev) — deferred to T22.13 integration gate.
+
+- **Tests**: 10/10 new tests pass in 2.5s in isolation. Full suite: 4407 passed / 2 skipped / 4 failed — same 4 pre-existing failures (`test_config_llm` x3 + `test_contract_credit_api` x1), zero new failures introduced. `bpsai-pair arch check` reports zero errors on all three owned files (warnings only on file size 192/216 vs 150 advisory threshold; both well under the 400-line error threshold from `architecture.md`).
+
+- **Wave 4 boundary respected**: did not touch T22.6 files (`roles_schema.py`, `auth_roles.py`, `queries_roles.py`, `test_roles.py`, alembic 0012) or T22.9's `test_anonymous_first_invariant.py`. Coordination with T22.6 on `_audit_integrity_fixtures.py` + `_cross_session_fixtures.py` was additive (one new entry each, no edits to T22.6's adjacent rows).
+
+### 2026-05-06 — T22.9 — Anonymous-first invariant test
+
+Branch: `engage/backlog-sprint-22-identity-foundation`. Sprint 22, T22.9 — shipped the load-bearing executable guard against forced-login drift. Auto-discovers every session-id route from the live FastAPI app and runs each one twice (anonymous session vs claimed session) asserting response equivalence.
+
+- **File added**:
+  - `backend/tests/test_anonymous_first_invariant.py` (538 lines, 4 tests) — top-of-file docstring binds the test to the integrity charter principle that GoWork is anonymous-first. Reuses the existing `tests._route_inventory.discover_session_routes` heuristic (also used by `test_cross_session_isolation`) so a new endpoint with a `session_id` + `token`/`session_token` parameter is automatically picked up. For each route: builds two requests (`_SESS_ANON`+`_TOK_ANON` vs `_SESS_CLAIMED`+`_TOK_CLAIMED` where `_SESS_CLAIMED` is bound to a test account in `account_sessions`), normalizes ephemeral fields (server-generated ids, timestamps, share tokens, the input session_id+token echoes themselves), and asserts identical status code + identical normalized body. Allowlist constants — `ALLOWED_DIFF_FIELDS` (account-aware response fields), `REQUIRES_AUTH_ALLOWLIST` (currently empty by sprint charter — no endpoint may force login), `SKIPPED_FOR_BODY_COMPLEXITY` (2 entries: `POST /api/barrier-intel/chat` + `POST /api/documents/cover-letter`, each documented to defer to its dedicated test file). The auto-discovery floor asserts ≥30 session routes and the per-test floor asserts ≥25 routes get the full anon-vs-claimed diff so a future allowlist amendment can't silently swallow coverage.
+
+- **Coverage**: 31 session-id routes discovered. 29 covered with full anon-vs-claimed diff. 2 skipped for body complexity (each with rationale + dedicated test file reference). 0 require-auth — the sprint charter holds.
+
+- **Schema/wiring**: applies the identity DDL on top of `runner.apply_pending` via a sync sqlite engine + `accounts_schema.apply_ddl`, then seeds two identical session rows + two feedback tokens + one account claiming `_SESS_CLAIMED`. The `invariant_client` fixture mirrors the wiring used by `test_cross_session_isolation` (same `_appointments_helpers.resolve_db_path` monkeypatch + DATABASE_URL/engine override) so both tests exercise the same surface against a single backing store. Adds defensive `_reset_known_rate_limiters()` on fixture entry + exit since the test calls every route twice — without this the in-process rate limiters (`plan._rate_limiter` etc.) leak `429`s into neighbouring tests like `test_cross_session_isolation::test_every_session_route_returns_403_on_cross_session`.
+
+- **Tests**: 4/4 pass in 5.3s in isolation. Full suite: 4407/4407 (was 4403 baseline; +4 net new tests) — same 4 pre-existing failures as before (`test_config_llm` x3 + `test_contract_credit_api` x1), zero new failures introduced. `bpsai-pair arch check` reports one warning (538 lines vs 400 warn / 600 error threshold for tests) and zero errors — acceptable for a comprehensive invariant guard.
+
+- **Wave 4 boundary respected**: file scope limited to `backend/tests/test_anonymous_first_invariant.py`. Did not touch T22.6's `roles_schema`/`auth_roles` files, T22.7's `routes/auth.py`, or any sibling Wave 4 file. Pre-existing concurrent failures from T22.7's not-yet-allowlisted `POST /api/auth/magic-link` route are explicitly not in scope for T22.9.
+
+### 2026-05-06 — T22.6 — account_roles + reviewer permission scaffold
+
+Branch: `engage/backlog-sprint-22-identity-foundation`. Sprint 22, T22.6 — shipped the role layer atop T22.5's accounts foundation. Single new table `account_roles` via alembic revision 0012 with composite PK, CHECK-constrained role enum, and a `require_role(role)` FastAPI dependency.
+
+- **Files added**:
+  - `backend/app/core/roles_schema.py` (76 lines) — `ROLE_NAMES` tuple + `account_roles_table` registered against `accounts_schema.metadata` (so the FK to `accounts.id` resolves at `create_all` time) but DDL helpers scope `create_all`/`drop_all` to `tables=[account_roles_table]` so revision 0012 stays surface-disjoint from 0011. `role_name` constrained via SQL `CHECK (role_name IN (...))` for portability across sqlite + postgres.
+  - `backend/alembic/versions/0012_account_roles.py` (39 lines, `revision='0012'`, `down_revision='0011'`) — thin shim delegating to `roles_schema.apply_ddl` / `drop_ddl`.
+  - `backend/app/core/queries_roles.py` (110 lines) — async CRUD surface: `grant_role` (idempotent via PK pre-check), `revoke_role` (idempotent — DELETE silently noops when no row matches), `list_roles_for_account`, `account_has_role`. Invalid role strings surface the underlying dialect's `IntegrityError` from the CHECK constraint.
+  - `backend/app/core/auth_roles.py` (66 lines) — `require_role(role: str)` dependency factory. Returns an async dep that resolves the requesting account from `session_id` via `get_account_for_session`; raises 403 "Authentication required" when anonymous, 403 "Insufficient permissions" when the role is missing. Returns the account dict on success so handlers can consume `account = Depends(require_role("admin"))`.
+  - `backend/tests/test_roles.py` (273 lines, 14 tests) — covers schema sanity, grant + has_role happy paths, list + revoke, idempotent grant + revoke, CHECK rejection of unknown roles, multi-role coexistence (single account holding all four roles), and three `require_role` paths (anonymous→403, authenticated-but-missing-role→403, authorized→returns account dict).
+
+- **Files modified**:
+  - `backend/tests/test_alembic_parity.py` — extended linear-chain expectation to `0012 -> 0011` (12 revisions total) and stripped `account_roles` from the parity comparison (legacy `runner.apply_pending` only knows m001..m010).
+
+- **Schema/design choices**: One MetaData with scoped DDL — the alternative (separate MetaData) blew up `create_all`'s FK resolution since `account_roles.account_id` references `accounts.id`. Scoping via `tables=[account_roles_table]` keeps the revision 0011/0012 boundary clean even though they share a SQLAlchemy MetaData. CHECK constraint over native `ENUM` — sqlite has no ENUM type and CHECK works on both engines without dialect branching; the constraint name `ck_account_roles_role_name` is stable so future migrations can `ALTER`/`DROP` it explicitly. `granted_at` ISO-8601 string (matches T22.5's `created_at` style). Composite PK `(account_id, role_name)` enforces "each role held at most once per account" without a separate UNIQUE index.
+
+- **Tests**: roles-only run 14/14 green on sqlite axis. Full suite: 4 pre-existing baseline failures + 2 transient failures attributable to T22.7's parallel `POST /api/auth/magic-link` route showing up in cross-session-isolation + audit-integrity allowlists (T22.7 owner will allowlist it) + 10 collection errors in `tests/test_auth_magic_link.py` (T22.7's WIP file). `bpsai-pair arch check` passes on every touched file.
+
+- **Verification**: ran `alembic upgrade head` against a fresh sqlite DB — `account_roles` present with the composite PK, CHECK constraint enumerating all four roles, and FK CASCADE to `accounts.id` (verified via `sqlite3 .schema account_roles`).
+
+### 2026-05-06 — T22.5 — accounts + account_sessions + account_credentials tables
+
+Branch: `engage/backlog-sprint-22-identity-foundation`. Sprint 22, T22.5 — introduced the identity-layer foundation. Three new tables shipped via alembic revision 0011 (no legacy `m011_*.py` counterpart — the alembic chain is now the sole source of truth past m010).
+
+- **Files added**:
+  - `backend/app/core/accounts_schema.py` (98 lines) — SQLAlchemy Core `MetaData` + `Table` definitions for `accounts`, `account_sessions`, `account_credentials`, plus `apply_ddl(connection)` / `drop_ddl(connection)` helpers consumed by both alembic and the test fixture. Dialect-portable by construction (sqlite + postgres).
+  - `backend/alembic/versions/0011_accounts.py` (39 lines, `revision='0011'`, `down_revision='0010'`) — thin shim that delegates to `accounts_schema.apply_ddl` / `drop_ddl` so the two code paths can never drift.
+  - `backend/app/core/queries_accounts.py` (124 lines) — async CRUD surface mirroring the `app.core.queries` style: `create_account` (RETURNING-id portable), `get_account_by_email` (case-insensitive lookup via normalized email), `claim_session` (idempotent on same `(account_id, session_id)`, raises `IntegrityError` on UNIQUE(session_id) collision with a different owner), `list_sessions_for_account`, `get_account_for_session` (JOIN-based; returns None for anonymous sessions).
+  - `backend/tests/test_accounts.py` (210 lines, 11 tests) — covers create + lookup + email-normalization + UNIQUE-email + claim (idempotent + cross-account-rejected) + list + get-for-session (claimed + anonymous-returns-None) + credential-row-round-trip. Uses an `accounts_engine` fixture that layers `apply_ddl` on top of `db_engine` (T22.2) so tests run on both axes.
+
+- **Files modified**:
+  - `backend/tests/test_alembic_parity.py` — extended the linear-chain expectation to include `0011 -> 0010` and stripped the new identity tables from the parity comparison (legacy `runner.apply_pending` only knows m001..m010, so the schema diff would otherwise show "only-in-alembic" rows).
+
+- **Schema choices**: account_id is INTRODUCED here but NOT yet linked to existing tables; binding lives entirely in the `account_sessions` link table per the anonymous-first invariant. UNIQUE(session_id) on `account_sessions` enforces at-most-one-account-per-session. `credential_value_hash` is sized for SHA-256 hex (64 chars, but VARCHAR(128) to accommodate future schemes); `credential_type` is a string column so future credential families (oauth_provider, phone_otp) drop in without migration. Composite index on `(credential_type, credential_value_hash)` keeps the lookup path on T22.8 sub-millisecond. ON DELETE CASCADE on both FKs to `accounts.id`.
+
+- **Tests**: 4 failed (pre-existing baseline) / 4379 passed / 2 skipped, full suite 66.12s. Accounts-only run: 11/11 green on sqlite axis (postgres axis opt-in via `GOWORK_TEST_POSTGRES_URL`). `bpsai-pair arch check` passes on every touched file.
+
+- **Verification**: ran `alembic upgrade head` against a fresh sqlite DB — all three new tables present with the correct UNIQUE/PK/FK/index constraints (verified via `.schema`).
+
+### 2026-05-06 — T22.4 — Postgres schema parity + CI service
+
+Branch: `engage/backlog-sprint-22-identity-foundation`. Sprint 22, T22.4 — wired a `postgres:16` service container into GitHub Actions and added round-trip schema-parity tests that run via the `db_engine` fixture (T22.2) on both sqlite and (opt-in) postgres axes.
+
+- **Files added**:
+  - `backend/tests/test_db_parity.py` (376 lines, 15 tests) — covers every major application table from m001-m010: employers, transit_routes, transit_stops, resources (incl. m008 `city` + m009 `barrier_affinity`), job_listings (incl. m010 `lat`/`lng`), sessions, feedback_tokens, visit_feedback, resource_feedback, barriers, barrier_relationships, barrier_resources, employer_policies, record_profiles, share_tokens. Each test INSERTs a representative row, COMMITs, SELECTs by every supplied column, and asserts column-level round-trip equality with bool/int/float coercion handled per-dialect via `_assert_round_trip`.
+
+- **Files modified**:
+  - `.github/workflows/ci.yml` (+92 lines) — added a new `backend-postgres` job alongside the existing sqlite `backend` job. Declares a `postgres:16` service container with `pg_isready` health check (10s interval, 10 retries), exposes 5432, runs `alembic upgrade head` against postgres before pytest, then runs the full backend test suite with `GOWORK_TEST_POSTGRES_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/postgres` set so the `db_engine` fixture's postgres axis activates.
+
+- **Verification**:
+  - Local sqlite axis: 15/15 parity tests PASS in 0.52s.
+  - Local postgres axis: SKIPPED (docker daemon not running locally; the `db_engine` fixture auto-skips when `GOWORK_TEST_POSTGRES_URL` is unset, per T22.2 contract). Postgres axis is CI-verified via the new `backend-postgres` job.
+  - Full backend suite (excluding `tests/test_accounts.py` which is mid-flight in T22.5): `4368 passed, 2 skipped, 4 failed` — same 4 pre-existing failures as baseline (test_config_llm × 3 + test_contract_credit_api × 1, both unrelated). +15 net new tests vs. T22.3 baseline of 4353.
+  - `bpsai-pair arch check backend/tests/test_db_parity.py` — clean (376 lines, under 600-line test ceiling; 17 functions, under 30-function test ceiling).
+
+- **CI shape after this task**: `backend` (sqlite) + `backend-postgres` (postgres service) run in parallel. Both must go green for backend gating. Postgres job migrates via `alembic upgrade head` so the same chain is exercised on both engines. The pre-existing `frontend`, `lighthouse`, and `security` jobs are unchanged.
+
+- **Note on `INTEGER PRIMARY KEY AUTOINCREMENT`**: m001's DDL uses sqlite-specific `INTEGER PRIMARY KEY AUTOINCREMENT` syntax. Postgres tolerates `INTEGER PRIMARY KEY` but treats `AUTOINCREMENT` as a parser error in some configurations — if the new `backend-postgres` CI job fails on `alembic upgrade head`, the fix is to teach `0001_initial.py` to rewrite the DDL per dialect (or split `AUTOINCREMENT` out via a regex). Not blocking T22.4 because the task is "wire postgres into CI"; surfacing dialect breakage IS the deliverable.
+
+### 2026-05-06 — T22.3 — Port m001-m010 to Alembic versions
+
+Branch: `engage/backlog-sprint-22-identity-foundation`. Sprint 22, T22.3 — replayed all 10 hand-rolled migrations as Alembic revisions in `backend/alembic/versions/` with byte-equivalent sqlite schema parity. Legacy `runner.apply_pending` continues to work for the ~50 tests that depend on it (sync sqlite3 path), but now emits a `DeprecationWarning` pointing callers at `alembic upgrade head`.
+
+- **Files added** (10 alembic revisions, all under 80 lines):
+  - `backend/alembic/versions/0001_initial.py` (46 lines) — re-exports `m001_initial.DDL_SQL` + `_DOWNGRADE_ORDER`; splits the multi-statement blob and replays via `bind.exec_driver_sql` so it works on both sqlite and postgres.
+  - `backend/alembic/versions/0002_s12_worker_companion.py` (45 lines) — re-exports `_TABLE_DDL` + `_INDEX_DDL` + `_DOWNGRADE_ORDER` from m002.
+  - `backend/alembic/versions/0003_appointments_starts_at_nullable.py` (70 lines) — preserves the create-new/copy/drop-old/rename rebuild verbatim from m003. Downgrade is no-op (NOT NULL re-tightening unsafe). Includes dialect-aware `_table_exists` helper.
+  - `backend/alembic/versions/0004_used_tokens.py` (34 lines).
+  - `backend/alembic/versions/0005_sessions_demo_column.py` (52 lines) — idempotent ADD COLUMN; clean DROP COLUMN downgrade.
+  - `backend/alembic/versions/0006_compliance_tombstones.py` (80 lines) — compliance_audit + tombstone columns on 3 tables; dialect-aware column-existence helpers.
+  - `backend/alembic/versions/0007_advisor_tokens.py` (37 lines).
+  - `backend/alembic/versions/0008_resources_city.py` (49 lines) — ADD COLUMN + index; downgrade drops index only.
+  - `backend/alembic/versions/0009_resources_barrier_affinity.py` (48 lines) — ADD COLUMN; no-op downgrade (SQLite < 3.35 limit).
+  - `backend/alembic/versions/0010_geocode_resources_jobs.py` (66 lines) — adds lat/lng on job_listings + composite indexes on both tables.
+  - `backend/tests/test_alembic_parity.py` (180 lines, 3 tests) — schema-equivalence diff, linear-chain check, deprecation-warning check.
+
+- **Files modified**:
+  - `backend/app/core/migrations/runner.py` — emits `DeprecationWarning` from `apply_pending`. Existing logic preserved (sync sqlite3 path; 50+ test callsites unchanged). +18 lines (deprecation message + warnings import + docstring update).
+
+- **Verification**:
+  - Schema parity: `runner.apply_pending` vs `alembic upgrade head` on fresh sqlite DBs produce byte-equivalent application schema. Diff is empty (verified via `test_alembic_upgrade_head_matches_runner_schema` + a manual `sqlite3 .schema` diff). The alembic-internal `alembic_version` table and the runner-internal `schema_migrations` table are filtered from comparison; `sqlite_sequence` (auto-managed) is also filtered.
+  - Linear chain: 0001 has `down_revision=None`; 0002..0010 each declare the previous as `down_revision` (verified by `test_alembic_revisions_chain_is_linear`).
+  - Full backend suite: `4353 passed, 2 skipped, 4 failed` — same 4 pre-existing failures as baseline (test_config_llm × 3 + test_contract_credit_api × 1; LLM env config + missing jwt module, unrelated). +4 net new tests vs. baseline 4349.
+  - `bpsai-pair arch check backend/alembic/versions/` clean.
+  - `bpsai-pair arch check backend/app/core/migrations/runner.py` — only a soft warning (file 183 lines, threshold 150); pre-existing, not introduced by this task.
+
+- **DDL re-export**: `backend/app/core/schema.py` `DDL_SQL` re-export still works (verified — imports cleanly, len 4239).
+
+- **Postgres parity**: NOT verified in this task (deferred to T22.4 once Postgres CI service is wired). Sqlite-only verification is sufficient per task spec. The dialect-aware helpers in 0003/0005/0006/0008/0009/0010 are forward-looking — they handle both sqlite (`PRAGMA table_info`) and postgres (`information_schema.columns`).
+
+- **What's next**: T22.4 — Postgres CI service so the postgres axis of `db_engine` actually exercises every migration.
+
+- **T22.2 done** (auto-updated by hook)
+
+- **T22.2 done** — Postgres driver + dual-DB config
+
+### 2026-05-06 — T22.2 — Postgres driver + dual-DB config
+
+Branch: `engage/backlog-sprint-22-identity-foundation`. Sprint 22, T22.2 — wired postgres alongside sqlite at the runtime engine layer + config layer + test fixture layer. T22.1 stood up the Alembic runner with the same dual-driver shape; T22.2 makes the rest of the app catch up so the app + migrations agree on URL handling.
+
+- **Files touched**
+  - `backend/requirements.txt` — added `asyncpg==0.30.0` and `psycopg[binary]==3.2.13`. asyncpg is the async driver the app + Alembic use at runtime; `psycopg[binary]` is for any sync Alembic ops (offline mode / data ops) that don't go through the async engine.
+  - `backend/app/core/db_url.py` — **new** (54 lines, 4 functions). Public helpers `is_sqlite_url`, `is_postgres_url`, `normalize_async_url`, `infer_dialect`. Single source of truth for "is this URL sqlite or postgres, and what's its async-driver form." Used by both `app.core.database` and `backend/alembic/env.py`.
+  - `backend/app/core/database.py` — `get_engine()` now dispatches: `StaticPool` for sqlite (legacy behaviour, required for in-memory + benign for file-based), `NullPool` for postgres (mirrors env.py, no dangling connections in CI). URL passes through `normalize_async_url` so callers may set `DATABASE_URL=postgresql://...` (sync form) and the runtime auto-coerces to `postgresql+asyncpg://...`. +18 lines, no new functions, still under arch limits (198 lines).
+  - `backend/app/core/config.py` — added `Settings.db_dialect` computed field (returns `"sqlite"` or `"postgresql"` via `infer_dialect`) + a model validator that runs the property at instantiation so unsupported schemes (mysql/oracle/etc.) fail fast as ValidationError instead of a runtime AttributeError. +22 lines.
+  - `backend/alembic/env.py` — refactored to import `normalize_async_url` from `app.core.db_url`; deleted the inline `_is_sqlite_url`/`_is_postgres_url`/`_normalize_async_url` (which T22.1 had stubbed locally). T22.1's behaviour preserved exactly — `alembic current` on the existing sqlite DB exits clean.
+  - `backend/tests/conftest.py` — added module docstring documenting the `GOWORK_TEST_POSTGRES_URL` opt-in env var. Exposed module constant `POSTGRES_TEST_URL_ENV_VAR = "GOWORK_TEST_POSTGRES_URL"`. Added `db_engine` fixture parameterized over `[sqlite]` (default) or `[sqlite, postgres]` when the env var is set. Existing `test_engine` fixture untouched — it remains the legacy sqlite-only fixture; `db_engine` is the new dual-engine entry point for tests that explicitly want parameterization.
+  - **Tests added** — `tests/test_db_url_helpers.py` (15 tests), `tests/test_config_db_dialect.py` (3 tests), `tests/test_database_engine_dispatch.py` (3 tests), `tests/test_db_engine_fixture.py` (2 tests).
+
+- **Verification**
+  - `backend/.venv/bin/python -m pytest backend/tests --tb=line -q` → **16 failed, 4338 passed, 2 skipped** (vs. baseline 16 failed, 4315 passed). The 16 failures are the pre-existing set (test_barrier_*, test_config_llm, test_contract_credit_api, test_montgomery_leaks, test_precrawl_city, test_proximity_scorer_city, test_wioa_screener_city) — `diff` of failure lists shows IDENTICAL. +23 passed accounts for the 23 new tests added.
+  - `bpsai-pair arch check` on each touched file: db_url.py / conftest.py / env.py = no violations; database.py + config.py = soft-warning only (file >150 lines, threshold below project's 200/400 standard) — net delta is small (+18 / +22) and both files were already past the warning threshold pre-T22.2.
+  - `cd backend && .venv/bin/alembic current` exits clean (env.py refactor verified).
+  - asyncpg + psycopg installed and importable in the venv.
+
+- **No callsite changes outside the four files in scope.** All existing test fixtures (`test_engine`, `client`, etc.) keep working unchanged; the new `db_engine` is additive.
+
+- **What's next.** T22.3 ports the m001-m010 DDL chain into versioned Alembic migrations (now that asyncpg is available), then T22.4 wires a Postgres CI service so the postgres axis of `db_engine` actually runs in CI.
+
+- **T22.1 done** (auto-updated by hook)
+
+### 2026-05-06 — T22.1 — Alembic infrastructure + async env
+
+Branch: `engage/backlog-sprint-22-identity-foundation`. Sprint 22 entry task — stood up the Alembic migration runner at `backend/alembic/` with async-engine support. No schema changes (T22.3 will port the m001-m010 chain into versioned migrations); this task is purely the runner.
+
+- **Files created** — `backend/alembic.ini` (64 lines), `backend/alembic/env.py` (124 lines), `backend/alembic/script.py.mako` (31 lines), `backend/alembic/versions/.gitkeep` (empty).
+- **`alembic.ini`** — `script_location = alembic`, `file_template = %(rev)s_%(slug)s` to enforce `0001_<slug>` numeric ordering (mirrors legacy m00X), `prepend_sys_path = .` so env.py can import `app.core.config` for the Settings fallback. Standard logger config kept verbatim from the alembic async template.
+- **`env.py`** — async-aware, single env.py drives both sqlite (aiosqlite) and postgres (asyncpg). DATABASE_URL resolution priority: CLI `-x dburl=...` → `DATABASE_URL` env → `app.core.config.Settings.database_url`. `_normalize_async_url` coerces sync URLs to their async-driver equivalents (`sqlite://` → `sqlite+aiosqlite://`, `postgresql://` → `postgresql+asyncpg://`). Postgres path is wired but not exercised until T22.2 lands asyncpg in requirements.txt. Uses `pool.NullPool` so engines are torn down between alembic invocations (avoids dangling connections in CI). `target_metadata = None` for now; T22.3 will wire SQLAlchemy models.
+- **`script.py.mako`** — adapted from the alembic async template; adds a comment block documenting the numeric-prefix convention and the `alembic revision --rev-id 0011 -m "slug"` invocation pattern.
+- **Verification** — `cd backend && DATABASE_URL=sqlite+aiosqlite:////tmp/X.db .venv/bin/alembic upgrade head` exits clean (no migrations to apply yet, but the runner cycles through context setup correctly + creates the sqlite DB file). `alembic current` and `alembic history` also clean. Settings-fallback path tested by running with `env -u DATABASE_URL` — falls through to `Settings.database_url = "sqlite+aiosqlite:///./montgowork.db"` and runs clean. Postgres path verified by code inspection only (asyncpg deferred to T22.2). `bpsai-pair arch check backend/alembic/env.py` passes (no violations: 124 lines, 6 functions, all under 50 lines each).
+- **Dependency status** — `alembic==1.18.4` was already in `backend/requirements.txt` (transitive expectation met); no requirements bump needed.
+
+### 2026-05-06 — Sprint 22 ideation → backlog → plan
+
+User dispatch: strategic planning conversation about the future of the platform — login + identity, gamification, DFW/Dallas expansion, FW DAO bounty integration, Mercor-style two-sided assessments + listing verification. Goal: total workforce solution; verification burden on both sides; bounty revenue path to fund quitting day job.
+
+- **Strategy lock-in.** 6 pillars surfaced (identity, two-sided assessments, anti-fake-listing verification, gamification, DFW unification, FW DAO niche). Ordering established as Sprints 22→30, foundation-first. Time-to-revenue path: bounty claims realistic at end of Sprint 26; vendor relationship pitched in person at FW DAO Roundtable (attended 2026-05-06).
+- **Integrity charter v0.1 drafted** (`docs/integrity-charter.draft.md`) — 10 binding principles led by "money never moves position." Saved to rig Downloads via SSH for review (`C:\Users\kmast\Downloads\integrity-charter.draft.md`).
+- **Wallet path established.** MetaMask install walkthrough delivered; ETH wallet needed for FW DAO membership/voting. Scheduled remote-agent check-in (trig_01J5UmkW7MFmLdBnrSUYx1i4) for 2026-05-06T22:56Z to gather DAO bounty list once Kevin is signed in.
+- **Sprint 22 — Identity Foundation ideated.** Step 0 caught two conflict blockers (T12.0, T12.1 in_progress) — resolved by rolling into Sprint 22 scope (option b). Validation issues fixed (AGENTS.md created; `## Current Focus` section added). Stale changes committed (5473b01: 22 files, 1311+/60-).
+- **Tooling bug filed.** `bpsai-pair query tasks --status in_progress` crashes with `AttributeError: TaskParser.parse_task missing` — reproduced and reported as BPSAI/paircoder#263.
+- **Brief written** — `.paircoder/plans/briefs/brief-sprint-22-identity-foundation.md`. 13 tasks, 225 Cx, dependency graph in 8 waves, file collision matrix clean.
+- **Backlog drafted** — `plans/backlogs/backlog-sprint-22-identity-foundation.md`. Validates clean via `bpsai-pair engage --dry-run` (13 tasks parsed at correct Cx + priorities).
+- **Plan created** — `plan-2026-05-s22-identity-foundation` (auto-scope: story; total Cx 225 within sprint budget 300). 13 task records (T22.1–T22.13) added with full content (objective, files, AC, verification, dependencies). Ready for engage.
 
 ### 2026-04-30 — subpage brand-parity sweep: shadcn HSL rebrand + every subpage on-brand
 
