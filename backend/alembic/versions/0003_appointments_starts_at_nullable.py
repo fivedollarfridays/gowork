@@ -28,6 +28,8 @@ from app.core.migrations.m003_appointments_starts_at_nullable import (
     _INDEX_DDL as _M003_INDEX_DDL,
 )
 
+from app.core.migrations.legacy_ddl_translator import translate_for_dialect
+
 revision: str = "0003"
 down_revision: Union[str, Sequence[str], None] = "0002"
 branch_labels: Union[str, Sequence[str], None] = None
@@ -39,7 +41,8 @@ def upgrade() -> None:
     bind = op.get_bind()
     if not _table_exists(bind, "appointments"):
         return
-    op.execute(_M003_CREATE_NEW_TABLE)
+    dialect = bind.dialect.name
+    op.execute(translate_for_dialect(_M003_CREATE_NEW_TABLE, dialect))
     op.execute(_M003_COPY_SQL)
     op.execute("DROP TABLE appointments")
     op.execute("ALTER TABLE appointments_new RENAME TO appointments")

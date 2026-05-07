@@ -26,6 +26,8 @@ from app.core.migrations.m006_compliance_tombstones import (
     _TOMBSTONE_TABLES as _M006_TOMBSTONE_TABLES,
 )
 
+from app.core.migrations.legacy_ddl_translator import translate_for_dialect
+
 revision: str = "0006"
 down_revision: Union[str, Sequence[str], None] = "0005"
 branch_labels: Union[str, Sequence[str], None] = None
@@ -34,10 +36,10 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Create compliance_audit + add tombstone columns (idempotent)."""
-    op.execute(_M006_AUDIT_TABLE_DDL)
+    bind = op.get_bind()
+    op.execute(translate_for_dialect(_M006_AUDIT_TABLE_DDL, bind.dialect.name))
     for idx in _M006_AUDIT_INDEXES:
         op.execute(idx)
-    bind = op.get_bind()
     for table in _M006_TOMBSTONE_TABLES:
         _add_tombstones(bind, table)
 

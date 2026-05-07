@@ -25,6 +25,8 @@ from app.core.migrations.m002_s12_worker_companion import (
     _TABLE_DDL as _M002_TABLE_DDL,
 )
 
+from app.core.migrations.legacy_ddl_translator import translate_for_dialect
+
 revision: str = "0002"
 down_revision: Union[str, Sequence[str], None] = "0001"
 branch_labels: Union[str, Sequence[str], None] = None
@@ -33,8 +35,9 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Create S12 worker-companion tables + indexes (13 tables)."""
+    dialect = op.get_bind().dialect.name
     for ddl in _M002_TABLE_DDL:
-        op.execute(ddl)
+        op.execute(translate_for_dialect(ddl, dialect))
     for ddl in _M002_INDEX_DDL:
         op.execute(ddl)
 
