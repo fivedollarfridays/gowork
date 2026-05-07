@@ -50,6 +50,14 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+- **T23.6 done** (auto-updated by hook)
+
+### 2026-05-07 — T23.6 — Public assessment-fetch endpoint
+
+Shipped `GET /api/assessments/{slug}` as a fully public, candidate-facing read of the assessment authoring pipeline. New route module `backend/app/routes/assessments_public.py` (96 lines) — auth.py untouched at 301 lines as required by the S23 cross-task constraint. Route returns the latest published version + questions in the documented schema (`{slug, kind, track, version_number, published_at, questions: [{position, prompt, kind, scoring_weight}]}`), 404s on draft-only / approved-only / unknown slugs, and sets `Cache-Control: public, max-age=60`. `rubric_json` is stripped at both the queries layer (already) and the route's explicit projection (belt-and-suspenders).
+
+Test file `backend/tests/test_assessments_public.py` (339 lines) with 8 cases — published-200, rubric-not-leaked, draft-only-404, approved-but-not-published-404, unknown-slug-404, cache-header, anon-vs-claimed-equivalence (HTTP-level smoke that mirrors the auto-discovery invariant for a route the discovery loop can't reach), and router registration. Full backend suite: 4554 passed (was 4546 baseline; +8 new), 4 pre-existing failures preserved exactly. Added `GET /api/assessments/{slug}` to `tests/_cross_session_fixtures.py:PUBLIC_ENDPOINTS` with rationale so the cross-session triage test stays green. Router registered in `backend/app/routes/__init__.py` between `assessments_admin_router` and `assessments_review_router`. `bpsai-pair arch check` clean on both new files.
+
 - **T23.5 done** (auto-updated by hook)
 
 - **T23.5 done** (auto-updated by hook)

@@ -8,6 +8,7 @@ from app.routes.appointments import router as appointments_router
 from app.routes.appointments_manage import router as appointments_manage_router
 from app.routes.assessment import router as assessment_router
 from app.routes.assessments_admin import router as assessments_admin_router
+from app.routes.assessments_public import router as assessments_public_router
 from app.routes.assessments_review import router as assessments_review_router
 from app.routes.auth import router as auth_router
 from app.routes.brightdata import router as brightdata_router
@@ -47,6 +48,7 @@ all_routers = [
     appointments_router,
     assessment_router,
     assessments_admin_router,
+    assessments_public_router,
     assessments_review_router,
     auth_router,
     plan_router,

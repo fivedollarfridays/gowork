@@ -80,6 +80,9 @@ PUBLIC_ENDPOINTS: dict[str, str] = {
         "Public job listings.",
     "GET /api/jobs/{job_id}":
         "Public job listing detail.",
+    "GET /api/assessments/{slug}":
+        "Public candidate-facing assessment fetch (T23.6); no session_id "
+        "input, published versions only, rubric_json stripped.",
     "POST /api/credit/assess":
         "Anonymous self-assessment; no session_id input.",
     "POST /api/assessment/":
