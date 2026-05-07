@@ -113,23 +113,22 @@ jobs:
         env:
           DATABASE_URL: "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"
 
-      - name: Run dialect-portability tests against postgres
-        # Postgres CI scope is the dialect-portability layer only —
-        # alembic chain, parity, URL helpers, dialect translator, dispatch.
-        # These tests are pure schema/dialect surface and don't carry
-        # cross-test data state.
+      - name: Run postgres-axis tests
+        # Postgres CI scope covers the dialect-portability layer
+        # (alembic chain, parity, URL helpers, dialect translator,
+        # dispatch) AND the identity layer (accounts, roles, auth).
         #
-        # The identity-layer tests (test_accounts, test_roles, test_auth_*)
-        # ARE designed to run against both engines via the db_engine
-        # fixture, but they share account_id state across tests within the
-        # postgres axis (the fixture's DROP SCHEMA teardown loses races
-        # against pooled connections in CI). Running them on postgres needs
-        # a transaction-per-test isolation rebuild that's deferred to a
-        # follow-up sprint. Sqlite axis still exercises full identity-layer
-        # coverage; alembic 0011/0012 + test_db_parity verify the postgres
-        # schema for those tables.
+        # T23.9 rebuilt the db_engine postgres axis with
+        # transaction-per-test isolation (session-scoped engine +
+        # alembic-once + per-test BEGIN/ROLLBACK), so the identity
+        # tests no longer collide on cross-test account_id state and
+        # don't depend on a DROP SCHEMA race for cleanup. Auth tests
+        # use the sqlite-only test_engine fixture but are listed here
+        # so the postgres CI job exercises them in a postgres-aware
+        # environment (env vars / dialect helpers) — they continue to
+        # hit sqlite via test_engine.
         #
-        # Adding a new dialect-portability test? Append it here.
+        # Adding a new postgres-aware test? Append it here.
         run: |
           pytest -v --tb=short \
             tests/test_alembic_parity.py \
@@ -138,7 +137,13 @@ jobs:
             tests/test_db_engine_fixture.py \
             tests/test_database_engine_dispatch.py \
             tests/test_legacy_ddl_translator.py \
-            tests/test_config_db_dialect.py
+            tests/test_config_db_dialect.py \
+            tests/test_accounts.py \
+            tests/test_roles.py \
+            tests/test_auth_magic_link.py \
+            tests/test_auth_claim.py \
+            tests/test_auth_me.py \
+            tests/test_anonymous_first_invariant.py
         env:
           ENVIRONMENT: test
           DATABASE_URL: "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"

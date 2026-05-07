@@ -50,6 +50,20 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+- **T23.9 done** (auto-updated by hook)
+
+- **T23.9 done** (driver session)
+
+### 2026-05-07 — T23.9 — Postgres test transaction-per-test isolation
+
+Closed the deferred S22 follow-up. Replaced the `db_engine` postgres-axis `DROP SCHEMA public CASCADE` per-test teardown (which lost races against pooled connections in CI) with a transaction-per-test pattern: a session-scoped `_postgres_engine_with_schema` fixture builds the engine and runs `alembic upgrade head` ONCE per pytest session, then each `db_engine` invocation opens a connection, BEGINs an outer transaction, yields it, and ROLLBACKs on teardown. The yielded object is a slot-compatible subclass of `AsyncConnection` (`_PgFixtureConnection`) swapped in via `__class__` assignment so `isinstance(bind, AsyncConnection)` holds for `async_sessionmaker` (sessions commit-as-SAVEPOINT inside the outer transaction) while overriding `begin()`/`connect()`/`url` to keep existing engine-style call sites (`async with db_engine.begin() as conn`, `db_engine.url.drivername`) working unchanged. Sqlite axis behaviour unchanged (still per-test tmp file with full `init_db` chain). Promoted `anyio_backend` from function-scope to session-scope so the session-scoped postgres engine fixture can transitively depend on it without ScopeMismatch. CI postgres job scope expanded: 6 identity test files added (`test_accounts.py`, `test_roles.py`, `test_auth_magic_link.py`, `test_auth_claim.py`, `test_auth_me.py`, `test_anonymous_first_invariant.py`) and the deferred-follow-up comment block updated. Verified locally with docker postgres: 66 dialect-portability tests pass on both axes (no regression), 52 identity tests pass on both axes (was sqlite-only before), 32 auth tests pass with `GOWORK_TEST_POSTGRES_URL` set. Sqlite-axis full suite: 4 baseline failed / 4475 passed / 2 skipped (no new regressions). `arch check backend/tests/conftest.py` clean (361 lines, under the 600-line test-file ceiling).
+
+- **T23.1 done** (auto-updated by hook)
+
+### 2026-05-07 — T23.1 — Assessments schema migration
+
+Landed alembic revision `0013_assessments` plus `app/core/assessments_schema.py` for the assessment authoring identity-of-content layer. Four tables on the shared `accounts_schema.metadata` (mirroring the `roles_schema` pattern so FKs to `accounts.id` resolve at `create_all` time): `assessments` (durable identity — slug, kind, track), `assessment_versions` (frozen-on-publish snapshots with UNIQUE(assessment_id, version_number)), `assessment_questions` (questions belong to a *version* with UNIQUE(version_id, position) so revisions don't break past scores), `assessment_reviews` (append-only review trail). All five ENUM-style columns enforced via portable `CHECK ... IN (...)` clauses with module-level tuples (`ASSESSMENT_KINDS`, `ASSESSMENT_TRACKS`, `ASSESSMENT_VERSION_STATUSES`, `QUESTION_KINDS`, `REVIEW_ACTIONS`) as the single source of truth. `idx_assessment_versions_status` indexes the reviewer-queue hot-path filter. `apply_ddl(connection)` helper scoped to the four tables via `tables=` arg keeps the revision surface-disjoint. 14 new schema-sanity tests passing (table presence × 4, CHECK rejection × 5, CHECK acceptance × 1, UNIQUE × 3, ENUM-tuple constants × 1). Backend suite: 4 baseline failed / 4475 passed / 2 skipped (+14 net new). `alembic upgrade head` clean on fresh sqlite (postgres axis deferred to CI). `test_alembic_parity.py` chain expectation extended to 0013 with the four new CREATE statements + status index stripped on the alembic side.
+
 - **T22.13 done** (auto-updated by hook)
 
 ### 2026-05-06 — Sprint 22 (Identity Foundation) — COMPLETE

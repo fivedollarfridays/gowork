@@ -49,6 +49,17 @@ _TOOLING_TABLE_PATTERNS = (
     # Role-layer table (T22.6, alembic 0012) likewise has no legacy
     # m*.py counterpart — strip from the alembic side.
     re.compile(r"CREATE TABLE account_roles\b", re.IGNORECASE),
+    # Assessment-authoring tables (T23.1, alembic 0013) — no legacy
+    # counterpart; strip from the alembic side so the parity check
+    # still pins the m001..m010 schema.
+    re.compile(r"CREATE TABLE assessments\b", re.IGNORECASE),
+    re.compile(r"CREATE TABLE assessment_versions\b", re.IGNORECASE),
+    re.compile(r"CREATE TABLE assessment_questions\b", re.IGNORECASE),
+    re.compile(r"CREATE TABLE assessment_reviews\b", re.IGNORECASE),
+    re.compile(
+        r"CREATE INDEX [^ ]*idx_assessment_versions_status",
+        re.IGNORECASE,
+    ),
 )
 
 
@@ -136,7 +147,7 @@ def test_alembic_upgrade_head_matches_runner_schema(
 
 
 def test_alembic_revisions_chain_is_linear(alembic_available):
-    """Each revision 0001..0012 must declare the previous as down_revision."""
+    """Each revision 0001..0013 must declare the previous as down_revision."""
     versions_dir = _backend_dir() / "alembic" / "versions"
     expected = {
         "0001": None,
@@ -151,9 +162,10 @@ def test_alembic_revisions_chain_is_linear(alembic_available):
         "0010": "0009",
         "0011": "0010",
         "0012": "0011",
+        "0013": "0012",
     }
     files = sorted(versions_dir.glob("[0-9][0-9][0-9][0-9]_*.py"))
-    assert len(files) == 12, f"expected 12 revisions, found {len(files)}"
+    assert len(files) == 13, f"expected 13 revisions, found {len(files)}"
 
     for path in files:
         rev = path.name[:4]

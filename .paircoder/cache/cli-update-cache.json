@@ -40,8 +40,8 @@
     "last_status": "done"
   },
   "T23.1": {
-    "last_cli_update": "2026-03-07T14:36:45.479726",
-    "last_status": "in_progress"
+    "last_cli_update": "2026-05-07T08:42:59.897737",
+    "last_status": "done"
   },
   "T31.2": {
     "last_cli_update": "2026-03-09T04:29:57.965584",
@@ -109,6 +109,10 @@
   },
   "T22.13": {
     "last_cli_update": "2026-05-06T18:38:38.118772",
+    "last_status": "done"
+  },
+  "T23.9": {
+    "last_cli_update": "2026-05-07T08:50:43.591365",
     "last_status": "done"
   }
 }
