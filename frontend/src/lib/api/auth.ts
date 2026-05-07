@@ -66,11 +66,38 @@ async function _fetchWithTimeout(
     return await fetch(`${API_BASE}${path}`, {
       ...init,
       headers,
-      signal: init?.signal ?? controller.signal,
+      signal: _composeSignal(init?.signal, controller.signal),
     });
   } finally {
     clearTimeout(timeoutId);
   }
+}
+
+/**
+ * Combine caller-provided AbortSignal with our timeout signal. Without
+ * this, passing `signal` from the caller silently disabled the timeout
+ * (the previous `init?.signal ?? controller.signal` form fell through
+ * to the caller's signal whenever it existed). Aborting either signal
+ * aborts the resulting one.
+ */
+function _composeSignal(
+  callerSignal: AbortSignal | undefined,
+  timeoutSignal: AbortSignal,
+): AbortSignal {
+  if (!callerSignal) return timeoutSignal;
+  if (typeof AbortSignal.any === "function") {
+    return AbortSignal.any([callerSignal, timeoutSignal]);
+  }
+  // Fallback for runtimes without AbortSignal.any: stitch with a relay.
+  const relay = new AbortController();
+  const onAbort = () => relay.abort();
+  if (callerSignal.aborted || timeoutSignal.aborted) {
+    relay.abort();
+  } else {
+    callerSignal.addEventListener("abort", onAbort, { once: true });
+    timeoutSignal.addEventListener("abort", onAbort, { once: true });
+  }
+  return relay.signal;
 }
 
 /**

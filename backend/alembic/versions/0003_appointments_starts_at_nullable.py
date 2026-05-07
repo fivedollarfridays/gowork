@@ -28,7 +28,10 @@ from app.core.migrations.m003_appointments_starts_at_nullable import (
     _INDEX_DDL as _M003_INDEX_DDL,
 )
 
-from app.core.migrations.legacy_ddl_translator import translate_for_dialect
+from app.core.migrations.legacy_ddl_translator import (
+    has_table,
+    translate_for_dialect,
+)
 
 revision: str = "0003"
 down_revision: Union[str, Sequence[str], None] = "0002"
@@ -39,10 +42,9 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     """Rebuild appointments with nullable starts_at (no-op if absent)."""
     bind = op.get_bind()
-    if not _table_exists(bind, "appointments"):
+    if not has_table(bind, "appointments"):
         return
-    dialect = bind.dialect.name
-    op.execute(translate_for_dialect(_M003_CREATE_NEW_TABLE, dialect))
+    op.execute(translate_for_dialect(_M003_CREATE_NEW_TABLE, bind.dialect.name))
     op.execute(_M003_COPY_SQL)
     op.execute("DROP TABLE appointments")
     op.execute("ALTER TABLE appointments_new RENAME TO appointments")
@@ -53,21 +55,3 @@ def upgrade() -> None:
 def downgrade() -> None:
     """No-op — re-tightening NOT NULL would fail on existing rows."""
     return
-
-
-def _table_exists(bind, name: str) -> bool:
-    """Dialect-aware table existence check."""
-    inspector_dialect = bind.dialect.name
-    if inspector_dialect == "sqlite":
-        row = bind.exec_driver_sql(
-            "SELECT name FROM sqlite_master "
-            "WHERE type='table' AND name=?",
-            (name,),
-        ).fetchone()
-        return row is not None
-    # Postgres / other — use information_schema.
-    row = bind.exec_driver_sql(
-        "SELECT 1 FROM information_schema.tables WHERE table_name = %s",
-        (name,),
-    ).fetchone()
-    return row is not None

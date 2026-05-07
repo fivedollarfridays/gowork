@@ -26,7 +26,10 @@ from app.core.migrations.m006_compliance_tombstones import (
     _TOMBSTONE_TABLES as _M006_TOMBSTONE_TABLES,
 )
 
-from app.core.migrations.legacy_ddl_translator import translate_for_dialect
+from app.core.migrations.legacy_ddl_translator import (
+    has_column,
+    translate_for_dialect,
+)
 
 revision: str = "0006"
 down_revision: Union[str, Sequence[str], None] = "0005"
@@ -52,31 +55,17 @@ def downgrade() -> None:
     op.execute("DROP TABLE IF EXISTS compliance_audit")
 
 
-def _has_column(bind, table: str, column: str) -> bool:
-    if bind.dialect.name == "sqlite":
-        rows = bind.exec_driver_sql(
-            f"PRAGMA table_info({table})"
-        ).fetchall()
-        return any(row[1] == column for row in rows)
-    row = bind.exec_driver_sql(
-        "SELECT 1 FROM information_schema.columns "
-        "WHERE table_name = %s AND column_name = %s",
-        (table, column),
-    ).fetchone()
-    return row is not None
-
-
 def _add_tombstones(bind, table: str) -> None:
     """Add deleted_at + deleted_reason to ``table`` (idempotent)."""
-    if not _has_column(bind, table, "deleted_at"):
+    if not has_column(bind, table, "deleted_at"):
         op.execute(f"ALTER TABLE {table} ADD COLUMN deleted_at TEXT")
-    if not _has_column(bind, table, "deleted_reason"):
+    if not has_column(bind, table, "deleted_reason"):
         op.execute(f"ALTER TABLE {table} ADD COLUMN deleted_reason TEXT")
 
 
 def _drop_tombstones(bind, table: str) -> None:
     """Drop deleted_at + deleted_reason from ``table`` (no-op if absent)."""
-    if _has_column(bind, table, "deleted_reason"):
+    if has_column(bind, table, "deleted_reason"):
         op.execute(f"ALTER TABLE {table} DROP COLUMN deleted_reason")
-    if _has_column(bind, table, "deleted_at"):
+    if has_column(bind, table, "deleted_at"):
         op.execute(f"ALTER TABLE {table} DROP COLUMN deleted_at")

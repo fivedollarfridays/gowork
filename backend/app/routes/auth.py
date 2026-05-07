@@ -256,10 +256,13 @@ async def claim_magic_link(
     claimed, conflict = await _maybe_claim_session(
         db, account_id=account_id, claim_sid=claim_sid
     )
+    # Consume the credential before returning — including on 409. Otherwise
+    # account B could re-POST the same valid token until 15-min expiry,
+    # trying different session_ids until one isn't already claimed by
+    # someone else. Single-use must hold across all outcomes.
+    await queries_accounts.mark_credential_used(db, credential_id)
     if conflict is not None:
         return conflict
-
-    await queries_accounts.mark_credential_used(db, credential_id)
     set_account_cookie(response, account_id)
     return {"account_id": account_id, "claimed_session_ids": claimed}
 

@@ -357,3 +357,14 @@ async def test_claim_cross_account_conflict_returns_409(
         )
         assert owner is not None
         assert int(owner["id"]) == other_account_id
+
+    # Single-use: the token is consumed even on 409, so account B cannot
+    # re-POST and try a different session_id until expiry.
+    second = await auth_client.get(
+        f"/api/auth/claim?token={raw_token}&session_id=other-session"
+    )
+    assert second.status_code == 401, (
+        "Token must be single-use across all outcomes — replay after 409 "
+        "would let an attacker spam different session_ids until one is "
+        "free, defeating the conflict guard."
+    )

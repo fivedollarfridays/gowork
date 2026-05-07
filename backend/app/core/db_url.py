@@ -39,8 +39,14 @@ def normalize_async_url(url: str) -> str:
         return url.replace("sqlite://", "sqlite+aiosqlite://", 1)
     if is_postgres_url(url):
         prefix, rest = url.split("://", 1)
+        # SQLAlchemy registers the dialect as ``postgresql``, not ``postgres``.
+        # Heroku/Render/RDS commonly emit the short ``postgres://`` form, so
+        # coerce to the canonical scheme before appending the async driver.
+        if prefix in ("postgres", "postgres+asyncpg", "postgres+psycopg"):
+            prefix = prefix.replace("postgres", "postgresql", 1)
         if "+" not in prefix:
             return f"{prefix}+asyncpg://{rest}"
+        return f"{prefix}://{rest}"
     return url
 
 

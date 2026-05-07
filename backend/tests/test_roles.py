@@ -231,69 +231,69 @@ async def test_one_account_can_hold_all_four_roles(session_factory):
 
 @pytest.mark.anyio
 async def test_require_role_403_when_anonymous(session_factory):
-    """Anonymous session (no account_sessions row) -> 403 Authentication required."""
+    """Missing/None gw_account cookie -> 403 Authentication required."""
     async with session_factory() as session:
         dep = require_role("admin")
         with pytest.raises(HTTPException) as exc:
-            await dep(db=session, session_id="anon-sess")
+            await dep(db=session, gw_account=None)
         assert exc.value.status_code == 403
         assert "Authentication" in exc.value.detail
 
 
 @pytest.mark.anyio
 async def test_require_role_403_when_missing_role(session_factory):
-    """Authenticated but missing the required role -> 403 Insufficient permissions."""
+    """Valid signed cookie but account lacks the required role -> 403."""
+    from app.routes._auth_claim_helpers import build_account_cookie_value
+
     async with session_factory() as session:
         account_id = await queries_accounts.create_account(
             session, email="caseworker@example.com"
         )
-        # Make a sessions row + claim it (mirrors test_accounts helper)
-        from datetime import datetime, timedelta, timezone
-        now = datetime.now(timezone.utc).isoformat()
-        expires = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
-        await session.execute(
-            text(
-                "INSERT INTO sessions (id, created_at, barriers, expires_at) "
-                "VALUES (:id, :created_at, :barriers, :expires_at)"
-            ),
-            {"id": "s-cw", "created_at": now, "barriers": "[]",
-             "expires_at": expires},
-        )
-        await session.commit()
-        await queries_accounts.claim_session(session, account_id, "s-cw")
         await queries_roles.grant_role(session, account_id, "case_manager")
+        cookie = build_account_cookie_value(account_id)
 
         dep = require_role("admin")
         with pytest.raises(HTTPException) as exc:
-            await dep(db=session, session_id="s-cw")
+            await dep(db=session, gw_account=cookie)
         assert exc.value.status_code == 403
         assert "Insufficient" in exc.value.detail
 
 
 @pytest.mark.anyio
 async def test_require_role_returns_account_when_authorized(session_factory):
-    """Authenticated + has role -> returns the account dict."""
+    """Valid signed cookie + has role -> returns the account dict."""
+    from app.routes._auth_claim_helpers import build_account_cookie_value
+
     async with session_factory() as session:
         account_id = await queries_accounts.create_account(
             session, email="boss@example.com"
         )
-        from datetime import datetime, timedelta, timezone
-        now = datetime.now(timezone.utc).isoformat()
-        expires = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
-        await session.execute(
-            text(
-                "INSERT INTO sessions (id, created_at, barriers, expires_at) "
-                "VALUES (:id, :created_at, :barriers, :expires_at)"
-            ),
-            {"id": "s-boss", "created_at": now, "barriers": "[]",
-             "expires_at": expires},
-        )
-        await session.commit()
-        await queries_accounts.claim_session(session, account_id, "s-boss")
         await queries_roles.grant_role(session, account_id, "admin")
+        cookie = build_account_cookie_value(account_id)
 
         dep = require_role("admin")
-        result = await dep(db=session, session_id="s-boss")
+        result = await dep(db=session, gw_account=cookie)
         assert result is not None
         assert result["id"] == account_id
         assert result["email"] == "boss@example.com"
+
+
+@pytest.mark.anyio
+async def test_require_role_403_when_cookie_tampered(session_factory):
+    """Tampered HMAC -> 403 Authentication required (oracle prevention)."""
+    from app.routes._auth_claim_helpers import build_account_cookie_value
+
+    async with session_factory() as session:
+        account_id = await queries_accounts.create_account(
+            session, email="admin@example.com"
+        )
+        await queries_roles.grant_role(session, account_id, "admin")
+        # Truncate the HMAC half to invalidate the signature.
+        good = build_account_cookie_value(account_id)
+        bad = good[: good.rindex(".") + 5]
+
+        dep = require_role("admin")
+        with pytest.raises(HTTPException) as exc:
+            await dep(db=session, gw_account=bad)
+        assert exc.value.status_code == 403
+        assert "Authentication" in exc.value.detail

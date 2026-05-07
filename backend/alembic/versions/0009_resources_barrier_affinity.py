@@ -15,6 +15,8 @@ from typing import Sequence, Union
 
 from alembic import op
 
+from app.core.migrations.legacy_ddl_translator import has_column
+
 revision: str = "0009"
 down_revision: Union[str, Sequence[str], None] = "0008"
 branch_labels: Union[str, Sequence[str], None] = None
@@ -23,7 +25,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Add resources.barrier_affinity (idempotent)."""
-    if not _has_column(op.get_bind(), "resources", "barrier_affinity"):
+    if not has_column(op.get_bind(), "resources", "barrier_affinity"):
         op.execute(
             "ALTER TABLE resources ADD COLUMN barrier_affinity TEXT"
         )
@@ -32,17 +34,3 @@ def upgrade() -> None:
 def downgrade() -> None:
     """No-op: SQLite < 3.35 can't drop columns."""
     return
-
-
-def _has_column(bind, table: str, column: str) -> bool:
-    if bind.dialect.name == "sqlite":
-        rows = bind.exec_driver_sql(
-            f"PRAGMA table_info({table})"
-        ).fetchall()
-        return any(row[1] == column for row in rows)
-    row = bind.exec_driver_sql(
-        "SELECT 1 FROM information_schema.columns "
-        "WHERE table_name = %s AND column_name = %s",
-        (table, column),
-    ).fetchone()
-    return row is not None

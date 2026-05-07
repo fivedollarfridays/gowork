@@ -63,6 +63,22 @@ class TestNormalizeAsyncUrl:
         url = "postgresql+psycopg://u:p@h/d"
         assert normalize_async_url(url) == url
 
+    def test_postgres_short_form_coerced_to_postgresql(self):
+        # Heroku/Render/RDS commonly emit ``postgres://``; SQLAlchemy
+        # registers the dialect as ``postgresql`` so the short form must
+        # be coerced before the async-driver suffix is appended.
+        assert (
+            normalize_async_url("postgres://u:p@h/d")
+            == "postgresql+asyncpg://u:p@h/d"
+        )
+
+    def test_postgres_short_with_driver_coerced(self):
+        # Same coercion when a driver is already present on the short form.
+        assert (
+            normalize_async_url("postgres+psycopg://u:p@h/d")
+            == "postgresql+psycopg://u:p@h/d"
+        )
+
 
 class TestInferDialect:
     def test_sqlite_url_yields_sqlite(self):
