@@ -52,6 +52,21 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+- **T24.1 done** (auto-updated by hook)
+
+### 2026-05-08 — T24.1 — Verification schema migration
+
+Sprint 24 entry task complete. Added the four-table verification substrate via SQLAlchemy Core + alembic revision 0014 (down_revision=0013).
+
+- **New schema module** `backend/app/core/listings_verification_schema.py` (267 lines): four `Table` defs on shared `accounts_schema.metadata` (mirrors S22 roles + S23 assessments pattern). Module-level ENUM tuples are the single source of truth: `VERIFICATION_STATUSES` (pending|claimed|admin_review|verified|retired), `SOURCE_TRUST_TIERS` (unknown|brightdata|honestjobs|twc|manual), `VERIFICATION_TIERS` (source_trust|claim_verified|admin_reviewed), `EVENT_KINDS` (response_received|withdrawn|placed|ghosted). All ENUM columns enforced via portable SQL `CHECK` clauses (sqlite + postgres compatible). `apply_ddl(connection)` helper scoped to the four tables.
+- **Tables**: `employer_accounts` (id, name UNIQUE, domain, verification_status, verified_at, verified_by_account_id FK→accounts SET NULL, retired_at, source_trust_tier, created_at), `listing_claims` (id, claim_token_hash UNIQUE, listing_id FK→job_listings CASCADE, employer_account_id FK SET NULL, claimant_email, claimant_account_id FK SET NULL, expires_at, used_at, created_at), `listing_verifications` (id, listing_id UNIQUE FK CASCADE, employer_account_id FK RESTRICT, verification_tier, intake_completed_at, intake_json TEXT, verified_at, created_at), `listing_reputation_events` (id, listing_id FK CASCADE, event_kind, session_id, occurred_at, recorded_by FK SET NULL, notes TEXT) + index `idx_listing_reputation_events_listing_id_occurred_at` on `(listing_id, occurred_at)` for the rolling-window reputation hot path.
+- **FK to legacy job_listings**: declared a reference-only stub `_job_listings_ref` Table (id-only, `extend_existing=True`) so SQLAlchemy can resolve FK targets at sort time without owning the table — `apply_ddl` is scoped to the four verification tables so the stub never appears in emitted DDL.
+- **Alembic revision** `backend/alembic/versions/0014_listing_verification.py` delegates to the schema module (mirrors 0012/0013 style).
+- **Schema tests** `backend/tests/test_listings_verification_schema.py` (15 tests): table presence × 4, CHECK rejection × 4 + acceptance × 2, UNIQUE × 3, reputation index, ENUM-tuple-spec.
+- **Parity test extended** to chain expectation 0014 (14 revisions) and the legacy-vs-alembic diff strips the four new tables + the reputation index.
+- **Verification**: `alembic upgrade head` clean on fresh sqlite (0001→0014). `sqlite3 .schema` confirms all CHECK + UNIQUE + FK + index DDL emitted correctly. Full backend suite: 4 failed (baseline) / 4573 passed / 2 skipped (was 4558; +15 from new tests, no new failures).
+- **Arch check**: 0014 revision + parity test + new schema test file all clean. Schema module 267 lines (warning at 150, error at 300 — same posture as the canonical assessments_schema.py at 270).
+
 - **T23.10 done** (auto-updated by hook)
 
 ### 2026-05-07 — Sprint 23 (Assessment Authoring Pipeline) — COMPLETE

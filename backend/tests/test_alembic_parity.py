@@ -60,6 +60,17 @@ _TOOLING_TABLE_PATTERNS = (
         r"CREATE INDEX [^ ]*idx_assessment_versions_status",
         re.IGNORECASE,
     ),
+    # Listing-verification tables (T24.1, alembic 0014) — no legacy
+    # counterpart; strip from the alembic side so the parity check
+    # still pins the m001..m010 schema.
+    re.compile(r"CREATE TABLE employer_accounts\b", re.IGNORECASE),
+    re.compile(r"CREATE TABLE listing_claims\b", re.IGNORECASE),
+    re.compile(r"CREATE TABLE listing_verifications\b", re.IGNORECASE),
+    re.compile(r"CREATE TABLE listing_reputation_events\b", re.IGNORECASE),
+    re.compile(
+        r"CREATE INDEX [^ ]*idx_listing_reputation_events_listing_id_occurred_at",
+        re.IGNORECASE,
+    ),
 )
 
 
@@ -147,7 +158,7 @@ def test_alembic_upgrade_head_matches_runner_schema(
 
 
 def test_alembic_revisions_chain_is_linear(alembic_available):
-    """Each revision 0001..0013 must declare the previous as down_revision."""
+    """Each revision 0001..0014 must declare the previous as down_revision."""
     versions_dir = _backend_dir() / "alembic" / "versions"
     expected = {
         "0001": None,
@@ -163,9 +174,10 @@ def test_alembic_revisions_chain_is_linear(alembic_available):
         "0011": "0010",
         "0012": "0011",
         "0013": "0012",
+        "0014": "0013",
     }
     files = sorted(versions_dir.glob("[0-9][0-9][0-9][0-9]_*.py"))
-    assert len(files) == 13, f"expected 13 revisions, found {len(files)}"
+    assert len(files) == 14, f"expected 14 revisions, found {len(files)}"
 
     for path in files:
         rev = path.name[:4]
