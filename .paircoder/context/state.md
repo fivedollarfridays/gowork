@@ -54,6 +54,26 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 - **T24.11 done** (auto-updated by hook)
 
+### 2026-05-08 — Sprint 24 — /reviewing-and-fixing pass on PR #125
+
+Post-merge review pipeline (cleaning-docs → reviewing-code → fix-all → simplify → push). Reviewer agent caught five real items; all fixed before re-pushing.
+
+P1 fixes (real bugs):
+- Dropped dead `verified_by` kwarg from `create_verification` + 17 call sites — required positional, never read in the INSERT body. Audit-of-who-verified is captured at the employer-account level (`employer_accounts.verified_by_account_id`), not the verification row.
+- Replaced runtime `assert` in `_employer_intake_helpers.execute_intake` with explicit 500 raise — `python -O` strips asserts, would silently turn into AttributeError at the `dict(None)` site.
+- Capped IN-clause in `get_public_verification_summary` at 1000 listing_ids per chunk — postgres `max_bind_vars=65535` ceiling becomes silent failure mode otherwise. Aggregator pages stay well under, but the helper is defensive.
+- Empty-listing-ids early return in `jobs.py:_attach_verification` — avoids a no-op DB roundtrip on filtered/empty pages.
+
+Cross-cutting (frontend DRY):
+- Extracted `frontend/src/lib/api/_client.ts` with shared `fetchWithTimeout` + `composeSignal` + `API_BASE` + `REQUEST_TIMEOUT_MS` constants. Removed ~70 LOC triplicated copy-paste across `auth.ts` + `assessments.ts` + `listing_claims.ts`. Each module now has a thin wrapper that delegates. The S22 review-fix `_composeSignal` correctness (caller-supplied AbortSignal must NOT silently disable timeout) lives in ONE place — future API clients in S25+ inherit it automatically.
+- Wrapped `<VerifiedBadge>` in `React.memo` — primitives-only props, parent `/jobs/page.tsx` re-renders frequently (filter, refetch, future Kanban DnD).
+
+Skipped (false-positive or deferrable):
+- Reviewer's "transactional approve/reject" concern on admin endpoints — SQLAlchemy async session auto-begins on first op; existing single-commit pattern is atomic.
+- Initially tried dropping the `_listing_exists` probe in `record_event` (FK enforcement + IntegrityError translation); reverted because SQLite test fixtures don't enforce FKs by default and the probe is portable. Comment added documenting the choice.
+
+Test result: 4700 backend / 3621 frontend / 0 regressions, 4 baseline failures preserved. Local pre-push gate green. Pushed `dd4a376` to `engage/backlog-sprint-24-listing-verification`; CI watch armed.
+
 ### 2026-05-08 — Sprint 24 (Two-Sided Listing Verification) — COMPLETE
 
 All 11 tasks landed (T24.1–T24.11). Sprint went /ideation → /draft-backlog → /pc-plan → /prepare-to-engage → /running-sprint-tasks across 7 dependency-aware waves. Path A (autonomous through Wave 5, integration gate at the end with user authorization).
