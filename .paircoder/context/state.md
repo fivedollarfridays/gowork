@@ -17,7 +17,7 @@
 
 ## Current Focus
 
-**Sprint 24 — Two-Sided Listing Verification** complete. 11/11 tasks done across 7 waves. PR ready to push for merge.
+**Sprint 24 — Two-Sided Listing Verification** shipped 2026-05-08 via PR #125 (merged). 11/11 tasks done across 7 waves; post-PR `/reviewing-and-fixing` pass shipped 4 P1 fixes + 1 DRY extraction + React.memo polish; CI green on all 5 jobs.
 
 - Backend: 4573 → 4700 passed (+127 net new); 4 baseline failures preserved
 - Frontend: 3580 → 3620 passed (+40 net new); 0 regressions
