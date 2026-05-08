@@ -1,0 +1,16 @@
+id: plan-2026-05-s24-listing-verification
+title: S24 — Two-Sided Listing Verification
+type: feature
+status: planned
+created_at: '2026-05-08T07:55:36.640233'
+skills:
+- planning-with-pm
+goals:
+- 'Anti-fake-listing core: domain-email claim flow, employer intake form, reputation
+  event stream, public verification-tier badge'
+- 'Charter integrity: matching engine reads zero verification signals (load-bearing
+  test in T24.11)'
+- First paid revenue surface (per-verified-listing fee) — substrate only; billing
+  integration deferred to S30
+metadata:
+  pm_scope: story

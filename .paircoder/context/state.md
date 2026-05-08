@@ -17,15 +17,17 @@
 
 ## Current Focus
 
-**Sprint 23 — Assessment Authoring Pipeline** complete. 10/10 tasks done across 8 waves. PR ready to push for merge.
+**Sprint 24 — Two-Sided Listing Verification** is planned and ready to engage. Plan ID: `plan-2026-05-s24-listing-verification`. 11 tasks (T24.1–T24.11), 205 Cx total, 10 P0 + 1 P1. Brief at `.paircoder/plans/briefs/brief-sprint-24-listing-verification.md`; backlog at `plans/backlogs/backlog-sprint-24-listing-verification.md`.
 
-- Backend: 4475 → 4558 passed (+83 net new); 4 baseline failures preserved
-- Frontend: 3527 → 3580 passed (+53 net new); 0 regressions
-- auth.py: 301 → 314 (T23.8 /me roles extension; well under 400 invariant)
-- E2E smoke (test_assessments_e2e) drives draft → review-approve → publish → public-fetch through real HTTP layer; mocks Claude at the get_llm_stream boundary; asserts charter provenance invariant on the published row
-- T23.9 closes the deferred S22 postgres-test-isolation follow-up — identity-layer tests now run on both axes via session-scoped engine + per-test transaction-rollback
+Scope: schema for employer_accounts / listing_claims / listing_verifications / listing_reputation_events (T24.1, T24.2); backend pipeline magic-link-style claim → verify → intake → public-tier surface → reputation events (T24.3–T24.7); rate computation (T24.8 — only P1, cuttable); admin claim-review dashboard + frontend Verified Listing badge (T24.9, T24.10); integration gate with charter-integrity test (T24.11).
 
-Sprint 22 — Identity Foundation shipped 2026-05-07 via PR #123 (merged).
+Cross-task constraint: `auth.py` must remain at 314 lines (sprint invariant; ceiling 400). All employer/listing routes land in their own modules (`routes/employers.py`, `routes/listing_reputation.py`). Existing `routes/jobs.py` extended for the verification-tier field.
+
+Cuttable scope: T24.8 only. Rate computation is read-side ergonomics; substrate works without it.
+
+**Sprint 23 — Assessment Authoring Pipeline** shipped 2026-05-07 via PR #124 (merged 2026-05-08). 10 tasks, +83 backend tests / +53 frontend tests, charter provenance invariant verified, postgres test isolation rebuild closed S22 follow-up.
+
+**Sprint 22 — Identity Foundation** shipped 2026-05-07 via PR #123 (merged).
 
 Out of focus: S13b deferred items (43 Tier-1 browser suites, 6 Tier-6 cross-module integrity, browser-dependent Tier-4) and the five other stale `in_progress` tasks (T1.7, T12.5, T12.16, T12.21, T12.24) — to be triaged separately.
 
