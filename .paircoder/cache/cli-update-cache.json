@@ -186,5 +186,9 @@
   "T24.9": {
     "last_cli_update": "2026-05-08T09:39:35.180664",
     "last_status": "done"
+  },
+  "T24.11": {
+    "last_cli_update": "2026-05-08T09:47:09.576886",
+    "last_status": "in_progress"
   }
 }

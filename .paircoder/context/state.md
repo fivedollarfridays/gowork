@@ -17,13 +17,13 @@
 
 ## Current Focus
 
-**Sprint 24 — Two-Sided Listing Verification** is planned and ready to engage. Plan ID: `plan-2026-05-s24-listing-verification`. 11 tasks (T24.1–T24.11), 205 Cx total, 10 P0 + 1 P1. Brief at `.paircoder/plans/briefs/brief-sprint-24-listing-verification.md`; backlog at `plans/backlogs/backlog-sprint-24-listing-verification.md`.
+**Sprint 24 — Two-Sided Listing Verification** complete. 11/11 tasks done across 7 waves. PR ready to push for merge.
 
-Scope: schema for employer_accounts / listing_claims / listing_verifications / listing_reputation_events (T24.1, T24.2); backend pipeline magic-link-style claim → verify → intake → public-tier surface → reputation events (T24.3–T24.7); rate computation (T24.8 — only P1, cuttable); admin claim-review dashboard + frontend Verified Listing badge (T24.9, T24.10); integration gate with charter-integrity test (T24.11).
-
-Cross-task constraint: `auth.py` must remain at 314 lines (sprint invariant; ceiling 400). All employer/listing routes land in their own modules (`routes/employers.py`, `routes/listing_reputation.py`). Existing `routes/jobs.py` extended for the verification-tier field.
-
-Cuttable scope: T24.8 only. Rate computation is read-side ergonomics; substrate works without it.
+- Backend: 4573 → 4700 passed (+127 net new); 4 baseline failures preserved
+- Frontend: 3580 → 3620 passed (+40 net new); 0 regressions
+- auth.py: 314 (UNCHANGED — sprint invariant held)
+- E2E smoke (test_listing_verification_e2e) drives claim → verify → intake → reputation event through real HTTP layer; mocks SendGrid via existing mock_provider; verifies `intake_json` never appears in public summary
+- **Charter integrity assertion** — explicit grep across `backend/app/modules/matching/` confirms ZERO references to verification fields (listing_verifications, listing_reputation_events, verification_tier, intake_complete, intake_json, employer_accounts, listing_claims). Display-only badge invariant holds.
 
 **Sprint 23 — Assessment Authoring Pipeline** shipped 2026-05-07 via PR #124 (merged 2026-05-08). 10 tasks, +83 backend tests / +53 frontend tests, charter provenance invariant verified, postgres test isolation rebuild closed S22 follow-up.
 
@@ -52,9 +52,21 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
-- **T24.9 done** (auto-updated by hook)
+### 2026-05-08 — Sprint 24 (Two-Sided Listing Verification) — COMPLETE
 
-- **T24.9 done** (auto-updated by hook)
+All 11 tasks landed (T24.1–T24.11). Sprint went /ideation → /draft-backlog → /pc-plan → /prepare-to-engage → /running-sprint-tasks across 7 dependency-aware waves. Path A (autonomous through Wave 5, integration gate at the end with user authorization).
+
+- **Test counts:** Backend 4573 → 4700 (+127 net new) / 4 baseline failed / 2 skipped. Frontend 3580 → 3620 (+40 net new) / 3 skipped / 0 failed.
+- **Schema substrate:** employer_accounts + listing_claims + listing_verifications + listing_reputation_events (alembic 0014) via SQLAlchemy Core sharing accounts_schema.metadata. ENUM constraints via portable CHECK clauses sourced from module-level tuples (VERIFICATION_STATUSES, SOURCE_TRUST_TIERS, VERIFICATION_TIERS, EVENT_KINDS). _job_listings_ref stub bridges FK resolution to legacy m001 job_listings.
+- **CRUD:** queries_employers (4 fns), queries_listings_verification (7 fns + 2 helpers), queries_listings_reputation (3 fns). State-machine guards raise ValueError; route layer translates to 409 / 404. Anti-oracle: find_unused_claim_by_hash returns None for all failure modes uniformly.
+- **Backend pipeline:** POST /api/employers/claim (T24.3) — magic-link-style domain-email proof, 202 always, anti-rotation rate-limit. GET /api/employers/claim/verify (T24.4) — uniform 401, 409 cross-employer, gw_employer_account HMAC cookie with `emp:` prefix. POST /api/employers/{eid}/listings/{lid}/intake (T24.5) — Pydantic-validated; cookie-or-admin gate. GET /api/jobs verification-tier extension (T24.6) — single batched read; intake_json EXCLUDED. POST /api/listings/{listing_id}/events (T24.7) — case_manager+admin gated. Rate computation (T24.8) — single GROUP BY SQL; ghosted-counted-but-not-surfaced invariant.
+- **Admin dashboard (T24.9):** factored to NEW backend module `employers_admin.py` (kept employers.py at 300, well under 400). 4 admin routes + 2 frontend pages wrapped in strict `<RoleGate roles={["admin"]}>`.
+- **Frontend Verified Listing badge (T24.10):** `<VerifiedBadge tier intakeComplete />` with three variants + amber sub-badge. Integrated into /jobs/page.tsx.
+- **E2E smoke (T24.11):** Full chain claim → verify → intake → public summary → reputation event through real HTTP layer. SendGrid mocked via existing mock_provider.
+- **Charter integrity assertion:** Explicit subprocess grep across `backend/app/modules/matching/` for `listing_verifications | listing_reputation_events | verification_tier | intake_complete | intake_json | employer_accounts | listing_claims` returns ZERO matches. The verified badge is display-only — matching engine reads zero verification signals. If a future sprint legitimately needs a verification signal, this test fails as the design-review trigger.
+- **Sprint invariant held:** auth.py 314 unchanged. employers.py 300 (under 400). New module employers_admin.py 111. New helpers _employer_claim_helpers (298) + _employer_intake_helpers (169) + _employer_issue_helpers (88) factored to keep employers.py from breaching budget.
+
+
 
 ### 2026-05-08 — T24.9 — Admin claim-review dashboard
 
