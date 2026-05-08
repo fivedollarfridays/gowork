@@ -169,6 +169,11 @@ PUBLIC_ENDPOINTS: dict[str, str] = {
         "session-scoped. Anonymous candidate session_id may appear in "
         "the body as a free-text reference but auth is the gw_account "
         "cookie, never the body session_id.",
+    "POST /api/employers/{employer_account_id}/listings/{listing_id}/intake":
+        "Role-gated (gw_employer_account cookie matching the path's "
+        "employer_account_id, OR admin role via gw_account cookie). "
+        "Not session-scoped — body has no session_id input. Tested "
+        "directly by test_employers_intake.py.",
 }
 
 

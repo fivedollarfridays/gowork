@@ -206,6 +206,11 @@ AUDIT_ALLOWLIST: dict[str, str] = {
         "No-persistence audit — listing_reputation_events row IS the "
         "audit (recorded_by + occurred_at columns set on insert); "
         "the event stream is itself the append-only audit log.",
+    "POST /api/employers/{employer_account_id}/listings/{listing_id}/intake":
+        "No-persistence audit — listing_verifications row IS the audit "
+        "(intake_json + intake_completed_at columns stamped on submit); "
+        "role-gated (gw_employer_account cookie matching path or admin "
+        "role override).",
 }
 
 

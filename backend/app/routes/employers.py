@@ -35,14 +35,20 @@ from app.core.audit import get_client_ip
 from app.core.config import get_settings
 from app.core.database import get_db
 from app.core.rate_limit import RateLimiter
-from app.routes._employer_claim_helpers import execute_claim_verify
-from app.routes._employer_issue_helpers import company_matches_domain
+# Sibling helpers consolidated into a single ``from app.routes`` import
+# to stay inside the per-file import-statement budget. The aliases
+# ``_intake`` / ``_claim`` / ``_issue`` keep call sites concise.
+from app.routes import (
+    _employer_claim_helpers as _claim,
+    _employer_intake_helpers as _intake,
+    _employer_issue_helpers as _issue,
+)
 
 # Backward-compat alias — existing T24.3 tests import the heuristic via
 # ``from app.routes.employers import _company_matches_domain``. The
 # implementation moved to :mod:`._employer_issue_helpers` to keep this
 # file inside the per-file size + function-count budgets.
-_company_matches_domain = company_matches_domain
+_company_matches_domain = _issue.company_matches_domain
 
 router = APIRouter(prefix="/api/employers", tags=["employers"])
 
@@ -263,4 +269,32 @@ async def verify_listing_claim(
     :func:`_employer_claim_helpers.execute_claim_verify` so this file
     stays inside the per-file size budget.
     """
-    return await execute_claim_verify(db, raw_token=raw_token, response=response)
+    return await _claim.execute_claim_verify(
+        db, raw_token=raw_token, response=response
+    )
+
+
+# -------------------- Intake route (T24.5) --------------------
+
+
+@router.post(
+    "/{employer_account_id}/listings/{listing_id}/intake",
+    response_model=None,
+)
+async def submit_listing_intake(
+    listing_id: int,
+    body: _intake.IntakeRequest,
+    employer_account_id: int = Depends(_intake.resolve_intake_caller),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Persist structured intake answers for an employer-verified listing.
+
+    Gated by :func:`_intake.resolve_intake_caller` (employer cookie
+    matching path id, OR admin role). Returns the full verification
+    record with ``intake_json`` included — the read-after-write
+    surface is employer-private (the public summary strips it).
+    """
+    return await _intake.execute_intake(
+        db, employer_account_id=employer_account_id,
+        listing_id=listing_id, body=body,
+    )

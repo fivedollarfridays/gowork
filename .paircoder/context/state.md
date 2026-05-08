@@ -52,6 +52,48 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+- **T24.5 done** (auto-updated by hook)
+
+### 2026-05-08 — T24.5 — Employer intake endpoint
+
+Shipped `POST /api/employers/{employer_account_id}/listings/{listing_id}/intake`
+— the third leg of the listing-verification flow. Accepts the
+structured intake answers (must-haves, nice-to-haves, real day-1
+tasks, comp band, fair-chance willingness, additional notes) for a
+listing the caller has just verified ownership of. Pydantic-validated:
+`must_haves` and `real_day1_tasks` non-empty, `comp_band_min` and
+`comp_band_max` positive, `comp_band_max >= comp_band_min` enforced
+via a `field_validator` on `comp_band_max`. Persists the JSON-encoded
+blob via `set_intake` (stamps `intake_completed_at`) and returns the
+full verification row with `intake_json` included — the
+read-after-write surface is intentionally employer-private.
+
+Cookie-or-admin gate: a custom `resolve_intake_caller` dependency
+passes when EITHER the signed `gw_employer_account` cookie decodes to
+the same employer id as the path param, OR the caller holds the
+`admin` role via the `gw_account` cookie. Anonymous + mismatched-
+employer both 403 with a uniform `not_authorised` body. Listing
+ownership is then re-verified at the orchestrator layer
+(`get_verification_for_listing` → 404 if `employer_account_id`
+mismatch) so a verified employer cannot submit intake for a listing
+owned by a different employer.
+
+Architecture: business logic + Pydantic schema + dependency factored
+into the new `backend/app/routes/_employer_intake_helpers.py` (169
+lines) so `employers.py` (266 → 300 lines after the route addition)
+stays inside per-file budgets. Sibling helper imports consolidated
+into a single `from app.routes import (…)` block to satisfy the
+15-statement import budget. `auth.py` unchanged at 314.
+
+Tests: 9 new in `test_employers_intake.py` covering schema validation
+(empty must_haves 422, empty real_day1_tasks 422, comp_band_min >
+comp_band_max 422, negative comp_band 422), happy paths (employer
+cookie 200 + intake_json round-trip, admin override 200), and gating
+failures (anonymous 403, wrong employer cookie 403, listing owned by
+different employer 404). Backend suite: 4 failed (baseline) / 4683
+passed / 2 skipped (+9 from T24.4). `AUDIT_ALLOWLIST` and
+`PUBLIC_ENDPOINTS` extended with the new role-gated mutation route.
+
 - **T24.4 done** (auto-updated by hook)
 
 ### 2026-05-08 — T24.4 — Listing claim verification endpoint
