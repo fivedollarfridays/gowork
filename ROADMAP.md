@@ -1,6 +1,8 @@
 # MontGoWork Roadmap
 
-Current state as of March 2026. Organized by what's done, what's in progress, and what's next.
+Current state as of May 2026. Organized by what's done, what's in progress, and what's next.
+
+> **Note on sprint numbering.** This roadmap mixes two tracks. The Montgomery, AL hackathon era (Sprints 3–30 below) used sequential numbering. The Fort Worth visual-rebirth and post-rebirth feature work (S1–S13, then S22+) is tracked separately by bpsai-pair under `.paircoder/context/state.md`; recent cross-track sprints are listed at the end of this section.
 
 ---
 
@@ -148,6 +150,47 @@ Current state as of March 2026. Organized by what's done, what's in progress, an
 - [x] safeHref XSS prevention on external URLs
 - [x] Prompt injection defense via XML user_input tags
 
+### Fort Worth Visual Rebirth + Worker Companion (Sprints S1–S13)
+City framework + Fort Worth substrate + Worker Companion (Foundation + Value Extensions) + Platform-Wide QC. Detail in `.paircoder/context/state.md` "Previous Sprints (summary)" and `.paircoder/archive/state-s12a.md` / `.paircoder/archive/state-s13.md`.
+- [x] S1 — City Framework Scaffold (8/8); S2 — Fort Worth Data + Texas Rules (18/18); S3 — Texas/Fort Worth audit
+- [x] S4 — Hackathon polish (share, sequence viz, what-if simulator, voice input, i18n)
+- [x] S5 — Employment Pathway Engine (cliff-aware multi-step); S6 — Backend hardening + Montgomery leak remediation
+- [x] S7 — Outcome-Informed Barrier Intelligence (N+1 loop); S8 — Cross-module integration verify
+- [x] S9 — Intelligence loop end-to-end (calibrated_weeks → pathway); S10 — Demo seed + pipeline verification
+- [x] S11 — "People Like You" Community Insights (deterministic, city-aware, no-LLM)
+- [x] S12a — Worker Companion Foundation (26/26): migrations, feature flags + audit, APScheduler, appointments/jobs/documents/plan modules, digest composer, nightly orchestrator
+- [x] S12b — Value Extensions (25/25): PDF rendering, resume + cover-letter builders, reminder engine, jobs kanban, advisor inbox, weekly review, compliance gate (export + right-to-delete)
+- [x] S13 — Platform-Wide QC + Submission Readiness (55/128): QC infra (Playwright, visual baseline, Lighthouse CI, bundle gate, Dependabot), 15 production fixes (injection-filter, PII retention, advisor PII leak, scheduler grace, etc.). Browser-driven remainder deferred to S13b.
+
+### Identity Foundation (Sprint S22) — merged 2026-05-07 (PR #123)
+- [x] Alembic migration runner + async env (sqlite + asyncpg)
+- [x] Identity layer: `accounts`, `account_sessions`, `account_credentials`, `account_roles` (alembic 0011 + 0012)
+- [x] Magic-link auth: `POST /api/auth/magic-link` (always 202, no enumeration), `GET /api/auth/claim` (signed `gw_account` cookie)
+- [x] Account-aware UI: `useAccount()` hook + `<SaveProgressCTA />` at 3 funnel insertion points
+- [x] Anonymous-first invariant test (auto-discovers session-id routes; 0 in REQUIRES_AUTH_ALLOWLIST)
+- [x] Postgres CI service container + dual-engine config + 15-test parity suite
+- [x] Integrity charter v1 (`docs/integrity-charter.md`, 10 binding principles led by "money never moves position")
+
+### Assessment Authoring Pipeline (Sprint S23) — merged 2026-05-08 (PR #124)
+- [x] Schema: `assessments`, `assessment_versions`, `assessment_questions`, `assessment_reviews` (alembic 0013)
+- [x] Claude-draft endpoint + reviewer queue API + publish endpoint with provenance lock
+- [x] Public fetch with rubric exclusion + Cache-Control
+- [x] Admin dashboard: `/admin/assessments` list + detail with filter dropdowns, comment textarea, approve / reject / request-revision actions
+- [x] Role substrate: `/api/auth/me` extended with roles, `useAccountRoles` hook, `<RoleGate>`, role-aware nav, `/admin/layout.tsx`
+- [x] Postgres test isolation rebuild (session-scoped engine + per-test transaction-rollback) — closed S22 follow-up
+
+### Two-Sided Listing Verification (Sprint S24) — merged 2026-05-08 (PR #125)
+- [x] Schema: `employer_accounts`, `listing_claims`, `listing_verifications`, `listing_reputation_events` (alembic 0014)
+- [x] `POST /api/employers/claim` — magic-link-style domain-email proof, 202 always, anti-rotation rate-limit
+- [x] `GET /api/employers/claim/verify` — uniform 401, 409 cross-employer, `gw_employer_account` HMAC cookie
+- [x] `POST /api/employers/{eid}/listings/{lid}/intake` — Pydantic-validated, cookie-or-admin gated
+- [x] `GET /api/jobs` verification-tier extension (display-only; `intake_json` excluded)
+- [x] `POST /api/listings/{lid}/events` — case_manager + admin gated; ghosted-counted-but-not-surfaced invariant
+- [x] Admin claim-review dashboard: `/admin/listings` queue + detail with approve/reject (`employers_admin.py`)
+- [x] Frontend `<VerifiedBadge tier intakeComplete />` with three tiers + amber sub-badge; integrated into `/jobs`
+- [x] E2E smoke (claim → verify → intake → public summary → reputation event through real HTTP layer)
+- [x] Charter integrity assertion — explicit grep across `backend/app/modules/matching/` confirms ZERO references to verification fields (display-only badge invariant)
+
 ---
 
 ## Known Gaps (Not Blockers)
@@ -155,7 +198,7 @@ Current state as of March 2026. Organized by what's done, what's in progress, an
 These are documented trade-offs, not missing features. See `docs/architecture.md` "Known Limitations" for details.
 
 ### Documentation Drift
-- Documentation is current as of Sprint 30. Test counts and endpoint references may drift between sprints.
+- Documentation is current as of Sprint S24 (2026-05-08). Test counts and endpoint references may drift between sprints.
 
 ### Employers Seed Data
 - `data/montgomery_businesses.json` is `[]` (empty array). Job matching uses `job_listings` table instead. The `employer_policies` table has 20+ records for fair-chance employer matching.

@@ -1,0 +1,19 @@
+id: plan-2026-05-s25-dallas-expansion
+title: S25 — Dallas Expansion (DFW Unification)
+type: feature
+status: planned
+created_at: '2026-05-08T18:18:14.497091'
+skills:
+- planning-with-pm
+goals:
+- Bring up Dallas, TX as the second city in the Texas state-share — additive only,
+  zero per-city branching (existing get_city_config dispatch on city.state == TX inherits
+  all TX state-level work for free)
+- Reusable DART GTFS importer (scripts/import_gtfs.py) emits canonical FW JSON shape
+  — contract boundary between any GTFS feed and the seed format, future cities (Houston
+  METRO, etc.) get the path for free
+- Read-only DFW cross-metro diagnostic surface (admin-gated /admin/cities/dfw); charter
+  integrity holds — matching engine reads ZERO Dallas-specific signals (T25.9 grep
+  gate)
+metadata:
+  pm_scope: story
