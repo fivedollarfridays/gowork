@@ -295,7 +295,6 @@ async def test_create_verification_persists_row(session_factory):
             listing_id=listing_id,
             employer_account_id=emp_id,
             tier="claim_verified",
-            verified_by=account_id,
         )
         row = await qlv.get_verification_for_listing(session, listing_id)
     assert row is not None
@@ -316,7 +315,6 @@ async def test_create_verification_invalid_tier_raises(session_factory):
                 listing_id=listing_id,
                 employer_account_id=emp_id,
                 tier="bogus_tier",
-                verified_by=account_id,
             )
 
 
@@ -332,7 +330,6 @@ async def test_create_verification_same_employer_idempotent(session_factory):
             listing_id=listing_id,
             employer_account_id=emp_id,
             tier="claim_verified",
-            verified_by=account_id,
         )
         # Second call by same employer — should not raise
         await qlv.create_verification(
@@ -340,7 +337,6 @@ async def test_create_verification_same_employer_idempotent(session_factory):
             listing_id=listing_id,
             employer_account_id=emp_id,
             tier="claim_verified",
-            verified_by=account_id,
         )
         result = await session.execute(
             text(
@@ -366,7 +362,6 @@ async def test_create_verification_different_employer_raises(session_factory):
             listing_id=listing_id,
             employer_account_id=emp_a,
             tier="claim_verified",
-            verified_by=account_id,
         )
         with pytest.raises(ValueError):
             await qlv.create_verification(
@@ -374,7 +369,6 @@ async def test_create_verification_different_employer_raises(session_factory):
                 listing_id=listing_id,
                 employer_account_id=emp_b,
                 tier="claim_verified",
-                verified_by=account_id,
             )
 
 
@@ -395,7 +389,6 @@ async def test_set_intake_persists_payload_and_timestamp(session_factory):
             listing_id=listing_id,
             employer_account_id=emp_id,
             tier="source_trust",
-            verified_by=account_id,
         )
         await qlv.set_intake(
             session,
@@ -436,7 +429,6 @@ async def test_public_summary_excludes_intake_json(session_factory):
             listing_id=listing_id,
             employer_account_id=emp_id,
             tier="claim_verified",
-            verified_by=account_id,
         )
         await qlv.set_intake(
             session,
@@ -468,7 +460,6 @@ async def test_public_summary_intake_complete_false_when_unset(
             listing_id=listing_id,
             employer_account_id=emp_id,
             tier="source_trust",
-            verified_by=account_id,
         )
     async with session_factory() as session:
         summary = await qlv.get_public_verification_summary(
@@ -491,14 +482,12 @@ async def test_public_summary_batched(session_factory):
             listing_id=l_a,
             employer_account_id=emp_id,
             tier="source_trust",
-            verified_by=account_id,
         )
         await qlv.create_verification(
             session,
             listing_id=l_b,
             employer_account_id=emp_id,
             tier="claim_verified",
-            verified_by=account_id,
         )
     async with session_factory() as session:
         summary = await qlv.get_public_verification_summary(

@@ -89,6 +89,10 @@ async def record_event(
         raise ValueError(
             f"invalid event_kind {event_kind!r}; expected {EVENT_KINDS}"
         )
+    # Explicit existence probe rather than relying on the FK to fire.
+    # SQLite test fixtures don't enforce foreign keys without
+    # ``PRAGMA foreign_keys=ON``, so an FK-only check would silently
+    # accept rows for nonexistent listings on the sqlite axis.
     if not await _listing_exists(session, listing_id):
         raise ValueError(f"listing {listing_id} does not exist")
     return await _insert_event_row(

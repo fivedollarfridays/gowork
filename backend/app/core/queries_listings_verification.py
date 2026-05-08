@@ -165,7 +165,6 @@ async def create_verification(
     listing_id: int,
     employer_account_id: int,
     tier: str,
-    verified_by: int,
 ) -> None:
     """Create one verification row for *listing_id*.
 
@@ -174,6 +173,11 @@ async def create_verification(
     raises ``ValueError`` for the route layer to translate to 409.
     Tier is validated against :data:`VERIFICATION_TIERS` for a clean
     ``ValueError`` rather than an opaque CHECK violation.
+
+    Auditing of *who* verified is captured at the employer-account
+    level (`employer_accounts.verified_by_account_id`), set on the
+    employer-account row when the magic-link claim is consumed. The
+    verification row itself only carries the tier + timestamps.
     """
     if tier not in VERIFICATION_TIERS:
         raise ValueError(
@@ -239,26 +243,33 @@ async def get_public_verification_summary(
     """
     if not listing_ids:
         return {}
-    placeholders = ", ".join(f":lid_{i}" for i in range(len(listing_ids)))
-    binds = {f"lid_{i}": lid for i, lid in enumerate(listing_ids)}
-    result = await session.execute(
-        text(
-            "SELECT listing_id, employer_account_id, verification_tier, "
-            "intake_completed_at, verified_at "
-            "FROM listing_verifications "
-            f"WHERE listing_id IN ({placeholders})"
-        ),
-        binds,
-    )
+    # Cap each chunk to stay well under postgres ``max_bind_vars=65535``
+    # (asyncpg + SQLAlchemy share the same ceiling). 1000 is plenty for
+    # any realistic ``/api/jobs`` page; the upstream aggregator already
+    # paginates at much smaller page sizes.
     summary: dict[int, dict] = {}
-    for row in result:
-        mp = row._mapping
-        summary[int(mp["listing_id"])] = {
-            "verification_tier": mp["verification_tier"],
-            "employer_account_id": int(mp["employer_account_id"]),
-            "intake_complete": mp["intake_completed_at"] is not None,
-            "verified_at": mp["verified_at"],
-        }
+    chunk_size = 1000
+    for start in range(0, len(listing_ids), chunk_size):
+        chunk = listing_ids[start : start + chunk_size]
+        placeholders = ", ".join(f":lid_{i}" for i in range(len(chunk)))
+        binds = {f"lid_{i}": lid for i, lid in enumerate(chunk)}
+        result = await session.execute(
+            text(
+                "SELECT listing_id, employer_account_id, verification_tier, "
+                "intake_completed_at, verified_at "
+                "FROM listing_verifications "
+                f"WHERE listing_id IN ({placeholders})"
+            ),
+            binds,
+        )
+        for row in result:
+            mp = row._mapping
+            summary[int(mp["listing_id"])] = {
+                "verification_tier": mp["verification_tier"],
+                "employer_account_id": int(mp["employer_account_id"]),
+                "intake_complete": mp["intake_completed_at"] is not None,
+                "verified_at": mp["verified_at"],
+            }
     return summary
 
 

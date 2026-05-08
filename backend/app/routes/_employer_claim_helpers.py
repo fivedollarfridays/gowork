@@ -212,7 +212,6 @@ async def _record_verification_or_conflict(
             listing_id=listing_id,
             employer_account_id=employer_account_id,
             tier=tier,
-            verified_by=0,
         )
     except ValueError:
         return listing_conflict_response()

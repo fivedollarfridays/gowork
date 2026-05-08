@@ -416,7 +416,6 @@ async def test_verify_cross_employer_conflict_returns_409(
             listing_id=listing_id,
             employer_account_id=employer_a,
             tier="claim_verified",
-            verified_by=0,
         )
         # Employer B exists and lays claim to the same listing.
         await _seed_employer(
@@ -457,7 +456,6 @@ async def test_verify_token_consumed_even_on_409(
             listing_id=listing_id,
             employer_account_id=employer_a,
             tier="claim_verified",
-            verified_by=0,
         )
         await _seed_employer(
             session, name="otherco.com", domain="otherco.com",

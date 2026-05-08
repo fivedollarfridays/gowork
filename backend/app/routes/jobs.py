@@ -131,6 +131,12 @@ def _apply_query_filters(
 async def _attach_verification(db: AsyncSession, jobs: list[dict]) -> None:
     """Add `verification` to each job via ONE batched read (no N+1)."""
     listing_ids = [int(j["id"]) for j in jobs if j.get("id") is not None]
+    if not listing_ids:
+        # Empty result page — annotate every job with verification=null
+        # without paying for a no-op DB call.
+        for job in jobs:
+            job["verification"] = None
+        return
     summary = await get_public_verification_summary(db, listing_ids)
     for job in jobs:
         row = summary.get(int(job["id"])) if job.get("id") is not None else None

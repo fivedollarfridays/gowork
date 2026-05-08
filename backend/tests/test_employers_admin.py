@@ -113,7 +113,6 @@ async def _seed_verification(
         listing_id=listing_id,
         employer_account_id=employer_id,
         tier=tier,
-        verified_by=0,
     )
 
 

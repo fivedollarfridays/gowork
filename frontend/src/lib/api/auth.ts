@@ -13,9 +13,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
-const REQUEST_TIMEOUT_MS = 30_000;
+import { fetchWithTimeout as _fetchWithTimeout } from "./_client";
 
 export interface ClaimSuccess {
   account_id: number;
@@ -45,59 +43,6 @@ function _classifyClaimStatus(status: number): ClaimErrorKind {
   if (status === 401) return "invalid";
   if (status === 409) return "conflict";
   return "unknown";
-}
-
-/**
- * Fetch with a hard timeout. Mirrors the convention in
- * `lib/api/appointments.ts` so behaviour stays consistent across the
- * frontend. Returns the raw Response so callers can branch on status.
- */
-async function _fetchWithTimeout(
-  path: string,
-  init?: RequestInit,
-): Promise<Response> {
-  const headers: HeadersInit = { ...(init?.headers ?? {}) };
-  if (init?.body) {
-    (headers as Record<string, string>)["Content-Type"] = "application/json";
-  }
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-  try {
-    return await fetch(`${API_BASE}${path}`, {
-      ...init,
-      headers,
-      signal: _composeSignal(init?.signal, controller.signal),
-    });
-  } finally {
-    clearTimeout(timeoutId);
-  }
-}
-
-/**
- * Combine caller-provided AbortSignal with our timeout signal. Without
- * this, passing `signal` from the caller silently disabled the timeout
- * (the previous `init?.signal ?? controller.signal` form fell through
- * to the caller's signal whenever it existed). Aborting either signal
- * aborts the resulting one.
- */
-function _composeSignal(
-  callerSignal: AbortSignal | null | undefined,
-  timeoutSignal: AbortSignal,
-): AbortSignal {
-  if (!callerSignal) return timeoutSignal;
-  if (typeof AbortSignal.any === "function") {
-    return AbortSignal.any([callerSignal, timeoutSignal]);
-  }
-  // Fallback for runtimes without AbortSignal.any: stitch with a relay.
-  const relay = new AbortController();
-  const onAbort = () => relay.abort();
-  if (callerSignal.aborted || timeoutSignal.aborted) {
-    relay.abort();
-  } else {
-    callerSignal.addEventListener("abort", onAbort, { once: true });
-    timeoutSignal.addEventListener("abort", onAbort, { once: true });
-  }
-  return relay.signal;
 }
 
 /**

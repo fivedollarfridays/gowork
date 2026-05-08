@@ -158,7 +158,13 @@ async def execute_intake(
     updated = await queries_listings_verification.get_verification_for_listing(
         db, listing_id
     )
-    assert updated is not None  # set_intake just stamped it
+    if updated is None:
+        # set_intake should have stamped this; bare ``assert`` would
+        # disappear under ``python -O``. Treat as a 5xx so callers see
+        # a real failure rather than ``AttributeError`` from ``dict(None)``.
+        raise HTTPException(
+            status_code=500, detail="intake_persist_failed"
+        )
     return dict(updated)
 
 

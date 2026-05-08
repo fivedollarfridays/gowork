@@ -78,7 +78,7 @@ const _BASE_BADGE_CLS =
 const _SUB_BADGE_CLS =
   "inline-flex items-center rounded-md bg-warning text-warning-foreground px-2 py-0.5 text-[10px] font-medium";
 
-export function VerifiedBadge({
+function _VerifiedBadgeImpl({
   tier,
   intakeComplete,
 }: VerifiedBadgeProps): React.ReactElement | null {
@@ -107,3 +107,10 @@ export function VerifiedBadge({
     </span>
   );
 }
+
+// Wrapped in React.memo because props (tier, intakeComplete) are
+// primitives that rarely change between renders, but the parent
+// /jobs/page.tsx re-renders frequently (filter changes, refetches,
+// kanban DnD if added later). Skipping per-card re-renders is free
+// here — primitive equality is cheap.
+export const VerifiedBadge = React.memo(_VerifiedBadgeImpl);
