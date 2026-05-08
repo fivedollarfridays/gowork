@@ -52,6 +52,87 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+- **T24.3 done** (auto-updated by hook)
+
+- **T24.6 done** (auto-updated by hook)
+
+### 2026-05-08 — T24.3 — Listing claim initiation endpoint
+
+Shipped `POST /api/employers/claim` in NEW route module
+`backend/app/routes/employers.py` (298 lines) — `auth.py` unchanged at
+314 lines per the sprint invariant. Body is
+`{listing_id: int, claimant_email: str}`; always returns 202 with empty
+body (no enumeration on unknown listing, banned IP, rate-limited, or
+SendGrid-failed). Pydantic `field_validator` rejects malformed emails
+with 422 before any DB write. Mints single-use claim token via
+`queries_listings_verification.mint_listing_claim_token`
+(secrets.token_urlsafe(32) → SHA-256 hash on disk; 15-min expiry).
+Extracts domain from email, looks up or auto-creates `employer_accounts`
+row keyed by domain (CI). Domain heuristic `_company_matches_domain`
+takes the first non-noise word of `job_listings.company` (lowercased,
+punctuation-stripped, drops words like "inc/llc/hiring/the/of") and
+prefix-matches it against the leading domain label with a 4-char
+minimum significant-token length. Match → status stays `pending`;
+mismatch → status flagged `admin_review` for T24.4 verify routing.
+SendGrid email built from text + html bodies + claim URL
+`{FRONTEND_URL}/employers/claim?token={token}`; category
+`listing_claim`; errors swallowed with `logger.exception`. Tighter
+rate limits than candidate magic-link: 5/hour per IP, 3/hour per
+email; over-limit calls still 202, no email sent. Router registered
+alphabetically in `app/routes/__init__.py:all_routers` between
+`documents_router` and `engagement_router`. AUDIT_ALLOWLIST extended
+with `POST /api/employers/claim` (no-persistence — claim row is the
+audit). PUBLIC_ENDPOINTS extended (role-gated/public, not
+session-scoped). New file `backend/tests/test_employers_claim.py`
+(432 lines, 14 tests): happy path 202 + 1 claim row, employer auto-
+created with domain heuristic, invalid email → 422, SendGrid mock
+receives claim URL with hashed-token cross-check, domain mismatch
+flags `admin_review`, second claim from same domain reuses employer,
+3/hour per-email rate limit, 5/hour per-IP rate limit, unknown
+listing_id → 202 (no claim, no SendGrid send), known/unknown response
+shape equivalence, and 4 unit tests for `_company_matches_domain`.
+Backend suite: 4647 passed / 4 baseline failed / 2 skipped.
+
+### 2026-05-08 — T24.6 — Public listing fetch verification-tier extension
+
+Extended `GET /api/jobs` with a `verification: {tier, verified_at,
+intake_complete: bool} | null` field per listing, projected from the
+`listing_verifications` table via the T24.2 batched read
+(`get_public_verification_summary(listing_ids)` — single query, no
+N+1). `intake_json` is EXCLUDED from the public payload (queries-layer
+already strips it; route belt-and-suspenders by projecting only three
+documented keys). Added `Cache-Control: public, max-age=60` mirroring
+T23.6. Anonymous-first invariant remains green (route takes no
+session_id, so byte-equivalence holds for all callers). New file
+`backend/tests/test_jobs_verification_tier.py` (224 lines, 6 tests):
+unverified→null, source_trust tier, claim_verified+intake_complete=true,
+intake_json canary leak guard, Cache-Control header, anon-vs-claimed
+shape equivalence (also pins single batched call). Extended existing
+`test_jobs_route.py` to mock the new helper since legacy alembic
+runner stops at m010 (verification tables ship in 0014). `jobs.py`
+ended at 191 lines (under 200 target); `auth.py` unchanged at 314.
+Backend suite: 4647 passed / 4 baseline failed / 2 skipped.
+
+### 2026-05-08 — T24.7 — Reputation event recording API
+
+Shipped `POST /api/listings/{listing_id}/events` in a NEW route module
+`backend/app/routes/listing_reputation.py` (95 lines) — keeps `auth.py`
+untouched at 314 lines per the sprint invariant. Body is
+`{kind, session_id?, notes?}` where `kind` is a Pydantic `Literal` over
+the four `EVENT_KINDS` (`response_received`, `withdrawn`, `placed`,
+`ghosted`) so unknown values auto-422 at the schema layer. Gated by
+`any_of_roles("case_manager", "admin")`; `recorded_by` is always pulled
+from the gw_account cookie (never the body). `record_event`'s
+`ValueError` for unknown listings is translated to 404. Anonymous
+candidate session_id is permitted in the payload so events tied to
+anonymous candidates aren't lost. Router registered alphabetically in
+`app/routes/__init__.py:all_routers` after `jobs_applications_router`,
+before `pathway_router`. Audit + cross-session allowlists extended with
+inline rationale (route is the audit; role-gated, not session-scoped).
+11 new tests pass (4 parametrized for each event_kind, role gating ×3,
+404 unknown listing, 422 invalid kind, anonymous-session_id support,
+router-registered). Arch check clean.
+
 - **T24.2 done** (auto-updated by hook)
 
 - **T24.2 done** — Verification CRUD modules

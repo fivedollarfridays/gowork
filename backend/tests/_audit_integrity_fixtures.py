@@ -197,6 +197,15 @@ AUDIT_ALLOWLIST: dict[str, str] = {
     "POST /api/admin/assessments/{version_id}/publish":
         "No-persistence audit — assessment_versions row IS the audit "
         "(approved_by + published_at columns set on publish).",
+    # ---------- S24 listing verification ----------
+    "POST /api/employers/claim":
+        "No-persistence audit — listing_claims row IS the audit "
+        "(claim_token_hash + listing_id + claimant_email + 15-min "
+        "expiry); always-202 contract precludes per-call audit_log.",
+    "POST /api/listings/{listing_id}/events":
+        "No-persistence audit — listing_reputation_events row IS the "
+        "audit (recorded_by + occurred_at columns set on insert); "
+        "the event stream is itself the append-only audit log.",
 }
 
 

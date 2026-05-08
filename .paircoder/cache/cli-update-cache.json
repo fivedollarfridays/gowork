@@ -154,5 +154,17 @@
   "T24.2": {
     "last_cli_update": "2026-05-08T08:39:19.129188",
     "last_status": "done"
+  },
+  "T24.3": {
+    "last_cli_update": "2026-05-08T08:52:49.791152",
+    "last_status": "done"
+  },
+  "T24.6": {
+    "last_cli_update": "2026-05-08T08:51:46.523316",
+    "last_status": "done"
+  },
+  "T24.7": {
+    "last_cli_update": "2026-05-08T08:47:59.337916",
+    "last_status": "done"
   }
 }

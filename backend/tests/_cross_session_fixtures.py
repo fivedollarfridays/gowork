@@ -154,6 +154,16 @@ PUBLIC_ENDPOINTS: dict[str, str] = {
         "Reviewer role auth (any_of_roles), not session-scoped.",
     "POST /api/admin/assessments/{version_id}/publish":
         "Admin role auth (require_role), not session-scoped.",
+    # ---------- S24 listing verification (role-gated, not session-scoped)
+    "POST /api/employers/claim":
+        "Public — accepts {listing_id, claimant_email}; no session_id "
+        "input. Always returns 202 to defeat enumeration "
+        "(test_employers_claim.py).",
+    "POST /api/listings/{listing_id}/events":
+        "Role-gated (any_of_roles case_manager, admin); not "
+        "session-scoped. Anonymous candidate session_id may appear in "
+        "the body as a free-text reference but auth is the gw_account "
+        "cookie, never the body session_id.",
 }
 
 
