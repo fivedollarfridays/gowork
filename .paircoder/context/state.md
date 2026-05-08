@@ -52,7 +52,39 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+- **T24.2 done** (auto-updated by hook)
+
+- **T24.2 done** — Verification CRUD modules
 - **T24.1 done** (auto-updated by hook)
+
+### 2026-05-08 — T24.2 — Verification CRUD modules
+
+Three async CRUD modules consumed by every backend endpoint in this sprint, all on `text()` + named binds + `RETURNING id` (portable across sqlite + postgres). All 18 helpers verified across 43 new tests.
+
+Files created:
+- `backend/app/core/queries_employers.py` (122 lines, 4 functions): `create_employer_account`, `get_employer_by_id`, `get_employer_by_domain`, `list_pending_admin_review` (joins listing_verifications + employer_accounts + job_listings, filters tier='admin_reviewed').
+- `backend/app/core/queries_listings_verification.py` (281 lines, 9 public + helpers): `mint_listing_claim_token` (15-min TTL, SHA-256 hash on disk, raw token returned once), `find_unused_claim_by_hash` (uniform None for not-found / expired / used → anti-oracle 401), `mark_claim_used`, `create_verification` (idempotent same-employer / ValueError different-employer / ValueError on invalid tier), `set_intake`, `get_verification_for_listing` (full row incl. intake_json), `get_public_verification_summary` (batched read; `intake_json` EXCLUDED, surfaces `intake_complete: bool`), plus `hash_claim_token` + `extract_domain_from_email` re-exports.
+- `backend/app/core/queries_listings_reputation.py` (137 lines, 3 public + helpers): `record_event` (validates EVENT_KINDS + listing existence, both ValueError-able), `get_signal_rates` + `aggregate_for_employer` (zero-shape stubs for T24.8; route + frontend can wire shape now).
+- `backend/app/core/_listings_verification_internals.py` (122 lines): private helpers (`utcnow_iso`, `normalize_email`, `hash_claim_token`, `extract_domain_from_email`, `existing_verification_owner`, `assert_no_other_owner`, `assert_claim_usable`) split out so the public CRUD module stays under per-file budget.
+
+Tests created (43 total):
+- `backend/tests/test_queries_employers.py` (241 lines, 12 tests): create + UNIQUE collision + domain CI normalization + admin-review queue join.
+- `backend/tests/test_queries_listings_verification.py` (521 lines, 22 tests): mint returns raw + hash on disk only + 15-min expiry + email norm; find returns None for missing/expired/used; mark_claim_used idempotency + ValueError guards; create_verification tier validation + same-employer idempotent + cross-employer ValueError; set_intake stamps both columns; public summary EXCLUDES intake_json + surfaces intake_complete + batched dict + empty-input no-op.
+- `backend/tests/test_queries_listings_reputation.py` (213 lines, 9 tests): record_event validates kind + listing existence + persists optional fields + accepts all EVENT_KINDS; signal-rate stubs return zero-shape with echoed window_days.
+- `backend/tests/_listings_verification_test_fixtures.py` (72 lines): shared `verification_engine` + `session_factory` + `make_account` + `make_listing` (underscore-prefixed so pytest skips collection).
+
+State-machine guards (all raise `ValueError`, route layer translates to 409):
+- `mark_claim_used`: claim already used → ValueError; claim expired → ValueError; claim missing → ValueError.
+- `create_verification`: invalid tier → ValueError; same employer re-claim → silent no-op (idempotent); different employer collision → ValueError.
+- `record_event`: invalid event_kind → ValueError; listing_id missing from job_listings → ValueError (404-able).
+
+Anti-oracle invariant verified: `find_unused_claim_by_hash` returns the same `None` for not-found / expired / used so the 401 response shape can't be probed for token state.
+
+Test result: full backend suite 4 failed (pre-existing baseline) / 4616 passed / 2 skipped. Sqlite axis verified; postgres axis available via `GOWORK_TEST_POSTGRES_URL`.
+
+`bpsai-pair arch check`: zero violations on touched files (all under 300-line / 12-function / 40-line-per-function limits).
+
+Branch: engage/backlog-sprint-24-listing-verification.
 
 ### 2026-05-08 — T24.1 — Verification schema migration
 
