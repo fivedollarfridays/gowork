@@ -28,12 +28,41 @@ import { JobCard } from "@/components/jobs/JobCard";
 import { JobKanbanColumn } from "@/components/jobs/JobKanbanColumn";
 import { FunnelStatsSidebar } from "@/components/jobs/FunnelStatsSidebar";
 import {
+  VerifiedBadge,
+  type VerifiedTier,
+} from "@/components/jobs/VerifiedBadge";
+import {
   STATUS_COLUMNS,
   groupByStatus,
   indexVersionsById,
   parseDraggableApplicationId,
   parseDroppableStatus,
 } from "@/components/jobs/kanbanHelpers";
+
+/**
+ * T24.10 — narrow extractor for the optional ``verification`` field
+ * that the public listing fetch surfaces (T24.6). The Kanban
+ * ``JobApplication`` type does not yet declare this field; a runtime
+ * read with shape validation keeps the integration display-only without
+ * forcing a backend-side type change. Display-only: this never
+ * influences ordering or filtering (Sprint 24 charter invariant).
+ */
+function _extractVerification(app: unknown): {
+  tier: VerifiedTier | null;
+  intakeComplete: boolean;
+} {
+  const v = (app as { verification?: unknown }).verification;
+  if (!v || typeof v !== "object") return { tier: null, intakeComplete: false };
+  const obj = v as { tier?: unknown; intake_complete?: unknown };
+  const tier =
+    obj.tier === "source_trust" ||
+    obj.tier === "claim_verified" ||
+    obj.tier === "admin_reviewed"
+      ? obj.tier
+      : null;
+  const intakeComplete = obj.intake_complete === true;
+  return { tier, intakeComplete };
+}
 
 function MoveMenu({
   application,
@@ -249,8 +278,17 @@ function JobsContent() {
                         app.resume_version_id != null
                           ? versionsById.get(app.resume_version_id)
                           : undefined;
+                      const verification = _extractVerification(app);
                       return (
                         <div key={app.id} role="listitem">
+                          {verification.tier !== null && (
+                            <div className="mb-1 px-1">
+                              <VerifiedBadge
+                                tier={verification.tier}
+                                intakeComplete={verification.intakeComplete}
+                              />
+                            </div>
+                          )}
                           <JobCard
                             application={app}
                             resumeGenerationMethod={v?.generation_method}

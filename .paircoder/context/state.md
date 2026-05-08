@@ -52,9 +52,164 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+- **T24.4 done** (auto-updated by hook)
+
+### 2026-05-08 — T24.4 — Listing claim verification endpoint
+
+Shipped `GET /api/employers/claim/verify?token=…` — the second leg of
+the two-sided listing-verification magic-link flow. Validates the
+single-use claim token minted by T24.3, marks it used, writes the
+`listing_verifications` row at the tier the T24.3 domain heuristic
+decided (`employer_account.verification_status == 'admin_review'` →
+tier=`admin_reviewed`; otherwise `claim_verified`), promotes a
+`pending` employer to `verified`, and sets a signed
+`gw_employer_account` cookie binding the browser to the employer
+identity.
+
+Architecture: business logic factored into the new
+`backend/app/routes/_employer_claim_helpers.py` (298 lines —
+cookie helpers, uniform 401/409 byte-pre-encoded response factories,
+verify orchestrator). The T24.3 domain heuristic moved into a new
+sibling `_employer_issue_helpers.py` so `employers.py` (361 → 266
+lines after extraction) stays inside per-file budgets even with the
+verify route added. `auth.py` unchanged at 314.
+
+Cookie design: parallel to S22's `gw_account` but namespace-scoped —
+value format `emp:{id}:{hmac}` where the HMAC signs `emp:{id}` (vs
+`gw_account`'s plain `{id}`). Reuses `audit_hash_salt` (no new
+secret) but the prefix difference makes the two cookies non-
+fungible: a tampered `gw_account` cannot satisfy
+`verify_employer_cookie` (or vice-versa), tested directly.
+
+Anti-oracle: invalid / expired / used tokens all return the same
+byte-encoded `_INVALID_TOKEN_BODY` 401 (mirrors S22 magic-link
+claim's posture, asserted via `r_invalid.content == r_expired.content
+== r_replayed.content`). Single-use is enforced across all outcomes
+including 409 — the credential is consumed before the conflict
+return so a different employer cannot replay the same token.
+
+409 cross-employer translation: `create_verification`'s
+`assert_no_other_owner` raises `ValueError` when
+`listing_verifications.UNIQUE(listing_id)` would clash with a
+different employer; the orchestrator catches it and returns the
+pre-baked `_CONFLICT_BODY`. Same-employer re-claim is silent
+(idempotent) per T24.2 design.
+
+Tests: 14 new in `backend/tests/test_employers_claim_verify.py`
+covering happy path on match (claim_verified), happy path on
+mismatch (admin_reviewed), employer status promotion, cookie set,
+3 invalid/expired/used 401s, byte-uniform 401 oracle, 409 cross-
+employer + token consumed on 409, 4 cookie helper unit tests
+(round-trip, account-cookie rejection, tampered-id rejection,
+malformed input). Full backend suite: 4 failed (pre-existing
+baseline) / 4674 passed / 2 skipped. PUBLIC_ENDPOINTS allowlist
+extended in `_cross_session_fixtures.py` (token-only auth, no
+session_id input, ownership tested directly).
+
+- **T24.8 done** (auto-updated by hook)
+
+- **T24.8 done** — Reputation rate computation (real rolling-window math)
+
+- **T24.10 done** (auto-updated by hook)
+
+- **T24.10 done** — Frontend Verified Listing badge component + integration
+
 - **T24.3 done** (auto-updated by hook)
 
 - **T24.6 done** (auto-updated by hook)
+
+### 2026-05-08 — T24.8 — Reputation rate computation
+
+Replaced the T24.2 zero-rate stubs in
+`backend/app/core/queries_listings_reputation.py` (138 → 235 lines)
+with the actual rolling-window math.
+
+`get_signal_rates(session, listing_id, window_days=30)` now issues a
+single SQL query — `SELECT event_kind, COUNT(*) ... WHERE listing_id =
+:lid AND occurred_at >= :cutoff GROUP BY event_kind` — and aggregates
+in Python via `_rates_from_counts`. Cutoff is `utcnow() -
+timedelta(days=window_days)` rendered as ISO-8601; lex-comparison on
+the always-UTC ISO string serves the cutoff without per-row datetime
+parsing. Returns the canonical
+`{response_rate, withdrawal_rate, placement_rate, sample_size,
+window_days}` dict.
+
+Design choice exercised in tests: `ghosted` events count toward
+`sample_size` (so the denominator captures every interaction with the
+listing) but are intentionally NOT surfaced as their own rate —
+`ghosted` is the inverse signal of `response_received` and surfacing
+both would double-count the same outcome. `_RATE_KINDS` makes this
+explicit at module level.
+
+`aggregate_for_employer(session, employer_account_id, window_days=30)`
+joins `listing_reputation_events` to `listing_verifications` on
+listing_id and filters by `employer_account_id`, returning the same
+rate-dict shape plus `listing_count` (computed from a separate count
+on `listing_verifications`). The aggregate's response shape is now
+the full rate dict — the T24.2 stub-shape `{sample_size, window_days}`
+test in `test_queries_listings_reputation.py` was updated to the
+finalised T24.8 contract (the only consumer of these functions today
+is the T24.4–T24.7 plumbing landing in parallel; no public-API drift).
+
+NEW `backend/tests/test_listing_reputation_rates.py` (480 lines, 13
+tests, 23 assertions across all 13). Coverage: empty listing → zeros
+shape; custom window_days echoed; mixed events (5/2/1 → 5/8, 2/8, 1/8,
+n=8); ghosted in denominator only (assertion: no `ghosted_rate` key);
+n<5 still returns rates (caller-side suppression, contract-only);
+all-kinds large-sample correctness (10/5/3/7, n=25); window cutoff
+excludes 100 placed events from 60 days ago; window-shrink (7d
+narrows what 30d kept); cross-listing isolation; aggregate empty +
+roll-up + cross-employer isolation + window cutoff. `_insert_event_at`
+helper bypasses `record_event` to seed events with controlled
+`occurred_at` timestamps for the window-cutoff cases.
+
+Suite: `cd backend && .venv/bin/python -m pytest tests
+--tb=line -q` → 4673 passed / 5 failed / 2 skipped. The 5 failures are
+all pre-existing and unrelated to T24.8: the 4 baseline failures
+(`test_config_llm.py` × 3 + `test_contract_credit_api.py` × 1) plus
+`test_cross_session_isolation::test_every_endpoint_is_either_flagged_or_allowlisted`
+which started failing when T24.4 (parallel) added
+`GET /api/employers/claim/verify` — that's a T24.4 follow-up, not
+T24.8 scope.
+
+Architecture: `bpsai-pair arch check
+backend/app/core/queries_listings_reputation.py` → 1 warning (235 lines
+> 150 informational threshold; well under the 400-line error
+threshold). Test file: 1 warning (480 lines > 400 informational
+threshold for tests; under the 600-line error threshold). Project-wide
+arch check: 40 pre-existing errors, none on the files I touched.
+
+### 2026-05-08 — T24.10 — Frontend Verified Listing badge
+
+Shipped `<VerifiedBadge tier intakeComplete />` in NEW component
+`frontend/src/components/jobs/VerifiedBadge.tsx` (109 lines) and
+integrated it into the existing `frontend/src/app/jobs/page.tsx` job
+list. Three tier variants:
+`source_trust → "Source Verified" (paler cyan, bg-primary/40)`,
+`claim_verified → "Verified Employer" (full cyan, bg-primary)`,
+`admin_reviewed → "Verified Employer" (same visual as claim_verified)`.
+`tier=null` returns `null` (no hidden div) — mirrors the
+`RoleGate` (T23.8) render-nothing pattern. `intakeComplete=true` adds a
+`+ Intake Complete` amber sub-badge (`bg-warning`); independent of tier.
+Tooltip via native `title` attribute (no shadcn tooltip primitive
+installed in `frontend/src/components/ui/`); per-variant copy explains
+provenance — source-feed origin, employer claim, or admin review.
+Display-only: matching engine reads zero verification signals; T24.11
+will explicitly grep-test this. Integration uses a narrow
+`_extractVerification` helper at the page level that runtime-validates
+the optional `verification: {tier, intake_complete} | null` field T24.6
+attached to the public listing fetch — no backend type changes
+required, no impact on the existing kanban shape. Detail page
+`/jobs/[jobId]/page.tsx` does NOT exist (verified via `ls`); list-only
+integration is correct. Tests: NEW
+`frontend/src/__tests__/jobs/verified-badge.test.tsx` (130 lines, 14
+tests covering null × intake_complete=true|false, all three tiers'
+labels + styling + tooltip text, and intake_complete sub-badge presence
+across tiers). Full vitest: 3595 passed / 3 skipped / 0 failed (+15 vs
+3580 baseline; +14 new badge tests + 1 in pre-existing differential).
+`tsc --noEmit` clean; `next build` green (`/jobs` page 21 kB / 174 kB
+First Load JS, unchanged class). Architecture clean on all three
+modified files.
 
 ### 2026-05-08 — T24.3 — Listing claim initiation endpoint
 

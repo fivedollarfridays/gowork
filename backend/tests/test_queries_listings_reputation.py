@@ -187,16 +187,28 @@ async def test_get_signal_rates_window_param_echoes(session_factory):
 
 
 # ---------------------------------------------------------------------------
-# aggregate_for_employer (T24.8 stub)
+# aggregate_for_employer (T24.8 — rolling-window rates)
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.anyio
-async def test_aggregate_for_employer_returns_zero_shape(session_factory):
-    """Stub returns sample_size + window_days only."""
+async def test_aggregate_for_employer_returns_full_rate_shape(session_factory):
+    """Unknown employer → full zero-rate shape with listing_count 0.
+
+    Contract finalised in T24.8: the aggregate returns the same rate
+    keys as :func:`get_signal_rates` plus ``listing_count`` so the
+    consumer surface mirrors the per-listing dict.
+    """
     async with session_factory() as session:
         result = await qlr.aggregate_for_employer(session, 42)
-    assert result == {"sample_size": 0, "window_days": 30}
+    assert result == {
+        "response_rate": 0.0,
+        "withdrawal_rate": 0.0,
+        "placement_rate": 0.0,
+        "sample_size": 0,
+        "window_days": 30,
+        "listing_count": 0,
+    }
 
 
 @pytest.mark.anyio

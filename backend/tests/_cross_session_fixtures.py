@@ -159,6 +159,11 @@ PUBLIC_ENDPOINTS: dict[str, str] = {
         "Public — accepts {listing_id, claimant_email}; no session_id "
         "input. Always returns 202 to defeat enumeration "
         "(test_employers_claim.py).",
+    "GET /api/employers/claim/verify":
+        "Listing-claim verify endpoint (T24.4); the claim token is "
+        "single-use and not a session-bound feedback token, so the "
+        "session-A id + session-B token IDOR contract does not apply. "
+        "Tested directly by test_employers_claim_verify.py.",
     "POST /api/listings/{listing_id}/events":
         "Role-gated (any_of_roles case_manager, admin); not "
         "session-scoped. Anonymous candidate session_id may appear in "

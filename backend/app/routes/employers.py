@@ -24,9 +24,8 @@ from __future__ import annotations
 
 import logging
 import re
-import string
 
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, Query, Request, Response
 from pydantic import BaseModel, field_validator
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -36,13 +35,20 @@ from app.core.audit import get_client_ip
 from app.core.config import get_settings
 from app.core.database import get_db
 from app.core.rate_limit import RateLimiter
+from app.routes._employer_claim_helpers import execute_claim_verify
+from app.routes._employer_issue_helpers import company_matches_domain
+
+# Backward-compat alias — existing T24.3 tests import the heuristic via
+# ``from app.routes.employers import _company_matches_domain``. The
+# implementation moved to :mod:`._employer_issue_helpers` to keep this
+# file inside the per-file size + function-count budgets.
+_company_matches_domain = company_matches_domain
 
 router = APIRouter(prefix="/api/employers", tags=["employers"])
 
 logger = logging.getLogger(__name__)
 
 _HOUR_SECONDS = 60 * 60
-_MIN_SIGNIFICANT_TOKEN_LEN = 4
 
 # In-memory rate limiters. Anonymous-first invariant + always-202
 # contract: we never persist limiter state. Tighter buckets than the
@@ -53,18 +59,6 @@ _ip_limiter = RateLimiter(max_requests=5, window_seconds=_HOUR_SECONDS)
 # Conservative email shape check — mirror auth.py so 422 fires before
 # any DB lookup. Full RFC validation is deferred to SendGrid.
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
-
-# Generic noise tokens we strip from a company name before deriving the
-# significant first word. Conservative list — overlap is preferred over
-# false-rejection because admin_review is a reversible outcome.
-_COMPANY_NOISE_WORDS: frozenset[str] = frozenset(
-    {
-        "inc", "incorporated", "llc", "ltd", "limited", "corp",
-        "corporation", "co", "company", "the", "and", "of",
-        "industries", "group", "holdings", "services", "solutions",
-        "hiring", "careers", "jobs",
-    }
-)
 
 
 # -------------------- Request schema --------------------
@@ -87,54 +81,6 @@ class ClaimRequest(BaseModel):
         if not _EMAIL_RE.match(v.strip()):
             raise ValueError("invalid email format")
         return v
-
-
-# -------------------- Domain heuristic --------------------
-
-
-def _normalize_company_word(word: str) -> str:
-    """Lowercase + drop punctuation; empty if word is pure noise."""
-    cleaned = "".join(ch for ch in word if ch not in string.punctuation)
-    return cleaned.lower()
-
-
-def _first_significant_company_token(company: str) -> str | None:
-    """Return the first non-noise token of *company*, or None.
-
-    ``ACME Hiring Inc`` → ``acme``; ``The Goodwill Industries`` →
-    ``goodwill``; ``LLC`` (pure noise) → None.
-    """
-    for raw in company.split():
-        word = _normalize_company_word(raw)
-        if not word or word in _COMPANY_NOISE_WORDS:
-            continue
-        return word
-    return None
-
-
-def _company_matches_domain(company: str | None, domain: str) -> bool:
-    """Return True if *company*'s first significant word overlaps *domain*.
-
-    Heuristic: take the first non-noise word of *company* (lowercased,
-    punctuation-stripped), take the leading label of *domain*
-    (everything before the first ``.``), and report a match iff one
-    is a prefix of the other AND the shorter side is at least
-    ``_MIN_SIGNIFICANT_TOKEN_LEN`` chars long. None / empty company
-    is conservatively treated as no match — the verify step routes
-    such listings into admin_review where a human can adjudicate.
-    """
-    if not company:
-        return False
-    company_token = _first_significant_company_token(company)
-    if not company_token:
-        return False
-    domain_label = domain.lower().split(".", 1)[0]
-    if not domain_label:
-        return False
-    short, long_ = sorted([company_token, domain_label], key=len)
-    if len(short) < _MIN_SIGNIFICANT_TOKEN_LEN:
-        return False
-    return long_.startswith(short)
 
 
 # -------------------- Helpers --------------------
@@ -296,3 +242,25 @@ async def issue_listing_claim(
 
     await _process_claim(db, listing_id=body.listing_id, email=email)
     return Response(status_code=202)
+
+
+# -------------------- Verify route (T24.4) --------------------
+
+
+@router.get("/claim/verify", response_model=None)
+async def verify_listing_claim(
+    response: Response,
+    raw_token: str = Query(..., alias="token"),
+    db: AsyncSession = Depends(get_db),
+) -> dict | Response:
+    """Validate a claim token and bind the browser to the employer identity.
+
+    Returns 200 ``{employer_account_id, listing_id, verification_tier,
+    next_step}`` on success (cookie set), 401 (uniform body) for
+    invalid / expired / replayed tokens, 409 when the listing is
+    already verified by a *different* employer. Single-use across all
+    outcomes (mirrors S22 magic-link claim). Business logic lives in
+    :func:`_employer_claim_helpers.execute_claim_verify` so this file
+    stays inside the per-file size budget.
+    """
+    return await execute_claim_verify(db, raw_token=raw_token, response=response)
