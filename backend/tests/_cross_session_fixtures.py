@@ -174,6 +174,18 @@ PUBLIC_ENDPOINTS: dict[str, str] = {
         "employer_account_id, OR admin role via gw_account cookie). "
         "Not session-scoped — body has no session_id input. Tested "
         "directly by test_employers_intake.py.",
+    "GET /api/employers/admin/claims/pending":
+        "Admin role-gated (require_role('admin')); not session-scoped. "
+        "Tested directly by test_employers_admin.py.",
+    "GET /api/employers/admin/claims/{claim_id}":
+        "Admin role-gated (require_role('admin')); not session-scoped. "
+        "Tested directly by test_employers_admin.py.",
+    "POST /api/employers/admin/claims/{claim_id}/approve":
+        "Admin role-gated (require_role('admin')); not session-scoped. "
+        "Tested directly by test_employers_admin.py.",
+    "DELETE /api/employers/admin/claims/{claim_id}":
+        "Admin role-gated (require_role('admin')); not session-scoped. "
+        "Tested directly by test_employers_admin.py.",
 }
 
 

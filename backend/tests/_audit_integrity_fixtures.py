@@ -211,6 +211,14 @@ AUDIT_ALLOWLIST: dict[str, str] = {
         "(intake_json + intake_completed_at columns stamped on submit); "
         "role-gated (gw_employer_account cookie matching path or admin "
         "role override).",
+    "POST /api/employers/admin/claims/{claim_id}/approve":
+        "No-persistence audit — employer_accounts.verified_at + "
+        "verification_status='verified' columns ARE the audit; "
+        "admin role-gated (require_role('admin')).",
+    "DELETE /api/employers/admin/claims/{claim_id}":
+        "No-persistence audit — employer_accounts.verification_status="
+        "'retired' is the audit trail for the rejection; admin "
+        "role-gated (require_role('admin')).",
 }
 
 

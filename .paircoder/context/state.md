@@ -52,6 +52,67 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+- **T24.9 done** (auto-updated by hook)
+
+- **T24.9 done** (auto-updated by hook)
+
+### 2026-05-08 — T24.9 — Admin claim-review dashboard
+
+Shipped the admin claim-review dashboard — backend admin endpoints +
+two frontend pages under `/admin/listings`. Closes the loop for
+domain-mismatch claims that landed at the `admin_reviewed`
+verification tier from T24.4: an admin can now approve (promotes the
+employer to `verified` + refreshes `verified_at`) or reject (deletes
+the claim + verification rows + retires the employer).
+
+Backend: factored four admin endpoints into a new
+`backend/app/routes/employers_admin.py` (111 lines) rather than
+extending `employers.py` (already at 300/400 budget). Routes: `GET
+/api/employers/admin/claims/pending` (queue), `GET
+/api/employers/admin/claims/{claim_id}` (detail with claim + listing
++ employer + verification + intake), `POST .../approve`, `DELETE
+.../{claim_id}`. All four gated by `require_role("admin")`. Helpers
+added to `queries_employers.py`: `get_claim_detail`,
+`approve_admin_review`, `reject_admin_review`. The pending-queue read
+now inner-joins `listing_claims` (queue is keyed by claim_id, not
+verification_id, so the URL semantic for detail/approve/reject is
+consistent with the dashboard). Updated `_seed_verification` in
+`test_queries_employers.py` to also seed a paired claim row so the
+existing two queue tests still pass.
+
+Frontend: typed `lib/api/listing_claims.ts` (182 lines) mirrors the
+T23.7 assessments client pattern (credentials:include,
+`_fetchWithTimeout`, single typed `ListingClaimsApiError`). List page
+`/admin/listings` (152 lines) renders the queue with a
+with-intake/no-intake filter, 30s React Query stale, click-through to
+detail. Detail page `/admin/listings/[claimId]` (290 lines) shows
+claimant email, listing, employer candidate, intake JSON parsed into
+readable fields, plus Approve (cyan / bg-primary) and Reject (rose /
+bg-destructive) with native `window.confirm` on reject. Both pages
+add a stricter `<RoleGate roles={["admin"]}>` wrap inside the
+broader admin-layout reviewer-role gate — non-admin reviewers get
+"Permission denied" instead of an empty queue or a 403 from the
+backend.
+
+Tests: 15 new backend tests in `test_employers_admin.py` (anonymous
+403 on each route, non-admin 403, admin 200 for queue+detail+approve+
+reject, queue empty when no admin_reviewed tier, queue surfaces
+admin_reviewed only, approve promotes employer + refreshes
+verified_at, reject deletes claim+verification + retires employer,
+unknown claim_id 404 on detail+approve+reject). 22 new frontend
+tests across api.test.ts (8), list.test.tsx (6), detail.test.tsx (8)
+covering wire shapes, error states, filter behaviour, navigation,
+strict RoleGate denial, approve/reject submission, and the reject
+confirmation dismissal path. AUDIT_ALLOWLIST + PUBLIC_ENDPOINTS
+extended for the four new endpoints.
+
+Result: backend 4698/4702 (4 baseline failures unchanged), frontend
+3620/3623 (3 skipped). Constraints: `auth.py` unchanged at 314,
+`employers.py` unchanged at 300, `employers_admin.py` 111. `npx tsc
+--noEmit` clean; `npx next build` green; arch check passes (one warn
+on queries_employers.py at 250 lines vs 150 target — well under the
+400 error threshold).
+
 - **T24.5 done** (auto-updated by hook)
 
 ### 2026-05-08 — T24.5 — Employer intake endpoint

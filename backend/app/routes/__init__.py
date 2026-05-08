@@ -21,6 +21,7 @@ from app.routes.demo_haiku import health_router as demo_health_router
 from app.routes.demo_haiku import router as demo_haiku_router
 from app.routes.documents import router as documents_router
 from app.routes.employers import router as employers_router
+from app.routes.employers_admin import router as employers_admin_router
 from app.routes.engagement import router as engagement_router
 from app.routes.engagement_preview import router as engagement_preview_router
 from app.routes.feedback import router as feedback_router
@@ -76,6 +77,7 @@ all_routers = [
     demo_health_router,
     documents_router,
     employers_router,
+    employers_admin_router,
     engagement_router,
     engagement_preview_router,
     sendgrid_webhook_router,

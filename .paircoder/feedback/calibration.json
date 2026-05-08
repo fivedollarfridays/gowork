@@ -2,17 +2,17 @@
   "task_types": {
     "feature": {
       "task_type": "feature",
-      "sample_count": 51,
-      "avg_tokens": 13154.019607843138,
-      "std_dev": 43587.94753116975,
-      "p80_tokens": 10082.0,
-      "avg_duration_seconds": 1312.4117647058824,
-      "success_rate": 0.8235294117647058,
+      "sample_count": 52,
+      "avg_tokens": 13091.711538461539,
+      "std_dev": 43169.091399330064,
+      "p80_tokens": 10055.800000000001,
+      "avg_duration_seconds": 1301.0961538461538,
+      "success_rate": 0.8269230769230769,
       "recommended_model": "haiku",
       "model": "aggregate",
       "recommended_effort": "high",
-      "_m2_tokens": 96895367668.98038,
-      "_m2_duration": 2552762388.352941,
+      "_m2_tokens": 96905663516.67307,
+      "_m2_duration": 2553101958.5192304,
       "estimation_mape": null,
       "estimation_sample_count": 0,
       "cx_per_minute": 26.140075289480265
@@ -70,17 +70,17 @@
     },
     "feature:claude-opus-4-7": {
       "task_type": "feature",
-      "sample_count": 26,
-      "avg_tokens": 23481.46153846154,
-      "std_dev": 59144.67030883533,
-      "p80_tokens": 21918.0,
-      "avg_duration_seconds": 2458.153846153846,
-      "success_rate": 0.9615384615384616,
+      "sample_count": 27,
+      "avg_tokens": 22978.962962962964,
+      "std_dev": 58095.59524864965,
+      "p80_tokens": 21674.2,
+      "avg_duration_seconds": 2393.925925925926,
+      "success_rate": 0.9629629629629629,
       "recommended_model": "sonnet",
       "model": "claude-opus-4-7",
       "recommended_effort": "high",
-      "_m2_tokens": 90950392674.46152,
-      "_m2_duration": 2482520605.384616,
+      "_m2_tokens": 91127651056.96295,
+      "_m2_duration": 2485416513.8518524,
       "estimation_mape": null,
       "estimation_sample_count": 0,
       "cx_per_minute": null
@@ -239,6 +239,6 @@
       "cx_per_minute": 4.325846981826184
     }
   },
-  "last_calibrated": "2026-05-08T14:23:50.197710+00:00",
-  "total_records": 61
+  "last_calibrated": "2026-05-08T14:40:42.052279+00:00",
+  "total_records": 62
 }

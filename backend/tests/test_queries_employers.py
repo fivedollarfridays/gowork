@@ -156,7 +156,13 @@ async def test_get_employer_by_domain_missing_returns_none(session_factory):
 async def _seed_verification(
     session, *, listing_id: int, employer_id: int, tier: str
 ) -> None:
-    """Helper: insert one listing_verifications row directly."""
+    """Helper: insert one listing_verifications row + a paired claim row.
+
+    The admin-queue read (T24.9) inner-joins ``listing_claims`` so the
+    queue is keyed by the per-attempt claim id (the URL the dashboard
+    uses for the detail/approve/reject routes). Tests seed both rows
+    via this helper so the join surfaces them.
+    """
     await session.execute(
         text(
             "INSERT INTO listing_verifications "
@@ -168,6 +174,21 @@ async def _seed_verification(
             "lid": listing_id,
             "eid": employer_id,
             "tier": tier,
+            "ts": "2026-05-08T00:00:00Z",
+        },
+    )
+    await session.execute(
+        text(
+            "INSERT INTO listing_claims "
+            "(claim_token_hash, listing_id, claimant_email, "
+            "expires_at, created_at) "
+            "VALUES (:h, :lid, :email, :exp, :ts)"
+        ),
+        {
+            "h": f"hash-for-listing-{listing_id}",
+            "lid": listing_id,
+            "email": f"claimant-{listing_id}@example.com",
+            "exp": "2099-01-01T00:00:00Z",
             "ts": "2026-05-08T00:00:00Z",
         },
     )
