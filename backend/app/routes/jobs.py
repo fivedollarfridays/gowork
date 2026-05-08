@@ -1,13 +1,30 @@
-"""GET /api/jobs — job listings with barrier, transit, and industry filters."""
+"""GET /api/jobs — public listing fetch with verification-tier projection.
+
+Each job dict carries ``verification: {tier, verified_at,
+intake_complete: bool} | null`` projected from ``listing_verifications``
+(T24.1 / T24.2). Integrity invariants (see ``docs/integrity-charter.md``):
+
+* ``intake_json`` is NEVER on the public payload — only the boolean
+  ``intake_complete`` derived from ``intake_completed_at IS NOT NULL``.
+  The queries-layer helper already strips ``intake_json``; this route
+  belt-and-suspenders that by projecting only three documented keys.
+* The verification join is ONE batched call to
+  ``get_public_verification_summary(listing_ids)`` — no N+1.
+* ``Cache-Control: public, max-age=60`` mirrors T23.6; the surface
+  stays accessible without forcing login (anonymous-first).
+"""
 
 import asyncio
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.queries import get_all_employers, get_all_transit_routes
 from app.core.queries_jobs import get_job_listing_by_id
+from app.core.queries_listings_verification import (
+    get_public_verification_summary,
+)
 from app.core.rate_limit import RateLimiter, require_rate_limit
 
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
@@ -18,6 +35,23 @@ _detail_rate_limiter = RateLimiter(max_requests=120, window_seconds=60)
 _check_detail_rate = require_rate_limit(_detail_rate_limiter)
 
 CREDIT_CHECK_INDUSTRIES = {"banking", "finance", "insurance"}
+_CACHE_CONTROL = "public, max-age=60"
+
+
+def _project_verification(row: dict | None) -> dict | None:
+    """Project a queries-layer summary row to the public response shape.
+
+    Returns ``None`` when no verification row exists. Otherwise returns
+    exactly three documented keys — additions to the queries-layer
+    dict (e.g. ``employer_account_id``) can't silently leak through.
+    """
+    if row is None:
+        return None
+    return {
+        "tier": row["verification_tier"],
+        "verified_at": row["verified_at"],
+        "intake_complete": bool(row["intake_complete"]),
+    }
 
 
 def requires_credit_check(license_type: str | None) -> bool:
@@ -80,8 +114,38 @@ def _application_steps(job: dict, credit_required: str) -> list[str]:
     return steps
 
 
+def _apply_query_filters(
+    jobs: list[dict], industry: str | None,
+    transit_accessible: bool | None, barriers: str | None,
+) -> list[dict]:
+    """Apply industry / transit / barrier filters to enriched jobs."""
+    if industry:
+        jobs = [j for j in jobs if j.get("industry") == industry]
+    if transit_accessible:
+        jobs = [j for j in jobs if (j.get("transit_info") or {}).get("accessible")]
+    if barriers and "credit" in [b.strip() for b in barriers.split(",")]:
+        jobs = [j for j in jobs if j.get("credit_check_required") != "yes"]
+    return jobs
+
+
+async def _attach_verification(db: AsyncSession, jobs: list[dict]) -> None:
+    """Add `verification` to each job via ONE batched read (no N+1)."""
+    listing_ids = [int(j["id"]) for j in jobs if j.get("id") is not None]
+    if not listing_ids:
+        # Empty result page — annotate every job with verification=null
+        # without paying for a no-op DB call.
+        for job in jobs:
+            job["verification"] = None
+        return
+    summary = await get_public_verification_summary(db, listing_ids)
+    for job in jobs:
+        row = summary.get(int(job["id"])) if job.get("id") is not None else None
+        job["verification"] = _project_verification(row)
+
+
 @router.get("/")
 async def list_jobs(
+    response: Response,
     db: AsyncSession = Depends(get_db),
     barriers: str | None = Query(None, description="Comma-separated barriers (e.g. credit,transportation)"),
     transit_accessible: bool | None = Query(None),
@@ -90,7 +154,11 @@ async def list_jobs(
     fair_chance: bool | None = Query(None, description="Filter to fair-chance employers only"),
     _: None = Depends(_check_list_rate),
 ) -> dict:
-    """List aggregated jobs with optional filters."""
+    """List aggregated jobs with optional filters + verification tier.
+
+    intake_json EXCLUDED from response (see module docstring). One
+    batched verification read; ``Cache-Control: public, max-age=60``.
+    """
     from app.integrations.job_aggregator import JobAggregator
 
     agg = JobAggregator(db)
@@ -102,21 +170,10 @@ async def list_jobs(
 
     employer_map = {e["name"]: e for e in employers}
     enriched = [_enrich_job(j, employer_map, transit_routes) for j in jobs]
+    enriched = _apply_query_filters(enriched, industry, transit_accessible, barriers)
+    await _attach_verification(db, enriched)
 
-    if industry:
-        enriched = [j for j in enriched if j.get("industry") == industry]
-
-    if transit_accessible:
-        enriched = [
-            j for j in enriched
-            if j.get("transit_info") and j["transit_info"].get("accessible")
-        ]
-
-    if barriers:
-        barrier_list = [b.strip() for b in barriers.split(",")]
-        if "credit" in barrier_list:
-            enriched = [j for j in enriched if j.get("credit_check_required") != "yes"]
-
+    response.headers["Cache-Control"] = _CACHE_CONTROL
     return {"jobs": enriched, "total": len(enriched)}
 
 

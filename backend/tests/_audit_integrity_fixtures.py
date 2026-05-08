@@ -197,6 +197,28 @@ AUDIT_ALLOWLIST: dict[str, str] = {
     "POST /api/admin/assessments/{version_id}/publish":
         "No-persistence audit — assessment_versions row IS the audit "
         "(approved_by + published_at columns set on publish).",
+    # ---------- S24 listing verification ----------
+    "POST /api/employers/claim":
+        "No-persistence audit — listing_claims row IS the audit "
+        "(claim_token_hash + listing_id + claimant_email + 15-min "
+        "expiry); always-202 contract precludes per-call audit_log.",
+    "POST /api/listings/{listing_id}/events":
+        "No-persistence audit — listing_reputation_events row IS the "
+        "audit (recorded_by + occurred_at columns set on insert); "
+        "the event stream is itself the append-only audit log.",
+    "POST /api/employers/{employer_account_id}/listings/{listing_id}/intake":
+        "No-persistence audit — listing_verifications row IS the audit "
+        "(intake_json + intake_completed_at columns stamped on submit); "
+        "role-gated (gw_employer_account cookie matching path or admin "
+        "role override).",
+    "POST /api/employers/admin/claims/{claim_id}/approve":
+        "No-persistence audit — employer_accounts.verified_at + "
+        "verification_status='verified' columns ARE the audit; "
+        "admin role-gated (require_role('admin')).",
+    "DELETE /api/employers/admin/claims/{claim_id}":
+        "No-persistence audit — employer_accounts.verification_status="
+        "'retired' is the audit trail for the rejection; admin "
+        "role-gated (require_role('admin')).",
 }
 
 

@@ -18,9 +18,7 @@
  * 409 → state-machine conflict).
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
-const REQUEST_TIMEOUT_MS = 30_000;
+import { fetchWithTimeout } from "./_client";
 
 /* -------------------------------------------------------------------------
  * Wire types — match the backend Pydantic / dict shapes 1:1.
@@ -93,48 +91,16 @@ export class AssessmentsApiError extends Error {
 }
 
 /* -------------------------------------------------------------------------
- * Internal fetch helpers — mirrors lib/api/auth.ts.
+ * Internal fetch helper — every admin-assessments call goes through the
+ * cookie session, so this wrapper bakes in `credentials: "include"`
+ * before delegating to the shared transport (`./_client.ts`).
  * ------------------------------------------------------------------------- */
-
-function _composeSignal(
-  callerSignal: AbortSignal | null | undefined,
-  timeoutSignal: AbortSignal,
-): AbortSignal {
-  if (!callerSignal) return timeoutSignal;
-  if (typeof AbortSignal.any === "function") {
-    return AbortSignal.any([callerSignal, timeoutSignal]);
-  }
-  const relay = new AbortController();
-  const onAbort = () => relay.abort();
-  if (callerSignal.aborted || timeoutSignal.aborted) {
-    relay.abort();
-  } else {
-    callerSignal.addEventListener("abort", onAbort, { once: true });
-    timeoutSignal.addEventListener("abort", onAbort, { once: true });
-  }
-  return relay.signal;
-}
 
 async function _fetchWithTimeout(
   path: string,
   init?: RequestInit,
 ): Promise<Response> {
-  const headers: HeadersInit = { ...(init?.headers ?? {}) };
-  if (init?.body) {
-    (headers as Record<string, string>)["Content-Type"] = "application/json";
-  }
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-  try {
-    return await fetch(`${API_BASE}${path}`, {
-      credentials: "include",
-      ...init,
-      headers,
-      signal: _composeSignal(init?.signal, controller.signal),
-    });
-  } finally {
-    clearTimeout(timeoutId);
-  }
+  return fetchWithTimeout(path, { credentials: "include", ...init });
 }
 
 async function _throwOnError(res: Response): Promise<void> {

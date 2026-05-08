@@ -20,6 +20,8 @@ from app.routes.demo import router as demo_router
 from app.routes.demo_haiku import health_router as demo_health_router
 from app.routes.demo_haiku import router as demo_haiku_router
 from app.routes.documents import router as documents_router
+from app.routes.employers import router as employers_router
+from app.routes.employers_admin import router as employers_admin_router
 from app.routes.engagement import router as engagement_router
 from app.routes.engagement_preview import router as engagement_preview_router
 from app.routes.feedback import router as feedback_router
@@ -27,6 +29,7 @@ from app.routes.insights import router as insights_router
 from app.routes.intelligence import router as intelligence_router
 from app.routes.jobs import router as jobs_router
 from app.routes.jobs_applications import router as jobs_applications_router
+from app.routes.listing_reputation import router as listing_reputation_router
 from app.routes.pathway import router as pathway_router
 from app.routes.plan import router as plan_router
 from app.routes.plan_haiku import router as plan_haiku_router
@@ -59,6 +62,7 @@ all_routers = [
     credit_router,
     jobs_router,
     jobs_applications_router,
+    listing_reputation_router,
     brightdata_router,
     feedback_router,
     dashboard_router,
@@ -72,6 +76,8 @@ all_routers = [
     demo_haiku_router,
     demo_health_router,
     documents_router,
+    employers_router,
+    employers_admin_router,
     engagement_router,
     engagement_preview_router,
     sendgrid_webhook_router,

@@ -10,6 +10,12 @@ _AGG_SEARCH_PATCH = "app.integrations.job_aggregator.JobAggregator.search"
 _JOB_PATCH = "app.routes.jobs.get_job_listing_by_id"
 _EMPLOYERS_PATCH = "app.routes.jobs.get_all_employers"
 _TRANSIT_PATCH = "app.routes.jobs.get_all_transit_routes"
+# T24.6: route now also reads listing_verifications via the batched
+# query helper; tests that don't apply the alembic chain (most of the
+# legacy /api/jobs tests) mock the call to keep them schema-agnostic.
+_VERIFICATION_PATCH = (
+    "app.routes.jobs.get_public_verification_summary"
+)
 
 
 def _sample_jobs():
@@ -63,6 +69,7 @@ class TestGetJobs:
             patch(_AGG_SEARCH_PATCH, new_callable=AsyncMock, return_value=_sample_jobs()),
             patch(_EMPLOYERS_PATCH, new_callable=AsyncMock, return_value=_sample_employers()),
             patch(_TRANSIT_PATCH, new_callable=AsyncMock, return_value=_sample_transit()),
+            patch(_VERIFICATION_PATCH, new_callable=AsyncMock, return_value={}),
         ):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -80,6 +87,7 @@ class TestGetJobs:
             patch(_AGG_SEARCH_PATCH, new_callable=AsyncMock, return_value=_sample_jobs()),
             patch(_EMPLOYERS_PATCH, new_callable=AsyncMock, return_value=_sample_employers()),
             patch(_TRANSIT_PATCH, new_callable=AsyncMock, return_value=_sample_transit()),
+            patch(_VERIFICATION_PATCH, new_callable=AsyncMock, return_value={}),
         ):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -97,6 +105,7 @@ class TestGetJobs:
             patch(_AGG_SEARCH_PATCH, new_callable=AsyncMock, return_value=_sample_jobs()),
             patch(_EMPLOYERS_PATCH, new_callable=AsyncMock, return_value=_sample_employers()),
             patch(_TRANSIT_PATCH, new_callable=AsyncMock, return_value=_sample_transit()),
+            patch(_VERIFICATION_PATCH, new_callable=AsyncMock, return_value={}),
         ):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -114,6 +123,7 @@ class TestGetJobs:
             patch(_AGG_SEARCH_PATCH, new_callable=AsyncMock, return_value=_sample_jobs()),
             patch(_EMPLOYERS_PATCH, new_callable=AsyncMock, return_value=_sample_employers()),
             patch(_TRANSIT_PATCH, new_callable=AsyncMock, return_value=_sample_transit()),
+            patch(_VERIFICATION_PATCH, new_callable=AsyncMock, return_value={}),
         ):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -132,6 +142,7 @@ class TestGetJobs:
             patch(_AGG_SEARCH_PATCH, new_callable=AsyncMock, return_value=[]),
             patch(_EMPLOYERS_PATCH, new_callable=AsyncMock, return_value=[]),
             patch(_TRANSIT_PATCH, new_callable=AsyncMock, return_value=[]),
+            patch(_VERIFICATION_PATCH, new_callable=AsyncMock, return_value={}),
         ):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -216,6 +227,7 @@ class TestJobsRateLimit:
             patch(_AGG_SEARCH_PATCH, new_callable=AsyncMock, return_value=[]),
             patch(_EMPLOYERS_PATCH, new_callable=AsyncMock, return_value=[]),
             patch(_TRANSIT_PATCH, new_callable=AsyncMock, return_value=[]),
+            patch(_VERIFICATION_PATCH, new_callable=AsyncMock, return_value={}),
         ):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:

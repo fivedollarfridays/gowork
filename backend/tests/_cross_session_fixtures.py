@@ -154,6 +154,38 @@ PUBLIC_ENDPOINTS: dict[str, str] = {
         "Reviewer role auth (any_of_roles), not session-scoped.",
     "POST /api/admin/assessments/{version_id}/publish":
         "Admin role auth (require_role), not session-scoped.",
+    # ---------- S24 listing verification (role-gated, not session-scoped)
+    "POST /api/employers/claim":
+        "Public — accepts {listing_id, claimant_email}; no session_id "
+        "input. Always returns 202 to defeat enumeration "
+        "(test_employers_claim.py).",
+    "GET /api/employers/claim/verify":
+        "Listing-claim verify endpoint (T24.4); the claim token is "
+        "single-use and not a session-bound feedback token, so the "
+        "session-A id + session-B token IDOR contract does not apply. "
+        "Tested directly by test_employers_claim_verify.py.",
+    "POST /api/listings/{listing_id}/events":
+        "Role-gated (any_of_roles case_manager, admin); not "
+        "session-scoped. Anonymous candidate session_id may appear in "
+        "the body as a free-text reference but auth is the gw_account "
+        "cookie, never the body session_id.",
+    "POST /api/employers/{employer_account_id}/listings/{listing_id}/intake":
+        "Role-gated (gw_employer_account cookie matching the path's "
+        "employer_account_id, OR admin role via gw_account cookie). "
+        "Not session-scoped — body has no session_id input. Tested "
+        "directly by test_employers_intake.py.",
+    "GET /api/employers/admin/claims/pending":
+        "Admin role-gated (require_role('admin')); not session-scoped. "
+        "Tested directly by test_employers_admin.py.",
+    "GET /api/employers/admin/claims/{claim_id}":
+        "Admin role-gated (require_role('admin')); not session-scoped. "
+        "Tested directly by test_employers_admin.py.",
+    "POST /api/employers/admin/claims/{claim_id}/approve":
+        "Admin role-gated (require_role('admin')); not session-scoped. "
+        "Tested directly by test_employers_admin.py.",
+    "DELETE /api/employers/admin/claims/{claim_id}":
+        "Admin role-gated (require_role('admin')); not session-scoped. "
+        "Tested directly by test_employers_admin.py.",
 }
 
 

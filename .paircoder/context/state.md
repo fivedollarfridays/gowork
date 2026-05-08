@@ -17,15 +17,17 @@
 
 ## Current Focus
 
-**Sprint 23 — Assessment Authoring Pipeline** complete. 10/10 tasks done across 8 waves. PR ready to push for merge.
+**Sprint 24 — Two-Sided Listing Verification** complete. 11/11 tasks done across 7 waves. PR ready to push for merge.
 
-- Backend: 4475 → 4558 passed (+83 net new); 4 baseline failures preserved
-- Frontend: 3527 → 3580 passed (+53 net new); 0 regressions
-- auth.py: 301 → 314 (T23.8 /me roles extension; well under 400 invariant)
-- E2E smoke (test_assessments_e2e) drives draft → review-approve → publish → public-fetch through real HTTP layer; mocks Claude at the get_llm_stream boundary; asserts charter provenance invariant on the published row
-- T23.9 closes the deferred S22 postgres-test-isolation follow-up — identity-layer tests now run on both axes via session-scoped engine + per-test transaction-rollback
+- Backend: 4573 → 4700 passed (+127 net new); 4 baseline failures preserved
+- Frontend: 3580 → 3620 passed (+40 net new); 0 regressions
+- auth.py: 314 (UNCHANGED — sprint invariant held)
+- E2E smoke (test_listing_verification_e2e) drives claim → verify → intake → reputation event through real HTTP layer; mocks SendGrid via existing mock_provider; verifies `intake_json` never appears in public summary
+- **Charter integrity assertion** — explicit grep across `backend/app/modules/matching/` confirms ZERO references to verification fields (listing_verifications, listing_reputation_events, verification_tier, intake_complete, intake_json, employer_accounts, listing_claims). Display-only badge invariant holds.
 
-Sprint 22 — Identity Foundation shipped 2026-05-07 via PR #123 (merged).
+**Sprint 23 — Assessment Authoring Pipeline** shipped 2026-05-07 via PR #124 (merged 2026-05-08). 10 tasks, +83 backend tests / +53 frontend tests, charter provenance invariant verified, postgres test isolation rebuild closed S22 follow-up.
+
+**Sprint 22 — Identity Foundation** shipped 2026-05-07 via PR #123 (merged).
 
 Out of focus: S13b deferred items (43 Tier-1 browser suites, 6 Tier-6 cross-module integrity, browser-dependent Tier-4) and the five other stale `in_progress` tasks (T1.7, T12.5, T12.16, T12.21, T12.24) — to be triaged separately.
 
@@ -49,6 +51,426 @@ Out of focus: S13b deferred items (43 Tier-1 browser suites, 6 Tier-6 cross-modu
 Older sprint task tables and session histories (Sprints 7 — 31) are in `.paircoder/archive/state-pre-s1.md`. S12a per-session entries plus S2 — S11 detail are in `.paircoder/archive/state-s12a.md`. S13 wave-by-wave detail + per-task driver sessions are in `.paircoder/archive/state-s13.md`.
 
 ## What Was Just Done
+
+- **T24.11 done** (auto-updated by hook)
+
+### 2026-05-08 — Sprint 24 — /reviewing-and-fixing pass on PR #125
+
+Post-merge review pipeline (cleaning-docs → reviewing-code → fix-all → simplify → push). Reviewer agent caught five real items; all fixed before re-pushing.
+
+P1 fixes (real bugs):
+- Dropped dead `verified_by` kwarg from `create_verification` + 17 call sites — required positional, never read in the INSERT body. Audit-of-who-verified is captured at the employer-account level (`employer_accounts.verified_by_account_id`), not the verification row.
+- Replaced runtime `assert` in `_employer_intake_helpers.execute_intake` with explicit 500 raise — `python -O` strips asserts, would silently turn into AttributeError at the `dict(None)` site.
+- Capped IN-clause in `get_public_verification_summary` at 1000 listing_ids per chunk — postgres `max_bind_vars=65535` ceiling becomes silent failure mode otherwise. Aggregator pages stay well under, but the helper is defensive.
+- Empty-listing-ids early return in `jobs.py:_attach_verification` — avoids a no-op DB roundtrip on filtered/empty pages.
+
+Cross-cutting (frontend DRY):
+- Extracted `frontend/src/lib/api/_client.ts` with shared `fetchWithTimeout` + `composeSignal` + `API_BASE` + `REQUEST_TIMEOUT_MS` constants. Removed ~70 LOC triplicated copy-paste across `auth.ts` + `assessments.ts` + `listing_claims.ts`. Each module now has a thin wrapper that delegates. The S22 review-fix `_composeSignal` correctness (caller-supplied AbortSignal must NOT silently disable timeout) lives in ONE place — future API clients in S25+ inherit it automatically.
+- Wrapped `<VerifiedBadge>` in `React.memo` — primitives-only props, parent `/jobs/page.tsx` re-renders frequently (filter, refetch, future Kanban DnD).
+
+Skipped (false-positive or deferrable):
+- Reviewer's "transactional approve/reject" concern on admin endpoints — SQLAlchemy async session auto-begins on first op; existing single-commit pattern is atomic.
+- Initially tried dropping the `_listing_exists` probe in `record_event` (FK enforcement + IntegrityError translation); reverted because SQLite test fixtures don't enforce FKs by default and the probe is portable. Comment added documenting the choice.
+
+Test result: 4700 backend / 3621 frontend / 0 regressions, 4 baseline failures preserved. Local pre-push gate green. Pushed `dd4a376` to `engage/backlog-sprint-24-listing-verification`; CI watch armed.
+
+### 2026-05-08 — Sprint 24 (Two-Sided Listing Verification) — COMPLETE
+
+All 11 tasks landed (T24.1–T24.11). Sprint went /ideation → /draft-backlog → /pc-plan → /prepare-to-engage → /running-sprint-tasks across 7 dependency-aware waves. Path A (autonomous through Wave 5, integration gate at the end with user authorization).
+
+- **Test counts:** Backend 4573 → 4700 (+127 net new) / 4 baseline failed / 2 skipped. Frontend 3580 → 3620 (+40 net new) / 3 skipped / 0 failed.
+- **Schema substrate:** employer_accounts + listing_claims + listing_verifications + listing_reputation_events (alembic 0014) via SQLAlchemy Core sharing accounts_schema.metadata. ENUM constraints via portable CHECK clauses sourced from module-level tuples (VERIFICATION_STATUSES, SOURCE_TRUST_TIERS, VERIFICATION_TIERS, EVENT_KINDS). _job_listings_ref stub bridges FK resolution to legacy m001 job_listings.
+- **CRUD:** queries_employers (4 fns), queries_listings_verification (7 fns + 2 helpers), queries_listings_reputation (3 fns). State-machine guards raise ValueError; route layer translates to 409 / 404. Anti-oracle: find_unused_claim_by_hash returns None for all failure modes uniformly.
+- **Backend pipeline:** POST /api/employers/claim (T24.3) — magic-link-style domain-email proof, 202 always, anti-rotation rate-limit. GET /api/employers/claim/verify (T24.4) — uniform 401, 409 cross-employer, gw_employer_account HMAC cookie with `emp:` prefix. POST /api/employers/{eid}/listings/{lid}/intake (T24.5) — Pydantic-validated; cookie-or-admin gate. GET /api/jobs verification-tier extension (T24.6) — single batched read; intake_json EXCLUDED. POST /api/listings/{listing_id}/events (T24.7) — case_manager+admin gated. Rate computation (T24.8) — single GROUP BY SQL; ghosted-counted-but-not-surfaced invariant.
+- **Admin dashboard (T24.9):** factored to NEW backend module `employers_admin.py` (kept employers.py at 300, well under 400). 4 admin routes + 2 frontend pages wrapped in strict `<RoleGate roles={["admin"]}>`.
+- **Frontend Verified Listing badge (T24.10):** `<VerifiedBadge tier intakeComplete />` with three variants + amber sub-badge. Integrated into /jobs/page.tsx.
+- **E2E smoke (T24.11):** Full chain claim → verify → intake → public summary → reputation event through real HTTP layer. SendGrid mocked via existing mock_provider.
+- **Charter integrity assertion:** Explicit subprocess grep across `backend/app/modules/matching/` for `listing_verifications | listing_reputation_events | verification_tier | intake_complete | intake_json | employer_accounts | listing_claims` returns ZERO matches. The verified badge is display-only — matching engine reads zero verification signals. If a future sprint legitimately needs a verification signal, this test fails as the design-review trigger.
+- **Sprint invariant held:** auth.py 314 unchanged. employers.py 300 (under 400). New module employers_admin.py 111. New helpers _employer_claim_helpers (298) + _employer_intake_helpers (169) + _employer_issue_helpers (88) factored to keep employers.py from breaching budget.
+
+
+
+### 2026-05-08 — T24.9 — Admin claim-review dashboard
+
+Shipped the admin claim-review dashboard — backend admin endpoints +
+two frontend pages under `/admin/listings`. Closes the loop for
+domain-mismatch claims that landed at the `admin_reviewed`
+verification tier from T24.4: an admin can now approve (promotes the
+employer to `verified` + refreshes `verified_at`) or reject (deletes
+the claim + verification rows + retires the employer).
+
+Backend: factored four admin endpoints into a new
+`backend/app/routes/employers_admin.py` (111 lines) rather than
+extending `employers.py` (already at 300/400 budget). Routes: `GET
+/api/employers/admin/claims/pending` (queue), `GET
+/api/employers/admin/claims/{claim_id}` (detail with claim + listing
++ employer + verification + intake), `POST .../approve`, `DELETE
+.../{claim_id}`. All four gated by `require_role("admin")`. Helpers
+added to `queries_employers.py`: `get_claim_detail`,
+`approve_admin_review`, `reject_admin_review`. The pending-queue read
+now inner-joins `listing_claims` (queue is keyed by claim_id, not
+verification_id, so the URL semantic for detail/approve/reject is
+consistent with the dashboard). Updated `_seed_verification` in
+`test_queries_employers.py` to also seed a paired claim row so the
+existing two queue tests still pass.
+
+Frontend: typed `lib/api/listing_claims.ts` (182 lines) mirrors the
+T23.7 assessments client pattern (credentials:include,
+`_fetchWithTimeout`, single typed `ListingClaimsApiError`). List page
+`/admin/listings` (152 lines) renders the queue with a
+with-intake/no-intake filter, 30s React Query stale, click-through to
+detail. Detail page `/admin/listings/[claimId]` (290 lines) shows
+claimant email, listing, employer candidate, intake JSON parsed into
+readable fields, plus Approve (cyan / bg-primary) and Reject (rose /
+bg-destructive) with native `window.confirm` on reject. Both pages
+add a stricter `<RoleGate roles={["admin"]}>` wrap inside the
+broader admin-layout reviewer-role gate — non-admin reviewers get
+"Permission denied" instead of an empty queue or a 403 from the
+backend.
+
+Tests: 15 new backend tests in `test_employers_admin.py` (anonymous
+403 on each route, non-admin 403, admin 200 for queue+detail+approve+
+reject, queue empty when no admin_reviewed tier, queue surfaces
+admin_reviewed only, approve promotes employer + refreshes
+verified_at, reject deletes claim+verification + retires employer,
+unknown claim_id 404 on detail+approve+reject). 22 new frontend
+tests across api.test.ts (8), list.test.tsx (6), detail.test.tsx (8)
+covering wire shapes, error states, filter behaviour, navigation,
+strict RoleGate denial, approve/reject submission, and the reject
+confirmation dismissal path. AUDIT_ALLOWLIST + PUBLIC_ENDPOINTS
+extended for the four new endpoints.
+
+Result: backend 4698/4702 (4 baseline failures unchanged), frontend
+3620/3623 (3 skipped). Constraints: `auth.py` unchanged at 314,
+`employers.py` unchanged at 300, `employers_admin.py` 111. `npx tsc
+--noEmit` clean; `npx next build` green; arch check passes (one warn
+on queries_employers.py at 250 lines vs 150 target — well under the
+400 error threshold).
+
+- **T24.5 done** (auto-updated by hook)
+
+### 2026-05-08 — T24.5 — Employer intake endpoint
+
+Shipped `POST /api/employers/{employer_account_id}/listings/{listing_id}/intake`
+— the third leg of the listing-verification flow. Accepts the
+structured intake answers (must-haves, nice-to-haves, real day-1
+tasks, comp band, fair-chance willingness, additional notes) for a
+listing the caller has just verified ownership of. Pydantic-validated:
+`must_haves` and `real_day1_tasks` non-empty, `comp_band_min` and
+`comp_band_max` positive, `comp_band_max >= comp_band_min` enforced
+via a `field_validator` on `comp_band_max`. Persists the JSON-encoded
+blob via `set_intake` (stamps `intake_completed_at`) and returns the
+full verification row with `intake_json` included — the
+read-after-write surface is intentionally employer-private.
+
+Cookie-or-admin gate: a custom `resolve_intake_caller` dependency
+passes when EITHER the signed `gw_employer_account` cookie decodes to
+the same employer id as the path param, OR the caller holds the
+`admin` role via the `gw_account` cookie. Anonymous + mismatched-
+employer both 403 with a uniform `not_authorised` body. Listing
+ownership is then re-verified at the orchestrator layer
+(`get_verification_for_listing` → 404 if `employer_account_id`
+mismatch) so a verified employer cannot submit intake for a listing
+owned by a different employer.
+
+Architecture: business logic + Pydantic schema + dependency factored
+into the new `backend/app/routes/_employer_intake_helpers.py` (169
+lines) so `employers.py` (266 → 300 lines after the route addition)
+stays inside per-file budgets. Sibling helper imports consolidated
+into a single `from app.routes import (…)` block to satisfy the
+15-statement import budget. `auth.py` unchanged at 314.
+
+Tests: 9 new in `test_employers_intake.py` covering schema validation
+(empty must_haves 422, empty real_day1_tasks 422, comp_band_min >
+comp_band_max 422, negative comp_band 422), happy paths (employer
+cookie 200 + intake_json round-trip, admin override 200), and gating
+failures (anonymous 403, wrong employer cookie 403, listing owned by
+different employer 404). Backend suite: 4 failed (baseline) / 4683
+passed / 2 skipped (+9 from T24.4). `AUDIT_ALLOWLIST` and
+`PUBLIC_ENDPOINTS` extended with the new role-gated mutation route.
+
+- **T24.4 done** (auto-updated by hook)
+
+### 2026-05-08 — T24.4 — Listing claim verification endpoint
+
+Shipped `GET /api/employers/claim/verify?token=…` — the second leg of
+the two-sided listing-verification magic-link flow. Validates the
+single-use claim token minted by T24.3, marks it used, writes the
+`listing_verifications` row at the tier the T24.3 domain heuristic
+decided (`employer_account.verification_status == 'admin_review'` →
+tier=`admin_reviewed`; otherwise `claim_verified`), promotes a
+`pending` employer to `verified`, and sets a signed
+`gw_employer_account` cookie binding the browser to the employer
+identity.
+
+Architecture: business logic factored into the new
+`backend/app/routes/_employer_claim_helpers.py` (298 lines —
+cookie helpers, uniform 401/409 byte-pre-encoded response factories,
+verify orchestrator). The T24.3 domain heuristic moved into a new
+sibling `_employer_issue_helpers.py` so `employers.py` (361 → 266
+lines after extraction) stays inside per-file budgets even with the
+verify route added. `auth.py` unchanged at 314.
+
+Cookie design: parallel to S22's `gw_account` but namespace-scoped —
+value format `emp:{id}:{hmac}` where the HMAC signs `emp:{id}` (vs
+`gw_account`'s plain `{id}`). Reuses `audit_hash_salt` (no new
+secret) but the prefix difference makes the two cookies non-
+fungible: a tampered `gw_account` cannot satisfy
+`verify_employer_cookie` (or vice-versa), tested directly.
+
+Anti-oracle: invalid / expired / used tokens all return the same
+byte-encoded `_INVALID_TOKEN_BODY` 401 (mirrors S22 magic-link
+claim's posture, asserted via `r_invalid.content == r_expired.content
+== r_replayed.content`). Single-use is enforced across all outcomes
+including 409 — the credential is consumed before the conflict
+return so a different employer cannot replay the same token.
+
+409 cross-employer translation: `create_verification`'s
+`assert_no_other_owner` raises `ValueError` when
+`listing_verifications.UNIQUE(listing_id)` would clash with a
+different employer; the orchestrator catches it and returns the
+pre-baked `_CONFLICT_BODY`. Same-employer re-claim is silent
+(idempotent) per T24.2 design.
+
+Tests: 14 new in `backend/tests/test_employers_claim_verify.py`
+covering happy path on match (claim_verified), happy path on
+mismatch (admin_reviewed), employer status promotion, cookie set,
+3 invalid/expired/used 401s, byte-uniform 401 oracle, 409 cross-
+employer + token consumed on 409, 4 cookie helper unit tests
+(round-trip, account-cookie rejection, tampered-id rejection,
+malformed input). Full backend suite: 4 failed (pre-existing
+baseline) / 4674 passed / 2 skipped. PUBLIC_ENDPOINTS allowlist
+extended in `_cross_session_fixtures.py` (token-only auth, no
+session_id input, ownership tested directly).
+
+- **T24.8 done** (auto-updated by hook)
+
+- **T24.8 done** — Reputation rate computation (real rolling-window math)
+
+- **T24.10 done** (auto-updated by hook)
+
+- **T24.10 done** — Frontend Verified Listing badge component + integration
+
+- **T24.3 done** (auto-updated by hook)
+
+- **T24.6 done** (auto-updated by hook)
+
+### 2026-05-08 — T24.8 — Reputation rate computation
+
+Replaced the T24.2 zero-rate stubs in
+`backend/app/core/queries_listings_reputation.py` (138 → 235 lines)
+with the actual rolling-window math.
+
+`get_signal_rates(session, listing_id, window_days=30)` now issues a
+single SQL query — `SELECT event_kind, COUNT(*) ... WHERE listing_id =
+:lid AND occurred_at >= :cutoff GROUP BY event_kind` — and aggregates
+in Python via `_rates_from_counts`. Cutoff is `utcnow() -
+timedelta(days=window_days)` rendered as ISO-8601; lex-comparison on
+the always-UTC ISO string serves the cutoff without per-row datetime
+parsing. Returns the canonical
+`{response_rate, withdrawal_rate, placement_rate, sample_size,
+window_days}` dict.
+
+Design choice exercised in tests: `ghosted` events count toward
+`sample_size` (so the denominator captures every interaction with the
+listing) but are intentionally NOT surfaced as their own rate —
+`ghosted` is the inverse signal of `response_received` and surfacing
+both would double-count the same outcome. `_RATE_KINDS` makes this
+explicit at module level.
+
+`aggregate_for_employer(session, employer_account_id, window_days=30)`
+joins `listing_reputation_events` to `listing_verifications` on
+listing_id and filters by `employer_account_id`, returning the same
+rate-dict shape plus `listing_count` (computed from a separate count
+on `listing_verifications`). The aggregate's response shape is now
+the full rate dict — the T24.2 stub-shape `{sample_size, window_days}`
+test in `test_queries_listings_reputation.py` was updated to the
+finalised T24.8 contract (the only consumer of these functions today
+is the T24.4–T24.7 plumbing landing in parallel; no public-API drift).
+
+NEW `backend/tests/test_listing_reputation_rates.py` (480 lines, 13
+tests, 23 assertions across all 13). Coverage: empty listing → zeros
+shape; custom window_days echoed; mixed events (5/2/1 → 5/8, 2/8, 1/8,
+n=8); ghosted in denominator only (assertion: no `ghosted_rate` key);
+n<5 still returns rates (caller-side suppression, contract-only);
+all-kinds large-sample correctness (10/5/3/7, n=25); window cutoff
+excludes 100 placed events from 60 days ago; window-shrink (7d
+narrows what 30d kept); cross-listing isolation; aggregate empty +
+roll-up + cross-employer isolation + window cutoff. `_insert_event_at`
+helper bypasses `record_event` to seed events with controlled
+`occurred_at` timestamps for the window-cutoff cases.
+
+Suite: `cd backend && .venv/bin/python -m pytest tests
+--tb=line -q` → 4673 passed / 5 failed / 2 skipped. The 5 failures are
+all pre-existing and unrelated to T24.8: the 4 baseline failures
+(`test_config_llm.py` × 3 + `test_contract_credit_api.py` × 1) plus
+`test_cross_session_isolation::test_every_endpoint_is_either_flagged_or_allowlisted`
+which started failing when T24.4 (parallel) added
+`GET /api/employers/claim/verify` — that's a T24.4 follow-up, not
+T24.8 scope.
+
+Architecture: `bpsai-pair arch check
+backend/app/core/queries_listings_reputation.py` → 1 warning (235 lines
+> 150 informational threshold; well under the 400-line error
+threshold). Test file: 1 warning (480 lines > 400 informational
+threshold for tests; under the 600-line error threshold). Project-wide
+arch check: 40 pre-existing errors, none on the files I touched.
+
+### 2026-05-08 — T24.10 — Frontend Verified Listing badge
+
+Shipped `<VerifiedBadge tier intakeComplete />` in NEW component
+`frontend/src/components/jobs/VerifiedBadge.tsx` (109 lines) and
+integrated it into the existing `frontend/src/app/jobs/page.tsx` job
+list. Three tier variants:
+`source_trust → "Source Verified" (paler cyan, bg-primary/40)`,
+`claim_verified → "Verified Employer" (full cyan, bg-primary)`,
+`admin_reviewed → "Verified Employer" (same visual as claim_verified)`.
+`tier=null` returns `null` (no hidden div) — mirrors the
+`RoleGate` (T23.8) render-nothing pattern. `intakeComplete=true` adds a
+`+ Intake Complete` amber sub-badge (`bg-warning`); independent of tier.
+Tooltip via native `title` attribute (no shadcn tooltip primitive
+installed in `frontend/src/components/ui/`); per-variant copy explains
+provenance — source-feed origin, employer claim, or admin review.
+Display-only: matching engine reads zero verification signals; T24.11
+will explicitly grep-test this. Integration uses a narrow
+`_extractVerification` helper at the page level that runtime-validates
+the optional `verification: {tier, intake_complete} | null` field T24.6
+attached to the public listing fetch — no backend type changes
+required, no impact on the existing kanban shape. Detail page
+`/jobs/[jobId]/page.tsx` does NOT exist (verified via `ls`); list-only
+integration is correct. Tests: NEW
+`frontend/src/__tests__/jobs/verified-badge.test.tsx` (130 lines, 14
+tests covering null × intake_complete=true|false, all three tiers'
+labels + styling + tooltip text, and intake_complete sub-badge presence
+across tiers). Full vitest: 3595 passed / 3 skipped / 0 failed (+15 vs
+3580 baseline; +14 new badge tests + 1 in pre-existing differential).
+`tsc --noEmit` clean; `next build` green (`/jobs` page 21 kB / 174 kB
+First Load JS, unchanged class). Architecture clean on all three
+modified files.
+
+### 2026-05-08 — T24.3 — Listing claim initiation endpoint
+
+Shipped `POST /api/employers/claim` in NEW route module
+`backend/app/routes/employers.py` (298 lines) — `auth.py` unchanged at
+314 lines per the sprint invariant. Body is
+`{listing_id: int, claimant_email: str}`; always returns 202 with empty
+body (no enumeration on unknown listing, banned IP, rate-limited, or
+SendGrid-failed). Pydantic `field_validator` rejects malformed emails
+with 422 before any DB write. Mints single-use claim token via
+`queries_listings_verification.mint_listing_claim_token`
+(secrets.token_urlsafe(32) → SHA-256 hash on disk; 15-min expiry).
+Extracts domain from email, looks up or auto-creates `employer_accounts`
+row keyed by domain (CI). Domain heuristic `_company_matches_domain`
+takes the first non-noise word of `job_listings.company` (lowercased,
+punctuation-stripped, drops words like "inc/llc/hiring/the/of") and
+prefix-matches it against the leading domain label with a 4-char
+minimum significant-token length. Match → status stays `pending`;
+mismatch → status flagged `admin_review` for T24.4 verify routing.
+SendGrid email built from text + html bodies + claim URL
+`{FRONTEND_URL}/employers/claim?token={token}`; category
+`listing_claim`; errors swallowed with `logger.exception`. Tighter
+rate limits than candidate magic-link: 5/hour per IP, 3/hour per
+email; over-limit calls still 202, no email sent. Router registered
+alphabetically in `app/routes/__init__.py:all_routers` between
+`documents_router` and `engagement_router`. AUDIT_ALLOWLIST extended
+with `POST /api/employers/claim` (no-persistence — claim row is the
+audit). PUBLIC_ENDPOINTS extended (role-gated/public, not
+session-scoped). New file `backend/tests/test_employers_claim.py`
+(432 lines, 14 tests): happy path 202 + 1 claim row, employer auto-
+created with domain heuristic, invalid email → 422, SendGrid mock
+receives claim URL with hashed-token cross-check, domain mismatch
+flags `admin_review`, second claim from same domain reuses employer,
+3/hour per-email rate limit, 5/hour per-IP rate limit, unknown
+listing_id → 202 (no claim, no SendGrid send), known/unknown response
+shape equivalence, and 4 unit tests for `_company_matches_domain`.
+Backend suite: 4647 passed / 4 baseline failed / 2 skipped.
+
+### 2026-05-08 — T24.6 — Public listing fetch verification-tier extension
+
+Extended `GET /api/jobs` with a `verification: {tier, verified_at,
+intake_complete: bool} | null` field per listing, projected from the
+`listing_verifications` table via the T24.2 batched read
+(`get_public_verification_summary(listing_ids)` — single query, no
+N+1). `intake_json` is EXCLUDED from the public payload (queries-layer
+already strips it; route belt-and-suspenders by projecting only three
+documented keys). Added `Cache-Control: public, max-age=60` mirroring
+T23.6. Anonymous-first invariant remains green (route takes no
+session_id, so byte-equivalence holds for all callers). New file
+`backend/tests/test_jobs_verification_tier.py` (224 lines, 6 tests):
+unverified→null, source_trust tier, claim_verified+intake_complete=true,
+intake_json canary leak guard, Cache-Control header, anon-vs-claimed
+shape equivalence (also pins single batched call). Extended existing
+`test_jobs_route.py` to mock the new helper since legacy alembic
+runner stops at m010 (verification tables ship in 0014). `jobs.py`
+ended at 191 lines (under 200 target); `auth.py` unchanged at 314.
+Backend suite: 4647 passed / 4 baseline failed / 2 skipped.
+
+### 2026-05-08 — T24.7 — Reputation event recording API
+
+Shipped `POST /api/listings/{listing_id}/events` in a NEW route module
+`backend/app/routes/listing_reputation.py` (95 lines) — keeps `auth.py`
+untouched at 314 lines per the sprint invariant. Body is
+`{kind, session_id?, notes?}` where `kind` is a Pydantic `Literal` over
+the four `EVENT_KINDS` (`response_received`, `withdrawn`, `placed`,
+`ghosted`) so unknown values auto-422 at the schema layer. Gated by
+`any_of_roles("case_manager", "admin")`; `recorded_by` is always pulled
+from the gw_account cookie (never the body). `record_event`'s
+`ValueError` for unknown listings is translated to 404. Anonymous
+candidate session_id is permitted in the payload so events tied to
+anonymous candidates aren't lost. Router registered alphabetically in
+`app/routes/__init__.py:all_routers` after `jobs_applications_router`,
+before `pathway_router`. Audit + cross-session allowlists extended with
+inline rationale (route is the audit; role-gated, not session-scoped).
+11 new tests pass (4 parametrized for each event_kind, role gating ×3,
+404 unknown listing, 422 invalid kind, anonymous-session_id support,
+router-registered). Arch check clean.
+
+- **T24.2 done** (auto-updated by hook)
+
+- **T24.2 done** — Verification CRUD modules
+- **T24.1 done** (auto-updated by hook)
+
+### 2026-05-08 — T24.2 — Verification CRUD modules
+
+Three async CRUD modules consumed by every backend endpoint in this sprint, all on `text()` + named binds + `RETURNING id` (portable across sqlite + postgres). All 18 helpers verified across 43 new tests.
+
+Files created:
+- `backend/app/core/queries_employers.py` (122 lines, 4 functions): `create_employer_account`, `get_employer_by_id`, `get_employer_by_domain`, `list_pending_admin_review` (joins listing_verifications + employer_accounts + job_listings, filters tier='admin_reviewed').
+- `backend/app/core/queries_listings_verification.py` (281 lines, 9 public + helpers): `mint_listing_claim_token` (15-min TTL, SHA-256 hash on disk, raw token returned once), `find_unused_claim_by_hash` (uniform None for not-found / expired / used → anti-oracle 401), `mark_claim_used`, `create_verification` (idempotent same-employer / ValueError different-employer / ValueError on invalid tier), `set_intake`, `get_verification_for_listing` (full row incl. intake_json), `get_public_verification_summary` (batched read; `intake_json` EXCLUDED, surfaces `intake_complete: bool`), plus `hash_claim_token` + `extract_domain_from_email` re-exports.
+- `backend/app/core/queries_listings_reputation.py` (137 lines, 3 public + helpers): `record_event` (validates EVENT_KINDS + listing existence, both ValueError-able), `get_signal_rates` + `aggregate_for_employer` (zero-shape stubs for T24.8; route + frontend can wire shape now).
+- `backend/app/core/_listings_verification_internals.py` (122 lines): private helpers (`utcnow_iso`, `normalize_email`, `hash_claim_token`, `extract_domain_from_email`, `existing_verification_owner`, `assert_no_other_owner`, `assert_claim_usable`) split out so the public CRUD module stays under per-file budget.
+
+Tests created (43 total):
+- `backend/tests/test_queries_employers.py` (241 lines, 12 tests): create + UNIQUE collision + domain CI normalization + admin-review queue join.
+- `backend/tests/test_queries_listings_verification.py` (521 lines, 22 tests): mint returns raw + hash on disk only + 15-min expiry + email norm; find returns None for missing/expired/used; mark_claim_used idempotency + ValueError guards; create_verification tier validation + same-employer idempotent + cross-employer ValueError; set_intake stamps both columns; public summary EXCLUDES intake_json + surfaces intake_complete + batched dict + empty-input no-op.
+- `backend/tests/test_queries_listings_reputation.py` (213 lines, 9 tests): record_event validates kind + listing existence + persists optional fields + accepts all EVENT_KINDS; signal-rate stubs return zero-shape with echoed window_days.
+- `backend/tests/_listings_verification_test_fixtures.py` (72 lines): shared `verification_engine` + `session_factory` + `make_account` + `make_listing` (underscore-prefixed so pytest skips collection).
+
+State-machine guards (all raise `ValueError`, route layer translates to 409):
+- `mark_claim_used`: claim already used → ValueError; claim expired → ValueError; claim missing → ValueError.
+- `create_verification`: invalid tier → ValueError; same employer re-claim → silent no-op (idempotent); different employer collision → ValueError.
+- `record_event`: invalid event_kind → ValueError; listing_id missing from job_listings → ValueError (404-able).
+
+Anti-oracle invariant verified: `find_unused_claim_by_hash` returns the same `None` for not-found / expired / used so the 401 response shape can't be probed for token state.
+
+Test result: full backend suite 4 failed (pre-existing baseline) / 4616 passed / 2 skipped. Sqlite axis verified; postgres axis available via `GOWORK_TEST_POSTGRES_URL`.
+
+`bpsai-pair arch check`: zero violations on touched files (all under 300-line / 12-function / 40-line-per-function limits).
+
+Branch: engage/backlog-sprint-24-listing-verification.
+
+### 2026-05-08 — T24.1 — Verification schema migration
+
+Sprint 24 entry task complete. Added the four-table verification substrate via SQLAlchemy Core + alembic revision 0014 (down_revision=0013).
+
+- **New schema module** `backend/app/core/listings_verification_schema.py` (267 lines): four `Table` defs on shared `accounts_schema.metadata` (mirrors S22 roles + S23 assessments pattern). Module-level ENUM tuples are the single source of truth: `VERIFICATION_STATUSES` (pending|claimed|admin_review|verified|retired), `SOURCE_TRUST_TIERS` (unknown|brightdata|honestjobs|twc|manual), `VERIFICATION_TIERS` (source_trust|claim_verified|admin_reviewed), `EVENT_KINDS` (response_received|withdrawn|placed|ghosted). All ENUM columns enforced via portable SQL `CHECK` clauses (sqlite + postgres compatible). `apply_ddl(connection)` helper scoped to the four tables.
+- **Tables**: `employer_accounts` (id, name UNIQUE, domain, verification_status, verified_at, verified_by_account_id FK→accounts SET NULL, retired_at, source_trust_tier, created_at), `listing_claims` (id, claim_token_hash UNIQUE, listing_id FK→job_listings CASCADE, employer_account_id FK SET NULL, claimant_email, claimant_account_id FK SET NULL, expires_at, used_at, created_at), `listing_verifications` (id, listing_id UNIQUE FK CASCADE, employer_account_id FK RESTRICT, verification_tier, intake_completed_at, intake_json TEXT, verified_at, created_at), `listing_reputation_events` (id, listing_id FK CASCADE, event_kind, session_id, occurred_at, recorded_by FK SET NULL, notes TEXT) + index `idx_listing_reputation_events_listing_id_occurred_at` on `(listing_id, occurred_at)` for the rolling-window reputation hot path.
+- **FK to legacy job_listings**: declared a reference-only stub `_job_listings_ref` Table (id-only, `extend_existing=True`) so SQLAlchemy can resolve FK targets at sort time without owning the table — `apply_ddl` is scoped to the four verification tables so the stub never appears in emitted DDL.
+- **Alembic revision** `backend/alembic/versions/0014_listing_verification.py` delegates to the schema module (mirrors 0012/0013 style).
+- **Schema tests** `backend/tests/test_listings_verification_schema.py` (15 tests): table presence × 4, CHECK rejection × 4 + acceptance × 2, UNIQUE × 3, reputation index, ENUM-tuple-spec.
+- **Parity test extended** to chain expectation 0014 (14 revisions) and the legacy-vs-alembic diff strips the four new tables + the reputation index.
+- **Verification**: `alembic upgrade head` clean on fresh sqlite (0001→0014). `sqlite3 .schema` confirms all CHECK + UNIQUE + FK + index DDL emitted correctly. Full backend suite: 4 failed (baseline) / 4573 passed / 2 skipped (was 4558; +15 from new tests, no new failures).
+- **Arch check**: 0014 revision + parity test + new schema test file all clean. Schema module 267 lines (warning at 150, error at 300 — same posture as the canonical assessments_schema.py at 270).
 
 - **T23.10 done** (auto-updated by hook)
 
