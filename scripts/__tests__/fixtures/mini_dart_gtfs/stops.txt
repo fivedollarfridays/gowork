@@ -1,0 +1,9 @@
+stop_id,stop_name,stop_lat,stop_lon
+S1,Union Station,32.77550,-96.80910
+S2,West End,32.77930,-96.80700
+S3,Akard,32.78180,-96.80370
+S4,St Paul,32.78250,-96.79870
+S5,Pearl,32.78720,-96.79670
+S6,Mockingbird,32.83740,-96.78290
+S7,Cityplace,32.79880,-96.78420
+S8,Lovers Lane,32.84680,-96.78550

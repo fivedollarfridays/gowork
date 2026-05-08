@@ -1,0 +1,4 @@
+route_id,route_short_name,route_long_name,route_type
+R1,1,Westbound Main,3
+R2,2,Eastbound Loop,3
+R3,3,Crosstown Express,3

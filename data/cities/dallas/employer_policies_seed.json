@@ -1,0 +1,352 @@
+[
+  {
+    "employer_name": "AT&T",
+    "fair_chance": false,
+    "excluded_charges": ["violence", "sex_offense", "fraud", "theft"],
+    "lookback_years": 7,
+    "bg_check_timing": "pre_offer",
+    "industry": "telecommunications",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Texas Instruments",
+    "fair_chance": false,
+    "excluded_charges": ["violence", "sex_offense", "drug", "fraud"],
+    "lookback_years": 10,
+    "bg_check_timing": "pre_offer",
+    "industry": "semiconductor",
+    "source": "federal_requirement",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Parkland Health",
+    "fair_chance": true,
+    "excluded_charges": ["violence", "sex_offense", "drug"],
+    "lookback_years": 10,
+    "bg_check_timing": "post_offer",
+    "industry": "healthcare",
+    "source": "industry_standard",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Baylor Scott & White Health",
+    "fair_chance": true,
+    "excluded_charges": ["violence", "sex_offense", "drug"],
+    "lookback_years": 10,
+    "bg_check_timing": "post_offer",
+    "industry": "healthcare",
+    "source": "industry_standard",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "UT Southwestern Medical Center",
+    "fair_chance": true,
+    "excluded_charges": ["violence", "sex_offense", "drug"],
+    "lookback_years": 10,
+    "bg_check_timing": "post_offer",
+    "industry": "healthcare",
+    "source": "state_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Methodist Health System",
+    "fair_chance": false,
+    "excluded_charges": ["violence", "sex_offense", "drug", "theft"],
+    "lookback_years": 10,
+    "bg_check_timing": "pre_offer",
+    "industry": "healthcare",
+    "source": "industry_standard",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "City of Dallas",
+    "fair_chance": true,
+    "excluded_charges": ["violence", "sex_offense"],
+    "lookback_years": 7,
+    "bg_check_timing": "post_offer",
+    "industry": "government",
+    "source": "municipal_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Dallas County Government",
+    "fair_chance": true,
+    "excluded_charges": ["violence", "sex_offense"],
+    "lookback_years": 7,
+    "bg_check_timing": "post_offer",
+    "industry": "government",
+    "source": "county_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Dallas Independent School District",
+    "fair_chance": false,
+    "excluded_charges": ["violence", "sex_offense", "drug"],
+    "lookback_years": null,
+    "bg_check_timing": "pre_offer",
+    "industry": "education",
+    "source": "state_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Dallas College",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": 7,
+    "bg_check_timing": "post_offer",
+    "industry": "education",
+    "source": "institutional_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "DART (Dallas Area Rapid Transit)",
+    "fair_chance": true,
+    "excluded_charges": ["violence", "sex_offense", "dui"],
+    "lookback_years": 7,
+    "bg_check_timing": "post_offer",
+    "industry": "transportation",
+    "source": "agency_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Southwest Airlines",
+    "fair_chance": false,
+    "excluded_charges": ["violence", "sex_offense", "drug", "fraud"],
+    "lookback_years": 10,
+    "bg_check_timing": "pre_offer",
+    "industry": "transportation",
+    "source": "federal_requirement",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "JPMorgan Chase Dallas",
+    "fair_chance": false,
+    "excluded_charges": ["fraud", "theft", "violence", "sex_offense"],
+    "lookback_years": 10,
+    "bg_check_timing": "pre_offer",
+    "industry": "finance",
+    "source": "federal_requirement",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Comerica Bank",
+    "fair_chance": false,
+    "excluded_charges": ["fraud", "theft", "violence", "sex_offense"],
+    "lookback_years": 10,
+    "bg_check_timing": "pre_offer",
+    "industry": "finance",
+    "source": "federal_requirement",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Walmart",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": 7,
+    "bg_check_timing": "post_offer",
+    "industry": "retail",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Target",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense", "violence"],
+    "lookback_years": 7,
+    "bg_check_timing": "post_offer",
+    "industry": "retail",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Home Depot",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": 7,
+    "bg_check_timing": "post_offer",
+    "industry": "retail",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Amazon DAL5 Fulfillment Center",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": 7,
+    "bg_check_timing": "post_offer",
+    "industry": "warehouse",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "FedEx Ground Dallas",
+    "fair_chance": true,
+    "excluded_charges": ["violence", "sex_offense", "dui"],
+    "lookback_years": 7,
+    "bg_check_timing": "pre_offer",
+    "industry": "warehouse",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "UPS Mesquite Hub",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense", "dui"],
+    "lookback_years": 5,
+    "bg_check_timing": "post_offer",
+    "industry": "warehouse",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Goodwill Industries of Dallas",
+    "fair_chance": true,
+    "excluded_charges": [],
+    "lookback_years": null,
+    "bg_check_timing": "post_offer",
+    "industry": "nonprofit",
+    "source": "direct_partnership",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Salvation Army Dallas",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": null,
+    "bg_check_timing": "post_offer",
+    "industry": "nonprofit",
+    "source": "direct_partnership",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Cafe Momentum",
+    "fair_chance": true,
+    "excluded_charges": [],
+    "lookback_years": null,
+    "bg_check_timing": "post_offer",
+    "industry": "food_service",
+    "source": "direct_partnership",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Bonton Farms",
+    "fair_chance": true,
+    "excluded_charges": [],
+    "lookback_years": null,
+    "bg_check_timing": "post_offer",
+    "industry": "agriculture",
+    "source": "direct_partnership",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Unlocking DOORS",
+    "fair_chance": true,
+    "excluded_charges": [],
+    "lookback_years": null,
+    "bg_check_timing": "post_offer",
+    "industry": "nonprofit",
+    "source": "direct_partnership",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Waste Management of Dallas",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": 5,
+    "bg_check_timing": "post_offer",
+    "industry": "sanitation",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Republic Services Dallas",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": 5,
+    "bg_check_timing": "post_offer",
+    "industry": "sanitation",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "TDIndustries",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": 7,
+    "bg_check_timing": "post_offer",
+    "industry": "construction",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Austin Industries",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense", "violence"],
+    "lookback_years": 7,
+    "bg_check_timing": "post_offer",
+    "industry": "construction",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Greystar Dallas",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense", "violence"],
+    "lookback_years": 7,
+    "bg_check_timing": "post_offer",
+    "industry": "property_management",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Dave's Hot Chicken",
+    "fair_chance": true,
+    "excluded_charges": [],
+    "lookback_years": null,
+    "bg_check_timing": "post_offer",
+    "industry": "food_service",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Whataburger Dallas",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": 5,
+    "bg_check_timing": "post_offer",
+    "industry": "food_service",
+    "source": "franchise_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Cintas",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": 5,
+    "bg_check_timing": "post_offer",
+    "industry": "services",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Turner Industries Dallas",
+    "fair_chance": true,
+    "excluded_charges": ["sex_offense"],
+    "lookback_years": 7,
+    "bg_check_timing": "post_offer",
+    "industry": "construction",
+    "source": "company_policy",
+    "montgomery_area": false
+  },
+  {
+    "employer_name": "Toyota North America",
+    "fair_chance": false,
+    "excluded_charges": ["violence", "sex_offense", "drug", "theft"],
+    "lookback_years": 7,
+    "bg_check_timing": "pre_offer",
+    "industry": "automotive",
+    "source": "company_policy",
+    "montgomery_area": false
+  }
+]

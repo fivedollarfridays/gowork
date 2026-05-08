@@ -1,0 +1,218 @@
+[
+  {
+    "route_name": "Beckley/Lancaster",
+    "route_number": 1,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "23:52",
+    "weekday_start": "05:00"
+  },
+  {
+    "route_name": "Park Lane Crosstown",
+    "route_number": 19,
+    "saturday": false,
+    "sunday": false,
+    "weekday_end": "21:18",
+    "weekday_start": "05:30"
+  },
+  {
+    "route_name": "Sylvan/Ross",
+    "route_number": 21,
+    "saturday": false,
+    "sunday": false,
+    "weekday_end": "20:48",
+    "weekday_start": "05:30"
+  },
+  {
+    "route_name": "Garland Rd",
+    "route_number": 26,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "23:22",
+    "weekday_start": "05:00"
+  },
+  {
+    "route_name": "Loop 12 Northwest",
+    "route_number": 36,
+    "saturday": false,
+    "sunday": false,
+    "weekday_end": "20:18",
+    "weekday_start": "05:30"
+  },
+  {
+    "route_name": "Greenville Ave",
+    "route_number": 51,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "23:22",
+    "weekday_start": "05:00"
+  },
+  {
+    "route_name": "Ferguson Rd",
+    "route_number": 60,
+    "saturday": false,
+    "sunday": false,
+    "weekday_end": "20:48",
+    "weekday_start": "05:30"
+  },
+  {
+    "route_name": "Cedar Hill Express",
+    "route_number": 161,
+    "saturday": false,
+    "sunday": false,
+    "weekday_end": "19:44",
+    "weekday_start": "05:30"
+  },
+  {
+    "route_name": "Las Colinas Connector",
+    "route_number": 183,
+    "saturday": false,
+    "sunday": false,
+    "weekday_end": "20:16",
+    "weekday_start": "05:30"
+  },
+  {
+    "route_name": "Forest Lane",
+    "route_number": 240,
+    "saturday": false,
+    "sunday": false,
+    "weekday_end": "20:50",
+    "weekday_start": "05:30"
+  },
+  {
+    "route_name": "Spring Valley",
+    "route_number": 282,
+    "saturday": false,
+    "sunday": false,
+    "weekday_end": "20:18",
+    "weekday_start": "05:30"
+  },
+  {
+    "route_name": "Garland Coit",
+    "route_number": 360,
+    "saturday": false,
+    "sunday": false,
+    "weekday_end": "20:18",
+    "weekday_start": "05:30"
+  },
+  {
+    "route_name": "Mesquite Express",
+    "route_number": 401,
+    "saturday": false,
+    "sunday": false,
+    "weekday_end": "19:44",
+    "weekday_start": "05:30"
+  },
+  {
+    "route_name": "Lake June",
+    "route_number": 408,
+    "saturday": false,
+    "sunday": false,
+    "weekday_end": "20:18",
+    "weekday_start": "05:30"
+  },
+  {
+    "route_name": "Pleasant Grove Crosstown",
+    "route_number": 466,
+    "saturday": false,
+    "sunday": false,
+    "weekday_end": "20:48",
+    "weekday_start": "05:30"
+  },
+  {
+    "route_name": "Garland - Forest",
+    "route_number": 521,
+    "saturday": false,
+    "sunday": false,
+    "weekday_end": "20:18",
+    "weekday_start": "05:30"
+  },
+  {
+    "route_name": "Plano Park",
+    "route_number": 528,
+    "saturday": false,
+    "sunday": false,
+    "weekday_end": "19:44",
+    "weekday_start": "05:30"
+  },
+  {
+    "route_name": "Frankford Crosstown",
+    "route_number": 549,
+    "saturday": false,
+    "sunday": false,
+    "weekday_end": "20:16",
+    "weekday_start": "05:30"
+  },
+  {
+    "route_name": "Far North Plano",
+    "route_number": 595,
+    "saturday": false,
+    "sunday": false,
+    "weekday_end": "19:44",
+    "weekday_start": "05:30"
+  },
+  {
+    "route_name": "Mockingbird/UNT Dallas",
+    "route_number": 700,
+    "saturday": false,
+    "sunday": false,
+    "weekday_end": "20:48",
+    "weekday_start": "05:30"
+  },
+  {
+    "route_name": "DART Express - Loop 12",
+    "route_number": 702,
+    "saturday": false,
+    "sunday": false,
+    "weekday_end": "19:16",
+    "weekday_start": "06:00"
+  },
+  {
+    "route_name": "Inland Port Express",
+    "route_number": 703,
+    "saturday": false,
+    "sunday": false,
+    "weekday_end": "19:14",
+    "weekday_start": "06:00"
+  },
+  {
+    "route_name": "South Dallas Loop",
+    "route_number": 704,
+    "saturday": false,
+    "sunday": false,
+    "weekday_end": "20:18",
+    "weekday_start": "05:30"
+  },
+  {
+    "route_name": "Red Line - Westmoreland to Parker Rd",
+    "route_number": 901,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "23:59",
+    "weekday_start": "04:30"
+  },
+  {
+    "route_name": "Blue Line - UNT Dallas to Rowlett",
+    "route_number": 902,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "23:59",
+    "weekday_start": "04:30"
+  },
+  {
+    "route_name": "Green Line - Buckner to N Carrollton/Frankford",
+    "route_number": 903,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "23:58",
+    "weekday_start": "04:30"
+  },
+  {
+    "route_name": "Orange Line - DFW Airport to Parker Rd",
+    "route_number": 904,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "23:59",
+    "weekday_start": "04:30"
+  }
+]

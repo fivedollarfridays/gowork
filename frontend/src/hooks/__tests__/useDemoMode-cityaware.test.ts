@@ -7,19 +7,29 @@ describe("useDemoMode city-aware", () => {
     vi.stubGlobal("location", { ...window.location, search: "" });
   });
 
-  it("uses Fort Worth ZIP (76102) when city param is fort-worth", async () => {
-    vi.stubGlobal("location", {
-      ...window.location,
-      search: "?demo=true&city=fort-worth",
-    });
-    const { useDemoMode } = await import("../useDemoMode");
-    const { result } = renderHook(() => useDemoMode());
+  // T25.8 (Sprint 25 — Dallas Expansion): parametrize over both DFW cities so
+  // the canonical demo ZIP for each metro is asserted by the same shape.
+  // Adding new cities = add a row here; the demo plumbing must already resolve.
+  const cityCases: Array<{ city: string; expectedZip: string; label: string }> = [
+    { city: "fort-worth", expectedZip: "76102", label: "Fort Worth" },
+    { city: "dallas", expectedZip: "75201", label: "Dallas" },
+  ];
 
-    await waitFor(() => {
-      expect(result.current).not.toBeNull();
+  for (const { city, expectedZip, label } of cityCases) {
+    it(`uses ${label} ZIP (${expectedZip}) when city param is ${city}`, async () => {
+      vi.stubGlobal("location", {
+        ...window.location,
+        search: `?demo=true&city=${city}`,
+      });
+      const { useDemoMode } = await import("../useDemoMode");
+      const { result } = renderHook(() => useDemoMode());
+
+      await waitFor(() => {
+        expect(result.current).not.toBeNull();
+      });
+      expect(result.current!.zipCode).toBe(expectedZip);
     });
-    expect(result.current!.zipCode).toBe("76102");
-  });
+  }
 
   it("uses Montgomery ZIP (36104) by default", async () => {
     vi.stubGlobal("location", {

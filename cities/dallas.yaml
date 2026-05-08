@@ -1,0 +1,37 @@
+name: Dallas
+state: TX
+location: "Dallas, TX"
+zip_ranges:
+  - "75201-75398"
+job_adapters:
+  - twc
+  - usajobs
+  # T25.3 — wired honestjobs alongside twc + usajobs once
+  # backend/data/cities/dallas/honestjobs_listings.json landed.  Mirrors
+  # the FW adapter list and feeds the JobAggregator path so the Dallas
+  # honestjobs seed surfaces in the aggregator/list endpoint, not just
+  # the matcher path.
+  - honestjobs
+data_dir: data/cities/dallas
+
+# T25.1 — appointment_services mirrors fort-worth.yaml exactly. Dallas is
+# also America/Chicago so per-service booking windows consumed by
+# app/modules/appointments/availability.py are identical to FW.
+# closed_days_of_week uses 0=Mon..6=Sun.
+appointment_services:
+  court_hearing:
+    duration_minutes: 60
+    hours_local: [["09:00", "12:00"], ["13:00", "16:00"]]
+    closed_days_of_week: [5, 6]
+  benefits_recert:
+    duration_minutes: 45
+    hours_local: [["08:30", "12:00"], ["13:00", "16:30"]]
+    closed_days_of_week: [5, 6]
+  dmv:
+    duration_minutes: 30
+    hours_local: [["08:30", "12:00"], ["13:00", "16:00"]]
+    closed_days_of_week: [5, 6]
+  childcare_intake:
+    duration_minutes: 45
+    hours_local: [["09:00", "12:00"], ["13:00", "16:00"]]
+    closed_days_of_week: [5, 6]

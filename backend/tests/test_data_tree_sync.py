@@ -56,6 +56,7 @@ _BACKEND_ONLY: set[str] = {
     # Per-city: each city's honestjobs is backend-tree only by design.
     "fort-worth/honestjobs_listings.json",
     "montgomery/honestjobs_listings.json",
+    "dallas/honestjobs_listings.json",
 }
 
 # Files that legitimately exist on root /data/cities/ only.
@@ -95,12 +96,24 @@ _ROOT_ONLY: set[str] = {
     "montgomery/training_programs.json",
     "montgomery/transit_routes.json",
     "montgomery/transit_stops.json",
+    # Dallas (Sprint 25) — same root-only pattern as fort-worth.
+    # honestjobs_listings.json is backend-only (see _BACKEND_ONLY above);
+    # resources.json is dual-tree (see _RESOURCES_CITIES below).
+    "dallas/barrier_graph_seed.json",
+    "dallas/career_centers.json",
+    "dallas/childcare_providers.json",
+    "dallas/community_resources.json",
+    "dallas/employer_policies_seed.json",
+    "dallas/employers.json",
+    "dallas/training_programs.json",
+    "dallas/transit_routes.json",
+    "dallas/transit_stops.json",
 }
 
 # Cities for which the per-city resources.json contract applies.
 # Montgomery uses the legacy 4-file fallback under root /data/ (not a
 # single resources.json), so it's intentionally excluded.
-_RESOURCES_CITIES: tuple[str, ...] = ("fort-worth",)
+_RESOURCES_CITIES: tuple[str, ...] = ("fort-worth", "dallas")
 
 
 class TestDualDataTreeSync:

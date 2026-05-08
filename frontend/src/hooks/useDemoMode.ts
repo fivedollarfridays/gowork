@@ -7,6 +7,10 @@ import type { BarrierFormData } from "@/components/wizard/BarrierForm";
 const DEMO_ZIPS: Record<string, string> = {
   montgomery: "36104",
   "fort-worth": "76102",
+  // T25.8 (Sprint 25 — Dallas Expansion): canonical Dallas demo ZIP. Stays
+  // anonymous-first (S22 invariant) — ZIP→city resolution remains the only
+  // path to a city; this lookup just maps the demo URL `?city=` param.
+  dallas: "75201",
 };
 
 function getDemoZip(city: string | null): string {

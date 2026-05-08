@@ -1,0 +1,2123 @@
+[
+  {
+    "lat": 32.7,
+    "lng": -96.825,
+    "route_id": 1,
+    "sequence": 1,
+    "stop_name": "1 Stop 1"
+  },
+  {
+    "lat": 32.7085,
+    "lng": -96.816,
+    "route_id": 1,
+    "sequence": 2,
+    "stop_name": "1 Stop 2"
+  },
+  {
+    "lat": 32.717,
+    "lng": -96.807,
+    "route_id": 1,
+    "sequence": 3,
+    "stop_name": "1 Stop 3"
+  },
+  {
+    "lat": 32.7255,
+    "lng": -96.825,
+    "route_id": 1,
+    "sequence": 4,
+    "stop_name": "1 Stop 4"
+  },
+  {
+    "lat": 32.734,
+    "lng": -96.816,
+    "route_id": 1,
+    "sequence": 5,
+    "stop_name": "1 Stop 5"
+  },
+  {
+    "lat": 32.7425,
+    "lng": -96.807,
+    "route_id": 1,
+    "sequence": 6,
+    "stop_name": "1 Stop 6"
+  },
+  {
+    "lat": 32.751,
+    "lng": -96.825,
+    "route_id": 1,
+    "sequence": 7,
+    "stop_name": "1 Stop 7"
+  },
+  {
+    "lat": 32.7595,
+    "lng": -96.816,
+    "route_id": 1,
+    "sequence": 8,
+    "stop_name": "1 Stop 8"
+  },
+  {
+    "lat": 32.768,
+    "lng": -96.807,
+    "route_id": 1,
+    "sequence": 9,
+    "stop_name": "1 Stop 9"
+  },
+  {
+    "lat": 32.7765,
+    "lng": -96.825,
+    "route_id": 1,
+    "sequence": 10,
+    "stop_name": "1 Stop 10"
+  },
+  {
+    "lat": 32.785,
+    "lng": -96.816,
+    "route_id": 1,
+    "sequence": 11,
+    "stop_name": "1 Stop 11"
+  },
+  {
+    "lat": 32.7935,
+    "lng": -96.807,
+    "route_id": 1,
+    "sequence": 12,
+    "stop_name": "1 Stop 12"
+  },
+  {
+    "lat": 32.8251,
+    "lng": -96.7845,
+    "route_id": 19,
+    "sequence": 1,
+    "stop_name": "19 Stop 1"
+  },
+  {
+    "lat": 32.8336,
+    "lng": -96.7755,
+    "route_id": 19,
+    "sequence": 2,
+    "stop_name": "19 Stop 2"
+  },
+  {
+    "lat": 32.8421,
+    "lng": -96.7665,
+    "route_id": 19,
+    "sequence": 3,
+    "stop_name": "19 Stop 3"
+  },
+  {
+    "lat": 32.8506,
+    "lng": -96.7845,
+    "route_id": 19,
+    "sequence": 4,
+    "stop_name": "19 Stop 4"
+  },
+  {
+    "lat": 32.8591,
+    "lng": -96.7755,
+    "route_id": 19,
+    "sequence": 5,
+    "stop_name": "19 Stop 5"
+  },
+  {
+    "lat": 32.8676,
+    "lng": -96.7665,
+    "route_id": 19,
+    "sequence": 6,
+    "stop_name": "19 Stop 6"
+  },
+  {
+    "lat": 32.8761,
+    "lng": -96.7845,
+    "route_id": 19,
+    "sequence": 7,
+    "stop_name": "19 Stop 7"
+  },
+  {
+    "lat": 32.8846,
+    "lng": -96.7755,
+    "route_id": 19,
+    "sequence": 8,
+    "stop_name": "19 Stop 8"
+  },
+  {
+    "lat": 32.8931,
+    "lng": -96.7665,
+    "route_id": 19,
+    "sequence": 9,
+    "stop_name": "19 Stop 9"
+  },
+  {
+    "lat": 32.9016,
+    "lng": -96.7845,
+    "route_id": 19,
+    "sequence": 10,
+    "stop_name": "19 Stop 10"
+  },
+  {
+    "lat": 32.7395,
+    "lng": -96.849,
+    "route_id": 21,
+    "sequence": 1,
+    "stop_name": "21 Stop 1"
+  },
+  {
+    "lat": 32.748,
+    "lng": -96.84,
+    "route_id": 21,
+    "sequence": 2,
+    "stop_name": "21 Stop 2"
+  },
+  {
+    "lat": 32.7565,
+    "lng": -96.831,
+    "route_id": 21,
+    "sequence": 3,
+    "stop_name": "21 Stop 3"
+  },
+  {
+    "lat": 32.765,
+    "lng": -96.849,
+    "route_id": 21,
+    "sequence": 4,
+    "stop_name": "21 Stop 4"
+  },
+  {
+    "lat": 32.7735,
+    "lng": -96.84,
+    "route_id": 21,
+    "sequence": 5,
+    "stop_name": "21 Stop 5"
+  },
+  {
+    "lat": 32.782,
+    "lng": -96.831,
+    "route_id": 21,
+    "sequence": 6,
+    "stop_name": "21 Stop 6"
+  },
+  {
+    "lat": 32.7905,
+    "lng": -96.849,
+    "route_id": 21,
+    "sequence": 7,
+    "stop_name": "21 Stop 7"
+  },
+  {
+    "lat": 32.799,
+    "lng": -96.84,
+    "route_id": 21,
+    "sequence": 8,
+    "stop_name": "21 Stop 8"
+  },
+  {
+    "lat": 32.8075,
+    "lng": -96.831,
+    "route_id": 21,
+    "sequence": 9,
+    "stop_name": "21 Stop 9"
+  },
+  {
+    "lat": 32.816,
+    "lng": -96.849,
+    "route_id": 21,
+    "sequence": 10,
+    "stop_name": "21 Stop 10"
+  },
+  {
+    "lat": 32.769,
+    "lng": -96.739,
+    "route_id": 26,
+    "sequence": 1,
+    "stop_name": "26 Stop 1"
+  },
+  {
+    "lat": 32.7775,
+    "lng": -96.73,
+    "route_id": 26,
+    "sequence": 2,
+    "stop_name": "26 Stop 2"
+  },
+  {
+    "lat": 32.786,
+    "lng": -96.721,
+    "route_id": 26,
+    "sequence": 3,
+    "stop_name": "26 Stop 3"
+  },
+  {
+    "lat": 32.7945,
+    "lng": -96.739,
+    "route_id": 26,
+    "sequence": 4,
+    "stop_name": "26 Stop 4"
+  },
+  {
+    "lat": 32.803,
+    "lng": -96.73,
+    "route_id": 26,
+    "sequence": 5,
+    "stop_name": "26 Stop 5"
+  },
+  {
+    "lat": 32.8115,
+    "lng": -96.721,
+    "route_id": 26,
+    "sequence": 6,
+    "stop_name": "26 Stop 6"
+  },
+  {
+    "lat": 32.82,
+    "lng": -96.739,
+    "route_id": 26,
+    "sequence": 7,
+    "stop_name": "26 Stop 7"
+  },
+  {
+    "lat": 32.8285,
+    "lng": -96.73,
+    "route_id": 26,
+    "sequence": 8,
+    "stop_name": "26 Stop 8"
+  },
+  {
+    "lat": 32.837,
+    "lng": -96.721,
+    "route_id": 26,
+    "sequence": 9,
+    "stop_name": "26 Stop 9"
+  },
+  {
+    "lat": 32.8455,
+    "lng": -96.739,
+    "route_id": 26,
+    "sequence": 10,
+    "stop_name": "26 Stop 10"
+  },
+  {
+    "lat": 32.854,
+    "lng": -96.73,
+    "route_id": 26,
+    "sequence": 11,
+    "stop_name": "26 Stop 11"
+  },
+  {
+    "lat": 32.8625,
+    "lng": -96.721,
+    "route_id": 26,
+    "sequence": 12,
+    "stop_name": "26 Stop 12"
+  },
+  {
+    "lat": 32.8175,
+    "lng": -96.889,
+    "route_id": 36,
+    "sequence": 1,
+    "stop_name": "36 Stop 1"
+  },
+  {
+    "lat": 32.826,
+    "lng": -96.88,
+    "route_id": 36,
+    "sequence": 2,
+    "stop_name": "36 Stop 2"
+  },
+  {
+    "lat": 32.8345,
+    "lng": -96.871,
+    "route_id": 36,
+    "sequence": 3,
+    "stop_name": "36 Stop 3"
+  },
+  {
+    "lat": 32.843,
+    "lng": -96.889,
+    "route_id": 36,
+    "sequence": 4,
+    "stop_name": "36 Stop 4"
+  },
+  {
+    "lat": 32.8515,
+    "lng": -96.88,
+    "route_id": 36,
+    "sequence": 5,
+    "stop_name": "36 Stop 5"
+  },
+  {
+    "lat": 32.86,
+    "lng": -96.871,
+    "route_id": 36,
+    "sequence": 6,
+    "stop_name": "36 Stop 6"
+  },
+  {
+    "lat": 32.8685,
+    "lng": -96.889,
+    "route_id": 36,
+    "sequence": 7,
+    "stop_name": "36 Stop 7"
+  },
+  {
+    "lat": 32.877,
+    "lng": -96.88,
+    "route_id": 36,
+    "sequence": 8,
+    "stop_name": "36 Stop 8"
+  },
+  {
+    "lat": 32.8855,
+    "lng": -96.871,
+    "route_id": 36,
+    "sequence": 9,
+    "stop_name": "36 Stop 9"
+  },
+  {
+    "lat": 32.894,
+    "lng": -96.889,
+    "route_id": 36,
+    "sequence": 10,
+    "stop_name": "36 Stop 10"
+  },
+  {
+    "lat": 32.769,
+    "lng": -96.779,
+    "route_id": 51,
+    "sequence": 1,
+    "stop_name": "51 Stop 1"
+  },
+  {
+    "lat": 32.7775,
+    "lng": -96.77,
+    "route_id": 51,
+    "sequence": 2,
+    "stop_name": "51 Stop 2"
+  },
+  {
+    "lat": 32.786,
+    "lng": -96.761,
+    "route_id": 51,
+    "sequence": 3,
+    "stop_name": "51 Stop 3"
+  },
+  {
+    "lat": 32.7945,
+    "lng": -96.779,
+    "route_id": 51,
+    "sequence": 4,
+    "stop_name": "51 Stop 4"
+  },
+  {
+    "lat": 32.803,
+    "lng": -96.77,
+    "route_id": 51,
+    "sequence": 5,
+    "stop_name": "51 Stop 5"
+  },
+  {
+    "lat": 32.8115,
+    "lng": -96.761,
+    "route_id": 51,
+    "sequence": 6,
+    "stop_name": "51 Stop 6"
+  },
+  {
+    "lat": 32.82,
+    "lng": -96.779,
+    "route_id": 51,
+    "sequence": 7,
+    "stop_name": "51 Stop 7"
+  },
+  {
+    "lat": 32.8285,
+    "lng": -96.77,
+    "route_id": 51,
+    "sequence": 8,
+    "stop_name": "51 Stop 8"
+  },
+  {
+    "lat": 32.837,
+    "lng": -96.761,
+    "route_id": 51,
+    "sequence": 9,
+    "stop_name": "51 Stop 9"
+  },
+  {
+    "lat": 32.8455,
+    "lng": -96.779,
+    "route_id": 51,
+    "sequence": 10,
+    "stop_name": "51 Stop 10"
+  },
+  {
+    "lat": 32.854,
+    "lng": -96.77,
+    "route_id": 51,
+    "sequence": 11,
+    "stop_name": "51 Stop 11"
+  },
+  {
+    "lat": 32.8625,
+    "lng": -96.761,
+    "route_id": 51,
+    "sequence": 12,
+    "stop_name": "51 Stop 12"
+  },
+  {
+    "lat": 32.7675,
+    "lng": -96.709,
+    "route_id": 60,
+    "sequence": 1,
+    "stop_name": "60 Stop 1"
+  },
+  {
+    "lat": 32.776,
+    "lng": -96.7,
+    "route_id": 60,
+    "sequence": 2,
+    "stop_name": "60 Stop 2"
+  },
+  {
+    "lat": 32.7845,
+    "lng": -96.691,
+    "route_id": 60,
+    "sequence": 3,
+    "stop_name": "60 Stop 3"
+  },
+  {
+    "lat": 32.793,
+    "lng": -96.709,
+    "route_id": 60,
+    "sequence": 4,
+    "stop_name": "60 Stop 4"
+  },
+  {
+    "lat": 32.8015,
+    "lng": -96.7,
+    "route_id": 60,
+    "sequence": 5,
+    "stop_name": "60 Stop 5"
+  },
+  {
+    "lat": 32.81,
+    "lng": -96.691,
+    "route_id": 60,
+    "sequence": 6,
+    "stop_name": "60 Stop 6"
+  },
+  {
+    "lat": 32.8185,
+    "lng": -96.709,
+    "route_id": 60,
+    "sequence": 7,
+    "stop_name": "60 Stop 7"
+  },
+  {
+    "lat": 32.827,
+    "lng": -96.7,
+    "route_id": 60,
+    "sequence": 8,
+    "stop_name": "60 Stop 8"
+  },
+  {
+    "lat": 32.8355,
+    "lng": -96.691,
+    "route_id": 60,
+    "sequence": 9,
+    "stop_name": "60 Stop 9"
+  },
+  {
+    "lat": 32.844,
+    "lng": -96.709,
+    "route_id": 60,
+    "sequence": 10,
+    "stop_name": "60 Stop 10"
+  },
+  {
+    "lat": 32.552,
+    "lng": -96.965,
+    "route_id": 161,
+    "sequence": 1,
+    "stop_name": "161 Stop 1"
+  },
+  {
+    "lat": 32.5605,
+    "lng": -96.956,
+    "route_id": 161,
+    "sequence": 2,
+    "stop_name": "161 Stop 2"
+  },
+  {
+    "lat": 32.569,
+    "lng": -96.947,
+    "route_id": 161,
+    "sequence": 3,
+    "stop_name": "161 Stop 3"
+  },
+  {
+    "lat": 32.5775,
+    "lng": -96.965,
+    "route_id": 161,
+    "sequence": 4,
+    "stop_name": "161 Stop 4"
+  },
+  {
+    "lat": 32.586,
+    "lng": -96.956,
+    "route_id": 161,
+    "sequence": 5,
+    "stop_name": "161 Stop 5"
+  },
+  {
+    "lat": 32.5945,
+    "lng": -96.947,
+    "route_id": 161,
+    "sequence": 6,
+    "stop_name": "161 Stop 6"
+  },
+  {
+    "lat": 32.603,
+    "lng": -96.965,
+    "route_id": 161,
+    "sequence": 7,
+    "stop_name": "161 Stop 7"
+  },
+  {
+    "lat": 32.6115,
+    "lng": -96.956,
+    "route_id": 161,
+    "sequence": 8,
+    "stop_name": "161 Stop 8"
+  },
+  {
+    "lat": 32.8388,
+    "lng": -96.9545,
+    "route_id": 183,
+    "sequence": 1,
+    "stop_name": "183 Stop 1"
+  },
+  {
+    "lat": 32.8473,
+    "lng": -96.9455,
+    "route_id": 183,
+    "sequence": 2,
+    "stop_name": "183 Stop 2"
+  },
+  {
+    "lat": 32.8558,
+    "lng": -96.9365,
+    "route_id": 183,
+    "sequence": 3,
+    "stop_name": "183 Stop 3"
+  },
+  {
+    "lat": 32.8643,
+    "lng": -96.9545,
+    "route_id": 183,
+    "sequence": 4,
+    "stop_name": "183 Stop 4"
+  },
+  {
+    "lat": 32.8728,
+    "lng": -96.9455,
+    "route_id": 183,
+    "sequence": 5,
+    "stop_name": "183 Stop 5"
+  },
+  {
+    "lat": 32.8813,
+    "lng": -96.9365,
+    "route_id": 183,
+    "sequence": 6,
+    "stop_name": "183 Stop 6"
+  },
+  {
+    "lat": 32.8898,
+    "lng": -96.9545,
+    "route_id": 183,
+    "sequence": 7,
+    "stop_name": "183 Stop 7"
+  },
+  {
+    "lat": 32.8983,
+    "lng": -96.9455,
+    "route_id": 183,
+    "sequence": 8,
+    "stop_name": "183 Stop 8"
+  },
+  {
+    "lat": 32.9068,
+    "lng": -96.9365,
+    "route_id": 183,
+    "sequence": 9,
+    "stop_name": "183 Stop 9"
+  },
+  {
+    "lat": 32.8681,
+    "lng": -96.7641,
+    "route_id": 240,
+    "sequence": 1,
+    "stop_name": "240 Stop 1"
+  },
+  {
+    "lat": 32.8766,
+    "lng": -96.7551,
+    "route_id": 240,
+    "sequence": 2,
+    "stop_name": "240 Stop 2"
+  },
+  {
+    "lat": 32.8851,
+    "lng": -96.7461,
+    "route_id": 240,
+    "sequence": 3,
+    "stop_name": "240 Stop 3"
+  },
+  {
+    "lat": 32.8936,
+    "lng": -96.7641,
+    "route_id": 240,
+    "sequence": 4,
+    "stop_name": "240 Stop 4"
+  },
+  {
+    "lat": 32.9021,
+    "lng": -96.7551,
+    "route_id": 240,
+    "sequence": 5,
+    "stop_name": "240 Stop 5"
+  },
+  {
+    "lat": 32.9106,
+    "lng": -96.7461,
+    "route_id": 240,
+    "sequence": 6,
+    "stop_name": "240 Stop 6"
+  },
+  {
+    "lat": 32.9191,
+    "lng": -96.7641,
+    "route_id": 240,
+    "sequence": 7,
+    "stop_name": "240 Stop 7"
+  },
+  {
+    "lat": 32.9276,
+    "lng": -96.7551,
+    "route_id": 240,
+    "sequence": 8,
+    "stop_name": "240 Stop 8"
+  },
+  {
+    "lat": 32.9361,
+    "lng": -96.7461,
+    "route_id": 240,
+    "sequence": 9,
+    "stop_name": "240 Stop 9"
+  },
+  {
+    "lat": 32.9446,
+    "lng": -96.7641,
+    "route_id": 240,
+    "sequence": 10,
+    "stop_name": "240 Stop 10"
+  },
+  {
+    "lat": 32.9531,
+    "lng": -96.7551,
+    "route_id": 240,
+    "sequence": 11,
+    "stop_name": "240 Stop 11"
+  },
+  {
+    "lat": 32.9135,
+    "lng": -96.749,
+    "route_id": 282,
+    "sequence": 1,
+    "stop_name": "282 Stop 1"
+  },
+  {
+    "lat": 32.922,
+    "lng": -96.74,
+    "route_id": 282,
+    "sequence": 2,
+    "stop_name": "282 Stop 2"
+  },
+  {
+    "lat": 32.9305,
+    "lng": -96.731,
+    "route_id": 282,
+    "sequence": 3,
+    "stop_name": "282 Stop 3"
+  },
+  {
+    "lat": 32.939,
+    "lng": -96.749,
+    "route_id": 282,
+    "sequence": 4,
+    "stop_name": "282 Stop 4"
+  },
+  {
+    "lat": 32.9475,
+    "lng": -96.74,
+    "route_id": 282,
+    "sequence": 5,
+    "stop_name": "282 Stop 5"
+  },
+  {
+    "lat": 32.956,
+    "lng": -96.731,
+    "route_id": 282,
+    "sequence": 6,
+    "stop_name": "282 Stop 6"
+  },
+  {
+    "lat": 32.9645,
+    "lng": -96.749,
+    "route_id": 282,
+    "sequence": 7,
+    "stop_name": "282 Stop 7"
+  },
+  {
+    "lat": 32.973,
+    "lng": -96.74,
+    "route_id": 282,
+    "sequence": 8,
+    "stop_name": "282 Stop 8"
+  },
+  {
+    "lat": 32.9815,
+    "lng": -96.731,
+    "route_id": 282,
+    "sequence": 9,
+    "stop_name": "282 Stop 9"
+  },
+  {
+    "lat": 32.99,
+    "lng": -96.749,
+    "route_id": 282,
+    "sequence": 10,
+    "stop_name": "282 Stop 10"
+  },
+  {
+    "lat": 32.8675,
+    "lng": -96.659,
+    "route_id": 360,
+    "sequence": 1,
+    "stop_name": "360 Stop 1"
+  },
+  {
+    "lat": 32.876,
+    "lng": -96.65,
+    "route_id": 360,
+    "sequence": 2,
+    "stop_name": "360 Stop 2"
+  },
+  {
+    "lat": 32.8845,
+    "lng": -96.641,
+    "route_id": 360,
+    "sequence": 3,
+    "stop_name": "360 Stop 3"
+  },
+  {
+    "lat": 32.893,
+    "lng": -96.659,
+    "route_id": 360,
+    "sequence": 4,
+    "stop_name": "360 Stop 4"
+  },
+  {
+    "lat": 32.9015,
+    "lng": -96.65,
+    "route_id": 360,
+    "sequence": 5,
+    "stop_name": "360 Stop 5"
+  },
+  {
+    "lat": 32.91,
+    "lng": -96.641,
+    "route_id": 360,
+    "sequence": 6,
+    "stop_name": "360 Stop 6"
+  },
+  {
+    "lat": 32.9185,
+    "lng": -96.659,
+    "route_id": 360,
+    "sequence": 7,
+    "stop_name": "360 Stop 7"
+  },
+  {
+    "lat": 32.927,
+    "lng": -96.65,
+    "route_id": 360,
+    "sequence": 8,
+    "stop_name": "360 Stop 8"
+  },
+  {
+    "lat": 32.9355,
+    "lng": -96.641,
+    "route_id": 360,
+    "sequence": 9,
+    "stop_name": "360 Stop 9"
+  },
+  {
+    "lat": 32.944,
+    "lng": -96.659,
+    "route_id": 360,
+    "sequence": 10,
+    "stop_name": "360 Stop 10"
+  },
+  {
+    "lat": 32.732,
+    "lng": -96.608,
+    "route_id": 401,
+    "sequence": 1,
+    "stop_name": "401 Stop 1"
+  },
+  {
+    "lat": 32.7405,
+    "lng": -96.599,
+    "route_id": 401,
+    "sequence": 2,
+    "stop_name": "401 Stop 2"
+  },
+  {
+    "lat": 32.749,
+    "lng": -96.59,
+    "route_id": 401,
+    "sequence": 3,
+    "stop_name": "401 Stop 3"
+  },
+  {
+    "lat": 32.7575,
+    "lng": -96.608,
+    "route_id": 401,
+    "sequence": 4,
+    "stop_name": "401 Stop 4"
+  },
+  {
+    "lat": 32.766,
+    "lng": -96.599,
+    "route_id": 401,
+    "sequence": 5,
+    "stop_name": "401 Stop 5"
+  },
+  {
+    "lat": 32.7745,
+    "lng": -96.59,
+    "route_id": 401,
+    "sequence": 6,
+    "stop_name": "401 Stop 6"
+  },
+  {
+    "lat": 32.783,
+    "lng": -96.608,
+    "route_id": 401,
+    "sequence": 7,
+    "stop_name": "401 Stop 7"
+  },
+  {
+    "lat": 32.7915,
+    "lng": -96.599,
+    "route_id": 401,
+    "sequence": 8,
+    "stop_name": "401 Stop 8"
+  },
+  {
+    "lat": 32.6975,
+    "lng": -96.709,
+    "route_id": 408,
+    "sequence": 1,
+    "stop_name": "408 Stop 1"
+  },
+  {
+    "lat": 32.706,
+    "lng": -96.7,
+    "route_id": 408,
+    "sequence": 2,
+    "stop_name": "408 Stop 2"
+  },
+  {
+    "lat": 32.7145,
+    "lng": -96.691,
+    "route_id": 408,
+    "sequence": 3,
+    "stop_name": "408 Stop 3"
+  },
+  {
+    "lat": 32.723,
+    "lng": -96.709,
+    "route_id": 408,
+    "sequence": 4,
+    "stop_name": "408 Stop 4"
+  },
+  {
+    "lat": 32.7315,
+    "lng": -96.7,
+    "route_id": 408,
+    "sequence": 5,
+    "stop_name": "408 Stop 5"
+  },
+  {
+    "lat": 32.74,
+    "lng": -96.691,
+    "route_id": 408,
+    "sequence": 6,
+    "stop_name": "408 Stop 6"
+  },
+  {
+    "lat": 32.7485,
+    "lng": -96.709,
+    "route_id": 408,
+    "sequence": 7,
+    "stop_name": "408 Stop 7"
+  },
+  {
+    "lat": 32.757,
+    "lng": -96.7,
+    "route_id": 408,
+    "sequence": 8,
+    "stop_name": "408 Stop 8"
+  },
+  {
+    "lat": 32.7655,
+    "lng": -96.691,
+    "route_id": 408,
+    "sequence": 9,
+    "stop_name": "408 Stop 9"
+  },
+  {
+    "lat": 32.774,
+    "lng": -96.709,
+    "route_id": 408,
+    "sequence": 10,
+    "stop_name": "408 Stop 10"
+  },
+  {
+    "lat": 32.6975,
+    "lng": -96.719,
+    "route_id": 466,
+    "sequence": 1,
+    "stop_name": "466 Stop 1"
+  },
+  {
+    "lat": 32.706,
+    "lng": -96.71,
+    "route_id": 466,
+    "sequence": 2,
+    "stop_name": "466 Stop 2"
+  },
+  {
+    "lat": 32.7145,
+    "lng": -96.701,
+    "route_id": 466,
+    "sequence": 3,
+    "stop_name": "466 Stop 3"
+  },
+  {
+    "lat": 32.723,
+    "lng": -96.719,
+    "route_id": 466,
+    "sequence": 4,
+    "stop_name": "466 Stop 4"
+  },
+  {
+    "lat": 32.7315,
+    "lng": -96.71,
+    "route_id": 466,
+    "sequence": 5,
+    "stop_name": "466 Stop 5"
+  },
+  {
+    "lat": 32.74,
+    "lng": -96.701,
+    "route_id": 466,
+    "sequence": 6,
+    "stop_name": "466 Stop 6"
+  },
+  {
+    "lat": 32.7485,
+    "lng": -96.719,
+    "route_id": 466,
+    "sequence": 7,
+    "stop_name": "466 Stop 7"
+  },
+  {
+    "lat": 32.757,
+    "lng": -96.71,
+    "route_id": 466,
+    "sequence": 8,
+    "stop_name": "466 Stop 8"
+  },
+  {
+    "lat": 32.7655,
+    "lng": -96.701,
+    "route_id": 466,
+    "sequence": 9,
+    "stop_name": "466 Stop 9"
+  },
+  {
+    "lat": 32.774,
+    "lng": -96.719,
+    "route_id": 466,
+    "sequence": 10,
+    "stop_name": "466 Stop 10"
+  },
+  {
+    "lat": 32.8575,
+    "lng": -96.639,
+    "route_id": 521,
+    "sequence": 1,
+    "stop_name": "521 Stop 1"
+  },
+  {
+    "lat": 32.866,
+    "lng": -96.63,
+    "route_id": 521,
+    "sequence": 2,
+    "stop_name": "521 Stop 2"
+  },
+  {
+    "lat": 32.8745,
+    "lng": -96.621,
+    "route_id": 521,
+    "sequence": 3,
+    "stop_name": "521 Stop 3"
+  },
+  {
+    "lat": 32.883,
+    "lng": -96.639,
+    "route_id": 521,
+    "sequence": 4,
+    "stop_name": "521 Stop 4"
+  },
+  {
+    "lat": 32.8915,
+    "lng": -96.63,
+    "route_id": 521,
+    "sequence": 5,
+    "stop_name": "521 Stop 5"
+  },
+  {
+    "lat": 32.9,
+    "lng": -96.621,
+    "route_id": 521,
+    "sequence": 6,
+    "stop_name": "521 Stop 6"
+  },
+  {
+    "lat": 32.9085,
+    "lng": -96.639,
+    "route_id": 521,
+    "sequence": 7,
+    "stop_name": "521 Stop 7"
+  },
+  {
+    "lat": 32.917,
+    "lng": -96.63,
+    "route_id": 521,
+    "sequence": 8,
+    "stop_name": "521 Stop 8"
+  },
+  {
+    "lat": 32.9255,
+    "lng": -96.621,
+    "route_id": 521,
+    "sequence": 9,
+    "stop_name": "521 Stop 9"
+  },
+  {
+    "lat": 32.934,
+    "lng": -96.639,
+    "route_id": 521,
+    "sequence": 10,
+    "stop_name": "521 Stop 10"
+  },
+  {
+    "lat": 32.9816,
+    "lng": -96.7124,
+    "route_id": 528,
+    "sequence": 1,
+    "stop_name": "528 Stop 1"
+  },
+  {
+    "lat": 32.9901,
+    "lng": -96.7034,
+    "route_id": 528,
+    "sequence": 2,
+    "stop_name": "528 Stop 2"
+  },
+  {
+    "lat": 32.9986,
+    "lng": -96.6944,
+    "route_id": 528,
+    "sequence": 3,
+    "stop_name": "528 Stop 3"
+  },
+  {
+    "lat": 33.0071,
+    "lng": -96.7124,
+    "route_id": 528,
+    "sequence": 4,
+    "stop_name": "528 Stop 4"
+  },
+  {
+    "lat": 33.0156,
+    "lng": -96.7034,
+    "route_id": 528,
+    "sequence": 5,
+    "stop_name": "528 Stop 5"
+  },
+  {
+    "lat": 33.0241,
+    "lng": -96.6944,
+    "route_id": 528,
+    "sequence": 6,
+    "stop_name": "528 Stop 6"
+  },
+  {
+    "lat": 33.0326,
+    "lng": -96.7124,
+    "route_id": 528,
+    "sequence": 7,
+    "stop_name": "528 Stop 7"
+  },
+  {
+    "lat": 33.0411,
+    "lng": -96.7034,
+    "route_id": 528,
+    "sequence": 8,
+    "stop_name": "528 Stop 8"
+  },
+  {
+    "lat": 32.9481,
+    "lng": -96.9065,
+    "route_id": 549,
+    "sequence": 1,
+    "stop_name": "549 Stop 1"
+  },
+  {
+    "lat": 32.9566,
+    "lng": -96.8975,
+    "route_id": 549,
+    "sequence": 2,
+    "stop_name": "549 Stop 2"
+  },
+  {
+    "lat": 32.9651,
+    "lng": -96.8885,
+    "route_id": 549,
+    "sequence": 3,
+    "stop_name": "549 Stop 3"
+  },
+  {
+    "lat": 32.9736,
+    "lng": -96.9065,
+    "route_id": 549,
+    "sequence": 4,
+    "stop_name": "549 Stop 4"
+  },
+  {
+    "lat": 32.9821,
+    "lng": -96.8975,
+    "route_id": 549,
+    "sequence": 5,
+    "stop_name": "549 Stop 5"
+  },
+  {
+    "lat": 32.9906,
+    "lng": -96.8885,
+    "route_id": 549,
+    "sequence": 6,
+    "stop_name": "549 Stop 6"
+  },
+  {
+    "lat": 32.9991,
+    "lng": -96.9065,
+    "route_id": 549,
+    "sequence": 7,
+    "stop_name": "549 Stop 7"
+  },
+  {
+    "lat": 33.0076,
+    "lng": -96.8975,
+    "route_id": 549,
+    "sequence": 8,
+    "stop_name": "549 Stop 8"
+  },
+  {
+    "lat": 33.0161,
+    "lng": -96.8885,
+    "route_id": 549,
+    "sequence": 9,
+    "stop_name": "549 Stop 9"
+  },
+  {
+    "lat": 33.0081,
+    "lng": -96.7082,
+    "route_id": 595,
+    "sequence": 1,
+    "stop_name": "595 Stop 1"
+  },
+  {
+    "lat": 33.0166,
+    "lng": -96.6992,
+    "route_id": 595,
+    "sequence": 2,
+    "stop_name": "595 Stop 2"
+  },
+  {
+    "lat": 33.0251,
+    "lng": -96.6902,
+    "route_id": 595,
+    "sequence": 3,
+    "stop_name": "595 Stop 3"
+  },
+  {
+    "lat": 33.0336,
+    "lng": -96.7082,
+    "route_id": 595,
+    "sequence": 4,
+    "stop_name": "595 Stop 4"
+  },
+  {
+    "lat": 33.0421,
+    "lng": -96.6992,
+    "route_id": 595,
+    "sequence": 5,
+    "stop_name": "595 Stop 5"
+  },
+  {
+    "lat": 33.0506,
+    "lng": -96.6902,
+    "route_id": 595,
+    "sequence": 6,
+    "stop_name": "595 Stop 6"
+  },
+  {
+    "lat": 33.0591,
+    "lng": -96.7082,
+    "route_id": 595,
+    "sequence": 7,
+    "stop_name": "595 Stop 7"
+  },
+  {
+    "lat": 33.0676,
+    "lng": -96.6992,
+    "route_id": 595,
+    "sequence": 8,
+    "stop_name": "595 Stop 8"
+  },
+  {
+    "lat": 32.7123,
+    "lng": -96.7727,
+    "route_id": 700,
+    "sequence": 1,
+    "stop_name": "700 Stop 1"
+  },
+  {
+    "lat": 32.7208,
+    "lng": -96.7637,
+    "route_id": 700,
+    "sequence": 2,
+    "stop_name": "700 Stop 2"
+  },
+  {
+    "lat": 32.7293,
+    "lng": -96.7547,
+    "route_id": 700,
+    "sequence": 3,
+    "stop_name": "700 Stop 3"
+  },
+  {
+    "lat": 32.7378,
+    "lng": -96.7727,
+    "route_id": 700,
+    "sequence": 4,
+    "stop_name": "700 Stop 4"
+  },
+  {
+    "lat": 32.7463,
+    "lng": -96.7637,
+    "route_id": 700,
+    "sequence": 5,
+    "stop_name": "700 Stop 5"
+  },
+  {
+    "lat": 32.7548,
+    "lng": -96.7547,
+    "route_id": 700,
+    "sequence": 6,
+    "stop_name": "700 Stop 6"
+  },
+  {
+    "lat": 32.7633,
+    "lng": -96.7727,
+    "route_id": 700,
+    "sequence": 7,
+    "stop_name": "700 Stop 7"
+  },
+  {
+    "lat": 32.7718,
+    "lng": -96.7637,
+    "route_id": 700,
+    "sequence": 8,
+    "stop_name": "700 Stop 8"
+  },
+  {
+    "lat": 32.7803,
+    "lng": -96.7547,
+    "route_id": 700,
+    "sequence": 9,
+    "stop_name": "700 Stop 9"
+  },
+  {
+    "lat": 32.7888,
+    "lng": -96.7727,
+    "route_id": 700,
+    "sequence": 10,
+    "stop_name": "700 Stop 10"
+  },
+  {
+    "lat": 32.816,
+    "lng": -96.889,
+    "route_id": 702,
+    "sequence": 1,
+    "stop_name": "702 Stop 1"
+  },
+  {
+    "lat": 32.8245,
+    "lng": -96.88,
+    "route_id": 702,
+    "sequence": 2,
+    "stop_name": "702 Stop 2"
+  },
+  {
+    "lat": 32.833,
+    "lng": -96.871,
+    "route_id": 702,
+    "sequence": 3,
+    "stop_name": "702 Stop 3"
+  },
+  {
+    "lat": 32.8415,
+    "lng": -96.889,
+    "route_id": 702,
+    "sequence": 4,
+    "stop_name": "702 Stop 4"
+  },
+  {
+    "lat": 32.85,
+    "lng": -96.88,
+    "route_id": 702,
+    "sequence": 5,
+    "stop_name": "702 Stop 5"
+  },
+  {
+    "lat": 32.8585,
+    "lng": -96.871,
+    "route_id": 702,
+    "sequence": 6,
+    "stop_name": "702 Stop 6"
+  },
+  {
+    "lat": 32.867,
+    "lng": -96.889,
+    "route_id": 702,
+    "sequence": 7,
+    "stop_name": "702 Stop 7"
+  },
+  {
+    "lat": 32.8755,
+    "lng": -96.88,
+    "route_id": 702,
+    "sequence": 8,
+    "stop_name": "702 Stop 8"
+  },
+  {
+    "lat": 32.884,
+    "lng": -96.871,
+    "route_id": 702,
+    "sequence": 9,
+    "stop_name": "702 Stop 9"
+  },
+  {
+    "lat": 32.666,
+    "lng": -96.759,
+    "route_id": 703,
+    "sequence": 1,
+    "stop_name": "703 Stop 1"
+  },
+  {
+    "lat": 32.6745,
+    "lng": -96.75,
+    "route_id": 703,
+    "sequence": 2,
+    "stop_name": "703 Stop 2"
+  },
+  {
+    "lat": 32.683,
+    "lng": -96.741,
+    "route_id": 703,
+    "sequence": 3,
+    "stop_name": "703 Stop 3"
+  },
+  {
+    "lat": 32.6915,
+    "lng": -96.759,
+    "route_id": 703,
+    "sequence": 4,
+    "stop_name": "703 Stop 4"
+  },
+  {
+    "lat": 32.7,
+    "lng": -96.75,
+    "route_id": 703,
+    "sequence": 5,
+    "stop_name": "703 Stop 5"
+  },
+  {
+    "lat": 32.7085,
+    "lng": -96.741,
+    "route_id": 703,
+    "sequence": 6,
+    "stop_name": "703 Stop 6"
+  },
+  {
+    "lat": 32.717,
+    "lng": -96.759,
+    "route_id": 703,
+    "sequence": 7,
+    "stop_name": "703 Stop 7"
+  },
+  {
+    "lat": 32.7255,
+    "lng": -96.75,
+    "route_id": 703,
+    "sequence": 8,
+    "stop_name": "703 Stop 8"
+  },
+  {
+    "lat": 32.6875,
+    "lng": -96.769,
+    "route_id": 704,
+    "sequence": 1,
+    "stop_name": "704 Stop 1"
+  },
+  {
+    "lat": 32.696,
+    "lng": -96.76,
+    "route_id": 704,
+    "sequence": 2,
+    "stop_name": "704 Stop 2"
+  },
+  {
+    "lat": 32.7045,
+    "lng": -96.751,
+    "route_id": 704,
+    "sequence": 3,
+    "stop_name": "704 Stop 3"
+  },
+  {
+    "lat": 32.713,
+    "lng": -96.769,
+    "route_id": 704,
+    "sequence": 4,
+    "stop_name": "704 Stop 4"
+  },
+  {
+    "lat": 32.7215,
+    "lng": -96.76,
+    "route_id": 704,
+    "sequence": 5,
+    "stop_name": "704 Stop 5"
+  },
+  {
+    "lat": 32.73,
+    "lng": -96.751,
+    "route_id": 704,
+    "sequence": 6,
+    "stop_name": "704 Stop 6"
+  },
+  {
+    "lat": 32.7385,
+    "lng": -96.769,
+    "route_id": 704,
+    "sequence": 7,
+    "stop_name": "704 Stop 7"
+  },
+  {
+    "lat": 32.747,
+    "lng": -96.76,
+    "route_id": 704,
+    "sequence": 8,
+    "stop_name": "704 Stop 8"
+  },
+  {
+    "lat": 32.7555,
+    "lng": -96.751,
+    "route_id": 704,
+    "sequence": 9,
+    "stop_name": "704 Stop 9"
+  },
+  {
+    "lat": 32.764,
+    "lng": -96.769,
+    "route_id": 704,
+    "sequence": 10,
+    "stop_name": "704 Stop 10"
+  },
+  {
+    "lat": 32.7203,
+    "lng": -96.8736,
+    "route_id": 901,
+    "sequence": 1,
+    "stop_name": "Westmoreland Station"
+  },
+  {
+    "lat": 32.7361,
+    "lng": -96.8525,
+    "route_id": 901,
+    "sequence": 2,
+    "stop_name": "Hampton Station"
+  },
+  {
+    "lat": 32.743,
+    "lng": -96.8412,
+    "route_id": 901,
+    "sequence": 3,
+    "stop_name": "Tyler/Vernon Station"
+  },
+  {
+    "lat": 32.7468,
+    "lng": -96.819,
+    "route_id": 901,
+    "sequence": 4,
+    "stop_name": "Dallas Zoo Station"
+  },
+  {
+    "lat": 32.7536,
+    "lng": -96.8004,
+    "route_id": 901,
+    "sequence": 5,
+    "stop_name": "8th & Corinth Station"
+  },
+  {
+    "lat": 32.7728,
+    "lng": -96.8033,
+    "route_id": 901,
+    "sequence": 6,
+    "stop_name": "Convention Center"
+  },
+  {
+    "lat": 32.7755,
+    "lng": -96.8091,
+    "route_id": 901,
+    "sequence": 7,
+    "stop_name": "Union Station"
+  },
+  {
+    "lat": 32.7793,
+    "lng": -96.807,
+    "route_id": 901,
+    "sequence": 8,
+    "stop_name": "West End Station"
+  },
+  {
+    "lat": 32.7818,
+    "lng": -96.8037,
+    "route_id": 901,
+    "sequence": 9,
+    "stop_name": "Akard Station"
+  },
+  {
+    "lat": 32.7825,
+    "lng": -96.7987,
+    "route_id": 901,
+    "sequence": 10,
+    "stop_name": "St Paul Station"
+  },
+  {
+    "lat": 32.7872,
+    "lng": -96.7967,
+    "route_id": 901,
+    "sequence": 11,
+    "stop_name": "Pearl/Arts District"
+  },
+  {
+    "lat": 32.7988,
+    "lng": -96.7842,
+    "route_id": 901,
+    "sequence": 12,
+    "stop_name": "Cityplace/Uptown"
+  },
+  {
+    "lat": 32.8374,
+    "lng": -96.7829,
+    "route_id": 901,
+    "sequence": 13,
+    "stop_name": "Mockingbird Station"
+  },
+  {
+    "lat": 32.8468,
+    "lng": -96.7855,
+    "route_id": 901,
+    "sequence": 14,
+    "stop_name": "Lovers Lane Station"
+  },
+  {
+    "lat": 32.8676,
+    "lng": -96.7755,
+    "route_id": 901,
+    "sequence": 15,
+    "stop_name": "Park Lane Station"
+  },
+  {
+    "lat": 32.8849,
+    "lng": -96.7659,
+    "route_id": 901,
+    "sequence": 16,
+    "stop_name": "Walnut Hill Station"
+  },
+  {
+    "lat": 32.9106,
+    "lng": -96.7551,
+    "route_id": 901,
+    "sequence": 17,
+    "stop_name": "Forest Lane Station"
+  },
+  {
+    "lat": 32.9242,
+    "lng": -96.7505,
+    "route_id": 901,
+    "sequence": 18,
+    "stop_name": "LBJ/Central Station"
+  },
+  {
+    "lat": 32.9694,
+    "lng": -96.7424,
+    "route_id": 901,
+    "sequence": 19,
+    "stop_name": "Arapaho Center"
+  },
+  {
+    "lat": 32.9798,
+    "lng": -96.735,
+    "route_id": 901,
+    "sequence": 20,
+    "stop_name": "Galatyn Park"
+  },
+  {
+    "lat": 32.9957,
+    "lng": -96.7152,
+    "route_id": 901,
+    "sequence": 21,
+    "stop_name": "CityLine/Bush"
+  },
+  {
+    "lat": 33.0156,
+    "lng": -96.7034,
+    "route_id": 901,
+    "sequence": 22,
+    "stop_name": "Downtown Plano"
+  },
+  {
+    "lat": 33.0421,
+    "lng": -96.6992,
+    "route_id": 901,
+    "sequence": 23,
+    "stop_name": "Parker Road"
+  },
+  {
+    "lat": 32.6501,
+    "lng": -96.8476,
+    "route_id": 902,
+    "sequence": 1,
+    "stop_name": "Ledbetter Station"
+  },
+  {
+    "lat": 32.6638,
+    "lng": -96.8517,
+    "route_id": 902,
+    "sequence": 2,
+    "stop_name": "VA Medical Center"
+  },
+  {
+    "lat": 32.6921,
+    "lng": -96.8329,
+    "route_id": 902,
+    "sequence": 3,
+    "stop_name": "Kiest Springs Station"
+  },
+  {
+    "lat": 32.7136,
+    "lng": -96.8231,
+    "route_id": 902,
+    "sequence": 4,
+    "stop_name": "Illinois Station"
+  },
+  {
+    "lat": 32.734,
+    "lng": -96.8131,
+    "route_id": 902,
+    "sequence": 5,
+    "stop_name": "Morrell Station"
+  },
+  {
+    "lat": 32.7536,
+    "lng": -96.8004,
+    "route_id": 902,
+    "sequence": 6,
+    "stop_name": "8th & Corinth Station"
+  },
+  {
+    "lat": 32.7728,
+    "lng": -96.8033,
+    "route_id": 902,
+    "sequence": 7,
+    "stop_name": "Convention Center"
+  },
+  {
+    "lat": 32.7755,
+    "lng": -96.8091,
+    "route_id": 902,
+    "sequence": 8,
+    "stop_name": "Union Station"
+  },
+  {
+    "lat": 32.7793,
+    "lng": -96.807,
+    "route_id": 902,
+    "sequence": 9,
+    "stop_name": "West End Station"
+  },
+  {
+    "lat": 32.7818,
+    "lng": -96.8037,
+    "route_id": 902,
+    "sequence": 10,
+    "stop_name": "Akard Station"
+  },
+  {
+    "lat": 32.7825,
+    "lng": -96.7987,
+    "route_id": 902,
+    "sequence": 11,
+    "stop_name": "St Paul Station"
+  },
+  {
+    "lat": 32.7872,
+    "lng": -96.7967,
+    "route_id": 902,
+    "sequence": 12,
+    "stop_name": "Pearl/Arts District"
+  },
+  {
+    "lat": 32.7988,
+    "lng": -96.7842,
+    "route_id": 902,
+    "sequence": 13,
+    "stop_name": "Cityplace/Uptown"
+  },
+  {
+    "lat": 32.8374,
+    "lng": -96.7829,
+    "route_id": 902,
+    "sequence": 14,
+    "stop_name": "Mockingbird Station"
+  },
+  {
+    "lat": 32.8468,
+    "lng": -96.7855,
+    "route_id": 902,
+    "sequence": 15,
+    "stop_name": "Lovers Lane Station"
+  },
+  {
+    "lat": 32.8404,
+    "lng": -96.7367,
+    "route_id": 902,
+    "sequence": 16,
+    "stop_name": "White Rock Station"
+  },
+  {
+    "lat": 32.883,
+    "lng": -96.7271,
+    "route_id": 902,
+    "sequence": 17,
+    "stop_name": "Lake Highlands Station"
+  },
+  {
+    "lat": 32.7692,
+    "lng": -96.7188,
+    "route_id": 902,
+    "sequence": 18,
+    "stop_name": "Lawnview Station"
+  },
+  {
+    "lat": 32.7393,
+    "lng": -96.7012,
+    "route_id": 902,
+    "sequence": 19,
+    "stop_name": "Lake June Station"
+  },
+  {
+    "lat": 32.7616,
+    "lng": -96.6923,
+    "route_id": 903,
+    "sequence": 1,
+    "stop_name": "Buckner Station"
+  },
+  {
+    "lat": 32.883,
+    "lng": -96.7271,
+    "route_id": 903,
+    "sequence": 2,
+    "stop_name": "Lake Highlands Station"
+  },
+  {
+    "lat": 32.7782,
+    "lng": -96.7665,
+    "route_id": 903,
+    "sequence": 3,
+    "stop_name": "Fair Park Station"
+  },
+  {
+    "lat": 32.7843,
+    "lng": -96.7799,
+    "route_id": 903,
+    "sequence": 4,
+    "stop_name": "Deep Ellum Station"
+  },
+  {
+    "lat": 32.7884,
+    "lng": -96.7716,
+    "route_id": 903,
+    "sequence": 5,
+    "stop_name": "Baylor University Med"
+  },
+  {
+    "lat": 32.7872,
+    "lng": -96.7967,
+    "route_id": 903,
+    "sequence": 6,
+    "stop_name": "Pearl/Arts District"
+  },
+  {
+    "lat": 32.7793,
+    "lng": -96.807,
+    "route_id": 903,
+    "sequence": 7,
+    "stop_name": "West End Station"
+  },
+  {
+    "lat": 32.8295,
+    "lng": -96.7791,
+    "route_id": 903,
+    "sequence": 8,
+    "stop_name": "Vaillant/Mockingbird"
+  },
+  {
+    "lat": 32.841,
+    "lng": -96.8492,
+    "route_id": 903,
+    "sequence": 9,
+    "stop_name": "Inwood/Love Field"
+  },
+  {
+    "lat": 32.852,
+    "lng": -96.8693,
+    "route_id": 903,
+    "sequence": 10,
+    "stop_name": "Bachman Station"
+  },
+  {
+    "lat": 32.8693,
+    "lng": -96.8772,
+    "route_id": 903,
+    "sequence": 11,
+    "stop_name": "Burbank Station"
+  },
+  {
+    "lat": 32.8961,
+    "lng": -96.8893,
+    "route_id": 903,
+    "sequence": 12,
+    "stop_name": "Royal Lane Station"
+  },
+  {
+    "lat": 32.9268,
+    "lng": -96.8892,
+    "route_id": 903,
+    "sequence": 13,
+    "stop_name": "Farmers Branch Station"
+  },
+  {
+    "lat": 32.9555,
+    "lng": -96.8895,
+    "route_id": 903,
+    "sequence": 14,
+    "stop_name": "Downtown Carrollton"
+  },
+  {
+    "lat": 32.9821,
+    "lng": -96.8975,
+    "route_id": 903,
+    "sequence": 15,
+    "stop_name": "Trinity Mills Station"
+  },
+  {
+    "lat": 32.8998,
+    "lng": -97.0403,
+    "route_id": 904,
+    "sequence": 1,
+    "stop_name": "DFW Airport Station"
+  },
+  {
+    "lat": 32.8728,
+    "lng": -96.9455,
+    "route_id": 904,
+    "sequence": 2,
+    "stop_name": "Las Colinas Urban Cntr"
+  },
+  {
+    "lat": 32.841,
+    "lng": -96.8492,
+    "route_id": 904,
+    "sequence": 3,
+    "stop_name": "Inwood/Love Field"
+  },
+  {
+    "lat": 32.852,
+    "lng": -96.8693,
+    "route_id": 904,
+    "sequence": 4,
+    "stop_name": "Bachman Station"
+  },
+  {
+    "lat": 32.8693,
+    "lng": -96.8772,
+    "route_id": 904,
+    "sequence": 5,
+    "stop_name": "Burbank Station"
+  },
+  {
+    "lat": 32.7793,
+    "lng": -96.807,
+    "route_id": 904,
+    "sequence": 6,
+    "stop_name": "West End Station"
+  },
+  {
+    "lat": 32.7818,
+    "lng": -96.8037,
+    "route_id": 904,
+    "sequence": 7,
+    "stop_name": "Akard Station"
+  },
+  {
+    "lat": 32.7825,
+    "lng": -96.7987,
+    "route_id": 904,
+    "sequence": 8,
+    "stop_name": "St Paul Station"
+  },
+  {
+    "lat": 32.7872,
+    "lng": -96.7967,
+    "route_id": 904,
+    "sequence": 9,
+    "stop_name": "Pearl/Arts District"
+  },
+  {
+    "lat": 32.7988,
+    "lng": -96.7842,
+    "route_id": 904,
+    "sequence": 10,
+    "stop_name": "Cityplace/Uptown"
+  },
+  {
+    "lat": 32.8374,
+    "lng": -96.7829,
+    "route_id": 904,
+    "sequence": 11,
+    "stop_name": "Mockingbird Station"
+  },
+  {
+    "lat": 32.8468,
+    "lng": -96.7855,
+    "route_id": 904,
+    "sequence": 12,
+    "stop_name": "Lovers Lane Station"
+  },
+  {
+    "lat": 32.8676,
+    "lng": -96.7755,
+    "route_id": 904,
+    "sequence": 13,
+    "stop_name": "Park Lane Station"
+  },
+  {
+    "lat": 32.8849,
+    "lng": -96.7659,
+    "route_id": 904,
+    "sequence": 14,
+    "stop_name": "Walnut Hill Station"
+  },
+  {
+    "lat": 32.9106,
+    "lng": -96.7551,
+    "route_id": 904,
+    "sequence": 15,
+    "stop_name": "Forest Lane Station"
+  },
+  {
+    "lat": 32.9242,
+    "lng": -96.7505,
+    "route_id": 904,
+    "sequence": 16,
+    "stop_name": "LBJ/Central Station"
+  },
+  {
+    "lat": 32.9694,
+    "lng": -96.7424,
+    "route_id": 904,
+    "sequence": 17,
+    "stop_name": "Arapaho Center"
+  },
+  {
+    "lat": 32.9798,
+    "lng": -96.735,
+    "route_id": 904,
+    "sequence": 18,
+    "stop_name": "Galatyn Park"
+  },
+  {
+    "lat": 32.9477,
+    "lng": -96.7397,
+    "route_id": 904,
+    "sequence": 19,
+    "stop_name": "Downtown Richardson"
+  },
+  {
+    "lat": 32.9957,
+    "lng": -96.7152,
+    "route_id": 904,
+    "sequence": 20,
+    "stop_name": "CityLine/Bush"
+  },
+  {
+    "lat": 33.0156,
+    "lng": -96.7034,
+    "route_id": 904,
+    "sequence": 21,
+    "stop_name": "Downtown Plano"
+  },
+  {
+    "lat": 33.0421,
+    "lng": -96.6992,
+    "route_id": 904,
+    "sequence": 22,
+    "stop_name": "Parker Road"
+  }
+]

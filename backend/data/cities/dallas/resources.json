@@ -1,0 +1,229 @@
+[
+  {
+    "name": "Workforce Solutions Greater Dallas",
+    "category": "career_center",
+    "subcategory": "workforce_development",
+    "address": "1201 Main St Suite 2700, Dallas, TX 75202",
+    "lat": 32.7796,
+    "lng": -96.8011,
+    "phone": "214-290-1000",
+    "url": "https://www.wfsdallas.com",
+    "eligibility": "Open to all jobseekers; income-eligible for WIOA training vouchers",
+    "services": [
+      "job_search",
+      "resume_help",
+      "WIOA_training_vouchers",
+      "transportation_vouchers",
+      "veterans_services"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "Network office for Workforce Solutions Greater Dallas; coordinates Dallas County workforce centers.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "Dallas College",
+    "category": "training",
+    "subcategory": "credentials",
+    "address": "1601 S Lamar St, Dallas, TX 75215",
+    "lat": 32.7677,
+    "lng": -96.7883,
+    "phone": "214-378-1824",
+    "url": "https://www.dallascollege.edu",
+    "eligibility": "Open admission; financial aid available",
+    "services": [
+      "CDL_training",
+      "welding",
+      "HVAC",
+      "healthcare_certifications",
+      "IT_certifications",
+      "associate_degrees"
+    ],
+    "hours": "Multiple class schedules; campus hours vary",
+    "notes": "Dallas County Community College District (rebranded Dallas College). Seven campuses across Dallas County. Pell-eligible.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "training"
+    ]
+  },
+  {
+    "name": "DART",
+    "category": "social_service",
+    "subcategory": "public_transit",
+    "address": "1401 Pacific Ave, Dallas, TX 75202",
+    "lat": 32.7798,
+    "lng": -96.8053,
+    "phone": "214-979-1111",
+    "url": "https://www.dart.org",
+    "eligibility": "Open to all riders; reduced fare available",
+    "services": [
+      "light_rail",
+      "bus_routes",
+      "TRE_commuter_rail",
+      "GoLink_microtransit",
+      "reduced_fare_program"
+    ],
+    "hours": "Mon-Sat 5am-12am; reduced Sunday service",
+    "notes": "Dallas Area Rapid Transit. Light rail (Red, Blue, Green, Orange, Silver lines), bus, and on-demand GoLink across Dallas County and select suburbs.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "transportation"
+    ]
+  },
+  {
+    "name": "Parkland Health",
+    "category": "social_service",
+    "subcategory": "healthcare",
+    "address": "5200 Harry Hines Blvd, Dallas, TX 75235",
+    "lat": 32.8125,
+    "lng": -96.8389,
+    "phone": "214-590-8000",
+    "url": "https://www.parklandhospital.com",
+    "eligibility": "Dallas County residents; sliding-scale based on income",
+    "services": [
+      "primary_care",
+      "urgent_care",
+      "specialty_care",
+      "behavioral_health",
+      "emergency_care"
+    ],
+    "hours": "Mon-Fri 8am-5pm; ER 24/7",
+    "notes": "Dallas County's public hospital and safety-net network. Sliding-scale fees; Parkland Financial Assistance program available.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "health"
+    ]
+  },
+  {
+    "name": "Legal Aid of NorthWest Texas — Dallas",
+    "category": "social_service",
+    "subcategory": "legal_aid",
+    "address": "1515 Main St, Dallas, TX 75201",
+    "lat": 32.7807,
+    "lng": -96.7993,
+    "phone": "214-748-1234",
+    "url": "https://www.lanwt.org",
+    "eligibility": "Income-eligible (125% FPL); civil legal matters",
+    "services": [
+      "expunction",
+      "nondisclosure",
+      "record_clearing",
+      "family_law",
+      "housing"
+    ],
+    "hours": "Mon-Fri 9am-5pm",
+    "notes": "Dallas branch of LANWT. Free civil legal services including record clearing eligibility consults.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "criminal_record"
+    ]
+  },
+  {
+    "name": "Dallas Housing Authority",
+    "category": "social_service",
+    "subcategory": "housing",
+    "address": "3939 N Hampton Rd, Dallas, TX 75212",
+    "lat": 32.8189,
+    "lng": -96.8633,
+    "phone": "214-951-8300",
+    "url": "https://www.dhadal.com",
+    "eligibility": "Income-eligible Dallas residents",
+    "services": [
+      "housing_choice_voucher",
+      "section_8",
+      "public_housing",
+      "family_self_sufficiency"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "Housing Choice Voucher and public housing for Dallas. Waitlists open periodically — check website.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "housing"
+    ]
+  },
+  {
+    "name": "Texas Rising Star",
+    "category": "childcare",
+    "subcategory": "referral_network",
+    "address": "Statewide Texas quality-rated childcare program",
+    "lat": 32.7796,
+    "lng": -96.8011,
+    "phone": "877-787-8999",
+    "url": "https://texasrisingstar.org",
+    "eligibility": "Open to families seeking quality-rated care; referral by ChildCareGroup or TWC",
+    "services": [
+      "quality_rated_provider_lookup",
+      "subsidy_navigation",
+      "provider_search"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "Texas's voluntary quality rating system for childcare providers. ChildCareGroup is the local resource center for Dallas.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "childcare"
+    ]
+  },
+  {
+    "name": "TWC Child Care Services",
+    "category": "childcare",
+    "subcategory": "subsidy",
+    "address": "1201 Main St Suite 2700, Dallas, TX 75202",
+    "lat": 32.7796,
+    "lng": -96.8011,
+    "phone": "214-630-7911",
+    "url": "https://www.wfsdallas.com/services/child-care",
+    "eligibility": "Working / training parents under 85% State Median Income",
+    "services": [
+      "child_care_subsidy",
+      "Texas_Rising_Star_referrals",
+      "after_school_subsidy"
+    ],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "Income-based childcare subsidy administered locally by Workforce Solutions Greater Dallas through ChildCareGroup. Pays direct to TRS-rated providers.",
+    "health_status": "healthy",
+    "barrier_affinity": [
+      "childcare"
+    ]
+  },
+  {
+    "name": "North Texas 211",
+    "category": "social_service",
+    "subcategory": "general_assistance",
+    "address": "1800 N Lamar St, Dallas, TX 75202",
+    "lat": 32.7906,
+    "lng": -96.8086,
+    "phone": "211",
+    "url": "https://www.unitedwaydallas.org/211",
+    "eligibility": "Open to all North Texas residents",
+    "services": [
+      "resource_referral",
+      "emergency_assistance",
+      "food",
+      "housing",
+      "utilities"
+    ],
+    "hours": "24/7",
+    "notes": "Free 211 information and referral line operated by United Way of Metropolitan Dallas. Always relevant for emergency needs.",
+    "health_status": "healthy"
+  },
+  {
+    "name": "Catholic Charities Dallas - Workforce + Case Management",
+    "category": "social_service",
+    "subcategory": "general_assistance",
+    "address": "1421 W Mockingbird Ln, Dallas, TX 75247",
+    "lat": 32.8217,
+    "lng": -96.8408,
+    "phone": "214-257-0674",
+    "url": "https://ccdallas.org",
+    "eligibility": "Open to all in need; income-eligible for some programs",
+    "services": [
+      "emergency_assistance",
+      "refugee_resettlement",
+      "immigration_legal",
+      "workforce_development",
+      "case_management"
+    ],
+    "hours": "Mon-Fri 9am-5pm",
+    "notes": "Catholic Charities serving Dallas, Collin, Ellis, Hunt, Kaufman, Navarro, and Rockwall counties. Workforce, refugee, and immigration legal services.",
+    "health_status": "healthy"
+  }
+]
