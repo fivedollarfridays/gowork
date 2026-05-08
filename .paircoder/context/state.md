@@ -52,6 +52,8 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+- **T24.11 done** (auto-updated by hook)
+
 ### 2026-05-08 — Sprint 24 (Two-Sided Listing Verification) — COMPLETE
 
 All 11 tasks landed (T24.1–T24.11). Sprint went /ideation → /draft-backlog → /pc-plan → /prepare-to-engage → /running-sprint-tasks across 7 dependency-aware waves. Path A (autonomous through Wave 5, integration gate at the end with user authorization).
