@@ -114,11 +114,17 @@ PUBLIC_ENDPOINTS: dict[str, str] = {
     "POST /api/admin/flags/{name}":
         "Admin-key gated, not session-scoped.",
     "POST /api/brightdata/crawl":
-        "Admin/internal scraper trigger.",
+        "Admin role-gated (require_role('admin'), T26.4); operator-only "
+        "scraper trigger. No session_id input — body is a list of URLs. "
+        "Tested directly by test_brightdata_routes.py.",
     "GET /api/brightdata/status/{snapshot_id}":
-        "Admin/internal scraper status.",
+        "Admin role-gated (require_role('admin'), T26.4); operator-only "
+        "scraper status. Path id is a BrightData snapshot id, not a "
+        "session_id. Tested directly by test_brightdata_routes.py.",
     "POST /api/brightdata/precrawl":
-        "Admin/internal scraper trigger.",
+        "Admin role-gated (require_role('admin'), T26.4); operator-only "
+        "scraper trigger. No body, no session_id input. Tested directly "
+        "by test_brightdata_routes.py.",
     "POST /api/barrier-intel/reindex":
         "Admin-key gated reindex.",
     "POST /api/demo/seed":

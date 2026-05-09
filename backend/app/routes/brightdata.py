@@ -1,11 +1,26 @@
-"""BrightData crawl routes — trigger, status, and pre-crawl."""
+"""BrightData crawl routes — trigger, status, and pre-crawl.
+
+Auth gating (T26.4)
+-------------------
+Routes here gate on :func:`require_role("admin")` (S22 cookie session)
+rather than the legacy header-based ``require_admin_key``. The new
+admin UI shipped in T26.10 calls these endpoints with the same
+``gw_account`` cookie used by every other admin surface — a single
+trust boundary for the operator UI.
+
+Breaking change for any external script that previously sent
+``X-Admin-Key``: those callers must claim a magic-link account, hold
+the ``admin`` role, and present the signed ``gw_account`` cookie.
+External use is unlikely (this is operator surface), but the
+boundary change is worth calling out.
+"""
 
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Path
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.auth import require_admin_key
+from app.core.auth_roles import require_role
 from app.core.config import get_settings
 from app.core.database import get_db
 from app.integrations.brightdata.client import BrightDataClient
@@ -23,7 +38,7 @@ from app.integrations.brightdata.types import (
 router = APIRouter(
     prefix="/api/brightdata",
     tags=["brightdata"],
-    dependencies=[Depends(require_admin_key)],
+    dependencies=[Depends(require_role("admin"))],
 )
 
 

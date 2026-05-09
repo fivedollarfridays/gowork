@@ -17,7 +17,7 @@
 **Plan:** plan-2026-05-s26-admin-dashboard
 **Type:** feature
 **Title:** S26 — Admin Dashboard
-**Status:** In progress (2/12 tasks done — T26.1 wave-0 migration + T26.3 admin-feedback backend shipped 2026-05-09)
+**Status:** In progress (3/12 tasks done — T26.1 wave-0 migration + T26.3 admin-feedback backend + T26.4 brightdata auth-gate migration shipped 2026-05-09)
 **Branch:** main (engage will create `engage/backlog-sprint-26-admin-dashboard`)
 **Current Sprint:** S26
 **Total Cx:** 192 (9 P0 / 3 P1 / 0 P2)
@@ -68,6 +68,25 @@ Out of focus: S13b deferred items (43 Tier-1 browser suites, 6 Tier-6 cross-modu
 Older sprint task tables and session histories (Sprints 7 — 31) are in `.paircoder/archive/state-pre-s1.md`. S12a per-session entries plus S2 — S11 detail are in `.paircoder/archive/state-s12a.md`. S13 wave-by-wave detail + per-task driver sessions are in `.paircoder/archive/state-s13.md`.
 
 ## What Was Just Done
+
+- **T26.4 done** (brightdata.py migrated from require_admin_key → require_role("admin"))
+
+### 2026-05-09 — T26.4 — brightdata.py auth migration
+
+Wave-0 third task done. `backend/app/routes/brightdata.py` swapped from header-based `require_admin_key` (legacy) to S22's cookie-based `require_role("admin")` — the same trust boundary every post-S22 admin surface uses (cities_admin, employers_admin, assessments_review, admin_feedback). Endpoint surface (POST /crawl, GET /status/{id}, POST /precrawl) unchanged; only the gate flipped.
+
+- **Breaking change (operator surface only):** any external script that hit these routes with `X-Admin-Key` must now claim a magic-link account, hold the `admin` role, and present the signed `gw_account` cookie. External use is unlikely (operator UI surface) but the boundary change is real and called out in the route module docstring.
+- **Test rewrite:** `backend/tests/test_brightdata_routes.py` rebuilt against the cookie pattern. Three new auth-cycle tests (`TestAuthGating`): anonymous → 403 with "Authentication required"; non-admin (no role grant) → 403 with "Insufficient permissions"; admin cookie → 200. All 11 prior tests (trigger / status / precrawl / snapshot-id-validation) ported to seed an admin account per-test and pass the cookie. Mirrors test_cities_admin.py + test_admin_feedback.py fixture pattern (apply accounts + roles DDL, mint cookie via `build_account_cookie_value`).
+- **test_auth.py refactor:** `TestRequireAdminKey` previously exercised the dependency through brightdata routes. Migrated to direct unit tests of the async dependency callable (no route vehicle needed). The dependency is still in use by `admin_flags.py`, `engagement.send-now`, and `demo.py` so the test class stays valid.
+- **PUBLIC_ENDPOINTS:** all 3 brightdata routes' rationales updated in `backend/tests/_cross_session_fixtures.py` to spell out "Admin role-gated (require_role('admin'), T26.4); operator-only ... no session_id input. Tested directly by test_brightdata_routes.py" — meeting the per-route AC discipline.
+- **Verification:**
+  - `bpsai-pair arch check backend/app/routes/brightdata.py` → clean (line count shrank slightly with the gate swap).
+  - `ruff check` → clean on all 4 touched files.
+  - 14/14 brightdata route tests pass; 186/186 brightdata + auth tests pass.
+  - Adjacent regression sweep: full suite 4811 passing / 3 pre-existing baselines (`test_config_llm.py` × 2, `test_contract_credit_api.py` × 1) plus the cross-session-isolation transient owned by T26.2's pending registration. Zero new failures.
+- **Files:** `backend/app/routes/brightdata.py`, `backend/tests/test_brightdata_routes.py`, `backend/tests/test_auth.py`, `backend/tests/_cross_session_fixtures.py`.
+
+- **T26.3 done** (auto-updated by hook)
 
 - **T26.3 done** (admin feedback inbox + flagged-queue backend)
 
