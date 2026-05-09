@@ -73,6 +73,31 @@ _TOOLING_TABLE_PATTERNS = (
     ),
 )
 
+# Columns added by alembic migrations beyond the legacy m001..m010
+# chain. The parity check normalises these out of the alembic-side
+# ``resources`` CREATE TABLE so the legacy schema (which lacks them)
+# stays comparable.
+_POST_LEGACY_RESOURCES_COLUMNS = (
+    # 0015 (T26.1) — admin curation marker.
+    "user_curated_at TIMESTAMP",
+)
+
+
+def _strip_post_legacy_resources_columns(sql: str) -> str:
+    """Remove post-legacy resource columns from a CREATE TABLE statement.
+
+    SQLite materialises ``ALTER TABLE ADD COLUMN`` into the stored
+    ``sqlite_master.sql``; alembic-side ``resources`` therefore lists
+    columns the legacy chain (which stops at m010) cannot have. Strip
+    those columns so the parity check still pins the m001..m010
+    schema.
+    """
+    if not re.search(r"CREATE TABLE resources\b", sql, re.IGNORECASE):
+        return sql
+    for col_def in _POST_LEGACY_RESOURCES_COLUMNS:
+        sql = re.sub(rf",\s*{re.escape(col_def)}", "", sql, flags=re.IGNORECASE)
+    return sql
+
 
 def _dump_app_schema(db_path: str) -> list[str]:
     """Return sorted application-level CREATE statements from a sqlite DB."""
@@ -89,6 +114,7 @@ def _dump_app_schema(db_path: str) -> list[str]:
     for (sql,) in rows:
         if any(p.search(sql) for p in _TOOLING_TABLE_PATTERNS):
             continue
+        sql = _strip_post_legacy_resources_columns(sql)
         # Normalize whitespace so "CREATE TABLE x(\n  ...\n)" matches
         # "CREATE TABLE x (\n  ...\n)" — alembic's op.execute preserves
         # the SQL text but sqlite normalises slightly on storage.
@@ -158,7 +184,7 @@ def test_alembic_upgrade_head_matches_runner_schema(
 
 
 def test_alembic_revisions_chain_is_linear(alembic_available):
-    """Each revision 0001..0014 must declare the previous as down_revision."""
+    """Each revision 0001..0015 must declare the previous as down_revision."""
     versions_dir = _backend_dir() / "alembic" / "versions"
     expected = {
         "0001": None,
@@ -175,9 +201,10 @@ def test_alembic_revisions_chain_is_linear(alembic_available):
         "0012": "0011",
         "0013": "0012",
         "0014": "0013",
+        "0015": "0014",
     }
     files = sorted(versions_dir.glob("[0-9][0-9][0-9][0-9]_*.py"))
-    assert len(files) == 14, f"expected 14 revisions, found {len(files)}"
+    assert len(files) == 15, f"expected 15 revisions, found {len(files)}"
 
     for path in files:
         rev = path.name[:4]
