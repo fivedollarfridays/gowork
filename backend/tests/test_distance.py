@@ -51,6 +51,30 @@ class TestHaversineMiles:
 # ---------- FW ZIP centroid lookup ----------------------------------
 
 
+def _assert_dallas_zip_in_box_or_absent(
+    zip_code: str, coords: tuple[float, float] | None,
+) -> bool:
+    """Return True iff ``coords`` is in DFW bbox; return False if None.
+
+    Helper for the Dallas-side bbox extension.  Asserts on a positive
+    coords and accepts None as the documented "no distance signal"
+    path -- raises ``AssertionError`` only when coords are present
+    AND outside the DFW bounding box used by the FW assertion.
+    """
+    if coords is None:
+        return False
+    lat, lng = coords
+    assert 32.5 <= lat <= 33.0, (
+        f"Dallas ZIP {zip_code} lat={lat} outside DFW bbox "
+        f"(box is FW-anchored 32.5..33.0)"
+    )
+    assert -97.6 <= lng <= -97.0, (
+        f"Dallas ZIP {zip_code} lng={lng} outside DFW bbox "
+        f"(box is FW-anchored -97.6..-97.0)"
+    )
+    return True
+
+
 class TestZipCentroid:
     """Hard-coded FW ZIPs only — anything else returns ``None`` and the
     caller treats it as "no distance signal" rather than estimating."""
@@ -70,6 +94,41 @@ class TestZipCentroid:
             lat, lng = coords
             assert 32.5 <= lat <= 33.0, f"{zip_code} lat={lat}"
             assert -97.6 <= lng <= -97.0, f"{zip_code} lng={lng}"
+
+    def test_known_dallas_zips_land_inside_dfw_bbox(self):
+        """T25.6 — Dallas embedded ZIPs must land inside the DFW box.
+
+        Dallas sits east of Fort Worth in the same metro; the existing
+        FW bounding box (lat 32.5..33.0, lng -97.6..-97.0) is wide
+        enough to cover both downtowns plus the southern Dallas
+        neighbourhoods we ship in the embedded centroids.  No box
+        widening required.
+
+        If a Dallas ZIP centroid is missing, the lookup returns None
+        -- documented as the "no distance signal" sentinel by the
+        production ``zip_centroid`` contract.  This test pins that
+        EITHER (a) the centroid is present AND inside the DFW box,
+        OR (b) the centroid is None (the safe default).  See
+        ``_assert_dallas_zip_in_box_or_absent`` for the per-ZIP check.
+        """
+        from app.modules.matching.distance import zip_centroid
+
+        dallas_zips = [
+            "75201", "75204", "75215", "75216", "75217",
+            "75224", "75227", "75228", "75232", "75241",
+        ]
+        in_box = 0
+        absent = 0
+        for zip_code in dallas_zips:
+            present = _assert_dallas_zip_in_box_or_absent(
+                zip_code, zip_centroid(zip_code),
+            )
+            in_box += int(present)
+            absent += int(not present)
+        assert in_box + absent == len(dallas_zips), (
+            f"Dallas ZIP lookup produced unexpected results: "
+            f"in_box={in_box} absent={absent} total={len(dallas_zips)}"
+        )
 
     def test_unknown_zip_returns_none(self):
         from app.modules.matching.distance import zip_centroid

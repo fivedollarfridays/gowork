@@ -79,6 +79,7 @@ class GenerationMethod(str, Enum):
 TIMEZONE_BY_CITY: dict[str, str] = {
     "montgomery": "America/Chicago",
     "fort-worth": "America/Chicago",
+    "dallas": "America/Chicago",
 }
 
 
