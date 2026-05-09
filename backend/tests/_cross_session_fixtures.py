@@ -222,6 +222,36 @@ PUBLIC_ENDPOINTS: dict[str, str] = {
         "optional action_taken on a visit_feedback row. Path id is a "
         "visit_feedback.id, not a session_id; the body never carries "
         "a session_id. Tested directly by test_admin_feedback.py.",
+    # ---------- S26 admin resource CRUD (T26.2)
+    "GET /api/admin/resources":
+        "Admin role-gated (require_role('admin')); paginated list of "
+        "resources with optional `?city=` filter and `?include_hidden=` "
+        "opt-in. No session_id input. Tested directly by "
+        "test_admin_resources.py.",
+    "GET /api/admin/resources/{resource_id}":
+        "Admin role-gated (require_role('admin')); single-resource read. "
+        "Path id is a resources.id, not a session_id. Tested directly "
+        "by test_admin_resources.py.",
+    "POST /api/admin/resources":
+        "Admin role-gated (require_role('admin')); create a new "
+        "resource. Body is the resource fields (name, category, city, "
+        "...); no session_id. Stamps user_curated_at server-side. "
+        "Tested directly by test_admin_resources.py.",
+    "PATCH /api/admin/resources/{resource_id}":
+        "Admin role-gated (require_role('admin')); partial-update a "
+        "resource. Path id is a resources.id; body is a patch with no "
+        "session_id. Stamps user_curated_at server-side. Tested "
+        "directly by test_admin_resources.py.",
+    "DELETE /api/admin/resources/{resource_id}":
+        "Admin role-gated (require_role('admin')); soft-hide a "
+        "resource (sets health_status='hidden'). Path id is a "
+        "resources.id, not a session_id. Tested directly by "
+        "test_admin_resources.py.",
+    "POST /api/admin/resources/{resource_id}/restore":
+        "Admin role-gated (require_role('admin')); restore a "
+        "soft-hidden resource (sets health_status='healthy'). Path id "
+        "is a resources.id, not a session_id. Tested directly by "
+        "test_admin_resources.py.",
 }
 
 
