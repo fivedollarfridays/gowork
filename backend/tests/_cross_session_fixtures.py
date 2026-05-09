@@ -114,11 +114,17 @@ PUBLIC_ENDPOINTS: dict[str, str] = {
     "POST /api/admin/flags/{name}":
         "Admin-key gated, not session-scoped.",
     "POST /api/brightdata/crawl":
-        "Admin/internal scraper trigger.",
+        "Admin role-gated (require_role('admin'), T26.4); operator-only "
+        "scraper trigger. No session_id input — body is a list of URLs. "
+        "Tested directly by test_brightdata_routes.py.",
     "GET /api/brightdata/status/{snapshot_id}":
-        "Admin/internal scraper status.",
+        "Admin role-gated (require_role('admin'), T26.4); operator-only "
+        "scraper status. Path id is a BrightData snapshot id, not a "
+        "session_id. Tested directly by test_brightdata_routes.py.",
     "POST /api/brightdata/precrawl":
-        "Admin/internal scraper trigger.",
+        "Admin role-gated (require_role('admin'), T26.4); operator-only "
+        "scraper trigger. No body, no session_id input. Tested directly "
+        "by test_brightdata_routes.py.",
     "POST /api/barrier-intel/reindex":
         "Admin-key gated reindex.",
     "POST /api/demo/seed":
@@ -191,6 +197,61 @@ PUBLIC_ENDPOINTS: dict[str, str] = {
         "page that aggregates per-city seed-file counts. No session_id "
         "input, no DB queries. Tested directly by test_cities_admin.py "
         "(S25 / T25.7).",
+    # ---------- S26 admin feedback inbox + flagged-queue (T26.3)
+    "GET /api/admin/feedback/flagged":
+        "Admin role-gated (require_role('admin')); flagged-resource "
+        "queue read. No session_id input — only an optional `?city=` "
+        "slug filter. Tested directly by test_admin_feedback.py.",
+    "POST /api/admin/feedback/flagged/{resource_id}/approve":
+        "Admin role-gated (require_role('admin')); clears a flagged "
+        "resource's flag (sets health_status='healthy'). Path id is a "
+        "resources.id, not a session_id; no session-scoped IDOR shape. "
+        "Tested directly by test_admin_feedback.py.",
+    "POST /api/admin/feedback/flagged/{resource_id}/confirm-hide":
+        "Admin role-gated (require_role('admin')); soft-hides a "
+        "flagged resource (sets health_status='hidden'). Path id is a "
+        "resources.id, not a session_id. Tested directly by "
+        "test_admin_feedback.py.",
+    "GET /api/admin/feedback/visits":
+        "Admin role-gated (require_role('admin')); paginated browse "
+        "of visit_feedback. No session_id input — only `reviewed`, "
+        "`limit`, `offset` query params. Tested directly by "
+        "test_admin_feedback.py.",
+    "POST /api/admin/feedback/visits/{visit_id}/mark-reviewed":
+        "Admin role-gated (require_role('admin')); sets reviewed=1 + "
+        "optional action_taken on a visit_feedback row. Path id is a "
+        "visit_feedback.id, not a session_id; the body never carries "
+        "a session_id. Tested directly by test_admin_feedback.py.",
+    # ---------- S26 admin resource CRUD (T26.2)
+    "GET /api/admin/resources":
+        "Admin role-gated (require_role('admin')); paginated list of "
+        "resources with optional `?city=` filter and `?include_hidden=` "
+        "opt-in. No session_id input. Tested directly by "
+        "test_admin_resources.py.",
+    "GET /api/admin/resources/{resource_id}":
+        "Admin role-gated (require_role('admin')); single-resource read. "
+        "Path id is a resources.id, not a session_id. Tested directly "
+        "by test_admin_resources.py.",
+    "POST /api/admin/resources":
+        "Admin role-gated (require_role('admin')); create a new "
+        "resource. Body is the resource fields (name, category, city, "
+        "...); no session_id. Stamps user_curated_at server-side. "
+        "Tested directly by test_admin_resources.py.",
+    "PATCH /api/admin/resources/{resource_id}":
+        "Admin role-gated (require_role('admin')); partial-update a "
+        "resource. Path id is a resources.id; body is a patch with no "
+        "session_id. Stamps user_curated_at server-side. Tested "
+        "directly by test_admin_resources.py.",
+    "DELETE /api/admin/resources/{resource_id}":
+        "Admin role-gated (require_role('admin')); soft-hide a "
+        "resource (sets health_status='hidden'). Path id is a "
+        "resources.id, not a session_id. Tested directly by "
+        "test_admin_resources.py.",
+    "POST /api/admin/resources/{resource_id}/restore":
+        "Admin role-gated (require_role('admin')); restore a "
+        "soft-hidden resource (sets health_status='healthy'). Path id "
+        "is a resources.id, not a session_id. Tested directly by "
+        "test_admin_resources.py.",
 }
 
 

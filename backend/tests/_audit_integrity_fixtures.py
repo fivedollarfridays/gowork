@@ -219,6 +219,46 @@ AUDIT_ALLOWLIST: dict[str, str] = {
         "No-persistence audit — employer_accounts.verification_status="
         "'retired' is the audit trail for the rejection; admin "
         "role-gated (require_role('admin')).",
+    # ---------- S26 admin feedback inbox + flagged-queue (T26.3)
+    "POST /api/admin/feedback/flagged/{resource_id}/approve":
+        "No-persistence audit — resources.health_status flip "
+        "('flagged' -> 'healthy') IS the audit; admin role-gated "
+        "(require_role('admin')). Tested directly by "
+        "test_admin_feedback.py.",
+    "POST /api/admin/feedback/flagged/{resource_id}/confirm-hide":
+        "No-persistence audit — resources.health_status flip "
+        "('flagged' -> 'hidden') IS the audit (soft-delete preserves "
+        "the row + its referencing feedback for audit replay); admin "
+        "role-gated (require_role('admin')). Tested directly by "
+        "test_admin_feedback.py.",
+    "POST /api/admin/feedback/visits/{visit_id}/mark-reviewed":
+        "No-persistence audit — visit_feedback.reviewed + "
+        "action_taken columns ARE the audit (set on flip; the row "
+        "itself is the operator-action record); admin role-gated "
+        "(require_role('admin')). Tested directly by "
+        "test_admin_feedback.py.",
+    # ---------- S26 admin resource CRUD (T26.2)
+    "POST /api/admin/resources":
+        "No-persistence audit — resources row IS the audit "
+        "(user_curated_at column stamped server-side on every create); "
+        "admin role-gated (require_role('admin')). Tested directly by "
+        "test_admin_resources.py.",
+    "PATCH /api/admin/resources/{resource_id}":
+        "No-persistence audit — resources.user_curated_at column "
+        "stamped server-side on every patch IS the audit (touch-as-"
+        "curation semantic); admin role-gated (require_role('admin')). "
+        "Tested directly by test_admin_resources.py.",
+    "DELETE /api/admin/resources/{resource_id}":
+        "No-persistence audit — resources.health_status flip to "
+        "'hidden' IS the audit (soft-delete preserves the row + its "
+        "referencing feedback for audit replay); admin role-gated "
+        "(require_role('admin')). Tested directly by "
+        "test_admin_resources.py.",
+    "POST /api/admin/resources/{resource_id}/restore":
+        "No-persistence audit — resources.health_status flip back to "
+        "'healthy' IS the audit (reverses a prior soft-delete); admin "
+        "role-gated (require_role('admin')). Tested directly by "
+        "test_admin_resources.py.",
 }
 
 
