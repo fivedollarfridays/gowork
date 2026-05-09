@@ -191,7 +191,7 @@ City framework + Fort Worth substrate + Worker Companion (Foundation + Value Ext
 - [x] E2E smoke (claim → verify → intake → public summary → reputation event through real HTTP layer)
 - [x] Charter integrity assertion — explicit grep across `backend/app/modules/matching/` confirms ZERO references to verification fields (display-only badge invariant)
 
-### Dallas Expansion / DFW Unification (Sprint S25) — merged 2026-05-08 (PR #TBD pending)
+### Dallas Expansion / DFW Unification (Sprint S25) — merged 2026-05-08 (PR #126)
 - [x] `cities/dallas.yaml` config (state=TX, zip 75201-75398, appointment_services byte-identical to FW); `backend/app/cities/dallas/` module with `DALLAS_ELIGIBILITY_RULES` (9 entries)
 - [x] Dallas seed under `data/cities/dallas/`: community_resources (17), career_centers (1), resources (10), employers (35), employer_policies (35), barrier_graph (33 barriers + 53 relationships, structurally identical to FW), training_programs (9), childcare_providers (12). honestjobs_listings.json (26 entries) under `backend/data/cities/dallas/`.
 - [x] **Reusable GTFS importer** (Spotlight invention): `scripts/import_gtfs.py` + `import_gtfs_calendar.py` + `import_gtfs_stops.py` — stdlib-only, contract boundary between any GTFS feed and the canonical FW JSON shape. Handles `calendar_dates.txt` (DART pattern) + sat/sun aggregation across multiple service_ids per route. 16 fixture tests; reusable for Houston METRO + future cities.

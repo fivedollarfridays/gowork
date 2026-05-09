@@ -1,6 +1,6 @@
 # Current State
 
-> Last updated: 2026-05-08 (Sprint 25 — Dallas Expansion (DFW Unification) shipped 9/9 tasks. Backend 4700 → 4822 passed (+122); frontend 3620 → 3629 passed (+9); ZERO regressions. Live DART GTFS data shipped (92 routes / 8270 stops) after Wave-6 user pushback on synthetic demo seed — surfaced 2 real importer bugs (calendar_dates.txt not read; sat/sun flags primary-service-only) both fixed in import_gtfs_calendar.py + 3 new fixture tests. Charter integrity assertion holds: backend/tests/test_charter_integrity_dallas.py confirms ZERO Dallas-specific references in backend/app/modules/matching/ (in-Python grep + subprocess grep + ZIP-specific test). Branch `engage/backlog-sprint-25-dallas-expansion`; PR #TBD pending push.
+> Last updated: 2026-05-08 (Sprint 25 — Dallas Expansion (DFW Unification) shipped 9/9 tasks. Backend 4700 → 4822 passed (+122); frontend 3620 → 3629 passed (+9); ZERO regressions. Live DART GTFS data shipped (92 routes / 8270 stops) after Wave-6 user pushback on synthetic demo seed — surfaced 2 real importer bugs (calendar_dates.txt not read; sat/sun flags primary-service-only) both fixed in import_gtfs_calendar.py + 3 new fixture tests. Charter integrity assertion holds: backend/tests/test_charter_integrity_dallas.py confirms ZERO Dallas-specific references in backend/app/modules/matching/ (in-Python grep + subprocess grep + ZIP-specific test). Branch `engage/backlog-sprint-25-dallas-expansion`; PR #126 open.
 
 > Previous: 2026-05-08 (Sprint 24 — Two-Sided Listing Verification merged via PR #125. 11/11 tasks across 7 waves; backend 4573 → 4700 (+127), frontend 3580 → 3620 (+40). Post-merge `/reviewing-and-fixing` shipped 4 P1 fixes (dead `verified_by` kwarg, runtime `assert` → 500, IN-clause cap, empty-listing-ids early return) + 1 DRY extraction (`frontend/src/lib/api/_client.ts`) + `<VerifiedBadge>` React.memo polish; CI green on all 5 jobs. Charter integrity assertion confirms ZERO references to verification fields in `backend/app/modules/matching/`. auth.py 314 (sprint invariant held).
 
@@ -13,13 +13,13 @@
 ## Active Plan
 
 **Plan:** _none — Sprint 25 ready for PR (9/9 tasks done, branch `engage/backlog-sprint-25-dallas-expansion`)_
-**Last shipped:** Sprint 25 — Dallas Expansion (DFW Unification) (PR #TBD pending)
+**Last shipped:** Sprint 25 — Dallas Expansion (DFW Unification) (PR #126 open)
 **Branch:** engage/backlog-sprint-25-dallas-expansion (push pending; PR pending)
 **Current Sprint:** _between sprints — awaiting S26 ideation_
 
 ## Current Focus
 
-**Sprint 25 — Dallas Expansion (DFW Unification)** shipped 2026-05-08 via PR #TBD (pending merge). 9/9 tasks done across 6 waves; live DART GTFS data swapped in for synthetic seed (Wave-5/6 follow-up Spotlight) after the user pushed back on shipping demo data — surfaced 2 real importer bugs (`calendar_dates.txt` not consumed; sat/sun flags read primary-service-only) both fixed in `scripts/import_gtfs_calendar.py` + 3 new fixture tests pinning the new behavior.
+**Sprint 25 — Dallas Expansion (DFW Unification)** shipped 2026-05-08 via PR #126 (open; pending merge). 9/9 tasks done across 6 waves; live DART GTFS data swapped in for synthetic seed (Wave-5/6 follow-up Spotlight) after the user pushed back on shipping demo data — surfaced 2 real importer bugs (`calendar_dates.txt` not consumed; sat/sun flags read primary-service-only) both fixed in `scripts/import_gtfs_calendar.py` + 3 new fixture tests pinning the new behavior.
 
 - Backend: 4700 → 4822 passed (+122 net new); 6 baseline failures preserved (4 from S24 + 2 from PR #114/#116 dep bumps)
 - Frontend: 3620 → 3629 passed (+9 net new); 3 skipped; 0 regressions
@@ -69,7 +69,7 @@ All 9 tasks landed (T25.1–T25.9). Sprint went /ideation → /draft-backlog →
 - **DFW cross-metro summary admin page (T25.7):** `/api/admin/cities/summary` (require_role admin) reads counts from JSON seed files via `load_city_config(slug).data_dir` — ZERO DB queries, ZERO matching imports. Frontend `/admin/cities/dfw` renders side-by-side cards with header copy "Read-only diagnostic. Cross-city matching is not enabled." (design-review trigger).
 - **Production fixes surfaced by validation:** (1) `temporal_types.TIMEZONE_BY_CITY` Dallas entry missing — T25.1 should have wired it; T25.6 surfaced the latent KeyError. (2) Cross-session allowlist needed `/api/admin/cities/summary` registration in `_cross_session_fixtures.py:PUBLIC_ENDPOINTS` — T25.7 added the route but didn't update the contract; surfaced by full-suite re-run after live DART data swap.
 - **Charter integrity assertion held:** `backend/tests/test_charter_integrity_dallas.py` (3 tests: in-Python grep, subprocess grep, ZIP-specific) confirms ZERO references to `dallas`/`DART`/`DFW`/embedded Dallas ZIPs across `backend/app/modules/matching/`. Matching engine remains city-symmetric; test is the design-review trigger if a future sprint legitimately needs cross-metro matching.
-- **Branch:** `engage/backlog-sprint-25-dallas-expansion`; PR #TBD pending push.
+- **Branch:** `engage/backlog-sprint-25-dallas-expansion`; PR #126 open.
 
 - **T25.7 done** (auto-updated by hook)
 
