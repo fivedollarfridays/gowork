@@ -64,3 +64,5 @@
 {"timestamp": "2026-05-09T09:56:46.402842", "command": "task_done --allow-dirty", "task_id": "T26.3", "reason": "Uncommitted changes in working tree"}
 {"timestamp": "2026-05-09T09:56:51.551142", "command": "task_done --allow-dirty", "task_id": "T26.3", "reason": "Uncommitted changes in working tree"}
 {"timestamp": "2026-05-09T09:57:12.555850", "command": "task update --local-only", "task_id": "T26.3", "reason": "no_meaningful_output"}
+{"timestamp": "2026-05-09T10:05:44.141985", "command": "task_done --allow-dirty", "task_id": "T26.4", "reason": "Uncommitted changes in working tree"}
+{"timestamp": "2026-05-09T10:05:48.886039", "command": "task_done --allow-dirty", "task_id": "T26.4", "reason": "Uncommitted changes in working tree"}
