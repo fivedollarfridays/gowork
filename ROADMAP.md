@@ -205,7 +205,7 @@ City framework + Fort Worth substrate + Worker Companion (Foundation + Value Ext
 - [x] Charter integrity assertion (`test_charter_integrity_dallas.py`): in-Python + subprocess grep + ZIP-specific tests confirm ZERO references to `dallas`/`DART`/`DFW`/embedded Dallas ZIPs across `backend/app/modules/matching/`. Matching engine remains city-symmetric.
 - [x] Production fix surfaced: `temporal_types.TIMEZONE_BY_CITY` Dallas entry added (T25.1 oversight; T25.6 validation surfaced the latent KeyError)
 
-### Admin Dashboard (Sprint S26) — merged 2026-05-09 (PR #TBD pending)
+### Admin Dashboard (Sprint S26) — merged 2026-05-09 (PR #127)
 - [x] alembic 0015 (T26.1): `resources.user_curated_at TIMESTAMP NULL` + `seed_helpers.py:seed_from_file` skips upsert when set. Without this, admin add/edit would be wiped on the next reseed.
 - [x] Resource CRUD backend (T26.2): 6 admin-gated routes + `queries_admin_resources.py` (5 fns; sole-writer set_health_status). Soft-hide via `health_status='hidden'`; restore reverses to `'healthy'`. WRITABLE_COLUMNS allowlist prevents stray fields from poisoning curation marker. Empty-patch still stamps timestamp (touch-as-curation).
 - [x] Admin feedback backend (T26.3): 5 admin-gated routes — flagged-queue read + approve/confirm-hide actions, visit-inbox read + mark-reviewed mutation. No schema changes (visit_feedback already has reviewed + action_taken from m001).
