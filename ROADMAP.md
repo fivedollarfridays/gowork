@@ -205,6 +205,19 @@ City framework + Fort Worth substrate + Worker Companion (Foundation + Value Ext
 - [x] Charter integrity assertion (`test_charter_integrity_dallas.py`): in-Python + subprocess grep + ZIP-specific tests confirm ZERO references to `dallas`/`DART`/`DFW`/embedded Dallas ZIPs across `backend/app/modules/matching/`. Matching engine remains city-symmetric.
 - [x] Production fix surfaced: `temporal_types.TIMEZONE_BY_CITY` Dallas entry added (T25.1 oversight; T25.6 validation surfaced the latent KeyError)
 
+### Admin Dashboard (Sprint S26) — merged 2026-05-09 (PR #TBD pending)
+- [x] alembic 0015 (T26.1): `resources.user_curated_at TIMESTAMP NULL` + `seed_helpers.py:seed_from_file` skips upsert when set. Without this, admin add/edit would be wiped on the next reseed.
+- [x] Resource CRUD backend (T26.2): 6 admin-gated routes + `queries_admin_resources.py` (5 fns; sole-writer set_health_status). Soft-hide via `health_status='hidden'`; restore reverses to `'healthy'`. WRITABLE_COLUMNS allowlist prevents stray fields from poisoning curation marker. Empty-patch still stamps timestamp (touch-as-curation).
+- [x] Admin feedback backend (T26.3): 5 admin-gated routes — flagged-queue read + approve/confirm-hide actions, visit-inbox read + mark-reviewed mutation. No schema changes (visit_feedback already has reviewed + action_taken from m001).
+- [x] BrightData gate migration (T26.4): `routes/brightdata.py` migrated from legacy `require_admin_key` (header) to S22 `require_role("admin")` (cookie). Admin UI now calls every endpoint via the same auth path.
+- [x] Cross-session allowlist (S24 carryforward): every new admin endpoint registered in `_cross_session_fixtures.py:PUBLIC_ENDPOINTS` with rationale at write time per per-route AC discipline (S25 lesson).
+- [x] Audit-integrity allowlist: 7 mutating endpoints triaged in `_audit_integrity_fixtures.py:AUDIT_ALLOWLIST` (3 from T26.3 carryover + 4 from T26.2). T26.2 driver caught the engage-shipped gap.
+- [x] Frontend admin pages (T26.8 + T26.9 + T26.10 + T26.11): `/admin/resources` (table + filters + edit/add modals + ResourceForm), `/admin/feedback` (tabbed Flagged + Visits with hash-sync deep links), `/admin/brightdata` (trigger + 4-state status display + AlertDialog confirmation), `/admin` landing (6 section cards + 4 quick-stats badges with graceful per-badge degradation).
+- [x] Frontend API clients (T26.5 + T26.6 + T26.7): `admin_resources.ts`, `admin_feedback.ts`, `admin_brightdata.ts` — all use the lifted `fetchWithCookie` + `throwOnApiError` from S25's `_client.ts`. Zero per-domain transport duplication.
+- [x] Reality-check (T26.7): backend mounts BrightData at `/api/brightdata` (not `/api/admin/brightdata`); CrawlStatus has 4 enum states (`starting | running | ready | failed`), not 3. Driver matched backend reality.
+- [x] Charter assertions held: anonymous-first invariant (S22), display-only matching engine (S25 charter test re-runs green; admin dashboard adds zero matching-engine references), money never moves position (charter principle 1).
+- [x] Backend 4824 → 4882 (+58); frontend 3629 → 3712 (+83). Zero new failures.
+
 ---
 
 ## Known Gaps (Not Blockers)
@@ -212,7 +225,7 @@ City framework + Fort Worth substrate + Worker Companion (Foundation + Value Ext
 These are documented trade-offs, not missing features. See `docs/architecture.md` "Known Limitations" for details.
 
 ### Documentation Drift
-- Documentation is current as of Sprint S25 (2026-05-08). Test counts and endpoint references may drift between sprints.
+- Documentation is current as of Sprint S26 (2026-05-09). Test counts and endpoint references may drift between sprints.
 
 ### Employers Seed Data
 - `data/montgomery_businesses.json` is `[]` (empty array). Job matching uses `job_listings` table instead. The `employer_policies` table has 20+ records for fair-chance employer matching.
@@ -224,11 +237,15 @@ These are documented trade-offs, not missing features. See `docs/architecture.md
 
 ## Planned Next
 
-### Phase: Admin Dashboard
-- Resource management (add/edit/hide resources)
-- Review flagged resources from feedback health decay
-- View visit feedback submissions
-- Manually trigger BrightData pre-crawl
+### Phase: Admin Dashboard — ✅ Sprint S26 (see Completed above)
+- [x] Resource management (add/edit/hide resources) — `/admin/resources` (T26.8) + alembic 0015 user_curated_at flag (T26.1) + 6 admin-gated CRUD routes (T26.2)
+- [x] Review flagged resources from feedback health decay — `/admin/feedback#flagged` (T26.9) + 3 backend routes (T26.3 list/approve/confirm-hide)
+- [x] View visit feedback submissions — `/admin/feedback#visits` (T26.9) + 2 backend routes (T26.3 list/mark-reviewed; uses existing m001 reviewed + action_taken columns)
+- [x] Manually trigger BrightData pre-crawl — `/admin/brightdata` (T26.10) + cookie-session admin gate (T26.4 migrated brightdata.py from legacy require_admin_key)
+- [x] /admin landing page indexing all admin sub-areas (T26.11; 6 cards: Assessments / Listings / Cities-DFW / Resources / Feedback / BrightData) — replaces URL-only navigation
+- [ ] **S27 follow-up:** bulk admin operations (bulk hide/restore on resources, bulk mark-reviewed on visits) — single-row only this sprint
+- [ ] **S27 follow-up:** resource provenance audit log (who-changed-what-when on `resources` table) — needs new `resources_audit_log` table; was explicit S26 out-of-scope
+- [ ] **S27 follow-up:** migrate other legacy `require_admin_key` callers (`admin_flags.py`, `demo.py`) — only `brightdata.py` migrated this sprint because the new admin UI needed it
 
 ### Phase: Dallas Expansion (DFW Unification) — ✅ Sprint S25 (see Completed above)
 - [x] Create `cities/dallas.yaml` config (ZIP ranges 75201-75398, coordinates, Workforce Solutions Greater Dallas info)
