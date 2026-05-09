@@ -1,6 +1,8 @@
 # Current State
 
-> Last updated: 2026-05-08 (Sprint 25 — Dallas Expansion (DFW Unification) shipped 9/9 tasks. Backend 4700 → 4822 passed (+122); frontend 3620 → 3629 passed (+9); ZERO regressions. Live DART GTFS data shipped (92 routes / 8270 stops) after Wave-6 user pushback on synthetic demo seed — surfaced 2 real importer bugs (calendar_dates.txt not read; sat/sun flags primary-service-only) both fixed in import_gtfs_calendar.py + 3 new fixture tests. Charter integrity assertion holds: backend/tests/test_charter_integrity_dallas.py confirms ZERO Dallas-specific references in backend/app/modules/matching/ (in-Python grep + subprocess grep + ZIP-specific test). Branch `engage/backlog-sprint-25-dallas-expansion`; PR #126 merged.
+> Last updated: 2026-05-09 (Sprint 26 — Admin Dashboard planned. /ideation → /draft-backlog → /pc-plan complete. 12 tasks (T26.1–T26.12), 192 Cx (9 P0 / 3 P1), 6 waves. Brief at `.paircoder/plans/briefs/brief-sprint-26-admin-dashboard.md`; backlog at `plans/backlogs/backlog-sprint-26-admin-dashboard.md`; plan record `plan-2026-05-s26-admin-dashboard`. Four sub-features under `/admin/*`: resource CRUD with seed-respecting persistence, flagged-resource review queue, visit-feedback inbox, BrightData manual trigger. Two key architectural finds: (1) resources reseed-on-init clobbers admin writes without `user_curated_at` flag → T26.1 alembic 0015 migration unlocks real CRUD; (2) brightdata.py uses legacy `require_admin_key` (header) — T26.4 migrates to S22 `require_role("admin")` (cookie) so admin UI calls every endpoint via the same auth path. Per-task AC discipline (S25 lesson): every backend route AC explicitly says "added to `_cross_session_fixtures.PUBLIC_ENDPOINTS` with rationale" — making registration a write-time requirement, not a gate-time fixup.
+
+> Previous: 2026-05-08 (Sprint 25 — Dallas Expansion (DFW Unification) shipped 9/9 tasks. Backend 4700 → 4822 passed (+122); frontend 3620 → 3629 passed (+9); ZERO regressions. Live DART GTFS data shipped (92 routes / 8270 stops) after Wave-6 user pushback on synthetic demo seed — surfaced 2 real importer bugs (calendar_dates.txt not read; sat/sun flags primary-service-only) both fixed in import_gtfs_calendar.py + 3 new fixture tests. Charter integrity assertion holds: backend/tests/test_charter_integrity_dallas.py confirms ZERO Dallas-specific references in backend/app/modules/matching/ (in-Python grep + subprocess grep + ZIP-specific test). Branch `engage/backlog-sprint-25-dallas-expansion`; PR #126 merged.
 
 > Previous: 2026-05-08 (Sprint 24 — Two-Sided Listing Verification merged via PR #125. 11/11 tasks across 7 waves; backend 4573 → 4700 (+127), frontend 3580 → 3620 (+40). Post-merge `/reviewing-and-fixing` shipped 4 P1 fixes (dead `verified_by` kwarg, runtime `assert` → 500, IN-clause cap, empty-listing-ids early return) + 1 DRY extraction (`frontend/src/lib/api/_client.ts`) + `<VerifiedBadge>` React.memo polish; CI green on all 5 jobs. Charter integrity assertion confirms ZERO references to verification fields in `backend/app/modules/matching/`. auth.py 314 (sprint invariant held).
 
@@ -12,12 +14,24 @@
 
 ## Active Plan
 
-**Plan:** _none — Sprint 25 ready for PR (9/9 tasks done, branch `engage/backlog-sprint-25-dallas-expansion`)_
-**Last shipped:** Sprint 25 — Dallas Expansion (DFW Unification) (PR #126 merged)
-**Branch:** engage/backlog-sprint-25-dallas-expansion (push pending; PR pending)
-**Current Sprint:** _between sprints — awaiting S26 ideation_
+**Plan:** plan-2026-05-s26-admin-dashboard
+**Type:** feature
+**Title:** S26 — Admin Dashboard
+**Status:** Planned (0/12 tasks done; ready for `/prepare-to-engage`)
+**Branch:** main (engage will create `engage/backlog-sprint-26-admin-dashboard`)
+**Current Sprint:** S26
+**Total Cx:** 192 (9 P0 / 3 P1 / 0 P2)
+**Brief:** `.paircoder/plans/briefs/brief-sprint-26-admin-dashboard.md`
+**Backlog:** `plans/backlogs/backlog-sprint-26-admin-dashboard.md`
+**Last shipped:** Sprint 25 — Dallas Expansion (DFW Unification) (PR #126 merged 2026-05-08; squash-merge `ca99f68`)
 
 ## Current Focus
+
+**Sprint 26 — Admin Dashboard** planned 2026-05-09. 12 tasks (T26.1–T26.12), 192 Cx (9 P0 / 3 P1). Brief + backlog + per-task plan records committed; ready for `/prepare-to-engage`. Compounds on three sprints of trust substrate (S22 identity → S23 reviewer roles → S24 listing claim review → S25 cross-metro diagnostic). Four sub-features under `/admin/*`: resource CRUD with seed-respecting persistence (alembic 0015 `user_curated_at` flag), flagged-resource review queue, visit-feedback inbox, manual BrightData pre-crawl trigger.
+
+Wave structure: W0 parallel (T26.1 migration, T26.3 admin-feedback backend, T26.4 brightdata gate migration) → W1 T26.2 (resource CRUD + bundles `routes/__init__.py` registrations for all 3 new routers — resolves a soft collision) → W2 parallel (3 typed API clients) → W3 parallel (3 admin pages) → W4 T26.11 landing page (P1) → W5 T26.12 gate. Cut-list: T26.11 (landing) + T26.10/T26.7 pair (BrightData UI). Min viable: 9 tasks / 154 Cx.
+
+**Key per-task AC discipline (S25 lesson learned):** every backend route AC explicitly says "added to `_cross_session_fixtures.PUBLIC_ENDPOINTS` with rationale" — making allowlist registration a per-route requirement, not a gate-time fixup. T25.7's CI-only failure was preventable; T26.12 re-asserts via the contract test.
 
 **Sprint 25 — Dallas Expansion (DFW Unification)** shipped 2026-05-08 via PR #126 (merged 2026-05-08; squash-merge to ca99f68). 9/9 tasks done across 6 waves; live DART GTFS data swapped in for synthetic seed (Wave-5/6 follow-up Spotlight) after the user pushed back on shipping demo data — surfaced 2 real importer bugs (`calendar_dates.txt` not consumed; sat/sun flags read primary-service-only) both fixed in `scripts/import_gtfs_calendar.py` + 3 new fixture tests pinning the new behavior.
 
@@ -54,6 +68,21 @@ Out of focus: S13b deferred items (43 Tier-1 browser suites, 6 Tier-6 cross-modu
 Older sprint task tables and session histories (Sprints 7 — 31) are in `.paircoder/archive/state-pre-s1.md`. S12a per-session entries plus S2 — S11 detail are in `.paircoder/archive/state-s12a.md`. S13 wave-by-wave detail + per-task driver sessions are in `.paircoder/archive/state-s13.md`.
 
 ## What Was Just Done
+
+### 2026-05-09 — Sprint 26 (Admin Dashboard) planned
+
+- **/ideation** produced `.paircoder/plans/briefs/brief-sprint-26-admin-dashboard.md`. Step 0 fail-fast: validate clean post-merge sync; 5 stale `in_progress` (T1.7, T12.5, T12.16, T12.21, T12.24) — none touch admin/feedback/brightdata/resources paths.
+- **Two architectural finds informed the brief:**
+  1. **Resources reseed-clobber problem** — `seed_resources_all_cities` runs on init; without intervention, admin add/edit gets wiped on next deploy. T26.1 adds `resources.user_curated_at TIMESTAMP NULL` (alembic 0015); seed loader skips rows where it's set. One small migration unlocks real CRUD persistence.
+  2. **Two coexisting auth-gate patterns** — `require_admin_key` (legacy header, used by `brightdata.py`, `admin_flags.py`, `demo.py`) vs `require_role("admin")` (S22+ cookie, used by `assessments_review.py`, `cities_admin.py`, `employers_admin.py`). T26.4 migrates only `brightdata.py` (the new admin UI needs it); other legacy callers stay out of scope.
+- **/draft-backlog** produced `plans/backlogs/backlog-sprint-26-admin-dashboard.md`. Validates clean via `bpsai-pair engage --dry-run`: 12 tasks, 192 Cx parsed.
+- **/pc-plan** created `plan-2026-05-s26-admin-dashboard` (auto-scope: story; 192 Cx; intelligence summary: ~157k tokens, Haiku-recommended, high confidence based on 63 historical tasks). 12 task records (T26.1–T26.12) added with full body content (Objective, Files, AC, Verification, Dependencies). Tags + depends_on populated. 89 ACs total across 12 tasks.
+- **Sprint shape:** 12 tasks / 192 Cx / 9 P0 + 3 P1 / 6 waves. Sits between S25 (201 Cx) and S22 (225 Cx) — substrate-extending sprint shape.
+- **Wave structure:** W0 parallel (T26.1, T26.3, T26.4) → W1 T26.2 (CRUD + bundles `routes/__init__.py` registrations for all 3 new routers — resolves a soft collision) → W2 parallel (3 typed API clients) → W3 parallel (3 admin pages) → W4 T26.11 landing → W5 T26.12 gate.
+- **Cut-list:** T26.11 (P1 landing), T26.10+T26.7 (P1 BrightData UI as a pair). Min viable: 9 tasks / 154 Cx.
+- **Per-task AC discipline (S25 lesson):** every backend route AC explicitly says "added to `_cross_session_fixtures.PUBLIC_ENDPOINTS` with rationale" — making allowlist registration a write-time requirement, not a gate-time fixup. T25.7's CI-only failure was preventable; T26.12 re-asserts via the contract test.
+- **Charter assertions carried forward:** anonymous-first invariant (S22), display-only matching engine (S25), money never moves position (charter principle 1). T26.12 re-runs all three.
+- **Visit-feedback inbox `mark-reviewed` ships without migration** — `visit_feedback.reviewed` + `action_taken` columns already exist from m001 (S14 wiring). Sub-feature 3 is pure new GET + small POST.
 
 - **T25.9 done** (auto-updated by hook)
 
