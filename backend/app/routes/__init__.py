@@ -2,6 +2,7 @@
 
 from app.barrier_intel.router import router as barrier_intel_router
 from app.health import router as health_router
+from app.routes.admin_feedback import router as admin_feedback_router
 from app.routes.admin_flags import router as admin_flags_router
 from app.routes.advisor_inbox import router as advisor_inbox_router
 from app.routes.appointments import router as appointments_router
@@ -65,6 +66,7 @@ all_routers = [
     jobs_applications_router,
     listing_reputation_router,
     brightdata_router,
+    admin_feedback_router,
     feedback_router,
     dashboard_router,
     barrier_intel_router,
