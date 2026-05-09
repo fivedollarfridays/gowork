@@ -1,6 +1,6 @@
 # Current State
 
-> Last updated: 2026-05-08 (Sprint 25 — Dallas Expansion (DFW Unification) planned. /ideation → /draft-backlog → /pc-plan complete. 9 tasks (T25.1–T25.9), 201 Cx (7 P0 / 2 P1), 6 waves. Brief at `.paircoder/plans/briefs/brief-sprint-25-dallas-expansion.md`; backlog at `plans/backlogs/backlog-sprint-25-dallas-expansion.md`; plan record `plan-2026-05-s25-dallas-expansion`. Architecture finding: existing `get_city_config()` dispatch via `city.state == "TX"` is plug-and-play across 10+ modules — Dallas inherits all TX state-level work (HHSC benefits, Art. 55 expunction, Gov Code Ch. 411 E-1 nondisclosure) for free. Sprint is *additive*, not invasive. Spotlight invention T25.5: reusable `scripts/import_gtfs.py` importer (contract boundary for any future GTFS feed → canonical FW JSON shape; future cities get the path for free). Charter integrity assertion (S24 carryforward) holds — matching engine reads ZERO Dallas-specific signals; T25.9 grep gate is the design-review trigger if a future sprint legitimately needs cross-metro matching.
+> Last updated: 2026-05-08 (Sprint 25 — Dallas Expansion (DFW Unification) shipped 9/9 tasks. Backend 4700 → 4822 passed (+122); frontend 3620 → 3629 passed (+9); ZERO regressions. Live DART GTFS data shipped (92 routes / 8270 stops) after Wave-6 user pushback on synthetic demo seed — surfaced 2 real importer bugs (calendar_dates.txt not read; sat/sun flags primary-service-only) both fixed in import_gtfs_calendar.py + 3 new fixture tests. Charter integrity assertion holds: backend/tests/test_charter_integrity_dallas.py confirms ZERO Dallas-specific references in backend/app/modules/matching/ (in-Python grep + subprocess grep + ZIP-specific test). Branch `engage/backlog-sprint-25-dallas-expansion`; PR #TBD pending push.
 
 > Previous: 2026-05-08 (Sprint 24 — Two-Sided Listing Verification merged via PR #125. 11/11 tasks across 7 waves; backend 4573 → 4700 (+127), frontend 3580 → 3620 (+40). Post-merge `/reviewing-and-fixing` shipped 4 P1 fixes (dead `verified_by` kwarg, runtime `assert` → 500, IN-clause cap, empty-listing-ids early return) + 1 DRY extraction (`frontend/src/lib/api/_client.ts`) + `<VerifiedBadge>` React.memo polish; CI green on all 5 jobs. Charter integrity assertion confirms ZERO references to verification fields in `backend/app/modules/matching/`. auth.py 314 (sprint invariant held).
 
@@ -12,38 +12,30 @@
 
 ## Active Plan
 
-**Plan:** plan-2026-05-s25-dallas-expansion
-**Type:** feature
-**Title:** S25 — Dallas Expansion (DFW Unification)
-**Status:** Planned (0/9 tasks done; ready for `/prepare-to-engage`)
-**Branch:** main (engage will create `engage/backlog-sprint-25-dallas-expansion`)
-**Current Sprint:** S25
-**Total Cx:** 201 (7 P0 / 2 P1 / 0 P2)
-**Brief:** `.paircoder/plans/briefs/brief-sprint-25-dallas-expansion.md`
-**Backlog:** `plans/backlogs/backlog-sprint-25-dallas-expansion.md`
+**Plan:** _none — Sprint 25 ready for PR (9/9 tasks done, branch `engage/backlog-sprint-25-dallas-expansion`)_
+**Last shipped:** Sprint 25 — Dallas Expansion (DFW Unification) (PR #TBD pending)
+**Branch:** engage/backlog-sprint-25-dallas-expansion (push pending; PR pending)
+**Current Sprint:** _between sprints — awaiting S26 ideation_
 
 ## Current Focus
 
-**Sprint 25 — Dallas Expansion (DFW Unification)** planned 2026-05-08. 9 tasks (T25.1–T25.9), 201 Cx (7 P0 / 2 P1). Brief + backlog + per-task plan records committed; ready for `/prepare-to-engage`. Spotlight invention: `scripts/import_gtfs.py` reusable GTFS-to-FW-JSON-shape importer (contract boundary for future cities — Houston METRO, etc.). Charter integrity assertion (S24 carryforward) extended in T25.9: grep across `backend/app/modules/matching/` for any Dallas-specific reference must return ZERO matches.
+**Sprint 25 — Dallas Expansion (DFW Unification)** shipped 2026-05-08 via PR #TBD (pending merge). 9/9 tasks done across 6 waves; live DART GTFS data swapped in for synthetic seed (Wave-5/6 follow-up Spotlight) after the user pushed back on shipping demo data — surfaced 2 real importer bugs (`calendar_dates.txt` not consumed; sat/sun flags read primary-service-only) both fixed in `scripts/import_gtfs_calendar.py` + 3 new fixture tests pinning the new behavior.
 
-Wave structure: T25.1 (entry, no deps) → T25.2/T25.3/T25.5/T25.8 parallel → T25.4 (deps T25.2) → T25.6 (deps all data) → T25.7 (deps T25.6, P1) → T25.9 gate (deps T25.6+T25.7+T25.8). Cut-list: T25.7 + T25.8 are P1; sprint still ships at 161 Cx without them.
+- Backend: 4700 → 4822 passed (+122 net new); 6 baseline failures preserved (4 from S24 + 2 from PR #114/#116 dep bumps)
+- Frontend: 3620 → 3629 passed (+9 net new); 3 skipped; 0 regressions
+- DART live feed: 92 routes / 8270 stops (vs synthetic 27/303 from initial T25.5 ship)
+- **Charter integrity assertion** — `backend/tests/test_charter_integrity_dallas.py` (3 tests, in-Python grep + subprocess grep + ZIP-specific) confirms ZERO references to `dallas`/`DART`/`DFW` or any embedded Dallas ZIP (75201/75204/75215/etc.) across `backend/app/modules/matching/`. Display-only invariant holds; matching engine remains city-symmetric.
+- **Spotlight invention:** `scripts/import_gtfs.py` (+ `import_gtfs_calendar.py` + `import_gtfs_stops.py`) — reusable GTFS-to-FW-JSON-shape importer. Houston METRO and any future GTFS-publishing city now ships data-only with a two-line invocation. Calendar-dates.txt support means agencies that diverge from the canonical M-F repeating pattern (DART) work without code changes.
+- **Production fix surfaced by validation:** `temporal_types.TIMEZONE_BY_CITY` Dallas entry was missing from T25.1; T25.6's parametrized validation tripped the latent KeyError before any caller hit it.
+- **Cross-session allowlist (S24 carryforward):** new `GET /api/admin/cities/summary` endpoint registered with rationale in `_cross_session_fixtures.py:PUBLIC_ENDPOINTS`.
 
-**Sprint 24 — Two-Sided Listing Verification** shipped 2026-05-08 via PR #125 (merged). 11/11 tasks done across 7 waves; post-PR `/reviewing-and-fixing` pass shipped 4 P1 fixes + 1 DRY extraction + React.memo polish; CI green on all 5 jobs.
-
-- Backend: 4573 → 4700 passed (+127 net new); 4 baseline failures preserved
-- Frontend: 3580 → 3620 passed (+40 net new); 0 regressions
-- auth.py: 314 (UNCHANGED — sprint invariant held)
-- E2E smoke (test_listing_verification_e2e) drives claim → verify → intake → reputation event through real HTTP layer; mocks SendGrid via existing mock_provider; verifies `intake_json` never appears in public summary
-- **Charter integrity assertion** — explicit grep across `backend/app/modules/matching/` confirms ZERO references to verification fields (listing_verifications, listing_reputation_events, verification_tier, intake_complete, intake_json, employer_accounts, listing_claims). Display-only badge invariant holds.
-
-**Sprint 23 — Assessment Authoring Pipeline** shipped 2026-05-07 via PR #124 (merged 2026-05-08). 10 tasks, +83 backend tests / +53 frontend tests, charter provenance invariant verified, postgres test isolation rebuild closed S22 follow-up.
-
-**Sprint 22 — Identity Foundation** shipped 2026-05-07 via PR #123 (merged).
-
-Out of focus: S13b deferred items (43 Tier-1 browser suites, 6 Tier-6 cross-module integrity, browser-dependent Tier-4) and the five other stale `in_progress` tasks (T1.7, T12.5, T12.16, T12.21, T12.24) — to be triaged separately.
+Out of focus: S13b deferred items (43 Tier-1 browser suites, 6 Tier-6 cross-module integrity, browser-dependent Tier-4) and the five other stale `in_progress` tasks (T1.7, T12.5, T12.16, T12.21, T12.24) — to be triaged separately. S26 candidates documented in What's Next below.
 
 ## Previous Sprints (summary)
 
+- **Sprint S24** — Two-Sided Listing Verification: 11/11 tasks; 7 waves; PR #125 merged 2026-05-08. Schema substrate (`employer_accounts`, `listing_claims`, `listing_verifications`, `listing_reputation_events`, alembic 0014). Magic-link domain-email claim flow + employer intake + reputation event stream + on-demand rate computation. Admin claim-review dashboard at `/admin/listings`. Frontend `<VerifiedBadge>` integrated into `/jobs`. Charter integrity assertion held — matching engine reads ZERO verification signals. auth.py 314 (sprint invariant). Backend 4573 → 4700 (+127); frontend 3580 → 3620 (+40).
+- **Sprint S23** — Assessment Authoring Pipeline: 10 tasks; 8 waves; PR #124 merged 2026-05-08. Schema (`assessments`, `assessment_versions`, `assessment_questions`, `assessment_reviews`, alembic 0013). Claude-draft endpoint + reviewer queue API + publish endpoint with provenance lock. Public fetch with rubric exclusion + Cache-Control. Admin dashboard at `/admin/assessments`. Role substrate: `<RoleGate>`, `useAccountRoles`, role-aware nav, `/admin/layout.tsx`. Postgres test isolation rebuild closed S22 follow-up.
+- **Sprint S22** — Identity Foundation: 13/13 tasks; 9 waves; PR #123 merged 2026-05-07. Alembic migration runner + async env (sqlite + asyncpg). Identity layer: `accounts`, `account_sessions`, `account_credentials`, `account_roles` (alembic 0011 + 0012). Magic-link auth (POST /api/auth/magic-link, GET /api/auth/claim, signed `gw_account` cookie). `useAccount()` hook + `<SaveProgressCTA />` at 3 funnel insertion points. Anonymous-first invariant test (auto-discovers session-id routes; 0 in REQUIRES_AUTH_ALLOWLIST). Postgres CI service container + dual-engine config + 15-test parity suite. **Integrity charter v1** (`docs/integrity-charter.md`, 10 binding principles led by "money never moves position").
 - **Sprint S13** — Platform-Wide QC + Submission Readiness: 55/128 tasks done. QC infrastructure (config + suite template + reset CLI + fake-clock + Playwright + visual baseline + QC dashboard + Lighthouse CI + bundle gate + Dependabot). Backend e2e for orchestrator/scheduler/SSRF/injection/audit/cross-session/compliance/rate-limiter/unsubscribe-race/key-rotation/flag-race/weekly-review/seed-coverage/i18n/module-status. Security audits (token scopes, PII logs, SSRF surface, secret hygiene, XSS, SQLi, CSRF, CAN-SPAM, GDPR, audit trail, CVE). Submission readiness (legal pages with COUNSEL REVIEW caveat, sitemap+robots, demo script, rollback runbook, env validator). 15 production fixes shipped: injection-filter expansion (25 bypasses), 2 PII retention bugs (compliance cascade + retention sweep), advisor PII leak in audit, 3 silent env defaults, scheduler misfire grace, CAN-SPAM idempotency, token downgrade × 3 modules, share-endpoint PII redaction, document/credit rate limits, plan empty-state UX, ES translation gaps, advisor stalled-sessions N+1 (42× query reduction), centralized PII log scrubber. Detail in `.paircoder/archive/state-s13.md`. Deferred to S13b: 43 Tier-1 browser suites (divona-driven), 6 Tier-6 cross-module integrity (vaivora), browser-dependent Tier-4 (a11y AAA, visual baseline, cross-browser, offline). 7 ops tasks cancelled (hackathon scope).
 - **Sprint S12b** — Worker Companion Value Extensions: PDF rendering, resume + cover-letter builders (LLM-gated, injection-defended), reminder engine + cooldown, plan refresher + 20-row history cap, transactional appointment emails + signed manage-link key rotation, jobs kanban, documents pages, advisor inbox (city-scoped), past-appointment auto-advance, module status contracts, weekly review, compliance gate (export + right-to-delete + retention sweep). 25/25 done, 510 Cx, GATE green, GA unblocked.
 - **Sprint S12a** — Worker Companion Foundation: 26/26 done, GATE green, staging-only until S12b T12.36 (now landed). Migration infra, DB-backed outcomes, feature flags + audit, APScheduler, day boundary, appointments + jobs + documents + plan modules, digest composer, stall detector, nightly orchestrator, daily-digest page, appointments page. Detail in `.paircoder/archive/state-s12a.md`.
@@ -62,6 +54,22 @@ Out of focus: S13b deferred items (43 Tier-1 browser suites, 6 Tier-6 cross-modu
 Older sprint task tables and session histories (Sprints 7 — 31) are in `.paircoder/archive/state-pre-s1.md`. S12a per-session entries plus S2 — S11 detail are in `.paircoder/archive/state-s12a.md`. S13 wave-by-wave detail + per-task driver sessions are in `.paircoder/archive/state-s13.md`.
 
 ## What Was Just Done
+
+- **T25.9 done** (auto-updated by hook)
+
+### 2026-05-08 — Sprint 25 (Dallas Expansion / DFW Unification) — COMPLETE
+
+All 9 tasks landed (T25.1–T25.9). Sprint went /ideation → /draft-backlog → /pc-plan → /prepare-to-engage → /running-sprint-tasks across 6 dependency-aware waves. Path A (autonomous through Wave 5; Wave 6 with user authorization). Wave 6 included a real-data refresh after user pushback on shipping the synthetic DART seed.
+
+- **Test counts:** Backend 4700 → 4822 (+122 net new) / 6 baseline failed (4 from S24 + 2 from openai 1.82→2.36 + fastapi 0.135→0.136 dep bumps via PRs #114/#116) / 2 skipped. Frontend 3620 → 3629 (+9 net new) / 3 skipped / 0 failed.
+- **City config + module skeleton:** `cities/dallas.yaml` + `backend/app/cities/dallas/{__init__.py, eligibility.py}`. Mirrors FW shape exactly (state=TX, zip 75201-75398, appointment_services byte-identical). DALLAS_ELIGIBILITY_RULES with 9 entries.
+- **Seed substrate:** community resources (17), career centers (1), resources (10), employers (35), employer policies (35), honestjobs listings (26), barrier graph (33 barriers + 53 relationships, structurally identical to FW; 16 of FW's 70 `barrier_resources` rows deferred — pinned in `SKIPPED_FW_RESOURCE_IDS` for the 3 FW resource_ids without Dallas equivalents in T25.2's community_resources scope: Community Action Partners, TCC, Trinity Metro), training programs (9), childcare providers (12).
+- **DART live feed shipped:** 92 routes / 8270 stops via reusable `scripts/import_gtfs.py` (Spotlight invention) + `scripts/import_gtfs_calendar.py` + `scripts/import_gtfs_stops.py`. Wave-6 user pushback on synthetic seed surfaced two real importer bugs — both fixed in the gate wave: (1) `calendar_dates.txt` not consumed (DART puts weekday operating days there, not in `calendar.txt`); (2) sat/sun flags read primary-service-only (DART splits weekday/Sat/Sun across separate service_ids). 3 new fixture tests pin the new behavior; all 13 original fixture tests still green.
+- **Frontend Dallas plumbing:** `DEMO_ZIPS["dallas"] = "75201"`; useDemoMode-cityaware test parametrized over both cities; en.json + es.json `chapter09.cityDallas` mirroring `chapter09.cityFW`; missingKeysAudit pass.
+- **DFW cross-metro summary admin page (T25.7):** `/api/admin/cities/summary` (require_role admin) reads counts from JSON seed files via `load_city_config(slug).data_dir` — ZERO DB queries, ZERO matching imports. Frontend `/admin/cities/dfw` renders side-by-side cards with header copy "Read-only diagnostic. Cross-city matching is not enabled." (design-review trigger).
+- **Production fixes surfaced by validation:** (1) `temporal_types.TIMEZONE_BY_CITY` Dallas entry missing — T25.1 should have wired it; T25.6 surfaced the latent KeyError. (2) Cross-session allowlist needed `/api/admin/cities/summary` registration in `_cross_session_fixtures.py:PUBLIC_ENDPOINTS` — T25.7 added the route but didn't update the contract; surfaced by full-suite re-run after live DART data swap.
+- **Charter integrity assertion held:** `backend/tests/test_charter_integrity_dallas.py` (3 tests: in-Python grep, subprocess grep, ZIP-specific) confirms ZERO references to `dallas`/`DART`/`DFW`/embedded Dallas ZIPs across `backend/app/modules/matching/`. Matching engine remains city-symmetric; test is the design-review trigger if a future sprint legitimately needs cross-metro matching.
+- **Branch:** `engage/backlog-sprint-25-dallas-expansion`; PR #TBD pending push.
 
 - **T25.7 done** (auto-updated by hook)
 
@@ -2030,18 +2038,20 @@ Outstanding pre-PR: /reviewing-and-fixing pipeline running. Browser-driven remai
 
 ## What's Next
 
-Sprint 24 merged 2026-05-08. No Sprint 25 backlog drafted yet. Candidate phases from `ROADMAP.md` "Planned Next" — to be ideated into a sprint backlog:
+Sprint 25 ready for PR (push pending). After merge, S26 candidates:
 
-1. **Admin Dashboard** — resource management (add/edit/hide), flagged-resource review from feedback health decay, visit-feedback inbox, manual BrightData pre-crawl trigger. Builds on the S24 admin claim-review dashboard pattern (`/admin/listings`).
-2. **Dallas Expansion (DFW Unification)** — `cities/dallas.yaml` config, DART GTFS transit data, Dallas seed data (resources, employers, fair-chance index). State-level TX modules (HHSC benefits, Art. 55 expunction, Ch. 411 E-1 nondisclosure) already built for FW. Consider DFW-level cross-city view.
-3. **Data Quality** — geocode resource coordinates from addresses to activate proximity scoring (currently neutral 0.5 for all resources); add transit-stop coordinates for route-to-resource distance.
-4. **Infrastructure Scaling** — SQLite → Postgres migration (S22 already laid postgres CI groundwork via T22.4); Redis caching (jobs 24h, resources 1h); circuit breakers on external APIs; separate API + crawl-worker Railway services.
-5. **UX / Integrations** — session persistence (currently 24h ephemeral), Spanish parity, PWA offline plan access, SMS plan delivery; Alabama JobLink, Montgomery Housing Authority, MATS real-time, 211 sync, expanded findhelp.org categories.
+1. **Admin Dashboard** — resource management (add/edit/hide), flagged-resource review from feedback health decay, visit-feedback inbox, manual BrightData pre-crawl trigger. Builds on the S24 admin claim-review dashboard + S25 cities-admin pattern (`/admin/listings`, `/admin/cities/dfw`). Natural next step in the trust/operator-tooling trajectory.
+2. **Cross-city matching** (the deferred S25 boundary) — Dallas residents seeing FW jobs in `/api/jobs`. Requires matching-engine changes (employer-index unification, geo-radius extension across metros). T25.9 charter test will fail when this work begins — that's the design-review trigger to consciously update the allowlist.
+3. **Data Quality** — geocode resource coordinates from addresses to activate proximity scoring (currently neutral 0.5 for all resources); add transit-stop coordinates for route-to-resource distance. Adds Dallas ZIP centroids to `_FW_ZIP_CENTROIDS` to close the S25 carryforward limitation.
+4. **GTFS importer polish** — the new `route_short_name` non-numeric handling (DART rail routes "RED LINE" etc. currently get raw 5-digit `route_id` numbers). Minor refinement; importer's contract is correct, just the display value for rail is ugly. Bundle with Houston METRO bring-up.
+5. **Infrastructure Scaling** — SQLite → Postgres operational swap (S22 CI substrate exists; production runtime swap is the next step). Redis caching, circuit breakers, separate API + crawl-worker Railway services.
+6. **UX / Integrations** — session persistence (currently 24h ephemeral), Spanish parity, PWA offline plan access, SMS plan delivery; Alabama JobLink, Montgomery Housing Authority, MATS real-time, 211 sync, expanded findhelp.org categories.
 
 Triage candidates (deferred, not yet promoted to a sprint):
 
 - **S13b** — 43 Tier-1 browser suites (divona-driven), 6 Tier-6 cross-module integrity (vaivora), browser-dependent Tier-4 (a11y AAA, visual baseline, cross-browser, offline).
 - **Stale `in_progress` tasks** — T1.7, T12.5, T12.16, T12.21, T12.24 (need triage: complete, cancel, or roll into a sprint).
+- **S25 known limitations carried forward** — `/api/jobs` `transit_info` enrichment fixture-wiring gap (S22/S24 fixture architecture, not Dallas-specific); `listing_verifications` + `run_seeds_and_rag` fixture-wiring (S22/S24 architecture).
 
 ## Blockers
 

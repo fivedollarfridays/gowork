@@ -191,6 +191,20 @@ City framework + Fort Worth substrate + Worker Companion (Foundation + Value Ext
 - [x] E2E smoke (claim → verify → intake → public summary → reputation event through real HTTP layer)
 - [x] Charter integrity assertion — explicit grep across `backend/app/modules/matching/` confirms ZERO references to verification fields (display-only badge invariant)
 
+### Dallas Expansion / DFW Unification (Sprint S25) — merged 2026-05-08 (PR #TBD pending)
+- [x] `cities/dallas.yaml` config (state=TX, zip 75201-75398, appointment_services byte-identical to FW); `backend/app/cities/dallas/` module with `DALLAS_ELIGIBILITY_RULES` (9 entries)
+- [x] Dallas seed under `data/cities/dallas/`: community_resources (17), career_centers (1), resources (10), employers (35), employer_policies (35), barrier_graph (33 barriers + 53 relationships, structurally identical to FW), training_programs (9), childcare_providers (12). honestjobs_listings.json (26 entries) under `backend/data/cities/dallas/`.
+- [x] **Reusable GTFS importer** (Spotlight invention): `scripts/import_gtfs.py` + `import_gtfs_calendar.py` + `import_gtfs_stops.py` — stdlib-only, contract boundary between any GTFS feed and the canonical FW JSON shape. Handles `calendar_dates.txt` (DART pattern) + sat/sun aggregation across multiple service_ids per route. 16 fixture tests; reusable for Houston METRO + future cities.
+- [x] **Live DART feed shipped:** 92 routes / 8270 stops via the importer (replaces initial synthetic Option-A seed after user pushback in Wave 6)
+- [x] City-aware router validation: parametrized tests over 10+ city-aware modules confirm Dallas dispatches correctly via existing `get_city_config()` + `city.state == "TX"` guards (zero per-city branching added)
+- [x] DFW bounding-box test extended for embedded Dallas ZIPs (75201/75204/75215/75216/75217/75224/75227/75228/75232/75241); all FW assertions still green
+- [x] Dallas E2E assessment-flow integration test (POST /api/assessment ZIP 75201 → GET /api/plan surfaces ≥1 Dallas resource + DART transit + Dallas employer)
+- [x] S22 anonymous-first invariant test green with `CITY=dallas`
+- [x] Frontend Dallas plumbing: `DEMO_ZIPS["dallas"] = "75201"`; useDemoMode-cityaware test parametrized over both cities; en.json + es.json `chapter09.cityDallas` mirroring `chapter09.cityFW`
+- [x] DFW cross-metro summary admin page (`/admin/cities/dfw`, P1): read-only diagnostic; reads counts from JSON seed files via `load_city_config(slug).data_dir` — ZERO DB queries; gated via `<RoleGate roles={["admin"]}>`. Header copy "Read-only diagnostic. Cross-city matching is not enabled." (design-review trigger)
+- [x] Charter integrity assertion (`test_charter_integrity_dallas.py`): in-Python + subprocess grep + ZIP-specific tests confirm ZERO references to `dallas`/`DART`/`DFW`/embedded Dallas ZIPs across `backend/app/modules/matching/`. Matching engine remains city-symmetric.
+- [x] Production fix surfaced: `temporal_types.TIMEZONE_BY_CITY` Dallas entry added (T25.1 oversight; T25.6 validation surfaced the latent KeyError)
+
 ---
 
 ## Known Gaps (Not Blockers)
@@ -198,7 +212,7 @@ City framework + Fort Worth substrate + Worker Companion (Foundation + Value Ext
 These are documented trade-offs, not missing features. See `docs/architecture.md` "Known Limitations" for details.
 
 ### Documentation Drift
-- Documentation is current as of Sprint S24 (2026-05-08). Test counts and endpoint references may drift between sprints.
+- Documentation is current as of Sprint S25 (2026-05-08). Test counts and endpoint references may drift between sprints.
 
 ### Employers Seed Data
 - `data/montgomery_businesses.json` is `[]` (empty array). Job matching uses `job_listings` table instead. The `employer_policies` table has 20+ records for fair-chance employer matching.
@@ -216,17 +230,19 @@ These are documented trade-offs, not missing features. See `docs/architecture.md
 - View visit feedback submissions
 - Manually trigger BrightData pre-crawl
 
-### Phase: Dallas Expansion (DFW Unification)
-- [ ] Create `cities/dallas.yaml` config (ZIP ranges, coordinates, Workforce Solutions Greater Dallas info)
-- [ ] Create `data/cities/dallas/` seed directory (community resources, employers, fair-chance index)
-- [ ] Add DART (Dallas Area Rapid Transit) transit data — GTFS feed, stop coordinates, route hours
-- [ ] Dallas-specific career center and resource seed data (legal aid, childcare, housing)
-- [ ] Dallas fair-chance employer index from open sources
-- [ ] No new state-level work needed — Texas benefits (HHSC), expunction (Art. 55), and nondisclosure (Gov Code Ch. 411 E-1) modules already built for Fort Worth
-- [ ] Frontend city selector or `CITY=dallas` env var support (same pattern as `fort-worth`)
-- [ ] Consider DFW-level view that spans both cities (shared employer index, cross-city job matches)
-- [ ] Validate all city-aware routers (benefits, criminal, geo, resources, AI prompts) work with Dallas config
-- [ ] Integration tests: end-to-end Dallas assessment flow
+### Phase: Dallas Expansion (DFW Unification) — ✅ Sprint S25 (see Completed above)
+- [x] Create `cities/dallas.yaml` config (ZIP ranges 75201-75398, coordinates, Workforce Solutions Greater Dallas info)
+- [x] Create `data/cities/dallas/` seed directory (community resources, employers, fair-chance index)
+- [x] Add DART (Dallas Area Rapid Transit) transit data — live GTFS feed (92 routes / 8270 stops via reusable importer)
+- [x] Dallas-specific career center and resource seed data (legal aid, childcare, housing)
+- [x] Dallas fair-chance employer index from open sources (35 employers + 35 policies + 26 honestjobs listings)
+- [x] No new state-level work needed — Texas benefits (HHSC), expunction (Art. 55), and nondisclosure (Gov Code Ch. 411 E-1) modules already built for Fort Worth
+- [x] `CITY=dallas` env var support (same pattern as `fort-worth`); ZIP→city resolution via existing dispatch — frontend city selector intentionally NOT added (anonymous-first invariant from S22)
+- [x] DFW-level read-only diagnostic view (`/admin/cities/dfw`) — admin-gated, displays per-metro counts; cross-city *matching* deliberately deferred (charter integrity assertion holds)
+- [x] Validate all city-aware routers (benefits, criminal, geo, resources, AI prompts) work with Dallas config (T25.6 parametrized tests over 10+ modules)
+- [x] Integration tests: end-to-end Dallas assessment flow (T25.6 `test_dallas_e2e.py`)
+- [ ] **S26 follow-up**: Cross-city matching (Dallas users seeing FW jobs / vice versa) — requires matcher + employer-index changes; T25.9 charter test will fail when this work begins (intended design-review trigger)
+- [ ] **S26 follow-up**: Add Dallas ZIP centroids to `_FW_ZIP_CENTROIDS` (Dallas users currently hit "no distance signal" fallback for commute-boost scoring)
 
 ### Phase: Data Quality
 - Populate resource coordinates from address geocoding
