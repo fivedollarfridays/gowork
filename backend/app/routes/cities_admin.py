@@ -50,6 +50,7 @@ from __future__ import annotations
 
 import json
 from collections import Counter
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -92,11 +93,17 @@ def _load_json(path: Path) -> Any:
         return json.load(f)
 
 
+@lru_cache(maxsize=8)
 def _summarize_city(slug: str) -> dict[str, Any]:
     """Build the per-city summary payload from seed JSON files.
 
     No DB queries; every value derives from
     ``_PROJECT_ROOT / load_city_config(slug).data_dir``.
+
+    Cached per-process: seed JSON is repo-static between deploys, so the
+    5-file-read cost only hits once per slug per process. Invalidation is
+    "redeploy" — the same contract the upstream ``load_city_config``
+    ``lru_cache`` relies on.
     """
     cfg = load_city_config(slug)
     data_dir = _PROJECT_ROOT / cfg.data_dir

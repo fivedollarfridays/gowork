@@ -70,33 +70,19 @@ def service_runs_weekday(cal_row: dict) -> bool:
     return any(cal_row.get(flag) == "1" for flag in WEEKDAY_FLAGS)
 
 
-def select_primary_service(
-    route_id: str, trips: list[dict], cal_index: dict[str, dict]
-) -> str | None:
-    """Pick the service_id with the most trips for this route.
-
-    Tie-breaker: alphabetical service_id (deterministic). Returns None if no
-    trips are scheduled for the route.
-    """
-    counts: dict[str, int] = {}
-    for trip in trips:
-        if trip["route_id"] != route_id:
-            continue
-        sid = trip["service_id"]
-        if sid not in cal_index:
-            continue
-        counts[sid] = counts.get(sid, 0) + 1
-    if not counts:
-        return None
-    return min(counts.keys(), key=lambda sid: (-counts[sid], sid))
-
-
 def to_minutes(gtfs_time: str) -> int:
+    """Parse a GTFS HH:MM[:SS] time into minutes-since-midnight.
+
+    GTFS allows times >= 24:00 (e.g. ``25:30:00``) to express next-day
+    service; we keep the over-24 value here and let ``from_minutes``
+    wrap with ``% 24`` when formatting back to display HH:MM.
+    """
     parts = gtfs_time.strip().split(":")
     return int(parts[0]) * 60 + int(parts[1])
 
 
 def from_minutes(total: int) -> str:
+    """Format minutes-since-midnight as ``HH:MM`` in the 00-23 range."""
     return f"{(total // 60) % 24:02d}:{total % 60:02d}"
 
 

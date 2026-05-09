@@ -18,7 +18,7 @@
  * 409 → state-machine conflict).
  */
 
-import { fetchWithTimeout } from "./_client";
+import { fetchWithCookie, throwOnApiError } from "./_client";
 
 /* -------------------------------------------------------------------------
  * Wire types — match the backend Pydantic / dict shapes 1:1.
@@ -91,49 +91,25 @@ export class AssessmentsApiError extends Error {
 }
 
 /* -------------------------------------------------------------------------
- * Internal fetch helper — every admin-assessments call goes through the
- * cookie session, so this wrapper bakes in `credentials: "include"`
- * before delegating to the shared transport (`./_client.ts`).
- * ------------------------------------------------------------------------- */
-
-async function _fetchWithTimeout(
-  path: string,
-  init?: RequestInit,
-): Promise<Response> {
-  return fetchWithTimeout(path, { credentials: "include", ...init });
-}
-
-async function _throwOnError(res: Response): Promise<void> {
-  if (res.ok) return;
-  const body = await res.json().catch(() => ({ detail: res.statusText }));
-  const detail = typeof body?.detail === "string" ? body.detail : undefined;
-  throw new AssessmentsApiError(
-    res.status,
-    detail ?? `assessments API error ${res.status}`,
-    detail,
-  );
-}
-
-/* -------------------------------------------------------------------------
  * Public surface — four typed functions consumed by the dashboard pages.
  * ------------------------------------------------------------------------- */
 
 export async function listPendingAssessments(): Promise<PendingAssessment[]> {
-  const res = await _fetchWithTimeout("/api/admin/assessments/pending", {
+  const res = await fetchWithCookie("/api/admin/assessments/pending", {
     method: "GET",
   });
-  await _throwOnError(res);
+  await throwOnApiError(res, AssessmentsApiError, "assessments");
   return (await res.json()) as PendingAssessment[];
 }
 
 export async function getAssessmentVersion(
   versionId: number,
 ): Promise<AssessmentVersion> {
-  const res = await _fetchWithTimeout(
+  const res = await fetchWithCookie(
     `/api/admin/assessments/${versionId}`,
     { method: "GET" },
   );
-  await _throwOnError(res);
+  await throwOnApiError(res, AssessmentsApiError, "assessments");
   return (await res.json()) as AssessmentVersion;
 }
 
@@ -142,24 +118,24 @@ export async function reviewAssessment(
   action: ReviewAction,
   comment: string | null,
 ): Promise<ReviewResponse> {
-  const res = await _fetchWithTimeout(
+  const res = await fetchWithCookie(
     `/api/admin/assessments/${versionId}/review`,
     {
       method: "POST",
       body: JSON.stringify({ action, comment }),
     },
   );
-  await _throwOnError(res);
+  await throwOnApiError(res, AssessmentsApiError, "assessments");
   return (await res.json()) as ReviewResponse;
 }
 
 export async function publishAssessment(
   versionId: number,
 ): Promise<PublishResponse> {
-  const res = await _fetchWithTimeout(
+  const res = await fetchWithCookie(
     `/api/admin/assessments/${versionId}/publish`,
     { method: "POST" },
   );
-  await _throwOnError(res);
+  await throwOnApiError(res, AssessmentsApiError, "assessments");
   return (await res.json()) as PublishResponse;
 }

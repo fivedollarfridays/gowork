@@ -70,6 +70,11 @@ LATLNG_PRECISION = 4
 
 
 def read_gtfs_table(zf: zipfile.ZipFile, name: str) -> list[dict]:
+    """Read a GTFS CSV out of the zip into a list of dict rows.
+
+    Uses ``utf-8-sig`` so feeds shipped with a BOM (some GTFS publishers
+    include one) parse cleanly without a leading-key garble.
+    """
     with zf.open(name) as raw:
         text = io.TextIOWrapper(raw, encoding="utf-8-sig", newline="")
         return list(csv.DictReader(text))

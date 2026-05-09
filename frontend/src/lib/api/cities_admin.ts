@@ -22,7 +22,7 @@
  * `credentials: "include"` so the cookie session reaches the gate.
  */
 
-import { fetchWithTimeout } from "./_client";
+import { fetchWithCookie, throwOnApiError } from "./_client";
 
 /* -------------------------------------------------------------------------
  * Wire types — match the backend dict shapes 1:1.
@@ -82,36 +82,13 @@ export class CitiesAdminApiError extends Error {
 }
 
 /* -------------------------------------------------------------------------
- * Internal fetch helper — mirrors listing_claims.ts so the cookie
- * session reaches the require_role("admin") gate.
- * ------------------------------------------------------------------------- */
-
-async function _fetchWithTimeout(
-  path: string,
-  init?: RequestInit,
-): Promise<Response> {
-  return fetchWithTimeout(path, { credentials: "include", ...init });
-}
-
-async function _throwOnError(res: Response): Promise<void> {
-  if (res.ok) return;
-  const body = await res.json().catch(() => ({ detail: res.statusText }));
-  const detail = typeof body?.detail === "string" ? body.detail : undefined;
-  throw new CitiesAdminApiError(
-    res.status,
-    detail ?? `cities-admin API error ${res.status}`,
-    detail,
-  );
-}
-
-/* -------------------------------------------------------------------------
  * Public surface — one typed function consumed by the DFW summary page.
  * ------------------------------------------------------------------------- */
 
 export async function getDfwSummary(): Promise<DfwSummaryResponse> {
-  const res = await _fetchWithTimeout("/api/admin/cities/summary", {
+  const res = await fetchWithCookie("/api/admin/cities/summary", {
     method: "GET",
   });
-  await _throwOnError(res);
+  await throwOnApiError(res, CitiesAdminApiError, "cities-admin");
   return (await res.json()) as DfwSummaryResponse;
 }

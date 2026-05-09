@@ -75,3 +75,53 @@ export async function fetchWithTimeout(
     clearTimeout(timeoutId);
   }
 }
+
+/**
+ * Fetch with the cookie session baked in. Every authed admin client used
+ * to hand-roll a one-line wrapper around `fetchWithTimeout` to add
+ * `credentials: "include"` (S23 assessments, S24 listing_claims, S25
+ * cities_admin). Lifted here so the next admin client inherits the
+ * pattern instead of copy-pasting it.
+ */
+export async function fetchWithCookie(
+  path: string,
+  init?: RequestInit,
+): Promise<Response> {
+  return fetchWithTimeout(path, { credentials: "include", ...init });
+}
+
+/**
+ * Constructor type for typed API errors. Each domain client subclasses
+ * Error with `(status, message, detail?)` and passes its constructor to
+ * `throwOnApiError` below.
+ */
+export type ApiErrorCtor<T extends Error> = new (
+  status: number,
+  message: string,
+  detail?: string,
+) => T;
+
+/**
+ * Throw a typed API error on a non-2xx response. Each per-domain client
+ * passes its own error class + a short label for the fallback message.
+ *
+ * Centralizes the body-parse-with-statusText-fallback + detail-string
+ * extraction that was previously copy-pasted into every client. The
+ * `.catch(() => ({ detail: res.statusText }))` matters: some endpoints
+ * return non-JSON 5xx bodies (Cloudflare HTML, etc.) and we still want
+ * a structured error rather than crashing in `res.json()`.
+ */
+export async function throwOnApiError<T extends Error>(
+  res: Response,
+  ErrorCtor: ApiErrorCtor<T>,
+  label: string,
+): Promise<void> {
+  if (res.ok) return;
+  const body = await res.json().catch(() => ({ detail: res.statusText }));
+  const detail = typeof body?.detail === "string" ? body.detail : undefined;
+  throw new ErrorCtor(
+    res.status,
+    detail ?? `${label} API error ${res.status}`,
+    detail,
+  );
+}

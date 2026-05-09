@@ -50,9 +50,10 @@ _FORBIDDEN_DALLAS_ZIPS = (
 # imported into matching code), allowlist the (file, token) pair here with
 # a brief reason. Keep this list small; the goal is design-review pressure,
 # not blanket suppression.
-_PINNED_ALLOWLIST: tuple[tuple[str, str, str], ...] = (
-    # (relative_path, token_regex, reason)
-)
+#
+# Schema: each entry is ``(relative_path, token_regex, reason)``.
+# ``reason`` is a free-form string captured for the next reviewer to read.
+_PINNED_ALLOWLIST: tuple[tuple[str, str, str], ...] = ()
 
 
 def _matching_py_files() -> list[Path]:
@@ -84,8 +85,6 @@ def test_matching_engine_has_no_dallas_token_references() -> None:
                 if not regex.search(line):
                     continue
                 rel = str(path.relative_to(_REPO_ROOT))
-                if (rel, token_pattern, _ANY_REASON) in _PINNED_ALLOWLIST:
-                    continue
                 allowlisted = any(
                     a_path == rel and a_token == token_pattern
                     for a_path, a_token, _reason in _PINNED_ALLOWLIST
@@ -169,6 +168,3 @@ def test_subprocess_grep_agrees_with_in_python_grep() -> None:
         )
 
 
-# Sentinel used by the in-python grep to make the allowlist tuple
-# (path, regex, reason) lookup explicit when reason is irrelevant.
-_ANY_REASON = object()

@@ -101,8 +101,9 @@ The importer is stdlib-only (`zipfile`, `csv`, `json`, `argparse`, `pathlib`)
 
 Any GTFS-compliant feed will work. The importer requires these five files
 inside the zip: `calendar.txt`, `routes.txt`, `trips.txt`, `stops.txt`,
-`stop_times.txt`. Optional GTFS files (`shapes.txt`, `frequencies.txt`,
-`calendar_dates.txt`) are ignored.
+`stop_times.txt`. `calendar_dates.txt` is read when present (see "Edge
+cases / GTFS quirks" below for the DART pattern). Other optional GTFS
+files (`shapes.txt`, `frequencies.txt`, `fare_*`, etc.) are ignored.
 
 ## Per-city sanity floors
 
@@ -128,9 +129,19 @@ generated from the live DART GTFS feed via:
 
 ```bash
 curl -L -A "Mozilla/5.0" -o /tmp/dart.zip https://www.dart.org/transitdata/latest/google_transit.zip
+unzip -l /tmp/dart.zip                       # sanity: confirm GTFS layout, no path-traversal entries (../)
 python3 scripts/import_gtfs.py --gtfs-zip /tmp/dart.zip --city dallas
 git diff data/cities/dallas/transit_*.json   # review the swap
 ```
+
+> **Third-party GTFS hardening.** When importing from operators other
+> than DART, run a GTFS validator (e.g.,
+> [`gtfs-validator`](https://github.com/MobilityData/gtfs-validator))
+> on the downloaded zip first. The importer reads entries by name and
+> writes only to `data/cities/<slug>/transit_*.json`, so the blast
+> radius is bounded — but `unzip -l` should not show any `../`
+> path-traversal entries, and the file count should match the GTFS
+> spec (typically 6-15 files).
 
 DART publishes the GTFS at `https://www.dart.org/transitdata/latest/google_transit.zip`
 (~8 MB). The download requires a `User-Agent` header — Cloudflare will
