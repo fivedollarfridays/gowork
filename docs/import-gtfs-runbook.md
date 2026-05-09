@@ -115,42 +115,31 @@ python3 -c "import json,sys; \
     print(f'routes={len(r)} stops={len(s)}')"
 ```
 
-| City        | Floor (routes) | Floor (stops) | Source                  |
-| ----------- | -------------- | ------------- | ----------------------- |
-| Fort Worth  | 14             | 42            | hand-curated seed       |
-| Dallas      | 80             | 1000          | live DART GTFS (target) |
-| Dallas      | 20             | 250           | demo seed (T25.5 ship)  |
-| Houston     | 90             | 9000          | live METRO GTFS (future)|
+| City        | Floor (routes) | Floor (stops) | Source                   |
+| ----------- | -------------- | ------------- | ------------------------ |
+| Fort Worth  | 14             | 42            | hand-curated seed        |
+| Dallas      | 80             | 1000          | live DART GTFS (current) |
+| Houston     | 90             | 9000          | live METRO GTFS (future) |
 
-## Demo-seed caveat (Sprint 25 / T25.5)
+## Live-feed swap procedure (Dallas / DART)
 
-The Dallas seed shipped in T25.5 is **synthetic, not from the live DART
-GTFS feed**. The Sprint 25 environment has restricted network access
-(dart.org is not reachable), so we generated a representative dataset
-that exercises the full importer code path:
-
-- 4 light-rail lines (Red, Blue, Green, Orange) with real station names
-  and approximate published latitude/longitude for the major shared
-  downtown stations (Union, West End, Akard, St Paul, Pearl, Cityplace,
-  Mockingbird, Lovers Lane, etc.).
-- 23 representative DART bus routes using real DART route numbers
-  (1, 19, 21, 26, 36, 51, 60, 161, 183, 240, 282, 360, 401, 408, 466,
-  521, 528, 549, 595, 700, 702, 703, 704). Stop coordinates are
-  approximated.
-- Output: 27 routes, 303 stops.
-
-**Production replacement plan:** when network access to dart.org is
-available, run:
+The Dallas seed in `data/cities/dallas/transit_{routes,stops}.json` was
+generated from the live DART GTFS feed via:
 
 ```bash
-curl -L -o /tmp/dart.zip https://www.dart.org/.../google_transit.zip
+curl -L -A "Mozilla/5.0" -o /tmp/dart.zip https://www.dart.org/transitdata/latest/google_transit.zip
 python3 scripts/import_gtfs.py --gtfs-zip /tmp/dart.zip --city dallas
 git diff data/cities/dallas/transit_*.json   # review the swap
 ```
 
-The importer itself is production-ready. Only the seed payload needs to
-be replaced; no code changes are required to swap the synthetic seed for
-the real DART feed.
+DART publishes the GTFS at `https://www.dart.org/transitdata/latest/google_transit.zip`
+(~8 MB). The download requires a `User-Agent` header — Cloudflare will
+return 404 to the bare curl default UA. To refresh the seed: re-run the
+two-liner above. The importer is idempotent so identical input yields
+byte-identical output; only schedule changes (real DART updates) cause
+diffs.
+
+Current live-feed sanity (May 2026 fetch): 92 routes, 8270 stops.
 
 ## Edge cases / GTFS quirks
 
@@ -166,10 +155,20 @@ the real DART feed.
 - **Mismatched `stop_id` references.** Stop_times rows that reference an
   unknown `stop_id` are silently dropped. Run a GTFS validator upstream
   if this matters.
-- **`calendar_dates.txt` overrides.** Not consumed in the current
-  importer. If a feed expresses service primarily through
-  `calendar_dates.txt` exceptions, the derived weekday window may be
-  incomplete; revisit when we add a city that depends on it.
+- **`calendar_dates.txt` for primary service.** Some agencies (DART)
+  put weekday operating days in `calendar_dates.txt` (date-by-date)
+  rather than the repeating M-F pattern in `calendar.txt`. The importer
+  reads `calendar_dates.txt` if present and synthesizes calendar-row
+  flags from each date's day-of-week. `calendar.txt` entries take
+  precedence — `calendar_dates.txt`-derived flags only cover service_ids
+  absent from `calendar.txt`.
+- **Weekend service across separate service_ids.** Saturday and Sunday
+  flags aggregate across ALL service_ids the route uses (not just the
+  primary). DART's pattern: weekday under `calendar_dates.txt`-defined
+  service_ids, Saturday under `service_id=3`, Sunday under
+  `service_id=4` — three separate services per route. The importer
+  walks `trips.txt` to find every service_id used by a route, then sets
+  `saturday`/`sunday` true if ANY of those services has the day flag set.
 
 ## Architecture
 

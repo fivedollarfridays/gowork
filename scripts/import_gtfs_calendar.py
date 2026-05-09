@@ -5,12 +5,64 @@ Kept in a separate module so scripts/import_gtfs.py stays under arch limits.
 
 from __future__ import annotations
 
+from collections import defaultdict
+from datetime import date
+
 WEEKDAY_FLAGS = ("monday", "tuesday", "wednesday", "thursday", "friday")
+_DAY_FLAG_NAMES = (
+    "monday", "tuesday", "wednesday", "thursday",
+    "friday", "saturday", "sunday",
+)
 
 
-def index_calendar(calendar: list[dict]) -> dict[str, dict]:
-    """Index calendar.txt rows by service_id."""
-    return {row["service_id"]: row for row in calendar}
+def derive_flags_from_calendar_dates(
+    calendar_dates: list[dict],
+) -> dict[str, dict]:
+    """Synthesize calendar.txt-shaped rows from calendar_dates.txt entries.
+
+    Some agencies (DART) put the bulk of operating days in calendar_dates.txt
+    rather than the repeating M-F pattern in calendar.txt. For each
+    service_id, walk the date entries with ``exception_type == "1"`` (service
+    runs that day), derive day-of-week flags, and emit a row with the same
+    shape calendar.txt would produce. Service_ids present in calendar.txt
+    take precedence over derived rows (see index_calendar merge order).
+    """
+    days_by_svc: dict[str, set[int]] = defaultdict(set)
+    for row in calendar_dates:
+        if row.get("exception_type") != "1":
+            continue
+        d = (row.get("date") or "").strip()
+        if len(d) != 8 or not d.isdigit():
+            continue
+        dt = date(int(d[:4]), int(d[4:6]), int(d[6:8]))
+        days_by_svc[row["service_id"]].add(dt.weekday())
+    return {
+        sid: {
+            "service_id": sid,
+            **{
+                _DAY_FLAG_NAMES[i]: ("1" if i in days else "0")
+                for i in range(7)
+            },
+        }
+        for sid, days in days_by_svc.items()
+    }
+
+
+def index_calendar(
+    calendar: list[dict],
+    calendar_dates: list[dict] | None = None,
+) -> dict[str, dict]:
+    """Index calendar.txt rows by service_id, merging calendar_dates derives.
+
+    Service_ids defined in calendar.txt take precedence — calendar.txt is the
+    authoritative repeating pattern. Derived rows from calendar_dates.txt only
+    cover service_ids absent from calendar.txt (DART's pattern).
+    """
+    out = {row["service_id"]: row for row in calendar}
+    if calendar_dates:
+        for sid, derived in derive_flags_from_calendar_dates(calendar_dates).items():
+            out.setdefault(sid, derived)
+    return out
 
 
 def service_runs_weekday(cal_row: dict) -> bool:
@@ -50,6 +102,30 @@ def from_minutes(total: int) -> str:
 
 def weekday_service_ids(cal_index: dict[str, dict]) -> set[str]:
     return {sid for sid, row in cal_index.items() if service_runs_weekday(row)}
+
+
+def route_runs_on(
+    day_flag: str,
+    route_id: str,
+    trips: list[dict],
+    cal_index: dict[str, dict],
+) -> bool:
+    """True if ANY service_id used by `route_id` has `day_flag` (e.g.
+    "saturday") set. Mirrors the weekday-window derivation philosophy:
+    sat/sun must NOT be read from the primary service alone, since the
+    primary is whichever service has the most trips (often weekdays) and
+    its flags don't reflect weekend service that lives in a separate
+    service_id (DART pattern: weekdays via calendar_dates.txt, Sat via
+    service_id 3, Sun via service_id 4 — three separate services per route).
+    """
+    for trip in trips:
+        if trip["route_id"] != route_id:
+            continue
+        sid = trip["service_id"]
+        cal = cal_index.get(sid)
+        if cal is not None and cal.get(day_flag) == "1":
+            return True
+    return False
 
 
 def weekday_trip_ids_for_route(

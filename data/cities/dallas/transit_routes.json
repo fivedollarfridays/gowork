@@ -1,218 +1,738 @@
 [
   {
-    "route_name": "Beckley/Lancaster",
+    "route_name": "MALCOLM X/MAPLE",
     "route_number": 1,
     "saturday": true,
     "sunday": true,
-    "weekday_end": "23:52",
-    "weekday_start": "05:00"
+    "weekday_end": "00:52",
+    "weekday_start": "03:50"
   },
   {
-    "route_name": "Park Lane Crosstown",
-    "route_number": 19,
-    "saturday": false,
-    "sunday": false,
-    "weekday_end": "21:18",
-    "weekday_start": "05:30"
-  },
-  {
-    "route_name": "Sylvan/Ross",
-    "route_number": 21,
-    "saturday": false,
-    "sunday": false,
-    "weekday_end": "20:48",
-    "weekday_start": "05:30"
-  },
-  {
-    "route_name": "Garland Rd",
-    "route_number": 26,
+    "route_name": "ROSS",
+    "route_number": 3,
     "saturday": true,
     "sunday": true,
-    "weekday_end": "23:22",
-    "weekday_start": "05:00"
+    "weekday_end": "00:59",
+    "weekday_start": "04:00"
   },
   {
-    "route_name": "Loop 12 Northwest",
-    "route_number": 36,
-    "saturday": false,
-    "sunday": false,
-    "weekday_end": "20:18",
-    "weekday_start": "05:30"
-  },
-  {
-    "route_name": "Greenville Ave",
-    "route_number": 51,
+    "route_name": "LOVE FIELD SHUTTLE",
+    "route_number": 5,
     "saturday": true,
     "sunday": true,
-    "weekday_end": "23:22",
+    "weekday_end": "01:23",
+    "weekday_start": "04:14"
+  },
+  {
+    "route_name": "JEFFERSON GASTON",
+    "route_number": 9,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:55",
+    "weekday_start": "04:00"
+  },
+  {
+    "route_name": "ERVAY",
+    "route_number": 13,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:16",
+    "weekday_start": "04:00"
+  },
+  {
+    "route_name": "BUCKNER",
+    "route_number": 15,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:43",
+    "weekday_start": "04:00"
+  },
+  {
+    "route_name": "FERGUSON",
+    "route_number": 16,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:04",
+    "weekday_start": "04:00"
+  },
+  {
+    "route_name": "SKILLMAN",
+    "route_number": 17,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:55",
+    "weekday_start": "04:00"
+  },
+  {
+    "route_name": "SAMUELL",
+    "route_number": 18,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:37",
+    "weekday_start": "04:05"
+  },
+  {
+    "route_name": "NORTHWEST HWY",
+    "route_number": 20,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:41",
+    "weekday_start": "04:00"
+  },
+  {
+    "route_name": "FOREST LANE",
+    "route_number": 22,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:31",
+    "weekday_start": "03:55"
+  },
+  {
+    "route_name": "HASKELL",
+    "route_number": 23,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:41",
+    "weekday_start": "04:06"
+  },
+  {
+    "route_name": "COCKRELL HILL NORTH",
+    "route_number": 25,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:38",
+    "weekday_start": "04:00"
+  },
+  {
+    "route_name": "RIDGECREST",
+    "route_number": 27,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:00",
+    "weekday_start": "04:15"
+  },
+  {
+    "route_name": "LAKE JUNE",
+    "route_number": 30,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:49",
+    "weekday_start": "04:00"
+  },
+  {
+    "route_name": "LEDBETTER",
+    "route_number": 38,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:21",
+    "weekday_start": "03:50"
+  },
+  {
+    "route_name": "WESTMORELAND",
+    "route_number": 57,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:46",
+    "weekday_start": "03:55"
+  },
+  {
+    "route_name": "HAMPTON",
+    "route_number": 101,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:27",
+    "weekday_start": "03:59"
+  },
+  {
+    "route_name": "FORT WORTH",
+    "route_number": 102,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:56",
+    "weekday_start": "04:30"
+  },
+  {
+    "route_name": "CEDAR SPRINGS",
+    "route_number": 103,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:24",
+    "weekday_start": "04:36"
+  },
+  {
+    "route_name": "ILLINOIS",
+    "route_number": 104,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:17",
+    "weekday_start": "04:55"
+  },
+  {
+    "route_name": "BICKERS",
+    "route_number": 106,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:01",
+    "weekday_start": "04:30"
+  },
+  {
+    "route_name": "CAMP WISDOM",
+    "route_number": 108,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:15",
+    "weekday_start": "04:00"
+  },
+  {
+    "route_name": "BECKLEY",
+    "route_number": 109,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:05",
+    "weekday_start": "04:17"
+  },
+  {
+    "route_name": "EAST OAK CLIFF",
+    "route_number": 114,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:16",
     "weekday_start": "05:00"
   },
   {
-    "route_name": "Ferguson Rd",
-    "route_number": 60,
-    "saturday": false,
-    "sunday": false,
-    "weekday_end": "20:48",
-    "weekday_start": "05:30"
+    "route_name": "RECORD CROSSING",
+    "route_number": 122,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:58",
+    "weekday_start": "04:06"
   },
   {
-    "route_name": "Cedar Hill Express",
-    "route_number": 161,
-    "saturday": false,
-    "sunday": false,
-    "weekday_end": "19:44",
-    "weekday_start": "05:30"
+    "route_name": "SINGLETON",
+    "route_number": 128,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:11",
+    "weekday_start": "03:54"
   },
   {
-    "route_name": "Las Colinas Connector",
-    "route_number": 183,
-    "saturday": false,
-    "sunday": false,
-    "weekday_end": "20:16",
-    "weekday_start": "05:30"
+    "route_name": "BONNIE VIEW",
+    "route_number": 141,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:12",
+    "weekday_start": "04:00"
   },
   {
-    "route_name": "Forest Lane",
-    "route_number": 240,
-    "saturday": false,
-    "sunday": false,
-    "weekday_end": "20:50",
-    "weekday_start": "05:30"
+    "route_name": "MARSALIS",
+    "route_number": 145,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:20",
+    "weekday_start": "03:55"
   },
   {
-    "route_name": "Spring Valley",
-    "route_number": 282,
-    "saturday": false,
-    "sunday": false,
-    "weekday_end": "20:18",
-    "weekday_start": "05:30"
+    "route_name": "POLK",
+    "route_number": 147,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:33",
+    "weekday_start": "04:30"
   },
   {
-    "route_name": "Garland Coit",
-    "route_number": 360,
-    "saturday": false,
-    "sunday": false,
-    "weekday_end": "20:18",
-    "weekday_start": "05:30"
+    "route_name": "SPRING VALLEY",
+    "route_number": 200,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:55",
+    "weekday_start": "04:30"
   },
   {
-    "route_name": "Mesquite Express",
-    "route_number": 401,
-    "saturday": false,
-    "sunday": false,
-    "weekday_end": "19:44",
-    "weekday_start": "05:30"
+    "route_name": "BUCKINGHAM",
+    "route_number": 202,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:29",
+    "weekday_start": "05:15"
   },
   {
-    "route_name": "Lake June",
+    "route_name": "CENTERVILLE",
+    "route_number": 203,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:54",
+    "weekday_start": "05:00"
+  },
+  {
+    "route_name": "MILLER",
+    "route_number": 204,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:43",
+    "weekday_start": "05:00"
+  },
+  {
+    "route_name": "HENDERSON",
+    "route_number": 205,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:01",
+    "weekday_start": "04:20"
+  },
+  {
+    "route_name": "LEMMON",
+    "route_number": 207,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:14",
+    "weekday_start": "04:22"
+  },
+  {
+    "route_name": "LA PRADA",
+    "route_number": 212,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:14",
+    "weekday_start": "05:00"
+  },
+  {
+    "route_name": "HARRY HINES",
+    "route_number": 213,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:11",
+    "weekday_start": "04:36"
+  },
+  {
+    "route_name": "LINDSLEY",
+    "route_number": 214,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:08",
+    "weekday_start": "04:20"
+  },
+  {
+    "route_name": "KIEST",
+    "route_number": 215,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:47",
+    "weekday_start": "04:16"
+  },
+  {
+    "route_name": "EVERGLADE",
+    "route_number": 216,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:54",
+    "weekday_start": "04:04"
+  },
+  {
+    "route_name": "LANCASTER/RAMONA",
+    "route_number": 217,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:54",
+    "weekday_start": "04:30"
+  },
+  {
+    "route_name": "MILITARY",
+    "route_number": 218,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:26",
+    "weekday_start": "03:55"
+  },
+  {
+    "route_name": "SYLVAN",
+    "route_number": 219,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:26",
+    "weekday_start": "04:36"
+  },
+  {
+    "route_name": "SCYENE",
+    "route_number": 220,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:59",
+    "weekday_start": "05:00"
+  },
+  {
+    "route_name": "MERRIFIELD",
+    "route_number": 221,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:39",
+    "weekday_start": "04:00"
+  },
+  {
+    "route_name": "CLARK",
+    "route_number": 223,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:53",
+    "weekday_start": "04:45"
+  },
+  {
+    "route_name": "I-30 BROADWAY",
+    "route_number": 224,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:08",
+    "weekday_start": "04:15"
+  },
+  {
+    "route_name": "CLARENDON",
+    "route_number": 226,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:52",
+    "weekday_start": "04:22"
+  },
+  {
+    "route_name": "O-CONNOR - LUNA - VALLEY VIEW",
+    "route_number": 227,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:23",
+    "weekday_start": "04:39"
+  },
+  {
+    "route_name": "SIMPSON STUART",
+    "route_number": 228,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:37",
+    "weekday_start": "04:00"
+  },
+  {
+    "route_name": "MACARTHUR - BELTLINE",
+    "route_number": 229,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:19",
+    "weekday_start": "04:50"
+  },
+  {
+    "route_name": "IRVING BLVD",
+    "route_number": 230,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:05",
+    "weekday_start": "04:35"
+  },
+  {
+    "route_name": "S BELTLINE",
+    "route_number": 231,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:55",
+    "weekday_start": "04:47"
+  },
+  {
+    "route_name": "FRANKFORD",
+    "route_number": 232,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:14",
+    "weekday_start": "05:00"
+  },
+  {
+    "route_name": "JOSEY",
+    "route_number": 233,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:12",
+    "weekday_start": "04:01"
+  },
+  {
+    "route_name": "PARKER",
+    "route_number": 234,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:48",
+    "weekday_start": "05:00"
+  },
+  {
+    "route_name": "TIMBERGLEN/MIDWAY",
+    "route_number": 235,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:52",
+    "weekday_start": "04:57"
+  },
+  {
+    "route_name": "W 15",
+    "route_number": 236,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:59",
+    "weekday_start": "05:00"
+  },
+  {
+    "route_name": "PRESTON",
+    "route_number": 237,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:15",
+    "weekday_start": "04:19"
+  },
+  {
+    "route_name": "NAAMAN FOREST/BELTLINE",
+    "route_number": 238,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:25",
+    "weekday_start": "04:30"
+  },
+  {
+    "route_name": "DALLAS - ADDISON - LEGACY",
+    "route_number": 239,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:59",
+    "weekday_start": "04:51"
+  },
+  {
+    "route_name": "COIT",
+    "route_number": 241,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:04",
+    "weekday_start": "04:45"
+  },
+  {
+    "route_name": "WALNUT HILL",
+    "route_number": 242,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:52",
+    "weekday_start": "05:00"
+  },
+  {
+    "route_name": "PLANO RD",
+    "route_number": 243,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:49",
+    "weekday_start": "05:00"
+  },
+  {
+    "route_name": "UTD RICHARDSON",
+    "route_number": 244,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:49",
+    "weekday_start": "05:26"
+  },
+  {
+    "route_name": "SHILOH",
+    "route_number": 245,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:54",
+    "weekday_start": "05:00"
+  },
+  {
+    "route_name": "JUPITER",
+    "route_number": 247,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:52",
+    "weekday_start": "04:00"
+  },
+  {
+    "route_name": "COLUMBIA",
+    "route_number": 249,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:54",
+    "weekday_start": "04:30"
+  },
+  {
+    "route_name": "E BELTLINE",
+    "route_number": 250,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:56",
+    "weekday_start": "04:30"
+  },
+  {
+    "route_name": "SATURN",
+    "route_number": 251,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "00:54",
+    "weekday_start": "05:00"
+  },
+  {
+    "route_name": "GLENN HEIGHTS EXPRESS",
+    "route_number": 306,
+    "saturday": false,
+    "sunday": false,
+    "weekday_end": "19:30",
+    "weekday_start": "05:15"
+  },
+  {
+    "route_name": "NORTHWEST PLANO EXPRESS",
+    "route_number": 308,
+    "saturday": false,
+    "sunday": false,
+    "weekday_end": "20:24",
+    "weekday_start": "05:06"
+  },
+  {
+    "route_name": "PALISADES E-SHUTTLE",
     "route_number": 408,
     "saturday": false,
     "sunday": false,
-    "weekday_end": "20:18",
-    "weekday_start": "05:30"
+    "weekday_end": "18:45",
+    "weekday_start": "06:18"
   },
   {
-    "route_name": "Pleasant Grove Crosstown",
-    "route_number": 466,
+    "route_name": "TI SHUTTLE - FOREST LANE CAMPUS",
+    "route_number": 413,
     "saturday": false,
     "sunday": false,
-    "weekday_end": "20:48",
-    "weekday_start": "05:30"
+    "weekday_end": "20:02",
+    "weekday_start": "05:40"
   },
   {
-    "route_name": "Garland - Forest",
-    "route_number": 521,
+    "route_name": "TI SHUTTLE- MAIN CAMPUS NORTH ROUTE",
+    "route_number": 417,
     "saturday": false,
     "sunday": false,
-    "weekday_end": "20:18",
+    "weekday_end": "19:58",
     "weekday_start": "05:30"
   },
   {
-    "route_name": "Plano Park",
-    "route_number": 528,
+    "route_name": "TI SHUTTLE- MAIN CAMPUS SOUTH ROUTE",
+    "route_number": 419,
     "saturday": false,
     "sunday": false,
-    "weekday_end": "19:44",
-    "weekday_start": "05:30"
+    "weekday_end": "20:08",
+    "weekday_start": "05:40"
   },
   {
-    "route_name": "Frankford Crosstown",
-    "route_number": 549,
+    "route_name": "BAYLOR BRYAN TOWER",
+    "route_number": 421,
     "saturday": false,
     "sunday": false,
-    "weekday_end": "20:16",
+    "weekday_end": "19:25",
     "weekday_start": "05:30"
   },
   {
-    "route_name": "Far North Plano",
-    "route_number": 595,
+    "route_name": "UT SOUTHWESTERN SOUTH",
+    "route_number": 422,
     "saturday": false,
     "sunday": false,
-    "weekday_end": "19:44",
-    "weekday_start": "05:30"
+    "weekday_end": "19:00",
+    "weekday_start": "05:42"
   },
   {
-    "route_name": "Mockingbird/UNT Dallas",
-    "route_number": 700,
-    "saturday": false,
-    "sunday": false,
-    "weekday_end": "20:48",
-    "weekday_start": "05:30"
-  },
-  {
-    "route_name": "DART Express - Loop 12",
-    "route_number": 702,
+    "route_name": "UT SOUTHWESTERN NORTH",
+    "route_number": 423,
     "saturday": false,
     "sunday": false,
     "weekday_end": "19:16",
-    "weekday_start": "06:00"
+    "weekday_start": "05:52"
   },
   {
-    "route_name": "Inland Port Express",
-    "route_number": 703,
-    "saturday": false,
-    "sunday": false,
-    "weekday_end": "19:14",
-    "weekday_start": "06:00"
+    "route_name": "MCKINNEY AVENUE TROLLEY",
+    "route_number": 425,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "22:16",
+    "weekday_start": "07:00"
   },
   {
-    "route_name": "South Dallas Loop",
-    "route_number": 704,
+    "route_name": "MUSTANG EXPRESS",
+    "route_number": 440,
+    "saturday": true,
+    "sunday": false,
+    "weekday_end": "22:13",
+    "weekday_start": "07:07"
+  },
+  {
+    "route_name": "BUSH/ MEADOWS-MOCKINGBIRD STA.",
+    "route_number": 442,
     "saturday": false,
     "sunday": false,
-    "weekday_end": "20:18",
+    "weekday_end": "23:23",
     "weekday_start": "05:30"
   },
   {
-    "route_name": "Red Line - Westmoreland to Parker Rd",
-    "route_number": 901,
+    "route_name": "DALLAS STREETCAR",
+    "route_number": 620,
     "saturday": true,
     "sunday": true,
-    "weekday_end": "23:59",
-    "weekday_start": "04:30"
+    "weekday_end": "00:00",
+    "weekday_start": "05:30"
   },
   {
-    "route_name": "Blue Line - UNT Dallas to Rowlett",
-    "route_number": 902,
+    "route_name": "UT DALLAS EAST",
+    "route_number": 26957,
     "saturday": true,
     "sunday": true,
-    "weekday_end": "23:59",
-    "weekday_start": "04:30"
+    "weekday_end": "23:25",
+    "weekday_start": "07:00"
   },
   {
-    "route_name": "Green Line - Buckner to N Carrollton/Frankford",
-    "route_number": 903,
+    "route_name": "UT DALLAS WEST",
+    "route_number": 26958,
     "saturday": true,
     "sunday": true,
-    "weekday_end": "23:58",
-    "weekday_start": "04:30"
+    "weekday_end": "23:29",
+    "weekday_start": "07:00"
   },
   {
-    "route_name": "Orange Line - DFW Airport to Parker Rd",
-    "route_number": 904,
+    "route_name": "DART LIGHT RAIL - BLUE LINE",
+    "route_number": 26982,
     "saturday": true,
     "sunday": true,
-    "weekday_end": "23:59",
-    "weekday_start": "04:30"
+    "weekday_end": "01:55",
+    "weekday_start": "03:36"
+  },
+  {
+    "route_name": "DART LIGHT RAIL - GREEN LINE",
+    "route_number": 26983,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "02:04",
+    "weekday_start": "03:30"
+  },
+  {
+    "route_name": "DART LIGHT RAIL - ORANGE LINE",
+    "route_number": 26984,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "02:05",
+    "weekday_start": "03:05"
+  },
+  {
+    "route_name": "DART LIGHT RAIL - RED LINE",
+    "route_number": 26985,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:57",
+    "weekday_start": "03:11"
+  },
+  {
+    "route_name": "SILVER LINE",
+    "route_number": 26986,
+    "saturday": true,
+    "sunday": true,
+    "weekday_end": "01:22",
+    "weekday_start": "03:23"
+  },
+  {
+    "route_name": "TRINITY RAILWAY",
+    "route_number": 26988,
+    "saturday": true,
+    "sunday": false,
+    "weekday_end": "02:06",
+    "weekday_start": "03:59"
   }
 ]

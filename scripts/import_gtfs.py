@@ -43,7 +43,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from import_gtfs_calendar import (  # noqa: E402
     derive_weekday_window,
     index_calendar,
-    select_primary_service,
+    route_runs_on,
 )
 from import_gtfs_stops import (  # noqa: E402
     index_stop_times_by_trip,
@@ -60,6 +60,7 @@ GTFS_REQUIRED_FILES = (
     "stops.txt",
     "stop_times.txt",
 )
+GTFS_OPTIONAL_FILES = ("calendar_dates.txt",)
 LATLNG_PRECISION = 4
 
 
@@ -84,6 +85,8 @@ def load_gtfs_tables(gtfs_zip: Path) -> dict[str, list[dict]]:
             if required not in names:
                 raise ValueError(f"GTFS zip missing required file: {required}")
             tables[required] = read_gtfs_table(zf, required)
+        for optional in GTFS_OPTIONAL_FILES:
+            tables[optional] = read_gtfs_table(zf, optional) if optional in names else []
     return tables
 
 
@@ -97,12 +100,8 @@ def _build_route_row(
     cal_index: dict[str, dict],
 ) -> dict:
     route_id = row["route_id"]
-    primary_sid = select_primary_service(route_id, trips, cal_index)
-    sat, sun = False, False
-    if primary_sid is not None:
-        cal = cal_index[primary_sid]
-        sat = cal.get("saturday") == "1"
-        sun = cal.get("sunday") == "1"
+    sat = route_runs_on("saturday", route_id, trips, cal_index)
+    sun = route_runs_on("sunday", route_id, trips, cal_index)
     wkday_start, wkday_end = derive_weekday_window(
         route_id, trips, stop_times, cal_index
     )
@@ -117,7 +116,9 @@ def _build_route_row(
 
 
 def build_routes(tables: dict[str, list[dict]]) -> list[dict]:
-    cal_index = index_calendar(tables["calendar.txt"])
+    cal_index = index_calendar(
+        tables["calendar.txt"], tables.get("calendar_dates.txt") or []
+    )
     trips = tables["trips.txt"]
     stop_times = tables["stop_times.txt"]
     out = [
