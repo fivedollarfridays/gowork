@@ -17,7 +17,7 @@
 **Plan:** plan-2026-05-s26-admin-dashboard
 **Type:** feature
 **Title:** S26 — Admin Dashboard
-**Status:** Planned (0/12 tasks done; ready for `/prepare-to-engage`)
+**Status:** In progress (2/12 tasks done — T26.1 wave-0 migration + T26.3 admin-feedback backend shipped 2026-05-09)
 **Branch:** main (engage will create `engage/backlog-sprint-26-admin-dashboard`)
 **Current Sprint:** S26
 **Total Cx:** 192 (9 P0 / 3 P1 / 0 P2)
@@ -68,6 +68,47 @@ Out of focus: S13b deferred items (43 Tier-1 browser suites, 6 Tier-6 cross-modu
 Older sprint task tables and session histories (Sprints 7 — 31) are in `.paircoder/archive/state-pre-s1.md`. S12a per-session entries plus S2 — S11 detail are in `.paircoder/archive/state-s12a.md`. S13 wave-by-wave detail + per-task driver sessions are in `.paircoder/archive/state-s13.md`.
 
 ## What Was Just Done
+
+- **T26.3 done** (admin feedback inbox + flagged-queue backend)
+
+### 2026-05-09 — T26.3 — Admin feedback inbox + flagged-queue backend
+
+Wave-0 second task done. Ships the read-side admin surfaces over the existing S14 feedback substrate. Zero schema changes — `visit_feedback.reviewed` and `action_taken` already exist from m001. Five new endpoints under `/api/admin/feedback/...`, all gated by `require_role("admin")` (S22 cookie pattern). Pure SQLAlchemy `text()` + named binds; portable on sqlite + postgres.
+
+- **Surfaces:**
+  - `GET  /api/admin/feedback/flagged?city=<slug>` — flagged-resource queue with last-30-days negative `resource_feedback` rows joined for context.
+  - `POST /api/admin/feedback/flagged/{resource_id}/approve` — clears flag (`health_status='healthy'`).
+  - `POST /api/admin/feedback/flagged/{resource_id}/confirm-hide` — soft-hide (`health_status='hidden'`).
+  - `GET  /api/admin/feedback/visits?reviewed=<bool>&limit=<n>&offset=<n>` — paginated inbox; default 50, hard cap 100 via FastAPI `Query(le=100)`; offset + total returned in response shape.
+  - `POST /api/admin/feedback/visits/{visit_id}/mark-reviewed` — flips `reviewed=1` + stamps optional `action_taken` body.
+- **Module split:** new `routes/admin_feedback.py` rather than extending `routes/feedback.py` (which is candidate-facing, token-gated) — keeps the trust boundary unmistakable. `core/queries_admin_feedback.py` houses the four query helpers; mutations use `RETURNING` so existence check + update happens in one statement.
+- **N+1 avoidance on flagged-queue join:** `_fetch_recent_negative_feedback` bulk-loads all flagged resources' negative feedback in one IN-clause query (`bindparam("rids", expanding=True)` for sqlite + postgres portability), then groups in Python.
+- **Tests:** 23 new in `backend/tests/test_admin_feedback.py` covering each endpoint × {admin happy path, non-admin 403, anonymous 403, 404 on unknown id, mutation column verification, pagination semantics, reviewed-state filter, limit-cap rejection}. Tests mount the router on a fresh `FastAPI` (not `app.main.app`) because **T26.2 owns the `routes/__init__.py` registration this wave** — single-owner shared-file edit. Decoupling the test app from production lets T26.3 land before T26.2 without ordering games.
+- **PUBLIC_ENDPOINTS allowlist:** all 5 new routes registered in `backend/tests/_cross_session_fixtures.py` with explicit per-route rationale (S25 lesson: registration is a write-time AC, not a gate-time fixup). `test_cross_session_isolation::test_allowlist_only_references_real_endpoints` is transiently red on this branch until T26.2 mounts the router on `app.main.app` — this is wave-design (T26.12 re-asserts at gate).
+- **Cross-task contract:** T26.3 ships the router; T26.2 mounts it. The 5 PUBLIC_ENDPOINTS keys T26.3 added match the route paths T26.2 will register, so the merge is mechanical.
+- **Verification:**
+  - `bpsai-pair arch check backend/app/routes/admin_feedback.py` → 1 warning (160 lines, > 150 warn threshold; well under 400 error). Passes.
+  - `bpsai-pair arch check backend/app/core/queries_admin_feedback.py` → 1 warning (207 lines, > 150 warn threshold; well under 400 error). Passes.
+  - `ruff check` → clean on all 4 touched files.
+  - 23/23 admin_feedback tests pass.
+  - Adjacent regression: 98/98 across `test_feedback_routes.py`, `test_employers_admin.py`, `test_assessments_review.py`, `test_cities_admin.py`, `test_resources_user_curated.py`, `test_alembic_parity.py`.
+  - Full backend suite: 4853 passed / 5 failed / 2 skipped. 4 failures are pre-existing baselines (`test_config_llm.py` × 3, `test_contract_credit_api.py` × 1 — all from S24/PR-#114-#116 dep-bump fallout); 1 failure is the expected cross-session-isolation transient.
+- **Files:** `backend/app/core/queries_admin_feedback.py` (new), `backend/app/routes/admin_feedback.py` (new), `backend/tests/test_admin_feedback.py` (new), `backend/tests/_cross_session_fixtures.py` (5 PUBLIC_ENDPOINTS entries).
+
+- **T26.1 done** (auto-updated by hook)
+
+### 2026-05-09 — T26.1 — alembic 0015 resources.user_curated_at + seed-loader respect
+
+Wave-0 first task done. Adds `resources.user_curated_at TIMESTAMP NULL` (alembic 0015, down_revision 0014, idempotent via `has_column`) and teaches `seed_from_file` to skip rows whose `(city, name)` matches an existing curated row (`user_curated_at IS NOT NULL`). Closes the reseed-clobber loop the Sprint 26 brief flagged.
+
+- **Migration shape:** column-only; downgrade is no-op. SQLite < 3.35 cannot DROP COLUMN; on postgres dropping the column would erase the curation history this column exists to preserve.
+- **Loader contract:** new `_curated_resource_keys(conn)` helper returns the set of `(city, name)` tuples with curation set; returns empty set when the column is absent (pre-0015 deployments cannot have curated rows). Skip is scoped to `table == "resources"` only. Match key is `(city, name)` so an admin curating "Workforce Solutions" in fort-worth does NOT block the same name from seeding in dallas.
+- **Schema allowlist:** `ALLOWED_COLUMNS["resources"]` extended with `user_curated_at` so T26.2's CRUD writes can stamp the column via the same path.
+- **Parity test:** `test_alembic_parity` updated with a `_strip_post_legacy_resources_columns` normaliser so the alembic-side resources CREATE TABLE (which carries `user_curated_at` via materialised ALTER) compares equal to the legacy m001..m010 chain. Linear-chain expectation lifted from 14 to 15 revisions.
+- **arch check seed_helpers.py refactor:** extracted `_insert_seed_record` to keep `seed_from_file` under the function-length cap and the file under the function-count cap. Inline tagging kept in `seed_from_file` for clarity.
+- **Tests:** 7 new in `backend/tests/test_resources_user_curated.py` — column exists, nullable + no-default, legacy INSERT still works, idempotency, seed skip on curated row, no-skip on NULL, per-city scoping, non-resources table unaffected. Regression sweep: 419 passed across seed/migration/alembic/database tests, 0 failures.
+- **Cross-task contract:** T26.1 owns the column + loader skip; T26.2 owns the inverse half (admin INSERT/UPDATE stamp `user_curated_at = now()`). Together they guarantee container restarts cannot wipe manual curation.
+- **Files:** `backend/alembic/versions/0015_resources_user_curated.py` (new), `backend/tests/test_resources_user_curated.py` (new), `backend/app/core/seed_helpers.py` (curated-key lookup + insert helper), `backend/app/core/schema.py` (allowlist), `backend/tests/test_alembic_parity.py` (chain length + column normaliser). Commit `6566bf9`.
 
 ### 2026-05-09 — Sprint 26 (Admin Dashboard) planned
 
