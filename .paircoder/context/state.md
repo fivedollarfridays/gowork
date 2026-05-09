@@ -63,6 +63,18 @@ Older sprint task tables and session histories (Sprints 7 — 31) are in `.pairc
 
 ## What Was Just Done
 
+- **T25.4 done** (auto-updated by hook)
+
+- **T25.8 done** (auto-updated by hook)
+
+- **T25.5 done** (auto-updated by hook)
+
+- **T25.3 done** (auto-updated by hook)
+
+- **T25.2 done** (auto-updated by hook)
+
+- **T25.1 done** (auto-updated by hook)
+
 ### 2026-05-08 — Sprint 25 (Dallas Expansion) planned
 
 - **/ideation** produced `.paircoder/plans/briefs/brief-sprint-25-dallas-expansion.md` (brief). Step 0 fail-fast: 5 stale `in_progress` tasks (T1.7, T12.5, T12.16, T12.21, T12.24) — none touch `cities/`, `data/cities/`, `backend/app/cities/`, transit, or matching paths; no conflict risk. Architecture surface discovery confirmed: 10+ modules dispatch via `get_city_config()` + `city.state == "TX"` guards with ZERO per-city branching (`main.py`, `core/database.py`, `barrier_intel/prompts.py`, `barrier_intel/guardrails.py`, `core/day_boundary.py`, `integrations/brightdata/precrawl.py`, `integrations/job_aggregator.py`, `ai/client.py`, `ai/providers.py`, `ai/prompt_router.py`). Dallas is *additive*; no refactor prerequisites.
