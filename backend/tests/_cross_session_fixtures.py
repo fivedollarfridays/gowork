@@ -186,6 +186,11 @@ PUBLIC_ENDPOINTS: dict[str, str] = {
     "DELETE /api/employers/admin/claims/{claim_id}":
         "Admin role-gated (require_role('admin')); not session-scoped. "
         "Tested directly by test_employers_admin.py.",
+    "GET /api/admin/cities/summary":
+        "Admin role-gated (require_role('admin')); read-only diagnostic "
+        "page that aggregates per-city seed-file counts. No session_id "
+        "input, no DB queries. Tested directly by test_cities_admin.py "
+        "(S25 / T25.7).",
 }
 
 

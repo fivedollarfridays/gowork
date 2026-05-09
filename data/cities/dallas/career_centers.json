@@ -1,0 +1,16 @@
+[
+  {
+    "name": "Workforce Solutions Greater Dallas (Comprehensive)",
+    "category": "career_center",
+    "subcategory": "comprehensive",
+    "address": "1201 Main St Suite 2700, Dallas, TX 75202",
+    "lat": 32.7796,
+    "lng": -96.8011,
+    "phone": "(214) 290-1000",
+    "url": "https://www.wfsdallas.com",
+    "eligibility": "Open to all Dallas County residents, no appointment needed",
+    "services": ["Job search assistance", "Resume writing", "Interview preparation", "Career counseling", "Workshops", "Computer access", "WIOA enrollment", "Veterans services"],
+    "hours": "Mon-Fri 8am-5pm",
+    "notes": "TWC-aligned anchor for Dallas County. WIOA training vouchers available for income-eligible jobseekers. Ask for referrals to specialized programs (reentry, refugee, veterans)."
+  }
+]

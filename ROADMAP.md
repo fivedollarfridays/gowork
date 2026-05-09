@@ -1,6 +1,8 @@
 # MontGoWork Roadmap
 
-Current state as of March 2026. Organized by what's done, what's in progress, and what's next.
+Current state as of May 2026. Organized by what's done, what's in progress, and what's next.
+
+> **Note on sprint numbering.** This roadmap mixes two tracks. The Montgomery, AL hackathon era (Sprints 3–30 below) used sequential numbering. The Fort Worth visual-rebirth and post-rebirth feature work (S1–S13, then S22+) is tracked separately by bpsai-pair under `.paircoder/context/state.md`; recent cross-track sprints are listed at the end of this section.
 
 ---
 
@@ -148,6 +150,61 @@ Current state as of March 2026. Organized by what's done, what's in progress, an
 - [x] safeHref XSS prevention on external URLs
 - [x] Prompt injection defense via XML user_input tags
 
+### Fort Worth Visual Rebirth + Worker Companion (Sprints S1–S13)
+City framework + Fort Worth substrate + Worker Companion (Foundation + Value Extensions) + Platform-Wide QC. Detail in `.paircoder/context/state.md` "Previous Sprints (summary)" and `.paircoder/archive/state-s12a.md` / `.paircoder/archive/state-s13.md`.
+- [x] S1 — City Framework Scaffold (8/8); S2 — Fort Worth Data + Texas Rules (18/18); S3 — Texas/Fort Worth audit
+- [x] S4 — Hackathon polish (share, sequence viz, what-if simulator, voice input, i18n)
+- [x] S5 — Employment Pathway Engine (cliff-aware multi-step); S6 — Backend hardening + Montgomery leak remediation
+- [x] S7 — Outcome-Informed Barrier Intelligence (N+1 loop); S8 — Cross-module integration verify
+- [x] S9 — Intelligence loop end-to-end (calibrated_weeks → pathway); S10 — Demo seed + pipeline verification
+- [x] S11 — "People Like You" Community Insights (deterministic, city-aware, no-LLM)
+- [x] S12a — Worker Companion Foundation (26/26): migrations, feature flags + audit, APScheduler, appointments/jobs/documents/plan modules, digest composer, nightly orchestrator
+- [x] S12b — Value Extensions (25/25): PDF rendering, resume + cover-letter builders, reminder engine, jobs kanban, advisor inbox, weekly review, compliance gate (export + right-to-delete)
+- [x] S13 — Platform-Wide QC + Submission Readiness (55/128): QC infra (Playwright, visual baseline, Lighthouse CI, bundle gate, Dependabot), 15 production fixes (injection-filter, PII retention, advisor PII leak, scheduler grace, etc.). Browser-driven remainder deferred to S13b.
+
+### Identity Foundation (Sprint S22) — merged 2026-05-07 (PR #123)
+- [x] Alembic migration runner + async env (sqlite + asyncpg)
+- [x] Identity layer: `accounts`, `account_sessions`, `account_credentials`, `account_roles` (alembic 0011 + 0012)
+- [x] Magic-link auth: `POST /api/auth/magic-link` (always 202, no enumeration), `GET /api/auth/claim` (signed `gw_account` cookie)
+- [x] Account-aware UI: `useAccount()` hook + `<SaveProgressCTA />` at 3 funnel insertion points
+- [x] Anonymous-first invariant test (auto-discovers session-id routes; 0 in REQUIRES_AUTH_ALLOWLIST)
+- [x] Postgres CI service container + dual-engine config + 15-test parity suite
+- [x] Integrity charter v1 (`docs/integrity-charter.md`, 10 binding principles led by "money never moves position")
+
+### Assessment Authoring Pipeline (Sprint S23) — merged 2026-05-08 (PR #124)
+- [x] Schema: `assessments`, `assessment_versions`, `assessment_questions`, `assessment_reviews` (alembic 0013)
+- [x] Claude-draft endpoint + reviewer queue API + publish endpoint with provenance lock
+- [x] Public fetch with rubric exclusion + Cache-Control
+- [x] Admin dashboard: `/admin/assessments` list + detail with filter dropdowns, comment textarea, approve / reject / request-revision actions
+- [x] Role substrate: `/api/auth/me` extended with roles, `useAccountRoles` hook, `<RoleGate>`, role-aware nav, `/admin/layout.tsx`
+- [x] Postgres test isolation rebuild (session-scoped engine + per-test transaction-rollback) — closed S22 follow-up
+
+### Two-Sided Listing Verification (Sprint S24) — merged 2026-05-08 (PR #125)
+- [x] Schema: `employer_accounts`, `listing_claims`, `listing_verifications`, `listing_reputation_events` (alembic 0014)
+- [x] `POST /api/employers/claim` — magic-link-style domain-email proof, 202 always, anti-rotation rate-limit
+- [x] `GET /api/employers/claim/verify` — uniform 401, 409 cross-employer, `gw_employer_account` HMAC cookie
+- [x] `POST /api/employers/{eid}/listings/{lid}/intake` — Pydantic-validated, cookie-or-admin gated
+- [x] `GET /api/jobs` verification-tier extension (display-only; `intake_json` excluded)
+- [x] `POST /api/listings/{lid}/events` — case_manager + admin gated; ghosted-counted-but-not-surfaced invariant
+- [x] Admin claim-review dashboard: `/admin/listings` queue + detail with approve/reject (`employers_admin.py`)
+- [x] Frontend `<VerifiedBadge tier intakeComplete />` with three tiers + amber sub-badge; integrated into `/jobs`
+- [x] E2E smoke (claim → verify → intake → public summary → reputation event through real HTTP layer)
+- [x] Charter integrity assertion — explicit grep across `backend/app/modules/matching/` confirms ZERO references to verification fields (display-only badge invariant)
+
+### Dallas Expansion / DFW Unification (Sprint S25) — merged 2026-05-08 (PR #126)
+- [x] `cities/dallas.yaml` config (state=TX, zip 75201-75398, appointment_services byte-identical to FW); `backend/app/cities/dallas/` module with `DALLAS_ELIGIBILITY_RULES` (9 entries)
+- [x] Dallas seed under `data/cities/dallas/`: community_resources (17), career_centers (1), resources (10), employers (35), employer_policies (35), barrier_graph (33 barriers + 53 relationships, structurally identical to FW), training_programs (9), childcare_providers (12). honestjobs_listings.json (26 entries) under `backend/data/cities/dallas/`.
+- [x] **Reusable GTFS importer** (Spotlight invention): `scripts/import_gtfs.py` + `import_gtfs_calendar.py` + `import_gtfs_stops.py` — stdlib-only, contract boundary between any GTFS feed and the canonical FW JSON shape. Handles `calendar_dates.txt` (DART pattern) + sat/sun aggregation across multiple service_ids per route. 16 fixture tests; reusable for Houston METRO + future cities.
+- [x] **Live DART feed shipped:** 92 routes / 8270 stops via the importer (replaces initial synthetic Option-A seed after user pushback in Wave 6)
+- [x] City-aware router validation: parametrized tests over 10+ city-aware modules confirm Dallas dispatches correctly via existing `get_city_config()` + `city.state == "TX"` guards (zero per-city branching added)
+- [x] DFW bounding-box test extended for embedded Dallas ZIPs (75201/75204/75215/75216/75217/75224/75227/75228/75232/75241); all FW assertions still green
+- [x] Dallas E2E assessment-flow integration test (POST /api/assessment ZIP 75201 → GET /api/plan surfaces ≥1 Dallas resource + DART transit + Dallas employer)
+- [x] S22 anonymous-first invariant test green with `CITY=dallas`
+- [x] Frontend Dallas plumbing: `DEMO_ZIPS["dallas"] = "75201"`; useDemoMode-cityaware test parametrized over both cities; en.json + es.json `chapter09.cityDallas` mirroring `chapter09.cityFW`
+- [x] DFW cross-metro summary admin page (`/admin/cities/dfw`, P1): read-only diagnostic; reads counts from JSON seed files via `load_city_config(slug).data_dir` — ZERO DB queries; gated via `<RoleGate roles={["admin"]}>`. Header copy "Read-only diagnostic. Cross-city matching is not enabled." (design-review trigger)
+- [x] Charter integrity assertion (`test_charter_integrity_dallas.py`): in-Python + subprocess grep + ZIP-specific tests confirm ZERO references to `dallas`/`DART`/`DFW`/embedded Dallas ZIPs across `backend/app/modules/matching/`. Matching engine remains city-symmetric.
+- [x] Production fix surfaced: `temporal_types.TIMEZONE_BY_CITY` Dallas entry added (T25.1 oversight; T25.6 validation surfaced the latent KeyError)
+
 ---
 
 ## Known Gaps (Not Blockers)
@@ -155,7 +212,7 @@ Current state as of March 2026. Organized by what's done, what's in progress, an
 These are documented trade-offs, not missing features. See `docs/architecture.md` "Known Limitations" for details.
 
 ### Documentation Drift
-- Documentation is current as of Sprint 30. Test counts and endpoint references may drift between sprints.
+- Documentation is current as of Sprint S25 (2026-05-08). Test counts and endpoint references may drift between sprints.
 
 ### Employers Seed Data
 - `data/montgomery_businesses.json` is `[]` (empty array). Job matching uses `job_listings` table instead. The `employer_policies` table has 20+ records for fair-chance employer matching.
@@ -173,17 +230,19 @@ These are documented trade-offs, not missing features. See `docs/architecture.md
 - View visit feedback submissions
 - Manually trigger BrightData pre-crawl
 
-### Phase: Dallas Expansion (DFW Unification)
-- [ ] Create `cities/dallas.yaml` config (ZIP ranges, coordinates, Workforce Solutions Greater Dallas info)
-- [ ] Create `data/cities/dallas/` seed directory (community resources, employers, fair-chance index)
-- [ ] Add DART (Dallas Area Rapid Transit) transit data — GTFS feed, stop coordinates, route hours
-- [ ] Dallas-specific career center and resource seed data (legal aid, childcare, housing)
-- [ ] Dallas fair-chance employer index from open sources
-- [ ] No new state-level work needed — Texas benefits (HHSC), expunction (Art. 55), and nondisclosure (Gov Code Ch. 411 E-1) modules already built for Fort Worth
-- [ ] Frontend city selector or `CITY=dallas` env var support (same pattern as `fort-worth`)
-- [ ] Consider DFW-level view that spans both cities (shared employer index, cross-city job matches)
-- [ ] Validate all city-aware routers (benefits, criminal, geo, resources, AI prompts) work with Dallas config
-- [ ] Integration tests: end-to-end Dallas assessment flow
+### Phase: Dallas Expansion (DFW Unification) — ✅ Sprint S25 (see Completed above)
+- [x] Create `cities/dallas.yaml` config (ZIP ranges 75201-75398, coordinates, Workforce Solutions Greater Dallas info)
+- [x] Create `data/cities/dallas/` seed directory (community resources, employers, fair-chance index)
+- [x] Add DART (Dallas Area Rapid Transit) transit data — live GTFS feed (92 routes / 8270 stops via reusable importer)
+- [x] Dallas-specific career center and resource seed data (legal aid, childcare, housing)
+- [x] Dallas fair-chance employer index from open sources (35 employers + 35 policies + 26 honestjobs listings)
+- [x] No new state-level work needed — Texas benefits (HHSC), expunction (Art. 55), and nondisclosure (Gov Code Ch. 411 E-1) modules already built for Fort Worth
+- [x] `CITY=dallas` env var support (same pattern as `fort-worth`); ZIP→city resolution via existing dispatch — frontend city selector intentionally NOT added (anonymous-first invariant from S22)
+- [x] DFW-level read-only diagnostic view (`/admin/cities/dfw`) — admin-gated, displays per-metro counts; cross-city *matching* deliberately deferred (charter integrity assertion holds)
+- [x] Validate all city-aware routers (benefits, criminal, geo, resources, AI prompts) work with Dallas config (T25.6 parametrized tests over 10+ modules)
+- [x] Integration tests: end-to-end Dallas assessment flow (T25.6 `test_dallas_e2e.py`)
+- [ ] **S26 follow-up**: Cross-city matching (Dallas users seeing FW jobs / vice versa) — requires matcher + employer-index changes; T25.9 charter test will fail when this work begins (intended design-review trigger)
+- [ ] **S26 follow-up**: Add Dallas ZIP centroids to `_FW_ZIP_CENTROIDS` (Dallas users currently hit "no distance signal" fallback for commute-boost scoring)
 
 ### Phase: Data Quality
 - Populate resource coordinates from address geocoding

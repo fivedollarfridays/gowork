@@ -1,0 +1,6 @@
+route_id,service_id,trip_id
+R1,WKDY,T1A
+R1,WKDY,T1B
+R2,DAILY,T2A
+R2,WKND,T2B
+R3,WKDY,T3A

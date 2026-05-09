@@ -12,6 +12,7 @@ from app.routes.assessments_public import router as assessments_public_router
 from app.routes.assessments_review import router as assessments_review_router
 from app.routes.auth import router as auth_router
 from app.routes.brightdata import router as brightdata_router
+from app.routes.cities_admin import router as cities_admin_router
 from app.routes.city import router as city_router
 from app.routes.compliance import router as compliance_router
 from app.routes.credit import router as credit_router
@@ -71,6 +72,7 @@ all_routers = [
     intelligence_router,
     plan_intelligence_router,
     city_router,
+    cities_admin_router,
     insights_router,
     demo_router,
     demo_haiku_router,

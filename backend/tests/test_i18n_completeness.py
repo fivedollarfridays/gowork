@@ -73,6 +73,7 @@ IDENTICAL_PAIR_ALLOWLIST: dict[str, str] = {
     # are US place names that don't translate (proper nouns).
     "wall.chapter09.cityFW": "'Fort Worth, TX' — US city proper noun.",
     "wall.chapter09.cityMontgomery": "'Montgomery, AL' — US city proper noun.",
+    "wall.chapter09.cityDallas": "'Dallas, TX' — US city proper noun. Added by S25/T25.8 for the deployed-cities row alongside cityFW; see frontend/src/lib/translations/{en,es}.json.",
     "wall.chapter09.futureCityDallas": "'Dallas' — US city proper noun.",
     "wall.chapter09.futureCityHouston": "'Houston' — US city proper noun.",
     "wall.chapter09.futureCityAtlanta": "'Atlanta' — US city proper noun.",

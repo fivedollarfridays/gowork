@@ -18,7 +18,7 @@
  * can branch on `.status` (403 → not-authorised, 404 → missing).
  */
 
-import { fetchWithTimeout } from "./_client";
+import { fetchWithCookie, throwOnApiError } from "./_client";
 
 /* -------------------------------------------------------------------------
  * Wire types — match the backend dict shapes 1:1.
@@ -83,66 +83,42 @@ export class ListingClaimsApiError extends Error {
 }
 
 /* -------------------------------------------------------------------------
- * Internal fetch helper — every admin-claim call goes through the cookie
- * session, so this wrapper bakes in `credentials: "include"` before
- * delegating to the shared transport (`./_client.ts`).
- * ------------------------------------------------------------------------- */
-
-async function _fetchWithTimeout(
-  path: string,
-  init?: RequestInit,
-): Promise<Response> {
-  return fetchWithTimeout(path, { credentials: "include", ...init });
-}
-
-async function _throwOnError(res: Response): Promise<void> {
-  if (res.ok) return;
-  const body = await res.json().catch(() => ({ detail: res.statusText }));
-  const detail = typeof body?.detail === "string" ? body.detail : undefined;
-  throw new ListingClaimsApiError(
-    res.status,
-    detail ?? `listing-claims API error ${res.status}`,
-    detail,
-  );
-}
-
-/* -------------------------------------------------------------------------
  * Public surface — four typed functions consumed by the dashboard pages.
  * ------------------------------------------------------------------------- */
 
 export async function listPendingClaims(): Promise<PendingClaim[]> {
-  const res = await _fetchWithTimeout(
+  const res = await fetchWithCookie(
     "/api/employers/admin/claims/pending",
     { method: "GET" },
   );
-  await _throwOnError(res);
+  await throwOnApiError(res, ListingClaimsApiError, "listing-claims");
   return (await res.json()) as PendingClaim[];
 }
 
 export async function getClaim(claimId: number): Promise<ClaimDetail> {
-  const res = await _fetchWithTimeout(
+  const res = await fetchWithCookie(
     `/api/employers/admin/claims/${claimId}`,
     { method: "GET" },
   );
-  await _throwOnError(res);
+  await throwOnApiError(res, ListingClaimsApiError, "listing-claims");
   return (await res.json()) as ClaimDetail;
 }
 
 export async function approveClaim(
   claimId: number,
 ): Promise<ApproveResponse> {
-  const res = await _fetchWithTimeout(
+  const res = await fetchWithCookie(
     `/api/employers/admin/claims/${claimId}/approve`,
     { method: "POST" },
   );
-  await _throwOnError(res);
+  await throwOnApiError(res, ListingClaimsApiError, "listing-claims");
   return (await res.json()) as ApproveResponse;
 }
 
 export async function rejectClaim(claimId: number): Promise<void> {
-  const res = await _fetchWithTimeout(
+  const res = await fetchWithCookie(
     `/api/employers/admin/claims/${claimId}`,
     { method: "DELETE" },
   );
-  await _throwOnError(res);
+  await throwOnApiError(res, ListingClaimsApiError, "listing-claims");
 }
