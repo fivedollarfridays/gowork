@@ -17,7 +17,7 @@ faiss-cpu==1.13.2
 cachetools==5.5.2
 apscheduler==3.11.2
 sendgrid==6.11.0
-weasyprint==68.0
+weasyprint==68.1
 fpdf2==2.8.7
 markdown==3.8.1
 
