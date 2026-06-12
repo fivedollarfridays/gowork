@@ -1,59 +1,71 @@
 {
   "features": {
-    "bugfix": {
-      "total_invocations": 35556,
-      "unique_licenses": 4,
-      "adoption_rate": 0.8,
-      "stale": false
-    },
     "feature": {
-      "total_invocations": 231578,
-      "unique_licenses": 4,
-      "adoption_rate": 0.8,
+      "total_invocations": 691950,
+      "unique_licenses": 7,
+      "adoption_rate": 1.0,
       "stale": false
     },
-    "chore": {
-      "total_invocations": 52343,
-      "unique_licenses": 3,
-      "adoption_rate": 0.6,
+    "bugfix": {
+      "total_invocations": 47118,
+      "unique_licenses": 5,
+      "adoption_rate": 0.7143,
       "stale": false
     },
     "refactor": {
-      "total_invocations": 9967,
-      "unique_licenses": 4,
-      "adoption_rate": 0.8,
+      "total_invocations": 11616,
+      "unique_licenses": 5,
+      "adoption_rate": 0.7143,
+      "stale": false
+    },
+    "chore": {
+      "total_invocations": 86396,
+      "unique_licenses": 5,
+      "adoption_rate": 0.7143,
       "stale": false
     },
     "unknown": {
       "total_invocations": 243691,
       "unique_licenses": 2,
-      "adoption_rate": 0.4,
+      "adoption_rate": 0.2857,
+      "stale": false
+    },
+    "docs": {
+      "total_invocations": 111,
+      "unique_licenses": 1,
+      "adoption_rate": 0.1429,
+      "stale": false
+    },
+    "test": {
+      "total_invocations": 17,
+      "unique_licenses": 1,
+      "adoption_rate": 0.1429,
       "stale": false
     },
     "implementation": {
       "total_invocations": 450,
       "unique_licenses": 1,
-      "adoption_rate": 0.2,
+      "adoption_rate": 0.1429,
       "stale": false
     },
     "documentation": {
       "total_invocations": 25,
       "unique_licenses": 1,
-      "adoption_rate": 0.2,
+      "adoption_rate": 0.1429,
       "stale": false
     },
     "content": {
       "total_invocations": 25,
       "unique_licenses": 1,
-      "adoption_rate": 0.2,
+      "adoption_rate": 0.1429,
       "stale": false
     },
     "design": {
       "total_invocations": 25,
       "unique_licenses": 1,
-      "adoption_rate": 0.2,
+      "adoption_rate": 0.1429,
       "stale": false
     }
   },
-  "total_active_licenses": 5
+  "total_active_licenses": 7
 }

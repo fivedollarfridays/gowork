@@ -1,6 +1,10 @@
 # Current State
 
-> Last updated: 2026-05-08 (Sprint 25 — Dallas Expansion (DFW Unification) shipped 9/9 tasks. Backend 4700 → 4822 passed (+122); frontend 3620 → 3629 passed (+9); ZERO regressions. Live DART GTFS data shipped (92 routes / 8270 stops) after Wave-6 user pushback on synthetic demo seed — surfaced 2 real importer bugs (calendar_dates.txt not read; sat/sun flags primary-service-only) both fixed in import_gtfs_calendar.py + 3 new fixture tests. Charter integrity assertion holds: backend/tests/test_charter_integrity_dallas.py confirms ZERO Dallas-specific references in backend/app/modules/matching/ (in-Python grep + subprocess grep + ZIP-specific test). Branch `engage/backlog-sprint-25-dallas-expansion`; PR #126 merged.
+> Last updated: 2026-05-09 (Sprint 26 — Admin Dashboard shipped 12/12 tasks. Backend 4824 → 4882 passed (+58); frontend 3629 → 3712 passed (+83); ZERO regressions. Hybrid execution path: engage CLI ran W0 autonomously (auto-committed, but bookkeeping marked all 3 W0 tasks `failed` despite shipping working code — switched to /running-sprint-tasks for W1-W5 after fixing one missing router registration). 4 sub-features live under `/admin/*`: resource CRUD (alembic 0015 user_curated_at flag prevents reseed-clobber), flagged-queue + visit-inbox over existing m001 columns, BrightData manual trigger (gate migrated from legacy require_admin_key to S22 require_role admin so cookie-session UI works). Carryover audit-allowlist fix shipped in T26.2 (3 T26.3 + 4 T26.2 mutating endpoints triaged in _audit_integrity_fixtures.py). T26.7 driver caught real-vs-brief deviation: backend mounts BrightData at /api/brightdata not /api/admin/brightdata; CrawlStatus has 4 enum states not 3. Charter assertions held: anonymous-first invariant (S22), cross-session isolation contract (S24, with per-route AC discipline), display-only matching engine (S25, charter test re-runs green; admin dashboard adds zero matching-engine references). Branch `engage/backlog-sprint-26-admin-dashboard`; PR #127 open.
+
+> Previous: 2026-05-09 (Sprint 26 — Admin Dashboard planned. /ideation → /draft-backlog → /pc-plan complete. 12 tasks (T26.1–T26.12), 192 Cx (9 P0 / 3 P1), 6 waves. Brief at `.paircoder/plans/briefs/brief-sprint-26-admin-dashboard.md`; backlog at `plans/backlogs/backlog-sprint-26-admin-dashboard.md`; plan record `plan-2026-05-s26-admin-dashboard`. Four sub-features under `/admin/*`: resource CRUD with seed-respecting persistence, flagged-resource review queue, visit-feedback inbox, BrightData manual trigger. Two key architectural finds: (1) resources reseed-on-init clobbers admin writes without `user_curated_at` flag → T26.1 alembic 0015 migration unlocks real CRUD; (2) brightdata.py uses legacy `require_admin_key` (header) — T26.4 migrates to S22 `require_role("admin")` (cookie) so admin UI calls every endpoint via the same auth path. Per-task AC discipline (S25 lesson): every backend route AC explicitly says "added to `_cross_session_fixtures.PUBLIC_ENDPOINTS` with rationale" — making registration a write-time requirement, not a gate-time fixup.
+
+> Previous: 2026-05-08 (Sprint 25 — Dallas Expansion (DFW Unification) shipped 9/9 tasks. Backend 4700 → 4822 passed (+122); frontend 3620 → 3629 passed (+9); ZERO regressions. Live DART GTFS data shipped (92 routes / 8270 stops) after Wave-6 user pushback on synthetic demo seed — surfaced 2 real importer bugs (calendar_dates.txt not read; sat/sun flags primary-service-only) both fixed in import_gtfs_calendar.py + 3 new fixture tests. Charter integrity assertion holds: backend/tests/test_charter_integrity_dallas.py confirms ZERO Dallas-specific references in backend/app/modules/matching/ (in-Python grep + subprocess grep + ZIP-specific test). Branch `engage/backlog-sprint-25-dallas-expansion`; PR #126 merged.
 
 > Previous: 2026-05-08 (Sprint 24 — Two-Sided Listing Verification merged via PR #125. 11/11 tasks across 7 waves; backend 4573 → 4700 (+127), frontend 3580 → 3620 (+40). Post-merge `/reviewing-and-fixing` shipped 4 P1 fixes (dead `verified_by` kwarg, runtime `assert` → 500, IN-clause cap, empty-listing-ids early return) + 1 DRY extraction (`frontend/src/lib/api/_client.ts`) + `<VerifiedBadge>` React.memo polish; CI green on all 5 jobs. Charter integrity assertion confirms ZERO references to verification fields in `backend/app/modules/matching/`. auth.py 314 (sprint invariant held).
 
@@ -12,27 +16,33 @@
 
 ## Active Plan
 
-**Plan:** _none — Sprint 25 ready for PR (9/9 tasks done, branch `engage/backlog-sprint-25-dallas-expansion`)_
-**Last shipped:** Sprint 25 — Dallas Expansion (DFW Unification) (PR #126 merged)
-**Branch:** engage/backlog-sprint-25-dallas-expansion (push pending; PR pending)
-**Current Sprint:** _between sprints — awaiting S26 ideation_
+**Plan:** _none — Sprint 26 ready for PR (12/12 tasks done, branch `engage/backlog-sprint-26-admin-dashboard`)_
+**Last shipped:** Sprint 26 — Admin Dashboard (PR #127 open)
+**Branch:** engage/backlog-sprint-26-admin-dashboard (push pending; PR pending)
+**Current Sprint:** _between sprints — awaiting S27 ideation_
 
 ## Current Focus
 
+**Sprint 26 — Admin Dashboard** shipped 2026-05-09 via PR #127 (open; pending merge). 12/12 tasks across 6 waves. Operator-facing `/admin/*` surface compounding on S22-S25 trust substrate. **Hybrid execution path:** engage CLI executed Wave 0 (T26.1, T26.3, T26.4) autonomously but its bookkeeping marked all 3 as `failed` despite shipping working code (50/50 tests pass on shipped W0 work after fixing one missing router registration). Switched to `/running-sprint-tasks` orchestration for W1-W5; 4 driver-agent waves shipped clean.
+
+- Backend: 4824 → 4882 passed (+58 net new); 4 baseline failures preserved (3 from PR #114 openai bump + 1 contract_credit_api — same set as S25)
+- Frontend: 3629 → 3712 passed (+83 net new); 3 skipped; 0 regressions
+- 4 sub-features live: resource CRUD (`/admin/resources`), flagged-queue + visit-inbox (`/admin/feedback`), BrightData manual trigger (`/admin/brightdata`), and a landing page (`/admin`) indexing all 6 admin sub-areas (S23-S26) with quick-stats badges
+- **Carryover audit-allowlist fix shipped in T26.2:** engage's T26.3 added 5 mutating endpoints to PUBLIC_ENDPOINTS but didn't triage them in `_audit_integrity_fixtures.py:AUDIT_ALLOWLIST`. T26.2 driver caught + fixed (3 T26.3 + 4 T26.2 entries triaged). Per-route AC discipline pattern from S25 prevented the same gap from going to CI.
+- **alembic 0015 (T26.1) added `resources.user_curated_at TIMESTAMP NULL`** + seed-loader respect logic. T26.2 CRUD writes always stamp the timestamp; reseed skips curated rows. Without this, admin add/edit would be wiped on the next deploy.
+- **`brightdata.py` gate migrated** from legacy `require_admin_key` (header) to S22 `require_role("admin")` (cookie). Admin UI now calls every endpoint via the same auth path as the rest of the dashboard.
+- **`_client.ts` lift consumed by 3 new API clients** (admin_resources.ts + admin_feedback.ts + admin_brightdata.ts) — no per-domain transport duplication. The S25 post-PR-#126 simplify pass paid off immediately.
+- **Reality-check from T26.7 driver:** backend mounts BrightData at `/api/brightdata` not `/api/admin/brightdata` (admin gating is router-level via `require_role` dependency); CrawlStatus has 4 enum states (`starting | running | ready | failed`), not the 3 the brief assumed. Driver matched backend reality + exposed both `CrawlStatus` (response interface) and `CrawlStatusValue` (string-literal union) so T26.10's status panel renders all 4 states.
+- **shadcn primitives gap discovered + handled:** `AlertDialog`, `Dialog`, `Select`, `Textarea`, `Table` aren't scaffolded in `frontend/src/components/ui/` — drivers matched the project convention (native `<select>`/`<textarea>` + inline divs with `role="dialog"` from the existing `SendAdvisorNoteDialog` pattern). Behaviorally indistinguishable for these use cases.
+- **Charter assertions held:** anonymous-first invariant (S22) — zero new auth-gated USER routes; cross-session isolation contract (S24) — every new admin endpoint allowlisted with rationale at write time per per-route AC; display-only matching engine (S25) — `test_charter_integrity_dallas.py` re-runs green; admin dashboard adds zero matching-engine references (grep verified at gate; only one comment-doc reference in a page docstring describing the carryforward).
+
 **Sprint 25 — Dallas Expansion (DFW Unification)** shipped 2026-05-08 via PR #126 (merged 2026-05-08; squash-merge to ca99f68). 9/9 tasks done across 6 waves; live DART GTFS data swapped in for synthetic seed (Wave-5/6 follow-up Spotlight) after the user pushed back on shipping demo data — surfaced 2 real importer bugs (`calendar_dates.txt` not consumed; sat/sun flags read primary-service-only) both fixed in `scripts/import_gtfs_calendar.py` + 3 new fixture tests pinning the new behavior.
 
-- Backend: 4700 → 4822 passed (+122 net new); 6 baseline failures preserved (4 from S24 + 2 from PR #114/#116 dep bumps)
-- Frontend: 3620 → 3629 passed (+9 net new); 3 skipped; 0 regressions
-- DART live feed: 92 routes / 8270 stops (vs synthetic 27/303 from initial T25.5 ship)
-- **Charter integrity assertion** — `backend/tests/test_charter_integrity_dallas.py` (3 tests, in-Python grep + subprocess grep + ZIP-specific) confirms ZERO references to `dallas`/`DART`/`DFW` or any embedded Dallas ZIP (75201/75204/75215/etc.) across `backend/app/modules/matching/`. Display-only invariant holds; matching engine remains city-symmetric.
-- **Spotlight invention:** `scripts/import_gtfs.py` (+ `import_gtfs_calendar.py` + `import_gtfs_stops.py`) — reusable GTFS-to-FW-JSON-shape importer. Houston METRO and any future GTFS-publishing city now ships data-only with a two-line invocation. Calendar-dates.txt support means agencies that diverge from the canonical M-F repeating pattern (DART) work without code changes.
-- **Production fix surfaced by validation:** `temporal_types.TIMEZONE_BY_CITY` Dallas entry was missing from T25.1; T25.6's parametrized validation tripped the latent KeyError before any caller hit it.
-- **Cross-session allowlist (S24 carryforward):** new `GET /api/admin/cities/summary` endpoint registered with rationale in `_cross_session_fixtures.py:PUBLIC_ENDPOINTS`.
-
-Out of focus: S13b deferred items (43 Tier-1 browser suites, 6 Tier-6 cross-module integrity, browser-dependent Tier-4) and the five other stale `in_progress` tasks (T1.7, T12.5, T12.16, T12.21, T12.24) — to be triaged separately. S26 candidates documented in What's Next below.
+Out of focus: S13b deferred items (43 Tier-1 browser suites, 6 Tier-6 cross-module integrity, browser-dependent Tier-4) and the five other stale `in_progress` tasks (T1.7, T12.5, T12.16, T12.21, T12.24) — to be triaged separately. S27 candidates documented in What's Next below.
 
 ## Previous Sprints (summary)
 
+- **Sprint S25** — Dallas Expansion (DFW Unification): 9/9 tasks; 6 waves; PR #126 merged 2026-05-08 (squash-merge `ca99f68`). `cities/dallas.yaml` + `backend/app/cities/dallas/` module + full `data/cities/dallas/` seed (resources, employers, barrier graph, training, childcare). Live DART GTFS data (92 routes / 8270 stops) via reusable `scripts/import_gtfs.py` Spotlight invention. DFW cross-metro summary admin page (`/admin/cities/dfw`) — read-only diagnostic. Charter integrity holds (matching engine reads ZERO Dallas-specific signals). Backend 4700 → 4824 (+124); frontend 3620 → 3629 (+9). 2 real importer bugs found + fixed in Wave 6 (calendar_dates.txt support + sat/sun aggregation across service_ids).
 - **Sprint S24** — Two-Sided Listing Verification: 11/11 tasks; 7 waves; PR #125 merged 2026-05-08. Schema substrate (`employer_accounts`, `listing_claims`, `listing_verifications`, `listing_reputation_events`, alembic 0014). Magic-link domain-email claim flow + employer intake + reputation event stream + on-demand rate computation. Admin claim-review dashboard at `/admin/listings`. Frontend `<VerifiedBadge>` integrated into `/jobs`. Charter integrity assertion held — matching engine reads ZERO verification signals. auth.py 314 (sprint invariant). Backend 4573 → 4700 (+127); frontend 3580 → 3620 (+40).
 - **Sprint S23** — Assessment Authoring Pipeline: 10 tasks; 8 waves; PR #124 merged 2026-05-08. Schema (`assessments`, `assessment_versions`, `assessment_questions`, `assessment_reviews`, alembic 0013). Claude-draft endpoint + reviewer queue API + publish endpoint with provenance lock. Public fetch with rubric exclusion + Cache-Control. Admin dashboard at `/admin/assessments`. Role substrate: `<RoleGate>`, `useAccountRoles`, role-aware nav, `/admin/layout.tsx`. Postgres test isolation rebuild closed S22 follow-up.
 - **Sprint S22** — Identity Foundation: 13/13 tasks; 9 waves; PR #123 merged 2026-05-07. Alembic migration runner + async env (sqlite + asyncpg). Identity layer: `accounts`, `account_sessions`, `account_credentials`, `account_roles` (alembic 0011 + 0012). Magic-link auth (POST /api/auth/magic-link, GET /api/auth/claim, signed `gw_account` cookie). `useAccount()` hook + `<SaveProgressCTA />` at 3 funnel insertion points. Anonymous-first invariant test (auto-discovers session-id routes; 0 in REQUIRES_AUTH_ALLOWLIST). Postgres CI service container + dual-engine config + 15-test parity suite. **Integrity charter v1** (`docs/integrity-charter.md`, 10 binding principles led by "money never moves position").
@@ -54,6 +64,121 @@ Out of focus: S13b deferred items (43 Tier-1 browser suites, 6 Tier-6 cross-modu
 Older sprint task tables and session histories (Sprints 7 — 31) are in `.paircoder/archive/state-pre-s1.md`. S12a per-session entries plus S2 — S11 detail are in `.paircoder/archive/state-s12a.md`. S13 wave-by-wave detail + per-task driver sessions are in `.paircoder/archive/state-s13.md`.
 
 ## What Was Just Done
+
+- **T26.12 done** (auto-updated by hook)
+
+### 2026-05-09 — Sprint 26 (Admin Dashboard) — COMPLETE
+
+All 12 tasks landed (T26.1–T26.12). Hybrid execution: engage CLI ran W0 (T26.1, T26.3, T26.4) autonomously with auto-commits; switched to `/running-sprint-tasks` orchestration for W1-W5 after engage's bookkeeping marked W0 tasks `failed` despite shipping working code.
+
+- **Test counts:** Backend 4824 → 4882 (+58 net new) / 4 baseline failed (3 from PR #114 openai bump + 1 contract_credit_api — same set as S25) / 2 skipped. Frontend 3629 → 3712 (+83 net new) / 3 skipped / 0 failed.
+- **Schema substrate:** alembic 0015 (T26.1) added `resources.user_curated_at TIMESTAMP NULL`; `seed_helpers.py:seed_from_file` modified to skip upsert when the column is set. Without this, admin add/edit would be wiped on reseed (deploy or test fixture).
+- **Backend admin surface:** `routes/admin_resources.py` (T26.2: 6 routes, full CRUD + soft-hide via health_status) + `routes/admin_feedback.py` (T26.3: 5 routes — flagged-queue read + approve/confirm-hide actions, visit-inbox read + mark-reviewed mutation) + migrated `routes/brightdata.py` (T26.4: legacy `require_admin_key` → S22 `require_role("admin")`).
+- **Per-route allowlist discipline (S25 lesson):** every new admin endpoint registered in `_cross_session_fixtures.py:PUBLIC_ENDPOINTS` with rationale at write time. Carryover audit-allowlist gap from engage's W0 caught + fixed in T26.2 (3 T26.3 + 4 T26.2 mutating endpoints triaged in `_audit_integrity_fixtures.py:AUDIT_ALLOWLIST`).
+- **Frontend admin pages:** `/admin/resources` (T26.8: table + filters + edit/add modals + ResourceForm component), `/admin/feedback` (T26.9: tabbed Flagged + Visits with hash-sync deep links), `/admin/brightdata` (T26.10: trigger panel + 4-state status display + AlertDialog confirmation), `/admin` landing (T26.11: 6 section cards + 4 quick-stats badges with graceful per-badge degradation).
+- **Frontend API clients (Wave 2):** `admin_resources.ts`, `admin_feedback.ts`, `admin_brightdata.ts` — all use the lifted `fetchWithCookie` + `throwOnApiError` from S25's `_client.ts`. Zero per-domain transport duplication.
+- **Reality-check from T26.7 driver:** backend mounts BrightData at `/api/brightdata` (NOT `/api/admin/brightdata` as brief assumed); admin gating is router-level via `require_role` dependency. CrawlStatus enum has 4 states (`starting | running | ready | failed`), not the 3 (`running | done | failed`) the brief assumed. Driver matched backend reality + exposed both `CrawlStatus` (response interface) and `CrawlStatusValue` (string-literal union) so T26.10's status panel renders all 4.
+- **shadcn primitives gap:** `AlertDialog`, `Dialog`, `Select`, `Textarea`, `Table` aren't scaffolded in `frontend/src/components/ui/` — drivers matched the project convention (native `<select>`/`<textarea>` + inline divs with `role="dialog"` from the existing `SendAdvisorNoteDialog` pattern). Behaviorally indistinguishable; tests assert via `screen.findByRole`.
+- **Charter assertions held:** anonymous-first invariant (S22) — zero new auth-gated USER routes (admin routes are operator-only, exempt by design); cross-session isolation contract (S24) — every new admin endpoint allowlisted at write time per per-route AC; display-only matching engine (S25) — `test_charter_integrity_dallas.py` re-runs green; admin dashboard adds zero matching-engine references (grep verified at gate; only 1 comment-doc reference in a page docstring describing the carryforward, not a real import).
+- **Hybrid path lesson:** `bpsai-pair engage` IS autonomous (auto-commits per task, dispatches Haiku subagents per telemetry) but its post-execution AC verification is brittle — marks tasks `failed` even when the work shipped + tests pass. Switching to `/running-sprint-tasks` for W1-W5 gave full orchestrator visibility + clean per-wave commits with comprehensive messages. Both paths produce working code; engage is faster for simple tasks but its bookkeeping confusion forces orchestrator intervention to recover state.
+- **Branch:** `engage/backlog-sprint-26-admin-dashboard`; PR #127 open.
+
+- **T26.10 done** (auto-updated by hook)
+
+- **T26.9 done** (auto-updated by hook)
+
+- **T26.8 done** (auto-updated by hook)
+
+- **T26.7 done** (auto-updated by hook)
+
+- **T26.6 done** (auto-updated by hook)
+
+- **T26.5 done** (auto-updated by hook)
+
+- **T26.2 done** (auto-updated by hook)
+
+- **T26.4 done** (auto-updated by hook)
+
+- **T26.3 done** (auto-updated by hook)
+
+- **T26.1 done** (auto-updated by hook)
+
+- **T26.4 done** (auto-updated by hook)
+
+- **T26.4 done** (brightdata.py migrated from require_admin_key → require_role("admin"))
+
+### 2026-05-09 — T26.4 — brightdata.py auth migration
+
+Wave-0 third task done. `backend/app/routes/brightdata.py` swapped from header-based `require_admin_key` (legacy) to S22's cookie-based `require_role("admin")` — the same trust boundary every post-S22 admin surface uses (cities_admin, employers_admin, assessments_review, admin_feedback). Endpoint surface (POST /crawl, GET /status/{id}, POST /precrawl) unchanged; only the gate flipped.
+
+- **Breaking change (operator surface only):** any external script that hit these routes with `X-Admin-Key` must now claim a magic-link account, hold the `admin` role, and present the signed `gw_account` cookie. External use is unlikely (operator UI surface) but the boundary change is real and called out in the route module docstring.
+- **Test rewrite:** `backend/tests/test_brightdata_routes.py` rebuilt against the cookie pattern. Three new auth-cycle tests (`TestAuthGating`): anonymous → 403 with "Authentication required"; non-admin (no role grant) → 403 with "Insufficient permissions"; admin cookie → 200. All 11 prior tests (trigger / status / precrawl / snapshot-id-validation) ported to seed an admin account per-test and pass the cookie. Mirrors test_cities_admin.py + test_admin_feedback.py fixture pattern (apply accounts + roles DDL, mint cookie via `build_account_cookie_value`).
+- **test_auth.py refactor:** `TestRequireAdminKey` previously exercised the dependency through brightdata routes. Migrated to direct unit tests of the async dependency callable (no route vehicle needed). The dependency is still in use by `admin_flags.py`, `engagement.send-now`, and `demo.py` so the test class stays valid.
+- **PUBLIC_ENDPOINTS:** all 3 brightdata routes' rationales updated in `backend/tests/_cross_session_fixtures.py` to spell out "Admin role-gated (require_role('admin'), T26.4); operator-only ... no session_id input. Tested directly by test_brightdata_routes.py" — meeting the per-route AC discipline.
+- **Verification:**
+  - `bpsai-pair arch check backend/app/routes/brightdata.py` → clean (line count shrank slightly with the gate swap).
+  - `ruff check` → clean on all 4 touched files.
+  - 14/14 brightdata route tests pass; 186/186 brightdata + auth tests pass.
+  - Adjacent regression sweep: full suite 4811 passing / 3 pre-existing baselines (`test_config_llm.py` × 2, `test_contract_credit_api.py` × 1) plus the cross-session-isolation transient owned by T26.2's pending registration. Zero new failures.
+- **Files:** `backend/app/routes/brightdata.py`, `backend/tests/test_brightdata_routes.py`, `backend/tests/test_auth.py`, `backend/tests/_cross_session_fixtures.py`.
+
+- **T26.3 done** (auto-updated by hook)
+
+- **T26.3 done** (admin feedback inbox + flagged-queue backend)
+
+### 2026-05-09 — T26.3 — Admin feedback inbox + flagged-queue backend
+
+Wave-0 second task done. Ships the read-side admin surfaces over the existing S14 feedback substrate. Zero schema changes — `visit_feedback.reviewed` and `action_taken` already exist from m001. Five new endpoints under `/api/admin/feedback/...`, all gated by `require_role("admin")` (S22 cookie pattern). Pure SQLAlchemy `text()` + named binds; portable on sqlite + postgres.
+
+- **Surfaces:**
+  - `GET  /api/admin/feedback/flagged?city=<slug>` — flagged-resource queue with last-30-days negative `resource_feedback` rows joined for context.
+  - `POST /api/admin/feedback/flagged/{resource_id}/approve` — clears flag (`health_status='healthy'`).
+  - `POST /api/admin/feedback/flagged/{resource_id}/confirm-hide` — soft-hide (`health_status='hidden'`).
+  - `GET  /api/admin/feedback/visits?reviewed=<bool>&limit=<n>&offset=<n>` — paginated inbox; default 50, hard cap 100 via FastAPI `Query(le=100)`; offset + total returned in response shape.
+  - `POST /api/admin/feedback/visits/{visit_id}/mark-reviewed` — flips `reviewed=1` + stamps optional `action_taken` body.
+- **Module split:** new `routes/admin_feedback.py` rather than extending `routes/feedback.py` (which is candidate-facing, token-gated) — keeps the trust boundary unmistakable. `core/queries_admin_feedback.py` houses the four query helpers; mutations use `RETURNING` so existence check + update happens in one statement.
+- **N+1 avoidance on flagged-queue join:** `_fetch_recent_negative_feedback` bulk-loads all flagged resources' negative feedback in one IN-clause query (`bindparam("rids", expanding=True)` for sqlite + postgres portability), then groups in Python.
+- **Tests:** 23 new in `backend/tests/test_admin_feedback.py` covering each endpoint × {admin happy path, non-admin 403, anonymous 403, 404 on unknown id, mutation column verification, pagination semantics, reviewed-state filter, limit-cap rejection}. Tests mount the router on a fresh `FastAPI` (not `app.main.app`) because **T26.2 owns the `routes/__init__.py` registration this wave** — single-owner shared-file edit. Decoupling the test app from production lets T26.3 land before T26.2 without ordering games.
+- **PUBLIC_ENDPOINTS allowlist:** all 5 new routes registered in `backend/tests/_cross_session_fixtures.py` with explicit per-route rationale (S25 lesson: registration is a write-time AC, not a gate-time fixup). `test_cross_session_isolation::test_allowlist_only_references_real_endpoints` is transiently red on this branch until T26.2 mounts the router on `app.main.app` — this is wave-design (T26.12 re-asserts at gate).
+- **Cross-task contract:** T26.3 ships the router; T26.2 mounts it. The 5 PUBLIC_ENDPOINTS keys T26.3 added match the route paths T26.2 will register, so the merge is mechanical.
+- **Verification:**
+  - `bpsai-pair arch check backend/app/routes/admin_feedback.py` → 1 warning (160 lines, > 150 warn threshold; well under 400 error). Passes.
+  - `bpsai-pair arch check backend/app/core/queries_admin_feedback.py` → 1 warning (207 lines, > 150 warn threshold; well under 400 error). Passes.
+  - `ruff check` → clean on all 4 touched files.
+  - 23/23 admin_feedback tests pass.
+  - Adjacent regression: 98/98 across `test_feedback_routes.py`, `test_employers_admin.py`, `test_assessments_review.py`, `test_cities_admin.py`, `test_resources_user_curated.py`, `test_alembic_parity.py`.
+  - Full backend suite: 4853 passed / 5 failed / 2 skipped. 4 failures are pre-existing baselines (`test_config_llm.py` × 3, `test_contract_credit_api.py` × 1 — all from S24/PR-#114-#116 dep-bump fallout); 1 failure is the expected cross-session-isolation transient.
+- **Files:** `backend/app/core/queries_admin_feedback.py` (new), `backend/app/routes/admin_feedback.py` (new), `backend/tests/test_admin_feedback.py` (new), `backend/tests/_cross_session_fixtures.py` (5 PUBLIC_ENDPOINTS entries).
+
+- **T26.1 done** (auto-updated by hook)
+
+### 2026-05-09 — T26.1 — alembic 0015 resources.user_curated_at + seed-loader respect
+
+Wave-0 first task done. Adds `resources.user_curated_at TIMESTAMP NULL` (alembic 0015, down_revision 0014, idempotent via `has_column`) and teaches `seed_from_file` to skip rows whose `(city, name)` matches an existing curated row (`user_curated_at IS NOT NULL`). Closes the reseed-clobber loop the Sprint 26 brief flagged.
+
+- **Migration shape:** column-only; downgrade is no-op. SQLite < 3.35 cannot DROP COLUMN; on postgres dropping the column would erase the curation history this column exists to preserve.
+- **Loader contract:** new `_curated_resource_keys(conn)` helper returns the set of `(city, name)` tuples with curation set; returns empty set when the column is absent (pre-0015 deployments cannot have curated rows). Skip is scoped to `table == "resources"` only. Match key is `(city, name)` so an admin curating "Workforce Solutions" in fort-worth does NOT block the same name from seeding in dallas.
+- **Schema allowlist:** `ALLOWED_COLUMNS["resources"]` extended with `user_curated_at` so T26.2's CRUD writes can stamp the column via the same path.
+- **Parity test:** `test_alembic_parity` updated with a `_strip_post_legacy_resources_columns` normaliser so the alembic-side resources CREATE TABLE (which carries `user_curated_at` via materialised ALTER) compares equal to the legacy m001..m010 chain. Linear-chain expectation lifted from 14 to 15 revisions.
+- **arch check seed_helpers.py refactor:** extracted `_insert_seed_record` to keep `seed_from_file` under the function-length cap and the file under the function-count cap. Inline tagging kept in `seed_from_file` for clarity.
+- **Tests:** 7 new in `backend/tests/test_resources_user_curated.py` — column exists, nullable + no-default, legacy INSERT still works, idempotency, seed skip on curated row, no-skip on NULL, per-city scoping, non-resources table unaffected. Regression sweep: 419 passed across seed/migration/alembic/database tests, 0 failures.
+- **Cross-task contract:** T26.1 owns the column + loader skip; T26.2 owns the inverse half (admin INSERT/UPDATE stamp `user_curated_at = now()`). Together they guarantee container restarts cannot wipe manual curation.
+- **Files:** `backend/alembic/versions/0015_resources_user_curated.py` (new), `backend/tests/test_resources_user_curated.py` (new), `backend/app/core/seed_helpers.py` (curated-key lookup + insert helper), `backend/app/core/schema.py` (allowlist), `backend/tests/test_alembic_parity.py` (chain length + column normaliser). Commit `6566bf9`.
+
+### 2026-05-09 — Sprint 26 (Admin Dashboard) planned
+
+- **/ideation** produced `.paircoder/plans/briefs/brief-sprint-26-admin-dashboard.md`. Step 0 fail-fast: validate clean post-merge sync; 5 stale `in_progress` (T1.7, T12.5, T12.16, T12.21, T12.24) — none touch admin/feedback/brightdata/resources paths.
+- **Two architectural finds informed the brief:**
+  1. **Resources reseed-clobber problem** — `seed_resources_all_cities` runs on init; without intervention, admin add/edit gets wiped on next deploy. T26.1 adds `resources.user_curated_at TIMESTAMP NULL` (alembic 0015); seed loader skips rows where it's set. One small migration unlocks real CRUD persistence.
+  2. **Two coexisting auth-gate patterns** — `require_admin_key` (legacy header, used by `brightdata.py`, `admin_flags.py`, `demo.py`) vs `require_role("admin")` (S22+ cookie, used by `assessments_review.py`, `cities_admin.py`, `employers_admin.py`). T26.4 migrates only `brightdata.py` (the new admin UI needs it); other legacy callers stay out of scope.
+- **/draft-backlog** produced `plans/backlogs/backlog-sprint-26-admin-dashboard.md`. Validates clean via `bpsai-pair engage --dry-run`: 12 tasks, 192 Cx parsed.
+- **/pc-plan** created `plan-2026-05-s26-admin-dashboard` (auto-scope: story; 192 Cx; intelligence summary: ~157k tokens, Haiku-recommended, high confidence based on 63 historical tasks). 12 task records (T26.1–T26.12) added with full body content (Objective, Files, AC, Verification, Dependencies). Tags + depends_on populated. 89 ACs total across 12 tasks.
+- **Sprint shape:** 12 tasks / 192 Cx / 9 P0 + 3 P1 / 6 waves. Sits between S25 (201 Cx) and S22 (225 Cx) — substrate-extending sprint shape.
+- **Wave structure:** W0 parallel (T26.1, T26.3, T26.4) → W1 T26.2 (CRUD + bundles `routes/__init__.py` registrations for all 3 new routers — resolves a soft collision) → W2 parallel (3 typed API clients) → W3 parallel (3 admin pages) → W4 T26.11 landing → W5 T26.12 gate.
+- **Cut-list:** T26.11 (P1 landing), T26.10+T26.7 (P1 BrightData UI as a pair). Min viable: 9 tasks / 154 Cx.
+- **Per-task AC discipline (S25 lesson):** every backend route AC explicitly says "added to `_cross_session_fixtures.PUBLIC_ENDPOINTS` with rationale" — making allowlist registration a write-time requirement, not a gate-time fixup. T25.7's CI-only failure was preventable; T26.12 re-asserts via the contract test.
+- **Charter assertions carried forward:** anonymous-first invariant (S22), display-only matching engine (S25), money never moves position (charter principle 1). T26.12 re-runs all three.
+- **Visit-feedback inbox `mark-reviewed` ships without migration** — `visit_feedback.reviewed` + `action_taken` columns already exist from m001 (S14 wiring). Sub-feature 3 is pure new GET + small POST.
 
 - **T25.9 done** (auto-updated by hook)
 
@@ -2038,20 +2163,24 @@ Outstanding pre-PR: /reviewing-and-fixing pipeline running. Browser-driven remai
 
 ## What's Next
 
-Sprint 25 ready for PR (push pending). After merge, S26 candidates:
+Sprint 26 ready for PR (push pending). After merge, S27 candidates:
 
-1. **Admin Dashboard** — resource management (add/edit/hide), flagged-resource review from feedback health decay, visit-feedback inbox, manual BrightData pre-crawl trigger. Builds on the S24 admin claim-review dashboard + S25 cities-admin pattern (`/admin/listings`, `/admin/cities/dfw`). Natural next step in the trust/operator-tooling trajectory.
-2. **Cross-city matching** (the deferred S25 boundary) — Dallas residents seeing FW jobs in `/api/jobs`. Requires matching-engine changes (employer-index unification, geo-radius extension across metros). T25.9 charter test will fail when this work begins — that's the design-review trigger to consciously update the allowlist.
-3. **Data Quality** — geocode resource coordinates from addresses to activate proximity scoring (currently neutral 0.5 for all resources); add transit-stop coordinates for route-to-resource distance. Adds Dallas ZIP centroids to `_FW_ZIP_CENTROIDS` to close the S25 carryforward limitation.
-4. **GTFS importer polish** — the new `route_short_name` non-numeric handling (DART rail routes "RED LINE" etc. currently get raw 5-digit `route_id` numbers). Minor refinement; importer's contract is correct, just the display value for rail is ugly. Bundle with Houston METRO bring-up.
-5. **Infrastructure Scaling** — SQLite → Postgres operational swap (S22 CI substrate exists; production runtime swap is the next step). Redis caching, circuit breakers, separate API + crawl-worker Railway services.
-6. **UX / Integrations** — session persistence (currently 24h ephemeral), Spanish parity, PWA offline plan access, SMS plan delivery; Alabama JobLink, Montgomery Housing Authority, MATS real-time, 211 sync, expanded findhelp.org categories.
+1. **Cross-city matching** (the deferred S25 boundary) — Dallas residents seeing FW jobs in `/api/jobs`. Requires matching-engine changes (employer-index unification, geo-radius extension across metros). T25.9 charter test will fail when this work begins — that's the intended design-review trigger.
+2. **Bulk admin operations** (the deferred S26 boundary) — bulk hide/restore on resources, bulk mark-reviewed on visit_feedback. T26.8 + T26.9 ship single-row only this sprint.
+3. **Resource provenance audit log** — who-changed-what-when on `resources` table. Useful for SOC2; needs a new `resources_audit_log` table + write-side wiring in T26.2's CRUD module. Was explicit S26 out-of-scope.
+4. **shadcn primitive scaffolding** — S26 surfaced that `AlertDialog`, `Dialog`, `Select`, `Textarea`, `Table` aren't installed in `frontend/src/components/ui/`. Drivers worked around with native + inline-div pattern. A small infra sprint to install + standardize these would simplify future admin pages.
+5. **Data Quality** — geocode resource coordinates from addresses to activate proximity scoring (currently neutral 0.5 for all resources); add transit-stop coordinates for route-to-resource distance. Adds Dallas ZIP centroids to `_FW_ZIP_CENTROIDS` to close the S25 carryforward limitation.
+6. **GTFS importer polish** — non-numeric `route_short_name` handling for rail (DART RED/BLUE/GREEN/ORANGE/SILVER currently get raw 5-digit `route_id` numbers). Bundle with Houston METRO bring-up.
+7. **Infrastructure Scaling** — SQLite → Postgres operational swap (S22 CI substrate exists; production runtime swap is the next step). Redis caching, circuit breakers, separate API + crawl-worker Railway services.
+8. **UX / Integrations** — session persistence (currently 24h ephemeral), Spanish parity, PWA offline plan access, SMS plan delivery; Alabama JobLink, Montgomery Housing Authority, MATS real-time, 211 sync, expanded findhelp.org categories.
 
 Triage candidates (deferred, not yet promoted to a sprint):
 
 - **S13b** — 43 Tier-1 browser suites (divona-driven), 6 Tier-6 cross-module integrity (vaivora), browser-dependent Tier-4 (a11y AAA, visual baseline, cross-browser, offline).
 - **Stale `in_progress` tasks** — T1.7, T12.5, T12.16, T12.21, T12.24 (need triage: complete, cancel, or roll into a sprint).
-- **S25 known limitations carried forward** — `/api/jobs` `transit_info` enrichment fixture-wiring gap (S22/S24 fixture architecture, not Dallas-specific); `listing_verifications` + `run_seeds_and_rag` fixture-wiring (S22/S24 architecture).
+- **S25 known limitations** — `/api/jobs` `transit_info` enrichment fixture-wiring gap; `listing_verifications` + `run_seeds_and_rag` fixture-wiring (S22/S24 architecture).
+- **Other legacy `require_admin_key` callers** — `routes/admin_flags.py` + `routes/demo.py` still use the legacy header gate. S26 only migrated brightdata.py because the new admin UI needed it. Migrating the others is a small follow-up that completes the auth-gate consolidation.
+- **`bpsai-pair engage` AC-verification bug** — engage marks tasks `failed` even when work shipped + tests pass. Affected T26.1/T26.3/T26.4 in S26. Worth filing upstream; orchestrator workaround is to override status manually after verification. Per-route AC discipline (S25 lesson) helps catch the verification false-positives early since allowlist registration AC is concrete and testable.
 
 ## Blockers
 

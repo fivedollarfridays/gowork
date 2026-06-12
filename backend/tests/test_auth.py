@@ -1,9 +1,16 @@
-"""Tests for admin authentication dependency."""
+"""Tests for admin authentication dependency.
+
+The ``require_admin_key`` header gate was previously exercised through
+the BrightData routes; T26.4 migrated those routes to
+``require_role("admin")`` (cookie session). The dependency itself is
+still used by ``admin_flags`` / ``engagement.send-now`` / ``demo.seed``,
+so we test it directly as a unit here rather than through a route.
+"""
 
 from unittest.mock import patch
 
 import pytest
-from httpx import ASGITransport, AsyncClient
+from fastapi import HTTPException
 
 
 _SETTINGS_PATCH = "app.core.auth.get_settings"
@@ -18,68 +25,42 @@ def _mock_settings(admin_api_key: str = "test-admin-key-123"):
 
 
 class TestRequireAdminKey:
-    """Test the require_admin_key FastAPI dependency via BrightData routes."""
+    """Unit-test the ``require_admin_key`` dependency directly.
+
+    Calling the async callable bypasses FastAPI's request lifecycle —
+    that's intentional. The 422-on-missing-header behaviour is
+    FastAPI's own ``Header(...)`` enforcement, not anything inside
+    ``require_admin_key``; it's covered by routes that still use the
+    dependency (e.g. test_admin_flags.py).
+    """
 
     @pytest.mark.asyncio
     async def test_valid_key_passes(self):
-        from app.main import app
+        from app.core.auth import require_admin_key
 
-        bd_settings = _mock_settings()
-        bd_settings.brightdata_api_key = "key-123"
-        bd_settings.brightdata_dataset_id = "ds-123"
-
-        with (
-            patch(_SETTINGS_PATCH, return_value=bd_settings),
-            patch("app.routes.brightdata.get_settings", return_value=bd_settings),
-            patch(
-                "app.routes.brightdata.precrawl_jobs",
-                return_value={"snapshot_id": "snap-1", "jobs_cached": 5, "skipped": False},
-            ),
-        ):
-            transport = ASGITransport(app=app)
-            async with AsyncClient(transport=transport, base_url="http://test") as c:
-                resp = await c.post(
-                    "/api/brightdata/precrawl",
-                    headers={"X-Admin-Key": "test-admin-key-123"},
-                )
-        assert resp.status_code == 200
-
-    @pytest.mark.asyncio
-    async def test_missing_header_returns_422(self):
-        from app.main import app
-
-        transport = ASGITransport(app=app)
-        async with AsyncClient(transport=transport, base_url="http://test") as c:
-            resp = await c.post("/api/brightdata/precrawl")
-        assert resp.status_code == 422
+        with patch(_SETTINGS_PATCH, return_value=_mock_settings()):
+            # Returning normally (no exception) means the gate passed.
+            await require_admin_key(x_admin_key="test-admin-key-123")
 
     @pytest.mark.asyncio
     async def test_wrong_key_returns_403(self):
-        from app.main import app
+        from app.core.auth import require_admin_key
 
         with patch(_SETTINGS_PATCH, return_value=_mock_settings()):
-            transport = ASGITransport(app=app)
-            async with AsyncClient(transport=transport, base_url="http://test") as c:
-                resp = await c.post(
-                    "/api/brightdata/precrawl",
-                    headers={"X-Admin-Key": "wrong-key"},
-                )
-        assert resp.status_code == 403
-        assert "Invalid admin key" in resp.json()["detail"]
+            with pytest.raises(HTTPException) as exc_info:
+                await require_admin_key(x_admin_key="wrong-key")
+        assert exc_info.value.status_code == 403
+        assert "Invalid admin key" in exc_info.value.detail
 
     @pytest.mark.asyncio
     async def test_empty_config_returns_503(self):
-        from app.main import app
+        from app.core.auth import require_admin_key
 
         with patch(_SETTINGS_PATCH, return_value=_mock_settings(admin_api_key="")):
-            transport = ASGITransport(app=app)
-            async with AsyncClient(transport=transport, base_url="http://test") as c:
-                resp = await c.post(
-                    "/api/brightdata/precrawl",
-                    headers={"X-Admin-Key": "any-key"},
-                )
-        assert resp.status_code == 503
-        assert "not configured" in resp.json()["detail"]
+            with pytest.raises(HTTPException) as exc_info:
+                await require_admin_key(x_admin_key="any-key")
+        assert exc_info.value.status_code == 503
+        assert "not configured" in exc_info.value.detail
 
 
 @pytest.mark.anyio

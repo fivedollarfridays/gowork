@@ -190,5 +190,17 @@
   "T24.11": {
     "last_cli_update": "2026-05-08T09:53:36.258749",
     "last_status": "done"
+  },
+  "T26.1": {
+    "last_cli_update": "2026-05-09T09:45:09.326105",
+    "last_status": "failed"
+  },
+  "T26.3": {
+    "last_cli_update": "2026-05-09T09:57:12.745261",
+    "last_status": "failed"
+  },
+  "T26.4": {
+    "last_cli_update": "2026-05-09T09:57:24.131428",
+    "last_status": "in_progress"
   }
 }

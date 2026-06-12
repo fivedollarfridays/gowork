@@ -1,0 +1,20 @@
+id: plan-2026-05-s26-admin-dashboard
+title: S26 — Admin Dashboard
+type: feature
+status: planned
+created_at: '2026-05-09T07:55:57.187053'
+skills:
+- planning-with-pm
+goals:
+- 'Operator-facing admin surface compounding on S22-S25 trust substrate: resource
+  CRUD with seed-respecting persistence (alembic 0015 user_curated_at flag), flagged-resource
+  review queue, visit-feedback inbox, manual BrightData pre-crawl trigger'
+- Migrate routes/brightdata.py from legacy require_admin_key to S22 require_role('admin')
+  so the cookie-session admin UI calls every endpoint via the same auth path; admin_flags.py
+  + demo.py gate migrations explicitly out of scope
+- Cross-session allowlist registration as a per-route AC (S25 lesson learned — T25.7's
+  CI-only failure was preventable). T26.12 re-asserts via the contract test. All charter
+  assertions carried forward (anonymous-first invariant, display-only matching engine,
+  money never moves position)
+metadata:
+  pm_scope: story

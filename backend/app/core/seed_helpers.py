@@ -149,6 +149,23 @@ async def resources_has_city_column(conn) -> bool:
     return any(row[1] == "city" for row in res.fetchall())
 
 
+async def _curated_resource_keys(conn) -> set[tuple[str | None, str | None]]:
+    """Return ``(city, name)`` keys for resources with admin curation set.
+
+    Used by ``seed_from_file`` to skip re-seeding rows an admin has
+    edited (T26.1 contract: ``user_curated_at IS NOT NULL`` means
+    "preserve"). Returns an empty set when the column is absent —
+    pre-0015 deployments can't have curated rows by definition.
+    """
+    cols = await conn.execute(text("PRAGMA table_info(resources)"))
+    if not any(row[1] == "user_curated_at" for row in cols.fetchall()):
+        return set()
+    res = await conn.execute(text(
+        "SELECT city, name FROM resources WHERE user_curated_at IS NOT NULL"
+    ))
+    return {(row[0], row[1]) for row in res.fetchall()}
+
+
 async def seed_resources_all_cities(conn) -> None:
     """Seed the ``resources`` table once per configured city, tagged.
 
@@ -172,35 +189,55 @@ async def seed_resources_all_cities(conn) -> None:
             )
 
 
+async def _insert_seed_record(conn, table: str, clean: dict) -> None:
+    """Insert one validated seed record into *table*.
+
+    SAFETY: table comes from a hardcoded seed map; columns are filtered
+    against ALLOWED_COLUMNS; values are parameterised via :key binding.
+    No user input reaches this SQL builder.
+    """
+    columns = ", ".join(clean.keys())
+    placeholders = ", ".join(f":{k}" for k in clean.keys())
+    await conn.execute(
+        text(f"INSERT INTO {table} ({columns}) VALUES ({placeholders})"),
+        clean,
+    )
+
+
 async def seed_from_file(
     conn, filepath: Path, table: str, *, city_slug: str | None = None,
 ) -> None:
     """Load a single seed file into the given table.
 
     When *city_slug* is provided AND the table accepts a ``city``
-    column, every inserted row is tagged with that slug.  Pre-tagged
+    column, every inserted row is tagged with that slug. Pre-tagged
     JSON files keep their explicit ``city`` value.
+
+    For the ``resources`` table, rows with the same ``(city, name)``
+    as an existing admin-curated row (``user_curated_at IS NOT NULL``)
+    are skipped — preserving manual edits across container restarts
+    (T26.1 contract).
     """
     data = json.loads(filepath.read_text())
     if not data:
         return
+    curated_keys: set[tuple[str | None, str | None]] = (
+        await _curated_resource_keys(conn) if table == "resources" else set()
+    )
+    table_cols = ALLOWED_COLUMNS.get(table, set())
     for record in data:
-        record_with_city = dict(record)
+        tagged = dict(record)
         if (
             city_slug is not None
-            and "city" not in record_with_city
-            and "city" in ALLOWED_COLUMNS.get(table, set())
+            and "city" not in tagged
+            and "city" in table_cols
         ):
-            record_with_city["city"] = city_slug
-        clean = validate_seed_record(table, record_with_city)
+            tagged["city"] = city_slug
+        if table == "resources" and (
+            (tagged.get("city"), tagged.get("name")) in curated_keys
+        ):
+            continue
+        clean = validate_seed_record(table, tagged)
         if not clean:
             continue
-        # SAFETY: table comes from a hardcoded seed map; columns are
-        # filtered against ALLOWED_COLUMNS allowlist; values are
-        # parameterized via :key binding.  No user input reaches here.
-        columns = ", ".join(clean.keys())
-        placeholders = ", ".join(f":{k}" for k in clean.keys())
-        await conn.execute(
-            text(f"INSERT INTO {table} ({columns}) VALUES ({placeholders})"),
-            clean,
-        )
+        await _insert_seed_record(conn, table, clean)

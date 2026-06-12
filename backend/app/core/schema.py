@@ -19,6 +19,7 @@ ALLOWED_COLUMNS = {
         "phone", "url", "eligibility", "services", "hours", "notes",
         "city",  # m008 — per-row city slug for per-request filtering
         "barrier_affinity",  # m009 — explicit barrier tags (JSON list)
+        "user_curated_at",  # 0015 — admin curation marker; seed-loader skips when set
     },
     "transit_stops": {"route_id", "stop_name", "lat", "lng", "sequence"},
     "job_listings": {
