@@ -1,4 +1,4 @@
-version: 2.26.0
+version: 2.27.1
 project:
   name: MontGoWork
   description: "MontGoWork helps Montgomery residents overcome the real barriers between\
@@ -392,10 +392,9 @@ toggl:
 pm:
   provider: none
   workflow: simple
-
-# Lodestar star — the grand goal this repo is steering toward (dogfood, 2026-06-07)
 lodestar:
-  stated: "Win HackFW 2026 with GoWork — Fort Worth residents complete a barrier assessment and start work that week; revenue permanently out of scope (mission)"
+  stated: "Win HackFW 2026 with GoWork \u2014 Fort Worth residents complete a barrier\
+    \ assessment and start work that week; revenue permanently out of scope (mission)"
   tier: mission
   confirmed_at_sha: e45351d
   goal_hash: hackfw2026-residents-employed
